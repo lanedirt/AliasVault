@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasDb", "src\AliasDb\Alia
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasGenerators", "src\AliasGenerators\AliasGenerators.csproj", "{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaviconExtractor", "src\Utilities\FaviconExtractor\FaviconExtractor.csproj", "{ED328644-A152-403D-86EB-81201AA07744}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Tests", "src\AliasVault.Tests\AliasVault.Tests.csproj", "{8E6A418A-B305-465D-857D-49953605C18E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,16 @@ Global
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED328644-A152-403D-86EB-81201AA07744}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED328644-A152-403D-86EB-81201AA07744}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED328644-A152-403D-86EB-81201AA07744}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED328644-A152-403D-86EB-81201AA07744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E6A418A-B305-465D-857D-49953605C18E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E6A418A-B305-465D-857D-49953605C18E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E6A418A-B305-465D-857D-49953605C18E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E6A418A-B305-465D-857D-49953605C18E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ED328644-A152-403D-86EB-81201AA07744} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 EndGlobal

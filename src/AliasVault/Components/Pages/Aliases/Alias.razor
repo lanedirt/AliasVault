@@ -1,13 +1,31 @@
 @using AliasDb
 @inherits AuthorizePageBase
 
+<style>
+    .card {
+        border-radius: 10px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        background-color: #abd5ff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+</style>
+
 <div class="col">
-    <div class="card mb-3">
+    <div class="card mb-3" @onclick="ShowDetails">
         <div class="card-body">
-            <h5 class="card-title">@Login.Service.Name</h5>
-            <p class="card-text">Username: @Login.Identity.NickName. Email: @Login.Identity.EmailPrefix. <small class="text-muted">Created: @Login.CreatedAt.ToShortDateString()</small>
-            </p>
-            <a href="javascript:void(0)" @onclick="ShowDetails" class="btn btn-primary">View</a>
+            <div class="card-text text-center">
+                <DisplayFavicon faviconBytes="@Login.Service.Logo"></DisplayFavicon>
+                <div>@Login.Service.Name</div>
+                <div><small class="text-muted">@Login.CreatedAt.ToShortDateString()</small></div>
+            </div>
         </div>
     </div>
 </div>

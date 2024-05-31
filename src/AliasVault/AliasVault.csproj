@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
+      <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 
     <ItemGroup>

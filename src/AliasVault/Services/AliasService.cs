@@ -101,6 +101,8 @@ public class AliasService
 
             // Update service.
             record.Service.Name = aliasObject.Service.Name;
+            record.Service.Url = aliasObject.Service.Url;
+            record.Service.Logo = aliasObject.Service.Logo;
             record.Service.UpdatedAt = DateTime.UtcNow;
 
             await dbContext.SaveChangesAsync();

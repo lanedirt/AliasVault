@@ -11,6 +11,7 @@
 @using AliasGenerators.Password.Implementations
 @using AliasVault.Models
 @using AliasVault.Services
+@using Microsoft.IdentityModel.Tokens
 
 @if (EditMode)
 {
@@ -42,6 +43,10 @@ else
             <div class="form-group">
                 <label for="serviceName">Service Name</label>
                 <input type="text" class="form-control" id="serviceName" @bind="obj.Service.Name" required>
+            </div>
+            <div class="form-group">
+                <label for="serviceName">Service URL</label>
+                <input type="text" class="form-control" id="serviceUrl" @bind="obj.Service.Url" required>
             </div>
         </div>
     </div>
@@ -262,6 +267,12 @@ else
         // Save the login, identity, password, and service to the database.
         using (var context = new AliasDbContext())
         {
+            // Try to extract favicon from service URL
+            if (obj.Service.Url != null  && !obj.Service.Url.IsNullOrEmpty())
+            {
+                obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
+            }
+
             if (EditMode)
             {
                 obj = await AliasService.UpdateAliasAsync(obj);
