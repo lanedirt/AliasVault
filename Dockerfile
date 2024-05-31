@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0  AS build
 WORKDIR /src
 
 # Copy the solution file to the /src directory in the container
-COPY aliasVault.sln ./
+COPY aliasvault.sln ./
 
 # Copy the project file to the /src/AliasVault directory in the container
 COPY src/AliasVault/AliasVault.csproj ./AliasVault/
@@ -25,7 +25,7 @@ RUN /root/.dotnet/tools/dotnet-ef migrations bundle -o /app/migrationbundle
 
 # Use the official ASP.NET Core runtime image to run the app
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-WORKDIR /app/aliasVault
+WORKDIR /app/AliasVault
 
 # Copy the published output from the build stage to the runtime stage
 COPY --from=build /app ./

@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
     blazorapp:
-        image: aliasVault
+        image: aliasvault
         build:
             context: .
             dockerfile: Dockerfile
