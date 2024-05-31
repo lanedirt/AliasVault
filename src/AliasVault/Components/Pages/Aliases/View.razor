@@ -21,7 +21,6 @@
         }
     </div>
 </div>
-<p>Find all of your aliases below.</p>
 
 <Breadcrumb BreadcrumbItems="BreadcrumbItems"></Breadcrumb>
 
@@ -34,7 +33,7 @@
 else
 {
     <h4>@Alias.Service.Name</h4>
-    <h5>@Alias.Service.Url</h5>
+    <h5><a href="@Alias.Service.Url" target="_blank">@Alias.Service.Url</a></h5>
 
     <div class="row row-cols-1 g-4">
         <div class="card">
@@ -53,7 +52,7 @@ else
                 Email
             </div>
             <div class="card-body">
-                <a href="https://spamok.com/@Alias.Identity.EmailPrefix">Click here to open the email client.</a>
+                <a href="https://spamok.com/@Alias.Identity.EmailPrefix" target="_blank">Click here to open the email client.</a>
             </div>
         </div>
 
