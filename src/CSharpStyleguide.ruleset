@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="C# styleguide ruleset" Description="C# styleguide ruleset" ToolsVersion="15.0">
+    <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+        <Rule Id="SA1001" Action="Error" /> <!-- Commas must be spaced correctly -->
+        <Rule Id="SA1003" Action="Error" /> <!-- Symbols must be spaced correctly -->
+        <Rule Id="SA1008" Action="Error" /> <!-- Opening parenthesis must be spaced correctly -->
+        <Rule Id="SA1009" Action="Error" /> <!-- Closing parenthesis must be spaced correctly -->
+        <Rule Id="SA1010" Action="Error" /> <!-- Opening square brackets must be spaced correctly -->
+        <Rule Id="SA1011" Action="Error" /> <!-- Closing square brackets must be spaced correctly -->
+        <Rule Id="SA1012" Action="Error" /> <!-- Opening curly brackets must be spaced correctly -->
+        <Rule Id="SA1013" Action="Error" /> <!-- Closing curly brackets must be spaced correctly -->
+        <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
+        <Rule Id="SA1121" Action="Error" /> <!-- Use built in type alias -->
+        <Rule Id="SA1201" Action="Warning" /> <!-- Elements must appear in the correct order -->
+        <Rule Id="SA1202" Action="Warning" /> <!-- Elements must be ordered by access -->
+        <Rule Id="SA1206" Action="Warning" /> <!-- Declaration keywords must follow order -->
+        <Rule Id="SA1210" Action="Warning" /> <!-- Using directives must be ordered alphabetically by namespace -->
+        <Rule Id="SA1300" Action="Error" /> <!-- Element must begin with upper case letter -->
+        <Rule Id="SA1302" Action="Error" /> <!-- Interface names must begin with I -->
+        <Rule Id="SA1303" Action="Error" /> <!-- Const field names must begin with upper case letter -->
+        <Rule Id="SA1309" Action="None" /> <!-- Field names must not begin with underscore -->
+        <Rule Id="SA1500" Action="Error" /> <!-- Curly brackets for multi line statements must not share line -->
+        <Rule Id="SA1503" Action="None" /> <!-- Curly brackets must not be omitted -->
+        <Rule Id="SA1507" Action="Error" /> <!-- Code must not contain multiple blank lines in a row -->
+        <Rule Id="SA1508" Action="Error" /> <!-- Closing curly brackets must not be preceded by blank line -->
+        <Rule Id="SA1509" Action="Error" /> <!-- Opening curly brackets must not be precededed by blank line -->
+    </Rules>
+</RuleSet>

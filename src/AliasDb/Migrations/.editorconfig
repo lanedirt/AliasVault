@@ -1,0 +1,3 @@
+[*.cs]
+generated_code = true
+dotnet_diagnostic.SA1413.severity = none

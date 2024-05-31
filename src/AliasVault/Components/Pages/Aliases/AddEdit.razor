@@ -1,0 +1,283 @@
+@page "/add-alias"
+@page "/alias/{id:guid}/edit"
+
+@inject NavigationManager Navigation
+@inject UserService UserService
+@inherits AuthorizePageBase
+@using AliasDb
+@using AliasGenerators.Identity
+@using AliasGenerators.Identity.Implementations
+@using AliasGenerators.Implementations
+@using AliasGenerators.Password.Implementations
+@using AliasVault.Models
+@using AliasVault.Services
+
+@if (EditMode)
+{
+    <PageTitleAppend PageTitleSuffix="Edit alias" />
+    <h3>Edit alias</h3>
+}
+else {
+    <PageTitleAppend PageTitleSuffix="Add alias" />
+    <h3>Add alias</h3>
+}
+
+<Breadcrumb BreadcrumbItems="BreadcrumbItems"></Breadcrumb>
+
+@if (Loading)
+{
+    <div class="col-12">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-header">Service</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="serviceName">Service Name</label>
+                <input type="text" class="form-control" id="serviceName" @bind="obj.Service.Name" required>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Identity</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <button class="btn btn-primary" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
+            </div>
+
+            @if (IsIdentityLoading) {
+                <p>Loading...</p>
+            }
+
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" class="form-control" id="firstName" @bind="obj.Identity.FirstName">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" class="form-control" id="lastName" @bind="obj.Identity.LastName">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <input type="text" class="form-control" id="gender" @bind="obj.Identity.Gender">
+            </div>
+            <div class="form-group">
+                <label for="nickName">Nick Name</label>
+                <input type="text" class="form-control" id="nickName" @bind="obj.Identity.NickName">
+            </div>
+            <div class="form-group">
+                <label for="birthDate">Birth Date</label>
+                <input type="date" class="form-control" id="birthDate" @bind="obj.Identity.BirthDate">
+            </div>
+            <div class="form-group">
+                <label for="addressStreet">Address Street</label>
+                <input type="text" class="form-control" id="addressStreet" @bind="obj.Identity.AddressStreet">
+            </div>
+            <div class="form-group">
+                <label for="addressCity">Address City</label>
+                <input type="text" class="form-control" id="addressCity" @bind="obj.Identity.AddressCity">
+            </div>
+            <div class="form-group">
+                <label for="addressState">Address State</label>
+                <input type="text" class="form-control" id="addressState" @bind="obj.Identity.AddressState">
+            </div>
+            <div class="form-group">
+                <label for="addressZipCode">Address Zip Code</label>
+                <input type="text" class="form-control" id="addressZipCode" @bind="obj.Identity.AddressZipCode">
+            </div>
+            <div class="form-group">
+                <label for="addressCountry">Address Country</label>
+                <input type="text" class="form-control" id="addressCountry" @bind="obj.Identity.AddressCountry">
+            </div>
+            <div class="form-group">
+                <label for="hobbies">Hobbies</label>
+                <input type="text" class="form-control" id="hobbies" @bind="obj.Identity.Hobbies">
+            </div>
+            <div class="form-group">
+                <label for="phoneMobile">Phone Mobile</label>
+                <input type="text" class="form-control" id="phoneMobile" @bind="obj.Identity.PhoneMobile">
+            </div>
+            <div class="form-group">
+                <label for="bankAccountIBAN">Bank Account IBAN</label>
+                <input type="text" class="form-control" id="bankAccountIBAN" @bind="obj.Identity.BankAccountIBAN">
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Email</div>
+        <div class="card-body">
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" @bind="obj.Identity.EmailPrefix" placeholder="Email prefix" aria-label="Email prefix">
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="basic-addon2">@@landmail.nl</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Password</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <button class="btn btn-secondary" @onclick="GenerateRandomPassword">Generate Random Password</button>
+            </div>
+
+            <div class="form-group">
+                <label for="passwordValue">Password</label>
+                <input type="text" class="form-control" id="passwordValue" @bind="obj.Passwords.First().Value">
+            </div>
+        </div>
+    </div>
+
+    @if (IsSaving) {
+    <p>Saving...</p>
+    }
+
+    <button class="btn btn-success" @onclick="SaveLogin">Save Alias</button>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private bool EditMode = false;
+    private bool Loading = true;
+    private Login obj = new Login();
+    private Password Password { get; set; } = new Password();
+
+    private bool IsIdentityLoading { get; set; }
+    private bool IsSaving { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Id.HasValue)
+        {
+            // Edit mode
+            EditMode = true;
+        }
+        else
+        {
+            // Add mode
+            EditMode = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await AccessCheck()) return;
+        await base.OnInitializedAsync();
+
+        if (EditMode)
+        {
+            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Edit alias" });
+        }
+        else
+        {
+            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Add new alias" });
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (EditMode)
+            {
+                // Load existing obj, retrieve from service
+                obj = await AliasService.LoadAliasAsync(Id.Value);
+            }
+            else
+            {
+                // Create new obj
+                obj = new Login();
+                obj.Identity = new Identity();
+                obj.Service = new Service();
+                obj.Passwords = new List<Password>();
+                obj.Passwords.Add(new Password());
+            }
+
+            // Hide loading spinner
+            Loading = false;
+            // Force re-render invoke so the charts can be rendered
+            StateHasChanged();
+
+        }
+    }
+
+    private async Task GenerateRandomIdentity()
+    {
+        IsIdentityLoading = true;
+        StateHasChanged();
+
+        // Generate a random identity using the IIdentityGenerator implementation.
+        IIdentityGenerator identityGenerator = new FigIdentityGenerator();
+        var identity = await identityGenerator.GenerateRandomIdentityAsync();
+
+        // Generate random values for the Identity properties
+        obj.Identity.FirstName = identity.FirstName;
+        obj.Identity.LastName = identity.LastName;
+        obj.Identity.NickName = identity.NickName;
+        obj.Identity.Gender = identity.Gender == 1 ? "Male" : "Female";
+        obj.Identity.BirthDate = DateTime.Now.AddYears(-30);
+        obj.Identity.AddressStreet = identity.Address.Street;
+        obj.Identity.AddressCity = identity.Address.City;
+        obj.Identity.AddressState = identity.Address.State;
+        obj.Identity.AddressZipCode = identity.Address.ZipCode;
+        obj.Identity.AddressCountry = identity.Address.Country;
+        obj.Identity.Hobbies = identity.Hobbies.First();
+        obj.Identity.EmailPrefix = identity.EmailPrefix;
+        obj.Identity.PhoneMobile = identity.PhoneMobile;
+        obj.Identity.BankAccountIBAN = identity.BankAccountIBAN;
+
+        // Generate password
+        GenerateRandomPassword();
+
+        IsIdentityLoading = false;
+        StateHasChanged();
+    }
+
+    private void GenerateRandomPassword()
+    {
+        // Generate a random password using a IPasswordGenerator implementation.
+        IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
+        obj.Passwords.First().Value = passwordGenerator.GenerateRandomPassword();
+    }
+
+    private async Task SaveLogin()
+    {
+        IsSaving = true;
+        StateHasChanged();
+
+        // Save the login, identity, password, and service to the database.
+        using (var context = new AliasDbContext())
+        {
+            if (EditMode)
+            {
+                obj = await AliasService.UpdateAliasAsync(obj);
+            }
+            else
+            {
+                obj.Passwords.Add(Password);
+                obj.UserId = UserService.User().Id;
+                obj = await AliasService.InsertAliasAsync(obj);
+            }
+
+            IsSaving = false;
+            StateHasChanged();
+
+            Navigation.NavigateTo("/alias/" + obj.Id);
+
+        }
+    }
+}

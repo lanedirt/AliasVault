@@ -1,0 +1,83 @@
+﻿@page "/user/email-confirm"
+@attribute [IgnoreAntiforgeryToken]
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@if (Success)
+{
+    <partial name="_Logo" />
+    <h2 class="fw-bold mb-2 text-uppercase">Email address confirmed!</h2>
+
+    <p class="mb-5">
+        Your email address has been successfully confirmed. You can now log in to your account.
+    </p>
+
+    <a href="/" class="btn btn-primary"><span class="material-symbols-rounded align-middle me-2">arrow_back</span>Log in</a>
+}
+else
+{
+    <partial name="_Logo" />
+    <h2 class="fw-bold mb-2 text-uppercase">Confirm email address</h2>
+
+    <div class="alert alert-danger" role="alert">
+        @Error
+    </div>
+
+    <a href="/" class="btn btn-primary"><span class="material-symbols-rounded align-middle me-2">arrow_back</span>Return to login</a>
+}
+
+@functions {
+    public bool Success { get; set; }
+    public string Message { get; set; } = "";
+    public string Error { get; set; } = "";
+
+    public async Task<IActionResult> OnGet()
+    {
+        var userId = Request.Query["userId"];
+        var code = Request.Query["code"];
+
+        var user = await UserManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            // Error: User not found
+            Error = "Invalid URL";
+            return Page();
+        }
+
+        var result = await UserManager.ConfirmEmailAsync(user, code);
+        if (result.Succeeded)
+        {
+            // Email confirmed!
+            Success = true;
+            // Check if user is logged in already, if so, redirect to homepage
+            if (SignInManager.IsSignedIn(User))
+            {
+                return Redirect("~/?successMessage=EmailConfirmed");
+            }
+            else
+            {
+                // Show success message to tell user they can now log in
+                return Redirect("/user/login?emailConfirmed=true");
+            }
+        }
+        else
+        {
+            // Error: Invalid token
+            // Convert errors to ErrorString
+            Error = "Custom errors: \n";
+            result.Errors.ToList().ForEach(e => Error += e.Description + "\n");
+        }
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        if (SignInManager.IsSignedIn(User))
+        {
+            await SignInManager.SignOutAsync();
+        }
+
+        return Redirect("~/");
+    }
+}

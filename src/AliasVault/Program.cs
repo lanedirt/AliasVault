@@ -1,0 +1,80 @@
+using AliasDb;
+using AliasVault;
+using AliasVault.Components;
+using AliasVault.Identity;
+using AliasVault.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// We use dbContextFactory to create a new instance of the DbContext for every place that needs it
+// as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
+builder.Services.AddDbContextFactory<AliasDbContext>();
+builder.Services.AddDataProtection();
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+    options.TokenLifespan = TimeSpan.FromHours(12));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequiredLength = 8;
+        options.Password.RequiredUniqueChars = 0;
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddEntityFrameworkStores<AliasDbContext>()
+    .AddDefaultTokenProviders();
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Services.AddScoped<JsInvokeService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PortalMessageService>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
+builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
+
+// Force all app generated URLs to be lowercase as this improves SEO.
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// Add services to the container.
+if (!builder.Environment.IsDevelopment())
+{
+    // Normal production use
+    builder.Services.AddServerSideBlazor();
+}
+else
+{
+    // Dev use
+    builder.Services.AddServerSideBlazor()
+        .AddCircuitOptions(e => {
+            e.DetailedErrors = true;
+        }); ;
+}
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddRazorPages();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
+
+using (var scope = app.Services.CreateScope())
+{
+    await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);
+}
+
+app.Run();

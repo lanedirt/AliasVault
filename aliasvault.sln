@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault", "src\AliasVault\AliasVault.csproj", "{BD2050C0-DC26-4777-9514-546525307370}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasDb", "src\AliasDb\AliasDb.csproj", "{64F47C9A-FE69-4793-B469-28BAADEC6706}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasGenerators", "src\AliasGenerators\AliasGenerators.csproj", "{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD2050C0-DC26-4777-9514-546525307370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2050C0-DC26-4777-9514-546525307370}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2050C0-DC26-4777-9514-546525307370}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2050C0-DC26-4777-9514-546525307370}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

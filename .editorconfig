@@ -1,0 +1,49 @@
+# Top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C# files
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Razor files
+[*.razor]
+indent_style = space
+indent_size = 4
+
+# CSS files
+[*.css]
+indent_style = space
+indent_size = 4
+
+# HTML files
+[*.html]
+indent_style = space
+indent_size = 4
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 4
+
+# JavaScript files
+[*.js]
+indent_style = space
+indent_size = 4
+
+# TypeScript files
+[*.ts]
+indent_style = space
+indent_size = 4
+
+# XML files
+[*.xml]
+indent_style = space
+indent_size = 4

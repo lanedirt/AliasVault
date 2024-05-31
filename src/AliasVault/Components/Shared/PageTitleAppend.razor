@@ -1,0 +1,15 @@
+﻿@using AliasVault.Pages
+@using Microsoft.Extensions.Configuration
+
+<PageTitle>@PageTitlePrefix AliasVault - @PageTitleSuffix</PageTitle>
+
+@code {
+    [Parameter]
+    public string PageTitleSuffix { get; set; }
+
+    public string PageTitlePrefix { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+    }
+}

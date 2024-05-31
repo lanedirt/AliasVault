@@ -1,0 +1,24 @@
+﻿@inherits AliasVault.Components.Layouts.Base.BaseInAppLayout
+
+@if (!AccessCheckCompleted)
+{
+<div class="mt-10">
+    <FullPageLoadingAnimation />
+</div>
+}
+else
+{
+    <TopMenu />
+
+    <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+              @Body
+            </div>
+            <!-- / Content -->
+
+
+
+            <div class="content-backdrop fade"></div>
+          </div>
+}

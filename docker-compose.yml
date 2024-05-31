@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+    blazorapp:
+        image: aliasVault
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "80:8080"
+        volumes:
+            - ./database:/database
+        restart: always

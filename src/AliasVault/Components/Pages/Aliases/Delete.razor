@@ -1,0 +1,82 @@
+@page "/alias/{id:guid}/delete"
+
+@using AliasDb
+@using AliasVault.Models
+@using AliasVault.Services
+@inherits AuthorizePageBase
+
+<PageTitleHeading Title="Delete alias" />
+<Breadcrumb BreadcrumbItems="BreadcrumbItems"></Breadcrumb>
+
+@if (_loading)
+{
+    <FullPageLoadingAnimation />
+}
+else
+{
+    <AlertMessageError Message="Note: removing this alias is permanent and cannot be undone." />
+
+    <form>
+        <div class="row">
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Id</label>
+                <div class="col-sm-10">
+                    @obj?.Id
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Service name</label>
+                <div class="col-sm-10">
+                    @obj?.Service.Name
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="button" class="btn btn-danger" @onclick="DeleteConfirm" value="Delete" />
+                    <input type="button" class="btn btn-primary" @onclick="Cancel" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool _loading = true;
+    private Login? obj;
+
+    // OnInitialized
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await AccessCheck()) return;
+        await base.OnInitializedAsync();
+
+        // Load existing obj, retrieve from service
+        obj = await AliasService.LoadAliasAsync(Id);
+
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete alias" });
+
+        // Hide loading spinner
+        _loading = false;
+        // Force re-render invoke so the charts can be rendered
+        StateHasChanged();
+    }
+
+    private async void DeleteConfirm()
+    {
+        if (obj != null)
+        {
+            await AliasService.DeleteAliasAsync(obj);
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

@@ -1,0 +1,138 @@
+@page "/alias/{id:guid}"
+
+@using AliasDb
+@using AliasVault.Models
+@inherits AuthorizePageBase
+@using Microsoft.EntityFrameworkCore
+
+<div class="row align-items-center">
+    <div class="col">
+        <h1>View alias</h1>
+    </div>
+    <div class="col-auto">
+        @if (!IsLoading)
+        {
+            <a href="/alias/@Alias.Id/edit" class="btn btn-warning">
+                <i class="bi bi-plus-circle"></i> Edit alias
+            </a>
+            <a href="/alias/@Alias.Id/delete" class="btn btn-danger">
+                <i class="bi bi-plus-circle"></i> Delete alias
+            </a>
+        }
+    </div>
+</div>
+<p>Find all of your aliases below.</p>
+
+<Breadcrumb BreadcrumbItems="BreadcrumbItems"></Breadcrumb>
+
+@if (IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <h4>@Alias.Service.Name</h4>
+
+    <div class="row row-cols-1 g-4">
+        <div class="card">
+            <div class="card-header">
+                Login credentials
+            </div>
+            <div class="card-body">
+                <CopyPasteFormRow Label="Email" Value="@(Alias.Identity.EmailPrefix + "@landmail.nl")" />
+                <CopyPasteFormRow Label="Username" Value="@Alias.Identity.NickName" />
+                <CopyPasteFormRow Label="Password" Value="@Alias.Passwords.First().Value" />
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Email
+            </div>
+            <div class="card-body">
+                <a href="https://spamok.com/@Alias.Identity.EmailPrefix">Click here to open the email client.</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Name
+            </div>
+            <div class="card-body">
+                <CopyPasteFormRow Label="Initials" Value="@(Alias.Identity.FirstName.Substring(0, 1))" />
+                <CopyPasteFormRow Label="First name" Value="@Alias.Identity.FirstName" />
+                <CopyPasteFormRow Label="Last name" Value="@Alias.Identity.LastName" />
+                <CopyPasteFormRow Label="Birthdate" Value="@Alias.Identity.BirthDate.ToString("dd-MM-yyyy")" />
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Contact
+            </div>
+            <div class="card-body">
+                <CopyPasteFormRow Label="Phone" Value="@(Alias.Identity.PhoneMobile)" />
+                <CopyPasteFormRow Label="IBAN" Value="@Alias.Identity.BankAccountIBAN" />
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Address
+            </div>
+            <div class="card-body">
+                <CopyPasteFormRow Label="Street" Value="@(Alias.Identity.AddressStreet)" />
+                <CopyPasteFormRow Label="Postal code" Value="@(Alias.Identity.AddressZipCode)" />
+                <CopyPasteFormRow Label="City" Value="@(Alias.Identity.AddressCity)" />
+                <CopyPasteFormRow Label="Country" Value="@Alias.Identity.AddressCountry" />
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private Login Alias { get; set; }
+    private bool IsIdentityLoading { get; set; }
+    private bool IsLoading { get; set; } = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await AccessCheck()) return;
+        await base.OnInitializedAsync();
+
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "View alias" });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAliasAsync();
+        }
+    }
+
+    private async Task LoadAliasAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        // Load the aliases from the database.
+        using (var context = new AliasDbContext())
+        {
+            Alias = await context.Logins
+                .Include(x => x.Identity)
+                .Include(x => x.Service)
+                .Include(x => x.Passwords)
+                .Where(x => x.Id == Id)
+                .Where(x => x.UserId == UserService.User().Id)
+                .FirstAsync();
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}
