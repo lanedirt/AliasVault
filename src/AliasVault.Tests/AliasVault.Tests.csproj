@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 

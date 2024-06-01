@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaviconExtractor", "src\Uti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Tests", "src\AliasVault.Tests\AliasVault.Tests.csproj", "{8E6A418A-B305-465D-857D-49953605C18E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography", "src\Utilities\Cryptography\Cryptography.csproj", "{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,8 +40,13 @@ Global
 		{8E6A418A-B305-465D-857D-49953605C18E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E6A418A-B305-465D-857D-49953605C18E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E6A418A-B305-465D-857D-49953605C18E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{ED328644-A152-403D-86EB-81201AA07744} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
+		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 EndGlobal
