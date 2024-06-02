@@ -8,40 +8,39 @@
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 
-<Logo />
-<h2 class="fw-bold mb-2 text-uppercase">Create account</h2>
-<p class="text-white-50 mb-4">To get started, please register your account.</p>
 
-<form id="account" method="post" class="z-index-1 position-relative needs-validation" novalidate="">
-    <EditForm Model="user" OnSubmit="HandleRegister">
-        <div data-mdb-input-init class="form-outline form-white mb-4">
-            <label asp-for="Input.Email" class="form-label">Email</label>
-            <InputTextField id="Input.Email" @bind-Value="user.Email" class="form-control" />
-            <ValidationMessage For="@(() => user.Email)" />
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+    Create a Free Account
+</h2>
+
+<EditForm Model="user" OnSubmit="HandleRegister" class="mt-8 space-y-6">
+    <div>
+        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
+        <InputTextField id="email" @bind-Value="user.Email" placeholder="name@company.com" />
+    </div>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+        <InputTextField id="password" @bind-Value="user.Password" type="password" placeholder="••••••••" />
+    </div>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
+        <InputTextField id="password" @bind-Value="user.PasswordConfirm" type="password" placeholder="••••••••" />
+    </div>
+
+    <div class="flex items-start">
+        <div class="flex items-center h-5">
+            <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" required>
         </div>
-
-        <div data-mdb-input-init class="form-outline form-white mb-4">
-            <label asp-for="Input.Password" class="form-label">Password</label>
-            <InputTextField id="Input.Password" @bind-Value="user.Password" class="form-control" />
-            <ValidationMessage For="@(() => user.Password)" />
+        <div class="ml-3 text-sm">
+            <label for="remember" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
         </div>
+    </div>
 
-        <div data-mdb-input-init class="form-outline form-white mb-4">
-            <label asp-for="Input.PasswordConfirm" class="form-label">Password (confirm)</label>
-            <InputTextField id="Input.PasswordConfirm" @bind-Value="user.PasswordConfirm" class="form-control" />
-            <ValidationMessage For="@(() => user.PasswordConfirm)" />
-        </div>
-
-        <div class="form-check mb-3">
-            <div>
-                <InputCheckbox id="Input.AcceptTerms" @bind-Value="user.AcceptTerms" class="form-check-input"></InputCheckbox>
-                <label for="Input_AcceptTerms" class="form-label">I agree with the <a href="/terms-conditions" target="_blank">terms and conditions</a></label>
-            </div>
-        </div>
-
-        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Register</button>
-    </EditForm>
-</form>
+    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Create account</button>
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+        Already registered? <a href="/user/login" class="text-primary-700 hover:underline dark:text-primary-500">Login here</a>
+    </div>
+</EditForm>
 
 @if (validationErrors.Any())
 {
@@ -54,11 +53,6 @@
         </ul>
     </div>
 }
-
-<div>
-    <p class="mb-0">Already have an account? <a href="/user/login" class="text-white-50 fw-bold">Sign In</a>
-    </p>
-</div>
 
 <LoadingIndicator @ref="loadingIndicator" />
 
