@@ -1,0 +1,113 @@
+@page "/user/register"
+@attribute [AllowAnonymous]
+@layout Auth.Layout.MainLayout
+@using AliasVault.Shared.Models
+@using AliasVault.WebApp.Auth.Components
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<Logo />
+<h2 class="fw-bold mb-2 text-uppercase">Create account</h2>
+<p class="text-white-50 mb-4">To get started, please register your account.</p>
+
+<form id="account" method="post" class="z-index-1 position-relative needs-validation" novalidate="">
+    <EditForm Model="user" OnSubmit="HandleRegister">
+        <div data-mdb-input-init class="form-outline form-white mb-4">
+            <label asp-for="Input.Email" class="form-label">Email</label>
+            <InputTextField id="Input.Email" @bind-Value="user.Email" class="form-control" />
+            <ValidationMessage For="@(() => user.Email)" />
+        </div>
+
+        <div data-mdb-input-init class="form-outline form-white mb-4">
+            <label asp-for="Input.Password" class="form-label">Password</label>
+            <InputTextField id="Input.Password" @bind-Value="user.Password" class="form-control" />
+            <ValidationMessage For="@(() => user.Password)" />
+        </div>
+
+        <div data-mdb-input-init class="form-outline form-white mb-4">
+            <label asp-for="Input.PasswordConfirm" class="form-label">Password (confirm)</label>
+            <InputTextField id="Input.PasswordConfirm" @bind-Value="user.PasswordConfirm" class="form-control" />
+            <ValidationMessage For="@(() => user.PasswordConfirm)" />
+        </div>
+
+        <div class="form-check mb-3">
+            <div>
+                <InputCheckbox id="Input.AcceptTerms" @bind-Value="user.AcceptTerms" class="form-check-input"></InputCheckbox>
+                <label for="Input_AcceptTerms" class="form-label">I agree with the <a href="/terms-conditions" target="_blank">terms and conditions</a></label>
+            </div>
+        </div>
+
+        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Register</button>
+    </EditForm>
+</form>
+
+@if (validationErrors.Any())
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in validationErrors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<div>
+    <p class="mb-0">Already have an account? <a href="/user/login" class="text-white-50 fw-bold">Sign In</a>
+    </p>
+</div>
+
+<LoadingIndicator @ref="loadingIndicator" />
+
+@code {
+    RegisterModel user = new RegisterModel();
+    LoadingIndicator loadingIndicator;
+    List<string> validationErrors = new List<string>();
+
+    async Task HandleRegister()
+    {
+        loadingIndicator.Show();
+        validationErrors.Clear();
+
+        try
+        {
+            var result = await Http.PostAsJsonAsync("api/Auth/register", user);
+
+            if (result.IsSuccessStatusCode)
+            {
+                var token = await result.Content.ReadAsStringAsync();
+                await LocalStorage.SetItemAsync("token", token);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var responseContent = await result.Content.ReadAsStringAsync();
+                var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ValidationErrorResponse>(responseContent);
+                if (errorResponse != null && errorResponse.Errors != null)
+                {
+                    foreach (var error in errorResponse.Errors.Values)
+                    {
+                        validationErrors.AddRange(error);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            loadingIndicator.Hide();
+        }
+    }
+
+    public class ValidationErrorResponse
+    {
+        public string Type { get; set; }
+        public string Title { get; set; }
+        public int Status { get; set; }
+        public IDictionary<string, string[]> Errors { get; set; }
+        public string TraceId { get; set; }
+    }
+}

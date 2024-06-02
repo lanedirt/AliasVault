@@ -1,3 +1,5 @@
+using AliasVault.Shared.Models;
+
 namespace AliasVault.Api.Controllers;
 
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +36,26 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    {
+        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (result.Succeeded)
+        {
+            // When a user is registered, they are automatically signed in.
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            // Return the token.
+            var token = GenerateJwtToken(user);
+            return Ok(new { token });
+        }
+        else
+        {
+            return BadRequest(result.Errors);
+        }
+    }
+
     private string GenerateJwtToken(IdentityUser user)
     {
         var claims = new[]
@@ -54,10 +76,4 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-}
-
-public class LoginModel
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
 }

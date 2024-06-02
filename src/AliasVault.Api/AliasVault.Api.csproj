@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
+      <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
     </ItemGroup>
 
 </Project>

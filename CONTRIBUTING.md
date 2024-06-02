@@ -19,3 +19,9 @@ export PATH="$PATH:$HOME/.dotnet/tools"
 dotnet ef
 ```
 
+- Run Tailwind CSS compiler while changing HTML files
+
+```bash
+npm run build:css
+```
+
