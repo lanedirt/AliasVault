@@ -1363,6 +1363,11 @@ video {
   color: rgb(74 222 128 / var(--tw-text-opacity));
 }
 
+.text-primary-900 {
+  --tw-text-opacity: 1;
+  color: rgb(123 74 30 / var(--tw-text-opacity));
+}
+
 .opacity-0 {
   opacity: 0;
 }
@@ -1586,6 +1591,11 @@ video {
 .dark\:text-green-500:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity));
+}
+
+.dark\:text-primary-200:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(251 203 116 / var(--tw-text-opacity));
 }
 
 .dark\:placeholder-gray-400:is(.dark *)::-moz-placeholder {

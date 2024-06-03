@@ -1,0 +1,20 @@
+@page "/user/logout"
+@attribute [AllowAnonymous]
+@layout Auth.Layout.MainLayout
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LocalStorage.RemoveItemAsync("token");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+
+        // Redirect to home page
+        NavigationManager.NavigateTo("/");
+    }
+
+}

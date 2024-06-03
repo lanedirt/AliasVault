@@ -30,6 +30,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             try
             {
                 identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+                var claims = identity.Claims;
                 _http.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
             }

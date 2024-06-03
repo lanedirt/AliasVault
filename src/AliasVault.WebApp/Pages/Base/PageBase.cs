@@ -1,5 +1,6 @@
 ﻿using AliasVault.WebApp.Components.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
 namespace AliasVault.WebApp.Pages.Base;
@@ -13,6 +14,9 @@ public class PageBase : OwningComponentBase
 {
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    public AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
 
     [Inject]
     public IJSRuntime Js { get; set; } = null!;
@@ -34,6 +38,16 @@ public class PageBase : OwningComponentBase
 
         // Detect success messages in query string and add them to the SuccessMessages list
         var uri = new Uri(NavigationManager.Uri);
+    }
+
+    /// <summary>
+    /// Get username from the authentication state.
+    /// </summary>
+    /// <returns></returns>
+    protected async Task<string> GetUsernameAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        return authState.User?.Identity?.Name ?? "[Unknown]";
     }
 
     protected override async Task OnParametersSetAsync()
