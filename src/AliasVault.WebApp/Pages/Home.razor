@@ -1,18 +1,19 @@
 ﻿@page "/"
+@page "/aliases"
 @using AliasVault.WebApp.Components.Alias
 @inherits PageBase
 
 <LayoutPageTitle>Home</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:px-0 xl:gap-4 dark:bg-gray-900">
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Aliaseses</h1>
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Aliases</h1>
         <p>Find all of your aliases below.</p>
     </div>
 </div>
 
-<div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6 xl:px-0">
+<div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
     <Alias />
     <Alias />
     <Alias />
