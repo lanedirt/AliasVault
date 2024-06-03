@@ -1,16 +1,16 @@
 @page "/user/logout"
+@using AliasVault.WebApp.Auth.Services
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
-@inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
+@inject AuthService AuthService
 
 @code {
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await LocalStorage.RemoveItemAsync("token");
+        await AuthService.RemoveTokensAsync();
         await AuthStateProvider.GetAuthenticationStateAsync();
 
         // Redirect to home page

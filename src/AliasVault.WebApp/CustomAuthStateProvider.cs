@@ -1,44 +1,37 @@
+using AliasVault.WebApp.Auth.Services;
 using Blazored.LocalStorage;
 
 namespace AliasVault.WebApp;
 
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
-    private readonly ILocalStorageService _localStorage;
-    private readonly HttpClient _http;
+    private readonly AuthService _authService;
 
-    public CustomAuthStateProvider(ILocalStorageService localStorage, HttpClient http)
+    public CustomAuthStateProvider(AuthService authService)
     {
-        _localStorage = localStorage;
-        _http = http;
+        _authService = authService;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        string token = await _localStorage.GetItemAsStringAsync("token");
+        string token = await _authService.GetAccessTokenAsync();
 
         var identity = new ClaimsIdentity();
-        _http.DefaultRequestHeaders.Authorization = null;
 
         if (!string.IsNullOrEmpty(token))
         {
             try
             {
-                // Ensure the token does not have unnecessary quotes
-                token = token.Replace("\"", "");
-
                 identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
-                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             catch (Exception)
             {
                 Console.WriteLine("Invalid JWT token. Removing...");
-                await _localStorage.RemoveItemAsync("token");
+                await _authService.RemoveTokensAsync();
                 identity = new ClaimsIdentity();
             }
         }

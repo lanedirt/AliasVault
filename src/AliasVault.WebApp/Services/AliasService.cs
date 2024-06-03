@@ -118,9 +118,9 @@ public class AliasService
         {
             return await _httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/Alias/items");
         }
-        catch (AccessTokenNotAvailableException ex)
+        catch
         {
-            ex.Redirect();
+            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
             return null;
         }
     }

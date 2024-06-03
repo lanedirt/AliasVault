@@ -4,10 +4,11 @@
 @using System.Text.Json
 @using AliasVault.Shared.Models
 @using AliasVault.WebApp.Auth.Components
+@using AliasVault.WebApp.Auth.Services
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
-@inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
+@inject AuthService AuthService
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Sign in to AliasVault
@@ -46,6 +47,16 @@
     LoginModel user = new LoginModel();
     FullScreenLoadingIndicator loadingIndicator;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true) {
+            // Already authenticated, redirect to home page.a
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
     async Task HandleLogin()
     {
         loadingIndicator.Show();
@@ -54,12 +65,13 @@
         {
             var result = await Http.PostAsJsonAsync("api/Auth/login", user);
             var responseContent = await result.Content.ReadAsStringAsync();
-            var tokenObject = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
 
-            if (tokenObject != null && tokenObject.TryGetValue("token", out var token))
+            if (tokenObject != null)
             {
                 // Store the token as a plain string in local storage
-                await LocalStorage.SetItemAsStringAsync("token", token);
+                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
+                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
                 await AuthStateProvider.GetAuthenticationStateAsync();
             }
             else

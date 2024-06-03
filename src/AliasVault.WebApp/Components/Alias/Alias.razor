@@ -1,4 +1,3 @@
-@using AliasDb
 @inject NavigationManager NavigationManager
 
 <div @onclick="ShowDetails" class="p-4 space-y-2 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700
@@ -9,20 +8,6 @@
         <div>@Obj.CreateDate.ToShortDateString()</div>
     </div>
 </div>
-
-<!--
-<div class="col">
-    <div class="card mb-3" @onclick="ShowDetails">
-        <div class="card-body">
-            <div class="card-text text-center">
-                <DisplayFavicon faviconBytes="@Login.Service.Logo"></DisplayFavicon>
-                <div>@Login.Service.Name</div>
-                <div><small class="text-muted">@Login.CreatedAt.ToShortDateString()</small></div>
-            </div>
-        </div>
-    </div>
-</div>
-    -->
 
 @code {
     [Parameter]

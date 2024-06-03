@@ -46,6 +46,11 @@ public class AliasDbContext : IdentityDbContext
     public DbSet<Service> Services { get; set; }
 
     /// <summary>
+    /// Gets or sets the AspNetUserRefreshTokens DbSet.
+    /// </summary>
+    public DbSet<AspNetUserRefreshTokens> AspNetUserRefreshTokens { get; set; }
+
+    /// <summary>
     /// Gets or sets the Identities DbSet.
     /// </summary>
     /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
@@ -116,5 +121,12 @@ public class AliasDbContext : IdentityDbContext
             .WithMany()
             .HasForeignKey(i => i.DefaultPasswordId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure the Login - UserId entity
+        modelBuilder.Entity<AspNetUserRefreshTokens>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .IsRequired();
     }
 }

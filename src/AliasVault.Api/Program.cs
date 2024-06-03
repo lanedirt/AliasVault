@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using AliasDb;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,8 +9,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Debug); // Set the minimum level to Information
+    logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Debug); // Ensure Identity logs are captured
+    logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Debug); // Ensure Identity logs are captured
+});
+
 // Add services to the container.
 builder.Services.AddDbContextFactory<AliasDbContext>();
+builder.Services.AddDataProtection();
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromDays(30); // Set token lifespan for refresh tokens
+    options.Name = "AliasVault";
+});
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     {
         options.Password.RequireDigit = false;
@@ -21,9 +34,13 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
         options.Password.RequiredLength = 8;
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
+        options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<IdentityUser>)));
     })
     .AddEntityFrameworkStores<AliasDbContext>()
-    .AddDefaultTokenProviders();
+    // Note: The AliasVault token provider is used to generate refresh tokens and is also defined
+    // in the AuthController.
+    .AddDefaultTokenProviders()
+    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("AliasVault");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -37,10 +54,12 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
+        RequireExpirationTime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = configuration["Jwt:Issuer"],
         ValidAudience = configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+        ClockSkew = TimeSpan.Zero,
     };
 });
 
@@ -81,12 +100,6 @@ builder.Services.AddSwaggerGen(c =>
         },
         Array.Empty<string>()
     }});
-});
-
-builder.Services.AddLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole();
 });
 
 var app = builder.Build();
