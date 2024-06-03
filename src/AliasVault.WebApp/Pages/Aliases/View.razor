@@ -1,0 +1,16 @@
+﻿@page "/alias/{id:guid}"
+@inherits PageBase
+
+<LayoutPageTitle>View alias</LayoutPageTitle>
+
+View alias here.
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

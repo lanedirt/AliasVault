@@ -2,7 +2,6 @@
 @page "/alias/{id:guid}/edit"
 
 @inject NavigationManager Navigation
-@inject UserService UserService
 @inherits AuthorizePageBase
 @using AliasDb
 @using AliasGenerators.Identity
@@ -149,7 +148,7 @@ else
     <p>Saving...</p>
     }
 
-    <button class="btn btn-success" @onclick="SaveLogin">Save Alias</button>
+    <button class="btn btn-success" @onclick="SaveLogin">Save Aliases</button>
 }
 
 @code {
