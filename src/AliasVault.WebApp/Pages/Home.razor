@@ -1,6 +1,8 @@
 ﻿@page "/"
 @page "/aliases"
 @using AliasVault.WebApp.Components.Alias
+@using AliasVault.WebApp.Services
+@inject AliasService AliasService
 @inherits PageBase
 
 <LayoutPageTitle>Home</LayoutPageTitle>
@@ -13,18 +15,39 @@
     </div>
 </div>
 
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+
 <div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
-    <Alias />
-    <Alias />
-    <Alias />
-    <Alias />
-    <Alias />
-    <Alias />
+    @foreach (var alias in Aliases)
+    {
+        <Alias Obj="@alias"/>
+    }
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    private bool IsLoading { get; set; } = true;
+    private List<Shared.Models.WebApi.AliasListEntry> Aliases { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnInitializedAsync();
+        if (firstRender)
+        {
+            await LoadAliasesAsync();
+        }
+    }
+
+    private async Task LoadAliasesAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        // Load the aliases from the webapi via AliasService.
+        Aliases = await AliasService.GetListAsync();
+
+        IsLoading = false;
+        StateHasChanged();
     }
 }

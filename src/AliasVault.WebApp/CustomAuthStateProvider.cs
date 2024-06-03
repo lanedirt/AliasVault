@@ -29,10 +29,11 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         {
             try
             {
+                // Ensure the token does not have unnecessary quotes
+                token = token.Replace("\"", "");
+
                 identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
-                var claims = identity.Claims;
-                _http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             catch (Exception)
             {

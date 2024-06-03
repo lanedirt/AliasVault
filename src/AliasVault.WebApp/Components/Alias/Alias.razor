@@ -5,13 +5,10 @@
  dark:bg-gray-800 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
     <div class="px-4 py-2 text-gray-400 rounded text-center flex flex-col items-center">
         <DisplayFavicon faviconBytes="null"></DisplayFavicon>
-        <div>Servicename</div>
-        <div>01-01-2000</div>
+        <div>@Obj.Service</div>
+        <div>@Obj.CreateDate.ToShortDateString()</div>
     </div>
 </div>
-
-
-
 
 <!--
 <div class="col">
@@ -28,7 +25,8 @@
     -->
 
 @code {
-    [Parameter] public Login Login { get; set; } = new Login();
+    [Parameter]
+    public AliasVault.Shared.Models.WebApi.AliasListEntry Obj { get; set; } = new();
     private bool showModal = false;
 
     private void ShowDetails()

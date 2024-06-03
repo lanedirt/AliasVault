@@ -1,6 +1,7 @@
 @page "/user/login"
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
+@using System.Text.Json
 @using AliasVault.Shared.Models
 @using AliasVault.WebApp.Auth.Components
 @inject HttpClient Http
@@ -39,11 +40,11 @@
 </EditForm>
 
 
-<LoadingIndicator @ref="loadingIndicator" />
+<FullScreenLoadingIndicator @ref="loadingIndicator" />
 
 @code {
     LoginModel user = new LoginModel();
-    LoadingIndicator loadingIndicator;
+    FullScreenLoadingIndicator loadingIndicator;
 
     async Task HandleLogin()
     {
@@ -52,9 +53,21 @@
         try
         {
             var result = await Http.PostAsJsonAsync("api/Auth/login", user);
-            var token = await result.Content.ReadAsStringAsync();
-            Console.WriteLine(token);
-            await LocalStorage.SetItemAsync("token", token);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var tokenObject = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+
+            if (tokenObject != null && tokenObject.TryGetValue("token", out var token))
+            {
+                // Store the token as a plain string in local storage
+                await LocalStorage.SetItemAsStringAsync("token", token);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+            }
+            else
+            {
+                // Handle the case where the token is not present in the response
+                Console.WriteLine("Token not found in the response.");
+            }
+
             await AuthStateProvider.GetAuthenticationStateAsync();
 
             if (result.IsSuccessStatusCode)

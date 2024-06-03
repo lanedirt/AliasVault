@@ -54,11 +54,11 @@
     </div>
 }
 
-<LoadingIndicator @ref="loadingIndicator" />
+<FullScreenLoadingIndicator @ref="loadingIndicator" />
 
 @code {
     RegisterModel user = new RegisterModel();
-    LoadingIndicator loadingIndicator;
+    FullScreenLoadingIndicator loadingIndicator;
     List<string> validationErrors = new List<string>();
 
     async Task HandleRegister()

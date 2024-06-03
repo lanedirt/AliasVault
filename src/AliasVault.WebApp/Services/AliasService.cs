@@ -1,37 +1,31 @@
+using System.Net.Http.Json;
 using AliasDb;
 using AliasGenerators.Identity.Models;
+using AliasVault.Shared.Models.WebApi;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace AliasVault.WebApp.Services;
 
 public class AliasService
 {
-    private Login _alias;
+    private HttpClient _httpClient;
 
     /// <summary>
     /// Public constructor which can be called from static async method or directly.
     /// </summary>
     /// <param name="aliasObj"></param>
-    /// <param name="userService"></param>
-    public AliasService(Login aliasObj)
+    /// <param name="httpClient"></param>
+    public AliasService(HttpClient httpClient)
     {
-        _alias = aliasObj;
-    }
-
-    /// <summary>
-    /// Returns inner event EF object.
-    /// </summary>
-    /// <returns></returns>
-    public Login Alias()
-    {
-        return _alias;
+        _httpClient = httpClient;
     }
 
     /// <summary>
     /// Insert new entry into database.
     /// </summary>
     /// <param name="aliasObject"></param>
-    public static async Task<Login> InsertAliasAsync(Login aliasObject)
+    public async Task<Login> InsertAliasAsync(Login aliasObject)
     {
         using (var dbContext = new AliasDbContext())
         {
@@ -54,7 +48,7 @@ public class AliasService
     /// Update an existing entry to database.
     /// </summary>
     /// <param name="aliasObject"></param>
-    public static async Task<Login> UpdateAliasAsync(Login aliasObject)
+    public async Task<Login> UpdateAliasAsync(Login aliasObject)
     {
         using (var dbContext = new AliasDbContext())
         {
@@ -99,7 +93,7 @@ public class AliasService
     /// Load existing entry from database.
     /// </summary>
     /// <param name="aliasId"></param>
-    public static async Task<Login> LoadAliasAsync(Guid aliasId)
+    public async Task<Login> LoadAliasAsync(Guid aliasId)
     {
         using (var dbContext = new AliasDbContext())
         {
@@ -115,10 +109,27 @@ public class AliasService
     }
 
     /// <summary>
+    /// Get list with all entries from database.
+    /// </summary>
+    public async Task<List<AliasListEntry>?> GetListAsync()
+    {
+        // Make webapi call to get list of all entries.
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/Alias/items");
+        }
+        catch (AccessTokenNotAvailableException ex)
+        {
+            ex.Redirect();
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Removes existing entry from database.
     /// </summary>
     /// <param name="alias"></param>
-    public static async Task DeleteAliasAsync(Login alias)
+    public async Task DeleteAliasAsync(Login alias)
     {
         using (var dbContext = new AliasDbContext())
         {
