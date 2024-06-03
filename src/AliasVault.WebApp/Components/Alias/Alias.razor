@@ -1,0 +1,47 @@
+@using AliasDb
+@inject NavigationManager NavigationManager
+
+<div class="p-4 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="px-4 py-2 text-gray-400 border border-gray-200 border-dashed rounded dark:border-gray-600">
+        <h3>Card header</h3>
+    </div>
+    <div class="h-16 px-4 py-2 text-gray-400 border border-gray-200 border-dashed rounded dark:border-gray-600">
+        <h3>Card body</h3>
+    </div>
+    <div class="px-4 py-2 text-gray-400 border border-gray-200 border-dashed rounded dark:border-gray-600">
+        <h3>Card footer</h3>
+    </div>
+</div>
+
+
+<!--
+<div class="col">
+    <div class="card mb-3" @onclick="ShowDetails">
+        <div class="card-body">
+            <div class="card-text text-center">
+                <DisplayFavicon faviconBytes="@Login.Service.Logo"></DisplayFavicon>
+                <div>@Login.Service.Name</div>
+                <div><small class="text-muted">@Login.CreatedAt.ToShortDateString()</small></div>
+            </div>
+        </div>
+    </div>
+</div>
+    -->
+
+@code {
+    [Parameter] public Login Login { get; set; } = new Login();
+    private bool showModal = false;
+
+    private void ShowDetails()
+    {
+        // Redirect to view page instead for now.
+        NavigationManager.NavigateTo($"/alias/{Login.Id}");
+        //showModal = true;
+    }
+
+    private void CloseDetails()
+    {
+        showModal = false;
+    }
+
+}

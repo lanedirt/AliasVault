@@ -22,6 +22,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
+      <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 </Project>

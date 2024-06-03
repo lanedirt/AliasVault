@@ -27,3 +27,12 @@ docker compose up -d --build --force-recreate
 ```
 
 The app will be available at http://localhost:80
+
+
+
+## Credits
+The following libraries and frameworks are used in this project:
+
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
+- [Flowbite](https://flowbite.com/) - A free and open-source UI component library.
+- [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.

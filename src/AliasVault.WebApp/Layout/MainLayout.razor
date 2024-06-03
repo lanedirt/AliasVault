@@ -1,17 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<TopMenu />
 
-    <main>
-        <div class="top-row px-4">
-            <LoginLogoutButton />
-        </div>
+<div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
 
-        <article class="content px-4">
+    <div id="main-content" class="relative w-full max-w-screen-2xl mx-auto h-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <main>
             @Body
-        </article>
-    </main>
+
+        </main>
+        <Footer />
+    </div>
 </div>
