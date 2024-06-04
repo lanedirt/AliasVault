@@ -1,125 +1,145 @@
 ﻿@page "/alias/{id:guid}"
+@using AliasVault.Shared.Models.WebApi
+@using AliasVault.WebApp.Services
+@inject AliasService AliasService
 @inherits PageBase
 
 <LayoutPageTitle>View alias</LayoutPageTitle>
 
-<div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">User settings</h1>
-    </div>
-    <!-- Right Content -->
-    <div class="col-span-full lg:col-auto">
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <div class="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
-                <img class="mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0" src="/img/service-placeholder.webp" alt="Service logo">
-                <div>
-                    <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Service name</h3>
+
+@if (IsLoading || Alias == null)
+{
+<LoadingIndicator />
+}
+else
+{
+    <div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
+        <div class="mb-4 col-span-full xl:mb-2">
+            <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">User settings</h1>
+        </div>
+        <!-- Right Content -->
+        <div class="col-span-full lg:col-auto">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
+                    <img class="mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0" src="/img/service-placeholder.webp" alt="Service logo">
+                    <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Service name</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Email</h3>
+                <div class="mb-4">
+                    No recent emails.
                 </div>
             </div>
         </div>
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Email</h3>
-            <div class="mb-4">
-                No recent emails.
+        <div class="col-span-2">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Login credentials</h3>
+                <form action="#">
+                    <div class="grid gap-6">
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Email" Value="@AliasEmail"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Username" Value="@(Alias.Identity.NickName)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Password" Value="@(Alias.Password.Value)"></CopyPasteFormRow>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Name</h3>
+                <form action="#">
+                    <div class="grid grid-cols-6 gap-6">
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Initials" Value="@(Alias.Identity.FirstName.Substring(0,1))"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="First name" Value="@(Alias.Identity.FirstName)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Last name" Value="@(Alias.Identity.LastName)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Birthdate" Value="@(Alias.Identity.BirthDate.ToShortDateString())"></CopyPasteFormRow>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Contact</h3>
+                <form action="#">
+                    <div class="grid grid-cols-6 gap-6">
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Phone" Value="@(Alias.Identity.PhoneMobile)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="IBAN" Value="@(Alias.Identity.BankAccountIBAN)"></CopyPasteFormRow>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Address</h3>
+                <form action="#">
+                    <div class="grid grid-cols-6 gap-6">
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Street" Value="@(Alias.Identity.AddressStreet)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Postal code" Value="@(Alias.Identity.AddressZipCode)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="City" Value="@(Alias.Identity.AddressCity)"></CopyPasteFormRow>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <CopyPasteFormRow Label="Country" Value="@(Alias.Identity.AddressCountry)"></CopyPasteFormRow>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <div class="col-span-2">
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Login credentials</h3>
-            <form action="#">
-                <div class="grid gap-6">
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="current-password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-                        <input type="text" name="current-password" id="current-password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-                        <input data-popover-target="popover-password" data-popover-placement="bottom" type="text" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="confirm-password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-                        <input type="text" name="confirm-password" id="confirm-password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" required="">
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Name</h3>
-            <form action="#">
-                <div class="grid grid-cols-6 gap-6">
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="first-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Initials</label>
-                        <input type="text" name="first-name" id="first-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Bonnie" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name</label>
-                        <input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Green" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last name</label>
-                        <input type="text" name="country" id="country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="United States" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Birthdate</label>
-                        <input type="text" name="city" id="city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="e.g. San Francisco" required="">
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Contact</h3>
-            <form action="#">
-                <div class="grid grid-cols-6 gap-6">
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="first-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone</label>
-                        <input type="text" name="first-name" id="first-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Bonnie" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">IBAN</label>
-                        <input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Green" required="">
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Address</h3>
-            <form action="#">
-                <div class="grid grid-cols-6 gap-6">
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="first-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Street</label>
-                        <input type="text" name="first-name" id="first-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Bonnie" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Postal code</label>
-                        <input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Green" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
-                        <input type="text" name="country" id="country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="United States" required="">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
-                        <input type="text" name="city" id="city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="e.g. San Francisco" required="">
-                    </div>
-                </div>
-            </form>
-        </div>
-
-    </div>
-</div>
+}
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private Alias? Alias { get; set; } = new();
+    private string AliasEmail { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "View alias" });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAliasesAsync();
+        }
+    }
+
+    private async Task LoadAliasesAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        // Load the aliases from the webapi via AliasService.
+        Alias = await AliasService.LoadAliasAsync(Id);
+        AliasEmail = Alias?.Identity.EmailPrefix + "@landmail.nl";
+
+        IsLoading = false;
+        StateHasChanged();
     }
 }

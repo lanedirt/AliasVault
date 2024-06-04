@@ -45,7 +45,7 @@ public class AliasController : AuthenticatedRequestController
         }
     }
 
-    [HttpGet("alias/{aliasId}")]
+    [HttpGet("{aliasId}")]
     public async Task<IActionResult> GetAlias(Guid aliasId)
     {
         var user = await GetCurrentUserAsync();
@@ -74,8 +74,11 @@ public class AliasController : AuthenticatedRequestController
                     },
                     Identity = new Identity()
                     {
+                        NickName = x.Identity.NickName,
                         FirstName = x.Identity.FirstName,
                         LastName = x.Identity.LastName,
+                        BirthDate = x.Identity.BirthDate,
+                        AddressStreet = x.Identity.AddressStreet,
                         AddressCity = x.Identity.AddressCity,
                         AddressState = x.Identity.AddressState,
                         AddressZipCode = x.Identity.AddressZipCode,
@@ -89,7 +92,7 @@ public class AliasController : AuthenticatedRequestController
                     },
                     Password = new AliasVault.Shared.Models.WebApi.Password()
                     {
-                        Value = x.Passwords.First().Value,
+                        Value = x.Passwords.First().Value ?? "",
                         Description = "",
                         CreatedAt = x.Passwords.First().CreatedAt,
                         UpdatedAt = x.Passwords.First().UpdatedAt

@@ -93,18 +93,17 @@ public class AliasService
     /// Load existing entry from database.
     /// </summary>
     /// <param name="aliasId"></param>
-    public async Task<Login> LoadAliasAsync(Guid aliasId)
+    public async Task<Alias?> LoadAliasAsync(Guid aliasId)
     {
-        using (var dbContext = new AliasDbContext())
+        // Make webapi call to get list of all entries.
+        try
         {
-            var aliasObject = await dbContext.Logins
-                .Include(x => x.Passwords)
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Where(x => x.Id == aliasId)
-                .FirstAsync();
-
-            return aliasObject;
+            return await _httpClient.GetFromJsonAsync<Alias>("api/Alias/" + aliasId);
+        }
+        catch
+        {
+            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
+            return null;
         }
     }
 

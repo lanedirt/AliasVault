@@ -32,6 +32,15 @@
         window.initTopMenu = function() {
             initDarkModeSwitcher();
         };
+
+        window.clipboardCopy = {
+            copyText: function (text) {
+                navigator.clipboard.writeText(text).then(function () { })
+                    .catch(function (error) {
+                        alert(error);
+                    });
+            }
+        };
     </script>
 
     <script src="_framework/blazor.webassembly.js"></script>

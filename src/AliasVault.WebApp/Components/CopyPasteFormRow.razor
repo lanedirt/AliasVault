@@ -1,0 +1,30 @@
+﻿@inject IJSRuntime JSRuntime
+
+<label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
+<input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value="@Value" onclick="@CopyToClipboard" required="">
+@if (_copied)
+{
+    <div class="text-sm text-green-500 dark:text-green-400">Copied!</div>
+}
+@code {
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string Value { get; set; }
+
+    private bool _copied = false;
+
+    public async Task CopyToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("window.clipboardCopy.copyText", Value);
+        _copied = true;
+
+        StateHasChanged();
+
+        // After 2 seconds, remove the success class again
+        await Task.Delay(2000);
+        _copied = false;
+
+        StateHasChanged();
+    }
+}
