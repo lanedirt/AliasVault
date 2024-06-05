@@ -25,6 +25,7 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<AliasService>();
+builder.Services.AddSingleton<ClipboardCopyService>();
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();

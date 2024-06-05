@@ -1,30 +1,52 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using AliasVault.WebApp.Services
+<!-- CopyPasteFormRow.razor -->
+@inject ClipboardCopyService ClipboardCopyService
+@inject IJSRuntime JsRuntime
+@implements IDisposable
 
-<label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
-<input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value="@Value" onclick="@CopyToClipboard" required="">
-@if (_copied)
-{
-    <div class="text-sm text-green-500 dark:text-green-400">Copied!</div>
-}
-@code {
-    [Parameter]
-    public string Label { get; set; }
-    [Parameter]
-    public string Value { get; set; }
-
-    private bool _copied = false;
-
-    public async Task CopyToClipboard()
+<label for="@_inputId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
+<div class="relative">
+    <input type="text" id="@_inputId" class="outline-0 shadow-sm bg-gray-50 border @(_copied ? "border-green-500 border-2" : "border-gray-300") text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-@(_copied ? "green-500" : "gray-600") dark:placeholder-gray-400 dark:text-white" value="@Value" @onclick="CopyToClipboard" readonly>
+    @if (_copied)
     {
-        await JSRuntime.InvokeVoidAsync("window.clipboardCopy.copyText", Value);
-        _copied = true;
+        <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500 dark:text-green-400">
+            Copied!
+        </span>
+    }
+</div>
 
-        StateHasChanged();
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public string Value { get; set; }
 
-        // After 2 seconds, remove the success class again
+    private bool _copied => ClipboardCopyService.GetCopiedId() == _inputId;
+    private string _inputId = Guid.NewGuid().ToString();
+
+    protected override void OnInitialized()
+    {
+        ClipboardCopyService.OnCopy += HandleCopy;
+    }
+
+    private async Task CopyToClipboard()
+    {
+        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Value);
+        ClipboardCopyService.SetCopied(_inputId);
+
+        // After 2 seconds, reset the copied state if it's still the same element
         await Task.Delay(2000);
-        _copied = false;
+        if (ClipboardCopyService.GetCopiedId() == _inputId)
+        {
+            ClipboardCopyService.SetCopied(string.Empty);
+        }
+    }
 
+    private void HandleCopy(string copiedElementId)
+    {
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ClipboardCopyService.OnCopy -= HandleCopy;
     }
 }
