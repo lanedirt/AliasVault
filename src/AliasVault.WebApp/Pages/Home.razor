@@ -10,22 +10,28 @@
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Aliases</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Aliases</h1>
+            <a href="/add-alias" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                + Add new alias
+            </a>
+        </div>
         <p>Find all of your aliases below.</p>
     </div>
 </div>
 
 @if (IsLoading)
 {
-    <LoadingIndicator />
+<LoadingIndicator />
 }
 
 <div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
     @foreach (var alias in Aliases)
     {
-        <Alias Obj="@alias"/>
+    <Alias Obj="@alias"/>
     }
 </div>
+
 
 @code {
     private bool IsLoading { get; set; } = true;
