@@ -46,6 +46,10 @@ public class AliasVaultApiHandlerService : DelegatingHandler
             }
             else
             {
+                // Refreshing token failed. This might be caused by the refresh token itself expired or has been revoked.
+                // Remove token from localstorage and redirect to login.
+                await authService.RemoveTokensAsync();
+
                 // Redirect to the login page.
                 var navigationManager = _serviceProvider.GetRequiredService<NavigationManager>();
                 navigationManager.NavigateTo("/user/login");
