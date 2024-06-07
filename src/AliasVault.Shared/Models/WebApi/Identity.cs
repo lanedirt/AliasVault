@@ -7,10 +7,10 @@ public class Identity
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string NickName { get; set; }
-    public DateTime BirthDate { get; set; }
+    public string BirthDate { get; set; }
     public string AddressStreet { get; set; }
     public string AddressCity { get; set; }
-    public string AddressState { get; set; }
+    public string? AddressState { get; set; }
     public string AddressZipCode { get; set; }
     public string AddressCountry { get; set; }
     public string Hobbies { get; set; }

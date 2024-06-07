@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AliasDb;
 using AliasVault.Shared.Models.WebApi;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasVault.Shared.Models.WebApi.Identity;
 using Service = AliasVault.Shared.Models.WebApi.Service;
@@ -77,7 +76,8 @@ public class AliasController : AuthenticatedRequestController
                         NickName = x.Identity.NickName,
                         FirstName = x.Identity.FirstName,
                         LastName = x.Identity.LastName,
-                        BirthDate = x.Identity.BirthDate,
+                        BirthDate = x.Identity.BirthDate.ToString("yyyy-MM-dd"),
+                        Gender = x.Identity.Gender,
                         AddressStreet = x.Identity.AddressStreet,
                         AddressCity = x.Identity.AddressCity,
                         AddressState = x.Identity.AddressState,
@@ -112,8 +112,8 @@ public class AliasController : AuthenticatedRequestController
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
-    [HttpPost("")]
-    public async Task<IActionResult> Insert([FromBody] Login model)
+    [HttpPut("")]
+    public async Task<IActionResult> Insert([FromBody] Alias model)
     {
         var user = await GetCurrentUserAsync();
         if (user == null)
@@ -123,11 +123,131 @@ public class AliasController : AuthenticatedRequestController
 
         using (var dbContext = new AliasDbContext())
         {
-            model.UserId = user.Id;
-            dbContext.Logins.Add(model);
+            var login = new Login();
+            login.UserId = user.Id;
+            login.CreatedAt = DateTime.UtcNow;
+            login.UpdatedAt = DateTime.UtcNow;
+            login.Identity = new AliasDb.Identity()
+            {
+                NickName = model.Identity.NickName,
+                FirstName = model.Identity.FirstName,
+                LastName = model.Identity.LastName,
+                BirthDate = DateTime.Parse(model.Identity.BirthDate),
+                Gender = model.Identity.Gender,
+                AddressStreet = model.Identity.AddressStreet,
+                AddressCity = model.Identity.AddressCity,
+                AddressState = model.Identity.AddressState,
+                AddressZipCode = model.Identity.AddressZipCode,
+                AddressCountry = model.Identity.AddressCountry,
+                Hobbies = model.Identity.Hobbies,
+                EmailPrefix = model.Identity.EmailPrefix,
+                PhoneMobile = model.Identity.PhoneMobile,
+                BankAccountIBAN = model.Identity.BankAccountIBAN,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            login.Passwords.Add(new AliasDb.Password()
+            {
+                Value = model.Password.Value,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+
+            login.Service = new AliasDb.Service()
+            {
+                Name = model.Service.Name,
+                Url = model.Service.Url,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            dbContext.Logins.Add(login);
             await dbContext.SaveChangesAsync();
 
-            return Ok(model);
+            return Ok(login.Id);
+        }
+    }
+
+    /// <summary>
+    /// Update an existing entry in the database.
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="aliasId"></param>
+    /// <returns></returns>
+    [HttpPost("{aliasId}")]
+    public async Task<IActionResult> Update([FromBody] Alias model, Guid aliasId)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        using (var dbContext = new AliasDbContext())
+        {
+            // Get the existing entry.
+            var login = await dbContext.Logins
+                .Include(x => x.Identity)
+                .Include(x => x.Service)
+                .Include(x => x.Passwords)
+                .Where(x => x.Id == aliasId)
+                .Where(x => x.UserId == user.Id)
+                .FirstAsync();
+
+            login.UpdatedAt = DateTime.UtcNow;
+            login.Identity.NickName = model.Identity.NickName;
+            login.Identity.FirstName = model.Identity.FirstName;
+            login.Identity.LastName = model.Identity.LastName;
+            login.Identity.BirthDate = DateTime.Parse(model.Identity.BirthDate);
+            login.Identity.Gender = model.Identity.Gender;
+            login.Identity.AddressStreet = model.Identity.AddressStreet;
+            login.Identity.AddressCity = model.Identity.AddressCity;
+            login.Identity.AddressState = model.Identity.AddressState;
+            login.Identity.AddressZipCode = model.Identity.AddressZipCode;
+            login.Identity.AddressCountry = model.Identity.AddressCountry;
+            login.Identity.Hobbies = model.Identity.Hobbies;
+            login.Identity.EmailPrefix = model.Identity.EmailPrefix;
+            login.Identity.PhoneMobile = model.Identity.PhoneMobile;
+            login.Identity.BankAccountIBAN = model.Identity.BankAccountIBAN;
+
+            login.Passwords.First().Value = model.Password.Value;
+            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
+
+            login.Service.Name = model.Service.Name;
+            login.Service.Url = model.Service.Url;
+            login.Service.UpdatedAt = DateTime.UtcNow;
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok(login.Id);
+        }
+    }
+
+    /// <summary>
+    /// Delete an existing entry from the database.
+    /// </summary>
+    /// <param name="aliasId"></param>
+    [HttpDelete("{aliasId}")]
+    public async Task<IActionResult> Delete(Guid aliasId)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        using (var dbContext = new AliasDbContext())
+        {
+            var login = await dbContext.Logins
+                .Where(x => x.Id == aliasId)
+                .Where(x => x.UserId == user.Id)
+                .FirstAsync();
+
+            dbContext.Logins.Remove(login);
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

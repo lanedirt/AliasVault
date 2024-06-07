@@ -33,6 +33,8 @@ The app will be available at http://localhost:80
 ## Credits
 The following libraries and frameworks are used in this project:
 
+- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern, cloud-based, internet-connected applications.
+- [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript.
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
 - [Flowbite](https://flowbite.com/) - A free and open-source UI component library.
 - [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.

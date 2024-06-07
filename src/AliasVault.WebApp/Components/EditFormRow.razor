@@ -1,0 +1,22 @@
+﻿@using AliasVault.WebApp.Services
+@inject ClipboardCopyService ClipboardCopyService
+@inject IJSRuntime JsRuntime
+
+<label for="@_inputId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
+<div class="relative">
+    <input type="text" id="@_inputId" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public string Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private string _inputId = Guid.NewGuid().ToString();
+
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        Value = e.Value.ToString();
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

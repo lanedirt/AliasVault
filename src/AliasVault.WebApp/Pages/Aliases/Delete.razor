@@ -1,0 +1,87 @@
+@page "/alias/{id:guid}/delete"
+
+@using AliasVault.Shared.Models.WebApi
+@using AliasVault.WebApp.Services
+@inherits PageBase
+@inject AliasService AliasService
+
+<LayoutPageTitle>Delete alias</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Delete alias</h1>
+        </div>
+        <p>You can delete an alias below.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <FullPageLoadingAnimation />
+}
+else
+{
+    <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <AlertMessageError Message="Note: removing this alias is permanent and cannot be undone." />
+        <h3 class="mb-4 text-xl font-semibold dark:text-white">Alias</h3>
+        <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
+            <div>@Id</div>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Service name</label>
+            <div>@obj?.Service.Name</div>
+        </div>
+        <button @onclick="DeleteConfirm" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-900">
+            Yes, I'm sure
+        </button>
+
+        <button @onclick="Cancel" class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 border border-gray-200 font-medium inline-flex items-center rounded-lg text-sm px-3 py-2.5 text-center dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700" data-drawer-hide="drawer-delete-product-default">
+            No, cancel
+        </button>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private Alias? obj;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbItems.Add(new BreadcrumbItem { Url = "alias/" + Id, DisplayName = "View Alias" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete alias" });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Load existing obj, retrieve from service
+            obj = await AliasService.LoadAliasAsync(Id);
+
+            // Hide loading spinner
+            IsLoading = false;
+            // Force re-render invoke so the charts can be rendered
+            StateHasChanged();
+
+        }
+    }
+
+    private async void DeleteConfirm()
+    {
+        if (obj != null)
+        {
+            await AliasService.DeleteAliasAsync(Id);
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/alias/" + Id);
+    }
+}

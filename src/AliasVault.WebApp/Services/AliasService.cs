@@ -1,9 +1,6 @@
 using System.Net.Http.Json;
 using AliasDb;
-using AliasGenerators.Identity.Models;
 using AliasVault.Shared.Models.WebApi;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
 
 namespace AliasVault.WebApp.Services;
@@ -35,18 +32,18 @@ public class AliasService
     /// Insert new entry into database.
     /// </summary>
     /// <param name="aliasObject"></param>
-    public async Task<Login> InsertAliasAsync(Login aliasObject)
+    public async Task<Guid> InsertAliasAsync(Alias aliasObject)
     {
-        // Post to webapi.
+        // Put to webapi.
         try
         {
-            var returnObject = await _httpClient.PostAsJsonAsync<Login>("api/Alias", aliasObject);
-            return await returnObject.Content.ReadFromJsonAsync<Login>();
+            var returnObject = await _httpClient.PutAsJsonAsync<Alias>("api/Alias", aliasObject);
+            return await returnObject.Content.ReadFromJsonAsync<Guid>();
         }
         catch
         {
             // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
-            return null;
+            return Guid.Empty;
         }
     }
 
@@ -54,44 +51,19 @@ public class AliasService
     /// Update an existing entry to database.
     /// </summary>
     /// <param name="aliasObject"></param>
-    public async Task<Login> UpdateAliasAsync(Login aliasObject)
+    /// <param name="id"></param>
+    public async Task<Guid> UpdateAliasAsync(Alias aliasObject, Guid id)
     {
-        using (var dbContext = new AliasDbContext())
+        // Post to webapi.
+        try
         {
-            // Load existing record..
-            var record = dbContext.Logins.First(x => x.Id == aliasObject.Id);
-
-            // Update properties
-            record.Identity.FirstName = aliasObject.Identity.FirstName;
-            record.Identity.LastName = aliasObject.Identity.LastName;
-            record.Identity.NickName = aliasObject.Identity.NickName;
-            record.Identity.Gender = aliasObject.Identity.Gender;
-            record.Identity.BirthDate = aliasObject.Identity.BirthDate;
-            record.Identity.AddressStreet = aliasObject.Identity.AddressStreet;
-            record.Identity.AddressCity = aliasObject.Identity.AddressCity;
-            record.Identity.AddressState = aliasObject.Identity.AddressState;
-            record.Identity.AddressZipCode = aliasObject.Identity.AddressZipCode;
-            record.Identity.AddressCountry = aliasObject.Identity.AddressCountry;
-            record.Identity.Hobbies = aliasObject.Identity.Hobbies;
-            record.Identity.EmailPrefix = aliasObject.Identity.EmailPrefix;
-            record.Identity.PhoneMobile = aliasObject.Identity.PhoneMobile;
-            record.Identity.BankAccountIBAN = aliasObject.Identity.BankAccountIBAN;
-            record.Identity.UpdatedAt = DateTime.UtcNow;
-
-            // TODO: support multiple passwords.
-            var password = record.Passwords.First();
-            password.Value = aliasObject.Passwords.First().Value;
-            password.UpdatedAt = DateTime.UtcNow;
-
-            // Update service.
-            record.Service.Name = aliasObject.Service.Name;
-            record.Service.Url = aliasObject.Service.Url;
-            record.Service.Logo = aliasObject.Service.Logo;
-            record.Service.UpdatedAt = DateTime.UtcNow;
-
-            await dbContext.SaveChangesAsync();
-
-            return record;
+            var returnObject = await _httpClient.PostAsJsonAsync<Alias>("api/Alias/" + id, aliasObject);
+            return await returnObject.Content.ReadFromJsonAsync<Guid>();
+        }
+        catch
+        {
+            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
+            return Guid.Empty;
         }
     }
 
@@ -134,12 +106,16 @@ public class AliasService
     /// Removes existing entry from database.
     /// </summary>
     /// <param name="alias"></param>
-    public async Task DeleteAliasAsync(Login alias)
+    public async Task DeleteAliasAsync(Guid Id)
     {
-        using (var dbContext = new AliasDbContext())
+        // Delete from webapi.
+        try
         {
-            dbContext.Logins.Remove(dbContext.Logins.First(x => x.Id == alias.Id));
-            dbContext.SaveChanges();
+            await _httpClient.DeleteAsync("api/Alias/" + Id);
+        }
+        catch
+        {
+            // If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
         }
     }
 }

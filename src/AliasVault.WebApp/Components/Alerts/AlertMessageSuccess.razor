@@ -1,0 +1,17 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@inherits ComponentBase
+
+@if (Message.IsNullOrEmpty())
+{
+    return;
+}
+
+<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+    @Message
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+}

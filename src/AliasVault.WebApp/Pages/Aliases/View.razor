@@ -15,7 +15,17 @@ else
     <div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
         <div class="mb-4 col-span-full xl:mb-2">
             <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View alias</h1>
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View alias</h1>
+                <div class="flex">
+                <a href="/alias/@Id/edit" class="mr-3 px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                    Edit alias
+                </a>
+                <a href="/alias/@Id/delete" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800">
+                    Delete alias
+                </a>
+                </div>
+            </div>
         </div>
         <!-- Right Content -->
         <div class="col-span-full lg:col-auto">
@@ -23,7 +33,7 @@ else
                 <div class="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
                     <img class="mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0" src="/img/service-placeholder.webp" alt="Service logo">
                     <div>
-                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Service name</h3>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">@Alias.Service.Name</h3>
                     </div>
                 </div>
             </div>
@@ -65,7 +75,7 @@ else
                             <CopyPasteFormRow Label="Last name" Value="@(Alias.Identity.LastName)"></CopyPasteFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <CopyPasteFormRow Label="Birthdate" Value="@(Alias.Identity.BirthDate.ToShortDateString())"></CopyPasteFormRow>
+                            <CopyPasteFormRow Label="Birthdate" Value="@(Alias.Identity.BirthDate)"></CopyPasteFormRow>
                         </div>
                     </div>
                 </form>

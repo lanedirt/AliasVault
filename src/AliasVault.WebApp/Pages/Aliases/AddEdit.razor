@@ -4,12 +4,11 @@
 @inject NavigationManager Navigation
 @inject AliasService AliasService
 @inherits PageBase
-@using AliasDb
-@using AliasGenerators.Identity
-@using AliasGenerators.Identity.Implementations
 @using AliasGenerators.Implementations
 @using AliasGenerators.Password.Implementations
+@using AliasVault.Shared.Models.WebApi
 @using AliasVault.WebApp.Services
+@using Password = AliasDb.Password
 
 @if (EditMode)
 {
@@ -23,9 +22,21 @@ else {
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Add alias</h1>
+            @if (EditMode)
+            {
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Edit alias</h1>
+            }
+            else {
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Add alias</h1>
+            }
         </div>
-        <p>Create a new alias below.</p>
+        @if (EditMode)
+        {
+            <p>Edit the existing alias below.</p>
+        }
+        else {
+            <p>Create a new alias below.</p>
+        }
     </div>
 </div>
 
@@ -35,118 +46,104 @@ else {
 }
 else
 {
-  <div class="mb-6 bg-white shadow-md rounded-lg dark:bg-gray-800">
-    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700">Service</div>
-    <div class="p-4">
-        <div class="mb-4">
-            <label for="serviceName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Service Name</label>
-            <input type="text" id="serviceName" @bind="obj.Service.Name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+    <div class="grid px-4 pt-6 lg:gap-4 dark:bg-gray-900">
+        <div class="col">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Service</h3>
+                <div class="grid gap-6">
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Service Name" Value="@(obj.Service.Name)" ValueChanged="@(val => obj.Service.Name = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Service URL" Value="@(obj.Service.Url)" ValueChanged="@(val => obj.Service.Url = val)"></EditFormRow>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-4">
-            <label for="serviceUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Service URL</label>
-            <input type="text" id="serviceUrl" @bind="obj.Service.Url" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-    </div>
-</div>
-
-<div class="mb-6 bg-white shadow-md rounded-lg dark:bg-gray-800">
-    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700">Identity</div>
-    <div class="p-4">
-        <div class="mb-4">
-            <button class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
-        </div>
-
-        @if (IsIdentityLoading)
-        {
-            <p>Loading...</p>
-        }
-
-        <div class="mb-4">
-            <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">First Name</label>
-            <input type="text" id="firstName" @bind="obj.Identity.FirstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Last Name</label>
-            <input type="text" id="lastName" @bind="obj.Identity.LastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Gender</label>
-            <input type="text" id="gender" @bind="obj.Identity.Gender" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="nickName" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nick Name</label>
-            <input type="text" id="nickName" @bind="obj.Identity.NickName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="birthDate" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Birth Date</label>
-            <input type="date" id="birthDate" @bind="obj.Identity.BirthDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="addressStreet" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Address Street</label>
-            <input type="text" id="addressStreet" @bind="obj.Identity.AddressStreet" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="addressCity" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Address City</label>
-            <input type="text" id="addressCity" @bind="obj.Identity.AddressCity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="addressState" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Address State</label>
-            <input type="text" id="addressState" @bind="obj.Identity.AddressState" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="addressZipCode" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Address Zip Code</label>
-            <input type="text" id="addressZipCode" @bind="obj.Identity.AddressZipCode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="addressCountry" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Address Country</label>
-            <input type="text" id="addressCountry" @bind="obj.Identity.AddressCountry" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="hobbies" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Hobbies</label>
-            <input type="text" id="hobbies" @bind="obj.Identity.Hobbies" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="phoneMobile" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Phone Mobile</label>
-            <input type="text" id="phoneMobile" @bind="obj.Identity.PhoneMobile" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-        <div class="mb-4">
-            <label for="bankAccountIBAN" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Bank Account IBAN</label>
-            <input type="text" id="bankAccountIBAN" @bind="obj.Identity.BankAccountIBAN" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-        </div>
-    </div>
-</div>
-
-<div class="mb-6 bg-white shadow-md rounded-lg dark:bg-gray-800">
-    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700">Email</div>
-    <div class="p-4">
-        <div class="mb-4">
-            <div class="relative flex items-center">
-                <input type="text" @bind="obj.Identity.EmailPrefix" placeholder="Email prefix" aria-label="Email prefix" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                <span class="ml-2 text-gray-500 dark:text-gray-400">@@landmail.nl</span>
+        <div class="col">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Login credentials</h3>
+                <div class="mb-4">
+                    <button class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
+                    <button class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800" @onclick="SaveAlias">Save Alias</button>
+                    @if (IsIdentityLoading)
+                    {
+                        <p>Loading...</p>
+                    }
+                </div>
+                <div class="grid gap-6">
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Email" Value="@(obj.Identity.EmailPrefix)" ValueChanged="@(val => obj.Identity.EmailPrefix = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Username" Value="@(obj.Identity.NickName)" ValueChanged="@(val => obj.Identity.NickName = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <div class="relative">
+                            <EditFormRow Label="Password" Value="@(obj.Password.Value)" ValueChanged="@(val => obj.Password.Value = val)"></EditFormRow>
+                            <button type="submit" class="text-white absolute end-1 bottom-1 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800" @onclick="GenerateRandomPassword">(Re)generate Random Password</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="mb-6 bg-white shadow-md rounded-lg dark:bg-gray-800">
-    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700">Password</div>
-    <div class="p-4">
-        <div class="mb-4">
-            <button class="px-4 py-2 text-white bg-secondary-600 rounded-lg hover:bg-secondary-700 focus:ring-4 focus:ring-secondary-300 dark:bg-secondary-500 dark:hover:bg-secondary-600 dark:focus:ring-secondary-800" @onclick="GenerateRandomPassword">Generate Random Password</button>
-        </div>
-        <div class="mb-4">
-            <label for="passwordValue" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
-            <input type="text" id="passwordValue" @bind="obj.Passwords.First().Value" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+    <div class="grid px-4 pt-6 lg:gap-4 dark:bg-gray-900">
+    <div class="col">
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">Identity</h3>
+                <div class="grid gap-6">
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="First Name" Value="@(obj.Identity.FirstName)" ValueChanged="@(val => obj.Identity.FirstName = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Last Name" Value="@(obj.Identity.LastName)" ValueChanged="@(val => obj.Identity.LastName = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Gender" Value="@(obj.Identity.Gender)" ValueChanged="@(val => obj.Identity.Gender = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Nick Name" Value="@(obj.Identity.NickName)" ValueChanged="@(val => obj.Identity.NickName = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Birth Date" Value="@(obj.Identity.BirthDate)" ValueChanged="@(val => obj.Identity.BirthDate = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Address Street" Value="@(obj.Identity.AddressStreet)" ValueChanged="@(val => obj.Identity.AddressStreet = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Address City" Value="@(obj.Identity.AddressCity)" ValueChanged="@(val => obj.Identity.AddressCity = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Address State" Value="@(obj.Identity.AddressState)" ValueChanged="@(val => obj.Identity.AddressState = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Address Zip Code" Value="@(obj.Identity.AddressZipCode)" ValueChanged="@(val => obj.Identity.AddressZipCode = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Address Country" Value="@(obj.Identity.AddressCountry)" ValueChanged="@(val => obj.Identity.AddressCountry = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Hobbies" Value="@(obj.Identity.Hobbies)" ValueChanged="@(val => obj.Identity.Hobbies = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Phone Mobile" Value="@(obj.Identity.PhoneMobile)" ValueChanged="@(val => obj.Identity.PhoneMobile = val)"></EditFormRow>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <EditFormRow Label="Bank Account IBAN" Value="@(obj.Identity.BankAccountIBAN)" ValueChanged="@(val => obj.Identity.BankAccountIBAN = val)"></EditFormRow>
+                    </div>
+                </div>
         </div>
     </div>
-</div>
+        <button class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800" @onclick="SaveAlias">Save Alias</button>
+    </div>
 
 @if (IsSaving)
 {
     <p>Saving...</p>
 }
 
-<button class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800" @onclick="SaveLogin">Save Aliases</button>
 }
 
 @code {
@@ -155,8 +152,7 @@ else
 
     private bool EditMode = false;
     private bool Loading = true;
-    private Login obj = new Login();
-    private Password Password { get; set; } = new Password();
+    private Alias obj = new Alias();
 
     private bool IsIdentityLoading { get; set; }
     private bool IsSaving { get; set; }
@@ -194,16 +190,15 @@ else
             if (EditMode)
             {
                 // Load existing obj, retrieve from service
-                //obj = await AliasService.LoadAliasAsync(Id.Value);
+                obj = await AliasService.LoadAliasAsync(Id.Value);
             }
             else
             {
                 // Create new obj
-                obj = new Login();
-                obj.Identity = new Identity();
-                obj.Service = new Service();
-                obj.Passwords = new List<Password>();
-                obj.Passwords.Add(new Password());
+                obj = new Alias();
+                obj.Identity = new Shared.Models.WebApi.Identity();
+                obj.Service = new Shared.Models.WebApi.Service();
+                obj.Password = new Shared.Models.WebApi.Password();
             }
 
             // Hide loading spinner
@@ -227,7 +222,7 @@ else
         obj.Identity.LastName = identity.LastName;
         obj.Identity.NickName = identity.NickName;
         obj.Identity.Gender = identity.Gender == 1 ? "Male" : "Female";
-        obj.Identity.BirthDate = DateTime.Now.AddYears(-30);
+        obj.Identity.BirthDate = DateTime.Now.AddYears(-30).ToString("yyyy-MM-dd");
         obj.Identity.AddressStreet = identity.Address.Street;
         obj.Identity.AddressCity = identity.Address.City;
         obj.Identity.AddressState = identity.Address.State;
@@ -249,32 +244,41 @@ else
     {
         // Generate a random password using a IPasswordGenerator implementation.
         IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
-        obj.Passwords.First().Value = passwordGenerator.GenerateRandomPassword();
+        obj.Password.Value = passwordGenerator.GenerateRandomPassword();
     }
 
-    private async Task SaveLogin()
+    private async Task SaveAlias()
     {
         IsSaving = true;
         StateHasChanged();
 
         // Try to extract favicon from service URL
-        if (obj.Service.Url != null  && !string.IsNullOrEmpty(obj.Service.Url))
+        // TODO: Fix favicon extraction
+        /*if (obj.Service.Url != null  && !string.IsNullOrEmpty(obj.Service.Url))
         {
             obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
-        }
+        } */
 
         if (EditMode)
         {
-            //obj = await AliasService.UpdateAliasAsync(obj);
+            await AliasService.UpdateAliasAsync(obj, Id.Value);
         }
         else
         {
-            obj = await AliasService.InsertAliasAsync(obj);
+            Id = await AliasService.InsertAliasAsync(obj);
         }
 
         IsSaving = false;
         StateHasChanged();
 
-        Navigation.NavigateTo("/alias/" + obj.Id);
+        if (Id == Guid.Empty)
+        {
+            // Error saving, do not navigate.
+            return;
+        }
+
+        Navigation.NavigateTo("/alias/" + Id);
+
+
     }
 }
