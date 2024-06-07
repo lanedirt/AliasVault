@@ -18,11 +18,6 @@ COPY src/. ./
 WORKDIR /src/AliasVault
 RUN dotnet publish -c Release -o /app --verbosity detailed
 
-# Create the migration bundle
-# Install the Entity Framework Core CLI tool and run migrations to create the database
-RUN dotnet tool install --global dotnet-ef --version 8.0.5
-RUN /root/.dotnet/tools/dotnet-ef migrations bundle -o /app/migrationbundle
-
 # Use the official ASP.NET Core runtime image to run the app
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app/AliasVault
@@ -31,10 +26,8 @@ WORKDIR /app/AliasVault
 COPY --from=build /app ./
 
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 8082
+ENV ASPNETCORE_URLS=http://+:8082
 
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["dotnet", "AliasVault.dll"]
 
-ENTRYPOINT ["/entrypoint.sh"]

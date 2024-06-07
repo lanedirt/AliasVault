@@ -7,6 +7,9 @@ using AliasVault.WebApp.Services;
 using AliasVault.WebApp.Auth.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
@@ -19,7 +22,7 @@ builder.Services.AddScoped(sp =>
 {
     var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
     var httpClient = httpClientFactory.CreateClient("AliasVault.Api");
-    httpClient.BaseAddress = new Uri("http://localhost:5092");
+    httpClient.BaseAddress = new Uri(builder.Configuration["ApiUrl"]);
     return httpClient;
 });
 

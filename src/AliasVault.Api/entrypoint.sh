@@ -2,8 +2,8 @@
 
 # Apply database migrations using the bundle
 echo "Running database migrations..."
-/app/AliasVault/migrationbundle
+/app/migrationbundle
 
 # Start the application
 echo "Starting application..."
-dotnet /app/AliasVault/AliasVault.dll
+dotnet /app/AliasVault.Api.dll
