@@ -4,6 +4,7 @@ using AliasGenerators.Identity.Models;
 using AliasVault.Shared.Models.WebApi;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Identity = AliasGenerators.Identity.Models.Identity;
 
 namespace AliasVault.WebApp.Services;
 
@@ -22,25 +23,30 @@ public class AliasService
     }
 
     /// <summary>
+    /// Generate random identity by calling the IdentityGenerator API.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<Identity> GenerateRandomIdentityAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<Identity>("api/Identity/generate");
+    }
+
+    /// <summary>
     /// Insert new entry into database.
     /// </summary>
     /// <param name="aliasObject"></param>
     public async Task<Login> InsertAliasAsync(Login aliasObject)
     {
-        using (var dbContext = new AliasDbContext())
+        // Post to webapi.
+        try
         {
-            var newObject = aliasObject;
-            newObject.Identity.CreatedAt = DateTime.UtcNow;
-            newObject.Identity.UpdatedAt = DateTime.UtcNow;
-            newObject.Passwords.First().CreatedAt = DateTime.UtcNow;
-            newObject.Passwords.First().UpdatedAt = DateTime.UtcNow;
-            newObject.CreatedAt = DateTime.UtcNow;
-            newObject.UpdatedAt = DateTime.UtcNow;
-
-            dbContext.Add(newObject);
-            await dbContext.SaveChangesAsync();
-
-            return newObject;
+            var returnObject = await _httpClient.PostAsJsonAsync<Login>("api/Alias", aliasObject);
+            return await returnObject.Content.ReadFromJsonAsync<Login>();
+        }
+        catch
+        {
+            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
+            return null;
         }
     }
 

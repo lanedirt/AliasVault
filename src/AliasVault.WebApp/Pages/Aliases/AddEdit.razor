@@ -2,12 +2,14 @@
 @page "/alias/{id:guid}/edit"
 
 @inject NavigationManager Navigation
+@inject AliasService AliasService
 @inherits PageBase
 @using AliasDb
 @using AliasGenerators.Identity
 @using AliasGenerators.Identity.Implementations
 @using AliasGenerators.Implementations
 @using AliasGenerators.Password.Implementations
+@using AliasVault.WebApp.Services
 
 @if (EditMode)
 {
@@ -218,8 +220,7 @@ else
         StateHasChanged();
 
         // Generate a random identity using the IIdentityGenerator implementation.
-        IIdentityGenerator identityGenerator = new FigIdentityGenerator();
-        var identity = await identityGenerator.GenerateRandomIdentityAsync();
+        var identity = await AliasService.GenerateRandomIdentityAsync();
 
         // Generate random values for the Identity properties
         obj.Identity.FirstName = identity.FirstName;
@@ -255,6 +256,21 @@ else
     {
         IsSaving = true;
         StateHasChanged();
+
+        // Try to extract favicon from service URL
+        if (obj.Service.Url != null  && !string.IsNullOrEmpty(obj.Service.Url))
+        {
+            obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
+        }
+
+        if (EditMode)
+        {
+            //obj = await AliasService.UpdateAliasAsync(obj);
+        }
+        else
+        {
+            obj = await AliasService.InsertAliasAsync(obj);
+        }
 
         IsSaving = false;
         StateHasChanged();

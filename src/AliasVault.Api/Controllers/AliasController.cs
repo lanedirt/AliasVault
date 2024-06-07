@@ -106,4 +106,28 @@ public class AliasController : AuthenticatedRequestController
             return Ok(aliasObject);
         }
     }
+
+    /// <summary>
+    /// Insert a new entry to the database.
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    [HttpPost("")]
+    public async Task<IActionResult> Insert([FromBody] Login model)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        using (var dbContext = new AliasDbContext())
+        {
+            model.UserId = user.Id;
+            dbContext.Logins.Add(model);
+            await dbContext.SaveChangesAsync();
+
+            return Ok(model);
+        }
+    }
 }
