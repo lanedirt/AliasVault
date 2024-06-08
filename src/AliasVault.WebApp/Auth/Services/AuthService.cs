@@ -95,7 +95,26 @@ public class AuthService
     /// </summary>
     public async Task RemoveTokensAsync()
     {
-        // TODO: also revoke the refresh token on the server to kill the session.
+        await _localStorage.RemoveItemAsync(AccessTokenKey);
+        await _localStorage.RemoveItemAsync(RefreshTokenKey);
+
+        // If the remote call fails we catch the exception and ignore it.
+        // This is because the user is already logged out and we don't want to trigger another refresh token request.
+        try
+        {
+            await RevokeTokenAsync();
+        }
+        catch (Exception)
+        {
+            // Ignore the exception
+        }
+    }
+
+    /// <summary>
+    /// Revoke the access and refresh tokens on the server.
+    /// </summary>
+    private async Task RevokeTokenAsync()
+    {
         var tokenInput = new TokenModel { Token = await GetAccessTokenAsync(), RefreshToken = await GetRefreshTokenAsync() };
         using var request = new HttpRequestMessage(HttpMethod.Post, "api/Auth/revoke")
         {
@@ -104,8 +123,5 @@ public class AuthService
         // Add the X-Ignore-Failure header to the request so any failure does not trigger another refresh token request.
         request.Headers.Add("X-Ignore-Failure", "true");
         await _httpClient.SendAsync(request);
-
-        await _localStorage.RemoveItemAsync(AccessTokenKey);
-        await _localStorage.RemoveItemAsync(RefreshTokenKey);
     }
 }
