@@ -1,10 +1,7 @@
+namespace AliasVault.E2ETests;
+
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using OSPlatform = NUnit.Framework.Internal.OSPlatform;
-
-namespace AliasVault.E2ETests;
 
 public class WebAppManager
 {
@@ -21,82 +18,15 @@ public class WebAppManager
         return baseDir;
     }
 
-    private void KillExistingProcesses(string uniqueIdentifier)
-    {
-        var existingProcesses = Process.GetProcessesByName("dotnet")
-            .Where(p => GetCommandLineArgs(p).Contains(uniqueIdentifier));
-
-        foreach (var process in existingProcesses)
-        {
-            try
-            {
-                process.Kill();
-                process.WaitForExit();
-                TestContext.Progress.WriteLine($"Killed existing process with PID: {process.Id}");
-            }
-            catch (Exception ex)
-            {
-                TestContext.Progress.WriteLine($"Failed to kill process with PID: {process.Id}, Error: {ex.Message}");
-            }
-        }
-    }
-
-    private string GetCommandLineArgs(Process process)
-    {
-#if WINDOWS
-        return GetCommandLineArgsWindows(process);
-#else
-        return GetCommandLineArgsUnix(process);
-#endif
-    }
-
-    private string GetCommandLineArgsWindows(Process process)
-    {
-#if WINDOWS
-
-        try
-        {
-            using (var searcher = new System.Management.ManagementObjectSearcher(
-                $"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {process.Id}"))
-            using (var objects = searcher.Get())
-            {
-                return objects.Cast<System.Management.ManagementBaseObject>()
-                              .SingleOrDefault()?["CommandLine"]?.ToString();
-            }
-        }
-        catch
-        {
-            return string.Empty;
-        }
-#else
-    return string.Empty;
-#endif
-    }
-
-    private string GetCommandLineArgsUnix(Process process)
-    {
-        try
-        {
-            string path = $"/proc/{process.Id}/cmdline";
-            return File.Exists(path) ? File.ReadAllText(path).Replace('\0', ' ') : string.Empty;
-        }
-        catch
-        {
-            return string.Empty;
-        }
-    }
-
     public async Task StartWebApiAsync(int port)
     {
         var projectPath = $"{GetBaseDirectory()}/../../AliasVault.Api/AliasVault.Api.csproj";
-        KillExistingProcesses("AliasVaultWebApiIdentifier");
-
         _webApiProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project {projectPath} --urls=http://localhost:{port} AliasVaultWebApiIdentifier",
+                Arguments = $"run --project {projectPath} --urls=http://localhost:{port}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -139,14 +69,13 @@ public class WebAppManager
     public async Task StartBlazorWasmAsync(int port)
     {
         var projectPath = $"{GetBaseDirectory()}/../../AliasVault.WebApp/AliasVault.WebApp.csproj";
-        KillExistingProcesses("AliasVaultWasmAppIdentifier");
 
         _blazorWasmProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project {projectPath} --urls=http://localhost:{port} AliasVaultWasmAppIdentifier",
+                Arguments = $"run --project {projectPath} --urls=http://localhost:{port}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -204,19 +133,89 @@ public class WebAppManager
 
     public void StopWebApi()
     {
-        if (_webApiProcess != null && !_webApiProcess.HasExited)
+        if (_webApiProcess.HasExited)
         {
-            _webApiProcess.Kill();
+#if WINDOWS
+            KillProcessAndChildrenWindows(_webApiProcess.Id);
+#else
+            KillProcessAndChildrenUnix(_webApiProcess.Id);
+#endif
             _webApiProcess.Dispose();
         }
     }
 
     public void StopBlazorWasm()
     {
-        if (_blazorWasmProcess != null && !_blazorWasmProcess.HasExited)
+        if (!_blazorWasmProcess.HasExited)
         {
-            _blazorWasmProcess.Kill();
-            _blazorWasmProcess.Dispose();
+#if WINDOWS
+            KillProcessAndChildrenWindows(_blazorWasmProcess.Id);
+#else
+            KillProcessAndChildrenUnix(_blazorWasmProcess.Id);
+#endif
+            _webApiProcess.Dispose();
         }
     }
+
+#if WINDOWS
+    private void KillProcessAndChildrenWindows(int pid)
+    {
+        var searcher = new ManagementObjectSearcher($"Select * From Win32_Process Where ParentProcessID={pid}");
+        var managementObjects = searcher.Get();
+
+        foreach (var obj in managementObjects)
+        {
+            int childProcessId = Convert.ToInt32(obj["ProcessID"]);
+            KillProcessAndChildrenWindows(childProcessId);
+        }
+
+        try
+        {
+            Process process = Process.GetProcessById(pid);
+            process.Kill();
+        }
+        catch (ArgumentException)
+        {
+            // Process already exited.
+        }
+    }
+#else
+    private void KillProcessAndChildrenUnix(int pid)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "pkill",
+                Arguments = $"-TERM -P {pid}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            var pkillProcess = new Process
+            {
+                StartInfo = startInfo
+            };
+
+            pkillProcess.Start();
+            pkillProcess.WaitForExit();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+
+        try
+        {
+            Process process = Process.GetProcessById(pid);
+            process.Kill();
+        }
+        catch (ArgumentException)
+        {
+            // Process already exited.
+        }
+    }
+#endif
 }
