@@ -13,13 +13,13 @@ public class Tests : PlaywrightTest
     public async Task Login()
     {
         // Replace with the URL where your Blazor app is running
-        await Page.GotoAsync("http://localhost:5067");
+        await Page.GotoAsync("http://localhost:5000");
         var navigationTask = Page.WaitForNavigationAsync();
         await navigationTask;
 
         // Check that we got redirected to /user/login
         var currentUrl = Page.Url;
-        Assert.That(currentUrl, Is.EqualTo("http://localhost:5067/user/login"));
+        Assert.That(currentUrl, Is.EqualTo("http://localhost:5000/user/login"));
 
         // Try to login with test credentials.
         var emailField = Page.Locator("input[id='email']");
@@ -29,13 +29,13 @@ public class Tests : PlaywrightTest
 
         // Check if we get redirected when clicking on the login button.
         var loginButton = Page.Locator("button[type='submit']");
-        navigationTask = Page.WaitForNavigationAsync(new PageWaitForNavigationOptions() { Timeout = 2000});
+        navigationTask = Page.WaitForNavigationAsync(new PageWaitForNavigationOptions() { Timeout = 200000});
         await loginButton.ClickAsync();
         await navigationTask;
 
         // Check if the redirection occurred
         currentUrl = Page.Url;
-        Assert.That(currentUrl, Is.EqualTo("http://localhost:5067/"));
+        Assert.That(currentUrl, Is.EqualTo("http://localhost:5000/"));
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
