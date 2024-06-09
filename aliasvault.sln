@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaviconExtractor", "src\Utilities\FaviconExtractor\FaviconExtractor.csproj", "{ED328644-A152-403D-86EB-81201AA07744}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Tests", "src\AliasVault.Tests\AliasVault.Tests.csproj", "{8E6A418A-B305-465D-857D-49953605C18E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.UnitTests", "src\Tests\AliasVault.UnitTests\AliasVault.UnitTests.csproj", "{8E6A418A-B305-465D-857D-49953605C18E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography", "src\Utilities\Cryptography\Cryptography.csproj", "{427EA8E2-EA76-467E-A6BC-201EFE40C0D0}"
 EndProject
@@ -19,6 +19,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.WebApp", "src\AliasVault.WebApp\AliasVault.WebApp.csproj", "{25248E01-5A4B-4F95-A63C-BEA01499A1C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Shared", "src\AliasVault.Shared\AliasVault.Shared.csproj", "{15EFE0D0-F41B-47D7-86B7-8F840335CB82}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.E2ETests", "src\Tests\AliasVault.E2ETests\AliasVault.E2ETests.csproj", "{AF013D08-1BF6-4E23-87D2-37F614BE7952}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,9 +66,15 @@ Global
 		{15EFE0D0-F41B-47D7-86B7-8F840335CB82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15EFE0D0-F41B-47D7-86B7-8F840335CB82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15EFE0D0-F41B-47D7-86B7-8F840335CB82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{ED328644-A152-403D-86EB-81201AA07744} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
+		{8E6A418A-B305-465D-857D-49953605C18E} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
+		{AF013D08-1BF6-4E23-87D2-37F614BE7952} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
 	EndGlobalSection
 EndGlobal

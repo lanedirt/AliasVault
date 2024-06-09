@@ -25,3 +25,14 @@ dotnet ef
 npm run build:css
 ```
 
+- Install Playwright locally in order to run NUnit E2E (end-to-end) tests
+
+```bash
+# First install PowerShell for Mac (if you don't have it already)
+brew install powershell/tap/powershell
+# Install Playwright
+dotnet tool install --global Microsoft.Playwright.CLI
+# Run Playwright install script to download local browsers
+# Note: make sure the E2E test project has been built at least once so the bin dir exists.
+pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install
+```
