@@ -23,7 +23,7 @@ jobs:
         run: |
             # Wait for a few seconds
             sleep 5
-      - name: Test if localhost:80 responds
+      - name: Test if localhost:80 (WASM app) responds
         run: |
             # Test if the service on localhost:80 responds
             http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
@@ -32,4 +32,14 @@ jobs:
               exit 1
             else
               echo "Service responded with 200 OK"
+            fi
+      - name: Test if localhost:81 (WebApi) responds
+        run: |
+            # Test if the service on localhost:81 responds
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
+            if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 404 ]; then
+                echo "Service did not respond with expected 200 OK or 404 Not Found"
+                exit 1
+            else
+                echo "Service responded with $http_code"
             fi
