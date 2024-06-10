@@ -2,6 +2,7 @@
 @page "/alias/{id:guid}/edit"
 
 @inject NavigationManager Navigation
+@inject AliasService AliasService
 @inherits AuthorizePageBase
 @using AliasDb
 @using AliasGenerators.Identity
@@ -264,30 +265,27 @@ else
         StateHasChanged();
 
         // Save the login, identity, password, and service to the database.
-        using (var context = new AliasDbContext())
+
+        // Try to extract favicon from service URL
+        if (obj.Service.Url != null  && !obj.Service.Url.IsNullOrEmpty())
         {
-            // Try to extract favicon from service URL
-            if (obj.Service.Url != null  && !obj.Service.Url.IsNullOrEmpty())
-            {
-                obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
-            }
-
-            if (EditMode)
-            {
-                obj = await AliasService.UpdateAliasAsync(obj);
-            }
-            else
-            {
-                obj.Passwords.Add(Password);
-                obj.UserId = UserService.User().Id;
-                obj = await AliasService.InsertAliasAsync(obj);
-            }
-
-            IsSaving = false;
-            StateHasChanged();
-
-            Navigation.NavigateTo("/alias/" + obj.Id);
-
+            obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
         }
+
+        if (EditMode)
+        {
+            obj = await AliasService.UpdateAliasAsync(obj);
+        }
+        else
+        {
+            obj.Passwords.Add(Password);
+            obj.UserId = UserService.User().Id;
+            obj = await AliasService.InsertAliasAsync(obj);
+        }
+
+        IsSaving = false;
+        StateHasChanged();
+
+        Navigation.NavigateTo("/alias/" + obj.Id);
     }
 }
