@@ -22,6 +22,6 @@ jobs:
     - name: Build
       run: dotnet build
     - name: Ensure browsers are installed
-      run: pwsh src/Tests/AliasVault/E2ETests/bin/Debug/net8.0/playwright.ps1 install --with-deps
+      run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install --with-deps
     - name: Run your tests
       run: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal
