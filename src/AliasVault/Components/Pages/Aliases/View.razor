@@ -3,6 +3,7 @@
 @using AliasDb
 @using AliasVault.Models
 @inherits AuthorizePageBase
+@inject AliasDbContext dbContext
 @using Microsoft.EntityFrameworkCore
 
 <div class="row align-items-center">
@@ -121,16 +122,13 @@ else
         StateHasChanged();
 
         // Load the aliases from the database.
-        using (var context = new AliasDbContext())
-        {
-            Alias = await context.Logins
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Include(x => x.Passwords)
-                .Where(x => x.Id == Id)
-                .Where(x => x.UserId == UserService.User().Id)
-                .FirstAsync();
-        }
+        Alias = await dbContext.Logins
+            .Include(x => x.Identity)
+            .Include(x => x.Service)
+            .Include(x => x.Passwords)
+            .Where(x => x.Id == Id)
+            .Where(x => x.UserId == UserService.User().Id)
+            .FirstAsync();
 
         IsLoading = false;
         StateHasChanged();

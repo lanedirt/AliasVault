@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 public class UserService
 {
+    private readonly AliasDbContext _dbContext;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private IdentityUser? _user;
@@ -44,8 +45,9 @@ public class UserService
 
     private void NotifyStateChanged() => OnChange.Invoke();
 
-    public UserService(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IHttpContextAccessor httpContextAccessor)
+    public UserService(AliasDbContext dbContext, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IHttpContextAccessor httpContextAccessor)
     {
+        _dbContext = dbContext;
         _userManager = userManager;
         _signInManager = signInManager;
         _httpContextAccessor = httpContextAccessor;
@@ -117,23 +119,21 @@ public class UserService
     {
         if (_httpContextAccessor.HttpContext != null)
         {
-            using (var dbContext = new AliasDbContext())
+
+            // Load user from database. Use a new context everytime to ensure we get the latest data.
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == _httpContextAccessor.HttpContext.User.Identity.Name);
+            if (user != null)
             {
-                // Load user from database. Use a new context everytime to ensure we get the latest data.
-                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserName == _httpContextAccessor.HttpContext.User.Identity.Name);
-                if (user != null)
-                {
-                    _user = user;
+                _user = user;
 
-                    // Load managed event ids for current user.
-                    //_managedEventIds = await GetUserAllowedEventIdsAsync(_user);
+                // Load managed event ids for current user.
+                //_managedEventIds = await GetUserAllowedEventIdsAsync(_user);
 
-                    // Load all roles for current user.
-                    _userRoles = await _userManager.GetRolesAsync(this.User());
+                // Load all roles for current user.
+                _userRoles = await _userManager.GetRolesAsync(this.User());
 
-                    // Define if current user is admin.
-                    _isAdmin = _userRoles.Contains(AdminRole);
-                }
+                // Define if current user is admin.
+                _isAdmin = _userRoles.Contains(AdminRole);
             }
 
             // UserManager implementation: throughout Blazor server session user is not updated when user is updated in database
@@ -360,13 +360,6 @@ public class UserService
         // First delete all related data...
         // @TODO: do we not want to preserve certain anonymized data?
 
-        using (var dbContext = new AliasDbContext())
-        {
-            // Delete all emailqueuerecords associated with this user
-            //var emailQueueRecords = dbContext.EmailQueueRecords.Where(x => x.IdentityUser_Id == user.Id);
-            //dbContext.EmailQueueRecords.RemoveRange(emailQueueRecords);
-            //await dbContext.SaveChangesAsync();
-        }
 
         // ...then delete the user
         var result = await _userManager.DeleteAsync(user);

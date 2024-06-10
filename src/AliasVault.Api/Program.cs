@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
 var configuration = builder.Configuration;
 
 builder.Services.AddLogging(logging =>

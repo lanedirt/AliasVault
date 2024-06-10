@@ -1,17 +1,37 @@
+using System.Data.Common;
 using AliasDb;
 using AliasVault;
-using AliasVault.Components;
 using AliasVault.Identity;
 using AliasVault.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // We use dbContextFactory to create a new instance of the DbContext for every place that needs it
 // as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
-builder.Services.AddDbContextFactory<AliasDbContext>();
+builder.Services.AddSingleton<DbConnection>(container =>
+{
+    var configFile = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json")
+        .Build();
+
+    var connection = new SqliteConnection(configFile.GetConnectionString("AliasDbContext"));
+    connection.Open();
+
+    return connection;
+});
+
+builder.Services.AddDbContextFactory<AliasDbContext>((container, options) =>
+{
+    var connection = container.GetRequiredService<DbConnection>();
+    options.UseSqlite(connection).UseLazyLoadingProxies();
+});
+
 builder.Services.AddDataProtection();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     options.TokenLifespan = TimeSpan.FromHours(12));
@@ -31,6 +51,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Services.AddScoped<JsInvokeService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AliasService>();
 builder.Services.AddScoped<PortalMessageService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
@@ -51,7 +72,7 @@ else
     builder.Services.AddServerSideBlazor()
         .AddCircuitOptions(e => {
             e.DetailedErrors = true;
-        }); ;
+        });
 }
 
 builder.Services.AddHttpContextAccessor();

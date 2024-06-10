@@ -2,6 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore.Metadata.Internal
 @inherits AuthorizePageBase
+@inject AliasDbContext dbContext
 @page "/"
 
 <PageTitle>Aliaseses</PageTitle>
@@ -51,18 +52,14 @@ else
         IsLoading = true;
         StateHasChanged();
 
-
         // Load the aliases from the database.
-        using (var context = new AliasDbContext())
-        {
-            var user = UserService.User();
-            Aliases = await context.Logins
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Include(x => x.Passwords)
-                .Where(x => x.UserId == user.Id)
-                .ToListAsync();
-        }
+        var user = UserService.User();
+        Aliases = await dbContext.Logins
+            .Include(x => x.Identity)
+            .Include(x => x.Service)
+            .Include(x => x.Passwords)
+            .Where(x => x.UserId == user.Id)
+            .ToListAsync();
 
         IsLoading = false;
         StateHasChanged();
