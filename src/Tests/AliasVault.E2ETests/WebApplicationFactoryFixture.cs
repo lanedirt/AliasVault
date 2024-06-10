@@ -1,8 +1,9 @@
+using System.Data.Common;
 using AliasDb;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -19,21 +20,32 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
 
         builder.ConfigureServices((context, services) =>
         {
-            var databaseFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.db");
-            var connectionString = $"Data Source={Guid.NewGuid()}.db";
+            var dbContextDescriptor = services.SingleOrDefault(
+                d => d.ServiceType ==
+                     typeof(DbContextOptions<AliasDbContext>));
 
-            services.AddDbContextFactory<AliasDbContext>(options =>
+            services.Remove(dbContextDescriptor);
+
+            var dbConnectionDescriptor = services.SingleOrDefault(
+                d => d.ServiceType ==
+                     typeof(DbConnection));
+
+            services.Remove(dbConnectionDescriptor);
+
+            // Create open SqliteConnection so EF won't automatically close it.
+            services.AddSingleton<DbConnection>(container =>
             {
-                options.UseSqlite(connectionString).UseLazyLoadingProxies();
+                var connection = new SqliteConnection("DataSource=:memory:");
+                connection.Open();
+
+                return connection;
             });
 
-            // Ensure the database is created
-            var sp = services.BuildServiceProvider();
-            using (var scope = sp.CreateScope())
+            services.AddDbContext<AliasDbContext>((container, options) =>
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AliasDbContext>();
-                dbContext.Database.EnsureCreated();
-            }
+                var connection = container.GetRequiredService<DbConnection>();
+                options.UseSqlite(connection);
+            });
         });
     }
 

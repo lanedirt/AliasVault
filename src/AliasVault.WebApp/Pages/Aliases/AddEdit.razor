@@ -259,6 +259,20 @@ else
             obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
         } */
 
+        // Sanity check for unittest. Delete later if not needed.
+        // Try to parse birthdate as datetime. if it fails, set it to empty.
+        if (obj.Identity.BirthDate != null)
+        {
+            try
+            {
+                DateTime.Parse(obj.Identity.BirthDate);
+            }
+            catch (Exception)
+            {
+                obj.Identity.BirthDate = "1900-01-01";
+            }
+        }
+
         if (EditMode)
         {
             await AliasService.UpdateAliasAsync(obj, Id.Value);

@@ -1,7 +1,10 @@
+using System.Data.Common;
 using System.Text;
 using AliasDb;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -18,7 +21,25 @@ builder.Services.AddLogging(logging =>
 });
 
 // Add services to the container.
-builder.Services.AddDbContextFactory<AliasDbContext>();
+builder.Services.AddSingleton<DbConnection>(container =>
+{
+    var configFile = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json")
+        .Build();
+
+    var connection = new SqliteConnection(configFile.GetConnectionString("AliasDbContext"));
+    connection.Open();
+
+    return connection;
+});
+
+builder.Services.AddDbContext<AliasDbContext>((container, options) =>
+{
+    var connection = container.GetRequiredService<DbConnection>();
+    options.UseSqlite(connection).UseLazyLoadingProxies();
+});
+
 builder.Services.AddDataProtection();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
@@ -118,6 +139,27 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var container = scope.ServiceProvider;
+    var db = container.GetRequiredService<AliasDbContext>();
+
+    db.Database.EnsureCreated();
+
+    /*if (!db..Any())
+    {
+        try
+        {
+            db.Initialize();
+        }
+        catch (Exception ex)
+        {
+            var logger = container.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred seeding the database. Error: {Message}", ex.Message);
+        }
+    }*/
+}
 
 app.Run();
 

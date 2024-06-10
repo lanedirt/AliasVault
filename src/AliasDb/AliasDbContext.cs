@@ -51,19 +51,25 @@ public class AliasDbContext : IdentityDbContext
     public DbSet<AspNetUserRefreshTokens> AspNetUserRefreshTokens { get; set; }
 
     /// <summary>
-    /// Gets or sets the Identities DbSet.
+    /// Sets up the connection string if it is not already configured.
     /// </summary>
     /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
+        // If the options are not already configured, use the appsettings.json file.
+        // Tip: the E2E tests will provide a different connection string directly
+        // which will override this default config.
+        /*if (!optionsBuilder.IsConfigured)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
 
-        optionsBuilder
-            .UseSqlite(configuration.GetConnectionString("AliasDbContext"))
-            .UseLazyLoadingProxies();
+            optionsBuilder
+                .UseSqlite(configuration.GetConnectionString("AliasDbContext"))
+                .UseLazyLoadingProxies();
+        }    */
     }
 
     /// <summary>

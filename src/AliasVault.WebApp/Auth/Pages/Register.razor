@@ -1,12 +1,15 @@
 @page "/user/register"
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
+@using System.Text.Json
 @using AliasVault.Shared.Models
 @using AliasVault.WebApp.Auth.Components
+@using AliasVault.WebApp.Auth.Services
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
+@inject AuthService AuthService
 
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -24,15 +27,15 @@
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
-        <InputTextField id="password" @bind-Value="user.PasswordConfirm" type="password" placeholder="••••••••" />
+        <InputTextField id="password2" @bind-Value="user.PasswordConfirm" type="password" placeholder="••••••••" />
     </div>
 
     <div class="flex items-start">
         <div class="flex items-center h-5">
-            <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" required>
+            <input id="terms" aria-describedby="terms" name="terms" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" required>
         </div>
         <div class="ml-3 text-sm">
-            <label for="remember" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
+            <label for="terms" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
         </div>
     </div>
 
@@ -72,9 +75,22 @@
 
             if (result.IsSuccessStatusCode)
             {
-                var token = await result.Content.ReadAsStringAsync();
-                await LocalStorage.SetItemAsync("token", token);
-                await AuthStateProvider.GetAuthenticationStateAsync();
+                var responseContent = await result.Content.ReadAsStringAsync();
+                var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
+
+                if (tokenObject != null)
+                {
+                    // Store the token as a plain string in local storage
+                    await AuthService.StoreAccessTokenAsync(tokenObject.Token);
+                    await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
+                    await AuthStateProvider.GetAuthenticationStateAsync();
+                }
+                else
+                {
+                    // Handle the case where the token is not present in the response
+                    Console.WriteLine("Token not found in the response.");
+                }
+
                 NavigationManager.NavigateTo("/");
             }
             else

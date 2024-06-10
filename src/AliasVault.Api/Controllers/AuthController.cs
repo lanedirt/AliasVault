@@ -15,14 +15,16 @@ using System.Text;
 [ApiController]
 public class AuthController : ControllerBase
 {
+    private readonly AliasDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly IConfiguration _configuration;
     private const string LoginProvider = "AliasVault";
     private const string RefreshToken = "RefreshToken";
 
-    public AuthController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
+    public AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
     {
+        _context = context;
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
@@ -34,34 +36,8 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            var token = GenerateJwtToken(user);
-            var refreshToken = GenerateRefreshToken();
-
-            // Generate device identifier
-            var deviceIdentifier = GenerateDeviceIdentifier(Request);
-
-            // Save refresh token to database.
-            using (var dbContext = new AliasDbContext())
-            {
-                // Remove any existing refresh tokens for this user and device.
-                var existingTokens = dbContext.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-                dbContext.AspNetUserRefreshTokens.RemoveRange(existingTokens);
-
-                // Add new refresh token.
-                dbContext.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
-                {
-                    UserId = user.Id,
-                    DeviceIdentifier = deviceIdentifier,
-                    Value = refreshToken,
-                    ExpireDate = DateTime.Now.AddDays(30),
-                    CreatedAt = DateTime.Now
-                });
-                await dbContext.SaveChangesAsync();
-            }
-
-            await _userManager.SetAuthenticationTokenAsync(user, LoginProvider, RefreshToken, refreshToken);
-
-            return Ok(new TokenModel() { Token = token, RefreshToken = refreshToken });
+            var tokenModel = await GenerateNewTokenForUser(user);
+            return Ok(tokenModel);
         }
         return Unauthorized();
     }
@@ -82,36 +58,34 @@ public class AuthController : ControllerBase
         }
 
         // Check if the refresh token is valid.
-        using (var dbContext = new AliasDbContext())
+        // Remove any existing refresh tokens for this user and device.
+        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+        var existingToken = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < DateTime.Now)
         {
-            // Remove any existing refresh tokens for this user and device.
-            var deviceIdentifier = GenerateDeviceIdentifier(Request);
-            var existingToken = dbContext.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
-            if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < DateTime.Now)
-            {
-                return Unauthorized("Refresh token expired");
-            }
-
-            // Remove the existing refresh token.
-            dbContext.AspNetUserRefreshTokens.Remove(existingToken);
-
-            // Generate a new refresh token to replace the old one.
-            var newRefreshToken = GenerateRefreshToken();
-
-            // Add new refresh token.
-            dbContext.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
-            {
-                UserId = user.Id,
-                DeviceIdentifier = deviceIdentifier,
-                Value = newRefreshToken,
-                ExpireDate = DateTime.Now.AddDays(30),
-                CreatedAt = DateTime.Now
-            });
-            await dbContext.SaveChangesAsync();
-
-            var token = GenerateJwtToken(user);
-            return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
+            return Unauthorized("Refresh token expired");
         }
+
+        // Remove the existing refresh token.
+        _context.AspNetUserRefreshTokens.Remove(existingToken);
+
+        // Generate a new refresh token to replace the old one.
+        var newRefreshToken = GenerateRefreshToken();
+
+        // Add new refresh token.
+        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
+        {
+            UserId = user.Id,
+            DeviceIdentifier = deviceIdentifier,
+            Value = newRefreshToken,
+            ExpireDate = DateTime.Now.AddDays(30),
+            CreatedAt = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        var token = GenerateJwtToken(user);
+        return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
+
     }
 
     [HttpPost("revoke")]
@@ -130,19 +104,16 @@ public class AuthController : ControllerBase
         }
 
         // Check if the refresh token is valid.
-        using (var dbContext = new AliasDbContext())
+        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+        var existingToken = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
-            var deviceIdentifier = GenerateDeviceIdentifier(Request);
-            var existingToken = dbContext.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
-            if (existingToken == null || existingToken.Value != model.RefreshToken)
-            {
-                return Unauthorized("Invalid refresh token");
-            }
-
-            // Remove the existing refresh token.
-            dbContext.AspNetUserRefreshTokens.Remove(existingToken);
-            await dbContext.SaveChangesAsync();
+            return Unauthorized("Invalid refresh token");
         }
+
+        // Remove the existing refresh token.
+        _context.AspNetUserRefreshTokens.Remove(existingToken);
+        await _context.SaveChangesAsync();
 
         return Ok("Refresh token revoked successfully");
     }
@@ -157,9 +128,10 @@ public class AuthController : ControllerBase
         {
             // When a user is registered, they are automatically signed in.
             await _signInManager.SignInAsync(user, isPersistent: false);
+
             // Return the token.
-            var token = GenerateJwtToken(user);
-            return Ok(new { token });
+            var tokenModel = await GenerateNewTokenForUser(user);
+            return Ok(tokenModel);
         }
         else
         {
@@ -231,5 +203,32 @@ public class AuthController : ControllerBase
 
         var rawIdentifier = $"{userAgent}|{acceptLanguage}";
         return rawIdentifier;
+    }
+
+    private async Task<TokenModel> GenerateNewTokenForUser(IdentityUser user)
+    {
+        var token = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        // Generate device identifier
+        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+
+        // Save refresh token to database.
+        // Remove any existing refresh tokens for this user and device.
+        var existingTokens = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        _context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
+
+        // Add new refresh token.
+        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
+        {
+            UserId = user.Id,
+            DeviceIdentifier = deviceIdentifier,
+            Value = refreshToken,
+            ExpireDate = DateTime.Now.AddDays(30),
+            CreatedAt = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        return new TokenModel() { Token = token, RefreshToken = refreshToken };
     }
 }

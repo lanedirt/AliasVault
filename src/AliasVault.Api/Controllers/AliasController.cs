@@ -10,8 +10,11 @@ using Service = AliasVault.Shared.Models.WebApi.Service;
 
 public class AliasController : AuthenticatedRequestController
 {
-    public AliasController(UserManager<IdentityUser> userManager) : base(userManager)
+    private readonly AliasDbContext _context;
+
+    public AliasController(AliasDbContext context, UserManager<IdentityUser> userManager) : base(userManager)
     {
+        _context = context;
     }
 
     [HttpGet("items")]
@@ -24,24 +27,21 @@ public class AliasController : AuthenticatedRequestController
         }
 
         // Logic to retrieve items for the user.
-        using (var dbContext = new AliasDbContext())
-        {
-            var aliases = await dbContext.Logins
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Where(x => x.UserId == user.Id)
-                .Select(x => new AliasListEntry
-                {
-                    Id = x.Id,
-                    Logo = x.Service.Logo,
-                    Service = x.Service.Name,
-                    CreateDate = x.CreatedAt
-                })
+        var aliases = await _context.Logins
+            .Include(x => x.Identity)
+            .Include(x => x.Service)
+            .Where(x => x.UserId == user.Id)
+            .Select(x => new AliasListEntry
+            {
+                Id = x.Id,
+                Logo = x.Service.Logo,
+                Service = x.Service.Name,
+                CreateDate = x.CreatedAt
+            })
 
-                .ToListAsync();
+            .ToListAsync();
 
-            return Ok(aliases);
-        }
+        return Ok(aliases);
     }
 
     [HttpGet("{aliasId}")]
@@ -53,58 +53,55 @@ public class AliasController : AuthenticatedRequestController
             return Unauthorized();
         }
 
-        using (var dbContext = new AliasDbContext())
-        {
-            var aliasObject = await dbContext.Logins
-                .Include(x => x.Passwords)
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Where(x => x.Id == aliasId)
-                .Where(x => x.UserId == user.Id)
-                .Select(x => new Alias()
+        var aliasObject = await _context.Logins
+            .Include(x => x.Passwords)
+            .Include(x => x.Identity)
+            .Include(x => x.Service)
+            .Where(x => x.Id == aliasId)
+            .Where(x => x.UserId == user.Id)
+            .Select(x => new Alias()
+            {
+                Service = new Service()
                 {
-                    Service = new Service()
-                    {
-                        Name = x.Service.Name,
-                        Url = x.Service.Url,
-                        LogoUrl = "",
-                        CreatedAt = x.Service.CreatedAt,
-                        UpdatedAt = x.Service.UpdatedAt
-                    },
-                    Identity = new Identity()
-                    {
-                        NickName = x.Identity.NickName,
-                        FirstName = x.Identity.FirstName,
-                        LastName = x.Identity.LastName,
-                        BirthDate = x.Identity.BirthDate.ToString("yyyy-MM-dd"),
-                        Gender = x.Identity.Gender,
-                        AddressStreet = x.Identity.AddressStreet,
-                        AddressCity = x.Identity.AddressCity,
-                        AddressState = x.Identity.AddressState,
-                        AddressZipCode = x.Identity.AddressZipCode,
-                        AddressCountry = x.Identity.AddressCountry,
-                        Hobbies = x.Identity.Hobbies,
-                        EmailPrefix = x.Identity.EmailPrefix,
-                        PhoneMobile = x.Identity.PhoneMobile,
-                        BankAccountIBAN = x.Identity.BankAccountIBAN,
-                        CreatedAt = x.Identity.CreatedAt,
-                        UpdatedAt = x.Identity.UpdatedAt
-                    },
-                    Password = new AliasVault.Shared.Models.WebApi.Password()
-                    {
-                        Value = x.Passwords.First().Value ?? "",
-                        Description = "",
-                        CreatedAt = x.Passwords.First().CreatedAt,
-                        UpdatedAt = x.Passwords.First().UpdatedAt
-                    },
-                    CreateDate = x.CreatedAt,
-                    LastUpdate = x.UpdatedAt
+                    Name = x.Service.Name,
+                    Url = x.Service.Url,
+                    LogoUrl = "",
+                    CreatedAt = x.Service.CreatedAt,
+                    UpdatedAt = x.Service.UpdatedAt
+                },
+                Identity = new Identity()
+                {
+                    NickName = x.Identity.NickName,
+                    FirstName = x.Identity.FirstName,
+                    LastName = x.Identity.LastName,
+                    BirthDate = x.Identity.BirthDate.ToString("yyyy-MM-dd"),
+                    Gender = x.Identity.Gender,
+                    AddressStreet = x.Identity.AddressStreet,
+                    AddressCity = x.Identity.AddressCity,
+                    AddressState = x.Identity.AddressState,
+                    AddressZipCode = x.Identity.AddressZipCode,
+                    AddressCountry = x.Identity.AddressCountry,
+                    Hobbies = x.Identity.Hobbies,
+                    EmailPrefix = x.Identity.EmailPrefix,
+                    PhoneMobile = x.Identity.PhoneMobile,
+                    BankAccountIBAN = x.Identity.BankAccountIBAN,
+                    CreatedAt = x.Identity.CreatedAt,
+                    UpdatedAt = x.Identity.UpdatedAt
+                },
+                Password = new AliasVault.Shared.Models.WebApi.Password()
+                {
+                    Value = x.Passwords.First().Value ?? "",
+                    Description = "",
+                    CreatedAt = x.Passwords.First().CreatedAt,
+                    UpdatedAt = x.Passwords.First().UpdatedAt
+                },
+                CreateDate = x.CreatedAt,
+                LastUpdate = x.UpdatedAt
 
-                })
-                .FirstAsync();
+            })
+            .FirstAsync();
 
-            return Ok(aliasObject);
-        }
+        return Ok(aliasObject);
     }
 
     /// <summary>
@@ -121,52 +118,49 @@ public class AliasController : AuthenticatedRequestController
             return Unauthorized();
         }
 
-        using (var dbContext = new AliasDbContext())
+        var login = new Login();
+        login.UserId = user.Id;
+        login.CreatedAt = DateTime.UtcNow;
+        login.UpdatedAt = DateTime.UtcNow;
+        login.Identity = new AliasDb.Identity()
         {
-            var login = new Login();
-            login.UserId = user.Id;
-            login.CreatedAt = DateTime.UtcNow;
-            login.UpdatedAt = DateTime.UtcNow;
-            login.Identity = new AliasDb.Identity()
-            {
-                NickName = model.Identity.NickName,
-                FirstName = model.Identity.FirstName,
-                LastName = model.Identity.LastName,
-                BirthDate = DateTime.Parse(model.Identity.BirthDate),
-                Gender = model.Identity.Gender,
-                AddressStreet = model.Identity.AddressStreet,
-                AddressCity = model.Identity.AddressCity,
-                AddressState = model.Identity.AddressState,
-                AddressZipCode = model.Identity.AddressZipCode,
-                AddressCountry = model.Identity.AddressCountry,
-                Hobbies = model.Identity.Hobbies,
-                EmailPrefix = model.Identity.EmailPrefix,
-                PhoneMobile = model.Identity.PhoneMobile,
-                BankAccountIBAN = model.Identity.BankAccountIBAN,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            NickName = model.Identity.NickName,
+            FirstName = model.Identity.FirstName,
+            LastName = model.Identity.LastName,
+            BirthDate = DateTime.Parse(model.Identity.BirthDate),
+            Gender = model.Identity.Gender,
+            AddressStreet = model.Identity.AddressStreet,
+            AddressCity = model.Identity.AddressCity,
+            AddressState = model.Identity.AddressState,
+            AddressZipCode = model.Identity.AddressZipCode,
+            AddressCountry = model.Identity.AddressCountry,
+            Hobbies = model.Identity.Hobbies,
+            EmailPrefix = model.Identity.EmailPrefix,
+            PhoneMobile = model.Identity.PhoneMobile,
+            BankAccountIBAN = model.Identity.BankAccountIBAN,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
 
-            login.Passwords.Add(new AliasDb.Password()
-            {
-                Value = model.Password.Value,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
+        login.Passwords.Add(new AliasDb.Password()
+        {
+            Value = model.Password.Value,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
 
-            login.Service = new AliasDb.Service()
-            {
-                Name = model.Service.Name,
-                Url = model.Service.Url,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+        login.Service = new AliasDb.Service()
+        {
+            Name = model.Service.Name,
+            Url = model.Service.Url,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
 
-            dbContext.Logins.Add(login);
-            await dbContext.SaveChangesAsync();
+        _context.Logins.Add(login);
+        await _context.SaveChangesAsync();
 
-            return Ok(login.Id);
-        }
+        return Ok(login.Id);
     }
 
     /// <summary>
@@ -184,44 +178,41 @@ public class AliasController : AuthenticatedRequestController
             return Unauthorized();
         }
 
-        using (var dbContext = new AliasDbContext())
-        {
-            // Get the existing entry.
-            var login = await dbContext.Logins
-                .Include(x => x.Identity)
-                .Include(x => x.Service)
-                .Include(x => x.Passwords)
-                .Where(x => x.Id == aliasId)
-                .Where(x => x.UserId == user.Id)
-                .FirstAsync();
+        // Get the existing entry.
+        var login = await _context.Logins
+            .Include(x => x.Identity)
+            .Include(x => x.Service)
+            .Include(x => x.Passwords)
+            .Where(x => x.Id == aliasId)
+            .Where(x => x.UserId == user.Id)
+            .FirstAsync();
 
-            login.UpdatedAt = DateTime.UtcNow;
-            login.Identity.NickName = model.Identity.NickName;
-            login.Identity.FirstName = model.Identity.FirstName;
-            login.Identity.LastName = model.Identity.LastName;
-            login.Identity.BirthDate = DateTime.Parse(model.Identity.BirthDate);
-            login.Identity.Gender = model.Identity.Gender;
-            login.Identity.AddressStreet = model.Identity.AddressStreet;
-            login.Identity.AddressCity = model.Identity.AddressCity;
-            login.Identity.AddressState = model.Identity.AddressState;
-            login.Identity.AddressZipCode = model.Identity.AddressZipCode;
-            login.Identity.AddressCountry = model.Identity.AddressCountry;
-            login.Identity.Hobbies = model.Identity.Hobbies;
-            login.Identity.EmailPrefix = model.Identity.EmailPrefix;
-            login.Identity.PhoneMobile = model.Identity.PhoneMobile;
-            login.Identity.BankAccountIBAN = model.Identity.BankAccountIBAN;
+        login.UpdatedAt = DateTime.UtcNow;
+        login.Identity.NickName = model.Identity.NickName;
+        login.Identity.FirstName = model.Identity.FirstName;
+        login.Identity.LastName = model.Identity.LastName;
+        login.Identity.BirthDate = DateTime.Parse(model.Identity.BirthDate);
+        login.Identity.Gender = model.Identity.Gender;
+        login.Identity.AddressStreet = model.Identity.AddressStreet;
+        login.Identity.AddressCity = model.Identity.AddressCity;
+        login.Identity.AddressState = model.Identity.AddressState;
+        login.Identity.AddressZipCode = model.Identity.AddressZipCode;
+        login.Identity.AddressCountry = model.Identity.AddressCountry;
+        login.Identity.Hobbies = model.Identity.Hobbies;
+        login.Identity.EmailPrefix = model.Identity.EmailPrefix;
+        login.Identity.PhoneMobile = model.Identity.PhoneMobile;
+        login.Identity.BankAccountIBAN = model.Identity.BankAccountIBAN;
 
-            login.Passwords.First().Value = model.Password.Value;
-            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
+        login.Passwords.First().Value = model.Password.Value;
+        login.Passwords.First().UpdatedAt = DateTime.UtcNow;
 
-            login.Service.Name = model.Service.Name;
-            login.Service.Url = model.Service.Url;
-            login.Service.UpdatedAt = DateTime.UtcNow;
+        login.Service.Name = model.Service.Name;
+        login.Service.Url = model.Service.Url;
+        login.Service.UpdatedAt = DateTime.UtcNow;
 
-            await dbContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
-            return Ok(login.Id);
-        }
+        return Ok(login.Id);
     }
 
     /// <summary>
@@ -237,17 +228,14 @@ public class AliasController : AuthenticatedRequestController
             return Unauthorized();
         }
 
-        using (var dbContext = new AliasDbContext())
-        {
-            var login = await dbContext.Logins
-                .Where(x => x.Id == aliasId)
-                .Where(x => x.UserId == user.Id)
-                .FirstAsync();
+        var login = await _context.Logins
+            .Where(x => x.Id == aliasId)
+            .Where(x => x.UserId == user.Id)
+            .FirstAsync();
 
-            dbContext.Logins.Remove(login);
-            await dbContext.SaveChangesAsync();
+        _context.Logins.Remove(login);
+        await _context.SaveChangesAsync();
 
-            return Ok();
-        }
+        return Ok();
     }
 }

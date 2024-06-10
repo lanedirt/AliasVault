@@ -153,7 +153,7 @@ public class WebAppManager
 #else
             KillProcessAndChildrenUnix(_blazorWasmProcess.Id);
 #endif
-            _webApiProcess.Dispose();
+            _blazorWasmProcess.Dispose();
         }
     }
 
