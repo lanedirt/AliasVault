@@ -120,3 +120,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// For starting the WebAPI project in-memory from E2ETests project.
+/// </summary>
+public class AliasVaultApiProgram { }

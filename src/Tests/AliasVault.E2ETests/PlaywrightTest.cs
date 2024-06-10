@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+
 namespace AliasVault.E2ETests;
 
 using Microsoft.Playwright;
@@ -10,14 +13,20 @@ public class PlaywrightTest
 
     private WebAppManager _webAppManager;
 
+    /// <summary>
+    /// For starting the WebAPI project in-memory.
+    /// </summary>
+    private WebApplicationFactoryFixture<AliasVaultApiProgram> _factory = new();
 
     [SetUp]
     public async Task SetUp()
     {
         _webAppManager = new WebAppManager();
 
-        // Start WebAPI and Blazor WASM projects
-        await _webAppManager.StartWebApiAsync(5001);
+        _factory.HostUrl = "http://localhost:5001";
+        _factory.CreateDefaultClient();
+
+        //await _webAppManager.StartWebApiAsync(5001);
         await _webAppManager.StartBlazorWasmAsync( 5000);
 
         var playwright = await Playwright.CreateAsync();
@@ -48,7 +57,8 @@ public class PlaywrightTest
         await Context.CloseAsync();
         await Browser.CloseAsync();
 
-        _webAppManager.StopWebApi();
+        _factory.Dispose();
+        //_webAppManager.StopWebApi();
         _webAppManager.StopBlazorWasm();
     }
 }
