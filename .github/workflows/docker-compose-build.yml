@@ -1,0 +1,35 @@
+name: Docker Compose Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-docker:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:26.0.0
+        options: --privileged
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Compose
+        run: |
+            # Build the images and start the services
+            docker compose -f docker-compose.prod.yml up -d
+      - name: Wait for services to be up
+        run: |
+            # Wait for a few seconds
+            sleep 5
+      - name: Test if localhost:80 responds
+        run: |
+            # Test if the service on localhost:80 responds
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
+            if [ "$http_code" -ne 200 ]; then
+              echo "Service did not respond with 200 OK"
+              exit 1
+            else
+              echo "Service responded with 200 OK"
+            fi
