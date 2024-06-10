@@ -43,7 +43,7 @@ public class PlaywrightTest
         await _webAppManager.StartBlazorWasmAsync(appPort);
 
         var playwright = await Playwright.CreateAsync();
-        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         Context = await Browser.NewContextAsync();
 
         // Intercept requests and override appsettings.json
