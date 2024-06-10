@@ -18,7 +18,7 @@ jobs:
       - name: Set up Docker Compose
         run: |
             # Build the images and start the services
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.yml up -d
       - name: Wait for services to be up
         run: |
             # Wait for a few seconds
