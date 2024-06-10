@@ -29,8 +29,8 @@ public class PlaywrightTest
     {
         _webAppManager = new WebAppManager();
 
-        // Determine random port for the WebAPI between 5000-5500
-        apiPort = new Random().Next(5000, 5500);
+        // Determine random port for the WebAPI between 5100-5900
+        apiPort = new Random().Next(5100, 5900);
         // Determine random port for the BlazorWasm which is apiPort + 1
         appPort = apiPort + 1;
         // Update base URL
