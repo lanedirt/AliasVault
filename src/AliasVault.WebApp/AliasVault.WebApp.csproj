@@ -37,4 +37,8 @@
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Pages\Aliases\Mailbox\Models\" />
+    </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿@page "/alias/{id:guid}"
 @using AliasVault.Shared.Models.WebApi
 @using AliasVault.WebApp.Services
+@using AliasVault.WebApp.Components.Email
 @inject AliasService AliasService
 @inherits PageBase
 
@@ -38,10 +39,7 @@ else
                 </div>
             </div>
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-                <h3 class="mb-4 text-xl font-semibold dark:text-white">Email</h3>
-                <div class="mb-4">
-                    No recent emails.
-                </div>
+                <RecentEmails EmailPrefix="@Alias.Identity.EmailPrefix" />
             </div>
         </div>
         <div class="col-span-2">
