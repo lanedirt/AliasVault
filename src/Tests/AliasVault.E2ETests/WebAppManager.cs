@@ -33,11 +33,17 @@ public class WebAppManager
             }
         };
 
-        _blazorWasmProcess.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
+        _blazorWasmProcess.OutputDataReceived += (sender, args) =>
+        {
+            TestContext.Out.WriteLine(args.Data);
+        };
         _blazorWasmProcess.ErrorDataReceived += (sender, args) =>
         {
-            _blazorWasmErrors.Add(args.Data);
-
+            TestContext.Out.WriteLine(args.Data);
+            if (args.Data != null && (args.Data.Contains("error") || args.Data.Contains("fail")))
+            {
+                _blazorWasmErrors.Add(args.Data);
+            }
         };
 
         _blazorWasmProcess.Start();
