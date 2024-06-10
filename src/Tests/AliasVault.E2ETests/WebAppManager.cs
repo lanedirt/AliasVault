@@ -5,8 +5,6 @@ using System.Net;
 
 public class WebAppManager
 {
-    private Process _webApiProcess;
-    private List<string> _webApiErrors = new();
     private Process _blazorWasmProcess;
     private List<string> _blazorWasmErrors = new();
 
@@ -16,54 +14,6 @@ public class WebAppManager
         // Adjust this if your solution directory is different
         string baseDir = Directory.GetParent(currentDir).Parent.Parent.FullName;
         return baseDir;
-    }
-
-    public async Task StartWebApiAsync(int port)
-    {
-        var projectPath = $"{GetBaseDirectory()}/../../AliasVault.Api/AliasVault.Api.csproj";
-        _webApiProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project {projectPath} --urls=http://localhost:{port}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        _webApiProcess.OutputDataReceived += (sender, args) =>
-        {
-            TestContext.Progress.WriteLine("WebAPI: " + args.Data);
-            if (args.Data != null && args.Data.Contains("error"))
-            {
-                _webApiErrors.Add(args.Data);
-            }
-        };
-        _webApiProcess.ErrorDataReceived += (sender, args) =>
-        {
-            if (args.Data != null && !string.IsNullOrEmpty(args.Data))
-            {
-                _webApiErrors.Add(args.Data);
-            }
-        };
-
-        try
-        {
-            _webApiProcess.Start();
-            _webApiProcess.BeginOutputReadLine();
-            _webApiProcess.BeginErrorReadLine();
-            TestContext.Progress.WriteLine("WebAPI process started, waiting for startup...");
-
-            await WaitForStartupAsync(port);
-            TestContext.Progress.WriteLine("WebAPI started successfully.");
-        }
-        catch (Exception ex)
-        {
-            TestContext.Progress.WriteLine($"Failed to start WebAPI: {ex.Message}");
-        }
     }
 
     public async Task StartBlazorWasmAsync(int port)
@@ -113,34 +63,15 @@ public class WebAppManager
             }
             catch (Exception e)
             {
-                if (_webApiErrors != null && _webApiErrors.Count > 0)
+                if (_blazorWasmErrors.Count > 0)
                 {
-                    // Concatenate all errors and fail the test
-                    Assert.Fail($"WebAPI failed to start: {string.Join(Environment.NewLine, _webApiErrors)}");
-                    return;
-                }
-                if (_blazorWasmErrors != null && _blazorWasmErrors.Count > 0)
-                {
-                    Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _webApiErrors)}");
+                    Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
                     return;
                 }
 
                 Console.WriteLine(e.Message);
                 await Task.Delay(500);
             }
-        }
-    }
-
-    public void StopWebApi()
-    {
-        if (_webApiProcess.HasExited)
-        {
-#if WINDOWS
-            KillProcessAndChildrenWindows(_webApiProcess.Id);
-#else
-            KillProcessAndChildrenUnix(_webApiProcess.Id);
-#endif
-            _webApiProcess.Dispose();
         }
     }
 
