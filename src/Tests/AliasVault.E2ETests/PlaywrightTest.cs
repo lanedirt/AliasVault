@@ -39,11 +39,14 @@ public class PlaywrightTest
         _factory.HostUrl = "http://localhost:" + apiPort;
         _factory.CreateDefaultClient();
 
-        //await _webAppManager.StartWebApiAsync(5001);
         await _webAppManager.StartBlazorWasmAsync(appPort);
 
+        // Set headless mode based on debug mode
+        bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
+        bool headless = isDebugMode ? false : true;
+
         var playwright = await Playwright.CreateAsync();
-        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
         Context = await Browser.NewContextAsync();
 
         // Intercept requests and override appsettings.json
@@ -115,7 +118,7 @@ public class PlaywrightTest
 
         // Check if we get redirected when clicking on the register button.
         var submitButton = Page.Locator("button[type='submit']");
-        navigationTask = Page.WaitForNavigationAsync(new PageWaitForNavigationOptions() { Timeout = 200000});
+        navigationTask = Page.WaitForNavigationAsync(new PageWaitForNavigationOptions() { Timeout = 200000 });
         await submitButton.ClickAsync();
         await navigationTask;
 
