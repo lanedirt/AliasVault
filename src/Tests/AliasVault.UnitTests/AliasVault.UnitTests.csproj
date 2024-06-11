@@ -10,6 +10,16 @@
         <RootNamespace>AliasVault.Tests</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Debug\net8.0\AliasVault.UnitTests.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Release\net8.0\AliasVault.UnitTests.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <Content Include="..\..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
