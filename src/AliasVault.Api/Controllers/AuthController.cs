@@ -1,16 +1,25 @@
-using System.Security.Cryptography;
-using AliasDb;
-using AliasVault.Shared.Models;
+//-----------------------------------------------------------------------
+// <copyright file="AuthController.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace AliasVault.Api.Controllers;
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using AliasDb;
+using AliasVault.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
+/// <summary>
+/// Auth controller for handling authentication.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -19,9 +28,14 @@ public class AuthController : ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly IConfiguration _configuration;
-    private const string LoginProvider = "AliasVault";
-    private const string RefreshToken = "RefreshToken";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthController"/> class.
+    /// </summary>
+    /// <param name="context">AliasDbContext instance.</param>
+    /// <param name="userManager">UserManager instance.</param>
+    /// <param name="signInManager">SignInManager instance.</param>
+    /// <param name="configuration">IConfiguration instance.</param>
     public AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
     {
         _context = context;
@@ -30,6 +44,11 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Login endpoint used to process login attempt using credentials.
+    /// </summary>
+    /// <param name="model">Login model.</param>
+    /// <returns>IActionResult.</returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
@@ -39,9 +58,15 @@ public class AuthController : ControllerBase
             var tokenModel = await GenerateNewTokenForUser(user);
             return Ok(tokenModel);
         }
+
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Refresh endpoint used to refresh an expired access token using a valid refresh token.
+    /// </summary>
+    /// <param name="tokenModel">Token model.</param>
+    /// <returns>IActionResult.</returns>
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] TokenModel tokenModel)
     {
@@ -73,13 +98,13 @@ public class AuthController : ControllerBase
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshToken
+        await _context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
             Value = newRefreshToken,
             ExpireDate = DateTime.Now.AddDays(30),
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
         });
         await _context.SaveChangesAsync();
 
@@ -88,6 +113,11 @@ public class AuthController : ControllerBase
 
     }
 
+    /// <summary>
+    /// Revoke endpoint used to revoke a refresh token.
+    /// </summary>
+    /// <param name="model">Token model.</param>
+    /// <returns>IActionResult.</returns>
     [HttpPost("revoke")]
     public async Task<IActionResult> Revoke([FromBody] TokenModel model)
     {
@@ -97,7 +127,7 @@ public class AuthController : ControllerBase
             return Unauthorized("User not found (email-1)");
         }
 
-        var user = await _userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+        var user = await _userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
             return Unauthorized("User not found (email-2)");
@@ -118,6 +148,11 @@ public class AuthController : ControllerBase
         return Ok("Refresh token revoked successfully");
     }
 
+    /// <summary>
+    /// Register endpoint used to register a new user.
+    /// </summary>
+    /// <param name="model">Register model.</param>
+    /// <returns>IActionResult.</returns>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
@@ -146,7 +181,7 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -181,7 +216,7 @@ public class AuthController : ControllerBase
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-            ValidateLifetime = false
+            ValidateLifetime = false,
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -219,13 +254,13 @@ public class AuthController : ControllerBase
         _context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshToken
+        await _context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
             Value = refreshToken,
             ExpireDate = DateTime.Now.AddDays(30),
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
         });
         await _context.SaveChangesAsync();
 

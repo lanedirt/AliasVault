@@ -6,8 +6,8 @@
 //-----------------------------------------------------------------------
 namespace AliasDb;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// The AliasDbContext class.

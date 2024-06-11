@@ -1,3 +1,10 @@
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 using System.Data.Common;
 using System.Text;
 using AliasDb;
@@ -14,9 +21,9 @@ var configuration = builder.Configuration;
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();
-    logging.SetMinimumLevel(LogLevel.Debug); // Set the minimum level to Information
-    logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Debug); // Ensure Identity logs are captured
-    logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Debug); // Ensure Identity logs are captured
+    logging.SetMinimumLevel(LogLevel.Error);
+    logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
+    logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
 });
 
 // Add services to the container.
@@ -42,7 +49,7 @@ builder.Services.AddDbContext<AliasDbContext>((container, options) =>
 builder.Services.AddDataProtection();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
-    options.TokenLifespan = TimeSpan.FromDays(30); // Set token lifespan for refresh tokens
+    options.TokenLifespan = TimeSpan.FromDays(30);
     options.Name = "AliasVault";
 });
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -57,8 +64,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
         options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<IdentityUser>)));
     })
     .AddEntityFrameworkStores<AliasDbContext>()
-    // Note: The AliasVault token provider is used to generate refresh tokens and is also defined
-    // in the AuthController.
     .AddDefaultTokenProviders()
     .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("AliasVault");
 
@@ -86,7 +91,8 @@ builder.Services.AddAuthentication(options =>
 // Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy",
+    options.AddPolicy(
+        "CorsPolicy",
         policy => policy.AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader());
@@ -106,20 +112,22 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
-        Scheme = "Bearer"
+        Scheme = "Bearer",
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        new OpenApiSecurityScheme
         {
-            Reference = new OpenApiReference
+            new OpenApiSecurityScheme
             {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            }
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer",
+                },
+            },
+            Array.Empty<string>()
         },
-        Array.Empty<string>()
-    }});
+    });
 });
 
 var app = builder.Build();
@@ -144,23 +152,10 @@ using (var scope = app.Services.CreateScope())
     var container = scope.ServiceProvider;
     var db = container.GetRequiredService<AliasDbContext>();
 
-    db.Database.EnsureCreated();
-
-    /*if (!db..Any())
-    {
-        try
-        {
-            db.Initialize();
-        }
-        catch (Exception ex)
-        {
-            var logger = container.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred seeding the database. Error: {Message}", ex.Message);
-        }
-    }*/
+    await db.Database.EnsureCreatedAsync();
 }
 
-app.Run();
+await app.RunAsync();
 
 /// <summary>
 /// For starting the WebAPI project in-memory from E2ETests project.
