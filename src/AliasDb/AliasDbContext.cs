@@ -1,7 +1,12 @@
-﻿namespace AliasDb;
+﻿//-----------------------------------------------------------------------
+// <copyright file="AliasDbContext.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace AliasDb;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 /// <summary>
@@ -48,29 +53,7 @@ public class AliasDbContext : IdentityDbContext
     /// <summary>
     /// Gets or sets the AspNetUserRefreshTokens DbSet.
     /// </summary>
-    public DbSet<AspNetUserRefreshTokens> AspNetUserRefreshTokens { get; set; }
-
-    /// <summary>
-    /// Sets up the connection string if it is not already configured.
-    /// </summary>
-    /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // If the options are not already configured, use the appsettings.json file.
-        // Tip: the E2E tests will provide a different connection string directly
-        // which will override this default config.
-        /*if (!optionsBuilder.IsConfigured)
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            optionsBuilder
-                .UseSqlite(configuration.GetConnectionString("AliasDbContext"))
-                .UseLazyLoadingProxies();
-        }    */
-    }
+    public DbSet<AspNetUserRefreshToken> AspNetUserRefreshTokens { get; set; }
 
     /// <summary>
     /// The OnModelCreating method.
@@ -128,8 +111,8 @@ public class AliasDbContext : IdentityDbContext
             .HasForeignKey(i => i.DefaultPasswordId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Configure the Login - UserId entity
-        modelBuilder.Entity<AspNetUserRefreshTokens>()
+        // Configure the User - AspNetUserRefreshToken entity
+        modelBuilder.Entity<AspNetUserRefreshToken>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)

@@ -73,7 +73,7 @@ public class AuthController : ControllerBase
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
+        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -219,7 +219,7 @@ public class AuthController : ControllerBase
         _context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshTokens
+        _context.AspNetUserRefreshTokens.Add(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
