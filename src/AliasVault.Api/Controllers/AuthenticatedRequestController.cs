@@ -14,34 +14,22 @@ using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Base controller for requests that require authentication.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="AuthenticatedRequestController"/> class.
+/// </remarks>
+/// <param name="userManager">UserManager instance.</param>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class AuthenticatedRequestController : ControllerBase
+public class AuthenticatedRequestController(UserManager<IdentityUser> userManager) : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AuthenticatedRequestController"/> class.
-    /// </summary>
-    /// <param name="userManager">UserManager instance.</param>
-    public AuthenticatedRequestController(UserManager<IdentityUser> userManager)
-    {
-        _userManager = userManager;
-    }
-
     /// <summary>
     /// Get the current authenticated user.
     /// </summary>
     /// <returns>IdentityUser object for current user.</returns>
     protected async Task<IdentityUser?> GetCurrentUserAsync()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
-        {
-            throw new InvalidOperationException("Unable to find user ID.");
-        }
-
-        return await _userManager.FindByIdAsync(userId);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unable to find user ID.");
+        return await userManager.FindByIdAsync(userId);
     }
 }

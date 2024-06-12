@@ -20,30 +20,14 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Auth controller for handling authentication.
 /// </summary>
+/// <param name="context">AliasDbContext instance.</param>
+/// <param name="userManager">UserManager instance.</param>
+/// <param name="signInManager">SignInManager instance.</param>
+/// <param name="configuration">IConfiguration instance.</param>
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration) : ControllerBase
 {
-    private readonly AliasDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly IConfiguration _configuration;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AuthController"/> class.
-    /// </summary>
-    /// <param name="context">AliasDbContext instance.</param>
-    /// <param name="userManager">UserManager instance.</param>
-    /// <param name="signInManager">SignInManager instance.</param>
-    /// <param name="configuration">IConfiguration instance.</param>
-    public AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
-    {
-        _context = context;
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _configuration = configuration;
-    }
-
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
@@ -52,8 +36,8 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+        var user = await userManager.FindByEmailAsync(model.Email);
+        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
         {
             var tokenModel = await GenerateNewTokenForUser(user);
             return Ok(tokenModel);
@@ -76,7 +60,7 @@ public class AuthController : ControllerBase
             return Unauthorized("User not found (email-1)");
         }
 
-        var user = await _userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+        var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
             return Unauthorized("User not found (email-2)");
@@ -85,20 +69,20 @@ public class AuthController : ControllerBase
         // Check if the refresh token is valid.
         // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < DateTime.Now)
         {
             return Unauthorized("Refresh token expired");
         }
 
         // Remove the existing refresh token.
-        _context.AspNetUserRefreshTokens.Remove(existingToken);
+        context.AspNetUserRefreshTokens.Remove(existingToken);
 
         // Generate a new refresh token to replace the old one.
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        await _context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -106,11 +90,10 @@ public class AuthController : ControllerBase
             ExpireDate = DateTime.Now.AddDays(30),
             CreatedAt = DateTime.Now,
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
         return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
-
     }
 
     /// <summary>
@@ -127,7 +110,7 @@ public class AuthController : ControllerBase
             return Unauthorized("User not found (email-1)");
         }
 
-        var user = await _userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+        var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
             return Unauthorized("User not found (email-2)");
@@ -135,15 +118,15 @@ public class AuthController : ControllerBase
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             return Unauthorized("Invalid refresh token");
         }
 
         // Remove the existing refresh token.
-        _context.AspNetUserRefreshTokens.Remove(existingToken);
-        await _context.SaveChangesAsync();
+        context.AspNetUserRefreshTokens.Remove(existingToken);
+        await context.SaveChangesAsync();
 
         return Ok("Refresh token revoked successfully");
     }
@@ -157,12 +140,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
         var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var result = await userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)
         {
             // When a user is registered, they are automatically signed in.
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            await signInManager.SignInAsync(user, isPersistent: false);
 
             // Return the token.
             var tokenModel = await GenerateNewTokenForUser(user);
@@ -176,24 +159,23 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(IdentityUser user)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? string.Empty));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Issuer"],
+            issuer: configuration["Jwt:Issuer"] ?? string.Empty,
+            audience: configuration["Jwt:Issuer"] ?? string.Empty,
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: creds
-        );
+            signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -201,11 +183,10 @@ public class AuthController : ControllerBase
     private string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
-        }
+        using var rng = RandomNumberGenerator.Create();
+
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 
     private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
@@ -215,14 +196,13 @@ public class AuthController : ControllerBase
             ValidateAudience = false,
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? string.Empty)),
             ValidateLifetime = false,
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        var jwtSecurityToken = securityToken as JwtSecurityToken;
-        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
         {
             throw new SecurityTokenException("Invalid token");
         }
@@ -233,8 +213,8 @@ public class AuthController : ControllerBase
     private string GenerateDeviceIdentifier(HttpRequest request)
     {
         // TODO: Add more headers to the device identifier or let client send a unique identifier instead.
-        var userAgent = request.Headers["User-Agent"].ToString();
-        var acceptLanguage = request.Headers["Accept-Language"].ToString();
+        var userAgent = request.Headers.UserAgent.ToString();
+        var acceptLanguage = request.Headers.AcceptLanguage.ToString();
 
         var rawIdentifier = $"{userAgent}|{acceptLanguage}";
         return rawIdentifier;
@@ -250,11 +230,11 @@ public class AuthController : ControllerBase
 
         // Save refresh token to database.
         // Remove any existing refresh tokens for this user and device.
-        var existingTokens = _context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        _context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
+        var existingTokens = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        await _context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -262,7 +242,7 @@ public class AuthController : ControllerBase
             ExpireDate = DateTime.Now.AddDays(30),
             CreatedAt = DateTime.Now,
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return new TokenModel() { Token = token, RefreshToken = refreshToken };
     }

@@ -14,20 +14,13 @@ using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Controller for identity generation.
 /// </summary>
-public class IdentityController : AuthenticatedRequestController
+/// <param name="userManager">UserManager instance.</param>
+public class IdentityController(UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="IdentityController"/> class.
-    /// </summary>
-    /// <param name="userManager">UserManager instance.</param>
-    public IdentityController(UserManager<IdentityUser> userManager) : base(userManager)
-    {
-    }
-
     /// <summary>
     /// Proxies the request to the identity generator to generate a random identity.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Identity model.</returns>
     [HttpGet("generate")]
     public async Task<IActionResult> Generate()
     {
