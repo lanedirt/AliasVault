@@ -8,15 +8,15 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; }
-    [Parameter] public string Value { get; set; }
+    [Parameter] public string Label { get; set; } = "Value";
+    [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
     private string _inputId = Guid.NewGuid().ToString();
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {
-        Value = e.Value.ToString();
+        Value = e.Value?.ToString() ?? string.Empty;
         await ValueChanged.InvokeAsync(Value);
     }
 }

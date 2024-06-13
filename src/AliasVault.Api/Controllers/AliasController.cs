@@ -23,8 +23,6 @@ using Service = AliasVault.Shared.Models.WebApi.Service;
 /// <param name="userManager">UserManager instance.</param>
 public class AliasController(AliasDbContext context, UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
 {
-    private readonly AliasDbContext _context = context;
-
     /// <summary>
     /// Get all alias items for the current user.
     /// </summary>
@@ -39,7 +37,7 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
         }
 
         // Logic to retrieve items for the user.
-        var aliases = await _context.Logins
+        var aliases = await context.Logins
             .Include(x => x.Identity)
             .Include(x => x.Service)
             .Where(x => x.UserId == user.Id)
@@ -70,7 +68,7 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
             return Unauthorized();
         }
 
-        var aliasObject = await _context.Logins
+        var aliasObject = await context.Logins
             .Include(x => x.Passwords)
             .Include(x => x.Identity)
             .Include(x => x.Service)
@@ -175,8 +173,8 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
             UpdatedAt = DateTime.UtcNow,
         };
 
-        await _context.Logins.AddAsync(login);
-        await _context.SaveChangesAsync();
+        await context.Logins.AddAsync(login);
+        await context.SaveChangesAsync();
 
         return Ok(login.Id);
     }
@@ -197,7 +195,7 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
         }
 
         // Get the existing entry.
-        var login = await _context.Logins
+        var login = await context.Logins
             .Include(x => x.Identity)
             .Include(x => x.Service)
             .Include(x => x.Passwords)
@@ -228,7 +226,7 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
         login.Service.Url = model.Service.Url;
         login.Service.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return Ok(login.Id);
     }
@@ -247,13 +245,13 @@ public class AliasController(AliasDbContext context, UserManager<IdentityUser> u
             return Unauthorized();
         }
 
-        var login = await _context.Logins
+        var login = await context.Logins
             .Where(x => x.Id == aliasId)
             .Where(x => x.UserId == user.Id)
             .FirstAsync();
 
-        _context.Logins.Remove(login);
-        await _context.SaveChangesAsync();
+        context.Logins.Remove(login);
+        await context.SaveChangesAsync();
 
         return Ok();
     }

@@ -157,7 +157,13 @@ using (var scope = app.Services.CreateScope())
 
 await app.RunAsync();
 
-/// <summary>
-/// For starting the WebAPI project in-memory from E2ETests project.
-/// </summary>
-public class AliasVaultApiProgram { }
+namespace AliasVault.Api
+{
+    /// <summary>
+    /// Explicit program class definition. This is required in order to start the WebAPI project
+    /// in-memory from E2ETests project via WebApplicationFactory.
+    /// </summary>
+    public partial class Program
+    {
+    }
+}

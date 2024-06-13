@@ -12,18 +12,10 @@
 @code {
     [Parameter]
     public AliasVault.Shared.Models.WebApi.AliasListEntry Obj { get; set; } = new();
-    private bool showModal = false;
 
     private void ShowDetails()
     {
         // Redirect to view page instead for now.
         NavigationManager.NavigateTo($"/alias/{Obj.Id}");
-        //showModal = true;
     }
-
-    private void CloseDetails()
-    {
-        showModal = false;
-    }
-
 }

@@ -1,6 +1,6 @@
-@code {
-    [Inject] private NavigationManager Navigation { get; set; }
+@inject NavigationManager Navigation
 
+@code {
     protected override void OnInitialized()
     {
         Navigation.NavigateTo("/user/login");

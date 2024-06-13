@@ -22,7 +22,7 @@ public class PlaywrightTest
     /// <summary>
     /// For starting the WebAPI project in-memory.
     /// </summary>
-    private WebApplicationFactoryFixture<AliasVaultApiProgram> _factory = new();
+    private WebApplicationFactoryFixture<AliasVault.Api.Program> _factory = new();
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()

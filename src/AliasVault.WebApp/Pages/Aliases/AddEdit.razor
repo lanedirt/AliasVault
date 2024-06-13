@@ -173,6 +173,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Task.Yield();
+
         if (EditMode)
         {
             BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Edit alias" });

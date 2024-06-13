@@ -1,48 +1,50 @@
-using System.Net.Http.Json;
-using AliasDb;
-using AliasVault.Shared.Models.WebApi;
-using Identity = AliasGenerators.Identity.Models.Identity;
+//-----------------------------------------------------------------------
+// <copyright file="AliasService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace AliasVault.WebApp.Services;
 
-public class AliasService
+using System.Net.Http.Json;
+using AliasVault.Shared.Models.WebApi;
+using Identity = AliasGenerators.Identity.Models.Identity;
+
+/// <summary>
+/// Service class for alias operations.
+/// </summary>
+public class AliasService(HttpClient httpClient)
 {
-    private HttpClient _httpClient;
-
-    /// <summary>
-    /// Public constructor which can be called from static async method or directly.
-    /// </summary>
-    /// <param name="aliasObj"></param>
-    /// <param name="httpClient"></param>
-    public AliasService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
     /// <summary>
     /// Generate random identity by calling the IdentityGenerator API.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Identity object.</returns>
     public async Task<Identity> GenerateRandomIdentityAsync()
     {
-        return await _httpClient.GetFromJsonAsync<Identity>("api/Identity/generate");
+        var identity = await httpClient.GetFromJsonAsync<Identity>("api/Identity/generate");
+        if (identity == null)
+        {
+            throw new InvalidOperationException("Failed to generate random identity.");
+        }
+
+        return identity;
     }
 
     /// <summary>
     /// Insert new entry into database.
     /// </summary>
-    /// <param name="aliasObject"></param>
+    /// <param name="aliasObject">Alias object to insert.</param>
+    /// <returns>Guid of inserted entry.</returns>
     public async Task<Guid> InsertAliasAsync(Alias aliasObject)
     {
-        // Put to webapi.
         try
         {
-            var returnObject = await _httpClient.PutAsJsonAsync<Alias>("api/Alias", aliasObject);
+            var returnObject = await httpClient.PutAsJsonAsync<Alias>("api/Alias", aliasObject);
             return await returnObject.Content.ReadFromJsonAsync<Guid>();
         }
         catch
         {
-            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
             return Guid.Empty;
         }
     }
@@ -50,19 +52,18 @@ public class AliasService
     /// <summary>
     /// Update an existing entry to database.
     /// </summary>
-    /// <param name="aliasObject"></param>
-    /// <param name="id"></param>
+    /// <param name="aliasObject">Alias object to update.</param>
+    /// <param name="id">Id of alias to update.</param>
+    /// <returns>Guid of updated entry.</returns>
     public async Task<Guid> UpdateAliasAsync(Alias aliasObject, Guid id)
     {
-        // Post to webapi.
         try
         {
-            var returnObject = await _httpClient.PostAsJsonAsync<Alias>("api/Alias/" + id, aliasObject);
+            var returnObject = await httpClient.PostAsJsonAsync<Alias>("api/Alias/" + id, aliasObject);
             return await returnObject.Content.ReadFromJsonAsync<Guid>();
         }
         catch
         {
-            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
             return Guid.Empty;
         }
     }
@@ -70,48 +71,47 @@ public class AliasService
     /// <summary>
     /// Load existing entry from database.
     /// </summary>
-    /// <param name="aliasId"></param>
+    /// <param name="aliasId">Id of alias to load.</param>
+    /// <returns>Alias object.</returns>
     public async Task<Alias?> LoadAliasAsync(Guid aliasId)
     {
-        // Make webapi call to get list of all entries.
         try
         {
-            return await _httpClient.GetFromJsonAsync<Alias>("api/Alias/" + aliasId);
+            return await httpClient.GetFromJsonAsync<Alias>("api/Alias/" + aliasId);
         }
         catch
         {
-            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
             return null;
         }
     }
 
     /// <summary>
-    /// Get list with all entries from database.
+    /// Get list with all entries that belong to current user.
     /// </summary>
+    /// <returns>List of AliasListEntry objects.</returns>
     public async Task<List<AliasListEntry>?> GetListAsync()
     {
-        // Make webapi call to get list of all entries.
         try
         {
-            return await _httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/Alias/items");
+            return await httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/Alias/items");
         }
         catch
         {
-            // Return null if failed. If authentication failed, the AliasVaultApiHandlerService will redirect to login page.
-            return null;
+            return new List<AliasListEntry>();
         }
     }
 
     /// <summary>
     /// Removes existing entry from database.
     /// </summary>
-    /// <param name="alias"></param>
-    public async Task DeleteAliasAsync(Guid Id)
+    /// <param name="id">Id of alias to delete.</param>
+    /// <returns>Task.</returns>
+    public async Task DeleteAliasAsync(Guid id)
     {
         // Delete from webapi.
         try
         {
-            await _httpClient.DeleteAsync("api/Alias/" + Id);
+            await httpClient.DeleteAsync("api/Alias/" + id);
         }
         catch
         {

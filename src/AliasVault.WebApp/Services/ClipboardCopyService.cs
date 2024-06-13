@@ -1,3 +1,10 @@
+//-----------------------------------------------------------------------
+// <copyright file="ClipboardCopyService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 namespace AliasVault.WebApp.Services;
 
 /// <summary>
@@ -5,18 +12,26 @@ namespace AliasVault.WebApp.Services;
 /// </summary>
 public class ClipboardCopyService
 {
-    private string _currentCopiedId;
-    public event Action<string> OnCopy;
+    private string _currentCopiedId = string.Empty;
+
+    /// <summary>
+    /// Event to notify the application that an item has been copied.
+    /// </summary>
+    public event Action<string> OnCopy = null!;
 
     /// <summary>
     /// Keep track of the last copied item.
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">Id of the last copied item.</param>
     public void SetCopied(string id)
     {
         _currentCopiedId = id;
         OnCopy?.Invoke(_currentCopiedId);
     }
 
+    /// <summary>
+    /// Get the last copied item.
+    /// </summary>
+    /// <returns>Id of last copied item.</returns>
     public string GetCopiedId() => _currentCopiedId;
 }

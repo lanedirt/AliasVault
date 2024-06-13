@@ -16,8 +16,8 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; }
-    [Parameter] public string Value { get; set; }
+    [Parameter] public string Label { get; set; } = "Value";
+    [Parameter] public string Value { get; set; } = string.Empty;
 
     private bool _copied => ClipboardCopyService.GetCopiedId() == _inputId;
     private string _inputId = Guid.NewGuid().ToString();

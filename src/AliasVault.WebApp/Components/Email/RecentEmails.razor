@@ -56,23 +56,21 @@ else
 
 @code {
     [Parameter]
-    public string EmailPrefix { get; set; }
+    public string EmailPrefix { get; set; } = string.Empty;
 
     [Parameter]
     public List<MailboxEmailApiModel> MailboxEmails { get; set; } = new List<MailboxEmailApiModel>();
 
     public bool IsLoading { get; set; } = true;
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        base.OnAfterRenderAsync(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
 
         if (firstRender)
         {
-            LoadRecentEmailsAsync();
+            await LoadRecentEmailsAsync();
         }
-
-        return Task.CompletedTask;
     }
 
     private async Task LoadRecentEmailsAsync()
