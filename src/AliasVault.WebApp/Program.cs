@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using AliasVault.WebApp;
 using AliasVault.WebApp.Services;
 using AliasVault.WebApp.Auth.Services;
+using AliasVault.WebApp.Auth.Providers;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -26,7 +27,7 @@ builder.Services.AddScoped(sp =>
     return httpClient;
 });
 
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<AliasService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 

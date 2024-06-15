@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace BlazorServer.Models.Spamok;
+namespace AliasVault.WebApp.Pages.Aliases.Models.Spamok;
 
 /// <summary>
 /// Represents a mailbox API model.

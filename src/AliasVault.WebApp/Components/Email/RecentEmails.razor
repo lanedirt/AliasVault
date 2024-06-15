@@ -1,4 +1,5 @@
-﻿@using BlazorServer.Models.Spamok
+﻿@using AliasVault.WebApp.Pages.Aliases.Models.Spamok
+@using BlazorServer.Models.Spamok
 @inherits ComponentBase
 @inject IHttpClientFactory HttpClientFactory
 
@@ -79,9 +80,9 @@ else
         StateHasChanged();
 
         var client = HttpClientFactory.CreateClient("EmailClient");
-        MailboxApiModel mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{EmailPrefix}");
+        MailboxApiModel? mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{EmailPrefix}");
 
-        if (mailbox.Mails != null)
+        if (mailbox?.Mails != null)
         {
             MailboxEmails = mailbox.Mails;
         }

@@ -1,9 +1,16 @@
-﻿using AliasVault.WebApp.Components.Models;
+﻿//-----------------------------------------------------------------------
+// <copyright file="PageBase.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.WebApp.Pages.Base;
+
+using AliasVault.WebApp.Components.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-
-namespace AliasVault.WebApp.Pages.Base;
 
 /// <summary>
 /// Base authorize page that all pages that are part of the logged in website should inherit from.
@@ -12,22 +19,35 @@ namespace AliasVault.WebApp.Pages.Base;
 /// </summary>
 public class PageBase : OwningComponentBase
 {
+    private bool _parametersInitialSet;
+
+    /// <summary>
+    /// Gets or sets the NavigationManager.
+    /// </summary>
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the AuthenticationStateProvider.
+    /// </summary>
     [Inject]
     public AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the IJSRuntime.
+    /// </summary>
     [Inject]
     public IJSRuntime Js { get; set; } = null!;
 
     /// <summary>
-    /// Contains the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
+    /// Gets or sets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = new List<BreadcrumbItem>();
 
-    private bool _parametersInitialSet;
-
+    /// <summary>
+    /// Initializes the component asynchronously.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -37,28 +57,32 @@ public class PageBase : OwningComponentBase
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
 
         // Detect success messages in query string and add them to the SuccessMessages list
+        // TODO: Implement this with example for default add/edit update action...
         var uri = new Uri(NavigationManager.Uri);
     }
 
     /// <summary>
-    /// Get username from the authentication state.
+    /// Gets the username from the authentication state asynchronously.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The username.</returns>
     protected async Task<string> GetUsernameAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         return authState.User?.Identity?.Name ?? "[Unknown]";
     }
 
+    /// <summary>
+    /// Sets the parameters asynchronously.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
 
-        // This is needed to prevent the OnParametersSetAsync method from running together with OnInitialized on initial page load.
+        // This is to prevent the OnParametersSetAsync method from running together with OnInitialized on initial page load.
         if (!_parametersInitialSet)
         {
             _parametersInitialSet = true;
-            return;
         }
     }
 }

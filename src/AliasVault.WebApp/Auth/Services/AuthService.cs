@@ -136,7 +136,8 @@ public class AuthService
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private async Task RevokeTokenAsync()
     {
-        var tokenInput = new TokenModel {
+        var tokenInput = new TokenModel
+        {
             Token = await GetAccessTokenAsync(),
             RefreshToken = await GetRefreshTokenAsync(),
         };
