@@ -14,9 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Base controller for requests that require authentication.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="AuthenticatedRequestController"/> class.
-/// </remarks>
 /// <param name="userManager">UserManager instance.</param>
 [Route("api/[controller]")]
 [ApiController]
