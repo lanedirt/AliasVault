@@ -1,6 +1,13 @@
-# AliasVault
+<div align="center">
 
----
+<h1>AliasVault</h1>
+    
+[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/OGameX/releases) 
+[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/docker-compose-build.yml?label=docker-compose%20build">](https://github.com/lanedirt/AliasVault/actions/workflows/docker-compose-build.yml) 
+[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-build-run-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml) 
+[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-integration-tests.yml?label=e2e tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-integration-tests.yml)
+
+</div>
 
 > Disclaimer: This repository is currently in an alpha state and is NOT ready for production use. Critical features, such as encryption, are not yet fully implemented. AliasVault is a work in progress and as of this moment serves as a research playground. Users are welcome to explore and use this project, but please be aware that there are no guarantees regarding its security or stability. Use at your own risk!
 
