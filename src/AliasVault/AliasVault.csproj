@@ -6,6 +6,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net8.0\AliasVault.xml</DocumentationFile>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net8.0\AliasVault.xml</DocumentationFile>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
@@ -16,18 +26,15 @@
       <Content Include="..\..\LICENSE.md">
         <Link>LICENSE.md</Link>
       </Content>
+      <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="stylecop.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

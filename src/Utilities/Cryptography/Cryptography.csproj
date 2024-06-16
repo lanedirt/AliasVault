@@ -6,8 +6,25 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Debug\net8.0\Cryptography.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="..\..\stylecop.json" Link="stylecop.json" />
+    </ItemGroup>
+
     <ItemGroup>
       <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.0" />
+      <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

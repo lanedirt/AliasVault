@@ -1,21 +1,27 @@
-namespace AliasVault.E2ETests;
+//-----------------------------------------------------------------------
+// <copyright file="BlazorWasmAppManager.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Diagnostics;
 using System.Net;
 
-public class WebAppManager
+/// <summary>
+/// A class for managing the Blazor WebAssembly application in out-of-process mode for E2E testing.
+/// </summary>
+public class BlazorWasmAppManager
 {
-    private Process _blazorWasmProcess;
-    private List<string> _blazorWasmErrors = new();
+    private readonly List<string> _blazorWasmErrors = [];
+    private Process? _blazorWasmProcess;
 
-    private string GetBaseDirectory()
-    {
-        string currentDir = Directory.GetCurrentDirectory();
-        // Adjust this if your solution directory is different
-        string baseDir = Directory.GetParent(currentDir).Parent.Parent.FullName;
-        return baseDir;
-    }
-
+    /// <summary>
+    /// Starts the Blazor WebAssembly application in out-of-process mode.
+    /// </summary>
+    /// <param name="port">The port number to run the app under.</param>
+    /// <returns>Async task.</returns>
     public async Task StartBlazorWasmAsync(int port)
     {
         var projectPath = $"{GetBaseDirectory()}/../../AliasVault.WebApp/AliasVault.WebApp.csproj";
@@ -30,7 +36,7 @@ public class WebAppManager
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-            }
+            },
         };
 
         _blazorWasmProcess.OutputDataReceived += (sender, args) =>
@@ -39,11 +45,13 @@ public class WebAppManager
         };
         _blazorWasmProcess.ErrorDataReceived += (sender, args) =>
         {
-            TestContext.Out.WriteLine(args.Data);
-            if (args.Data != null && (args.Data.Contains("error") || args.Data.Contains("fail")))
+            if (args.Data is null)
             {
-                _blazorWasmErrors.Add(args.Data);
+                return;
             }
+
+            TestContext.Out.WriteLine(args.Data);
+            _blazorWasmErrors.Add(args.Data);
         };
 
         _blazorWasmProcess.Start();
@@ -51,6 +59,35 @@ public class WebAppManager
         _blazorWasmProcess.BeginErrorReadLine();
 
         await WaitForStartupAsync(port);
+    }
+
+    /// <summary>
+    /// Stops the Blazor WebAssembly application process.
+    /// </summary>
+    public void StopBlazorWasm()
+    {
+        if (_blazorWasmProcess is not null && !_blazorWasmProcess.HasExited)
+        {
+#if WINDOWS
+            KillProcessAndChildrenWindows(_blazorWasmProcess.Id);
+#else
+            KillProcessAndChildrenUnix(_blazorWasmProcess.Id);
+#endif
+            _blazorWasmProcess.Dispose();
+        }
+    }
+
+    private string GetBaseDirectory()
+    {
+        string currentDir = Directory.GetCurrentDirectory();
+        string baseDir = string.Empty;
+        var parentDir = Directory.GetParent(currentDir);
+        if (parentDir?.Parent?.Parent != null)
+        {
+            baseDir = parentDir.Parent.Parent.FullName;
+        }
+
+        return baseDir;
     }
 
     private async Task WaitForStartupAsync(int port)
@@ -78,19 +115,6 @@ public class WebAppManager
                 Console.WriteLine(e.Message);
                 await Task.Delay(500);
             }
-        }
-    }
-
-    public void StopBlazorWasm()
-    {
-        if (!_blazorWasmProcess.HasExited)
-        {
-#if WINDOWS
-            KillProcessAndChildrenWindows(_blazorWasmProcess.Id);
-#else
-            KillProcessAndChildrenUnix(_blazorWasmProcess.Id);
-#endif
-            _blazorWasmProcess.Dispose();
         }
     }
 
@@ -128,20 +152,20 @@ public class WebAppManager
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             };
 
             var pkillProcess = new Process
             {
-                StartInfo = startInfo
+                StartInfo = startInfo,
             };
 
             pkillProcess.Start();
             pkillProcess.WaitForExit();
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            // Handle exception
+            Console.WriteLine(e.Message);
         }
 
         try
@@ -149,9 +173,9 @@ public class WebAppManager
             Process process = Process.GetProcessById(pid);
             process.Kill();
         }
-        catch (ArgumentException)
+        catch (ArgumentException e)
         {
-            // Process already exited.
+            Console.WriteLine(e.Message);
         }
     }
 #endif

@@ -8,15 +8,29 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; }
-    [Parameter] public string Value { get; set; }
-    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    /// <summary>
+    /// Label for the input field.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Value";
+
+    /// <summary>
+    /// Value of the input field.
+    /// </summary>
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Callback that is triggered when the value changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
 
     private string _inputId = Guid.NewGuid().ToString();
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {
-        Value = e.Value.ToString();
+        Value = e.Value?.ToString() ?? string.Empty;
         await ValueChanged.InvokeAsync(Value);
     }
 }

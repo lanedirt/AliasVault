@@ -1,9 +1,22 @@
-using System.Security.Cryptography;
+//-----------------------------------------------------------------------
+// <copyright file="CryptographyTests.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace AliasVault.Tests;
 
+using System.Security.Cryptography;
+
+/// <summary>
+/// Tests for the Cryptography class.
+/// </summary>
 public class CryptographyTests
 {
+    /// <summary>
+    /// Common setup for all tests.
+    /// </summary>
     [SetUp]
     public void Setup()
     {
@@ -32,7 +45,6 @@ public class CryptographyTests
         Assert.That(encrypted, Is.Not.Empty);
         Assert.That(encrypted, Is.Not.EqualTo(plaintext));
 
-
         // Decrypt the ciphertext
         string decrypted = Cryptography.Cryptography.Decrypt(encrypted, key);
         Console.WriteLine($"Decrypted: {decrypted}");
@@ -52,6 +64,7 @@ public class CryptographyTests
 
         // Derive a key from the password using Argon2id
         byte[] key = Cryptography.Cryptography.DeriveKeyFromPassword(password, salt);
+
         // Encrypt the plaintext
         string encrypted = Cryptography.Cryptography.Encrypt(plaintext, key);
 

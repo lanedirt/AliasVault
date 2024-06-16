@@ -6,6 +6,18 @@ Note: all instructions below are based on MacOS. If you are using a different op
 ## Getting Started
 In order to contribute to this project, you will need to have the following tools installed on your machine:
 
+- Make sure to install the latest version of .NET SDK 8:
+
+```bash
+# Install .NET SDK 8
+
+# On MacOS via brew: 
+brew install --cask dotnet-sdk
+
+# On Windows via winget
+winget install Microsoft.DotNet.SDK.8
+```
+
 - Dotnet CLI EF Tools
 
 ```bash

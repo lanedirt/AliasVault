@@ -6,6 +6,15 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>AliasVault.Api</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,7 +25,11 @@
         </PackageReference>
         <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.0" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.6.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,6 +42,7 @@
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
 
 </Project>

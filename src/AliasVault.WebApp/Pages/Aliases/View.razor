@@ -64,7 +64,7 @@ else
                 <form action="#">
                     <div class="grid grid-cols-6 gap-6">
                         <div class="col-span-6 sm:col-span-3">
-                            <CopyPasteFormRow Label="Initials" Value="@(Alias.Identity.FirstName.Substring(0,1))"></CopyPasteFormRow>
+                            <CopyPasteFormRow Label="Initials" Value="@(Alias.Identity.FirstName?.Substring(0,1))"></CopyPasteFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
                             <CopyPasteFormRow Label="First name" Value="@(Alias.Identity.FirstName)"></CopyPasteFormRow>

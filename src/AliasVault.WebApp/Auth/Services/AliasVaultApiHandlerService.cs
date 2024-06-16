@@ -1,19 +1,28 @@
-using Microsoft.AspNetCore.Components;
+//-----------------------------------------------------------------------
+// <copyright file="AliasVaultApiHandlerService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace AliasVault.WebApp.Auth.Services;
 
 using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components;
 
-public class AliasVaultApiHandlerService : DelegatingHandler
+/// <summary>
+/// This services handles all API requests to the AliasVault API and will add the access token to the request headers.
+/// If a 401 unauthorized is returned by the API it will intercept this response and attempt to automatically refresh the access token.
+/// </summary>
+public class AliasVaultApiHandlerService(IServiceProvider serviceProvider) : DelegatingHandler
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public AliasVaultApiHandlerService(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
+    /// <summary>
+    /// Override the SendAsync method to add the access token to the request headers.
+    /// </summary>
+    /// <param name="request">HttpRequestMessage instance.</param>
+    /// <param name="cancellationToken">CancellationToken instance.</param>
+    /// <returns>HttpResponseMessage.</returns>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         // Check if the request already contains the refreshed token to prevent infinite loop
@@ -25,7 +34,7 @@ public class AliasVaultApiHandlerService : DelegatingHandler
         }
 
         // Set the access token in the Authorization header
-        var authService = _serviceProvider.GetRequiredService<AuthService>();
+        var authService = serviceProvider.GetRequiredService<AuthService>();
         var token = await authService.GetAccessTokenAsync();
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -39,21 +48,20 @@ public class AliasVaultApiHandlerService : DelegatingHandler
             {
                 // Retry the original request with the new access token
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
-                // Add a custom header to indicate that this is a retry attempt
+
+                // Add a custom header to indicate that the next request is a retry attempt and any failure should be ignored.
                 request.Headers.Add("X-Ignore-Failure", "true");
                 response = await base.SendAsync(request, cancellationToken);
                 return response;
             }
             else
             {
-                // Refreshing token failed. This might be caused by the refresh token itself expired or has been revoked.
-                // Remove token from localstorage and redirect to login.
+                // Refreshing token failed. This might be caused by the expiration or revocation of the refresh token itself.
+                // Remove the token from local storage and redirect to the login page.
                 await authService.RemoveTokensAsync();
 
-                // Redirect to the login page.
-                var navigationManager = _serviceProvider.GetRequiredService<NavigationManager>();
+                var navigationManager = serviceProvider.GetRequiredService<NavigationManager>();
                 navigationManager.NavigateTo("/user/login");
-
             }
         }
 

@@ -51,8 +51,16 @@
         StateHasChanged();
 
         // Load the aliases from the webapi via AliasService.
-        Aliases = await AliasService.GetListAsync();
+        var aliasListEntries = await AliasService.GetListAsync();
+        if (aliasListEntries is null)
+        {
+            // Error loading aliases.
+            IsLoading = false;
+            StateHasChanged();
+            return;
+        }
 
+        Aliases = aliasListEntries;
         IsLoading = false;
         StateHasChanged();
     }

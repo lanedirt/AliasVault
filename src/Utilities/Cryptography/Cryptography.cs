@@ -1,11 +1,27 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Konscious.Security.Cryptography;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Cryptography.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Cryptography;
 
-public class Cryptography
+using System.Security.Cryptography;
+using System.Text;
+using Konscious.Security.Cryptography;
+
+/// <summary>
+/// Cryptography class.
+/// </summary>
+public static class Cryptography
 {
+    /// <summary>
+    /// Derive a key used for encryption/decryption based on a user password and system salt.
+    /// </summary>
+    /// <param name="password">User password.</param>
+    /// <param name="salt">The salt to use for the Argon2id hash.</param>
+    /// <returns>Encryption key as byte array.</returns>
     public static byte[] DeriveKeyFromPassword(string password, string salt)
     {
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
@@ -16,12 +32,18 @@ public class Cryptography
             Salt = saltBytes,
             DegreeOfParallelism = 8,
             MemorySize = 65536,
-            Iterations = 4
+            Iterations = 4,
         };
 
         return argon2.GetBytes(32); // Generate a 256-bit key
     }
 
+    /// <summary>
+    /// Encrypt a plaintext string using AES-256.
+    /// </summary>
+    /// <param name="plaintext">The plaintext string.</param>
+    /// <param name="key">Key to use for encryption.</param>
+    /// <returns>The encrypted string (ciphertext).</returns>
     public static string Encrypt(string plaintext, byte[] key)
     {
         using (Aes aes = Aes.Create())
@@ -53,6 +75,12 @@ public class Cryptography
         }
     }
 
+    /// <summary>
+    /// Decrypt a ciphertext string using AES-256.
+    /// </summary>
+    /// <param name="ciphertext">The encrypted string (ciphertext).</param>
+    /// <param name="key">The key used to originally encrypt the string.</param>
+    /// <returns>The original plaintext string.</returns>
     public static string Decrypt(string ciphertext, byte[] key)
     {
         byte[] fullCipher = Convert.FromBase64String(ciphertext);

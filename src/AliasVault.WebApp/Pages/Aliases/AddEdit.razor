@@ -173,6 +173,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         if (EditMode)
         {
             BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Edit alias" });
@@ -189,8 +191,21 @@ else
         {
             if (EditMode)
             {
+                if (Id is null)
+                {
+                    Navigation.NavigateTo("/404");
+                    return;
+                }
+
                 // Load existing obj, retrieve from service
-                obj = await AliasService.LoadAliasAsync(Id.Value);
+                var alias = await AliasService.LoadAliasAsync(Id.Value);
+                if (alias is null)
+                {
+                    Navigation.NavigateTo("/404");
+                    return;
+                }
+
+                alias = obj;
             }
             else
             {
@@ -255,7 +270,7 @@ else
         // Try to extract favicon from service URL
         // TODO: Fix favicon extraction
         /*if (obj.Service.Url != null  && !string.IsNullOrEmpty(obj.Service.Url))
-        {
+            {
             obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
         } */
 
@@ -275,7 +290,10 @@ else
 
         if (EditMode)
         {
-            await AliasService.UpdateAliasAsync(obj, Id.Value);
+            if (Id is not null)
+            {
+                await AliasService.UpdateAliasAsync(obj, Id.Value);
+            }
         }
         else
         {

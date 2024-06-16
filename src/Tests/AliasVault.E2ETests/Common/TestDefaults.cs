@@ -1,19 +1,19 @@
 //-----------------------------------------------------------------------
-// <copyright file="IPasswordGenerator.cs" company="lanedirt">
+// <copyright file="TestDefaults.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace AliasGenerators.Implementations;
+
+namespace AliasVault.E2ETests.Common;
 
 /// <summary>
-/// Interface for password generators.
+/// Default values for tests.
 /// </summary>
-public interface IPasswordGenerator
+public static class TestDefaults
 {
     /// <summary>
-    /// Generates a random password.
+    /// Gets or sets default timeout while waiting for pages to load in milliseconds.
     /// </summary>
-    /// <returns>Random generated password as string.</returns>
-    string GenerateRandomPassword();
+    public static int DefaultTimeout { get; set; } = 5000;
 }

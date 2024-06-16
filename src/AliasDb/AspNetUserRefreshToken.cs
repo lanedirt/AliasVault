@@ -1,13 +1,19 @@
+//-----------------------------------------------------------------------
+// <copyright file="AspNetUserRefreshToken.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace AliasDb;
 
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 /// <summary>
 /// Refresh tokens for users.
 /// </summary>
-public class AspNetUserRefreshTokens
+public class AspNetUserRefreshToken
 {
     /// <summary>
     /// Gets or sets Refresh Token ID.

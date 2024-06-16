@@ -1,7 +1,17 @@
+//-----------------------------------------------------------------------
+// <copyright file="AuthTests.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 using Microsoft.Playwright;
 
 namespace AliasVault.E2ETests;
 
+/// <summary>
+/// End-to-end tests for authentication.
+/// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
 public class AuthTests : PlaywrightTest
@@ -9,20 +19,19 @@ public class AuthTests : PlaywrightTest
     /// <summary>
     /// Test if registering a new account works.
     /// </summary>
+    /// <returns>Async task.</returns>
     [Test]
     public async Task LogoutAndLogin()
     {
-        // Logout
-        var navigationTask = Page.WaitForNavigationAsync();
-        await Page.GotoAsync(_appBaseUrl + "user/logout");
-        await navigationTask;
+        // Logout.
+        await Page.GotoAsync(AppBaseUrl + "user/logout");
+        await Page.WaitForURLAsync("**/user/logout", new PageWaitForURLOptions() { Timeout = 2000 });
 
         // Wait for the content to load.
         await Page.WaitForSelectorAsync("text=AliasVault");
 
-        // Check that we got redirected to /user/login
-        var currentUrl = Page.Url;
-        Assert.That(currentUrl, Is.EqualTo(_appBaseUrl + "user/login"));
+        // Wait and check if we get redirected to /user/login.
+        await Page.WaitForURLAsync("**/user/login", new PageWaitForURLOptions() { Timeout = 2000 });
 
         await Login();
     }
@@ -30,31 +39,25 @@ public class AuthTests : PlaywrightTest
     /// <summary>
     /// Test if logging in works.
     /// </summary>
+    /// <returns>Async task.</returns>
     public async Task Login()
     {
-        await Page.GotoAsync(_appBaseUrl);
-        var navigationTask = Page.WaitForNavigationAsync();
-        await navigationTask;
+        await Page.GotoAsync(AppBaseUrl);
 
-        // Check that we got redirected to /user/login
-        var currentUrl = Page.Url;
-        Assert.That(currentUrl, Is.EqualTo(_appBaseUrl + "user/login"));
+        // Check that we are on the login page after navigating to the base URL.
+        // We are expecting to not be authenticated and thus to be redirected to the login page.
+        await WaitForURLAsync("**/user/login");
 
         // Try to login with test credentials.
         var emailField = Page.Locator("input[id='email']");
         var passwordField = Page.Locator("input[id='password']");
-        await emailField.FillAsync(_randomEmail);
-        await passwordField.FillAsync(_randomPassword);
+        await emailField.FillAsync(TestUserEmail);
+        await passwordField.FillAsync(TestUserPassword);
 
         // Check if we get redirected when clicking on the login button.
         var loginButton = Page.Locator("button[type='submit']");
-        navigationTask = Page.WaitForNavigationAsync(new PageWaitForNavigationOptions() { Timeout = 200000});
         await loginButton.ClickAsync();
-        await navigationTask;
-
-        // Check if the redirection occurred
-        currentUrl = Page.Url;
-        Assert.That(currentUrl, Is.EqualTo(_appBaseUrl));
+        await WaitForURLAsync(AppBaseUrl);
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");

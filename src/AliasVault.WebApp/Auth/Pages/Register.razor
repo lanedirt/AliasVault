@@ -1,16 +1,15 @@
 @page "/user/register"
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@using System.Text.Json
-@using AliasVault.Shared.Models
-@using AliasVault.WebApp.Auth.Components
-@using AliasVault.WebApp.Auth.Services
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
-
+@using System.Text.Json
+@using AliasVault.Shared.Models
+@using AliasVault.WebApp.Auth.Components
+@using AliasVault.WebApp.Auth.Services
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Create a Free Account
@@ -61,7 +60,7 @@
 
 @code {
     RegisterModel user = new RegisterModel();
-    FullScreenLoadingIndicator loadingIndicator;
+    FullScreenLoadingIndicator loadingIndicator = new();
     List<string> validationErrors = new List<string>();
 
     async Task HandleRegister()
@@ -114,10 +113,10 @@
 
     public class ValidationErrorResponse
     {
-        public string Type { get; set; }
-        public string Title { get; set; }
+        public string Type { get; set; } = null!;
+        public string Title { get; set; } = null!;
         public int Status { get; set; }
-        public IDictionary<string, string[]> Errors { get; set; }
-        public string TraceId { get; set; }
+        public Dictionary<string, string[]> Errors { get; set; } = new();
+        public string TraceId { get; set; } = null!;
     }
 }

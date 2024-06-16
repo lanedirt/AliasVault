@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------
+// <copyright file="SpamOkPasswordGenerator.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace AliasGenerators.Password.Implementations;
 
 using AliasGenerators.Implementations;
@@ -7,10 +13,7 @@ using AliasGenerators.Implementations;
 /// </summary>
 public class SpamOkPasswordGenerator : IPasswordGenerator
 {
-    /// <summary>
-    /// Generates a random password using the SpamOK library with diceware (dictionary) method.
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public string GenerateRandomPassword()
     {
         var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
@@ -23,7 +26,6 @@ public class SpamOkPasswordGenerator : IPasswordGenerator
             .UseNonAmbiguousChars(false)
             .GeneratePassword()
             .ToString();
-
 
         return password;
     }

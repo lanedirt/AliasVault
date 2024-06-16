@@ -1,38 +1,88 @@
+//-----------------------------------------------------------------------
+// <copyright file="Identity.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace AliasGenerators.Identity.Models;
 
+/// <summary>
+/// Identity model.
+/// </summary>
 public class Identity
 {
-    public string Id { get; set; }
+    /// <summary>
+    /// Gets or sets the id.
+    /// </summary>
+    public string Id { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the gender.
+    /// </summary>
     public int Gender { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string NickName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the first name.
+    /// </summary>
+    public string FirstName { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the last name.
+    /// </summary>
+    public string LastName { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the nickname. This is also used as the username.
+    /// </summary>
+    public string NickName { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the birth date.
+    /// </summary>
     public DateTime BirthDate { get; set; }
-    public Address Address { get; set; }
-    public Job Job { get; set; }
-    public List<string> Hobbies { get; set; }
-    public string EmailPrefix { get; set; }
-    public string Password { get; set; }
-    public string PhoneMobile { get; set; }
-    public string BankAccountIBAN { get; set; }
-    public string ProfilePhotoBase64 { get; set; }
-    public string ProfilePhotoPrompt { get; set; }
-}
 
-public class Address
-{
-    public string Street { get; set; }
-    public string City { get; set; }
-    public string State { get; set; }
-    public string ZipCode { get; set; }
-    public string Country { get; set; }
-}
+    /// <summary>
+    /// Gets or sets the address.
+    /// </summary>
+    public Address Address { get; set; } = null!;
 
-public class Job
-{
-    public string Title { get; set; }
-    public string Company { get; set; }
-    public string Salary { get; set; }
-    public decimal SalaryCalculated { get; set; }
-    public string Description { get; set; }
+    /// <summary>
+    /// Gets or sets the job.
+    /// </summary>
+    public Job Job { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the hobbies.
+    /// </summary>
+    public List<string> Hobbies { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the email address prefix.
+    /// </summary>
+    public string EmailPrefix { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the password.
+    /// </summary>
+    public string Password { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the phone mobile.
+    /// </summary>
+    public string PhoneMobile { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the bank account IBAN.
+    /// </summary>
+    public string BankAccountIBAN { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the profile photo in base64 format.
+    /// </summary>
+    public string ProfilePhotoBase64 { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the profile photo prompt.
+    /// </summary>
+    public string ProfilePhotoPrompt { get; set; } = null!;
 }

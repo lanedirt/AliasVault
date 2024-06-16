@@ -1,14 +1,15 @@
 @page "/user/login"
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@using System.Text.Json
-@using AliasVault.Shared.Models
-@using AliasVault.WebApp.Auth.Components
-@using AliasVault.WebApp.Auth.Services
+
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
+@using System.Text.Json
+@using AliasVault.Shared.Models
+@using AliasVault.WebApp.Auth.Components
+@using AliasVault.WebApp.Auth.Services
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Sign in to AliasVault
@@ -45,7 +46,7 @@
 
 @code {
     LoginModel user = new LoginModel();
-    FullScreenLoadingIndicator loadingIndicator;
+    FullScreenLoadingIndicator loadingIndicator = new();
 
     protected override async Task OnInitializedAsync()
     {
