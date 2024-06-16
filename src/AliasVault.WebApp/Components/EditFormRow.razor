@@ -8,9 +8,23 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; } = "Value";
-    [Parameter] public string Value { get; set; } = string.Empty;
-    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    /// <summary>
+    /// Label for the input field.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Value";
+
+    /// <summary>
+    /// Value of the input field.
+    /// </summary>
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Callback that is triggered when the value changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
 
     private string _inputId = Guid.NewGuid().ToString();
 
