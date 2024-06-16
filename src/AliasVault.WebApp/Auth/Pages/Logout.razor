@@ -7,6 +7,7 @@
 @inject AuthService AuthService
 
 @code {
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -16,5 +17,4 @@
         // Redirect to home page
         NavigationManager.NavigateTo("/");
     }
-
 }

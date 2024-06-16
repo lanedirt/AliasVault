@@ -3,7 +3,6 @@
 @layout Auth.Layout.MainLayout
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
-@inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
 @using System.Text.Json
@@ -59,9 +58,9 @@
 <FullScreenLoadingIndicator @ref="loadingIndicator" />
 
 @code {
-    RegisterModel user = new RegisterModel();
+    RegisterModel user = new();
     FullScreenLoadingIndicator loadingIndicator = new();
-    List<string> validationErrors = new List<string>();
+    List<string> validationErrors = [];
 
     async Task HandleRegister()
     {

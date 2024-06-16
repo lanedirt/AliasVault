@@ -10,8 +10,11 @@
 </div>
 
 @code {
+    /// <summary>
+    /// Gets or sets the alias object to show.
+    /// </summary>
     [Parameter]
-    public AliasVault.Shared.Models.WebApi.AliasListEntry Obj { get; set; } = new();
+    public AliasVault.Shared.Models.WebApi.AliasListEntry Obj { get; set; } = null!;
 
     private void ShowDetails()
     {

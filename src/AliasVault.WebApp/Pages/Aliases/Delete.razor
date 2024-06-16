@@ -32,7 +32,7 @@ else
         </div>
         <div class="mb-4">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Service name</label>
-            <div>@obj?.Service.Name</div>
+            <div>@Obj?.Service.Name</div>
         </div>
         <button @onclick="DeleteConfirm" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-900">
             Yes, I'm sure
@@ -44,13 +44,17 @@ else
     </div>
 }
 
-
 @code {
+    /// <summary>
+    /// Gets or sets the alias ID.
+    /// </summary>
     [Parameter]
     public Guid Id { get; set; }
-    private bool IsLoading { get; set; } = true;
-    private Alias? obj;
 
+    private bool IsLoading { get; set; } = true;
+    private Alias? Obj { get; set; }
+
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -58,30 +62,34 @@ else
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete alias" });
     }
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Load existing obj, retrieve from service
-            obj = await AliasService.LoadAliasAsync(Id);
+            // Load existing Obj, retrieve from service
+            Obj = await AliasService.LoadAliasAsync(Id);
 
             // Hide loading spinner
             IsLoading = false;
+
             // Force re-render invoke so the charts can be rendered
             StateHasChanged();
-
         }
     }
 
     private async void DeleteConfirm()
     {
-        if (obj != null)
+        if (Obj is null)
         {
-            await AliasService.DeleteAliasAsync(Id);
-            NavigationManager.NavigateTo("/");
+            return;
         }
+
+        await AliasService.DeleteAliasAsync(Id);
+        NavigationManager.NavigateTo("/");
     }
-    void Cancel()
+
+    private void Cancel()
     {
         NavigationManager.NavigateTo("/alias/" + Id);
     }

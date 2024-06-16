@@ -20,7 +20,7 @@
         <Rule Id="SA1303" Action="Error" /> <!-- Const field names must begin with upper case letter -->
         <Rule Id="SA1309" Action="None" /> <!-- Field names must not begin with underscore -->
         <Rule Id="SA1500" Action="Error" /> <!-- Curly brackets for multi line statements must not share line -->
-        <Rule Id="SA1503" Action="None" /> <!-- Curly brackets must not be omitted -->
+        <Rule Id="SA1503" Action="Error" /> <!-- Curly brackets must not be omitted -->
         <Rule Id="SA1507" Action="Error" /> <!-- Code must not contain multiple blank lines in a row -->
         <Rule Id="SA1508" Action="Error" /> <!-- Closing curly brackets must not be preceded by blank line -->
         <Rule Id="SA1509" Action="Error" /> <!-- Opening curly brackets must not be precededed by blank line -->
