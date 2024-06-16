@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Text.Json.Serialization;
-
 namespace AliasVault.Shared.Models;
+
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Token model.

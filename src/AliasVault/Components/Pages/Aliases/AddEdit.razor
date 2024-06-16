@@ -269,7 +269,7 @@ else
         // Try to extract favicon from service URL
         if (obj.Service.Url != null  && !obj.Service.Url.IsNullOrEmpty())
         {
-            obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
+            obj.Service.Logo = await FaviconExtractor.FaviconExtractor.GetFaviconAsync(obj.Service.Url);
         }
 
         if (EditMode)

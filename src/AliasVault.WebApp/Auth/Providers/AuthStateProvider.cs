@@ -5,12 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasVault.WebApp.Auth.Services;
-
 namespace AliasVault.WebApp.Auth.Providers;
 
 using System.Security.Claims;
 using System.Text.Json;
+using AliasVault.WebApp.Auth.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 
 /// <summary>
