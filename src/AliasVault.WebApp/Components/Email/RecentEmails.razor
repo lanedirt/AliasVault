@@ -58,10 +58,8 @@ else
 @code {
     [Parameter]
     public string EmailPrefix { get; set; } = string.Empty;
-
     [Parameter]
     public List<MailboxEmailApiModel> MailboxEmails { get; set; } = new List<MailboxEmailApiModel>();
-
     public bool IsLoading { get; set; } = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -90,5 +88,4 @@ else
         IsLoading = false;
         StateHasChanged();
     }
-
 }
