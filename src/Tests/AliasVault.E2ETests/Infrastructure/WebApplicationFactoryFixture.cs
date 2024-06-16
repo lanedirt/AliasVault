@@ -1,3 +1,12 @@
+//-----------------------------------------------------------------------
+// <copyright file="WebApplicationFactoryFixture.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.E2ETests.Infrastructure;
+
 using System.Data.Common;
 using AliasDb;
 using Microsoft.AspNetCore.Hosting;
@@ -7,32 +16,52 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace AliasVault.E2ETests;
-
+/// <summary>
+/// Web application factory fixture for integration tests.
+/// </summary>
+/// <typeparam name="TEntryPoint">The entry point.</typeparam>
 public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>
     where TEntryPoint : class
 {
-    public string HostUrl { get; set; } = "https://localhost:5001"; // we can use any free port
+    /// <summary>
+    /// Gets or sets the URL the web application host will listen on.
+    /// </summary>
+    public string HostUrl { get; set; } = "https://localhost:5001";
 
+    /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseUrls(HostUrl);
 
         builder.ConfigureServices((context, services) =>
         {
+            // Remove the existing AliasDbContext registration.
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
                      typeof(DbContextOptions<AliasDbContext>));
 
+            if (dbContextDescriptor is null)
+            {
+                throw new InvalidOperationException(
+                    "No DbContextOptions<AliasDbContext> registered.");
+            }
+
             services.Remove(dbContextDescriptor);
 
+            // Remove the existing DbConnection registration.
             var dbConnectionDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
                      typeof(DbConnection));
 
+            if (dbConnectionDescriptor is null)
+            {
+                throw new InvalidOperationException(
+                    "No DbContextOptions<AliasDbContext> registered.");
+            }
+
             services.Remove(dbConnectionDescriptor);
 
-            // Create open SqliteConnection so EF won't automatically close it.
+            // Create a new DbConnection and AliasDbContext with an in-memory database.
             services.AddSingleton<DbConnection>(container =>
             {
                 var connection = new SqliteConnection("DataSource=:memory:");
@@ -49,6 +78,7 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
         });
     }
 
+    /// <inheritdoc />
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var dummyHost = builder.Build();

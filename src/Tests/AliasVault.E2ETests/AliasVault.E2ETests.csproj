@@ -16,14 +16,7 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Release\net8.0\AliasVault.E2ETests.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
