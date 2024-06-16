@@ -5,12 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Microsoft.Extensions.Configuration;
-
 namespace AliasDb;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 /// <summary>
 /// The AliasDbContext class.

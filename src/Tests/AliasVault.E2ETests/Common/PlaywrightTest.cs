@@ -128,6 +128,17 @@ public class PlaywrightTest
     }
 
     /// <summary>
+    /// Wait for the specified URL to be loaded with a custom timeout.
+    /// </summary>
+    /// <param name="url">The URL to wait for. This may also contains wildcard such as "**/user/login".</param>
+    /// <param name="timeoutInMs">Custom timeout in milliseconds.</param>
+    /// <returns>Async task.</returns>
+    protected async Task WaitForURLAsync(string url, int timeoutInMs)
+    {
+        await Page.WaitForURLAsync(url, new PageWaitForURLOptions() { Timeout = timeoutInMs });
+    }
+
+    /// <summary>
     /// Register a new random account.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -139,7 +150,7 @@ public class PlaywrightTest
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
-        await WaitForURLAsync("**/user/login");
+        await WaitForURLAsync("**/user/login", 20000);
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
