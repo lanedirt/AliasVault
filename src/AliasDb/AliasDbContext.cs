@@ -4,6 +4,9 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
+using Microsoft.Extensions.Configuration;
+
 namespace AliasDb;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -117,5 +120,25 @@ public class AliasDbContext : IdentityDbContext
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .IsRequired();
+    }
+
+    /// <summary>
+    /// Sets up the connection string if it is not already configured.
+    /// </summary>
+    /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // If the options are not already configured, use the appsettings.json file.
+        if (!optionsBuilder.IsConfigured)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            optionsBuilder
+                .UseSqlite(configuration.GetConnectionString("AliasDbContext"))
+                .UseLazyLoadingProxies();
+        }
     }
 }
