@@ -56,7 +56,7 @@ public class AliasTests : PlaywrightTest
     public async Task AliasListingCorrect()
     {
         await Page.GotoAsync(AppBaseUrl + "aliases");
-        await Page.WaitForURLAsync("**/aliases", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/aliases");
 
         // Wait for the content to load.
         await Page.WaitForSelectorAsync("text=AliasVault");
@@ -74,7 +74,7 @@ public class AliasTests : PlaywrightTest
     public async Task CreateAlias()
     {
         await Page.GotoAsync(AppBaseUrl + "add-alias");
-        await Page.WaitForURLAsync("**/add-alias", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/add-alias");
 
         // Wait for the content to load.
         await Page.WaitForSelectorAsync("text=AliasVault");
@@ -89,11 +89,7 @@ public class AliasTests : PlaywrightTest
         // Press submit button with text "Create Alias"
         var submitButton = Page.Locator("text=Save Alias").First;
         await submitButton.ClickAsync();
-        await Page.WaitForURLAsync("**/alias/**", new PageWaitForURLOptions() { Timeout = 2000 });
-
-        // Check if the redirection occurred
-        var currentUrl = Page.Url;
-        Assert.That(currentUrl, Does.Contain(AppBaseUrl + "alias/"));
+        await WaitForURLAsync("**/alias/**");
 
         // Wait for the content to load.
         await Page.WaitForSelectorAsync("text=Login credentials");

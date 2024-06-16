@@ -118,6 +118,16 @@ public class PlaywrightTest
     }
 
     /// <summary>
+    /// Wait for the specified URL to be loaded with a default timeout.
+    /// </summary>
+    /// <param name="url">The URL to wait for. This may also contains wildcard such as "**/user/login".</param>
+    /// <returns>Async task.</returns>
+    protected async Task WaitForURLAsync(string url)
+    {
+        await Page.WaitForURLAsync(url, new PageWaitForURLOptions() { Timeout = TestDefaults.DefaultTimeout });
+    }
+
+    /// <summary>
     /// Register a new random account.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -129,12 +139,12 @@ public class PlaywrightTest
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
-        await Page.WaitForURLAsync("**/user/login", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/user/login");
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
         await registerButton.ClickAsync();
-        await Page.WaitForURLAsync("**/user/register", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/user/register");
 
         // Try to login with test credentials.
         var emailField = Page.Locator("input[id='email']");
@@ -153,6 +163,6 @@ public class PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
-        await Page.WaitForURLAsync(AppBaseUrl, new PageWaitForURLOptions() { Timeout = 5000 });
+        await WaitForURLAsync(AppBaseUrl);
     }
 }

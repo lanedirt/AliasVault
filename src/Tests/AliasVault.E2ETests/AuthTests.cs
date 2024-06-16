@@ -46,7 +46,7 @@ public class AuthTests : PlaywrightTest
 
         // Check that we are on the login page after navigating to the base URL.
         // We are expecting to not be authenticated and thus to be redirected to the login page.
-        await Page.WaitForURLAsync("**/user/login", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/user/login");
 
         // Try to login with test credentials.
         var emailField = Page.Locator("input[id='email']");
@@ -57,7 +57,7 @@ public class AuthTests : PlaywrightTest
         // Check if we get redirected when clicking on the login button.
         var loginButton = Page.Locator("button[type='submit']");
         await loginButton.ClickAsync();
-        await Page.WaitForURLAsync(AppBaseUrl, new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync(AppBaseUrl);
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
