@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Commit-msg hook to check commit messages for issue number in format "(#123)"
+
+commit_message=$(cat "$1")
+
+if ! grep -q "(\#[0-9]\+)" <<< "$commit_message"; then
+    echo "Error: Commit message must contain an issue number in the format \"(#123)\""
+    exit 1
+fi
