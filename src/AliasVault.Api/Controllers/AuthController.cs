@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using AliasVault.Shared.Models.WebApi;
+
 namespace AliasVault.Api.Controllers;
 
 using System.IdentityModel.Tokens.Jwt;
@@ -43,7 +45,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             return Ok(tokenModel);
         }
 
-        return Unauthorized();
+        return BadRequest(ServerValidationErrorResponse.Create("Invalid username or password. Please try again.", 400));
     }
 
     /// <summary>
@@ -151,10 +153,9 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             var tokenModel = await GenerateNewTokenForUser(user);
             return Ok(tokenModel);
         }
-        else
-        {
-            return BadRequest(result.Errors);
-        }
+
+        var errors = result.Errors.Select(e => e.Description).ToArray();
+        return BadRequest(ServerValidationErrorResponse.Create(errors, 400));
     }
 
     private string GenerateJwtToken(IdentityUser user)

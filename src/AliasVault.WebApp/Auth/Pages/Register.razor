@@ -14,26 +14,34 @@
     Create a Free Account
 </h2>
 
-<EditForm Model="user" OnSubmit="HandleRegister" class="mt-8 space-y-6">
+<FullScreenLoadingIndicator @ref="_loadingIndicator" />
+<ServerValidationErrors @ref="_serverValidationErrors" />
+
+<EditForm Model="_registerModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
+    <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="user.Email" placeholder="name@company.com" />
+        <InputTextField id="email" @bind-Value="_registerModel.Email" placeholder="name@company.com" />
+        <ValidationMessage For="() => _registerModel.Email"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="user.Password" type="password" placeholder="••••••••" />
+        <InputTextField id="password" @bind-Value="_registerModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => _registerModel.Password"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
-        <InputTextField id="password2" @bind-Value="user.PasswordConfirm" type="password" placeholder="••••••••" />
+        <InputTextField id="password2" @bind-Value="_registerModel.PasswordConfirm" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => _registerModel.PasswordConfirm"/>
     </div>
 
     <div class="flex items-start">
         <div class="flex items-center h-5">
-            <input id="terms" aria-describedby="terms" name="terms" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" required>
+            <InputCheckbox id="terms" @bind-Value="_registerModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
         </div>
         <div class="ml-3 text-sm">
             <label for="terms" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
+            <ValidationMessage For="() => _registerModel.AcceptTerms"/>
         </div>
     </div>
 
@@ -43,79 +51,48 @@
     </div>
 </EditForm>
 
-@if (validationErrors.Any())
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in validationErrors)
-            {
-                <li>@error</li>
-            }
-        </ul>
-    </div>
-}
-
-<FullScreenLoadingIndicator @ref="loadingIndicator" />
-
 @code {
-    RegisterModel user = new();
-    FullScreenLoadingIndicator loadingIndicator = new();
-    List<string> validationErrors = [];
+    private readonly RegisterModel _registerModel = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
 
     async Task HandleRegister()
     {
-        loadingIndicator.Show();
-        validationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
-            var result = await Http.PostAsJsonAsync("api/Auth/register", user);
+            var result = await Http.PostAsJsonAsync("api/Auth/register", _registerModel);
+            var responseContent = await result.Content.ReadAsStringAsync();
 
-            if (result.IsSuccessStatusCode)
+            if (!result.IsSuccessStatusCode)
             {
-                var responseContent = await result.Content.ReadAsStringAsync();
-                var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
+                _serverValidationErrors.ParseResponse(responseContent);
+                StateHasChanged();
+                return;
+            }
 
-                if (tokenObject != null)
-                {
-                    // Store the token as a plain string in local storage
-                    await AuthService.StoreAccessTokenAsync(tokenObject.Token);
-                    await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-                    await AuthStateProvider.GetAuthenticationStateAsync();
-                }
-                else
-                {
-                    // Handle the case where the token is not present in the response
-                    Console.WriteLine("Token not found in the response.");
-                }
+            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
 
-                NavigationManager.NavigateTo("/");
+            if (tokenObject != null)
+            {
+                // Store the token as a plain string in local storage
+                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
+                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
+                await AuthStateProvider.GetAuthenticationStateAsync();
             }
             else
             {
-                var responseContent = await result.Content.ReadAsStringAsync();
-                var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ValidationErrorResponse>(responseContent);
-                if (errorResponse != null && errorResponse.Errors != null)
-                {
-                    foreach (var error in errorResponse.Errors.Values)
-                    {
-                        validationErrors.AddRange(error);
-                    }
-                }
+                // Handle the case where the token is not present in the response
+                Console.WriteLine("Token not found in the response.");
             }
+
+            NavigationManager.NavigateTo("/");
         }
         finally
         {
-            loadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
-    }
-
-    public class ValidationErrorResponse
-    {
-        public string Type { get; set; } = null!;
-        public string Title { get; set; } = null!;
-        public int Status { get; set; }
-        public Dictionary<string, string[]> Errors { get; set; } = new();
-        public string TraceId { get; set; } = null!;
     }
 }

@@ -43,7 +43,7 @@
                 {
                     <div class="z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="userMenuDropdown" data-popper-placement="bottom" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; margin-left: -200px; transform: translate3d(1537.5px, 58px, 0px);">
                         <div class="py-3 px-4">
-                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">@Username</span>
+                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">@_username</span>
                         </div>
                         <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="userMenuDropdownButton">
                             <li>
@@ -101,14 +101,16 @@
 
 @code {
     private bool isMenuOpen = false;
-    public string Username { get; set; } = "";
+    private string _username { get; set; } = "";
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Username = await GetUsernameAsync();
+        _username = await GetUsernameAsync();
     }
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

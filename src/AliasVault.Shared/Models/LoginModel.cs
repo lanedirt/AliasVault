@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.ComponentModel.DataAnnotations;
+
 namespace AliasVault.Shared.Models;
 
 /// <summary>
@@ -15,10 +17,13 @@ public class LoginModel
     /// <summary>
     /// Gets or sets the email.
     /// </summary>
+    [Required]
+    [EmailAddress]
     public string Email { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
+    [Required]
     public string Password { get; set; } = null!;
 }

@@ -48,7 +48,7 @@
     /// <summary>
     /// Refreshes the messages by adding any new messages from the PortalMessageService.
     /// </summary>
-    public void RefreshAddMessages()
+    private void RefreshAddMessages()
     {
         // We retrieve any additional messages from the GlobalNotificationService that we do not yet have.
         var newMessages = GlobalNotificationService.GetMessagesForDisplay();
