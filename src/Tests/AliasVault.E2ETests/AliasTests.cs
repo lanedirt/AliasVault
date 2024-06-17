@@ -86,8 +86,8 @@ public class AliasTests : PlaywrightTest
         await submitButton.ClickAsync();
         await WaitForURLAsync("**/alias/**", "View alias");
 
-        // Check if the alias was correctly updated.
         pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Alias updated"), "Alias update confirmation message not shown.");
         Assert.That(pageContent, Does.Contain(serviceNameAfter), "Alias not updated correctly.");
     }
 

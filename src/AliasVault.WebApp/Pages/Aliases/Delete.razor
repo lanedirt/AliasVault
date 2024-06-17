@@ -1,8 +1,6 @@
 @page "/alias/{id:guid}/delete"
-
-@using AliasVault.Shared.Models.WebApi
-@using AliasVault.WebApp.Services
 @inherits PageBase
+@using AliasVault.Shared.Models.WebApi
 @inject AliasService AliasService
 
 <LayoutPageTitle>Delete alias</LayoutPageTitle>
@@ -82,10 +80,12 @@ else
     {
         if (Obj is null)
         {
+            GlobalNotificationService.AddErrorMessage("Error deleting. Alias not found.", true);
             return;
         }
 
         await AliasService.DeleteAliasAsync(Id);
+        GlobalNotificationService.AddSuccessMessage("Alias successfully deleted.");
         NavigationManager.NavigateTo("/");
     }
 

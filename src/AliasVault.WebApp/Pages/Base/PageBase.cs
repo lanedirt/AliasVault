@@ -8,6 +8,7 @@
 namespace AliasVault.WebApp.Pages.Base;
 
 using AliasVault.WebApp.Components.Models;
+using AliasVault.WebApp.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
@@ -34,6 +35,12 @@ public class PageBase : OwningComponentBase
     public AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the GlobalNotificationService.
+    /// </summary>
+    [Inject]
+    public GlobalNotificationService GlobalNotificationService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the IJSRuntime.
     /// </summary>
     [Inject]
@@ -55,10 +62,6 @@ public class PageBase : OwningComponentBase
 
         // Add base breadcrumbs
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
-
-        // Detect success messages in query string and add them to the SuccessMessages list
-        // TODO: Implement this with example for default add/edit update action...
-        var uri = new Uri(NavigationManager.Uri);
     }
 
     /// <summary>
