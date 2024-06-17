@@ -62,10 +62,6 @@ public class PageBase : OwningComponentBase
 
         // Add base breadcrumbs
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
-
-        // Detect success messages in query string and add them to the SuccessMessages list
-        // TODO: Implement this with example for default add/edit update action...
-        var uri = new Uri(NavigationManager.Uri);
     }
 
     /// <summary>
