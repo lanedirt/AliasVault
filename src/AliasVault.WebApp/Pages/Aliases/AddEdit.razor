@@ -51,10 +51,10 @@ else
                 <h3 class="mb-4 text-xl font-semibold dark:text-white">Service</h3>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Service Name" Value="@(Obj.Service.Name)" ValueChanged="@(val => Obj.Service.Name = val)"></EditFormRow>
+                        <EditFormRow Id="service-name" Label="Service Name" Value="@(Obj.Service.Name)" ValueChanged="@(val => Obj.Service.Name = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Service URL" Value="@(Obj.Service.Url)" ValueChanged="@(val => Obj.Service.Url = val)"></EditFormRow>
+                        <EditFormRow Id="service-url" Label="Service URL" Value="@(Obj.Service.Url)" ValueChanged="@(val => Obj.Service.Url = val)"></EditFormRow>
                     </div>
                 </div>
             </div>
@@ -72,14 +72,14 @@ else
                 </div>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Email" Value="@(Obj.Identity.EmailPrefix)" ValueChanged="@(val => Obj.Identity.EmailPrefix = val)"></EditFormRow>
+                        <EditFormRow Id="email" Label="Email" Value="@(Obj.Identity.EmailPrefix)" ValueChanged="@(val => Obj.Identity.EmailPrefix = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Username" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
+                        <EditFormRow Id="username" Label="Username" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
                         <div class="relative">
-                            <EditFormRow Label="Password" Value="@(Obj.Password.Value)" ValueChanged="@(val => Obj.Password.Value = val)"></EditFormRow>
+                            <EditFormRow Id="password" Label="Password" Value="@(Obj.Password.Value)" ValueChanged="@(val => Obj.Password.Value = val)"></EditFormRow>
                             <button type="submit" class="text-white absolute end-1 bottom-1 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800" @onclick="GenerateRandomPassword">(Re)generate Random Password</button>
                         </div>
                     </div>
@@ -94,43 +94,43 @@ else
             <h3 class="mb-4 text-xl font-semibold dark:text-white">Identity</h3>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="First Name" Value="@(Obj.Identity.FirstName)" ValueChanged="@(val => Obj.Identity.FirstName = val)"></EditFormRow>
+                        <EditFormRow Id="first-name" Label="First Name" Value="@(Obj.Identity.FirstName)" ValueChanged="@(val => Obj.Identity.FirstName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Last Name" Value="@(Obj.Identity.LastName)" ValueChanged="@(val => Obj.Identity.LastName = val)"></EditFormRow>
+                        <EditFormRow Id="last-name" Label="Last Name" Value="@(Obj.Identity.LastName)" ValueChanged="@(val => Obj.Identity.LastName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Gender" Value="@(Obj.Identity.Gender)" ValueChanged="@(val => Obj.Identity.Gender = val)"></EditFormRow>
+                        <EditFormRow Id="gender" Label="Gender" Value="@(Obj.Identity.Gender)" ValueChanged="@(val => Obj.Identity.Gender = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Nick Name" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
+                        <EditFormRow Id="nickname" Label="Nick Name" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Birth Date" Value="@(Obj.Identity.BirthDate)" ValueChanged="@(val => Obj.Identity.BirthDate = val)"></EditFormRow>
+                        <EditFormRow Id="birthdate" Label="Birth Date" Value="@(Obj.Identity.BirthDate)" ValueChanged="@(val => Obj.Identity.BirthDate = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Street" Value="@(Obj.Identity.AddressStreet)" ValueChanged="@(val => Obj.Identity.AddressStreet = val)"></EditFormRow>
+                        <EditFormRow Id="street" Label="Address Street" Value="@(Obj.Identity.AddressStreet)" ValueChanged="@(val => Obj.Identity.AddressStreet = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address City" Value="@(Obj.Identity.AddressCity)" ValueChanged="@(val => Obj.Identity.AddressCity = val)"></EditFormRow>
+                        <EditFormRow Id="city" Label="Address City" Value="@(Obj.Identity.AddressCity)" ValueChanged="@(val => Obj.Identity.AddressCity = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address State" Value="@(Obj.Identity.AddressState)" ValueChanged="@(val => Obj.Identity.AddressState = val)"></EditFormRow>
+                        <EditFormRow Id="state" Label="Address State" Value="@(Obj.Identity.AddressState)" ValueChanged="@(val => Obj.Identity.AddressState = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Zip Code" Value="@(Obj.Identity.AddressZipCode)" ValueChanged="@(val => Obj.Identity.AddressZipCode = val)"></EditFormRow>
+                        <EditFormRow Id="zipcode" Label="Address Zip Code" Value="@(Obj.Identity.AddressZipCode)" ValueChanged="@(val => Obj.Identity.AddressZipCode = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Country" Value="@(Obj.Identity.AddressCountry)" ValueChanged="@(val => Obj.Identity.AddressCountry = val)"></EditFormRow>
+                        <EditFormRow Id="country" Label="Address Country" Value="@(Obj.Identity.AddressCountry)" ValueChanged="@(val => Obj.Identity.AddressCountry = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Hobbies" Value="@(Obj.Identity.Hobbies)" ValueChanged="@(val => Obj.Identity.Hobbies = val)"></EditFormRow>
+                        <EditFormRow Id="hobbies" Label="Hobbies" Value="@(Obj.Identity.Hobbies)" ValueChanged="@(val => Obj.Identity.Hobbies = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Phone Mobile" Value="@(Obj.Identity.PhoneMobile)" ValueChanged="@(val => Obj.Identity.PhoneMobile = val)"></EditFormRow>
+                        <EditFormRow Id="phone-mobile" Label="Phone Mobile" Value="@(Obj.Identity.PhoneMobile)" ValueChanged="@(val => Obj.Identity.PhoneMobile = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Bank Account IBAN" Value="@(Obj.Identity.BankAccountIBAN)" ValueChanged="@(val => Obj.Identity.BankAccountIBAN = val)"></EditFormRow>
+                        <EditFormRow Id="iban" Label="Bank Account IBAN" Value="@(Obj.Identity.BankAccountIBAN)" ValueChanged="@(val => Obj.Identity.BankAccountIBAN = val)"></EditFormRow>
                     </div>
                 </div>
         </div>

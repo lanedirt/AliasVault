@@ -5,8 +5,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Microsoft.Playwright;
-
 namespace AliasVault.E2ETests;
 
 /// <summary>
@@ -17,7 +15,7 @@ namespace AliasVault.E2ETests;
 public class AuthTests : PlaywrightTest
 {
     /// <summary>
-    /// Test if registering a new account works.
+    /// Test if logging out and logging in works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
@@ -25,13 +23,10 @@ public class AuthTests : PlaywrightTest
     {
         // Logout.
         await Page.GotoAsync(AppBaseUrl + "user/logout");
-        await Page.WaitForURLAsync("**/user/logout", new PageWaitForURLOptions() { Timeout = 2000 });
-
-        // Wait for the content to load.
-        await Page.WaitForSelectorAsync("text=AliasVault");
+        await WaitForURLAsync("**/user/logout", "AliasVault");
 
         // Wait and check if we get redirected to /user/login.
-        await Page.WaitForURLAsync("**/user/login", new PageWaitForURLOptions() { Timeout = 2000 });
+        await WaitForURLAsync("**/user/login");
 
         await Login();
     }
@@ -40,7 +35,7 @@ public class AuthTests : PlaywrightTest
     /// Test if logging in works.
     /// </summary>
     /// <returns>Async task.</returns>
-    public async Task Login()
+    private async Task Login()
     {
         await Page.GotoAsync(AppBaseUrl);
 
