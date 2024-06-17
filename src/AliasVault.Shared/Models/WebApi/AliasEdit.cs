@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Service.cs" company="lanedirt">
+// <copyright file="AliasEdit.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,38 +10,38 @@ namespace AliasVault.Shared.Models.WebApi;
 using System.ComponentModel.DataAnnotations;
 
 /// <summary>
-/// Service model.
+/// Alias model.
 /// </summary>
-public class Service
+public class AliasEdit
 {
     /// <summary>
     /// Gets or sets the name of the service.
     /// </summary>
     [Required]
-    public string Name { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the description of the service.
-    /// </summary>
-    public string? Description { get; set; }
+    public string ServiceName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the URL of the service.
     /// </summary>
-    public string? Url { get; set; }
+    public string? ServiceUrl { get; set; }
 
     /// <summary>
-    /// Gets or sets the logo URL of the service.
+    /// Gets or sets the Alias Identity object.
     /// </summary>
-    public string? LogoUrl { get; set; }
+    public Identity Identity { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the creation date and time of the service.
+    /// Gets or sets the Alias Password object.
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public Password Password { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the last updated date and time of the service.
+    /// Gets or sets the Alias CreateDate.
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime CreateDate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Alias LastUpdate.
+    /// </summary>
+    public DateTime LastUpdate { get; set; }
 }

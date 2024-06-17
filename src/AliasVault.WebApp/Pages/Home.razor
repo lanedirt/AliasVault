@@ -36,6 +36,7 @@
     private bool IsLoading { get; set; } = true;
     private List<Shared.Models.WebApi.AliasListEntry> Aliases { get; set; } = new();
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

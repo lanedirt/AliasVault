@@ -1,0 +1,41 @@
+@using AliasVault.Shared.Models.WebApi
+
+@if (_errors.Any())
+{
+    @foreach (var error in _errors)
+    {
+        <AlertMessageError Message="@error" />
+    }
+}
+
+@code {
+    private bool IsVisible { get; set; }
+    private List<string> _errors = [];
+
+    /// <summary>
+    /// Parses the response content and displays the server validation errors.
+    /// </summary>
+    public void ParseResponse(string responseContent)
+    {
+        _errors.Clear();
+        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ServerValidationErrorResponse>(responseContent);
+        if (errorResponse is not null)
+        {
+            foreach (var error in errorResponse.Errors)
+            {
+                _errors.AddRange(error.Value);
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Clears the server validation errors.
+    /// </summary>
+    public void Clear()
+    {
+        _errors.Clear();
+        StateHasChanged();
+    }
+}
