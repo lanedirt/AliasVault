@@ -5,8 +5,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Microsoft.Playwright;
-
 namespace AliasVault.E2ETests;
 
 /// <summary>
@@ -37,7 +35,7 @@ public class AuthTests : PlaywrightTest
     /// Test if logging in works.
     /// </summary>
     /// <returns>Async task.</returns>
-    public async Task Login()
+    private async Task Login()
     {
         await Page.GotoAsync(AppBaseUrl);
 
