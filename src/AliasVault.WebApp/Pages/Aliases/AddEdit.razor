@@ -8,7 +8,6 @@
 @using AliasGenerators.Password.Implementations
 @using AliasVault.Shared.Models.WebApi
 @using AliasVault.WebApp.Services
-@using Password = AliasDb.Password
 
 @if (EditMode)
 {
@@ -52,10 +51,10 @@ else
                 <h3 class="mb-4 text-xl font-semibold dark:text-white">Service</h3>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Service Name" Value="@(obj.Service.Name)" ValueChanged="@(val => obj.Service.Name = val)"></EditFormRow>
+                        <EditFormRow Label="Service Name" Value="@(Obj.Service.Name)" ValueChanged="@(val => Obj.Service.Name = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Service URL" Value="@(obj.Service.Url)" ValueChanged="@(val => obj.Service.Url = val)"></EditFormRow>
+                        <EditFormRow Label="Service URL" Value="@(Obj.Service.Url)" ValueChanged="@(val => Obj.Service.Url = val)"></EditFormRow>
                     </div>
                 </div>
             </div>
@@ -73,14 +72,14 @@ else
                 </div>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Email" Value="@(obj.Identity.EmailPrefix)" ValueChanged="@(val => obj.Identity.EmailPrefix = val)"></EditFormRow>
+                        <EditFormRow Label="Email" Value="@(Obj.Identity.EmailPrefix)" ValueChanged="@(val => Obj.Identity.EmailPrefix = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Username" Value="@(obj.Identity.NickName)" ValueChanged="@(val => obj.Identity.NickName = val)"></EditFormRow>
+                        <EditFormRow Label="Username" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
                         <div class="relative">
-                            <EditFormRow Label="Password" Value="@(obj.Password.Value)" ValueChanged="@(val => obj.Password.Value = val)"></EditFormRow>
+                            <EditFormRow Label="Password" Value="@(Obj.Password.Value)" ValueChanged="@(val => Obj.Password.Value = val)"></EditFormRow>
                             <button type="submit" class="text-white absolute end-1 bottom-1 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800" @onclick="GenerateRandomPassword">(Re)generate Random Password</button>
                         </div>
                     </div>
@@ -95,43 +94,43 @@ else
             <h3 class="mb-4 text-xl font-semibold dark:text-white">Identity</h3>
                 <div class="grid gap-6">
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="First Name" Value="@(obj.Identity.FirstName)" ValueChanged="@(val => obj.Identity.FirstName = val)"></EditFormRow>
+                        <EditFormRow Label="First Name" Value="@(Obj.Identity.FirstName)" ValueChanged="@(val => Obj.Identity.FirstName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Last Name" Value="@(obj.Identity.LastName)" ValueChanged="@(val => obj.Identity.LastName = val)"></EditFormRow>
+                        <EditFormRow Label="Last Name" Value="@(Obj.Identity.LastName)" ValueChanged="@(val => Obj.Identity.LastName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Gender" Value="@(obj.Identity.Gender)" ValueChanged="@(val => obj.Identity.Gender = val)"></EditFormRow>
+                        <EditFormRow Label="Gender" Value="@(Obj.Identity.Gender)" ValueChanged="@(val => Obj.Identity.Gender = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Nick Name" Value="@(obj.Identity.NickName)" ValueChanged="@(val => obj.Identity.NickName = val)"></EditFormRow>
+                        <EditFormRow Label="Nick Name" Value="@(Obj.Identity.NickName)" ValueChanged="@(val => Obj.Identity.NickName = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Birth Date" Value="@(obj.Identity.BirthDate)" ValueChanged="@(val => obj.Identity.BirthDate = val)"></EditFormRow>
+                        <EditFormRow Label="Birth Date" Value="@(Obj.Identity.BirthDate)" ValueChanged="@(val => Obj.Identity.BirthDate = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Street" Value="@(obj.Identity.AddressStreet)" ValueChanged="@(val => obj.Identity.AddressStreet = val)"></EditFormRow>
+                        <EditFormRow Label="Address Street" Value="@(Obj.Identity.AddressStreet)" ValueChanged="@(val => Obj.Identity.AddressStreet = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address City" Value="@(obj.Identity.AddressCity)" ValueChanged="@(val => obj.Identity.AddressCity = val)"></EditFormRow>
+                        <EditFormRow Label="Address City" Value="@(Obj.Identity.AddressCity)" ValueChanged="@(val => Obj.Identity.AddressCity = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address State" Value="@(obj.Identity.AddressState)" ValueChanged="@(val => obj.Identity.AddressState = val)"></EditFormRow>
+                        <EditFormRow Label="Address State" Value="@(Obj.Identity.AddressState)" ValueChanged="@(val => Obj.Identity.AddressState = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Zip Code" Value="@(obj.Identity.AddressZipCode)" ValueChanged="@(val => obj.Identity.AddressZipCode = val)"></EditFormRow>
+                        <EditFormRow Label="Address Zip Code" Value="@(Obj.Identity.AddressZipCode)" ValueChanged="@(val => Obj.Identity.AddressZipCode = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Address Country" Value="@(obj.Identity.AddressCountry)" ValueChanged="@(val => obj.Identity.AddressCountry = val)"></EditFormRow>
+                        <EditFormRow Label="Address Country" Value="@(Obj.Identity.AddressCountry)" ValueChanged="@(val => Obj.Identity.AddressCountry = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Hobbies" Value="@(obj.Identity.Hobbies)" ValueChanged="@(val => obj.Identity.Hobbies = val)"></EditFormRow>
+                        <EditFormRow Label="Hobbies" Value="@(Obj.Identity.Hobbies)" ValueChanged="@(val => Obj.Identity.Hobbies = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Phone Mobile" Value="@(obj.Identity.PhoneMobile)" ValueChanged="@(val => obj.Identity.PhoneMobile = val)"></EditFormRow>
+                        <EditFormRow Label="Phone Mobile" Value="@(Obj.Identity.PhoneMobile)" ValueChanged="@(val => Obj.Identity.PhoneMobile = val)"></EditFormRow>
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <EditFormRow Label="Bank Account IBAN" Value="@(obj.Identity.BankAccountIBAN)" ValueChanged="@(val => obj.Identity.BankAccountIBAN = val)"></EditFormRow>
+                        <EditFormRow Label="Bank Account IBAN" Value="@(Obj.Identity.BankAccountIBAN)" ValueChanged="@(val => Obj.Identity.BankAccountIBAN = val)"></EditFormRow>
                     </div>
                 </div>
         </div>
@@ -147,16 +146,19 @@ else
 }
 
 @code {
+    /// <summary>
+    /// Gets or sets the alias ID.
+    /// </summary>
     [Parameter]
     public Guid? Id { get; set; }
 
-    private bool EditMode = false;
-    private bool Loading = true;
-    private Alias obj = new Alias();
-
+    private bool EditMode { get; set; }
+    private bool Loading { get; set; } = true;
+    private Alias Obj { get; set; } = new();
     private bool IsIdentityLoading { get; set; }
     private bool IsSaving { get; set; }
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         if (Id.HasValue)
@@ -171,6 +173,7 @@ else
         }
     }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -185,6 +188,7 @@ else
         }
     }
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -197,7 +201,7 @@ else
                     return;
                 }
 
-                // Load existing obj, retrieve from service
+                // Load existing Obj, retrieve from service
                 var alias = await AliasService.LoadAliasAsync(Id.Value);
                 if (alias is null)
                 {
@@ -205,22 +209,21 @@ else
                     return;
                 }
 
-                alias = obj;
+                Obj = alias;
             }
             else
             {
-                // Create new obj
-                obj = new Alias();
-                obj.Identity = new Shared.Models.WebApi.Identity();
-                obj.Service = new Shared.Models.WebApi.Service();
-                obj.Password = new Shared.Models.WebApi.Password();
+                // Create new Obj
+                Obj = new Alias();
+                Obj.Identity = new Shared.Models.WebApi.Identity();
+                Obj.Service = new Shared.Models.WebApi.Service();
+                Obj.Password = new Shared.Models.WebApi.Password();
             }
 
             // Hide loading spinner
             Loading = false;
             // Force re-render invoke so the charts can be rendered
             StateHasChanged();
-
         }
     }
 
@@ -233,20 +236,20 @@ else
         var identity = await AliasService.GenerateRandomIdentityAsync();
 
         // Generate random values for the Identity properties
-        obj.Identity.FirstName = identity.FirstName;
-        obj.Identity.LastName = identity.LastName;
-        obj.Identity.NickName = identity.NickName;
-        obj.Identity.Gender = identity.Gender == 1 ? "Male" : "Female";
-        obj.Identity.BirthDate = DateTime.Now.AddYears(-30).ToString("yyyy-MM-dd");
-        obj.Identity.AddressStreet = identity.Address.Street;
-        obj.Identity.AddressCity = identity.Address.City;
-        obj.Identity.AddressState = identity.Address.State;
-        obj.Identity.AddressZipCode = identity.Address.ZipCode;
-        obj.Identity.AddressCountry = identity.Address.Country;
-        obj.Identity.Hobbies = identity.Hobbies.First();
-        obj.Identity.EmailPrefix = identity.EmailPrefix;
-        obj.Identity.PhoneMobile = identity.PhoneMobile;
-        obj.Identity.BankAccountIBAN = identity.BankAccountIBAN;
+        Obj.Identity.FirstName = identity.FirstName;
+        Obj.Identity.LastName = identity.LastName;
+        Obj.Identity.NickName = identity.NickName;
+        Obj.Identity.Gender = identity.Gender == 1 ? "Male" : "Female";
+        Obj.Identity.BirthDate = DateTime.Now.AddYears(-30).ToString("yyyy-MM-dd");
+        Obj.Identity.AddressStreet = identity.Address.Street;
+        Obj.Identity.AddressCity = identity.Address.City;
+        Obj.Identity.AddressState = identity.Address.State;
+        Obj.Identity.AddressZipCode = identity.Address.ZipCode;
+        Obj.Identity.AddressCountry = identity.Address.Country;
+        Obj.Identity.Hobbies = identity.Hobbies.First();
+        Obj.Identity.EmailPrefix = identity.EmailPrefix;
+        Obj.Identity.PhoneMobile = identity.PhoneMobile;
+        Obj.Identity.BankAccountIBAN = identity.BankAccountIBAN;
 
         // Generate password
         GenerateRandomPassword();
@@ -259,7 +262,7 @@ else
     {
         // Generate a random password using a IPasswordGenerator implementation.
         IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
-        obj.Password.Value = passwordGenerator.GenerateRandomPassword();
+        Obj.Password.Value = passwordGenerator.GenerateRandomPassword();
     }
 
     private async Task SaveAlias()
@@ -269,22 +272,22 @@ else
 
         // Try to extract favicon from service URL
         // TODO: Fix favicon extraction
-        /*if (obj.Service.Url != null  && !string.IsNullOrEmpty(obj.Service.Url))
+        /*if (Obj.Service.Url != null  && !string.IsNullOrEmpty(Obj.Service.Url))
             {
-            obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(obj.Service.Url);
+            Obj.Service.Logo = await FaviconExtractor.FaviconService.GetFaviconAsync(Obj.Service.Url);
         } */
 
         // Sanity check for unittest. Delete later if not needed.
         // Try to parse birthdate as datetime. if it fails, set it to empty.
-        if (obj.Identity.BirthDate != null)
+        if (Obj.Identity.BirthDate != null)
         {
             try
             {
-                DateTime.Parse(obj.Identity.BirthDate);
+                DateTime.Parse(Obj.Identity.BirthDate);
             }
             catch (Exception)
             {
-                obj.Identity.BirthDate = "1900-01-01";
+                Obj.Identity.BirthDate = "1900-01-01";
             }
         }
 
@@ -292,12 +295,12 @@ else
         {
             if (Id is not null)
             {
-                await AliasService.UpdateAliasAsync(obj, Id.Value);
+                await AliasService.UpdateAliasAsync(Obj, Id.Value);
             }
         }
         else
         {
-            Id = await AliasService.InsertAliasAsync(obj);
+            Id = await AliasService.InsertAliasAsync(Obj);
         }
 
         IsSaving = false;
@@ -310,7 +313,5 @@ else
         }
 
         Navigation.NavigateTo("/alias/" + Id);
-
-
     }
 }

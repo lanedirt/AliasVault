@@ -11,12 +11,18 @@
 @code {
     private bool IsVisible { get; set; }
 
+    /// <summary>
+    /// Shows the loading indicator.
+    /// </summary>
     public void Show()
     {
         IsVisible = true;
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Hides the loading indicator.
+    /// </summary>
     public void Hide()
     {
         IsVisible = false;

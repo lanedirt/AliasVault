@@ -15,14 +15,14 @@
     Sign in to AliasVault
 </h2>
 
-<EditForm Model="user" OnSubmit="HandleLogin" class="mt-8 space-y-6">
+<EditForm Model="_user" OnSubmit="HandleLogin" class="mt-8 space-y-6">
     <div>
         <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="user.Email" placeholder="name@company.com" />
+        <InputTextField id="email" @bind-Value="_user.Email" placeholder="name@company.com" />
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="user.Password" type="password" placeholder="••••••••" />
+        <InputTextField id="password" @bind-Value="_user.Password" type="password" placeholder="••••••••" />
     </div>
 
     <div class="flex items-start">
@@ -42,12 +42,13 @@
 </EditForm>
 
 
-<FullScreenLoadingIndicator @ref="loadingIndicator" />
+<FullScreenLoadingIndicator @ref="_loadingIndicator" />
 
 @code {
-    LoginModel user = new LoginModel();
-    FullScreenLoadingIndicator loadingIndicator = new();
+    private LoginModel _user = new LoginModel();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await AuthStateProvider.GetAuthenticationStateAsync();
@@ -58,13 +59,13 @@
         }
     }
 
-    async Task HandleLogin()
+    private async Task HandleLogin()
     {
-        loadingIndicator.Show();
+        _loadingIndicator.Show();
 
         try
         {
-            var result = await Http.PostAsJsonAsync("api/Auth/login", user);
+            var result = await Http.PostAsJsonAsync("api/Auth/login", _user);
             var responseContent = await result.Content.ReadAsStringAsync();
             var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
 
@@ -90,7 +91,7 @@
         }
         finally
         {
-            loadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 }
