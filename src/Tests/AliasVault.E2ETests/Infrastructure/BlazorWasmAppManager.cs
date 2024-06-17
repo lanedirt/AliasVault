@@ -113,7 +113,6 @@ public class BlazorWasmAppManager
                 }
 
                 Console.WriteLine(e.Message);
-                await Task.Delay(500);
             }
         }
     }

@@ -17,49 +17,14 @@ public class AliasTests : PlaywrightTest
     private static readonly Random Random = new();
 
     /// <summary>
-    /// Helper method to fill all input fields on a page with random data.
-    /// </summary>
-    /// <param name="page">IPage instance where to fill the input fields for.</param>
-    /// <returns>Async task.</returns>
-    public static async Task FillAllInputFields(IPage page)
-    {
-        // Locate all input fields
-        var inputFields = page.Locator("input");
-
-        // Get the count of input fields
-        var count = await inputFields.CountAsync();
-
-        // Iterate through each input field and fill with random data
-        for (int i = 0; i < count; i++)
-        {
-            var input = inputFields.Nth(i);
-            var inputType = await input.GetAttributeAsync("type");
-
-            // Generate appropriate random data based on input type
-            string randomData = inputType switch
-            {
-                "email" => GenerateRandomEmail(),
-                "number" => GenerateRandomNumber(),
-                "password" => GenerateRandomPassword(),
-                _ => GenerateRandomString(), // Default for all other types
-            };
-
-            await input.FillAsync(randomData);
-        }
-    }
-
-    /// <summary>
     /// Test if the alias listing index page works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task AliasListingCorrect()
+    public async Task AliasListingTest()
     {
         await Page.GotoAsync(AppBaseUrl + "aliases");
-        await WaitForURLAsync("**/aliases");
-
-        // Wait for the content to load.
-        await Page.WaitForSelectorAsync("text=AliasVault");
+        await WaitForURLAsync("**/aliases", "AliasVault");
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
@@ -71,34 +36,115 @@ public class AliasTests : PlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task CreateAlias()
+    public async Task CreateAliasTest()
     {
-        await Page.GotoAsync(AppBaseUrl + "add-alias");
-        await WaitForURLAsync("**/add-alias");
+        // Create a new alias with service name = "Test Service".
+        var serviceName = "Test Service";
+        await CreateAlias(new Dictionary<string, string>
+        {
+            { "service-name", serviceName },
+        });
 
-        // Wait for the content to load.
-        await Page.WaitForSelectorAsync("text=AliasVault");
+        // Check that the service name is present in the content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(serviceName), "Created alias service name does not appear on alias page.");
+    }
 
-        // Check if a button with text "Generate Random Identity" appears
-        var generateButton = Page.Locator("text=Generate Random Identity");
-        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
+    /// <summary>
+    /// Test if editing a created alias works.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task EditAliasTest()
+    {
+        // Create a new alias with service name = "Alias service before".
+        var serviceNameBefore = "Alias service before";
+        await CreateAlias(new Dictionary<string, string>
+        {
+            { "service-name", serviceNameBefore },
+        });
 
-        // Fill all input fields with random data
-        await FillAllInputFields(Page);
+        // Check that the service name is present in the content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created alias service name does not appear on alias page.");
 
-        // Press submit button with text "Create Alias"
+        // Click the edit button.
+        var editButton = Page.Locator("text=Edit alias").First;
+        await editButton.ClickAsync();
+        await WaitForURLAsync("**/edit", "Save Alias");
+
+        // Replace the service name with "Alias service after".
+        var serviceNameAfter = "Alias service after";
+        await FillInputFields(
+            page: Page,
+            fieldValues: new Dictionary<string, string>
+            {
+                { "service-name", serviceNameAfter },
+            });
+
         var submitButton = Page.Locator("text=Save Alias").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/alias/**");
+        await WaitForURLAsync("**/alias/**", "View alias");
 
-        // Wait for the content to load.
-        await Page.WaitForSelectorAsync("text=Login credentials");
+        // Check if the alias was correctly updated.
+        pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(serviceNameAfter), "Alias not updated correctly.");
+    }
 
-        // Check if the alias was created
-        var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Login credentials"), "Alias not created.");
+    /// <summary>
+    /// Helper method to fill specified input fields on a page with given values.
+    /// </summary>
+    /// <param name="page">IPage instance where to fill the input fields for.</param>
+    /// <param name="fieldValues">Dictionary with html element ids and values to input as field value.</param>
+    /// <returns>Async task.</returns>
+    private static async Task FillInputFields(IPage page, Dictionary<string, string>? fieldValues = null)
+    {
+        var inputFields = page.Locator("input");
+        var count = await inputFields.CountAsync();
+        for (int i = 0; i < count; i++)
+        {
+            var input = inputFields.Nth(i);
+            var inputId = await input.GetAttributeAsync("id");
 
-        // TODO: Implement proper data input and verification if what was created is correct.
+            // If fieldValues dictionary is provided and the inputId is found in it, fill the input with the value.
+            if (inputId is not null && fieldValues is not null && fieldValues.TryGetValue(inputId, out var fieldValue))
+            {
+                await input.FillAsync(fieldValue);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Helper method to fill all empty input fields on a page with random data if not provided.
+    /// </summary>
+    /// <param name="page">IPage instance where to fill the input fields for.</param>
+    /// <returns>Async task.</returns>
+    private static async Task FillEmptyInputFieldsWithRandom(IPage page)
+    {
+        var inputFields = page.Locator("input");
+        var count = await inputFields.CountAsync();
+        for (int i = 0; i < count; i++)
+        {
+            var input = inputFields.Nth(i);
+            var inputType = await input.GetAttributeAsync("type");
+
+            // If is not empty, skip.
+            if (!string.IsNullOrEmpty(await input.InputValueAsync()))
+            {
+                continue;
+            }
+
+            // Generate appropriate random data based on input type.
+            string randomData = inputType switch
+            {
+                "email" => GenerateRandomEmail(),
+                "number" => GenerateRandomNumber(),
+                "password" => GenerateRandomPassword(),
+                _ => GenerateRandomString(), // Default for all other types.
+            };
+
+            await input.FillAsync(randomData);
+        }
     }
 
     private static string GenerateRandomString(int length = 10)
@@ -123,5 +169,32 @@ public class AliasTests : PlaywrightTest
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[Random.Next(s.Length)]).ToArray());
+    }
+
+    /// <summary>
+    /// Create new alias.
+    /// </summary>
+    /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
+    /// <returns>Async task.</returns>
+    private async Task CreateAlias(Dictionary<string, string>? formValues = null)
+    {
+        await Page.GotoAsync(AppBaseUrl + "add-alias");
+        await WaitForURLAsync("**/add-alias", "Add alias");
+
+        // Check if a button with text "Generate Random Identity" appears
+        var generateButton = Page.Locator("text=Generate Random Identity");
+        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
+
+        // Fill all input fields with specified values and remaining empty fields with random data.
+        await FillInputFields(Page, formValues);
+        await FillEmptyInputFieldsWithRandom(Page);
+
+        var submitButton = Page.Locator("text=Save Alias").First;
+        await submitButton.ClickAsync();
+        await WaitForURLAsync("**/alias/**", "Login credentials");
+
+        // Check if the alias was created
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Login credentials"), "Alias not created.");
     }
 }

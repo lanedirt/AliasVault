@@ -139,6 +139,21 @@ public class PlaywrightTest
     }
 
     /// <summary>
+    /// Wait for the specified URL to be loaded with a custom timeout.
+    /// </summary>
+    /// <param name="url">The URL to wait for. This may also contains wildcard such as "**/user/login".</param>
+    /// <param name="waitForText">Wait until a certain text appears on the page.
+    /// This can be useful for content that is loaded via AJAX after navigation.</param>
+    /// <returns>Async task.</returns>
+    protected async Task WaitForURLAsync(string url, string waitForText)
+    {
+        await Page.WaitForURLAsync(url, new PageWaitForURLOptions() { Timeout = TestDefaults.DefaultTimeout });
+
+        // Wait for actual content to load (web API calls, etc.)
+        await Page.WaitForSelectorAsync("text=" + waitForText, new PageWaitForSelectorOptions() { Timeout = TestDefaults.DefaultTimeout });
+    }
+
+    /// <summary>
     /// Register a new random account.
     /// </summary>
     /// <returns>Async task.</returns>
