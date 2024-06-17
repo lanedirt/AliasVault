@@ -4,21 +4,41 @@ This document is a work-in-progress and will be expanded as time goes on. If you
 Note: all instructions below are based on MacOS. If you are using a different operating system, you may need to adjust the commands accordingly.
 
 ## Getting Started
-In order to contribute to this project, you will need to have the following tools installed on your machine:
+In order to contribute to this project follow these instructions to setup your local environment:
 
-- Make sure to install the latest version of .NET SDK 8:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/lanedirt/AliasVault.git
+cd AliasVault
+```
+
+### 2. Copy pre-commit hook script to .git/hooks directory
+**Important**: All commits in this repo are required to contain a reference to a GitHub issue in the format of "your commit message (#123)" where "123" references the GitHub issue number.
+
+The pre-commit hook script below will check the commit message before allowing the commit to proceed. If the commit message is invalid, the commit will be aborted.
+
+```bash
+# Copy the commit-msg hook script to the .git/hooks directory
+cp .github/hooks/commit-msg .git/hooks/commit-msg
+
+# Make the script executable
+chmod +x .git/hooks/commit-msg
+```
+
+### 3. Install the latest version of .NET SDK 8
 
 ```bash
 # Install .NET SDK 8
 
-# On MacOS via brew: 
+# On MacOS via brew:
 brew install --cask dotnet-sdk
 
 # On Windows via winget
 winget install Microsoft.DotNet.SDK.8
 ```
 
-- Dotnet CLI EF Tools
+### 4. Install dotnet CLI EF Tools
 
 ```bash
 # Install dotnet EF tools globally
@@ -31,13 +51,13 @@ export PATH="$PATH:$HOME/.dotnet/tools"
 dotnet ef
 ```
 
-- Run Tailwind CSS compiler while changing HTML files
+### 5. Run Tailwind CSS compiler while changing HTML files to update compiled CSS
 
 ```bash
 npm run build:css
 ```
 
-- Install Playwright locally in order to run NUnit E2E (end-to-end) tests
+### 6. Install Playwright in order to locally run NUnit E2E (end-to-end) tests
 
 ```bash
 # First install PowerShell for Mac (if you don't have it already)
