@@ -16,7 +16,6 @@ else
     <div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
         <div class="mb-4 col-span-full xl:mb-2">
             <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-            <GlobalNotificationDisplay />
 
             <div class="flex items-center justify-between">
                 <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View alias</h1>
@@ -147,6 +146,15 @@ else
 
         // Load the aliases from the webapi via AliasService.
         Alias = await AliasService.LoadAliasAsync(Id);
+
+        if (Alias is null)
+        {
+            // Error loading alias.
+            GlobalNotificationService.AddErrorMessage("This alias does not exist (anymore). Please try again.");
+            NavigationManager.NavigateTo("/", false, true);
+            return;
+        }
+
         AliasEmail = Alias?.Identity.EmailPrefix + "@landmail.nl";
 
         IsLoading = false;

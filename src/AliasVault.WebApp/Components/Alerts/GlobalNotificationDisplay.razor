@@ -17,7 +17,7 @@
 }
 
 @code {
-    private Dictionary<string, string> Messages { get; set; } = new();
+    private List<KeyValuePair<string, string>> Messages { get; set; } = new();
     private bool _onChangeSubscribed = false;
 
     /// <inheritdoc />
@@ -54,17 +54,17 @@
         var newMessages = GlobalNotificationService.GetMessagesForDisplay();
         foreach (var message in newMessages)
         {
-            if (!Messages.ContainsValue(message.Value))
+            if (!Messages.Any(m => m.Key == message.Key && m.Value == message.Value))
             {
-                Messages.Add(message.Key, message.Value);
+                Messages.Add(message);
             }
         }
 
         // Remove messages that are no longer in the GlobalNotificationService and have already been displayed.
-        var keysToRemove = Messages.Keys.Except(newMessages.Keys).ToList();
-        foreach (var key in keysToRemove)
+        var messagesToRemove = Messages.Where(m => !newMessages.Any(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
+        foreach (var message in messagesToRemove)
         {
-            Messages.Remove(key);
+            Messages.Remove(message);
         }
 
         StateHasChanged();

@@ -80,10 +80,12 @@ else
     {
         if (Obj is null)
         {
+            GlobalNotificationService.AddErrorMessage("Error deleting. Alias not found.", true);
             return;
         }
 
         await AliasService.DeleteAliasAsync(Id);
+        GlobalNotificationService.AddSuccessMessage("Alias successfully deleted.");
         NavigationManager.NavigateTo("/");
     }
 

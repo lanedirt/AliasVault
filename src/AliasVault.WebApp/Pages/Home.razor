@@ -54,8 +54,7 @@
         if (aliasListEntries is null)
         {
             // Error loading aliases.
-            IsLoading = false;
-            StateHasChanged();
+            GlobalNotificationService.AddErrorMessage("Failed to load aliases.", true);
             return;
         }
 

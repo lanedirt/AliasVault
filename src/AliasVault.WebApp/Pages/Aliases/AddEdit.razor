@@ -195,7 +195,9 @@ else
             {
                 if (Id is null)
                 {
-                    Navigation.NavigateTo("/404");
+                    // Error loading alias.
+                    GlobalNotificationService.AddErrorMessage("This alias does not exist (anymore). Please try again.");
+                    NavigationManager.NavigateTo("/", false, true);
                     return;
                 }
 
@@ -203,7 +205,9 @@ else
                 var alias = await AliasService.LoadAliasAsync(Id.Value);
                 if (alias is null)
                 {
-                    Navigation.NavigateTo("/404");
+                    // Error loading alias.
+                    GlobalNotificationService.AddErrorMessage("This alias does not exist (anymore). Please try again.");
+                    NavigationManager.NavigateTo("/", false, true);
                     return;
                 }
 
@@ -293,23 +297,32 @@ else
         {
             if (Id is not null)
             {
-                await AliasService.UpdateAliasAsync(Obj, Id.Value);
-                GlobalNotificationService.AddSuccessMessage("Alias updated successfully.");
+                Id = await AliasService.UpdateAliasAsync(Obj, Id.Value);
             }
         }
         else
         {
             Id = await AliasService.InsertAliasAsync(Obj);
-            GlobalNotificationService.AddSuccessMessage("Alias created successfully.");
         }
 
         IsSaving = false;
         StateHasChanged();
 
-        if (Id == Guid.Empty)
+        if (Id is null || Id == Guid.Empty)
         {
-            // Error saving, do not navigate.
+            // Error saving.
+            GlobalNotificationService.AddErrorMessage("Error saving alias. Please try again.", true);
             return;
+        }
+
+        // No error, add success message.
+        if (EditMode)
+        {
+            GlobalNotificationService.AddSuccessMessage("Alias updated successfully.");
+        }
+        else
+        {
+            GlobalNotificationService.AddSuccessMessage("Alias created successfully.");
         }
 
         Navigation.NavigateTo("/alias/" + Id);

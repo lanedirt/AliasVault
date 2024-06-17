@@ -97,7 +97,7 @@ public class AliasService(HttpClient httpClient)
         }
         catch
         {
-            return new List<AliasListEntry>();
+            return null;
         }
     }
 
