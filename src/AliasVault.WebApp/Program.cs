@@ -36,6 +36,7 @@ builder.Services.AddTransient<AliasVaultApiHandlerService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<AliasService>();
+builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();

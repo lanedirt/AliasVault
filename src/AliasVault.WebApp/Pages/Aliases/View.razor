@@ -1,9 +1,8 @@
 ﻿@page "/alias/{id:guid}"
+@inherits PageBase
 @using AliasVault.Shared.Models.WebApi
-@using AliasVault.WebApp.Services
 @using AliasVault.WebApp.Components.Email
 @inject AliasService AliasService
-@inherits PageBase
 
 <LayoutPageTitle>View alias</LayoutPageTitle>
 
@@ -13,9 +12,12 @@
 }
 else
 {
+
     <div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
         <div class="mb-4 col-span-full xl:mb-2">
             <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+            <GlobalNotificationDisplay />
+
             <div class="flex items-center justify-between">
                 <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View alias</h1>
                 <div class="flex">
@@ -28,6 +30,7 @@ else
                 </div>
             </div>
         </div>
+
         <!-- Right Content -->
         <div class="col-span-full lg:col-auto">
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">

@@ -1,13 +1,11 @@
 @page "/add-alias"
 @page "/alias/{id:guid}/edit"
-
+@inherits PageBase
 @inject NavigationManager Navigation
 @inject AliasService AliasService
-@inherits PageBase
 @using AliasGenerators.Implementations
 @using AliasGenerators.Password.Implementations
 @using AliasVault.Shared.Models.WebApi
-@using AliasVault.WebApp.Services
 
 @if (EditMode)
 {
@@ -296,11 +294,13 @@ else
             if (Id is not null)
             {
                 await AliasService.UpdateAliasAsync(Obj, Id.Value);
+                GlobalNotificationService.AddSuccessMessage("Alias updated successfully.");
             }
         }
         else
         {
             Id = await AliasService.InsertAliasAsync(Obj);
+            GlobalNotificationService.AddSuccessMessage("Alias created successfully.");
         }
 
         IsSaving = false;

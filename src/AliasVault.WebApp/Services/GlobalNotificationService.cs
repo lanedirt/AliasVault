@@ -1,0 +1,63 @@
+//-----------------------------------------------------------------------
+// <copyright file="GlobalNotificationService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.WebApp.Services;
+
+/// <summary>
+/// Handles global notifications that should be displayed to the user, such as success or error messages. These messages
+/// are stored in this object which is scoped to the current session. This allows the messages to be cached until
+/// they actually have been displayed. So they can survive redirects and page reloads.
+/// </summary>
+public class GlobalNotificationService
+{
+    /// <summary>
+    /// Allow other components to subscribe to changes in the event object.
+    /// </summary>
+    public event Action? OnChange;
+
+    /// <summary>
+    /// Gets or sets success messages that should be displayed to the user. A default set of success messages is added in the parent OnInitialized method.
+    /// </summary>
+    protected List<string> SuccessMessages { get; set; } = new List<string>();
+
+    /// <summary>
+    /// Adds a success message to the list of messages that should be displayed to the user.
+    /// </summary>
+    /// <param name="message">The message to add.</param>
+    /// <param name="notifyStateChanged">Whether to notify state change to subscribers. Defaults to true.</param>
+    public void AddSuccessMessage(string message, bool notifyStateChanged = true)
+    {
+        SuccessMessages.Add(message);
+
+        // Notify subscribers that a message has been added.
+        if (notifyStateChanged)
+        {
+            NotifyStateChanged();
+        }
+    }
+
+    /// <summary>
+    /// Returns a dictionary with messages that should be displayed to the user. After this method is called,
+    /// the messages are automatically cleared.
+    /// </summary>
+    /// <returns>Dictionary with messages that are ready to be displayed on the next page load.</returns>
+    public Dictionary<string, string> GetMessagesForDisplay()
+    {
+        var messages = new Dictionary<string, string>();
+        foreach (var message in SuccessMessages)
+        {
+            messages.Add("success", message);
+        }
+
+        // Clear messages
+        SuccessMessages.Clear();
+
+        return messages;
+    }
+
+    private void NotifyStateChanged() => OnChange?.Invoke();
+}

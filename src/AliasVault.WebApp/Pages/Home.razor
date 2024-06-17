@@ -1,9 +1,8 @@
 ﻿@page "/"
 @page "/aliases"
-@using AliasVault.WebApp.Components.Alias
-@using AliasVault.WebApp.Services
-@inject AliasService AliasService
 @inherits PageBase
+@using AliasVault.WebApp.Components.Alias
+@inject AliasService AliasService
 
 <LayoutPageTitle>Home</LayoutPageTitle>
 
@@ -22,13 +21,13 @@
 
 @if (IsLoading)
 {
-<LoadingIndicator />
+    <LoadingIndicator />
 }
 
 <div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
     @foreach (var alias in Aliases)
     {
-    <Alias Obj="@alias"/>
+        <Alias Obj="@alias"/>
     }
 </div>
 
