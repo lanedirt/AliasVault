@@ -13,6 +13,7 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Release\net8.0\Cryptography.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
