@@ -8,6 +8,7 @@ namespace AliasVault.Api.Controllers;
 
 using AliasGenerators.Identity;
 using AliasGenerators.Identity.Implementations;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 /// Controller for identity generation.
 /// </summary>
 /// <param name="userManager">UserManager instance.</param>
+[ApiVersion("1")]
 public class IdentityController(UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>

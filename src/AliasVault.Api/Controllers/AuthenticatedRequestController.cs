@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 /// Base controller for requests that require authentication.
 /// </summary>
 /// <param name="userManager">UserManager instance.</param>
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [Authorize]
 public class AuthenticatedRequestController(UserManager<IdentityUser> userManager) : ControllerBase

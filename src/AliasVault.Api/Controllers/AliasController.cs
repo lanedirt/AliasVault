@@ -10,6 +10,7 @@ namespace AliasVault.Api.Controllers;
 using System.Globalization;
 using AliasDb;
 using AliasVault.Shared.Models.WebApi;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ using Service = AliasVault.Shared.Models.WebApi.Service;
 /// </summary>
 /// <param name="context">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
+[ApiVersion("1")]
 public class AliasController(AliasDbContext context, UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
