@@ -45,5 +45,5 @@ jobs:
               run: |
                   .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="src\Tests\AliasVault.UnitTests\coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
                   dotnet build
-                  dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover
+                  dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover --filter "FullyQualifiedName~!AliasVault.E2ETests"
                   .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
