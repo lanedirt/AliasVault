@@ -12,7 +12,6 @@ using System.Security.Cryptography;
 /// <summary>
 /// Tests for the Cryptography class.
 /// </summary>
-[TestFixture]
 public class CryptographyTests
 {
     /// <summary>
