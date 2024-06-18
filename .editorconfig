@@ -11,7 +11,6 @@ insert_final_newline = true
 # C# files
 [*.cs]
 csharp_indent_labels = one_less_than_current
-csharp_using_directive_placement = outside_namespace:silent
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_prefer_braces = true:silent
 csharp_style_namespace_declarations = block_scoped:silent
@@ -28,7 +27,6 @@ csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
 dotnet_diagnostic.SA1011.severity = none
 dotnet_diagnostic.SA1101.severity = none
-dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1309.severity = none
 dotnet_diagnostic.SA1310.severity = warning
 dotnet_diagnostic.SX1309.severity = none

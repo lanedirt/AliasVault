@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.DataAnnotations;
-
 namespace AliasVault.Shared.Models;
+
+using System.ComponentModel.DataAnnotations;
 
 /// <summary>
 /// Login model.

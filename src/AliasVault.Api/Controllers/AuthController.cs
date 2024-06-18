@@ -3,9 +3,7 @@
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
-//-----------------------------------------------------------------------
-
-using AliasVault.Shared.Models.WebApi;
+//-----------------------------------------------------------------------s
 
 namespace AliasVault.Api.Controllers;
 
@@ -15,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AliasDb;
 using AliasVault.Shared.Models;
+using AliasVault.Shared.Models.WebApi;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
