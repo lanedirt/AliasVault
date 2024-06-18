@@ -16,23 +16,15 @@ using Blazored.LocalStorage;
 /// This service is responsible for handling authentication-related operations such as refreshing tokens,
 /// storing tokens, and revoking tokens.
 /// </summary>
-public class AuthService
+/// <remarks>
+/// Initializes a new instance of the <see cref="AuthService"/> class.
+/// </remarks>
+/// <param name="httpClient">The HTTP client.</param>
+/// <param name="localStorage">The local storage service.</param>
+public class AuthService(HttpClient httpClient, ILocalStorageService localStorage)
 {
     private const string AccessTokenKey = "token";
     private const string RefreshTokenKey = "refreshToken";
-    private readonly HttpClient _httpClient;
-    private readonly ILocalStorageService _localStorage;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AuthService"/> class.
-    /// </summary>
-    /// <param name="httpClient">The HTTP client.</param>
-    /// <param name="localStorage">The local storage service.</param>
-    public AuthService(HttpClient httpClient, ILocalStorageService localStorage)
-    {
-        _httpClient = httpClient;
-        _localStorage = localStorage;
-    }
 
     /// <summary>
     /// Refreshes the access token asynchronously.
@@ -44,14 +36,14 @@ public class AuthService
         var accessToken = await GetAccessTokenAsync();
         var refreshToken = await GetRefreshTokenAsync();
         var tokenInput = new TokenModel { Token = accessToken, RefreshToken = refreshToken };
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/Auth/refresh")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Auth/refresh")
         {
             Content = JsonContent.Create(tokenInput),
         };
 
         // Add the X-Ignore-Failure header to the request so any failure does not trigger another refresh token request.
         request.Headers.Add("X-Ignore-Failure", "true");
-        var response = await _httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -77,7 +69,7 @@ public class AuthService
     /// <returns>The stored access token.</returns>
     public async Task<string> GetAccessTokenAsync()
     {
-        return await _localStorage.GetItemAsStringAsync(AccessTokenKey) ?? string.Empty;
+        return await localStorage.GetItemAsStringAsync(AccessTokenKey) ?? string.Empty;
     }
 
     /// <summary>
@@ -87,7 +79,7 @@ public class AuthService
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StoreAccessTokenAsync(string newToken)
     {
-        await _localStorage.SetItemAsStringAsync(AccessTokenKey, newToken);
+        await localStorage.SetItemAsStringAsync(AccessTokenKey, newToken);
     }
 
     /// <summary>
@@ -96,7 +88,7 @@ public class AuthService
     /// <returns>The stored refresh token.</returns>
     public async Task<string> GetRefreshTokenAsync()
     {
-        return await _localStorage.GetItemAsStringAsync(RefreshTokenKey) ?? string.Empty;
+        return await localStorage.GetItemAsStringAsync(RefreshTokenKey) ?? string.Empty;
     }
 
     /// <summary>
@@ -106,7 +98,7 @@ public class AuthService
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StoreRefreshTokenAsync(string newToken)
     {
-        await _localStorage.SetItemAsStringAsync(RefreshTokenKey, newToken);
+        await localStorage.SetItemAsStringAsync(RefreshTokenKey, newToken);
     }
 
     /// <summary>
@@ -115,8 +107,8 @@ public class AuthService
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task RemoveTokensAsync()
     {
-        await _localStorage.RemoveItemAsync(AccessTokenKey);
-        await _localStorage.RemoveItemAsync(RefreshTokenKey);
+        await localStorage.RemoveItemAsync(AccessTokenKey);
+        await localStorage.RemoveItemAsync(RefreshTokenKey);
 
         // If the remote call fails we catch the exception and ignore it.
         // This is because the user is already logged out and we don't want to trigger another refresh token request.
@@ -142,13 +134,13 @@ public class AuthService
             RefreshToken = await GetRefreshTokenAsync(),
         };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/Auth/revoke")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Auth/revoke")
         {
             Content = JsonContent.Create(tokenInput),
         };
 
         // Add the X-Ignore-Failure header to the request so any failure does not trigger another refresh token request.
         request.Headers.Add("X-Ignore-Failure", "true");
-        await _httpClient.SendAsync(request);
+        await httpClient.SendAsync(request);
     }
 }

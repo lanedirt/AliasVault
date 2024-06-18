@@ -15,6 +15,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AliasDb;
 using AliasVault.Shared.Models;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -26,8 +27,9 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
+[ApiVersion("1")]
 public class AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration) : ControllerBase
 {
     /// <summary>
@@ -175,7 +177,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             issuer: configuration["Jwt:Issuer"] ?? string.Empty,
             audience: configuration["Jwt:Issuer"] ?? string.Empty,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddSeconds(15),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

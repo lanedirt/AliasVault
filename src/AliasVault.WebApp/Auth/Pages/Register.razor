@@ -63,7 +63,7 @@
 
         try
         {
-            var result = await Http.PostAsJsonAsync("api/Auth/register", _registerModel);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", _registerModel);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
