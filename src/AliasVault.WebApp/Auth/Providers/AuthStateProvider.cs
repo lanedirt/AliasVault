@@ -28,7 +28,7 @@ public class AuthStateProvider(AuthService authService) : AuthenticationStatePro
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
-        if (keyValuePairs == null)
+        if (keyValuePairs is null)
         {
             throw new InvalidOperationException("Failed to parse JWT token.");
         }

@@ -25,5 +25,5 @@ public class MailboxApiModel
     /// <summary>
     /// Gets or sets the list of mailbox email API models.
     /// </summary>
-    public List<MailboxEmailApiModel> Mails { get; set; } = new();
+    public List<MailboxEmailApiModel> Mails { get; set; } = [];
 }
