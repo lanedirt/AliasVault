@@ -75,5 +75,5 @@ public class EmailApiModel
     /// <summary>
     /// Gets or sets the list of attachments in the email.
     /// </summary>
-    public List<AttachmentApiModel> Attachments { get; set; } = new();
+    public List<AttachmentApiModel> Attachments { get; set; } = [];
 }

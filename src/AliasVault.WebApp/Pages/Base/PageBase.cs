@@ -49,7 +49,7 @@ public class PageBase : OwningComponentBase
     /// <summary>
     /// Gets or sets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
-    protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = new List<BreadcrumbItem>();
+    protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = [];
 
     /// <summary>
     /// Initializes the component asynchronously.

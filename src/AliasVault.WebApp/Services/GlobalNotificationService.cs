@@ -90,5 +90,14 @@ public class GlobalNotificationService
         return messages;
     }
 
+    /// <summary>
+    /// Clear all messages.
+    /// </summary>
+    public void ClearMessages()
+    {
+        SuccessMessages.Clear();
+        ErrorMessages.Clear();
+    }
+
     private void NotifyStateChanged() => OnChange?.Invoke();
 }

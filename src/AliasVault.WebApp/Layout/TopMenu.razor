@@ -1,4 +1,5 @@
 ﻿@inherits PageBase
+@implements IDisposable
 
 <header>
     <nav class="fixed z-30 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4">
@@ -41,7 +42,7 @@
 
                 @if (isMenuOpen)
                 {
-                    <div class="z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="userMenuDropdown" data-popper-placement="bottom" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; margin-left: -200px; transform: translate3d(1537.5px, 58px, 0px);">
+                    <div class="absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="userMenuDropdown" data-popper-placement="bottom">
                         <div class="py-3 px-4">
                             <span class="block text-sm font-semibold text-gray-900 dark:text-white">@_username</span>
                         </div>
@@ -58,49 +59,35 @@
                     </div>
                 }
 
-
-                <button type="button" id="toggleMobileMenuButton" data-collapse-toggle="toggleMobileMenu" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+                <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
                     <span class="sr-only">Open menu</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
             </div>
         </div>
     </nav>
-    <nav class="bg-white dark:bg-gray-900">
-
-        <ul id="toggleMobileMenu" class="hidden flex-col mt-0 pt-16 w-full text-sm font-medium lg:hidden">
-            <li class="block border-b dark:border-gray-700">
-                <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0" aria-current="page">Home</a>
-            </li>
-            <li class="block border-b dark:border-gray-700">
-                <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Messages</a>
-            </li>
-            <li class="block border-b dark:border-gray-700">
-                <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Profile</a>
-            </li>
-            <li class="block border-b dark:border-gray-700">
-                <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Settings</a>
-            </li>
-            <li class="block border-b dark:border-gray-700">
-                <button type="button" data-collapse-toggle="dropdownMobileNavbar" class="flex justify-between items-center py-3 px-4 w-full text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Dropdown <svg class="w-6 h-6 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg></button>
-                <ul id="dropdownMobileNavbar" class="hidden">
-                    <li class="block border-t border-b dark:border-gray-700">
-                        <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Item 1</a>
-                    </li>
-                    <li class="block border-b dark:border-gray-700">
-                        <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Item 2</a>
-                    </li>
-                    <li class="block">
-                        <a href="#" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0">Item 3</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
+    @if (isMobileMenuOpen)
+    {
+        <nav class="bg-white dark:bg-gray-900">
+            <ul id="mobileMenu" class="flex-col mt-0 pt-16 w-full text-sm font-medium lg:hidden">
+                <li class="block border-b dark:border-gray-700">
+                    <NavLink href="/" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Home
+                    </NavLink>
+                </li>
+                <li class="block border-b dark:border-gray-700">
+                    <NavLink href="/aliases" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Aliases
+                    </NavLink>
+                </li>
+            </ul>
+        </nav>
+    }
 </header>
 
 @code {
     private bool isMenuOpen = false;
+    private bool isMobileMenuOpen = false;
     private string _username { get; set; } = "";
 
     /// <inheritdoc />
@@ -108,6 +95,7 @@
     {
         await base.OnInitializedAsync();
         _username = await GetUsernameAsync();
+        NavigationManager.LocationChanged += LocationChanged;
     }
 
     /// <inheritdoc />
@@ -117,7 +105,16 @@
         if (firstRender)
         {
             await Js.InvokeVoidAsync("window.initTopMenu");
+            DotNetObjectReference<TopMenu> objRef = DotNetObjectReference.Create(this);
+            await Js.InvokeVoidAsync("window.registerClickOutsideHandler", objRef);
         }
+    }
+
+    void LocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        isMenuOpen = false;
+        isMobileMenuOpen = false;
+        StateHasChanged();
     }
 
     private void ToggleMenu()
@@ -125,8 +122,21 @@
         isMenuOpen = !isMenuOpen;
     }
 
-    private void CloseMenu()
+    private void ToggleMobileMenu()
+    {
+        isMobileMenuOpen = !isMobileMenuOpen;
+    }
+
+    [JSInvokable]
+    public void CloseMenu()
     {
         isMenuOpen = false;
+        isMobileMenuOpen = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= LocationChanged;
     }
 }

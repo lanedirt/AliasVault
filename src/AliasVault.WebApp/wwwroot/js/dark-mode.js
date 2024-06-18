@@ -1,5 +1,4 @@
 function initDarkModeSwitcher() {
-    console.log('initDarkModeSwitcher');
     const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
     const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
@@ -15,6 +14,11 @@ function initDarkModeSwitcher() {
             document.documentElement.classList.add('dark');
             themeToggleDarkIcon.classList.remove('hidden');
         }
+    }
+    else {
+        // Default to light mode if not set.
+        document.documentElement.classList.remove('dark');
+        themeToggleLightIcon.classList.remove('hidden');
     }
 
     const themeToggleBtn = document.getElementById('theme-toggle');

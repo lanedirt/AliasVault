@@ -106,13 +106,13 @@ public class BlazorWasmAppManager
             }
             catch (Exception e)
             {
+                await TestContext.Out.WriteLineAsync(e.Message);
+
                 if (_blazorWasmErrors.Count > 0)
                 {
                     Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
                     return;
                 }
-
-                Console.WriteLine(e.Message);
             }
         }
     }

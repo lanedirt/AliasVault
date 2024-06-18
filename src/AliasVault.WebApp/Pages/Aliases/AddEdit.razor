@@ -64,7 +64,7 @@ else
                 <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                     <h3 class="mb-4 text-xl font-semibold dark:text-white">Login credentials</h3>
                     <div class="mb-4">
-                        <button class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
+                        <button type="button" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
                         <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800">Save Alias</button>
                         @if (IsIdentityLoading)
                         {
