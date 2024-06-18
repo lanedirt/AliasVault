@@ -5,11 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasVault.Shared.Models.Validation;
-
 namespace AliasVault.Shared.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasVault.Shared.Models.Validation;
 
 /// <summary>
 /// Register model.
