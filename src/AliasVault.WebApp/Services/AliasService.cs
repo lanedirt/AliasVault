@@ -22,8 +22,8 @@ public class AliasService(HttpClient httpClient)
     /// <returns>Identity object.</returns>
     public async Task<Identity> GenerateRandomIdentityAsync()
     {
-        var identity = await httpClient.GetFromJsonAsync<Identity>("api/Identity/generate");
-        if (identity == null)
+        var identity = await httpClient.GetFromJsonAsync<Identity>("api/v1/Identity/generate");
+        if (identity is null)
         {
             throw new InvalidOperationException("Failed to generate random identity.");
         }
@@ -40,7 +40,7 @@ public class AliasService(HttpClient httpClient)
     {
         try
         {
-            var returnObject = await httpClient.PutAsJsonAsync<Alias>("api/Alias", aliasObject);
+            var returnObject = await httpClient.PutAsJsonAsync<Alias>("api/v1/Alias", aliasObject);
             return await returnObject.Content.ReadFromJsonAsync<Guid>();
         }
         catch
@@ -59,7 +59,7 @@ public class AliasService(HttpClient httpClient)
     {
         try
         {
-            var returnObject = await httpClient.PostAsJsonAsync<Alias>("api/Alias/" + id, aliasObject);
+            var returnObject = await httpClient.PostAsJsonAsync<Alias>("api/v1/Alias/" + id, aliasObject);
             return await returnObject.Content.ReadFromJsonAsync<Guid>();
         }
         catch
@@ -77,7 +77,7 @@ public class AliasService(HttpClient httpClient)
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<Alias>("api/Alias/" + aliasId);
+            return await httpClient.GetFromJsonAsync<Alias>("api/v1/Alias/" + aliasId);
         }
         catch
         {
@@ -93,7 +93,7 @@ public class AliasService(HttpClient httpClient)
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/Alias/items");
+            return await httpClient.GetFromJsonAsync<List<AliasListEntry>>("api/v1/Alias/items");
         }
         catch
         {
@@ -111,7 +111,7 @@ public class AliasService(HttpClient httpClient)
         // Delete from webapi.
         try
         {
-            await httpClient.DeleteAsync("api/Alias/" + id);
+            await httpClient.DeleteAsync("api/v1/Alias/" + id);
         }
         catch
         {

@@ -1,7 +1,6 @@
 @page "/user/login"
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
@@ -71,7 +70,7 @@
 
         try
         {
-            var result = await Http.PostAsJsonAsync("api/Auth/login", _loginModel);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", _loginModel);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
