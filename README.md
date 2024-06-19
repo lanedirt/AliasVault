@@ -21,27 +21,38 @@ AliasVault is an open-source password manager that can generate virtual identiti
 
 ## Installation
 
-1. Clone this repository.
+### 1. Clone this repository.
 
 ```bash
-git clone https://github.com/lanedirt/AliasVault.git
+# Clone this Git repository to "AliasVault" directory
+$ git clone https://github.com/lanedirt/AliasVault.git
 ```
 
-2. Build and run the app via Docker:
+### 2. Run the init script to set up the .env file and generate a random encryption secret.
+This script will create a .env file in the root directory of the project if it does not yet exist and populate it with a random encryption secret.
+```bash
+# Go to the project directory
+$ cd AliasVault
+
+# Make init script executable
+$ chmod +x init.sh
+
+# Run the init script
+$ ./init.sh
+```
+
+### 3. Build and run the app via Docker:
 
 ```bash
-docker compose up -d --build --force-recreate
+# Build and run the app via Docker Compose
+$ docker compose up -d --build --force-recreate
 ```
+> Note: the container binds to port 80 by default. If you have another service running on port 80, you can change the port in the `docker-compose.yml` file.
 
-### Note for first time build:
+
+#### Note for first time build:
 - When running the app for the first time, it may take a few minutes to build the Docker image.
-- Two files will be created during build (if they don't yet exist):
-    - **Database:** `./database/aliasdb.sqlite`
-      - This SQLite file contains the database and in it all (encrypted) password vaults. It should be kept secure and not shared.
-    - **Encryption secrets:** `./.env`
-        - This file contains the JWT secret that is used to generate user access tokens for login and should be kept secret.
-
-
+- A SQLite database file will be created in `./database/aliasdb.sqlite`. This file will store all (encrypted) password vaults. It should be kept secure and not shared.
 
 After the Docker containers have started the app will be available at http://localhost:80
 
@@ -50,7 +61,10 @@ The following technologies, frameworks and libraries are used in this project:
 
 - [C#](https://docs.microsoft.com/en-us/dotnet/csharp/) - A simple, modern, object-oriented, and type-safe programming language.
 - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern, cloud-based, internet-connected applications.
-- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - A lightweight, extensible, open-source and cross-platform version of the popular Entity Framework data access technology.                                            - [Blazor WASM](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript. It's a single-page app framework that runs in the browser via WebAssembly.- [Docker](https://www.docker.com/) - A platform for building, sharing, and running containerized applications.- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
+- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - A lightweight, extensible, open-source and cross-platform version of the popular Entity Framework data access technology.
+- [Blazor WASM](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript. It's a single-page app framework that runs in the browser via WebAssembly.
+- [Docker](https://www.docker.com/) - A platform for building, sharing, and running containerized applications.
+- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
 - [Flowbite](https://flowbite.com/) - A free and open-source UI component library based on Tailwind CSS.
 - [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.

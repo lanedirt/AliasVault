@@ -13,9 +13,9 @@ using System.Text.Json;
 /// </summary>
 public class FigIdentityGenerator : IIdentityGenerator
 {
-    private static readonly HttpClient _httpClient = new();
-    private static readonly string _url = "https://api.identiteitgenerator.nl/generate/identity";
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    private static readonly HttpClient HttpClient = new();
+    private static readonly string Url = "https://api.identiteitgenerator.nl/generate/identity";
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
     };
@@ -23,11 +23,11 @@ public class FigIdentityGenerator : IIdentityGenerator
     /// <inheritdoc/>
     public async Task<Identity.Models.Identity> GenerateRandomIdentityAsync()
     {
-        var response = await _httpClient.GetAsync(_url);
+        var response = await HttpClient.GetAsync(Url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
-        var identity = JsonSerializer.Deserialize<Identity.Models.Identity>(json, _jsonSerializerOptions);
+        var identity = JsonSerializer.Deserialize<Identity.Models.Identity>(json, JsonSerializerOptions);
 
         if (identity is null)
         {

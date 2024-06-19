@@ -14,17 +14,6 @@ COPY ["src/AliasVault.Shared/AliasVault.Shared.csproj", "src/AliasVault.Shared/"
 COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
 RUN dotnet restore "src/AliasVault.Api/AliasVault.Api.csproj"
 
-# Copy .env.example to .env if .env does not exist
-RUN test -f .env || cp .env.example .env
-
-# Generate a random JWT key if not set
-RUN if [ -z "$(grep ^JWT_KEY= .env | cut -d '=' -f2)" ]; then \
-    echo "Generating JWT key..."; \
-    JWT_KEY=$(openssl rand -base64 32); \
-    sed -i "/^JWT_KEY=/c\JWT_KEY=${JWT_KEY}" .env; \
-    dos2unix .env; \
-fi
-
 # Copy the rest of the application code
 COPY . .
 

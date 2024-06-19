@@ -195,7 +195,13 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? string.Empty));
+        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+        if (jwtKey is null)
+        {
+            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
