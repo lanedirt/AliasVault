@@ -5,21 +5,21 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <CacheBuster Condition=" '$(Configuration)' == 'Release' ">$(UtcNow:yyyyMMddHHmmss)</CacheBuster>
-        <CacheBuster Condition=" '$(Configuration)' != 'Release' ">dev</CacheBuster>
+        <BuildVersion>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildVersion>
     </PropertyGroup>
 
     <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
-        <Exec Command="dotnet msbuild -target:ReplaceText -property:CacheBuster=$(CacheBuster)" />
+        <Exec Command="dotnet msbuild -t:ReplaceText -p:CacheBuster=$(CacheBuster);BuildVersion='$(BuildVersion)'" />
     </Target>
 
     <Target Name="ReplaceText">
-        <Exec Command="sed 's/@CacheBuster/$(CacheBuster)/g' wwwroot/index.template.html > wwwroot/index.html" />
+        <Exec Command="sed 's/@CacheBuster/$(CacheBuster)/g;s/@BuildVersion/$(BuildVersion)/g' wwwroot/index.template.html > wwwroot/index.html" />
     </Target>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <CacheBuster>dev</CacheBuster>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -27,6 +27,7 @@
       <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
       <Optimize>True</Optimize>
+      <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
     </PropertyGroup>
 
     <ItemGroup>
