@@ -19,12 +19,12 @@ COPY . .
 
 # Build the WebApi project
 WORKDIR "/src/src/AliasVault.Api"
-RUN dotnet build "AliasVault.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 # Publish the application to the /app/publish directory in the container
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "AliasVault.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 # Create the migration bundle
 # Install the Entity Framework Core CLI tool and run migrations to create the database

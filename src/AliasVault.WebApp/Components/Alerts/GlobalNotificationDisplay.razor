@@ -54,14 +54,14 @@
         var newMessages = GlobalNotificationService.GetMessagesForDisplay();
         foreach (var message in newMessages)
         {
-            if (!Messages.Any(m => m.Key == message.Key && m.Value == message.Value))
+            if (!Messages.Exists(m => m.Key == message.Key && m.Value == message.Value))
             {
                 Messages.Add(message);
             }
         }
 
         // Remove messages that are no longer in the GlobalNotificationService and have already been displayed.
-        var messagesToRemove = Messages.Where(m => !newMessages.Any(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
+        var messagesToRemove = Messages.Where(m => !newMessages.Exists(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
         foreach (var message in messagesToRemove)
         {
             Messages.Remove(message);

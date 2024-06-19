@@ -33,6 +33,9 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
     {
         builder.UseUrls(HostUrl);
 
+        // Set the JWT key environment variable to debug value.
+        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
+
         builder.ConfigureServices((context, services) =>
         {
             // Remove the existing AliasDbContext registration.

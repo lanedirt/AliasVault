@@ -20,12 +20,12 @@ COPY . .
 
 # Build the WebApp project
 WORKDIR "/src/src/AliasVault.WebApp"
-RUN dotnet build "AliasVault.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "AliasVault.WebApp.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 # Publish the WebApp project
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "AliasVault.WebApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AliasVault.WebApp.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 # Final stage: start nginx and serve static html files that were published in the previous stage
 FROM nginx:alpine AS final

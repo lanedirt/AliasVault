@@ -32,7 +32,7 @@ public class IdentityController(UserManager<IdentityUser> userManager) : Authent
             return Unauthorized();
         }
 
-        IIdentityGenerator identityGenerator = new FigIdentityGenerator();
+        var identityGenerator = new FigIdentityGenerator();
         return Ok(await identityGenerator.GenerateRandomIdentityAsync());
     }
 }
