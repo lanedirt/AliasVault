@@ -23,56 +23,56 @@ create_env_file() {
   if [ ! -f "$ENV_FILE" ]; then
     if [ -f "$ENV_EXAMPLE_FILE" ]; then
       cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
-      echo "${GREEN}> .env file created from .env.example.${NC}"
+      printf "${GREEN}> .env file created from .env.example.${NC}\n"
     else
       touch "$ENV_FILE"
-      echo "${YELLOW}> .env file created as empty because .env.example was not found.${NC}"
+      printf "${YELLOW}> .env file created as empty because .env.example was not found.${NC}\n"
     fi
   else
-    echo "${CYAN}> .env file already exists.${NC}"
+    printf "${CYAN}> .env file already exists.${NC}\n"
   fi
 }
 
 # Function to check and populate the .env file with JWT_KEY
 populate_jwt_key() {
   if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-    echo "${YELLOW}JWT_KEY not found or empty in $ENV_FILE. Generating a new JWT key...${NC}"
+    printf "${YELLOW}JWT_KEY not found or empty in $ENV_FILE. Generating a new JWT key...${NC}\n"
     JWT_KEY=$(generate_jwt_key)
     if grep -q "^JWT_KEY=" "$ENV_FILE"; then
       awk -v key="$JWT_KEY" '/^JWT_KEY=/ {$0="JWT_KEY="key} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     else
-      echo "JWT_KEY=${JWT_KEY}" >> "$ENV_FILE"
+      printf "JWT_KEY=${JWT_KEY}" >> "$ENV_FILE\n"
     fi
-    echo "${GREEN}> JWT_KEY has been added to $ENV_FILE.${NC}"
+    printf "${GREEN}> JWT_KEY has been added to $ENV_FILE.${NC}\n"
   else
-    echo "${CYAN}> JWT_KEY already exists and has a value in $ENV_FILE.${NC}"
+    printf "${CYAN}> JWT_KEY already exists and has a value in $ENV_FILE.${NC}\n"
   fi
 }
 
 # Function to print the CLI logo
 print_logo() {
-  echo "${MAGENTA}"
-  echo "========================================================="
-  echo "           _ _        __      __         _ _   "
-  echo "     /\   | (_)       \ \    / /        | | |  "
-  echo "    /  \  | |_  __ _ __\ \  / /_ _ _   _| | |_"
-  echo "   / /\ \ | | |/ _  / __\ \/ / _  | | | | | __|"
-  echo "  / ____ \| | | (_| \__ \\   / (_| | |_| | | |_ "
-  echo " /_/    \_\_|_|\__,_|___/ \/ \__,_|\__,_|_|\__|"
-  echo ""
-  echo "========================================================="
-  echo "${NC}"
+  printf "${MAGENTA}\n"
+  printf "=========================================================\n"
+  printf "           _ _        __      __         _ _   \n"
+  printf "     /\   | (_)       \ \    / /        | | |  \n"
+  printf "    /  \  | |_  __ _ __\ \  / /_ _ _   _| | |_\n"
+  printf "   / /\ \ | | |/ _  / __\ \/ / _  | | | | | __|\n"
+  printf "  / ____ \| | | (_| \__ \\   / (_| | |_| | | |_ \n"
+  printf " /_/    \_\_|_|\__,_|___/ \/ \__,_|\__,_|_|\__|\n"
+  printf "\n"
+  printf "=========================================================\n"
+  printf "${NC}\n"
 }
 
 # Run the functions and print status
 print_logo
-echo "${BLUE}Initializing AliasVault...${NC}"
+printf "${BLUE}Initializing AliasVault...${NC}\n"
 create_env_file
 populate_jwt_key
-echo "${BLUE}Initialization complete.${NC}"
-echo ""
-echo "To build the images and start the containers, run the following command:"
-echo ""
-echo "${CYAN}$ docker compose up -d --build --force-recreate${NC}"
-echo ""
-echo ""
+printf "${BLUE}Initialization complete.${NC}\n"
+printf "\n"
+printf "To build the images and start the containers, run the following command:\n"
+printf "\n"
+printf "${CYAN}$ docker compose up -d --build --force-recreate${NC}\n"
+printf "\n"
+printf "\n"
