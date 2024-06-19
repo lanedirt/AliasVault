@@ -77,7 +77,7 @@ public class BlazorWasmAppManager
         }
     }
 
-    private string GetBaseDirectory()
+    private static string GetBaseDirectory()
     {
         string currentDir = Directory.GetCurrentDirectory();
         string baseDir = string.Empty;
@@ -90,35 +90,8 @@ public class BlazorWasmAppManager
         return baseDir;
     }
 
-    private async Task WaitForStartupAsync(int port)
-    {
-        // Wait for the application to start up
-        var started = false;
-        while (!started)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var response = await client.GetAsync($"http://localhost:{port}");
-                    started = response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound;
-                }
-            }
-            catch (Exception e)
-            {
-                await TestContext.Out.WriteLineAsync(e.Message);
-
-                if (_blazorWasmErrors.Count > 0)
-                {
-                    Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
-                    return;
-                }
-            }
-        }
-    }
-
 #if WINDOWS
-    private void KillProcessAndChildrenWindows(int pid)
+    private static void KillProcessAndChildrenWindows(int pid)
     {
         var searcher = new ManagementObjectSearcher($"Select * From Win32_Process Where ParentProcessID={pid}");
         var managementObjects = searcher.Get();
@@ -140,7 +113,7 @@ public class BlazorWasmAppManager
         }
     }
 #else
-    private void KillProcessAndChildrenUnix(int pid)
+    private static void KillProcessAndChildrenUnix(int pid)
     {
         try
         {
@@ -178,4 +151,31 @@ public class BlazorWasmAppManager
         }
     }
 #endif
+
+    private async Task WaitForStartupAsync(int port)
+    {
+        // Wait for the application to start up
+        var started = false;
+        while (!started)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync($"http://localhost:{port}");
+                    started = response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound;
+                }
+            }
+            catch (Exception e)
+            {
+                await TestContext.Out.WriteLineAsync(e.Message);
+
+                if (_blazorWasmErrors.Count > 0)
+                {
+                    Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
+                    return;
+                }
+            }
+        }
+    }
 }

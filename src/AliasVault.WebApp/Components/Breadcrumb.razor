@@ -46,7 +46,7 @@
     {
         base.OnInitialized();
         // Remove first item if it is the home page
-        if (BreadcrumbItems.Any() && BreadcrumbItems.First().DisplayName == "Home")
+        if (BreadcrumbItems.Any() && BreadcrumbItems[0].DisplayName == "Home")
         {
             BreadcrumbItems.RemoveAt(0);
         }

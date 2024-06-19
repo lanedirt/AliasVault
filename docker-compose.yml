@@ -30,4 +30,6 @@ services:
             - "81:8081"
         volumes:
             - ./database:/database
+        env_file:
+            - .env
         restart: always

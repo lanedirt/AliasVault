@@ -20,7 +20,7 @@
     [Parameter] public string Value { get; set; } = string.Empty;
 
     private bool _copied => ClipboardCopyService.GetCopiedId() == _inputId;
-    private string _inputId = Guid.NewGuid().ToString();
+    private readonly string _inputId = Guid.NewGuid().ToString();
 
     protected override void OnInitialized()
     {

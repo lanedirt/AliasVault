@@ -84,7 +84,7 @@ public class ServerValidationErrorResponse
         return new ServerValidationErrorResponse
         {
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-            Title = errorArray.First(),
+            Title = errorArray[0],
             Errors = errors,
             Status = status,
             TraceId = Guid.NewGuid().ToString(),

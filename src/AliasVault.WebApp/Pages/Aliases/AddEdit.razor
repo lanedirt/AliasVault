@@ -6,6 +6,7 @@
 @using AliasGenerators.Implementations
 @using AliasGenerators.Password.Implementations
 @using AliasVault.Shared.Models.WebApi
+@using System.Globalization
 
 @if (EditMode)
 {
@@ -254,7 +255,7 @@ else
         Obj.Identity.AddressState = identity.Address.State;
         Obj.Identity.AddressZipCode = identity.Address.ZipCode;
         Obj.Identity.AddressCountry = identity.Address.Country;
-        Obj.Identity.Hobbies = identity.Hobbies.First();
+        Obj.Identity.Hobbies = identity.Hobbies[0];
         Obj.Identity.EmailPrefix = identity.EmailPrefix;
         Obj.Identity.PhoneMobile = identity.PhoneMobile;
         Obj.Identity.BankAccountIBAN = identity.BankAccountIBAN;
@@ -291,7 +292,7 @@ else
         {
             try
             {
-                DateTime.Parse(Obj.Identity.BirthDate);
+                DateTime.Parse(Obj.Identity.BirthDate, new CultureInfo("en-US"));
             }
             catch (Exception)
             {

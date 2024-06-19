@@ -42,7 +42,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
         var user = await userManager.FindByEmailAsync(model.Email);
         if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
         {
-            var tokenModel = await GenerateNewTokenForUser(user);
+            var tokenModel = await GenerateNewTokensForUser(user);
             return Ok(tokenModel);
         }
 
@@ -151,7 +151,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             await signInManager.SignInAsync(user, isPersistent: false);
 
             // Return the token.
-            var tokenModel = await GenerateNewTokenForUser(user);
+            var tokenModel = await GenerateNewTokensForUser(user);
             return Ok(tokenModel);
         }
 
@@ -159,6 +159,32 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
         return BadRequest(ServerValidationErrorResponse.Create(errors, 400));
     }
 
+    /// <summary>
+    /// Generate a device identifier based on request headers. This is used to associate refresh tokens
+    /// with a specific device for a specific user.
+    ///
+    /// NOTE: current implementation means that only one refresh token can be valid for a
+    /// specific user/device combo at a time. The identifier generation could be made more unique in the future
+    /// to prevent any unwanted conflicts.
+    /// </summary>
+    /// <param name="request">The HttpRequest instance for the request that the client used.</param>
+    /// <returns>Unique device identifier as string.</returns>
+    private static string GenerateDeviceIdentifier(HttpRequest request)
+    {
+        var userAgent = request.Headers.UserAgent.ToString();
+        var acceptLanguage = request.Headers.AcceptLanguage.ToString();
+
+        var rawIdentifier = $"{userAgent}|{acceptLanguage}";
+        return rawIdentifier;
+    }
+
+    /// <summary>
+    /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
+    /// and is short-lived by design. With the separate refresh token, the user can request a new access token
+    /// when this access token expires.
+    /// </summary>
+    /// <param name="user">The user to generate the Jwt access token for.</param>
+    /// <returns>Access token as string.</returns>
     private string GenerateJwtToken(IdentityUser user)
     {
         var claims = new List<Claim>
@@ -176,12 +202,17 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
             issuer: configuration["Jwt:Issuer"] ?? string.Empty,
             audience: configuration["Jwt:Issuer"] ?? string.Empty,
             claims: claims,
-            expires: DateTime.Now.AddSeconds(15),
+            expires: DateTime.Now.AddMinutes(10),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Generate a refresh token for a user. This token is used to request a new access token when the current
+    /// access token expires. The refresh token is long-lived by design.
+    /// </summary>
+    /// <returns>Random string to be used as refresh token.</returns>
     private string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
@@ -212,17 +243,13 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
         return principal;
     }
 
-    private string GenerateDeviceIdentifier(HttpRequest request)
-    {
-        // TODO: Add more headers to the device identifier or let client send a unique identifier instead.
-        var userAgent = request.Headers.UserAgent.ToString();
-        var acceptLanguage = request.Headers.AcceptLanguage.ToString();
-
-        var rawIdentifier = $"{userAgent}|{acceptLanguage}";
-        return rawIdentifier;
-    }
-
-    private async Task<TokenModel> GenerateNewTokenForUser(IdentityUser user)
+    /// <summary>
+    /// Generates a new access and refresh token for a user and persists the refresh token
+    /// to the database.
+    /// </summary>
+    /// <param name="user">The user to generate the tokens for.</param>
+    /// <returns>TokenModel which includes new access and refresh token.</returns>
+    private async Task<TokenModel> GenerateNewTokensForUser(IdentityUser user)
     {
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();

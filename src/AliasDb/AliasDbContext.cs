@@ -60,16 +60,17 @@ public class AliasDbContext : IdentityDbContext
     /// <summary>
     /// The OnModelCreating method.
     /// </summary>
-    /// <param name="modelBuilder">ModelBuilder instance.</param>
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    /// <param name="builder">ModelBuilder instance.</param>
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
-        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        base.OnModelCreating(builder);
+        foreach (var entity in builder.Model.GetEntityTypes())
         {
             foreach (var property in entity.GetProperties())
             {
-                // TODO: This is a workaround for SQLite. Add conditional check if SQLite is used.
-                // TODO: SQL server doesn't need this override.
+                // NOTE: This is a workaround for SQLite. Add conditional check if SQLite is used.
+                // NOTE: SQL server doesn't need this override.
+
                 // SQLite does not support varchar(max) so we use TEXT.
                 if (property.ClrType == typeof(string) && property.GetMaxLength() == null)
                 {
@@ -79,42 +80,42 @@ public class AliasDbContext : IdentityDbContext
         }
 
         // Configure Identity - Login relationship
-        modelBuilder.Entity<Login>()
+        builder.Entity<Login>()
             .HasOne(l => l.Identity)
             .WithMany()
             .HasForeignKey(l => l.IdentityId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure the Login - UserId entity
-        modelBuilder.Entity<Login>()
+        builder.Entity<Login>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .IsRequired();
 
         // Configure Login - Service relationship
-        modelBuilder.Entity<Login>()
+        builder.Entity<Login>()
             .HasOne(l => l.Service)
             .WithMany()
             .HasForeignKey(l => l.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Login - Password relationship
-        modelBuilder.Entity<Login>()
+        builder.Entity<Login>()
             .HasMany(l => l.Passwords)
             .WithOne(p => p.Login)
             .HasForeignKey(p => p.LoginId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Identity - DefaultPassword relationship
-        modelBuilder.Entity<Identity>()
+        builder.Entity<Identity>()
             .HasOne(i => i.DefaultPassword)
             .WithMany()
             .HasForeignKey(i => i.DefaultPasswordId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // Configure the User - AspNetUserRefreshToken entity
-        modelBuilder.Entity<AspNetUserRefreshToken>()
+        builder.Entity<AspNetUserRefreshToken>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)

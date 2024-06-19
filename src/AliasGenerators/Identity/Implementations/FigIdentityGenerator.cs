@@ -13,20 +13,21 @@ using System.Text.Json;
 /// </summary>
 public class FigIdentityGenerator : IIdentityGenerator
 {
-    private static readonly HttpClient HttpClient = new();
-    private static readonly string Url = "https://api.identiteitgenerator.nl/generate/identity";
+    private static readonly HttpClient _httpClient = new();
+    private static readonly string _url = "https://api.identiteitgenerator.nl/generate/identity";
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
 
     /// <inheritdoc/>
     public async Task<Identity.Models.Identity> GenerateRandomIdentityAsync()
     {
-        var response = await HttpClient.GetAsync(Url);
+        var response = await _httpClient.GetAsync(_url);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
-        var identity = JsonSerializer.Deserialize<Identity.Models.Identity>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        });
+        var identity = JsonSerializer.Deserialize<Identity.Models.Identity>(json, _jsonSerializerOptions);
 
         if (identity is null)
         {

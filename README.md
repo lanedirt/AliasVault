@@ -15,34 +15,42 @@
 AliasVault is an open-source password manager that can generate virtual identities complete with virtual email addresses. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
 
 ## Features
-- Password Management: Securely store and manage your passwords.
-- Virtual Identities: Generate virtual identities with virtual (working) email addresses.
-- Data Protection: Ensures that all sensitive data is encrypted and securely stored.
-- User Authentication: Secure login and user management functionalities.
+- **Password Management:** Securely store and manage your passwords.
+- **Virtual Identities:** Generate virtual identities with virtual (working) email addresses that are assigned to one or more passwords.
+- **Zero-knowledge architecture:** Ensures that all sensitive data is end-to-end encrypted on the client and stored in encrypted state on the database. The server never has access to your data.
 
 ## Installation
 
 1. Clone this repository.
 
 ```bash
-git clone [URL]
+git clone https://github.com/lanedirt/AliasVault.git
 ```
 
-2. Run the app via Docker:
+2. Build and run the app via Docker:
 
 ```bash
 docker compose up -d --build --force-recreate
 ```
 
-The app will be available at http://localhost:80
+### Note for first time build:
+- When running the app for the first time, it may take a few minutes to build the Docker image.
+- Two files will be created during build (if they don't yet exist):
+    - **Database:** `./database/aliasdb.sqlite`
+      - This SQLite file contains the database and in it all (encrypted) password vaults. It should be kept secure and not shared.
+    - **Encryption secrets:** `./.env`
+        - This file contains the JWT secret that is used to generate user access tokens for login and should be kept secret.
 
 
 
-## Credits
-The following libraries and frameworks are used in this project:
+After the Docker containers have started the app will be available at http://localhost:80
 
+## Tech stack / credits
+The following technologies, frameworks and libraries are used in this project:
+
+- [C#](https://docs.microsoft.com/en-us/dotnet/csharp/) - A simple, modern, object-oriented, and type-safe programming language.
 - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern, cloud-based, internet-connected applications.
-- [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript.
+- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - A lightweight, extensible, open-source and cross-platform version of the popular Entity Framework data access technology.                                            - [Blazor WASM](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript. It's a single-page app framework that runs in the browser via WebAssembly.- [Docker](https://www.docker.com/) - A platform for building, sharing, and running containerized applications.- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
-- [Flowbite](https://flowbite.com/) - A free and open-source UI component library.
+- [Flowbite](https://flowbite.com/) - A free and open-source UI component library based on Tailwind CSS.
 - [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.
