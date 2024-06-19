@@ -5,7 +5,17 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <CacheBuster Condition=" '$(Configuration)' == 'Release' ">$(UtcNow:yyyyMMddHHmmss)</CacheBuster>
+        <CacheBuster Condition=" '$(Configuration)' != 'Release' ">dev</CacheBuster>
     </PropertyGroup>
+
+    <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
+        <Exec Command="dotnet msbuild -target:ReplaceText -property:CacheBuster=$(CacheBuster)" />
+    </Target>
+
+    <Target Name="ReplaceText">
+        <Exec Command="sed 's/@CacheBuster/$(CacheBuster)/g' wwwroot/index.template.html > wwwroot/index.html" />
+    </Target>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>

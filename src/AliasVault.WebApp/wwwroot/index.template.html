@@ -2,14 +2,30 @@
 <html lang="en">
 
 <head>
+    <!--
+
+       db         88  88                       8b           d8                         88
+      d88b        88  ""                       `8b         d8'                         88    ,d
+     d8'`8b       88                            `8b       d8'                          88    88
+    d8'  `8b      88  88  ,adPPYYba,  ,adPPYba,  `8b     d8'  ,adPPYYba,  88       88  88  MM88MMM
+   d8YaaaaY8b     88  88  ""     `Y8  I8[    ""   `8b   d8'   ""     `Y8  88       88  88    88
+  d8""""""""8b    88  88  ,adPPPPP88   `"Y8ba,     `8b d8'    ,adPPPPP88  88       88  88    88
+ d8'        `8b   88  88  88,    ,88  aa    ]8I     `888'     88,    ,88  "8a,   ,a88  88    88,
+d8'          `8b  88  88  `"8bbdP"Y8  `"YbbdP"'      `8'      `"8bbdP"Y8   `"YbbdP'Y8  88    "Y888
+
+
+    AliasVault - Free open-source password manager.
+    Source code: https://github.com/lanedirt/AliasVault
+    License: MIT
+    -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AliasVault.WebApp</title>
     <base href="/" />
-    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/app.css?v=@CacheBuster" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="css/tailwind.css" rel="stylesheet">
-    <link href="AliasVault.WebApp.styles.css" rel="stylesheet" />
+    <link href="css/tailwind.css?v=@CacheBuster" rel="stylesheet">
+    <link href="AliasVault.WebApp.styles.css?v=@CacheBuster" rel="stylesheet" />
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-800">
@@ -26,7 +42,7 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="js/dark-mode.js"></script>
+    <script src="js/dark-mode.js?v=@CacheBuster"></script>
 
     <script>
         window.initTopMenu = function() {
@@ -59,7 +75,7 @@
         };
     </script>
 
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_framework/blazor.webassembly.js?v=@CacheBuster"></script>
 </body>
 
 </html>
