@@ -68,6 +68,14 @@
         _loadingIndicator.Show();
         _serverValidationErrors.Clear();
 
+        // Create argon2id hash of the password locally
+        var hash = await Cryptography.Cryptography.DeriveKeyFromPasswordAsync(_loginModel.Password, "aliasvault");
+
+        //var hash = "hello";
+        Console.WriteLine("Hash: " + hash);
+        //_loadingIndicator.Hide();
+        return;
+
         try
         {
             var result = await Http.PostAsJsonAsync("api/v1/Auth/login", _loginModel);

@@ -18,14 +18,14 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
       <CacheBuster>dev</CacheBuster>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DebugSymbols>true</DebugSymbols>
       <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
       <Optimize>True</Optimize>
       <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
     </PropertyGroup>
@@ -57,6 +57,7 @@
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 

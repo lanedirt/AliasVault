@@ -35,7 +35,7 @@ public class CryptographyTests
 
         // Derive a key from the password using Argon2id
         byte[] key = Cryptography.Cryptography.DeriveKeyFromPassword(password, salt);
-        Console.Write($"Derived key: {key})");
+        Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
 
         // Encrypt the plaintext
         string encrypted = Cryptography.Cryptography.Encrypt(plaintext, key);
@@ -72,5 +72,53 @@ public class CryptographyTests
         byte[] key2 = Cryptography.Cryptography.DeriveKeyFromPassword("your-password2", salt);
 
         Assert.Throws<CryptographicException>(() => Cryptography.Cryptography.Decrypt(encrypted, key2));
+    }
+
+    /// <summary>
+    /// Test the SRP authentication flow to ensure it works correctly.
+    /// </summary>
+    [Test]
+    public void TestSRPAuthentication()
+    {
+        var email = "test@example.com";
+        var password = "myPassword";
+        var argon2IdSalt = "AliasVault";
+
+        // Registration -----------------------------
+
+        // Derive a key from the password using Argon2id
+        byte[] passwordHash = Cryptography.Cryptography.DeriveKeyFromPassword(password, argon2IdSalt);
+
+        // Convert to string
+        string passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+
+        // Client generates a salt and verifier.
+        string salt = Cryptography.Srp.GenerateSalt()!;
+        string verifier = Cryptography.Srp.GenerateVerifier(email, passwordHashString, salt);
+
+        // Login -----------------------------------
+        // 1. Client generates an ephemeral value.
+        var clientEphemeral = Cryptography.Srp.GenerateEphemeral();
+
+        // --> Then client sends request to server.
+
+        // 2. Server retrieves salt and verifier from database.
+        // Then server generates an ephemeral value as well.
+        var serverEphemeral = Cryptography.Srp.GenerateEphemeral();
+
+        // --> Send serverEphemeral.Public to client.
+
+        // 3. Client derives shared session key.
+        var clientSession = Cryptography.Srp.DeriveSessionClient(passwordHashString, clientEphemeral.Secret, serverEphemeral.Public, salt, email);
+
+        // --> send session.Proof to server.
+
+        // 4. Server verifies the proof.
+        var serverSession = Cryptography.Srp.DeriveSessionServer(serverEphemeral.Secret, clientEphemeral.Public, salt, email, verifier, clientSession.Proof);
+
+        // --> send serverSession.Proof to client.
+
+        // 5. Client verifies the proof.
+        Cryptography.Srp.VerifySession(clientEphemeral.Public, clientSession, serverSession.Proof);
     }
 }
