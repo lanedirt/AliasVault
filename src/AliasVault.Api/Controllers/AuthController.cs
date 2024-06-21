@@ -46,7 +46,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         var user = await userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
         }
 
         // Server creates ephemeral and sends to client
@@ -69,12 +69,12 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         var user = await userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
         }
 
         if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || !(serverSecretEphemeral is string))
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
         }
 
         try
@@ -95,7 +95,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         }
         catch
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
         }
     }
 

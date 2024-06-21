@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Text.Json.Serialization;
-
 namespace AliasVault.Shared.Models.WebApi.Auth;
+
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Represents a login response.
