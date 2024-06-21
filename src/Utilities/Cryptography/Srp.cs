@@ -5,11 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Cryptography.Models;
-
 namespace Cryptography;
 
 using System.Security.Cryptography;
+using Cryptography.Models;
 using SecureRemotePassword;
 
 /// <summary>
@@ -27,15 +26,11 @@ public class Srp
     public static async Task<SrpSignup> SignupPrepareAsync(string email, string plaintextPassword)
     {
         // Derive a key from the password using Argon2id
-        byte[] passwordHash = await Cryptography.DeriveKeyFromPasswordAsync(plaintextPassword);
-
-        // Convert to string
-        string passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
         // Signup: client generates a salt and verifier.
         var client = new SrpClient();
         var salt = client.GenerateSalt();
-        var privateKey = client.DerivePrivateKey(salt, email, passwordHashString);
+        var privateKey = await DerivePrivateKey(salt, email, plaintextPassword);
         var verifier = client.DeriveVerifier(privateKey);
 
         return new SrpSignup(email, salt, privateKey, verifier);
@@ -46,12 +41,14 @@ public class Srp
     /// </summary>
     /// <param name="salt">Salt.</param>
     /// <param name="email">Email.</param>
-    /// <param name="passwordHash">PasswordHash.</param>
+    /// <param name="plaintextPassword">Plain text password.</param>
     /// <returns>Private key as string.</returns>
-    public static string DerivePrivateKey(string salt, string email, string passwordHash)
+    public static async Task<string> DerivePrivateKey(string salt, string email, string plaintextPassword)
     {
         var client = new SrpClient();
-        return client.DerivePrivateKey(salt, email, passwordHash);
+        byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(plaintextPassword);
+        var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+        return client.DerivePrivateKey(salt, email, passwordHashString);
     }
 
     /// <summary>
@@ -79,17 +76,17 @@ public class Srp
     /// Derive a shared session key on the client side.
     /// </summary>
     /// <param name="privateKey">Password hash.</param>
-    /// <param name="clientEphemeralSecret">Client ephemeral secret.</param>
-    /// <param name="serverPublicEphemeral">Server public ephemeral.</param>
+    /// <param name="clientSecretEphemeral">Client ephemeral secret.</param>
+    /// <param name="serverEphemeralPublic">Server public ephemeral.</param>
     /// <param name="salt">Salt.</param>
     /// <param name="email">Email.</param>
     /// <returns>session.</returns>
-    public static SrpSession DeriveSessionClient(string privateKey, string clientEphemeralSecret, string serverPublicEphemeral, string salt, string email)
+    public static SrpSession DeriveSessionClient(string privateKey, string clientSecretEphemeral, string serverEphemeralPublic, string salt, string email)
     {
         var client = new SrpClient();
         return client.DeriveSession(
-            clientEphemeralSecret,
-            serverPublicEphemeral,
+            clientSecretEphemeral,
+            serverEphemeralPublic,
             salt,
             email,
             privateKey);

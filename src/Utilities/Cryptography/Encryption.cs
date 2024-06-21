@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="Cryptography.cs" company="lanedirt">
+// <copyright file="Encryption.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -12,9 +12,9 @@ using System.Text;
 using Konscious.Security.Cryptography;
 
 /// <summary>
-/// Cryptography class.
+/// Encryption class.
 /// </summary>
-public static class Cryptography
+public static class Encryption
 {
     /// <summary>
     /// Derive a key used for encryption/decryption based on a user password and system salt.

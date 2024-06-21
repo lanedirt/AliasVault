@@ -5,10 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasDb;
-
 namespace AliasVault.Api.Controllers;
 
+using AliasDb;
 using AliasGenerators.Identity;
 using AliasGenerators.Identity.Implementations;
 using Asp.Versioning;

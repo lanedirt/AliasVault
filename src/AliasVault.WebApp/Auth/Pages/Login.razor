@@ -7,7 +7,7 @@
 @inject AuthService AuthService
 @using System.Text.Json
 @using AliasVault.Shared.Models
-@using AliasVault.Shared.Models.WebApi
+@using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.WebApp.Auth.Components
 @using AliasVault.WebApp.Auth.Services
 
@@ -68,17 +68,10 @@
         _loadingIndicator.Show();
         _serverValidationErrors.Clear();
 
-        // Create argon2id hash of the password locally
-        var hash = await Cryptography.Cryptography.DeriveKeyFromPasswordAsync(_loginModel.Password, "aliasvault");
-
-        //var hash = "hello";
-        Console.WriteLine("Hash: " + hash);
-        //_loadingIndicator.Hide();
-        return;
-
         try
         {
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", _loginModel);
+            // Send request to server with email to get server ephemeral public key.
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(_loginModel.Email));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -88,28 +81,60 @@
                 return;
             }
 
-            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
-
-            if (tokenObject != null)
+            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
+            if (loginResponse == null)
             {
-                // Store the token as a plain string in local storage
-                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
-                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-                await AuthStateProvider.GetAuthenticationStateAsync();
-            }
-            else
-            {
-                // Handle the case where the token is not present in the response
-                Console.WriteLine("Token not found in the response.");
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
                 return;
             }
 
-            await AuthStateProvider.GetAuthenticationStateAsync();
+            // 3. Client derives shared session key.
+            var clientEphemeral = Cryptography.Srp.GenerateEphemeralClient();
+            var privateKey = await Cryptography.Srp.DerivePrivateKey(loginResponse.Salt, _loginModel.Email, _loginModel.Password);
+            var clientSession = Cryptography.Srp.DeriveSessionClient(
+                privateKey,
+                clientEphemeral.Secret,
+                loginResponse.ServerEphemeral,
+                loginResponse.Salt,
+                _loginModel.Email);
 
-            if (result.IsSuccessStatusCode)
+            // 4. Client sends proof of session key to server.
+            result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(_loginModel.Email, clientEphemeral.Public, clientSession.Proof));
+            responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
             {
-                NavigationManager.NavigateTo("/");
+                _serverValidationErrors.ParseResponse(responseContent);
+                StateHasChanged();
+                return;
             }
+
+            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
+            if (validateLoginResponse == null)
+            {
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
+                return;
+            }
+
+            // 5. Client verifies proof.
+            Cryptography.Srp.VerifySession(clientEphemeral.Public, clientSession, validateLoginResponse.ServerSessionProof);
+
+            // Store the tokens in local storage.
+            await AuthService.StoreAccessTokenAsync(validateLoginResponse.Token.Token);
+            await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token.RefreshToken);
+
+            // Redirect to home page.
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            // If in debug mode, throw the exception.
+            #if DEBUG
+            _serverValidationErrors.AddError(ex.ToString());
+            #else
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            #endif
         }
         finally
         {

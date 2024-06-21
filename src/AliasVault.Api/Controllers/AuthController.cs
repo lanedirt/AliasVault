@@ -3,9 +3,7 @@
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
-//-----------------------------------------------------------------------s
-
-using Cryptography.Models;
+//-----------------------------------------------------------------------
 
 namespace AliasVault.Api.Controllers;
 
@@ -16,9 +14,12 @@ using System.Text;
 using AliasDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.WebApi.Auth;
 using Asp.Versioning;
+using Cryptography.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
@@ -28,10 +29,11 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
+/// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration) : ControllerBase
+public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
 {
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -39,16 +41,63 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
     /// <param name="model">Login model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
         var user = await userManager.FindByEmailAsync(model.Email);
-        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+        if (user == null)
         {
-            var tokenModel = await GenerateNewTokensForUser(user);
-            return Ok(tokenModel);
+            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
         }
 
-        return BadRequest(ServerValidationErrorResponse.Create("Invalid username or password. Please try again.", 400));
+        // Server creates ephemeral and sends to client
+        var ephemeral = Cryptography.Srp.GenerateEphemeralServer(user.Verifier);
+
+        // Store the server ephemeral in memory cache for Validate() endpoint to use.
+        cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
+        cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
+
+        return Ok(new LoginResponse(user.Salt, ephemeral.Public));
+    }
+
+    /// <summary>
+    /// Validate endpoint used to validate the client's proof and generate the server's proof.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequest model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("validate")]
+    public async Task<IActionResult> Validate([FromBody] ValidateLoginRequest model)
+    {
+        var user = await userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+        }
+
+        if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || !(serverSecretEphemeral is string))
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+        }
+
+        try
+        {
+            var serverSession = Cryptography.Srp.DeriveSessionServer(
+                serverSecretEphemeral.ToString() ?? string.Empty,
+                model.ClientPublicEphemeral,
+                user.Salt,
+                model.Email,
+                user.Verifier,
+                model.ClientSessionProof);
+
+            // If above does not throw an exception., then the client's proof is valid, and we can issue the JWT token.
+            var tokenModel = await GenerateNewTokensForUser(user);
+
+            // Return server proof for optional client check and token.
+            return Ok(new ValidateLoginResponse(serverSession.Proof, tokenModel));
+        }
+        catch
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(new [] { "Invalid email or password. Please try again." }, 400));
+        }
     }
 
     /// <summary>

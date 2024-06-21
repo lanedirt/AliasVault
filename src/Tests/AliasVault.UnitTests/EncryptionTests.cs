@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CryptographyTests.cs" company="lanedirt">
+// <copyright file="EncryptionTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,9 +10,9 @@ namespace AliasVault.Tests;
 using System.Security.Cryptography;
 
 /// <summary>
-/// Tests for the Cryptography class.
+/// Tests for the Encryption class.
 /// </summary>
-public class CryptographyTests
+public class EncryptionTests
 {
     /// <summary>
     /// Common setup for all tests.
@@ -34,11 +34,11 @@ public class CryptographyTests
         string plaintext = "Hello, World!";
 
         // Derive a key from the password using Argon2id
-        byte[] key = Cryptography.Cryptography.DeriveKeyFromPassword(password, salt);
+        byte[] key = Cryptography.Encryption.DeriveKeyFromPassword(password, salt);
         Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
 
         // Encrypt the plaintext
-        string encrypted = Cryptography.Cryptography.Encrypt(plaintext, key);
+        string encrypted = Cryptography.Encryption.Encrypt(plaintext, key);
         Console.WriteLine($"Encrypted: {encrypted}");
 
         Assert.That(encrypted, Is.Not.Null);
@@ -46,7 +46,7 @@ public class CryptographyTests
         Assert.That(encrypted, Is.Not.EqualTo(plaintext));
 
         // Decrypt the ciphertext
-        string decrypted = Cryptography.Cryptography.Decrypt(encrypted, key);
+        string decrypted = Cryptography.Encryption.Decrypt(encrypted, key);
         Console.WriteLine($"Decrypted: {decrypted}");
         Assert.That(decrypted, Is.EqualTo(plaintext));
     }
@@ -63,15 +63,15 @@ public class CryptographyTests
         string plaintext = "Hello, World!";
 
         // Derive a key from the password using Argon2id
-        byte[] key = Cryptography.Cryptography.DeriveKeyFromPassword(password, salt);
+        byte[] key = Cryptography.Encryption.DeriveKeyFromPassword(password, salt);
 
         // Encrypt the plaintext
-        string encrypted = Cryptography.Cryptography.Encrypt(plaintext, key);
+        string encrypted = Cryptography.Encryption.Encrypt(plaintext, key);
 
         // Decrypt the ciphertext using a different key
-        byte[] key2 = Cryptography.Cryptography.DeriveKeyFromPassword("your-password2", salt);
+        byte[] key2 = Cryptography.Encryption.DeriveKeyFromPassword("your-password2", salt);
 
-        Assert.Throws<CryptographicException>(() => Cryptography.Cryptography.Decrypt(encrypted, key2));
+        Assert.Throws<CryptographicException>(() => Cryptography.Encryption.Decrypt(encrypted, key2));
     }
 
     /// <summary>
