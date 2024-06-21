@@ -30,41 +30,61 @@ public class Srp
     /// <summary>
     /// Generate a verifier for a user.
     /// </summary>
-    /// <param name="email">Email.</param>
-    /// <param name="passwordHash">Hash as output of Argon2id.</param>
-    /// <param name="salt">Salt.</param>
+    /// <param name="privateKey">Hash as output of Argon2id.</param>
     /// <returns>Verifier as string.</returns>
-    public static string GenerateVerifier(string email, string passwordHash, string salt)
+    public static string GenerateVerifier(string privateKey)
     {
         var client = new SrpClient();
-        var privateKey = client.DerivePrivateKey(salt, email, passwordHash);
         var verifier = client.DeriveVerifier(privateKey);
         return verifier;
+    }
+
+    /// <summary>
+    /// Derive a private key for a user.
+    /// </summary>
+    /// <param name="salt">Salt.</param>
+    /// <param name="email">Email.</param>
+    /// <param name="passwordHash">PasswordHash.</param>
+    /// <returns>Private key as string.</returns>
+    public static string DerivePrivateKey(string salt, string email, string passwordHash)
+    {
+        var client = new SrpClient();
+        return client.DerivePrivateKey(salt, email, passwordHash);
     }
 
     /// <summary>
     /// Generate an ephemeral value for the client.
     /// </summary>
     /// <returns>Ephemeral as string.</returns>
-    public static SrpEphemeral GenerateEphemeral()
+    public static SrpEphemeral GenerateEphemeralClient()
     {
         var client = new SrpClient();
         return client.GenerateEphemeral();
     }
 
     /// <summary>
+    /// Generate an ephemeral value for the client.
+    /// </summary>
+    /// <param name="verifier">Verifier.</param>
+    /// <returns>Ephemeral as string.</returns>
+    public static SrpEphemeral GenerateEphemeralServer(string verifier)
+    {
+        var server = new SrpServer();
+        return server.GenerateEphemeral(verifier);
+    }
+
+    /// <summary>
     /// Derive a shared session key on the client side.
     /// </summary>
-    /// <param name="passwordHash">Password hash.</param>
+    /// <param name="privateKey">Password hash.</param>
     /// <param name="clientEphemeralSecret">Client ephemeral secret.</param>
     /// <param name="serverPublicEphemeral">Server public ephemeral.</param>
     /// <param name="salt">Salt.</param>
     /// <param name="email">Email.</param>
     /// <returns>session.</returns>
-    public static SrpSession DeriveSessionClient(string passwordHash, string clientEphemeralSecret, string serverPublicEphemeral, string salt, string email)
+    public static SrpSession DeriveSessionClient(string privateKey, string clientEphemeralSecret, string serverPublicEphemeral, string salt, string email)
     {
         var client = new SrpClient();
-        var privateKey = client.DerivePrivateKey(salt, email, passwordHash);
         return client.DeriveSession(
             clientEphemeralSecret,
             serverPublicEphemeral,

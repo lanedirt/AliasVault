@@ -78,7 +78,7 @@ public class CryptographyTests
     /// Test the SRP authentication flow to ensure it works correctly.
     /// </summary>
     [Test]
-    public void TestSRPAuthentication()
+    public void TestSrpAuthentication()
     {
         var email = "test@example.com";
         var password = "myPassword";
@@ -92,24 +92,25 @@ public class CryptographyTests
         // Convert to string
         string passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
-        // Client generates a salt and verifier.
+        // Signup: client generates a salt and verifier.
         string salt = Cryptography.Srp.GenerateSalt()!;
-        string verifier = Cryptography.Srp.GenerateVerifier(email, passwordHashString, salt);
+        string privateKey = Cryptography.Srp.DerivePrivateKey(salt, email, passwordHashString);
+        string verifier = Cryptography.Srp.GenerateVerifier(privateKey);
 
         // Login -----------------------------------
         // 1. Client generates an ephemeral value.
-        var clientEphemeral = Cryptography.Srp.GenerateEphemeral();
+        var clientEphemeral = Cryptography.Srp.GenerateEphemeralClient();
 
         // --> Then client sends request to server.
 
         // 2. Server retrieves salt and verifier from database.
         // Then server generates an ephemeral value as well.
-        var serverEphemeral = Cryptography.Srp.GenerateEphemeral();
+        var serverEphemeral = Cryptography.Srp.GenerateEphemeralServer(verifier);
 
         // --> Send serverEphemeral.Public to client.
 
         // 3. Client derives shared session key.
-        var clientSession = Cryptography.Srp.DeriveSessionClient(passwordHashString, clientEphemeral.Secret, serverEphemeral.Public, salt, email);
+        var clientSession = Cryptography.Srp.DeriveSessionClient(privateKey, clientEphemeral.Secret, serverEphemeral.Public, salt, email);
 
         // --> send session.Proof to server.
 
@@ -120,5 +121,8 @@ public class CryptographyTests
 
         // 5. Client verifies the proof.
         Cryptography.Srp.VerifySession(clientEphemeral.Public, clientSession, serverSession.Proof);
+
+        // Ensure the keys match.
+        Assert.That(clientSession.Key, Is.EqualTo(serverSession.Key));
     }
 }
