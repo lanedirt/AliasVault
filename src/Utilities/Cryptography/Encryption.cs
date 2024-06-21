@@ -44,7 +44,7 @@ public static class Encryption
     /// <param name="password">User password.</param>
     /// <param name="salt">The salt to use for the Argon2id hash.</param>
     /// <returns>Encryption key as byte array.</returns>
-    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt = "AliasVault")
+    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt)
     {
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
         byte[] saltBytes = Encoding.UTF8.GetBytes(salt);

@@ -46,7 +46,7 @@ public class Srp
     public static async Task<string> DerivePrivateKey(string salt, string email, string plaintextPassword)
     {
         var client = new SrpClient();
-        byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(plaintextPassword);
+        byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(plaintextPassword, salt);
         var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
         return client.DerivePrivateKey(salt, email, passwordHashString);
     }
