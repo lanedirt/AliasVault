@@ -77,25 +77,20 @@ public class CryptographyTests
     /// <summary>
     /// Test the SRP authentication flow to ensure it works correctly.
     /// </summary>
+    /// <returns>Async task.</returns>
     [Test]
-    public void TestSrpAuthentication()
+    public async Task TestSrpAuthentication()
     {
         var email = "test@example.com";
         var password = "myPassword";
-        var argon2IdSalt = "AliasVault";
 
-        // Registration -----------------------------
+        // Signup -----------------------------
+        // Client generates a salt and verifier.
+        var srpSignup = await Cryptography.Srp.SignupPrepareAsync(email, password);
 
-        // Derive a key from the password using Argon2id
-        byte[] passwordHash = Cryptography.Cryptography.DeriveKeyFromPassword(password, argon2IdSalt);
-
-        // Convert to string
-        string passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-
-        // Signup: client generates a salt and verifier.
-        string salt = Cryptography.Srp.GenerateSalt()!;
-        string privateKey = Cryptography.Srp.DerivePrivateKey(salt, email, passwordHashString);
-        string verifier = Cryptography.Srp.GenerateVerifier(privateKey);
+        var salt = srpSignup.Salt;
+        var privateKey = srpSignup.PrivateKey;
+        var verifier = srpSignup.Verifier;
 
         // Login -----------------------------------
         // 1. Client generates an ephemeral value.

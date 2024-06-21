@@ -63,7 +63,8 @@
 
         try
         {
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", _registerModel);
+            var srpSignup = await Cryptography.Srp.SignupPrepareAsync(_registerModel.Email, _registerModel.Password);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)

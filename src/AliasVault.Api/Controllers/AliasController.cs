@@ -23,7 +23,7 @@ using Service = AliasVault.Shared.Models.WebApi.Service;
 /// <param name="context">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class AliasController(AliasDbContext context, UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
+public class AliasController(AliasDbContext context, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Get all alias items for the current user.

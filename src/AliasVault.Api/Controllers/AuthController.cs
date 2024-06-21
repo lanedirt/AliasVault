@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------s
 
+using Cryptography.Models;
+
 namespace AliasVault.Api.Controllers;
 
 using System.IdentityModel.Tokens.Jwt;
@@ -29,7 +31,7 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration) : ControllerBase
+public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration) : ControllerBase
 {
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -140,10 +142,10 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
     /// <param name="model">Register model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
-        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-        var result = await userManager.CreateAsync(user, model.Password);
+        var user = new AliasVaultUser { UserName = model.Email, Email = model.Email, Salt = model.Salt, Verifier = model.Verifier };
+        var result = await userManager.CreateAsync(user);
 
         if (result.Succeeded)
         {
@@ -185,7 +187,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
     /// </summary>
     /// <param name="user">The user to generate the Jwt access token for.</param>
     /// <returns>Access token as string.</returns>
-    private string GenerateJwtToken(IdentityUser user)
+    private string GenerateJwtToken(AliasVaultUser user)
     {
         var claims = new List<Claim>
         {
@@ -255,7 +257,7 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
     /// </summary>
     /// <param name="user">The user to generate the tokens for.</param>
     /// <returns>TokenModel which includes new access and refresh token.</returns>
-    private async Task<TokenModel> GenerateNewTokensForUser(IdentityUser user)
+    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user)
     {
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();

@@ -22,7 +22,7 @@ public static class Cryptography
     /// <param name="password">User password.</param>
     /// <param name="salt">The salt to use for the Argon2id hash.</param>
     /// <returns>Encryption key as byte array.</returns>
-    public static byte[] DeriveKeyFromPassword(string password, string salt)
+    public static byte[] DeriveKeyFromPassword(string password, string salt = "AliasVault")
     {
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
         byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
@@ -30,9 +30,9 @@ public static class Cryptography
         var argon2 = new Argon2id(passwordBytes)
         {
             Salt = saltBytes,
-            DegreeOfParallelism = 2,
-            MemorySize = 4096,
-            Iterations = 4,
+            DegreeOfParallelism = 4,
+            MemorySize = 8192,
+            Iterations = 1,
         };
 
         return argon2.GetBytes(32); // Generate a 256-bit key
@@ -44,7 +44,7 @@ public static class Cryptography
     /// <param name="password">User password.</param>
     /// <param name="salt">The salt to use for the Argon2id hash.</param>
     /// <returns>Encryption key as byte array.</returns>
-    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt)
+    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt = "AliasVault")
     {
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
         byte[] saltBytes = Encoding.UTF8.GetBytes(salt);

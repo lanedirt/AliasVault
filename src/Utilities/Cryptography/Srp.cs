@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using Cryptography.Models;
+
 namespace Cryptography;
 
 using System.Security.Cryptography;
@@ -17,26 +19,26 @@ using SecureRemotePassword;
 public class Srp
 {
     /// <summary>
-    /// Generate a random salt.
+    /// Prepare signup step.
     /// </summary>
-    /// <returns>Byte array.</returns>
-    public static string? GenerateSalt()
+    /// <param name="email">Email.</param>
+    /// <param name="plaintextPassword">Plain-text password.</param>
+    /// <returns>SrpSignup model.</returns>
+    public static async Task<SrpSignup> SignupPrepareAsync(string email, string plaintextPassword)
     {
+        // Derive a key from the password using Argon2id
+        byte[] passwordHash = await Cryptography.DeriveKeyFromPasswordAsync(plaintextPassword);
+
+        // Convert to string
+        string passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+
+        // Signup: client generates a salt and verifier.
         var client = new SrpClient();
         var salt = client.GenerateSalt();
-        return salt;
-    }
-
-    /// <summary>
-    /// Generate a verifier for a user.
-    /// </summary>
-    /// <param name="privateKey">Hash as output of Argon2id.</param>
-    /// <returns>Verifier as string.</returns>
-    public static string GenerateVerifier(string privateKey)
-    {
-        var client = new SrpClient();
+        var privateKey = client.DerivePrivateKey(salt, email, passwordHashString);
         var verifier = client.DeriveVerifier(privateKey);
-        return verifier;
+
+        return new SrpSignup(email, salt, privateKey, verifier);
     }
 
     /// <summary>

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 /// <summary>
 /// The AliasDbContext class.
 /// </summary>
-public class AliasDbContext : IdentityDbContext
+public class AliasDbContext : IdentityDbContext<AliasVaultUser>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasDbContext"/> class.
@@ -56,6 +56,11 @@ public class AliasDbContext : IdentityDbContext
     /// Gets or sets the AspNetUserRefreshTokens DbSet.
     /// </summary>
     public DbSet<AspNetUserRefreshToken> AspNetUserRefreshTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultUser DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUser> AliasVaultUsers { get; set; }
 
     /// <summary>
     /// The OnModelCreating method.

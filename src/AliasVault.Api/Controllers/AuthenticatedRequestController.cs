@@ -4,6 +4,9 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
+using AliasDb;
+
 namespace AliasVault.Api.Controllers;
 
 using System.Security.Claims;
@@ -18,13 +21,13 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [Authorize]
-public class AuthenticatedRequestController(UserManager<IdentityUser> userManager) : ControllerBase
+public class AuthenticatedRequestController(UserManager<AliasVaultUser> userManager) : ControllerBase
 {
     /// <summary>
     /// Get the current authenticated user.
     /// </summary>
     /// <returns>IdentityUser object for current user.</returns>
-    protected async Task<IdentityUser?> GetCurrentUserAsync()
+    protected async Task<AliasVaultUser?> GetCurrentUserAsync()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unable to find user ID.");
         return await userManager.FindByIdAsync(userId);
