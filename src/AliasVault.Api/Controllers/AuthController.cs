@@ -54,7 +54,6 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
         cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
-        cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
         return Ok(new LoginResponse(user.Salt, ephemeral.Public));
     }
@@ -246,13 +245,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-        if (jwtKey is null)
-        {
-            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
-        }
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey()));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -286,7 +279,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
             ValidateAudience = false,
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? string.Empty)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
             ValidateLifetime = false,
         };
 
@@ -331,5 +324,21 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         await context.SaveChangesAsync();
 
         return new TokenModel() { Token = token, RefreshToken = refreshToken };
+    }
+
+    /// <summary>
+    /// Get the JWT key from the environment variables.
+    /// </summary>
+    /// <returns>JWT key as string.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if environment variable does not exist.</exception>
+    private string GetJwtKey()
+    {
+        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+        if (jwtKey is null)
+        {
+            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
+        }
+
+        return jwtKey;
     }
 }

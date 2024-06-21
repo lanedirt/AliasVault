@@ -25,7 +25,7 @@ public class AuthenticatedRequestController(UserManager<AliasVaultUser> userMana
     /// <summary>
     /// Get the current authenticated user.
     /// </summary>
-    /// <returns>IdentityUser object for current user.</returns>
+    /// <returns>AliasVaultUser object for current user.</returns>
     protected async Task<AliasVaultUser?> GetCurrentUserAsync()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unable to find user ID.");

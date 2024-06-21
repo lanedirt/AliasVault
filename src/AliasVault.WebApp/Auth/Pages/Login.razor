@@ -5,6 +5,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
+@inject GlobalNotificationService GlobalNotificationService
 @using System.Text.Json
 @using AliasVault.Shared.Models
 @using AliasVault.Shared.Models.WebApi.Auth
@@ -125,6 +126,7 @@
 
             // Redirect to home page.
             await AuthStateProvider.GetAuthenticationStateAsync();
+            GlobalNotificationService.ClearMessages();
             NavigationManager.NavigateTo("/");
         }
         catch (Exception ex)
