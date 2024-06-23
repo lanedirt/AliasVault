@@ -28,7 +28,7 @@ RUN dotnet publish "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/pub
 
 # Create the migration bundle
 # Install the Entity Framework Core CLI tool and run migrations to create the database
-RUN dotnet tool install --global dotnet-ef --version 8.0.5
+RUN dotnet tool install --global dotnet-ef --version 8.0.6
 RUN /root/.dotnet/tools/dotnet-ef migrations bundle -o /app/migrationbundle
 
 FROM base AS final
