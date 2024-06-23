@@ -37,7 +37,6 @@ public class RootController : ControllerBase
                 {
                     // There are pending migrations
                     return StatusCode(500, "Internal server error");
-
                 }
 
                 // Database is up to date
