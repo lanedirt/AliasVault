@@ -4,8 +4,10 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasVault.Api.Controllers;
 
+using AliasDb;
 using AliasGenerators.Identity;
 using AliasGenerators.Identity.Implementations;
 using Asp.Versioning;
@@ -17,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class IdentityController(UserManager<IdentityUser> userManager) : AuthenticatedRequestController(userManager)
+public class IdentityController(UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Proxies the request to the identity generator to generate a random identity.

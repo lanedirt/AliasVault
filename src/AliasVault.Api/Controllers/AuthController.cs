@@ -3,7 +3,7 @@
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
-//-----------------------------------------------------------------------s
+//-----------------------------------------------------------------------
 
 namespace AliasVault.Api.Controllers;
 
@@ -14,9 +14,12 @@ using System.Text;
 using AliasDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.WebApi.Auth;
 using Asp.Versioning;
+using Cryptography.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
@@ -26,27 +29,79 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
+/// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasDbContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration) : ControllerBase
+public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
 {
+    /// <summary>
+    /// Error message for invalid email or password.
+    /// </summary>
+    public static readonly string[] InvalidEmailOrPasswordError = { "Invalid email or password. Please try again." };
+
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
         var user = await userManager.FindByEmailAsync(model.Email);
-        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+        if (user == null)
         {
-            var tokenModel = await GenerateNewTokensForUser(user);
-            return Ok(tokenModel);
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
 
-        return BadRequest(ServerValidationErrorResponse.Create("Invalid username or password. Please try again.", 400));
+        // Server creates ephemeral and sends to client
+        var ephemeral = Cryptography.Srp.GenerateEphemeralServer(user.Verifier);
+
+        // Store the server ephemeral in memory cache for Validate() endpoint to use.
+        cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
+
+        return Ok(new LoginResponse(user.Salt, ephemeral.Public));
+    }
+
+    /// <summary>
+    /// Validate endpoint used to validate the client's proof and generate the server's proof.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequest model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("validate")]
+    public async Task<IActionResult> Validate([FromBody] ValidateLoginRequest model)
+    {
+        var user = await userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+        }
+
+        if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || !(serverSecretEphemeral is string))
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+        }
+
+        try
+        {
+            var serverSession = Cryptography.Srp.DeriveSessionServer(
+                serverSecretEphemeral.ToString() ?? string.Empty,
+                model.ClientPublicEphemeral,
+                user.Salt,
+                model.Email,
+                user.Verifier,
+                model.ClientSessionProof);
+
+            // If above does not throw an exception., then the client's proof is valid, and we can issue the JWT token.
+            var tokenModel = await GenerateNewTokensForUser(user);
+
+            // Return server proof for optional client check and token.
+            return Ok(new ValidateLoginResponse(serverSession.Proof, tokenModel));
+        }
+        catch
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+        }
     }
 
     /// <summary>
@@ -140,10 +195,10 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
     /// <param name="model">Register model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
-        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-        var result = await userManager.CreateAsync(user, model.Password);
+        var user = new AliasVaultUser { UserName = model.Email, Email = model.Email, Salt = model.Salt, Verifier = model.Verifier };
+        var result = await userManager.CreateAsync(user);
 
         if (result.Succeeded)
         {
@@ -179,29 +234,66 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
     }
 
     /// <summary>
-    /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
-    /// and is short-lived by design. With the separate refresh token, the user can request a new access token
-    /// when this access token expires.
+    /// Get the JWT key from the environment variables.
     /// </summary>
-    /// <param name="user">The user to generate the Jwt access token for.</param>
-    /// <returns>Access token as string.</returns>
-    private string GenerateJwtToken(IdentityUser user)
+    /// <returns>JWT key as string.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if environment variable does not exist.</exception>
+    private static string GetJwtKey()
     {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
-
         var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
         if (jwtKey is null)
         {
             throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        return jwtKey;
+    }
+
+    /// <summary>
+    /// Get the principal from an expired token. This is used to validate the token and extract the user.
+    /// </summary>
+    /// <param name="token">The expired token as string.</param>
+    /// <returns>Claims principal.</returns>
+    /// <exception cref="SecurityTokenException">Thrown if provided token is invalid.</exception>
+    private static ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
+            ValidateLifetime = false,
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return principal;
+    }
+
+    /// <summary>
+    /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
+    /// and is short-lived by design. With the separate refresh token, the user can request a new access token
+    /// when this access token expires.
+    /// </summary>
+    /// <param name="user">The user to generate the Jwt access token for.</param>
+    /// <returns>Access token as string.</returns>
+    private string GenerateJwtToken(AliasVaultUser user)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey()));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -228,34 +320,13 @@ public class AuthController(AliasDbContext context, UserManager<IdentityUser> us
         return Convert.ToBase64String(randomNumber);
     }
 
-    private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
-    {
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false,
-            ValidateIssuer = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? string.Empty)),
-            ValidateLifetime = false,
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-        {
-            throw new SecurityTokenException("Invalid token");
-        }
-
-        return principal;
-    }
-
     /// <summary>
     /// Generates a new access and refresh token for a user and persists the refresh token
     /// to the database.
     /// </summary>
     /// <param name="user">The user to generate the tokens for.</param>
     /// <returns>TokenModel which includes new access and refresh token.</returns>
-    private async Task<TokenModel> GenerateNewTokensForUser(IdentityUser user)
+    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user)
     {
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();

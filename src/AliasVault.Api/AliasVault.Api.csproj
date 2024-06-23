@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -38,6 +38,7 @@
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -28,10 +28,10 @@ public class Login
     public string UserId { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets foreign key to the IdentityUser object.
+    /// Gets or sets foreign key to the AliasVaultUser object.
     /// </summary>
     [ForeignKey("UserId")]
-    public virtual IdentityUser User { get; set; } = null!;
+    public virtual AliasVaultUser User { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets optional login description.

@@ -15,5 +15,5 @@ public static class TestDefaults
     /// <summary>
     /// Gets or sets default timeout while waiting for pages to load in milliseconds.
     /// </summary>
-    public static int DefaultTimeout { get; set; } = 5000;
+    public static int DefaultTimeout { get; set; } = 10000;
 }

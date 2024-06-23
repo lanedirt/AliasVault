@@ -52,7 +52,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     options.TokenLifespan = TimeSpan.FromDays(30);
     options.Name = "AliasVault";
 });
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AliasVaultUser, IdentityRole>(options =>
     {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
@@ -61,11 +61,11 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
         options.Password.RequiredLength = 8;
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
-        options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<IdentityUser>)));
+        options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<AliasVaultUser>)));
     })
     .AddEntityFrameworkStores<AliasDbContext>()
     .AddDefaultTokenProviders()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("AliasVault");
+    .AddTokenProvider<DataProtectorTokenProvider<AliasVaultUser>>("AliasVault");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -105,6 +105,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
+
 builder.Services.AddApiVersioning(options =>
     {
         options.DefaultApiVersion = new ApiVersion(1, 0);
