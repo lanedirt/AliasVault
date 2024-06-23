@@ -27,8 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{29DE523D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.E2ETests", "src\Tests\AliasVault.E2ETests\AliasVault.E2ETests.csproj", "{AF013D08-1BF6-4E23-87D2-37F614BE7952}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTasks", "src\Utilities\BuildTasks\BuildTasks.csproj", "{66E17D91-5262-4BB3-8EC0-7FE354366D19}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,10 +73,6 @@ Global
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66E17D91-5262-4BB3-8EC0-7FE354366D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66E17D91-5262-4BB3-8EC0-7FE354366D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66E17D91-5262-4BB3-8EC0-7FE354366D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66E17D91-5262-4BB3-8EC0-7FE354366D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +82,5 @@ Global
 		{8E6A418A-B305-465D-857D-49953605C18E} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
 		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
-		{66E17D91-5262-4BB3-8EC0-7FE354366D19} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 EndGlobal

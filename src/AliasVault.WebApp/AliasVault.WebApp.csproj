@@ -6,9 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <BuildVersion>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildVersion>
-        <!-- Define paths for Debug and Release configurations -->
-        <BuildTasksDllPath Condition="'$(Configuration)' == 'Debug'">bin\Debug\net8.0\BuildTasks.dll</BuildTasksDllPath>
-        <BuildTasksDllPath Condition="'$(Configuration)' == 'Release'">bin\Release\net8.0\BuildTasks.dll</BuildTasksDllPath>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -25,10 +22,27 @@
         <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
     </PropertyGroup>
 
-    <UsingTask TaskName="BuildTasks.ReplaceTextTask" AssemblyFile="buildtasks/BuildTasks.dll" />
+    <UsingTask TaskName="ReplaceText" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <InputFile ParameterType="System.String" Required="true" />
+            <OutputFile ParameterType="System.String" Required="true" />
+            <CacheBuster ParameterType="System.String" Required="true" />
+            <BuildVersion ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+        string content = File.ReadAllText(InputFile);
+        content = content.Replace("@CacheBuster", CacheBuster).Replace("@BuildVersion", BuildVersion);
+        File.WriteAllText(OutputFile, content);
+        Log.LogMessage(MessageImportance.High, "Replaced content in " + OutputFile);
+]]>
+            </Code>
+        </Task>
+    </UsingTask>
 
     <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
-        <ReplaceTextTask InputFile="wwwroot/index.template.html" OutputFile="wwwroot/index.html" CacheBuster="$(CacheBuster)" BuildVersion="$(BuildVersion)" />
+        <ReplaceText InputFile="wwwroot/index.template.html" OutputFile="wwwroot/index.html" CacheBuster="$(CacheBuster)" BuildVersion="$(BuildVersion)" />
     </Target>
 
     <ItemGroup>
@@ -58,7 +72,6 @@
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
-      <ProjectReference Include="..\Utilities\BuildTasks\BuildTasks.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
