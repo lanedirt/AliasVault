@@ -8,7 +8,6 @@
 namespace AliasVault.Api.Controllers;
 
 using AliasDb;
-using AliasGenerators.Identity;
 using AliasGenerators.Identity.Implementations;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;

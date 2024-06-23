@@ -172,7 +172,7 @@ using (var scope = app.Services.CreateScope())
     var container = scope.ServiceProvider;
     var db = container.GetRequiredService<AliasDbContext>();
 
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
 }
 
 await app.RunAsync();
