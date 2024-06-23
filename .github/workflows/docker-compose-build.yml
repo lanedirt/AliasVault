@@ -15,6 +15,10 @@ jobs:
         options: --privileged
     steps:
       - uses: actions/checkout@v2
+      - name: Set permissions and run init.sh
+        run: |
+          chmod +x init.sh
+          ./init.sh
       - name: Set up Docker Compose
         run: |
             # Build the images and start the services
