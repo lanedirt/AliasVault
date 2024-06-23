@@ -13,6 +13,7 @@ COPY ["src/AliasVault.Shared/AliasVault.Shared.csproj", "src/AliasVault.Shared/"
 COPY ["src/AliasDb/AliasDb.csproj", "src/AliasDb/"]
 COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
 COPY ["src/Utilities/FaviconExtractor/FaviconExtractor.csproj", "src/Utilities/FaviconExtractor/"]
+COPY ["src/Utilities/BuildTasks/BuildTasks.csproj", "src/Utilities/BuildTasks/"]
 RUN dotnet restore "src/AliasVault.WebApp/AliasVault.WebApp.csproj"
 
 # Copy the rest of the application code

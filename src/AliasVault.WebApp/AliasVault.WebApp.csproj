@@ -25,7 +25,7 @@
         <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
     </PropertyGroup>
 
-    <UsingTask TaskName="BuildTasks.ReplaceTextTask" AssemblyFile="$(BuildTasksDllPath)" />
+    <UsingTask TaskName="BuildTasks.ReplaceTextTask" AssemblyFile="buildtasks/BuildTasks.dll" />
 
     <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
         <ReplaceTextTask InputFile="wwwroot/index.template.html" OutputFile="wwwroot/index.html" CacheBuster="$(CacheBuster)" BuildVersion="$(BuildVersion)" />
