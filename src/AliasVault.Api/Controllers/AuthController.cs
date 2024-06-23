@@ -250,6 +250,33 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
     }
 
     /// <summary>
+    /// Get the principal from an expired token. This is used to validate the token and extract the user.
+    /// </summary>
+    /// <param name="token">The expired token as string.</param>
+    /// <returns>Claims principal.</returns>
+    /// <exception cref="SecurityTokenException">Thrown if provided token is invalid.</exception>
+    private static ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
+            ValidateLifetime = false,
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return principal;
+    }
+
+    /// <summary>
     /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
     /// and is short-lived by design. With the separate refresh token, the user can request a new access token
     /// when this access token expires.
@@ -291,27 +318,6 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
 
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
-    }
-
-    private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
-    {
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false,
-            ValidateIssuer = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
-            ValidateLifetime = false,
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-        {
-            throw new SecurityTokenException("Invalid token");
-        }
-
-        return principal;
     }
 
     /// <summary>
