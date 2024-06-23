@@ -41,8 +41,8 @@ jobs:
         run: |
             # Test if the service on localhost:81 responds
             http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
-            if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 404 ]; then
-                echo "Service did not respond with expected 200 OK or 404 Not Found"
+            if [ "$http_code" -ne 200 ] then
+                echo "Service did not respond with expected 200 OK. Check if all DB migrations are applied."
                 exit 1
             else
                 echo "Service responded with $http_code"
