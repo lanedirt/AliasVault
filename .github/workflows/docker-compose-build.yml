@@ -41,7 +41,7 @@ jobs:
         run: |
             # Test if the service on localhost:81 responds
             http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
-            if [ "$http_code" -ne 200 ] then
+            if [ "$http_code" -ne 200 ]; then
                 echo "Service did not respond with expected 200 OK. Check if all DB migrations are applied."
                 exit 1
             else
