@@ -8,7 +8,7 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.Shared.xml</DocumentationFile>
-      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

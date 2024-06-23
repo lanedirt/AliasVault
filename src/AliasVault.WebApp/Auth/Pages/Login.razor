@@ -129,15 +129,19 @@
             GlobalNotificationService.ClearMessages();
             NavigationManager.NavigateTo("/");
         }
+#if DEBUG
         catch (Exception ex)
         {
-            // If in debug mode, throw the exception.
-            #if DEBUG
+            // If in debug mode show the actual exception.
             _serverValidationErrors.AddError(ex.ToString());
-            #else
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
-            #endif
         }
+#else
+        catch
+        {
+            // If in release mode show a generic error.
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+        }
+#endif
         finally
         {
             _loadingIndicator.Hide();

@@ -8,27 +8,42 @@
         <BuildVersion>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <CacheBuster>dev</CacheBuster>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugSymbols>true</DebugSymbols>
+        <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Optimize>True</Optimize>
+        <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
+    </PropertyGroup>
+
+    <UsingTask TaskName="ReplaceText" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <InputFile ParameterType="System.String" Required="true" />
+            <OutputFile ParameterType="System.String" Required="true" />
+            <CacheBuster ParameterType="System.String" Required="true" />
+            <BuildVersion ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+        string content = File.ReadAllText(InputFile);
+        content = content.Replace("@CacheBuster", CacheBuster).Replace("@BuildVersion", BuildVersion);
+        File.WriteAllText(OutputFile, content);
+        Log.LogMessage(MessageImportance.High, "Replaced content in " + OutputFile);
+]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
     <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
-        <Exec Command="dotnet msbuild -t:ReplaceText -p:CacheBuster=$(CacheBuster);BuildVersion='$(BuildVersion)'" />
+        <ReplaceText InputFile="wwwroot/index.template.html" OutputFile="wwwroot/index.html" CacheBuster="$(CacheBuster)" BuildVersion="$(BuildVersion)" />
     </Target>
-
-    <Target Name="ReplaceText">
-        <Exec Command="sed 's/@CacheBuster/$(CacheBuster)/g;s/@BuildVersion/$(BuildVersion)/g' wwwroot/index.template.html > wwwroot/index.html" />
-    </Target>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-      <CacheBuster>dev</CacheBuster>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugSymbols>true</DebugSymbols>
-      <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-      <Optimize>True</Optimize>
-      <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
-    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
