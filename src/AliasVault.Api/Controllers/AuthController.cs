@@ -36,6 +36,11 @@ using Microsoft.IdentityModel.Tokens;
 public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
 {
     /// <summary>
+    /// Error message for invalid email or password.
+    /// </summary>
+    public static readonly string[] InvalidEmailOrPasswordError = { "Invalid email or password. Please try again." };
+
+    /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>
@@ -46,7 +51,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         var user = await userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
 
         // Server creates ephemeral and sends to client
@@ -69,12 +74,12 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         var user = await userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
 
         if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || !(serverSecretEphemeral is string))
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
 
         try
@@ -95,7 +100,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         }
         catch
         {
-            return BadRequest(ServerValidationErrorResponse.Create(new[] { "Invalid email or password. Please try again." }, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
     }
 
@@ -229,6 +234,22 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
     }
 
     /// <summary>
+    /// Get the JWT key from the environment variables.
+    /// </summary>
+    /// <returns>JWT key as string.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if environment variable does not exist.</exception>
+    private static string GetJwtKey()
+    {
+        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+        if (jwtKey is null)
+        {
+            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
+        }
+
+        return jwtKey;
+    }
+
+    /// <summary>
     /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
     /// and is short-lived by design. With the separate refresh token, the user can request a new access token
     /// when this access token expires.
@@ -239,7 +260,7 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+            new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -324,21 +345,5 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
         await context.SaveChangesAsync();
 
         return new TokenModel() { Token = token, RefreshToken = refreshToken };
-    }
-
-    /// <summary>
-    /// Get the JWT key from the environment variables.
-    /// </summary>
-    /// <returns>JWT key as string.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown if environment variable does not exist.</exception>
-    private string GetJwtKey()
-    {
-        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-        if (jwtKey is null)
-        {
-            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
-        }
-
-        return jwtKey;
     }
 }

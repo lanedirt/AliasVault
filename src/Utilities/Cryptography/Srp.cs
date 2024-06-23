@@ -7,7 +7,6 @@
 
 namespace Cryptography;
 
-using System.Security.Cryptography;
 using Cryptography.Models;
 using SecureRemotePassword;
 
@@ -15,7 +14,7 @@ using SecureRemotePassword;
 /// SRP is a secure remote password protocol that allows a user to authenticate themselves
 /// to a server without sending the password over the network.
 /// </summary>
-public class Srp
+public static class Srp
 {
     /// <summary>
     /// Prepare signup step.

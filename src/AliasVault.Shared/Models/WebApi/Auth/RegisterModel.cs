@@ -29,7 +29,7 @@ public class RegisterModel
     /// <summary>
     /// Gets or sets the email.
     /// </summary>
-    public string Email { get; set; } = null!;
+    public string Email { get; set; }
 
     /// <summary>
     /// Gets or sets the salt.
