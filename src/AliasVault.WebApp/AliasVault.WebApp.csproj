@@ -6,29 +6,30 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <BuildVersion>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildVersion>
+        <!-- Define paths for Debug and Release configurations -->
+        <BuildTasksDllPath Condition="'$(Configuration)' == 'Debug'">bin\Debug\net8.0\BuildTasks.dll</BuildTasksDllPath>
+        <BuildTasksDllPath Condition="'$(Configuration)' == 'Release'">bin\Release\net8.0\BuildTasks.dll</BuildTasksDllPath>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <CacheBuster>dev</CacheBuster>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugSymbols>true</DebugSymbols>
+        <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Optimize>True</Optimize>
+        <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
+    </PropertyGroup>
+
+    <UsingTask TaskName="BuildTasks.ReplaceTextTask" AssemblyFile="$(BuildTasksDllPath)" />
 
     <Target Name="GenerateCacheBustedIndexHtml" BeforeTargets="Build">
-        <Exec Command="dotnet msbuild -t:ReplaceText -p:CacheBuster=$(CacheBuster);BuildVersion='$(BuildVersion)'" />
+        <ReplaceTextTask InputFile="wwwroot/index.template.html" OutputFile="wwwroot/index.html" CacheBuster="$(CacheBuster)" BuildVersion="$(BuildVersion)" />
     </Target>
-
-    <Target Name="ReplaceText">
-        <Exec Command="sed 's/@CacheBuster/$(CacheBuster)/g;s/@BuildVersion/$(BuildVersion)/g' wwwroot/index.template.html > wwwroot/index.html" />
-    </Target>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <CacheBuster>dev</CacheBuster>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugSymbols>true</DebugSymbols>
-      <DocumentationFile>bin\Release\net8.0\AliasVault.WebApp.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <Optimize>True</Optimize>
-      <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>
-    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -57,6 +58,7 @@
       <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\Utilities\BuildTasks\BuildTasks.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
