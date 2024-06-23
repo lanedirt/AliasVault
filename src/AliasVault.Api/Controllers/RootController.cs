@@ -24,6 +24,8 @@ public class RootController : ControllerBase
     /// </summary>
     /// <returns>Http 200 if database connection is successful.</returns>
     [HttpGet]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<int>(StatusCodes.Status500InternalServerError)]
     public IActionResult Get()
     {
         try
@@ -36,7 +38,7 @@ public class RootController : ControllerBase
                 if (allMigrations.Except(appliedMigrations).Any())
                 {
                     // There are pending migrations
-                    return StatusCode(500, "Internal server error");
+                    return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
                 }
 
                 // Database is up to date

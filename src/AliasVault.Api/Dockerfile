@@ -26,11 +26,6 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
-# Create the migration bundle
-# Install the Entity Framework Core CLI tool and run migrations to create the database
-RUN dotnet tool install --global dotnet-ef --version 8.0.6
-RUN /root/.dotnet/tools/dotnet-ef migrations bundle -o /app/migrationbundle
-
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
