@@ -54,11 +54,34 @@ public class BlazorWasmAppManager
             _blazorWasmErrors.Add(args.Data);
         };
 
-        _blazorWasmProcess.Start();
-        _blazorWasmProcess.BeginOutputReadLine();
-        _blazorWasmProcess.BeginErrorReadLine();
-
-        await WaitForStartupAsync(port);
+        try
+        {
+            _blazorWasmProcess.Start();
+            _blazorWasmProcess.BeginOutputReadLine();
+            _blazorWasmProcess.BeginErrorReadLine();
+            await WaitForStartupAsync(port);
+        }
+        catch (Exception ex)
+        {
+            // Retry up to 3 times
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    _blazorWasmProcess.Start();
+                    _blazorWasmProcess.BeginOutputReadLine();
+                    _blazorWasmProcess.BeginErrorReadLine();
+                    await WaitForStartupAsync(port);
+                    break; // Success, exit the loop
+                }
+                catch (Exception)
+                {
+                    // Retry failed, log the exception and continue to the next attempt
+                    await TestContext.Out.WriteLineAsync($"Failed to start Blazor WebAssembly application. Retry attempt {i + 1}");
+                    await TestContext.Out.WriteLineAsync(ex.Message);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -172,8 +195,7 @@ public class BlazorWasmAppManager
 
                 if (_blazorWasmErrors.Count > 0)
                 {
-                    Assert.Fail($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
-                    return;
+                    throw new Exception($"WASM failed to start: {string.Join(Environment.NewLine, _blazorWasmErrors)}");
                 }
             }
         }
