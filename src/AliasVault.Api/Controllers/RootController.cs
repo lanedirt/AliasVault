@@ -7,7 +7,7 @@
 
 namespace AliasVault.Api.Controllers;
 
-using AliasDb;
+using AliasServerDb;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +30,7 @@ public class RootController : ControllerBase
     {
         try
         {
-            using (var dbContext = new AliasDbContext())
+            using (var dbContext = new AliasServerDbContext())
             {
                 var appliedMigrations = dbContext.Database.GetAppliedMigrations();
                 var allMigrations = dbContext.Database.GetMigrations();

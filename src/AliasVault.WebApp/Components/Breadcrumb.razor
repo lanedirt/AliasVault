@@ -1,5 +1,4 @@
 ﻿@inherits ComponentBase
-@using Microsoft.IdentityModel.Tokens
 
 <nav class="flex mb-5" aria-label="RecentEmails">
     <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
@@ -11,7 +10,7 @@
         </li>
         @foreach (var item in BreadcrumbItems)
         {
-            @if (!item.Url.IsNullOrEmpty())
+            @if (item.Url is not null)
             {
                 <li>
                     <div class="flex items-center">

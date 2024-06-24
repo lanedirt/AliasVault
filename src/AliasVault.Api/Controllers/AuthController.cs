@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AliasDb;
+using AliasServerDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
@@ -25,7 +25,7 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Auth controller for handling authentication.
 /// </summary>
-/// <param name="context">AliasDbContext instance.</param>
+/// <param name="context">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
+public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid email or password.

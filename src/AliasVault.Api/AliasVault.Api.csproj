@@ -35,9 +35,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
     </ItemGroup>
 

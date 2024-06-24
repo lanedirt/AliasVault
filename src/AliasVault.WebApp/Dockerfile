@@ -10,7 +10,7 @@ WORKDIR /src
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.WebApp/AliasVault.WebApp.csproj", "src/AliasVault.WebApp/"]
 COPY ["src/AliasVault.Shared/AliasVault.Shared.csproj", "src/AliasVault.Shared/"]
-COPY ["src/AliasDb/AliasDb.csproj", "src/AliasDb/"]
+COPY ["src/AliasServerDb/AliasServerDb.csproj", "src/AliasServerDb/"]
 COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
 COPY ["src/Utilities/FaviconExtractor/FaviconExtractor.csproj", "src/Utilities/FaviconExtractor/"]
 RUN dotnet restore "src/AliasVault.WebApp/AliasVault.WebApp.csproj"

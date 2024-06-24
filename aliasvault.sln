@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasDb", "src\AliasDb\AliasDb.csproj", "{64F47C9A-FE69-4793-B469-28BAADEC6706}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasGenerators", "src\AliasGenerators\AliasGenerators.csproj", "{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}"
@@ -25,16 +23,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{29DE523D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.E2ETests", "src\Tests\AliasVault.E2ETests\AliasVault.E2ETests.csproj", "{AF013D08-1BF6-4E23-87D2-37F614BE7952}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqliteWasm", "src\Utilities\SqliteWasm\SqliteWasm.csproj", "{6DC107A8-4887-42EA-B16B-C9A7B6A0298B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{5F7417F6-4388-49CC-9511-ED63C4A6488A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasServerDb", "src\Databases\AliasServerDb\AliasServerDb.csproj", "{1277105D-50CD-4CE0-9C2C-549F46867E54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasClientDb", "database\AliasClientDb\AliasClientDb.csproj", "{FE10F294-817F-477E-A24F-8597A15AF0B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64F47C9A-FE69-4793-B469-28BAADEC6706}.Release|Any CPU.Build.0 = Release|Any CPU
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -67,6 +69,18 @@ Global
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DC107A8-4887-42EA-B16B-C9A7B6A0298B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DC107A8-4887-42EA-B16B-C9A7B6A0298B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DC107A8-4887-42EA-B16B-C9A7B6A0298B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DC107A8-4887-42EA-B16B-C9A7B6A0298B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1277105D-50CD-4CE0-9C2C-549F46867E54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1277105D-50CD-4CE0-9C2C-549F46867E54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1277105D-50CD-4CE0-9C2C-549F46867E54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1277105D-50CD-4CE0-9C2C-549F46867E54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE10F294-817F-477E-A24F-8597A15AF0B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE10F294-817F-477E-A24F-8597A15AF0B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE10F294-817F-477E-A24F-8597A15AF0B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE10F294-817F-477E-A24F-8597A15AF0B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,5 +90,8 @@ Global
 		{8E6A418A-B305-465D-857D-49953605C18E} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
 		{427EA8E2-EA76-467E-A6BC-201EFE40C0D0} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{AF013D08-1BF6-4E23-87D2-37F614BE7952} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
+		{6DC107A8-4887-42EA-B16B-C9A7B6A0298B} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
+		{1277105D-50CD-4CE0-9C2C-549F46867E54} = {5F7417F6-4388-49CC-9511-ED63C4A6488A}
+		{FE10F294-817F-477E-A24F-8597A15AF0B5} = {5F7417F6-4388-49CC-9511-ED63C4A6488A}
 	EndGlobalSection
 EndGlobal

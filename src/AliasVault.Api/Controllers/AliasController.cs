@@ -8,7 +8,7 @@
 namespace AliasVault.Api.Controllers;
 
 using System.Globalization;
-using AliasDb;
+using AliasServerDb;
 using AliasVault.Shared.Models.WebApi;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
@@ -23,7 +23,7 @@ using Service = AliasVault.Shared.Models.WebApi.Service;
 /// <param name="context">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class AliasController(AliasDbContext context, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class AliasController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Get all alias items for the current user.
@@ -139,7 +139,7 @@ public class AliasController(AliasDbContext context, UserManager<AliasVaultUser>
             UserId = user.Id,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Identity = new AliasDb.Identity()
+            Identity = new AliasServerDb.Identity()
             {
                 NickName = model.Identity.NickName,
                 FirstName = model.Identity.FirstName,
@@ -160,14 +160,14 @@ public class AliasController(AliasDbContext context, UserManager<AliasVaultUser>
             },
         };
 
-        login.Passwords.Add(new AliasDb.Password()
+        login.Passwords.Add(new AliasServerDb.Password()
         {
             Value = model.Password.Value,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         });
 
-        login.Service = new AliasDb.Service()
+        login.Service = new AliasServerDb.Service()
         {
             Name = model.Service.Name,
             Url = model.Service.Url,

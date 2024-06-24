@@ -1,0 +1,76 @@
+﻿@page "/dbtest"
+@inherits PageBase
+@inject AliasService AliasService
+@inject SqliteWasmDbContextFactory<AliasClientDbContext> Factory
+
+
+<LayoutPageTitle>Dbtest</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Dbtest</h1>
+            <a href="/add-alias" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                + Add new alias
+            </a>
+        </div>
+        <p>Find all of your aliases below.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+
+<button @onclick="LoadAliasFromDbAsync">Load from db again</button>
+
+<div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
+    @foreach (var password in Passwords)
+    {
+        <div>
+            <p>@password.CreatedAt</p>
+            <p>@password.Value</p>
+        </div>
+    }
+</div>
+
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private List<AliasClientDb.Password> Passwords { get; set; } = new();
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAliasFromDbAsync();
+        }
+    }
+
+    private async Task LoadAliasFromDbAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        using var db = await Factory.CreateDbContextAsync();
+
+
+        // Insert row in database
+        db.Passwords.Add(new Password() { Id = Guid.NewGuid(), Value = "Test factory insert SQLite", CreatedAt = DateTime.Now });
+
+        // Save changes
+        await db.SaveChangesAsync();
+
+        // Load all passwords from the database
+        var passwords = await db.Passwords.ToListAsync();
+
+        // Show them on page
+
+        Passwords = passwords;
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

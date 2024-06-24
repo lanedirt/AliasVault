@@ -5,6 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using AliasClientDb;
 using AliasVault.WebApp;
 using AliasVault.WebApp.Auth.Providers;
 using AliasVault.WebApp.Auth.Services;
@@ -13,6 +14,8 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.EntityFrameworkCore;
+using SqliteWasm;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -38,6 +41,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<AliasService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
+builder.Services.AddSqliteWasmDbContextFactory<AliasClientDbContext>(
+    opts => opts.UseSqlite("Data Source=:memory:;"));
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 await builder.Build().RunAsync();
