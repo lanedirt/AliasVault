@@ -34,10 +34,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\LICENSE.md">
+      <Content Include="..\..\..\LICENSE.md">
         <Link>LICENSE.md</Link>
       </Content>
-      <AdditionalFiles Include="..\..\src\stylecop.json">
+      <AdditionalFiles Include="..\..\..\src\stylecop.json">
         <Link>stylecop.json</Link>
       </AdditionalFiles>
     </ItemGroup>

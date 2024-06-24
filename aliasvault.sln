@@ -27,7 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{5F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasServerDb", "src\Databases\AliasServerDb\AliasServerDb.csproj", "{1277105D-50CD-4CE0-9C2C-549F46867E54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasClientDb", "database\AliasClientDb\AliasClientDb.csproj", "{FE10F294-817F-477E-A24F-8597A15AF0B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasClientDb", "src\Databases\AliasClientDb\AliasClientDb.csproj", "{FE10F294-817F-477E-A24F-8597A15AF0B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
