@@ -5,10 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Data;
-
 namespace AliasVault.WebApp.Services;
 
+using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
@@ -135,6 +134,69 @@ public class AliasClientDbService
         }
     }
 
+    private static async Task ImportDbContextFromBase64Async(AliasClientDbContext dbContext, string base64String)
+    {
+        var bytes = Convert.FromBase64String(base64String);
+        var tempFileName = Path.GetRandomFileName();
+        await File.WriteAllBytesAsync(tempFileName, bytes);
+
+        using (var connection = new SqliteConnection(dbContext.Database.GetDbConnection().ConnectionString))
+        {
+            await connection.OpenAsync();
+            using (var command = connection.CreateCommand())
+            {
+                // Drop all tables in the original database
+                command.CommandText = @"
+                    SELECT 'DELETE FROM ' || name || ';'
+                    FROM sqlite_master
+                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+                var dropTableCommands = new List<string>();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        dropTableCommands.Add(reader.GetString(0));
+                    }
+                }
+
+                foreach (var dropTableCommand in dropTableCommands)
+                {
+                    command.CommandText = dropTableCommand;
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                // Attach the imported database and copy tables
+                command.CommandText = "ATTACH DATABASE @fileName AS importDb";
+                command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
+                await command.ExecuteNonQueryAsync();
+
+                command.CommandText = @"
+                    SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
+                    FROM sqlite_master
+                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+                var tableInsertCommands = new List<string>();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        tableInsertCommands.Add(reader.GetString(0));
+                    }
+                }
+
+                foreach (var tableInsertCommand in tableInsertCommands)
+                {
+                    command.CommandText = tableInsertCommand;
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                command.CommandText = "DETACH DATABASE importDb";
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+
+        File.Delete(tempFileName);
+    }
+
     private async Task InitializeDatabaseAsync()
     {
         // Create a new in-memory database.
@@ -234,68 +296,5 @@ public class AliasClientDbService
         {
             return false;
         }
-    }
-
-    private async Task ImportDbContextFromBase64Async(AliasClientDbContext dbContext, string base64String)
-    {
-        var bytes = Convert.FromBase64String(base64String);
-        var tempFileName = Path.GetRandomFileName();
-        await File.WriteAllBytesAsync(tempFileName, bytes);
-
-        using (var connection = new SqliteConnection(dbContext.Database.GetDbConnection().ConnectionString))
-        {
-            await connection.OpenAsync();
-            using (var command = connection.CreateCommand())
-            {
-                // Drop all tables in the original database
-                command.CommandText = @"
-                    SELECT 'DELETE FROM ' || name || ';'
-                    FROM sqlite_master
-                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
-                var dropTableCommands = new List<string>();
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        dropTableCommands.Add(reader.GetString(0));
-                    }
-                }
-
-                foreach (var dropTableCommand in dropTableCommands)
-                {
-                    command.CommandText = dropTableCommand;
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                // Attach the imported database and copy tables
-                command.CommandText = "ATTACH DATABASE @fileName AS importDb";
-                command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
-                await command.ExecuteNonQueryAsync();
-
-                command.CommandText = @"
-                    SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
-                    FROM sqlite_master
-                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
-                var tableInsertCommands = new List<string>();
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        tableInsertCommands.Add(reader.GetString(0));
-                    }
-                }
-
-                foreach (var tableInsertCommand in tableInsertCommands)
-                {
-                    command.CommandText = tableInsertCommand;
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                command.CommandText = "DETACH DATABASE importDb";
-                await command.ExecuteNonQueryAsync();
-            }
-        }
-
-        File.Delete(tempFileName);
     }
 }
