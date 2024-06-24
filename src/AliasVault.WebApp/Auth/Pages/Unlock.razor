@@ -135,6 +135,11 @@
 
             // 5. Client verifies proof.
             Srp.VerifySession(clientEphemeral.Public, clientSession, validateLoginResponse.ServerSessionProof);
+
+            // Store the changed access/refresh tokens in local storage.
+            await AuthService.StoreAccessTokenAsync(validateLoginResponse.Token.Token);
+            await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token.RefreshToken);
+
             // Store the encryption key in memory.
             AuthService.StoreEncryptionKey(passwordHash);
 
