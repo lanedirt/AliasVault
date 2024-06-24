@@ -70,7 +70,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\database\AliasClientDb\AliasClientDb.csproj" />
+      <ProjectReference Include="..\Databases\AliasClientDb\AliasClientDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
