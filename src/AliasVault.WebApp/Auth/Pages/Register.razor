@@ -86,6 +86,9 @@
 
             if (tokenObject != null)
             {
+                // Store the encryption key in memory.
+                AuthService.StoreEncryptionKey(passwordHash);
+
                 // Store the token as a plain string in local storage
                 await AuthService.StoreAccessTokenAsync(tokenObject.Token);
                 await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
