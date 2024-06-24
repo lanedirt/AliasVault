@@ -8,7 +8,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Install Python which is required by the WebAssembly tools
-RUN apt-get update && apt-get install -y python3
+RUN apt-get update && apt-get install -y python3 && apt-get clean
 
 # Install the WebAssembly tools
 RUN dotnet workload install wasm-tools
