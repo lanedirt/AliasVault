@@ -7,9 +7,12 @@
 
 namespace Cryptography;
 
-using System.Security.Cryptography;
 using System.Text;
 using Konscious.Security.Cryptography;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Modes;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 
 /// <summary>
 /// Encryption class.
@@ -61,44 +64,35 @@ public static class Encryption
     }
 
     /// <summary>
-    /// Encrypt a plaintext string using AES-256.
+    /// Encrypt a plaintext string using AES-256 GCM.
     /// </summary>
     /// <param name="plaintext">The plaintext string.</param>
-    /// <param name="key">Key to use for encryption.</param>
+    /// <param name="key">Key to use for encryption (must be 32 bytes for AES-256).</param>
     /// <returns>The encrypted string (ciphertext).</returns>
     public static string Encrypt(string plaintext, byte[] key)
     {
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = key;
-            aes.GenerateIV();
+        byte[] iv = new byte[12];
+        SecureRandom random = new SecureRandom();
+        random.NextBytes(iv);
 
-            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+        GcmBlockCipher gcm = new GcmBlockCipher(new AesEngine());
+        AeadParameters parameters = new AeadParameters(new KeyParameter(key), 128, iv, null);
+        gcm.Init(true, parameters);
 
-            using (MemoryStream ms = new MemoryStream())
-            {
-                using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                {
-                    using (StreamWriter sw = new StreamWriter(cs))
-                    {
-                        sw.Write(plaintext);
-                    }
-                }
+        byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
+        byte[] ciphertextBytes = new byte[gcm.GetOutputSize(plaintextBytes.Length)];
+        int outputLength = gcm.ProcessBytes(plaintextBytes, 0, plaintextBytes.Length, ciphertextBytes, 0);
+        gcm.DoFinal(ciphertextBytes, outputLength);
 
-                byte[] iv = aes.IV;
-                byte[] encryptedContent = ms.ToArray();
+        byte[] combined = new byte[iv.Length + ciphertextBytes.Length];
+        Array.Copy(iv, 0, combined, 0, iv.Length);
+        Array.Copy(ciphertextBytes, 0, combined, iv.Length, ciphertextBytes.Length);
 
-                byte[] result = new byte[iv.Length + encryptedContent.Length];
-                Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
-                Buffer.BlockCopy(encryptedContent, 0, result, iv.Length, encryptedContent.Length);
-
-                return Convert.ToBase64String(result);
-            }
-        }
+        return Convert.ToBase64String(combined);
     }
 
     /// <summary>
-    /// Decrypt a ciphertext string using AES-256.
+    /// Decrypt a ciphertext string using AES-256 GCM.
     /// </summary>
     /// <param name="ciphertext">The encrypted string (ciphertext).</param>
     /// <param name="key">The key used to originally encrypt the string.</param>
@@ -107,29 +101,20 @@ public static class Encryption
     {
         byte[] fullCipher = Convert.FromBase64String(ciphertext);
 
-        byte[] iv = new byte[16];
-        byte[] cipher = new byte[fullCipher.Length - iv.Length];
+        byte[] iv = new byte[12];
+        byte[] cipherBytes = new byte[fullCipher.Length - iv.Length];
 
-        Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
-        Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, cipher.Length);
+        Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+        Array.Copy(fullCipher, iv.Length, cipherBytes, 0, cipherBytes.Length);
 
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = key;
-            aes.IV = iv;
+        GcmBlockCipher gcm = new GcmBlockCipher(new AesEngine());
+        AeadParameters parameters = new AeadParameters(new KeyParameter(key), 128, iv, null);
+        gcm.Init(false, parameters);
 
-            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        byte[] plaintextBytes = new byte[gcm.GetOutputSize(cipherBytes.Length)];
+        int outputLength = gcm.ProcessBytes(cipherBytes, 0, cipherBytes.Length, plaintextBytes, 0);
+        gcm.DoFinal(plaintextBytes, outputLength);
 
-            using (MemoryStream ms = new MemoryStream(cipher))
-            {
-                using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                {
-                    using (StreamReader sr = new StreamReader(cs))
-                    {
-                        return sr.ReadToEnd();
-                    }
-                }
-            }
-        }
+        return Encoding.UTF8.GetString(plaintextBytes).TrimEnd('\0');
     }
 }

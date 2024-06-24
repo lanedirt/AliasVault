@@ -1,8 +1,6 @@
 ﻿@page "/dbtest"
 @inherits PageBase
-@inject AliasService AliasService
-@inject SqliteWasmDbContextFactory<AliasClientDbContext> Factory
-
+@inject AliasClientDbService AliasClientDbService
 
 <LayoutPageTitle>Dbtest</LayoutPageTitle>
 
@@ -24,7 +22,10 @@
     <LoadingIndicator />
 }
 
-<button @onclick="LoadAliasFromDbAsync">Load from db again</button>
+<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="LoadAliasFromDbAsync">Load from db again</button>
+<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="ExportDbToString">Export DB to string</button>
+<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="LoadDbFromString">Load from string</button>
+<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="SaveDb">SaveChanges</button>
 
 <div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
     @foreach (var password in Passwords)
@@ -39,7 +40,7 @@
 
 @code {
     private bool IsLoading { get; set; } = true;
-    private List<AliasClientDb.Password> Passwords { get; set; } = new();
+    private List<Password> Passwords { get; set; } = new();
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -55,8 +56,7 @@
         IsLoading = true;
         StateHasChanged();
 
-        using var db = await Factory.CreateDbContextAsync();
-
+        var db = AliasClientDbService.GetDbContext();
 
         // Insert row in database
         db.Passwords.Add(new Password() { Id = Guid.NewGuid(), Value = "Test factory insert SQLite", CreatedAt = DateTime.Now });
@@ -72,5 +72,24 @@
         Passwords = passwords;
         IsLoading = false;
         StateHasChanged();
+    }
+
+    private async Task LoadDbFromString()
+    {
+        await AliasClientDbService.LoadFromEncryptedString();
+
+        // Reload the passwords
+        await LoadAliasFromDbAsync();
+    }
+
+    private async Task ExportDbToString()
+    {
+        var exportString = await AliasClientDbService.SaveDatabaseAsync();
+        Console.WriteLine(exportString);
+    }
+
+    private async Task SaveDb()
+    {
+        await AliasClientDbService.GetDbContext().SaveChangesAsync();
     }
 }

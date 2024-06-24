@@ -36,6 +36,21 @@ public class AliasClientDbContext : DbContext
     /// </summary>
     public DbSet<Password> Passwords { get; set; }
 
+    /// <inheritdoc />
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        // Insert your custom logic here (before saving changes)
+        Console.WriteLine("Before SaveChangesAsync");
+
+        // Call the base method to save changes to the database
+        int result = await base.SaveChangesAsync(cancellationToken);
+
+        // Insert your custom logic here (after saving changes)
+        Console.WriteLine("After SaveChangesAsync");
+
+        return result;
+    }
+
     /// <summary>
     /// The OnModelCreating method.
     /// </summary>

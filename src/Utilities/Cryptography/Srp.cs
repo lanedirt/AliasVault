@@ -19,17 +19,17 @@ public static class Srp
     /// <summary>
     /// Prepare signup step.
     /// </summary>
+    /// <param name="client">SrpClient.</param>
+    /// <param name="salt">Salt.</param>
     /// <param name="email">Email.</param>
-    /// <param name="plaintextPassword">Plain-text password.</param>
+    /// <param name="passwordHashString">Hashed password string.</param>
     /// <returns>SrpSignup model.</returns>
-    public static async Task<SrpSignup> SignupPrepareAsync(string email, string plaintextPassword)
+    public static SrpSignup SignupPrepareAsync(SrpClient client, string salt, string email, string passwordHashString)
     {
         // Derive a key from the password using Argon2id
 
         // Signup: client generates a salt and verifier.
-        var client = new SrpClient();
-        var salt = client.GenerateSalt();
-        var privateKey = await DerivePrivateKey(salt, email, plaintextPassword);
+        var privateKey = DerivePrivateKey(salt, email, passwordHashString);
         var verifier = client.DeriveVerifier(privateKey);
 
         return new SrpSignup(email, salt, privateKey, verifier);
@@ -40,13 +40,11 @@ public static class Srp
     /// </summary>
     /// <param name="salt">Salt.</param>
     /// <param name="email">Email.</param>
-    /// <param name="plaintextPassword">Plain text password.</param>
+    /// <param name="passwordHashString">Hashed password string.</param>
     /// <returns>Private key as string.</returns>
-    public static async Task<string> DerivePrivateKey(string salt, string email, string plaintextPassword)
+    public static string DerivePrivateKey(string salt, string email, string passwordHashString)
     {
         var client = new SrpClient();
-        byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(plaintextPassword, salt);
-        var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
         return client.DerivePrivateKey(salt, email, passwordHashString);
     }
 
