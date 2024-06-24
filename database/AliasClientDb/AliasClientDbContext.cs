@@ -54,12 +54,12 @@ public class AliasClientDbContext : DbContext
     /// <summary>
     /// The OnModelCreating method.
     /// </summary>
-    /// <param name="builder">ModelBuilder instance.</param>
-    protected override void OnModelCreating(ModelBuilder builder)
+    /// <param name="modelBuilder">ModelBuilder instance.</param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
+        base.OnModelCreating(modelBuilder);
 
-        foreach (var entity in builder.Model.GetEntityTypes())
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entity.GetProperties())
             {

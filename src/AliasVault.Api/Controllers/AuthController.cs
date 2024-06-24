@@ -277,6 +277,20 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     }
 
     /// <summary>
+    /// Generate a refresh token for a user. This token is used to request a new access token when the current
+    /// access token expires. The refresh token is long-lived by design.
+    /// </summary>
+    /// <returns>Random string to be used as refresh token.</returns>
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    /// <summary>
     /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
     /// and is short-lived by design. With the separate refresh token, the user can request a new access token
     /// when this access token expires.
@@ -304,20 +318,6 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    /// <summary>
-    /// Generate a refresh token for a user. This token is used to request a new access token when the current
-    /// access token expires. The refresh token is long-lived by design.
-    /// </summary>
-    /// <returns>Random string to be used as refresh token.</returns>
-    private string GenerateRefreshToken()
-    {
-        var randomNumber = new byte[32];
-        using var rng = RandomNumberGenerator.Create();
-
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
     }
 
     /// <summary>

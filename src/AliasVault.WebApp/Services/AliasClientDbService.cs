@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Data;
+
 namespace AliasVault.WebApp.Services;
 
 using System.Net.Http.Json;
@@ -23,11 +25,11 @@ using Microsoft.JSInterop;
 /// </summary>
 public class AliasClientDbService
 {
+    private readonly AuthService _authService;
+    private readonly IJSRuntime _jsRuntime;
+    private readonly HttpClient _httpClient;
+    private readonly NavigationManager _navigationManager;
     private AliasClientDbContext? _dbContext;
-    private AuthService _authService;
-    private IJSRuntime _jsRuntime;
-    private HttpClient _httpClient;
-    private NavigationManager _navigationManager;
     private Task _initializationTask;
     private bool _isSuccessfullyInitialized = false;
     private int _retryCount = 0;
@@ -66,7 +68,7 @@ public class AliasClientDbService
     public async Task<AliasClientDbContext> GetDbContextAsync()
     {
         await EnsureInitializedAsync();
-        if (_isSuccessfullyInitialized == false)
+        if (!_isSuccessfullyInitialized)
         {
             // Retry initialization up to 5 times before giving up.
             if (_retryCount < 5)
@@ -78,7 +80,7 @@ public class AliasClientDbService
             }
             else
             {
-                throw new Exception("Failed to initialize database.");
+                throw new DataException("Failed to initialize database.");
             }
         }
 
@@ -99,7 +101,7 @@ public class AliasClientDbService
         using var command = connection.CreateCommand();
         command.CommandText = "VACUUM main INTO @fileName";
 
-        var tempFileName = Path.GetTempFileName();
+        var tempFileName = Path.GetRandomFileName();
         command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
         await command.ExecuteNonQueryAsync();
 
@@ -137,10 +139,6 @@ public class AliasClientDbService
     {
         // Create a new in-memory database.
         string connectionString = "Data Source=AliasClientDb.sqlite";
-
-        // TODO: why doesn't :memory: work? Is the file above still secure?
-
-        // string connectionString = "Data Source=:memory:";
         using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
 
@@ -241,7 +239,7 @@ public class AliasClientDbService
     private async Task ImportDbContextFromBase64Async(AliasClientDbContext dbContext, string base64String)
     {
         var bytes = Convert.FromBase64String(base64String);
-        var tempFileName = Path.GetTempFileName();
+        var tempFileName = Path.GetRandomFileName();
         await File.WriteAllBytesAsync(tempFileName, bytes);
 
         using (var connection = new SqliteConnection(dbContext.Database.GetDbConnection().ConnectionString))

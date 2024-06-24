@@ -122,7 +122,7 @@ public class PlaywrightTest
     /// </summary>
     /// <param name="relativeUrl">Relative URL.</param>
     /// <returns>Task.</returns>
-    public async Task NavigateUsingBlazorRouter(string relativeUrl)
+    protected async Task NavigateUsingBlazorRouter(string relativeUrl)
     {
         // Navigate to the app's base URL initially if not already there
         if (!Page.Url.StartsWith(AppBaseUrl))
