@@ -45,6 +45,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\AliasVault.Api\AliasVault.Api.csproj" />
+      <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
     </ItemGroup>
 
 </Project>

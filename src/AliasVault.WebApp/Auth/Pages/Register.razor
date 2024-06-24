@@ -9,6 +9,8 @@
 @using AliasVault.Shared.Models
 @using AliasVault.WebApp.Auth.Components
 @using AliasVault.WebApp.Auth.Services
+@using Cryptography
+@using SecureRemotePassword
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Create a Free Account
@@ -63,7 +65,13 @@
 
         try
         {
-            var srpSignup = await Cryptography.Srp.SignupPrepareAsync(_registerModel.Email, _registerModel.Password);
+            var client = new SrpClient();
+            var salt = client.GenerateSalt();
+
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_registerModel.Password, salt);
+            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+
+            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, _registerModel.Email, passwordHashString);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
             var responseContent = await result.Content.ReadAsStringAsync();
 

@@ -118,6 +118,26 @@ public class PlaywrightTest
     }
 
     /// <summary>
+    /// Navigate to a relative URL using Blazor's client-side router.
+    /// </summary>
+    /// <param name="relativeUrl">Relative URL.</param>
+    /// <returns>Task.</returns>
+    protected async Task NavigateUsingBlazorRouter(string relativeUrl)
+    {
+        // Navigate to the app's base URL initially if not already there
+        if (!Page.Url.StartsWith(AppBaseUrl))
+        {
+            await Page.GotoAsync(AppBaseUrl);
+
+            // Wait for Blazor to load completely
+            await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        }
+
+        // Perform soft navigation within the app
+        await Page.EvaluateAsync($"window.blazorNavigate('{relativeUrl}')");
+    }
+
+    /// <summary>
     /// Wait for the specified URL to be loaded with a default timeout.
     /// </summary>
     /// <param name="url">The URL to wait for. This may also contains wildcard such as "**/user/login".</param>

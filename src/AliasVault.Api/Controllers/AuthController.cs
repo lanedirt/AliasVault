@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AliasDb;
+using AliasServerDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
@@ -25,7 +25,7 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Auth controller for handling authentication.
 /// </summary>
-/// <param name="context">AliasDbContext instance.</param>
+/// <param name="context">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
+public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid email or password.
@@ -277,6 +277,20 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
     }
 
     /// <summary>
+    /// Generate a refresh token for a user. This token is used to request a new access token when the current
+    /// access token expires. The refresh token is long-lived by design.
+    /// </summary>
+    /// <returns>Random string to be used as refresh token.</returns>
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    /// <summary>
     /// Generate a Jwt access token for a user. This token is used to authenticate the user for a limited time
     /// and is short-lived by design. With the separate refresh token, the user can request a new access token
     /// when this access token expires.
@@ -304,20 +318,6 @@ public class AuthController(AliasDbContext context, UserManager<AliasVaultUser> 
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    /// <summary>
-    /// Generate a refresh token for a user. This token is used to request a new access token when the current
-    /// access token expires. The refresh token is long-lived by design.
-    /// </summary>
-    /// <returns>Random string to be used as refresh token.</returns>
-    private string GenerateRefreshToken()
-    {
-        var randomNumber = new byte[32];
-        using var rng = RandomNumberGenerator.Create();
-
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
     }
 
     /// <summary>

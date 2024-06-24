@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <BuildVersion>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildVersion>
+        <WasmBuildNative>true</WasmBuildNative>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -69,7 +70,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AliasDb\AliasDb.csproj" />
+      <ProjectReference Include="..\..\database\AliasClientDb\AliasClientDb.csproj" />
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />

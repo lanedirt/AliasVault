@@ -7,10 +7,16 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
+# Install Python which is required by the WebAssembly tools
+RUN apt-get update && apt-get install -y python3 && apt-get clean
+
+# Install the WebAssembly tools
+RUN dotnet workload install wasm-tools
+
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.WebApp/AliasVault.WebApp.csproj", "src/AliasVault.WebApp/"]
 COPY ["src/AliasVault.Shared/AliasVault.Shared.csproj", "src/AliasVault.Shared/"]
-COPY ["src/AliasDb/AliasDb.csproj", "src/AliasDb/"]
+COPY ["src/Databases/AliasServerDb/AliasServerDb.csproj", "src/Databases/AliasServerDb/"]
 COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
 COPY ["src/Utilities/FaviconExtractor/FaviconExtractor.csproj", "src/Utilities/FaviconExtractor/"]
 RUN dotnet restore "src/AliasVault.WebApp/AliasVault.WebApp.csproj"

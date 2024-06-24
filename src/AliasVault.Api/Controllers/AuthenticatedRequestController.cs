@@ -8,7 +8,7 @@
 namespace AliasVault.Api.Controllers;
 
 using System.Security.Claims;
-using AliasDb;
+using AliasServerDb;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

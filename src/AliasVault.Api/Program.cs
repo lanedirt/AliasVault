@@ -7,7 +7,7 @@
 
 using System.Data.Common;
 using System.Text;
-using AliasDb;
+using AliasServerDb;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -34,13 +34,13 @@ builder.Services.AddSingleton<DbConnection>(container =>
         .AddJsonFile("appsettings.json")
         .Build();
 
-    var connection = new SqliteConnection(configFile.GetConnectionString("AliasDbContext"));
+    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
     connection.Open();
 
     return connection;
 });
 
-builder.Services.AddDbContext<AliasDbContext>((container, options) =>
+builder.Services.AddDbContext<AliasServerDbContext>((container, options) =>
 {
     var connection = container.GetRequiredService<DbConnection>();
     options.UseSqlite(connection).UseLazyLoadingProxies();
@@ -63,7 +63,7 @@ builder.Services.AddIdentity<AliasVaultUser, IdentityRole>(options =>
         options.SignIn.RequireConfirmedAccount = false;
         options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<AliasVaultUser>)));
     })
-    .AddEntityFrameworkStores<AliasDbContext>()
+    .AddEntityFrameworkStores<AliasServerDbContext>()
     .AddDefaultTokenProviders()
     .AddTokenProvider<DataProtectorTokenProvider<AliasVaultUser>>("AliasVault");
 
@@ -170,7 +170,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<AliasDbContext>();
+    var db = container.GetRequiredService<AliasServerDbContext>();
 
     await db.Database.MigrateAsync();
 }

@@ -25,6 +25,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
 {
     private const string AccessTokenKey = "token";
     private const string RefreshTokenKey = "refreshToken";
+    private byte[] _encryptionKey = new byte[32];
 
     /// <summary>
     /// Refreshes the access token asynchronously.
@@ -89,6 +90,33 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     public async Task<string> GetRefreshTokenAsync()
     {
         return await localStorage.GetItemAsStringAsync(RefreshTokenKey) ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Get encryption key.
+    /// </summary>
+    /// <returns>Encryption key as byte[].</returns>
+    public byte[] GetEncryptionKeyAsync()
+    {
+        return _encryptionKey;
+    }
+
+    /// <summary>
+    /// Get encryption key as base64 string.
+    /// </summary>
+    /// <returns>Encryption key as base64 string.</returns>
+    public string GetEncryptionKeyAsBase64Async()
+    {
+        return Convert.ToBase64String(GetEncryptionKeyAsync());
+    }
+
+    /// <summary>
+    /// Stores the encryption key asynchronously in-memory.
+    /// </summary>
+    /// <param name="newKey">Encryption key.</param>
+    public void StoreEncryptionKey(byte[] newKey)
+    {
+        _encryptionKey = newKey;
     }
 
     /// <summary>

@@ -46,7 +46,9 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+
     <script src="js/dark-mode.js?v=@CacheBuster"></script>
+    <script src="js/cryptoInterop.js?v=@CacheBuster"></script>
 
     <script>
         window.initTopMenu = function() {
@@ -76,6 +78,11 @@
                         alert(error);
                     });
             }
+        };
+
+        // Primarily used by E2E tests.
+        window.blazorNavigate = (url) => {
+            Blazor.navigateTo(url);
         };
     </script>
 

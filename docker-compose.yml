@@ -10,17 +10,6 @@ services:
         environment:
             - API_URL=http://localhost:81
 
-    server:
-        image: aliasvault-server
-        build:
-            context: .
-            dockerfile: src/AliasVault/Dockerfile
-        ports:
-            - "82:8082"
-        volumes:
-            - ./database:/database
-        restart: always
-
     api:
         image: aliasvault-api
         build:

@@ -1,0 +1,167 @@
+@page "/unlock"
+@layout Auth.Layout.MainLayout
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject AuthService AuthService
+@inject GlobalNotificationService GlobalNotificationService
+@inject AliasClientDbService AliasClientDbService
+@using System.Text.Json
+@using AliasVault.Shared.Models
+@using AliasVault.Shared.Models.WebApi.Auth
+@using AliasVault.WebApp.Auth.Components
+@using AliasVault.WebApp.Auth.Services
+@using Cryptography
+
+<div class="flex space-x-4">
+    <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="Bonnie image">
+    <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Email</h2>
+</div>
+
+<p class="text-base font-normal text-gray-500 dark:text-gray-400">
+    Enter your master password in order to unlock your database.
+</p>
+
+<FullScreenLoadingIndicator @ref="_loadingIndicator" />
+<ServerValidationErrors @ref="_serverValidationErrors" />
+
+<EditForm Model="_unlockModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+    <DataAnnotationsValidator/>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+        <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => _unlockModel.Password"/>
+    </div>
+
+    <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+        <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+        Unlock
+    </button>
+
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Logout</a>
+    </div>
+</EditForm>
+
+@code {
+    private string? Email { get; set; }
+    private readonly UnlockModel _unlockModel = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == false) {
+            // Not authenticated (anymore), redirect to login page.
+            NavigationManager.NavigateTo("/user/login");
+        }
+
+        var email = authState.User.Identity?.Name;
+        if (email is null)
+        {
+            // Clear all tokens and redirect to login page.
+            await AuthService.RemoveTokensAsync();
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            GlobalNotificationService.ClearMessages();
+            NavigationManager.NavigateTo("/user/login");
+        }
+
+        Email = authState.User.Identity?.Name!;
+    }
+
+    private async Task HandleLogin()
+    {
+        if (Email == null)
+        {
+            return;
+        }
+
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
+
+        try
+        {
+            // Send request to server with email to get server ephemeral public key.
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(Email));
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                _serverValidationErrors.ParseResponse(responseContent);
+                StateHasChanged();
+                return;
+            }
+
+            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
+            if (loginResponse == null)
+            {
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
+                return;
+            }
+
+            // 3. Client derives shared session key.
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_unlockModel.Password, loginResponse.Salt);
+            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+
+            var clientEphemeral = Srp.GenerateEphemeralClient();
+            var privateKey = Srp.DerivePrivateKey(loginResponse.Salt, Email, passwordHashString);
+            var clientSession = Srp.DeriveSessionClient(
+                privateKey,
+                clientEphemeral.Secret,
+                loginResponse.ServerEphemeral,
+                loginResponse.Salt,
+                Email);
+
+            // 4. Client sends proof of session key to server.
+            result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(Email, clientEphemeral.Public, clientSession.Proof));
+            responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                _serverValidationErrors.ParseResponse(responseContent);
+                StateHasChanged();
+                return;
+            }
+
+            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
+            if (validateLoginResponse == null)
+            {
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
+                return;
+            }
+
+            // 5. Client verifies proof.
+            Srp.VerifySession(clientEphemeral.Public, clientSession, validateLoginResponse.ServerSessionProof);
+            // Store the encryption key in memory.
+            AuthService.StoreEncryptionKey(passwordHash);
+
+            // Try to retrieve vault again from remote.
+            await AliasClientDbService.GetDbContextAsync();
+
+            // Redirect to home page.
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            GlobalNotificationService.ClearMessages();
+            NavigationManager.NavigateTo("/");
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            // If in debug mode show the actual exception.
+            _serverValidationErrors.AddError(ex.ToString());
+        }
+#else
+        catch
+        {
+            // If in release mode show a generic error.
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+        }
+#endif
+        finally
+        {
+            _loadingIndicator.Hide();
+        }
+    }
+}

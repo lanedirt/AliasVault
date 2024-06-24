@@ -8,7 +8,7 @@
 namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
-using AliasDb;
+using AliasServerDb;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -38,15 +38,15 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
 
         builder.ConfigureServices((context, services) =>
         {
-            // Remove the existing AliasDbContext registration.
+            // Remove the existing AliasServerDbContext registration.
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
-                     typeof(DbContextOptions<AliasDbContext>));
+                     typeof(DbContextOptions<AliasServerDbContext>));
 
             if (dbContextDescriptor is null)
             {
                 throw new InvalidOperationException(
-                    "No DbContextOptions<AliasDbContext> registered.");
+                    "No DbContextOptions<AliasServerDbContext> registered.");
             }
 
             services.Remove(dbContextDescriptor);
@@ -59,12 +59,12 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
             if (dbConnectionDescriptor is null)
             {
                 throw new InvalidOperationException(
-                    "No DbContextOptions<AliasDbContext> registered.");
+                    "No DbContextOptions<AliasServerDbContext> registered.");
             }
 
             services.Remove(dbConnectionDescriptor);
 
-            // Create a new DbConnection and AliasDbContext with an in-memory database.
+            // Create a new DbConnection and AliasServerDbContext with an in-memory database.
             services.AddSingleton<DbConnection>(container =>
             {
                 var connection = new SqliteConnection("DataSource=:memory:");
@@ -73,7 +73,7 @@ public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<T
                 return connection;
             });
 
-            services.AddDbContext<AliasDbContext>((container, options) =>
+            services.AddDbContext<AliasServerDbContext>((container, options) =>
             {
                 var connection = container.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection);

@@ -23,7 +23,7 @@ public class AliasTests : PlaywrightTest
     [Test]
     public async Task AliasListingTest()
     {
-        await Page.GotoAsync(AppBaseUrl + "aliases");
+        await NavigateUsingBlazorRouter("aliases");
         await WaitForURLAsync("**/aliases", "AliasVault");
 
         // Check if the expected content is present.
@@ -178,7 +178,7 @@ public class AliasTests : PlaywrightTest
     /// <returns>Async task.</returns>
     private async Task CreateAlias(Dictionary<string, string>? formValues = null)
     {
-        await Page.GotoAsync(AppBaseUrl + "add-alias");
+        await NavigateUsingBlazorRouter("add-alias");
         await WaitForURLAsync("**/add-alias", "Add alias");
 
         // Check if a button with text "Generate Random Identity" appears
