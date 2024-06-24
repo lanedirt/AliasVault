@@ -47,6 +47,12 @@ public class PageBase : OwningComponentBase
     public IJSRuntime Js { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the AliasClientDbService.
+    /// </summary>
+    [Inject]
+    public AliasClientDbService AliasClientDbService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = [];

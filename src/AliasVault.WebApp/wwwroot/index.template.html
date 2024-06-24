@@ -79,6 +79,11 @@
                     });
             }
         };
+
+        // Primarily used by E2E tests.
+        window.blazorNavigate = (url) => {
+            Blazor.navigateTo(url);
+        };
     </script>
 
     <script src="_framework/blazor.webassembly.js?v=@CacheBuster"></script>

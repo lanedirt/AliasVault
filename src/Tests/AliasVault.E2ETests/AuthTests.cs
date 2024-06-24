@@ -22,7 +22,7 @@ public class AuthTests : PlaywrightTest
     public async Task LogoutAndLogin()
     {
         // Logout.
-        await Page.GotoAsync(AppBaseUrl + "user/logout");
+        await NavigateUsingBlazorRouter("user/logout");
         await WaitForURLAsync("**/user/logout", "AliasVault");
 
         // Wait and check if we get redirected to /user/login.
@@ -37,7 +37,7 @@ public class AuthTests : PlaywrightTest
     /// <returns>Async task.</returns>
     private async Task Login()
     {
-        await Page.GotoAsync(AppBaseUrl);
+        await NavigateUsingBlazorRouter("/");
 
         // Check that we are on the login page after navigating to the base URL.
         // We are expecting to not be authenticated and thus to be redirected to the login page.

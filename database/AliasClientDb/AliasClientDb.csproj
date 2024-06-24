@@ -27,9 +27,9 @@
       <Content Include="..\..\LICENSE.md">
         <Link>LICENSE.md</Link>
       </Content>
-      <Content Include="..\..\src\stylecop.json">
+      <AdditionalFiles Include="..\..\src\stylecop.json">
         <Link>stylecop.json</Link>
-      </Content>
+      </AdditionalFiles>
     </ItemGroup>
 
 </Project>

@@ -63,6 +63,11 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
     public DbSet<AliasVaultUser> AliasVaultUsers { get; set; }
 
     /// <summary>
+    /// Gets or sets the Vaults DbSet.
+    /// </summary>
+    public DbSet<Vault> Vaults { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="builder">ModelBuilder instance.</param>
@@ -121,6 +126,13 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
 
         // Configure the User - AspNetUserRefreshToken entity
         builder.Entity<AspNetUserRefreshToken>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .IsRequired();
+
+        // Configure the Vault - UserId entity
+        builder.Entity<Vault>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)
