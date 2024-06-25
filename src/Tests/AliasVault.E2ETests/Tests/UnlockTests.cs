@@ -45,5 +45,8 @@ public class UnlockTests : PlaywrightTest
 
         // Check if we get redirected back to the page we were trying to access.
         await WaitForURLAsync("**/" + startUrl, "AliasVault");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
     }
 }
