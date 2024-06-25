@@ -38,13 +38,11 @@ public class AliasClientDbService
     /// <param name="authService">AuthService.</param>
     /// <param name="jsRuntime">IJSRuntime.</param>
     /// <param name="httpClient">HttpClient.</param>
-    /// <param name="navigationManager">NavigationManager.</param>
-    public AliasClientDbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient, NavigationManager navigationManager)
+    public AliasClientDbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient)
     {
         _authService = authService;
         _jsRuntime = jsRuntime;
         _httpClient = httpClient;
-        _navigationManager = navigationManager;
 
         // Initialize the database asynchronously
         _initializationTask = InitializeDatabaseAsync();
