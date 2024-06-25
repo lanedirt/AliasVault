@@ -232,14 +232,6 @@ public class AliasClientDbService
     /// <returns>Task.</returns>
     private async Task<bool> LoadDatabaseFromServerAsync()
     {
-        // Sanity check: check that encryption key is set. If not, redirect to lock screen.
-        if (string.IsNullOrEmpty(_authService.GetEncryptionKeyAsBase64Async()) ||
-            _authService.GetEncryptionKeyAsBase64Async() == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-        {
-            _navigationManager.NavigateTo("/unlock");
-            return false;
-        }
-
         // Load from webapi.
         try
         {

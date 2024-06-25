@@ -7,8 +7,10 @@
 
 namespace AliasVault.WebApp.Pages.Base;
 
+using AliasVault.WebApp.Auth.Services;
 using AliasVault.WebApp.Components.Models;
 using AliasVault.WebApp.Services;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
@@ -53,6 +55,18 @@ public class PageBase : OwningComponentBase
     public AliasClientDbService AliasClientDbService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the AuthService.
+    /// </summary>
+    [Inject]
+    public AuthService AuthService { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the LocalStorage.
+    /// </summary>
+    [Inject]
+    public ILocalStorageService LocalStorage { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = [];
@@ -68,6 +82,15 @@ public class PageBase : OwningComponentBase
 
         // Add base breadcrumbs
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
+
+        await RedirectIfNoEncryptionKey();
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await RedirectIfNoEncryptionKey();
     }
 
     /// <summary>
@@ -92,6 +115,24 @@ public class PageBase : OwningComponentBase
         if (!_parametersInitialSet)
         {
             _parametersInitialSet = true;
+        }
+    }
+
+    /// <summary>
+    /// Checks if the encryption key is set. If not, redirect to the unlock screen
+    /// where the user can re-enter the master password so the encryption key gets refreshed.
+    ///
+    /// This method should be called on every authenticated page load.
+    /// </summary>
+    private async Task RedirectIfNoEncryptionKey()
+    {
+        // Sanity check: check that encryption key is set. If not, redirect to lock screen.
+        if (string.IsNullOrEmpty(AuthService.GetEncryptionKeyAsBase64Async()) ||
+            AuthService.GetEncryptionKeyAsBase64Async() == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        {
+            var currentUrl = NavigationManager.Uri;
+            await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+            NavigationManager.NavigateTo("/unlock");
         }
     }
 }
