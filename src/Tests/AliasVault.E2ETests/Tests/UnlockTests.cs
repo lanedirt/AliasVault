@@ -49,4 +49,43 @@ public class UnlockTests : PlaywrightTest
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
     }
+
+    /// <summary>
+    /// Test that hard navigating to the unlock page manually does not redirect to the unlock page on entering password.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task UnlockPageRedirect()
+    {
+        // Soft navigate to "aliases" page to test the unlock redirect.
+        var startUrl = "aliases";
+        await NavigateUsingBlazorRouter(startUrl);
+
+        // Hard refresh the page.
+        await Page.ReloadAsync();
+
+        // Check if the unlock page is displayed.
+        await WaitForURLAsync("**/unlock", "unlock");
+
+        // Hard refresh the page again.
+        await Page.ReloadAsync();
+
+        // Check if the unlock page is displayed.
+        await WaitForURLAsync("**/unlock", "unlock");
+
+        // Check if by entering password the unlock page is replaced by the alias listing page.
+        await InputHelper.FillInputFields(new Dictionary<string, string>
+        {
+            { "password", TestUserPassword },
+        });
+
+        var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
+        await submitButton.ClickAsync();
+
+        // Check if we get redirected back to the page we were trying to access.
+        await WaitForURLAsync("**/" + startUrl, "AliasVault");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
+    }
 }
