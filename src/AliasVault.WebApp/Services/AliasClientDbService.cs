@@ -27,11 +27,10 @@ public class AliasClientDbService
     private readonly AuthService _authService;
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
-    private readonly NavigationManager _navigationManager;
     private AliasClientDbContext? _dbContext;
     private Task _initializationTask;
-    private bool _isSuccessfullyInitialized = false;
-    private int _retryCount = 0;
+    private bool _isSuccessfullyInitialized;
+    private int _retryCount;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasClientDbService"/> class.

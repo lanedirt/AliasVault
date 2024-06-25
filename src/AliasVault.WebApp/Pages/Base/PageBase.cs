@@ -100,7 +100,7 @@ public class PageBase : OwningComponentBase
     protected async Task<string> GetUsernameAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        return authState.User?.Identity?.Name ?? "[Unknown]";
+        return authState.User.Identity?.Name ?? "[Unknown]";
     }
 
     /// <summary>
@@ -126,7 +126,14 @@ public class PageBase : OwningComponentBase
     /// </summary>
     private async Task RedirectIfNoEncryptionKey()
     {
-        // Sanity check: check that encryption key is set. If not, redirect to lock screen.
+        // If not logged in, let the normal login process handle it.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.Identity?.IsAuthenticated ?? true)
+        {
+            return;
+        }
+
+        // Check that encryption key is set. If not, redirect to unlock screen.
         if (string.IsNullOrEmpty(AuthService.GetEncryptionKeyAsBase64Async()) ||
             AuthService.GetEncryptionKeyAsBase64Async() == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
         {
