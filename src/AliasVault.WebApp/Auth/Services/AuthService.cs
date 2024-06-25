@@ -111,6 +111,27 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     }
 
     /// <summary>
+    /// Returns whether the encryption key is set.
+    /// </summary>
+    /// <returns>Return true if encryption key is set, otherwise false.</returns>
+    public bool IsEncryptionKeySet()
+    {
+        // Check that encryption key is set. If not, redirect to unlock screen.
+        var encryptionKey = GetEncryptionKeyAsBase64Async();
+        if (encryptionKey == string.Empty)
+        {
+            return false;
+        }
+
+        if (encryptionKey == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Stores the encryption key asynchronously in-memory.
     /// </summary>
     /// <param name="newKey">Encryption key.</param>

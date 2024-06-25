@@ -185,7 +185,7 @@ public class PlaywrightTest
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
-        await WaitForURLAsync("**/user/login", 20000);
+        await WaitForURLAsync("**/user/login");
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
@@ -206,6 +206,7 @@ public class PlaywrightTest
 
         // Check if we get redirected when clicking on the register button.
         var submitButton = Page.Locator("button[type='submit']");
+        Console.WriteLine(submitButton);
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.

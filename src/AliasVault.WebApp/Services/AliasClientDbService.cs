@@ -196,6 +196,12 @@ public class AliasClientDbService
 
     private async Task InitializeDatabaseAsync()
     {
+        // Check that encryption key is set. If not, do nothing.
+        if (!_authService.IsEncryptionKeySet())
+        {
+            return;
+        }
+
         // Create a new in-memory database.
         string connectionString = "Data Source=AliasClientDb.sqlite";
         using var connection = new SqliteConnection(connectionString);

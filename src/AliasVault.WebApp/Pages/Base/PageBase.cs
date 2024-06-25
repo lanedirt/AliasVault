@@ -134,8 +134,7 @@ public class PageBase : OwningComponentBase
         }
 
         // Check that encryption key is set. If not, redirect to unlock screen.
-        if (string.IsNullOrEmpty(AuthService.GetEncryptionKeyAsBase64Async()) ||
-            AuthService.GetEncryptionKeyAsBase64Async() == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        if (!AuthService.IsEncryptionKeySet())
         {
             var currentUrl = NavigationManager.Uri;
             await LocalStorage.SetItemAsync("returnUrl", currentUrl);
