@@ -83,14 +83,30 @@ public class PageBase : OwningComponentBase
         // Add base breadcrumbs
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
 
-        await RedirectIfNoEncryptionKey();
+        bool willRedirect = await RedirectIfNoEncryptionKey();
+        if (willRedirect)
+        {
+            // Keep the page from loading if a redirect is imminent.
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
     }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        await RedirectIfNoEncryptionKey();
+        bool willRedirect = await RedirectIfNoEncryptionKey();
+        if (willRedirect)
+        {
+            // Keep the page from loading if a redirect is imminent.
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
     }
 
     /// <summary>
@@ -124,21 +140,33 @@ public class PageBase : OwningComponentBase
     ///
     /// This method should be called on every authenticated page load.
     /// </summary>
-    private async Task RedirectIfNoEncryptionKey()
+    private async Task<bool> RedirectIfNoEncryptionKey()
     {
         // If not logged in, let the normal login process handle it.
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (!authState.User.Identity?.IsAuthenticated ?? true)
         {
-            return;
+            return true;
         }
 
         // Check that encryption key is set. If not, redirect to unlock screen.
         if (!AuthService.IsEncryptionKeySet())
         {
-            var currentUrl = NavigationManager.Uri;
-            await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+            // If returnUrl is not set and current URL is not unlock page, set it to the current URL.
+            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+            if (string.IsNullOrEmpty(localStorageReturnUrl))
+            {
+                var currentUrl = NavigationManager.Uri;
+                if (!currentUrl.Contains("unlock"))
+                {
+                    await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+                }
+            }
+
             NavigationManager.NavigateTo("/unlock");
+            return true;
         }
+
+        return false;
     }
 }
