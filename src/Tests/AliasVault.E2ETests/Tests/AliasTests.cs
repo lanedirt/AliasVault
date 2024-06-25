@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests;
+namespace AliasVault.E2ETests.Tests;
 
 /// <summary>
 /// End-to-end tests for the alias management.
@@ -75,8 +75,7 @@ public class AliasTests : PlaywrightTest
 
         // Replace the service name with "Alias service after".
         var serviceNameAfter = "Alias service after";
-        await FillInputFields(
-            page: Page,
+        await InputHelper.FillInputFields(
             fieldValues: new Dictionary<string, string>
             {
                 { "service-name", serviceNameAfter },
@@ -89,86 +88,6 @@ public class AliasTests : PlaywrightTest
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Alias updated"), "Alias update confirmation message not shown.");
         Assert.That(pageContent, Does.Contain(serviceNameAfter), "Alias not updated correctly.");
-    }
-
-    /// <summary>
-    /// Helper method to fill specified input fields on a page with given values.
-    /// </summary>
-    /// <param name="page">IPage instance where to fill the input fields for.</param>
-    /// <param name="fieldValues">Dictionary with html element ids and values to input as field value.</param>
-    /// <returns>Async task.</returns>
-    private static async Task FillInputFields(IPage page, Dictionary<string, string>? fieldValues = null)
-    {
-        var inputFields = page.Locator("input");
-        var count = await inputFields.CountAsync();
-        for (int i = 0; i < count; i++)
-        {
-            var input = inputFields.Nth(i);
-            var inputId = await input.GetAttributeAsync("id");
-
-            // If fieldValues dictionary is provided and the inputId is found in it, fill the input with the value.
-            if (inputId is not null && fieldValues is not null && fieldValues.TryGetValue(inputId, out var fieldValue))
-            {
-                await input.FillAsync(fieldValue);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Helper method to fill all empty input fields on a page with random data if not provided.
-    /// </summary>
-    /// <param name="page">IPage instance where to fill the input fields for.</param>
-    /// <returns>Async task.</returns>
-    private static async Task FillEmptyInputFieldsWithRandom(IPage page)
-    {
-        var inputFields = page.Locator("input");
-        var count = await inputFields.CountAsync();
-        for (int i = 0; i < count; i++)
-        {
-            var input = inputFields.Nth(i);
-            var inputType = await input.GetAttributeAsync("type");
-
-            // If is not empty, skip.
-            if (!string.IsNullOrEmpty(await input.InputValueAsync()))
-            {
-                continue;
-            }
-
-            // Generate appropriate random data based on input type.
-            string randomData = inputType switch
-            {
-                "email" => GenerateRandomEmail(),
-                "number" => GenerateRandomNumber(),
-                "password" => GenerateRandomPassword(),
-                _ => GenerateRandomString(), // Default for all other types.
-            };
-
-            await input.FillAsync(randomData);
-        }
-    }
-
-    private static string GenerateRandomString(int length = 10)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.Next(s.Length)]).ToArray());
-    }
-
-    private static string GenerateRandomEmail()
-    {
-        return $"{GenerateRandomString(5)}@example.com";
-    }
-
-    private static string GenerateRandomNumber()
-    {
-        return Random.Next(0, 10000).ToString();
-    }
-
-    private static string GenerateRandomPassword(int length = 12)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.Next(s.Length)]).ToArray());
     }
 
     /// <summary>
@@ -186,8 +105,8 @@ public class AliasTests : PlaywrightTest
         Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
 
         // Fill all input fields with specified values and remaining empty fields with random data.
-        await FillInputFields(Page, formValues);
-        await FillEmptyInputFieldsWithRandom(Page);
+        await InputHelper.FillInputFields(formValues);
+        await InputHelper.FillEmptyInputFieldsWithRandom();
 
         var submitButton = Page.Locator("text=Save Alias").First;
         await submitButton.ClickAsync();

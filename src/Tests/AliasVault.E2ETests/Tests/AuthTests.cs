@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests;
+namespace AliasVault.E2ETests.Tests;
 
 /// <summary>
 /// End-to-end tests for authentication.

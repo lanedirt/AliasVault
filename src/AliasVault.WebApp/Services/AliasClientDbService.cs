@@ -27,11 +27,10 @@ public class AliasClientDbService
     private readonly AuthService _authService;
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
-    private readonly NavigationManager _navigationManager;
     private AliasClientDbContext? _dbContext;
     private Task _initializationTask;
-    private bool _isSuccessfullyInitialized = false;
-    private int _retryCount = 0;
+    private bool _isSuccessfullyInitialized;
+    private int _retryCount;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasClientDbService"/> class.
@@ -39,13 +38,11 @@ public class AliasClientDbService
     /// <param name="authService">AuthService.</param>
     /// <param name="jsRuntime">IJSRuntime.</param>
     /// <param name="httpClient">HttpClient.</param>
-    /// <param name="navigationManager">NavigationManager.</param>
-    public AliasClientDbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient, NavigationManager navigationManager)
+    public AliasClientDbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient)
     {
         _authService = authService;
         _jsRuntime = jsRuntime;
         _httpClient = httpClient;
-        _navigationManager = navigationManager;
 
         // Initialize the database asynchronously
         _initializationTask = InitializeDatabaseAsync();
@@ -199,6 +196,12 @@ public class AliasClientDbService
 
     private async Task InitializeDatabaseAsync()
     {
+        // Check that encryption key is set. If not, do nothing.
+        if (!_authService.IsEncryptionKeySet())
+        {
+            return;
+        }
+
         // Create a new in-memory database.
         string connectionString = "Data Source=AliasClientDb.sqlite";
         using var connection = new SqliteConnection(connectionString);
@@ -232,14 +235,6 @@ public class AliasClientDbService
     /// <returns>Task.</returns>
     private async Task<bool> LoadDatabaseFromServerAsync()
     {
-        // Sanity check: check that encryption key is set. If not, redirect to lock screen.
-        if (string.IsNullOrEmpty(_authService.GetEncryptionKeyAsBase64Async()) ||
-            _authService.GetEncryptionKeyAsBase64Async() == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-        {
-            _navigationManager.NavigateTo("/unlock");
-            return false;
-        }
-
         // Load from webapi.
         try
         {

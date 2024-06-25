@@ -55,6 +55,11 @@ public class PlaywrightTest
     protected IPage Page { get; private set; }
 
     /// <summary>
+    /// Gets the input helper for Playwright tests.
+    /// </summary>
+    protected PlaywrightInputHelper InputHelper { get; private set; } = null!;
+
+    /// <summary>
     /// One time setup for the Playwright test which runs before all tests in the class.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -97,6 +102,7 @@ public class PlaywrightTest
         });
 
         Page = await Context.NewPageAsync();
+        InputHelper = new(Page);
 
         // Register a new account via the UI
         await Register();
@@ -185,7 +191,7 @@ public class PlaywrightTest
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
-        await WaitForURLAsync("**/user/login", 20000);
+        await WaitForURLAsync("**/user/login");
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
@@ -206,6 +212,7 @@ public class PlaywrightTest
 
         // Check if we get redirected when clicking on the register button.
         var submitButton = Page.Locator("button[type='submit']");
+        Console.WriteLine(submitButton);
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.

@@ -6,6 +6,7 @@
 @inject AuthService AuthService
 @inject GlobalNotificationService GlobalNotificationService
 @inject AliasClientDbService AliasClientDbService
+@inject ILocalStorageService LocalStorage
 @using System.Text.Json
 @using AliasVault.Shared.Models
 @using AliasVault.Shared.Models.WebApi.Auth
@@ -149,7 +150,18 @@
             // Redirect to home page.
             await AuthStateProvider.GetAuthenticationStateAsync();
             GlobalNotificationService.ClearMessages();
-            NavigationManager.NavigateTo("/");
+
+            // Redirect to the page the user was trying to access before if set.
+            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+            if (!string.IsNullOrEmpty(localStorageReturnUrl))
+            {
+                await LocalStorage.RemoveItemAsync("returnUrl");
+                NavigationManager.NavigateTo(localStorageReturnUrl);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/");
+            }
         }
 #if DEBUG
         catch (Exception ex)
