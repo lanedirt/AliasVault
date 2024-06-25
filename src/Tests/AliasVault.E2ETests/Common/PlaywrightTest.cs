@@ -55,6 +55,11 @@ public class PlaywrightTest
     protected IPage Page { get; private set; }
 
     /// <summary>
+    /// Gets the input helper for Playwright tests.
+    /// </summary>
+    protected PlaywrightInputHelper InputHelper { get; private set; } = null!;
+
+    /// <summary>
     /// One time setup for the Playwright test which runs before all tests in the class.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -97,6 +102,7 @@ public class PlaywrightTest
         });
 
         Page = await Context.NewPageAsync();
+        InputHelper = new(Page);
 
         // Register a new account via the UI
         await Register();
