@@ -14,6 +14,10 @@ using Microsoft.Playwright;
 /// </summary>
 public class PlaywrightTest
 {
+    private static readonly object _lock = new object();
+    private static int _basePort = 5600;
+    private static int _currentPort = _basePort;
+
     /// <summary>
     /// For starting the WebAPI project in-memory.
     /// </summary>
@@ -66,9 +70,16 @@ public class PlaywrightTest
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Determine random port for the WebAPI between 5100-5900. The WASM app will run on the next port.
-        var apiPort = new Random().Next(5100, 5900);
-        var appPort = apiPort + 1;
+        // Set the base port for the test starting at 5600. Increase the port by 2 for each test running
+        // in parallel to avoid port conflicts.
+        var apiPort = 0;
+        var appPort = 0;
+        lock (_lock)
+        {
+            apiPort = Interlocked.Increment(ref _currentPort);
+            appPort = Interlocked.Increment(ref _currentPort);
+        }
+
         AppBaseUrl = "http://localhost:" + appPort + "/";
 
         // Start WebAPI in-memory.
