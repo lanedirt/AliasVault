@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="WebApplicationFactoryFixture.cs" company="lanedirt">
+// <copyright file="WebApplicationApiFactoryFixture.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -20,7 +20,7 @@ using Microsoft.Extensions.Hosting;
 /// Web application factory fixture for integration tests.
 /// </summary>
 /// <typeparam name="TEntryPoint">The entry point.</typeparam>
-public class WebApplicationFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>
+public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>
     where TEntryPoint : class
 {
     /// <summary>
