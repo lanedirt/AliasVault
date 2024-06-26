@@ -14,15 +14,19 @@ using Microsoft.Playwright;
 /// </summary>
 public class PlaywrightTest
 {
+    private static readonly object _lock = new object();
+    private static int _basePort = 5600;
+    private static int _currentPort = _basePort;
+
     /// <summary>
     /// For starting the WebAPI project in-memory.
     /// </summary>
-    private readonly WebApplicationFactoryFixture<AliasVault.Api.Program> _factory = new();
+    private readonly WebApplicationApiFactoryFixture<AliasVault.Api.Program> _apiFactory = new();
 
     /// <summary>
-    /// The BlazorWasmAppManager instance.
+    /// For starting the WASM WebApp project in-memory.
     /// </summary>
-    private BlazorWasmAppManager _blazorWasmAppManager;
+    private readonly WebApplicationWasmFactoryFixture<AliasVault.E2ETests.WebApp.Server.Program> _wasmFactory = new();
 
     /// <summary>
     /// Gets or sets base URL where the Blazor WASM app runs on including random port.
@@ -66,18 +70,25 @@ public class PlaywrightTest
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Determine random port for the WebAPI between 5100-5900. The WASM app will run on the next port.
-        var apiPort = new Random().Next(5100, 5900);
-        var appPort = apiPort + 1;
+        // Set the base port for the test starting at 5600. Increase the port by 2 for each test running
+        // in parallel to avoid port conflicts.
+        var apiPort = 0;
+        var appPort = 0;
+        lock (_lock)
+        {
+            apiPort = Interlocked.Increment(ref _currentPort);
+            appPort = Interlocked.Increment(ref _currentPort);
+        }
+
         AppBaseUrl = "http://localhost:" + appPort + "/";
 
         // Start WebAPI in-memory.
-        _factory.HostUrl = "http://localhost:" + apiPort;
-        _factory.CreateDefaultClient();
+        _apiFactory.HostUrl = "http://localhost:" + apiPort;
+        _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM app out-of-process.
-        _blazorWasmAppManager = new BlazorWasmAppManager();
-        await _blazorWasmAppManager.StartBlazorWasmAsync(appPort);
+        _wasmFactory.HostUrl = "http://localhost:" + appPort;
+        _wasmFactory.CreateDefaultClient();
 
         // Set Playwright headless mode true if not in debug mode.
         bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
@@ -119,8 +130,8 @@ public class PlaywrightTest
         await Context.CloseAsync();
         await Browser.CloseAsync();
 
-        await _factory.DisposeAsync();
-        _blazorWasmAppManager.StopBlazorWasm();
+        await _apiFactory.DisposeAsync();
+        await _wasmFactory.DisposeAsync();
     }
 
     /// <summary>
