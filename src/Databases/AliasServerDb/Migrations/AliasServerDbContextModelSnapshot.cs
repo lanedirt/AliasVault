@@ -297,7 +297,7 @@ namespace AliasServerDb.Migrations
                     b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("AliasServerDb.Vault", b =>
+            modelBuilder.Entity("AliasServerDb.VaultHistory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -512,7 +512,7 @@ namespace AliasServerDb.Migrations
                     b.Navigation("Login");
                 });
 
-            modelBuilder.Entity("AliasServerDb.Vault", b =>
+            modelBuilder.Entity("AliasServerDb.VaultHistory", b =>
                 {
                     b.HasOne("AliasServerDb.AliasVaultUser", "User")
                         .WithMany()

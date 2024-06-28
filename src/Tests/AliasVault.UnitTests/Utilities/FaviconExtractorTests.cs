@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests;
+namespace AliasVault.Tests.Utilities;
 
 /// <summary>
 /// Tests for the FaviconExtractor class.

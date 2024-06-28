@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Vault controller for handling CRUD operations on the database for encrypted vault entities.
+/// VaultHistory controller for handling CRUD operations on the database for encrypted vault entities.
 /// </summary>
 /// <param name="context">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
@@ -53,7 +53,7 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
     /// <summary>
     /// Save a new vault to the database for the current user.
     /// </summary>
-    /// <param name="model">Vault model.</param>
+    /// <param name="model">VaultHistory model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("")]
     public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault model)

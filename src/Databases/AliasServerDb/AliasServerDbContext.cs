@@ -131,7 +131,7 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
             .HasForeignKey(p => p.UserId)
             .IsRequired();
 
-        // Configure the Vault - UserId entity
+        // Configure the VaultHistory - UserId entity
         builder.Entity<Vault>()
             .HasOne(p => p.User)
             .WithMany()

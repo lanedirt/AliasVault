@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /// <summary>
-/// Vault object.
+/// VaultHistory object.
 /// </summary>
 public class Vault
 {
