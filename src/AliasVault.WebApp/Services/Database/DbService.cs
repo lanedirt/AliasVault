@@ -13,7 +13,6 @@ using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.WebApp.Auth.Services;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -21,16 +20,18 @@ using Microsoft.JSInterop;
 /// with a AliasClientDb database instance that is only persisted in memory due to the encryption requirements of the
 /// database itself. The database should not be persisted to disk when in un-encrypted form.
 /// </summary>
-public class DbService
+public class DbService : IDisposable
 {
     private readonly AuthService _authService;
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
-    private AliasClientDbContext? _dbContext;
+    private SqliteConnection _connection;
+    private AliasClientDbContext _dbContext;
     private Task _initializationTask;
     private bool _isSuccessfullyInitialized;
     private int _retryCount;
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbService"/> class.
@@ -46,6 +47,9 @@ public class DbService
 
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
+
+        // Create an in-memory SQLite database connection which stays open for the lifetime of the service.
+        (_connection, _dbContext) = InitializeEmptyDatabase();
 
         // Initialize the database asynchronously
         _initializationTask = InitializeDatabaseAsync();
@@ -82,7 +86,6 @@ public class DbService
             if (_retryCount < 5)
             {
                 _retryCount++;
-                _dbContext = null;
                 _initializationTask = InitializeDatabaseAsync();
                 await EnsureInitializedAsync();
             }
@@ -92,7 +95,7 @@ public class DbService
             }
         }
 
-        return _dbContext!;
+        return _dbContext;
     }
 
     /// <summary>
@@ -107,7 +110,7 @@ public class DbService
         _state.UpdateState(DbServiceState.DatabaseStatus.Saving);
 
         // Save the actual dbContext.
-        await _dbContext!.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
         string base64String = await ExportSqliteToBase64Async();
 
@@ -138,9 +141,7 @@ public class DbService
 
         // Export SQLite memory database to a temp file.
         using var memoryStream = new MemoryStream();
-        using var connection = new SqliteConnection(_dbContext!.Database.GetDbConnection().ConnectionString);
-        await connection.OpenAsync();
-        using var command = connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = "VACUUM main INTO @fileName";
         command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
         await command.ExecuteNonQueryAsync();
@@ -155,69 +156,41 @@ public class DbService
         return base64String;
     }
 
-    private static async Task ImportDbContextFromBase64Async(AliasClientDbContext dbContext, string base64String)
+    /// <summary>
+    /// Clears the database connection and creates a new one so that the database is empty.
+    /// </summary>
+    /// <returns>SqliteConnection and AliasClientDbContext.</returns>
+    public (SqliteConnection SqliteConnection, AliasClientDbContext AliasClientDbContext) InitializeEmptyDatabase()
     {
-        var bytes = Convert.FromBase64String(base64String);
-        var tempFileName = Path.GetRandomFileName();
-        await File.WriteAllBytesAsync(tempFileName, bytes);
-
-        using (var connection = new SqliteConnection(dbContext.Database.GetDbConnection().ConnectionString))
+        if (_isSuccessfullyInitialized && _connection.State == ConnectionState.Open)
         {
-            await connection.OpenAsync();
-            using (var command = connection.CreateCommand())
-            {
-                // Drop all tables in the original database
-                command.CommandText = @"
-                    SELECT 'DELETE FROM ' || name || ';'
-                    FROM sqlite_master
-                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
-                var dropTableCommands = new List<string>();
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        dropTableCommands.Add(reader.GetString(0));
-                    }
-                }
-
-                foreach (var dropTableCommand in dropTableCommands)
-                {
-                    command.CommandText = dropTableCommand;
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                // Attach the imported database and copy tables
-                command.CommandText = "ATTACH DATABASE @fileName AS importDb";
-                command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
-                await command.ExecuteNonQueryAsync();
-
-                command.CommandText = @"
-                    SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
-                    FROM sqlite_master
-                    WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
-                var tableInsertCommands = new List<string>();
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        tableInsertCommands.Add(reader.GetString(0));
-                    }
-                }
-
-                foreach (var tableInsertCommand in tableInsertCommands)
-                {
-                    command.CommandText = tableInsertCommand;
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                command.CommandText = "DETACH DATABASE importDb";
-                await command.ExecuteNonQueryAsync();
-            }
+            _connection.Close();
         }
 
-        File.Delete(tempFileName);
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+
+        _dbContext = new AliasClientDbContext(_connection);
+        _isSuccessfullyInitialized = false;
+
+        return (_connection, _dbContext);
     }
 
+    /// <summary>
+    /// Implements the IDisposable interface.
+    /// </summary>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _connection.Dispose();
+            _disposed = true;
+        }
+    }
+
+    /// <summary>
+    /// Initializes the database, either by creating a new one or loading an existing one from the server.
+    /// </summary>
     private async Task InitializeDatabaseAsync()
     {
         // Check that encryption key is set. If not, do nothing.
@@ -228,18 +201,7 @@ public class DbService
 
         _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
 
-        // Create a new in-memory database.
-        string connectionString = "Data Source=AliasClientDb.sqlite";
-        using var connection = new SqliteConnection(connectionString);
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<AliasClientDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        _dbContext = new AliasClientDbContext(options);
-
-        // Ensure the database is created.
+        // Ensure the in-memory database representation is created and has the necessary tables.
         await _dbContext.Database.EnsureCreatedAsync();
 
         // Attempt to fill the local database with a previously saved database stored on the server.
@@ -255,6 +217,69 @@ public class DbService
             _state.UpdateState(DbServiceState.DatabaseStatus.Error);
             Console.WriteLine("Failed to load database from server.");
         }
+    }
+
+    /// <summary>
+    /// Loads a SQLite database from a base64 string which represents a .sqlite file.
+    /// </summary>
+    /// <param name="base64String">Base64 string representation of a .sqlite file.</param>
+    private async Task ImportDbContextFromBase64Async(string base64String)
+    {
+        var bytes = Convert.FromBase64String(base64String);
+        var tempFileName = Path.GetRandomFileName();
+        await File.WriteAllBytesAsync(tempFileName, bytes);
+
+        using (var command = _connection.CreateCommand())
+        {
+            // Drop all tables in the original database
+            command.CommandText = @"
+                SELECT 'DELETE FROM ' || name || ';'
+                FROM sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var dropTableCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    dropTableCommands.Add(reader.GetString(0));
+                }
+            }
+
+            foreach (var dropTableCommand in dropTableCommands)
+            {
+                command.CommandText = dropTableCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Attach the imported database and copy tables
+            command.CommandText = "ATTACH DATABASE @fileName AS importDb";
+            command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
+            await command.ExecuteNonQueryAsync();
+
+            command.CommandText = @"
+                SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
+                FROM sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var tableInsertCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    tableInsertCommands.Add(reader.GetString(0));
+                }
+            }
+
+            foreach (var tableInsertCommand in tableInsertCommands)
+            {
+                command.CommandText = tableInsertCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            command.CommandText = "DETACH DATABASE importDb";
+            await command.ExecuteNonQueryAsync();
+        }
+
+        File.Delete(tempFileName);
     }
 
     /// <summary>
@@ -280,7 +305,7 @@ public class DbService
                 {
                     // Attempt to decrypt the database blob.
                     string decryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
-                    await ImportDbContextFromBase64Async(_dbContext!, decryptedBase64String);
+                    await ImportDbContextFromBase64Async(decryptedBase64String);
                 }
                 catch (Exception ex)
                 {
