@@ -28,10 +28,10 @@ public class VaultRetentionManagerTests
     public void Setup()
     {
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
-        testVaults = new List<Vault>
-        {
-            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0) }, // yesterday 12:00
-            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0) }, // yesterday 04:00
+        testVaults =
+        [
+            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0) },
+            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0) },
             new Vault { UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0) }, // 2 days ago
             new Vault { UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0) }, // 3 days ago
             new Vault { UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0) }, // 4 days ago
@@ -39,7 +39,7 @@ public class VaultRetentionManagerTests
             new Vault { UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0) }, // 3 weeks ago
             new Vault { UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0) }, // 1 month ago
             new Vault { UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0) }, // 2 months ago
-        };
+        ];
     }
 
     /// <summary>
@@ -57,10 +57,13 @@ public class VaultRetentionManagerTests
         // - one from 36 hours ago (this one gets priority vs. the one from two days ago as we only take the last one per day)
         // - one from three days ago
         // The one from 4 days ago should be excluded because that one is outside the 3 day window.
-        Assert.That(result.Count, Is.EqualTo(3));
-        Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
-        Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 30, 12, 0, 0)));
-        Assert.That(result[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 29, 12, 0, 0)));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(3));
+            Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 30, 12, 0, 0)));
+            Assert.That(result[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 29, 12, 0, 0)));
+        });
     }
 
     /// <summary>
@@ -72,10 +75,13 @@ public class VaultRetentionManagerTests
         var rule = new WeeklyRetentionRule { WeeksToKeep = 3 };
         var result = rule.ApplyRule(testVaults, now).ToList();
 
-        Assert.That(result.Count, Is.EqualTo(3));
-        Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0))); // Most recent from this week
-        Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0))); // Most recent from last week
-        Assert.That(result[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 18, 12, 0, 0))); // Most recent from week before last week
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(3));
+            Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+            Assert.That(result[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 18, 12, 0, 0)));
+        });
     }
 
     /// <summary>
@@ -87,9 +93,12 @@ public class VaultRetentionManagerTests
         var rule = new MonthlyRetentionRule { MonthsToKeep = 2 };
         var result = rule.ApplyRule(testVaults, now).ToList();
 
-        Assert.That(result.Count, Is.EqualTo(2));
-        Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0))); // Most recent from last month
-        Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 4, 1, 12, 0, 0))); // Most recent from second last month
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 4, 1, 12, 0, 0)));
+        });
     }
 
     /// <summary>
@@ -119,11 +128,14 @@ public class VaultRetentionManagerTests
         var vaultsToKeep = new List<Vault>(testVaults);
         vaultsToKeep.RemoveAll(v => vaultsToDelete.Contains(v));
 
-        Assert.That(vaultsToKeep.Count, Is.EqualTo(3));
-        Assert.That(vaultsToDelete.Count, Is.EqualTo(6));
-        Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
-        Assert.That(vaultsToKeep[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 30, 12, 0, 0)));
-        Assert.That(vaultsToKeep[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+        Assert.Multiple(() =>
+        {
+            Assert.That(vaultsToKeep, Has.Count.EqualTo(3));
+            Assert.That(vaultsToDelete, Has.Count.EqualTo(6));
+            Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(vaultsToKeep[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 30, 12, 0, 0)));
+            Assert.That(vaultsToKeep[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+        });
     }
 
     /// <summary>
@@ -156,8 +168,11 @@ public class VaultRetentionManagerTests
         var vaultsToKeep = new List<Vault>(testVaults);
         vaultsToKeep.RemoveAll(v => vaultsToDelete.Contains(v));
 
-        Assert.That(vaultsToKeep.Count, Is.EqualTo(1));
-        Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+        Assert.Multiple(() =>
+        {
+            Assert.That(vaultsToKeep, Has.Count.EqualTo(1));
+            Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+        });
     }
 
     /// <summary>
@@ -179,7 +194,10 @@ public class VaultRetentionManagerTests
         var vaultsToKeep = new List<Vault>(testVaults);
         vaultsToKeep.RemoveAll(v => vaultsToDelete.Contains(v));
 
-        Assert.That(vaultsToKeep.Count, Is.EqualTo(1));
-        Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+        Assert.Multiple(() =>
+        {
+            Assert.That(vaultsToKeep, Has.Count.EqualTo(1));
+            Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+        });
     }
 }

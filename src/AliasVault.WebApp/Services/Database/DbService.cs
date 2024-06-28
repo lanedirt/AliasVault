@@ -26,7 +26,7 @@ public class DbService : IDisposable
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
-    private SqliteConnection _connection;
+    private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
     private Task _initializationTask;
     private bool _isSuccessfullyInitialized;
@@ -49,7 +49,7 @@ public class DbService : IDisposable
         _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
 
         // Create an in-memory SQLite database connection which stays open for the lifetime of the service.
-        (_connection, _dbContext) = InitializeEmptyDatabase();
+        (_sqlConnection, _dbContext) = InitializeEmptyDatabase();
 
         // Initialize the database asynchronously
         _initializationTask = InitializeDatabaseAsync();
@@ -141,7 +141,7 @@ public class DbService : IDisposable
 
         // Export SQLite memory database to a temp file.
         using var memoryStream = new MemoryStream();
-        using var command = _connection.CreateCommand();
+        using var command = _sqlConnection.CreateCommand();
         command.CommandText = "VACUUM main INTO @fileName";
         command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
         await command.ExecuteNonQueryAsync();
@@ -162,18 +162,18 @@ public class DbService : IDisposable
     /// <returns>SqliteConnection and AliasClientDbContext.</returns>
     public (SqliteConnection SqliteConnection, AliasClientDbContext AliasClientDbContext) InitializeEmptyDatabase()
     {
-        if (_isSuccessfullyInitialized && _connection.State == ConnectionState.Open)
+        if (_isSuccessfullyInitialized && _sqlConnection.State == ConnectionState.Open)
         {
-            _connection.Close();
+            _sqlConnection.Close();
         }
 
-        _connection = new SqliteConnection("Data Source=:memory:");
-        _connection.Open();
+        _sqlConnection = new SqliteConnection("Data Source=:memory:");
+        _sqlConnection.Open();
 
-        _dbContext = new AliasClientDbContext(_connection);
+        _dbContext = new AliasClientDbContext(_sqlConnection);
         _isSuccessfullyInitialized = false;
 
-        return (_connection, _dbContext);
+        return (_sqlConnection, _dbContext);
     }
 
     /// <summary>
@@ -181,11 +181,27 @@ public class DbService : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (!_disposed)
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes the service.
+    /// </summary>
+    /// <param name="disposing">True if disposing.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
         {
-            _connection.Dispose();
-            _disposed = true;
+            return;
         }
+
+        if (disposing)
+        {
+            _sqlConnection.Dispose();
+        }
+
+        _disposed = true;
     }
 
     /// <summary>
@@ -229,7 +245,7 @@ public class DbService : IDisposable
         var tempFileName = Path.GetRandomFileName();
         await File.WriteAllBytesAsync(tempFileName, bytes);
 
-        using (var command = _connection.CreateCommand())
+        using (var command = _sqlConnection.CreateCommand())
         {
             // Drop all tables in the original database
             command.CommandText = @"

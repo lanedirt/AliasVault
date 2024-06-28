@@ -52,9 +52,9 @@ public static class VaultRetentionManager
         }
 
         // Always keep the most recent vault
-        if (existingVaults.Any() && !vaultsToKeep.Contains(existingVaults.First()))
+        if (existingVaults.Count > 0 && !vaultsToKeep.Contains(existingVaults[0]))
         {
-            vaultsToKeep.Add(existingVaults.First());
+            vaultsToKeep.Add(existingVaults[0]);
         }
 
         // Determine vaults to delete
