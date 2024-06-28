@@ -8,6 +8,8 @@
 namespace AliasVault.Api.Controllers;
 
 using AliasServerDb;
+using AliasVault.Api.Controllers.Vault;
+using AliasVault.Api.Controllers.Vault.RetentionRules;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +23,19 @@ using Microsoft.EntityFrameworkCore;
 [ApiVersion("1")]
 public class VaultController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
+    /// <summary>
+    /// Default retention policy for vaults.
+    /// </summary>
+    private readonly RetentionPolicy _retentionPolicy = new RetentionPolicy
+    {
+        Rules = new List<IRetentionRule>
+        {
+            new DailyRetentionRule() { DaysToKeep = 3 },
+            new WeeklyRetentionRule() { WeeksToKeep = 1 },
+            new MonthlyRetentionRule() { MonthsToKeep = 1 },
+        },
+    };
+
     /// <summary>
     /// Get the newest version of the vault for the current user.
     /// </summary>
@@ -65,7 +80,7 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
         }
 
         // Create new vault entry.
-        var vault = new AliasServerDb.Vault
+        var newVault = new AliasServerDb.Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
@@ -73,7 +88,22 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
             UpdatedAt = DateTime.UtcNow,
         };
 
-        await context.Vaults.AddAsync(vault);
+        // Run the vault retention manager to keep the required vaults according
+        // to the applied retention policies and delete the rest.
+        // We only select the Id and UpdatedAt fields to reduce the amount of data transferred from the database.
+        var existingVaults = await context.Vaults
+            .Where(x => x.UserId == user.Id)
+            .OrderByDescending(v => v.UpdatedAt)
+            .Select(x => new AliasServerDb.Vault { Id = x.Id, UpdatedAt = x.UpdatedAt })
+            .ToListAsync();
+
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, newVault);
+
+        // Delete vaults that are not needed anymore.
+        context.Vaults.RemoveRange(vaultsToDelete);
+
+        // Add the new vault and commit to database.
+        await context.Vaults.AddAsync(newVault);
         await context.SaveChangesAsync();
 
         return Ok();

@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
 @inject GlobalNotificationService GlobalNotificationService
+@inject DbService DbService
 @using AliasVault.WebApp.Auth.Services
 
 @code {
@@ -14,6 +15,8 @@
         await base.OnInitializedAsync();
         await AuthService.RemoveTokensAsync();
         await AuthStateProvider.GetAuthenticationStateAsync();
+        // Initialize a new empty database to clear all data.
+        DbService.InitializeEmptyDatabase();
         GlobalNotificationService.ClearMessages();
 
         // Redirect to home page

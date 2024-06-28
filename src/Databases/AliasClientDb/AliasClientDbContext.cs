@@ -7,6 +7,7 @@
 
 namespace AliasClientDb;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -25,7 +26,18 @@ public class AliasClientDbContext : DbContext
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasClientDbContext"/> class.
     /// </summary>
-    /// <param name="options">DbContextOptions.</param>
+    /// <param name="sqliteConnection">The SQLite connection to use to connect to the SQLite database.</param>
+    public AliasClientDbContext(SqliteConnection sqliteConnection)
+        : this(new DbContextOptionsBuilder<AliasClientDbContext>()
+            .UseSqlite(sqliteConnection)
+            .Options)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AliasClientDbContext"/> class.
+    /// </summary>
+    /// <param name="options">DbContextOptions to use.</param>
     public AliasClientDbContext(DbContextOptions<AliasClientDbContext> options)
         : base(options)
     {
