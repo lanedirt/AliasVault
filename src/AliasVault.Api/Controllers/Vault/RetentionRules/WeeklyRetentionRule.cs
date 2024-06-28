@@ -29,13 +29,10 @@ public class WeeklyRetentionRule : IRetentionRule
             return date.Date.AddDays(-1 * diff).Date;
         }
 
-        var startOfCurrentWeek = GetStartOfWeek(now);
-
         return vaults
-            .Where(v => v.UpdatedAt >= startOfCurrentWeek.AddDays(-7 * WeeksToKeep))
-            .GroupBy(v => GetStartOfWeek(v.UpdatedAt))
-            .OrderByDescending(g => g.Key)
-            .Take(WeeksToKeep)
-            .Select(g => g.OrderByDescending(v => v.UpdatedAt).First());
+            .GroupBy(x => GetStartOfWeek(x.UpdatedAt))
+            .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(WeeksToKeep);
     }
 }

@@ -23,8 +23,9 @@ public class MonthlyRetentionRule : IRetentionRule
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)
     {
         return vaults
-            .Where(v => v.UpdatedAt >= now.Date.AddMonths(-MonthsToKeep))
-            .GroupBy(v => new DateTime(v.UpdatedAt.Year, v.UpdatedAt.Month, 1))
-            .Select(g => g.OrderByDescending(v => v.UpdatedAt).First());
+            .GroupBy(x => x.UpdatedAt.Month)
+            .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(MonthsToKeep);
     }
 }

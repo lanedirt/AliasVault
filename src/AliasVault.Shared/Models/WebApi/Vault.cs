@@ -8,7 +8,7 @@
 namespace AliasVault.Shared.Models.WebApi;
 
 /// <summary>
-/// VaultHistory model.
+/// Vault model.
 /// </summary>
 public class Vault
 {

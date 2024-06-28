@@ -22,9 +22,11 @@ public class DailyRetentionRule : IRetentionRule
    /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)
     {
+        // For the specified amount of days, take last vault per day.
         return vaults
-            .Where(v => v.UpdatedAt >= now.Date.AddDays(-DaysToKeep))
-            .GroupBy(v => v.UpdatedAt.Date)
-            .Select(g => g.OrderByDescending(v => v.UpdatedAt).First());
+            .GroupBy(x => x.UpdatedAt.Date)
+            .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(DaysToKeep);
     }
 }

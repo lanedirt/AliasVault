@@ -7,6 +7,8 @@
 
 namespace AliasVault.Api.Controllers.Vault;
 
+using AliasVault.Api.Controllers.Vault.RetentionRules;
+
 /// <summary>
 /// The retention policy that contains one or more retention rules.
 /// </summary>
