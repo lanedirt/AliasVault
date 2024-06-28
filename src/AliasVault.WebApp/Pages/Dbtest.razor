@@ -38,7 +38,6 @@
 @code {
     private bool IsLoading { get; set; } = true;
     private List<Password> Passwords { get; set; } = new();
-    private AliasClientDbContext dbContext = new();
 
     private async Task RemovePassword(Password password)
     {

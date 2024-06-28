@@ -21,7 +21,6 @@ else
     private bool Loading { get; set; } = false;
     private string Message { get; set; } = "";
     private string LoadingIndicatorMessage { get; set; } = "";
-    private bool _isSaving => DbService.GetState().CurrentState.Status == DbServiceState.DatabaseStatus.Saving;
 
     /// <inheritdoc />
     protected override void OnInitialized()
