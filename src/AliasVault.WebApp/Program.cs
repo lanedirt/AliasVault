@@ -9,6 +9,7 @@ using AliasVault.WebApp;
 using AliasVault.WebApp.Auth.Providers;
 using AliasVault.WebApp.Auth.Services;
 using AliasVault.WebApp.Services;
+using AliasVault.WebApp.Services.Database;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -36,7 +37,7 @@ builder.Services.AddTransient<AliasVaultApiHandlerService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<AliasService>();
-builder.Services.AddScoped<AliasClientDbService>();
+builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 

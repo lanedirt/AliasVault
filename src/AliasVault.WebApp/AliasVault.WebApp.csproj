@@ -60,6 +60,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Update="Layout\DbStatusIndicator.razor">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
       <Content Update="wwwroot\appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

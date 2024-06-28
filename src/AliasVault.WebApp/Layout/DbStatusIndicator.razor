@@ -1,0 +1,65 @@
+﻿@implements IDisposable
+@inject DbService DbService
+
+@if (Loading)
+{
+    <div class="flex items-center justify-center">
+        <SmallLoadingIndicator Title="@LoadingIndicatorMessage" />
+    </div>
+}
+else
+{
+    <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="false" />
+}
+
+<!--
+<p>Message: @DbService.GetState().CurrentState.Message</p>
+<p>Last Updated: @DbService.GetState().CurrentState.LastUpdated</p>
+-->
+
+@code {
+    private bool Loading { get; set; } = false;
+    private string Message { get; set; } = "";
+    private string LoadingIndicatorMessage { get; set; } = "";
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        DbService.GetState().StateChanged += OnDatabaseStateChanged;
+    }
+
+    private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
+    {
+        await InvokeAsync(StateHasChanged);
+        if (newState.Status == DbServiceState.DatabaseStatus.Saving)
+        {
+            // Show loading indicator for at least 0.5 seconds even if the save operation is faster.
+            Message = "Saving...";
+            await ShowLoadingIndicatorAsync();
+        }
+        else if (newState.Status == DbServiceState.DatabaseStatus.Loading)
+        {
+            Message = "Loading...";
+            await ShowLoadingIndicatorAsync();
+        }
+
+        LoadingIndicatorMessage = Message + " - " + newState.LastUpdated;
+    }
+
+    private async Task ShowLoadingIndicatorAsync()
+    {
+        Loading = true;
+        StateHasChanged();
+        await Task.Delay(800);
+        Loading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Dispose method.
+    /// </summary>
+    public void Dispose()
+    {
+        DbService.GetState().StateChanged -= OnDatabaseStateChanged;
+    }
+}
