@@ -60,7 +60,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="Layout\ClientDbStatusIndicator.razor">
+      <Content Update="Layout\DbStatusIndicator.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
       <Content Update="wwwroot\appsettings.json">

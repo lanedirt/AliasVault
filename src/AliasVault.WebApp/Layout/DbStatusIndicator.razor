@@ -1,13 +1,15 @@
-﻿@using AliasVault.WebApp.Services.Database
-@implements IDisposable
+﻿@implements IDisposable
 @inject DbService DbService
 
 @if (Loading)
 {
     <div class="flex items-center justify-center">
-        <SmallLoadingIndicator />
-        <p class="ml-2">@Message</p>
+        <SmallLoadingIndicator Title="@LoadingIndicatorMessage" />
     </div>
+}
+else
+{
+    <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="false" />
 }
 
 <!--
@@ -18,8 +20,10 @@
 @code {
     private bool Loading { get; set; } = false;
     private string Message { get; set; } = "";
+    private string LoadingIndicatorMessage { get; set; } = "";
     private bool _isSaving => DbService.GetState().CurrentState.Status == DbServiceState.DatabaseStatus.Saving;
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
@@ -39,17 +43,22 @@
             Message = "Loading...";
             await ShowLoadingIndicatorAsync();
         }
+
+        LoadingIndicatorMessage = Message + " - " + newState.LastUpdated;
     }
 
     private async Task ShowLoadingIndicatorAsync()
     {
         Loading = true;
         StateHasChanged();
-        await Task.Delay(500);
+        await Task.Delay(800);
         Loading = false;
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Dispose method.
+    /// </summary>
     public void Dispose()
     {
         DbService.GetState().StateChanged -= OnDatabaseStateChanged;
