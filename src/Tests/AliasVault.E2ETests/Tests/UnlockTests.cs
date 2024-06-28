@@ -14,8 +14,6 @@ namespace AliasVault.E2ETests.Tests;
 [TestFixture]
 public class UnlockTests : PlaywrightTest
 {
-    private static readonly Random Random = new();
-
     /// <summary>
     /// Test that the unlock page is displayed after hard refresh which should
     /// clear the encryption key from memory.

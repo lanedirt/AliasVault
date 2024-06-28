@@ -1,18 +1,17 @@
 //-----------------------------------------------------------------------
-// <copyright file="AliasClientDbService.cs" company="lanedirt">
+// <copyright file="DbService.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.WebApp.Services;
+namespace AliasVault.WebApp.Services.Database;
 
 using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.WebApp.Auth.Services;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -22,30 +21,43 @@ using Microsoft.JSInterop;
 /// with a AliasClientDb database instance that is only persisted in memory due to the encryption requirements of the
 /// database itself. The database should not be persisted to disk when in un-encrypted form.
 /// </summary>
-public class AliasClientDbService
+public class DbService
 {
     private readonly AuthService _authService;
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
+    private readonly DbServiceState _state = new();
     private AliasClientDbContext? _dbContext;
     private Task _initializationTask;
     private bool _isSuccessfullyInitialized;
     private int _retryCount;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AliasClientDbService"/> class.
+    /// Initializes a new instance of the <see cref="DbService"/> class.
     /// </summary>
     /// <param name="authService">AuthService.</param>
     /// <param name="jsRuntime">IJSRuntime.</param>
     /// <param name="httpClient">HttpClient.</param>
-    public AliasClientDbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient)
+    public DbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient)
     {
         _authService = authService;
         _jsRuntime = jsRuntime;
         _httpClient = httpClient;
 
+        // Set the initial state of the database service.
+        _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
+
         // Initialize the database asynchronously
         _initializationTask = InitializeDatabaseAsync();
+    }
+
+    /// <summary>
+    /// Gets database service state object which can be subscribed to.
+    /// </summary>
+    /// <returns>DbServiceState instance.</returns>
+    public DbServiceState GetState()
+    {
+        return _state;
     }
 
     /// <summary>
@@ -91,44 +103,56 @@ public class AliasClientDbService
     {
         await EnsureInitializedAsync();
 
-        using var memoryStream = new MemoryStream();
-        using var connection = new SqliteConnection(_dbContext!.Database.GetDbConnection().ConnectionString);
-        await connection.OpenAsync();
-        using var command = connection.CreateCommand();
-        command.CommandText = "VACUUM main INTO @fileName";
+        // Set the initial state of the database service.
+        _state.UpdateState(DbServiceState.DatabaseStatus.Saving);
 
-        var tempFileName = Path.GetRandomFileName();
-        command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
-        await command.ExecuteNonQueryAsync();
+        // Save the actual dbContext.
+        await _dbContext!.SaveChangesAsync();
 
-        var bytes = await File.ReadAllBytesAsync(tempFileName);
+        string base64String = await ExportSqliteToBase64Async();
 
-        string base64String = Convert.ToBase64String(bytes);
-        File.Delete(tempFileName);
-
-        // Encrypt base64 string.
-        // Encrypt using IJSInterop
-        Console.WriteLine("Encrypted using key: " + _authService.GetEncryptionKeyAsBase64Async());
+        // Encrypt base64 string using IJSInterop.
         string encryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.encrypt", base64String, _authService.GetEncryptionKeyAsBase64Async());
-
-        // Decrypt it again
-        string decryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", encryptedBase64String, _authService.GetEncryptionKeyAsBase64Async());
-
-        // Print original, encrypted and decrypted sting to console
-        Console.WriteLine("Original: " + base64String);
-        Console.WriteLine("Encrypted: " + encryptedBase64String);
-        Console.WriteLine("Decrypted: " + decryptedBase64String);
 
         // Save to webapi.
         var success = await SaveToServerAsync(encryptedBase64String);
         if (success)
         {
             Console.WriteLine("Database succesfully saved to server.");
+            _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
         }
         else
         {
             Console.WriteLine("Failed to save database to server.");
+            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
         }
+    }
+
+    /// <summary>
+    /// Export the in-memory SQLite database to a base64 string.
+    /// </summary>
+    /// <returns>Base64 encoded string that represents SQLite database.</returns>
+    public async Task<string> ExportSqliteToBase64Async()
+    {
+        var tempFileName = Path.GetRandomFileName();
+
+        // Export SQLite memory database to a temp file.
+        using var memoryStream = new MemoryStream();
+        using var connection = new SqliteConnection(_dbContext!.Database.GetDbConnection().ConnectionString);
+        await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = "VACUUM main INTO @fileName";
+        command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
+        await command.ExecuteNonQueryAsync();
+
+        // Get bytes.
+        var bytes = await File.ReadAllBytesAsync(tempFileName);
+        string base64String = Convert.ToBase64String(bytes);
+
+        // Delete temp file.
+        File.Delete(tempFileName);
+
+        return base64String;
     }
 
     private static async Task ImportDbContextFromBase64Async(AliasClientDbContext dbContext, string base64String)
@@ -202,6 +226,8 @@ public class AliasClientDbService
             return;
         }
 
+        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+
         // Create a new in-memory database.
         string connectionString = "Data Source=AliasClientDb.sqlite";
         using var connection = new SqliteConnection(connectionString);
@@ -221,10 +247,12 @@ public class AliasClientDbService
         if (loaded)
         {
             _isSuccessfullyInitialized = true;
+            _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
             Console.WriteLine("Database succesfully loaded from server.");
         }
         else
         {
+            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
             Console.WriteLine("Failed to load database from server.");
         }
     }
@@ -284,7 +312,7 @@ public class AliasClientDbService
 
         try
         {
-            await _httpClient.PostAsJsonAsync<Vault>("api/v1/Vault", vaultObject);
+            await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
             return true;
         }
         catch

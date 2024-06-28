@@ -10,6 +10,7 @@ namespace AliasVault.WebApp.Pages.Base;
 using AliasVault.WebApp.Auth.Services;
 using AliasVault.WebApp.Components.Models;
 using AliasVault.WebApp.Services;
+using AliasVault.WebApp.Services.Database;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -49,10 +50,10 @@ public class PageBase : OwningComponentBase
     public IJSRuntime Js { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the AliasClientDbService.
+    /// Gets or sets the DbService.
     /// </summary>
     [Inject]
-    public AliasClientDbService AliasClientDbService { get; set; } = null!;
+    public DbService DbService { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the AuthService.

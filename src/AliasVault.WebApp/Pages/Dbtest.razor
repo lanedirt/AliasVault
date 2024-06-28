@@ -22,14 +22,12 @@
 }
 
 <button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="AddRecord">Add new record</button>
-<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="LoadAliasFromDbAsync">Load from db again</button>
-<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="ExportDbToString">Save DB to remote</button>
-<button class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @onclick="SaveDb">SaveChanges</button>
 
 <div class="grid gap-4 px-4 mb-4 md:grid-cols-4 xl:grid-cols-6">
     @foreach (var password in Passwords)
     {
         <div>
+            <button @onclick="() => RemovePassword(password)">Remove</button>
             <p>@password.CreatedAt</p>
             <p>@password.Value</p>
         </div>
@@ -40,6 +38,15 @@
 @code {
     private bool IsLoading { get; set; } = true;
     private List<Password> Passwords { get; set; } = new();
+    private AliasClientDbContext dbContext = new();
+
+    private async Task RemovePassword(Password password)
+    {
+        var db = await DbService.GetDbContextAsync();
+        db.Passwords.Remove(password);
+        await DbService.SaveDatabaseAsync();
+        await RefreshAliasFromDbAsync();
+    }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -48,21 +55,19 @@
 
         if (firstRender)
         {
-            await LoadAliasFromDbAsync();
+            await RefreshAliasFromDbAsync();
         }
     }
 
-    private async Task LoadAliasFromDbAsync()
+    private async Task RefreshAliasFromDbAsync()
     {
         IsLoading = true;
         StateHasChanged();
 
-        var db = await AliasClientDbService.GetDbContextAsync();
+        var db = await DbService.GetDbContextAsync();
 
         // Load all passwords from the database
         var passwords = await db.Passwords.ToListAsync();
-
-        // Show them on page
 
         Passwords = passwords;
         IsLoading = false;
@@ -71,24 +76,13 @@
 
     private async Task AddRecord()
     {
-        var db = await AliasClientDbService.GetDbContextAsync();
+        var db = await DbService.GetDbContextAsync();
 
         // Insert row in database
         db.Passwords.Add(new Password() { Id = Guid.NewGuid(), Value = "Test factory insert SQLite", CreatedAt = DateTime.Now });
 
-        // Save changes
-        await db.SaveChangesAsync();
-
-        await LoadAliasFromDbAsync();
-    }
-
-    private async Task ExportDbToString()
-    {
-        await AliasClientDbService.SaveDatabaseAsync();
-    }
-
-    private async Task SaveDb()
-    {
-        await (await AliasClientDbService.GetDbContextAsync()).SaveChangesAsync();
+        // Save changes and upload db to remote.
+        await DbService.SaveDatabaseAsync();
+        await RefreshAliasFromDbAsync();
     }
 }

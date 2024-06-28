@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
 @inject GlobalNotificationService GlobalNotificationService
-@inject AliasClientDbService AliasClientDbService
+@inject DbService DbService
 @inject ILocalStorageService LocalStorage
 @using System.Text.Json
 @using AliasVault.Shared.Models
@@ -145,7 +145,7 @@
             AuthService.StoreEncryptionKey(passwordHash);
 
             // Try to retrieve vault again from remote.
-            await AliasClientDbService.GetDbContextAsync();
+            await DbService.GetDbContextAsync();
 
             // Redirect to home page.
             await AuthStateProvider.GetAuthenticationStateAsync();
