@@ -15,6 +15,7 @@ using AliasServerDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
+using AliasVault.Shared.Providers;
 using Asp.Versioning;
 using Cryptography.Models;
 using Microsoft.AspNetCore.Identity;
@@ -30,10 +31,11 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
+/// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing..</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache) : ControllerBase
+public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid email or password.
@@ -128,7 +130,7 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
         // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
         var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
-        if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < DateTime.Now)
+        if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             return Unauthorized("Refresh token expired");
         }
@@ -145,8 +147,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
             Value = newRefreshToken,
-            ExpireDate = DateTime.Now.AddDays(30),
-            CreatedAt = DateTime.Now,
+            ExpireDate = timeProvider.UtcNow.AddDays(30),
+            CreatedAt = timeProvider.UtcNow,
         });
         await context.SaveChangesAsync();
 
@@ -314,7 +316,7 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
             issuer: configuration["Jwt:Issuer"] ?? string.Empty,
             audience: configuration["Jwt:Issuer"] ?? string.Empty,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(10),
+            expires: timeProvider.UtcNow.AddMinutes(10),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -345,8 +347,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
             Value = refreshToken,
-            ExpireDate = DateTime.Now.AddDays(30),
-            CreatedAt = DateTime.Now,
+            ExpireDate = timeProvider.UtcNow.AddDays(30),
+            CreatedAt = DateTime.UtcNow,
         });
         await context.SaveChangesAsync();
 

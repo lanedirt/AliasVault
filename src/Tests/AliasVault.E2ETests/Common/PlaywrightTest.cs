@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Common;
 
+using AliasVault.Shared.Providers;
 using Microsoft.Playwright;
 
 /// <summary>
@@ -14,7 +15,7 @@ using Microsoft.Playwright;
 /// </summary>
 public class PlaywrightTest
 {
-    private static readonly object _lock = new object();
+    private static readonly object _lock = new();
     private static int _basePort = 5600;
     private static int _currentPort = _basePort;
 
@@ -27,6 +28,11 @@ public class PlaywrightTest
     /// For starting the WASM WebApp project in-memory.
     /// </summary>
     private readonly WebApplicationWasmFactoryFixture<AliasVault.E2ETests.WebApp.Server.Program> _wasmFactory = new();
+
+    /// <summary>
+    /// Gets the time provider instance for mutating the current WebApi time in tests.
+    /// </summary>
+    protected TestTimeProvider ApiTimeProvider => _apiFactory.TimeProvider;
 
     /// <summary>
     /// Gets or sets base URL where the Blazor WASM app runs on including random port.

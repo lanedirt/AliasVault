@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
 using AliasServerDb;
+using AliasVault.Shared.Providers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -28,6 +29,11 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// </summary>
     public string HostUrl { get; set; } = "https://localhost:5001";
 
+    /// <summary>
+    /// Gets the time provider instance for mutating the current time in tests.
+    /// </summary>
+    public TestTimeProvider TimeProvider { get; private set; } = new();
+
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -38,6 +44,21 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
 
         builder.ConfigureServices((context, services) =>
         {
+            // Replace the ITimeProvider registration with a TestTimeProvider.
+            var timeProviderDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(ITimeProvider));
+
+            if (timeProviderDescriptor is null)
+            {
+                throw new InvalidOperationException(
+                    "No ITimeProvider registered.");
+            }
+
+            services.Remove(timeProviderDescriptor);
+
+            // Add TestTimeProvider
+            services.AddSingleton<ITimeProvider>(TimeProvider);
+
             // Remove the existing AliasServerDbContext registration.
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==

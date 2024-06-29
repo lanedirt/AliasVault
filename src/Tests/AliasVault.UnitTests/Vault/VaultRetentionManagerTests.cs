@@ -122,7 +122,7 @@ public class VaultRetentionManagerTests
         // - 2 vaults from the last 2 weeks, where 1 is the same as the last 2 days because it's in the past.
         // - 1 vault from the last month, which is the same as the last 2 days one because it's in the past
         // Total expected: 3 to be kept so 9 deleted.
-        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults).ToList();
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults, DateTime.UtcNow).ToList();
 
         // Remove the vaults from the list of test vaults that are expected to be kept
         var vaultsToKeep = new List<Vault>(testVaults);
@@ -162,7 +162,7 @@ public class VaultRetentionManagerTests
         // With the test data set of 9 vaults, we expect to keep:
         // - 1 vault which is the new vault created now (not in the list)
         // - 1 vault from the past which is the latest one in the list.
-        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults, newVault).ToList();
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults, DateTime.UtcNow, newVault).ToList();
 
         // Remove the vaults from the list of test vaults that are expected to be kept
         var vaultsToKeep = new List<Vault>(testVaults);
@@ -188,7 +188,7 @@ public class VaultRetentionManagerTests
 
         // With the test data set of 9 vaults, we expect to keep:
         // - 1 vault which is the latest one. Even though we have no rules, we should always keep the latest one.
-        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults).ToList();
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(retentionPolicy, testVaults, DateTime.UtcNow).ToList();
 
         // Remove the vaults from the list of test vaults that are expected to be kept
         var vaultsToKeep = new List<Vault>(testVaults);
