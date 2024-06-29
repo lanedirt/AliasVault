@@ -8,6 +8,8 @@
 using System.Data.Common;
 using System.Text;
 using AliasServerDb;
+using AliasVault.Api.Jwt;
+using AliasVault.Shared.Providers;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +20,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
+builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
 
 builder.Services.AddLogging(logging =>
 {
@@ -92,6 +97,10 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero,
     };
+
+    // Add custom event handler for validating token expiration time in order
+    // to be able to mutate current time for testing the token expiration logic in unit tests.
+    options.EventsType = typeof(TimeValidationJwtBearerEvents);
 });
 
 // Configure CORS

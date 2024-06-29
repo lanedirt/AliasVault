@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers.Vault;
+namespace AliasVault.Api.Vault;
 
 using System;
 using System.Collections.Generic;
@@ -24,12 +24,11 @@ public static class VaultRetentionManager
     /// </summary>
     /// <param name="retentionPolicy">List of retention policies to apply.</param>
     /// <param name="existingVaults">List of existing vaults for a certain user.</param>
+    /// <param name="now">DateTime which represents current time.</param>
     /// <param name="newVault">New encrypted vault to be added that is also taken into account for calculating retention policy.</param>
     /// <returns>List of vaults to delete according to the retention policies.</returns>
-    public static List<Vault> ApplyRetention(RetentionPolicy retentionPolicy, List<Vault> existingVaults, Vault? newVault = null)
+    public static List<Vault> ApplyRetention(RetentionPolicy retentionPolicy, List<Vault> existingVaults, DateTime now, Vault? newVault = null)
     {
-        var now = DateTime.UtcNow;
-
         // Add the new vault to the list of existing vaults if provided
         if (newVault is not null)
         {

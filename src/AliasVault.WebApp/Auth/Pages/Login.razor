@@ -1,17 +1,9 @@
 @page "/user/login"
-@attribute [AllowAnonymous]
+@inherits AliasVault.WebApp.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.MainLayout
-@inject HttpClient Http
-@inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
-@inject AuthService AuthService
-@inject GlobalNotificationService GlobalNotificationService
-@using System.Text.Json
+@attribute [AllowAnonymous]
 @using AliasVault.Shared.Models
-@using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.WebApp.Auth.Components
-@using AliasVault.WebApp.Auth.Services
-@using Cryptography
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Sign in to AliasVault
@@ -72,69 +64,7 @@
 
         try
         {
-            // Send request to server with email to get server ephemeral public key.
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(_loginModel.Email));
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                _serverValidationErrors.ParseResponse(responseContent);
-                StateHasChanged();
-                return;
-            }
-
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
-            if (loginResponse == null)
-            {
-                _serverValidationErrors.AddError("An error occurred while processing the login request.");
-                return;
-            }
-
-            // 3. Client derives shared session key.
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_loginModel.Password, loginResponse.Salt);
-            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-
-            var clientEphemeral = Srp.GenerateEphemeralClient();
-            var privateKey = Srp.DerivePrivateKey(loginResponse.Salt, _loginModel.Email, passwordHashString);
-            var clientSession = Srp.DeriveSessionClient(
-                privateKey,
-                clientEphemeral.Secret,
-                loginResponse.ServerEphemeral,
-                loginResponse.Salt,
-                _loginModel.Email);
-
-            // 4. Client sends proof of session key to server.
-            result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(_loginModel.Email, clientEphemeral.Public, clientSession.Proof));
-            responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                _serverValidationErrors.ParseResponse(responseContent);
-                StateHasChanged();
-                return;
-            }
-
-            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
-            if (validateLoginResponse == null)
-            {
-                _serverValidationErrors.AddError("An error occurred while processing the login request.");
-                return;
-            }
-
-            // 5. Client verifies proof.
-            Srp.VerifySession(clientEphemeral.Public, clientSession, validateLoginResponse.ServerSessionProof);
-
-            // Store the tokens in local storage.
-            await AuthService.StoreAccessTokenAsync(validateLoginResponse.Token.Token);
-            await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token.RefreshToken);
-
-            // Store the encryption key in memory.
-            AuthService.StoreEncryptionKey(passwordHash);
-
-            // Redirect to home page.
-            await AuthStateProvider.GetAuthenticationStateAsync();
-            GlobalNotificationService.ClearMessages();
-            NavigationManager.NavigateTo("/");
+            await ProcessLoginAsync(_loginModel.Email, _loginModel.Password, _serverValidationErrors);
         }
 #if DEBUG
         catch (Exception ex)

@@ -8,8 +8,9 @@
 namespace AliasVault.Api.Controllers;
 
 using AliasServerDb;
-using AliasVault.Api.Controllers.Vault;
-using AliasVault.Api.Controllers.Vault.RetentionRules;
+using AliasVault.Api.Vault;
+using AliasVault.Api.Vault.RetentionRules;
+using AliasVault.Shared.Providers;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +21,9 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 /// <param name="context">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
+/// <param name="timeProvider">ITimeProvider instance.</param>
 [ApiVersion("1")]
-public class VaultController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class VaultController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Default retention policy for vaults.
@@ -84,8 +86,8 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.UtcNow,
+            UpdatedAt = timeProvider.UtcNow,
         };
 
         // Run the vault retention manager to keep the required vaults according
@@ -97,7 +99,7 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
             .Select(x => new AliasServerDb.Vault { Id = x.Id, UpdatedAt = x.UpdatedAt })
             .ToListAsync();
 
-        var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, newVault);
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, timeProvider.UtcNow, newVault);
 
         // Delete vaults that are not needed anymore.
         context.Vaults.RemoveRange(vaultsToDelete);

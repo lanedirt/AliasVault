@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers.Vault.RetentionRules;
+namespace AliasVault.Api.Vault.RetentionRules;
 
 using AliasServerDb;
 

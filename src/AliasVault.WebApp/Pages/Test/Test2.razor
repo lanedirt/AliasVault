@@ -1,0 +1,47 @@
+﻿@page "/test/2"
+@inherits PageBase
+@inject HttpClient HttpClient
+
+<LayoutPageTitle>Test webapi call 2</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Test webapi call 2</h1>
+        </div>
+        <p>Test webapi call 2.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <p>Test 2 OK.</p>
+}
+
+@code {
+    private bool IsLoading { get; set; } = true;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await MakeWebApiCall();
+        }
+    }
+
+    private async Task MakeWebApiCall()
+    {
+        await HttpClient.GetAsync("api/v1/Test");
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}
