@@ -22,20 +22,20 @@ public class JwtTokenTests : PlaywrightTest
     [Test]
     public async Task RefreshTokenTest()
     {
-        // Soft navigate to "aliases" page to verify that it works.
-        await NavigateUsingBlazorRouter("aliases");
-        await WaitForURLAsync("**/aliases", "Find all of your aliases below");
+        // Soft navigate to verify that we are logged in.
+        await NavigateUsingBlazorRouter("test/1");
+        await WaitForURLAsync("**/test/1", "Test webapi call 1.");
 
         // Increase the time by 1 hour to make the JWT token expire.
         ApiTimeProvider.AdvanceBy(TimeSpan.FromHours(1));
 
         // Soft navigate to another page to trigger the JWT token refresh
         // and check if the page is loaded successfully.
-        await NavigateUsingBlazorRouter("dbtest");
-        await WaitForURLAsync("**/dbtest", "Find all of your aliases below.");
+        await NavigateUsingBlazorRouter("test/2");
+        await WaitForURLAsync("**/test/2", "Test webapi call 2.");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 2."), "No page content after refreshing access token.");
     }
 
     /// <summary>
@@ -47,10 +47,10 @@ public class JwtTokenTests : PlaywrightTest
     [Test]
     public async Task RefreshTokenUnlockPageTest()
     {
-        // Soft navigate to "aliases" page to verify that it works.
-        var startUrl = "dbtest";
+        // Soft navigate to verify that we are logged in.
+        var startUrl = "test/1";
         await NavigateUsingBlazorRouter(startUrl);
-        await WaitForURLAsync("**/" + startUrl, "Find all of your aliases below");
+        await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
 
         // Hard reload the page to trigger the unlock page to show up.
         await Page.ReloadAsync();
@@ -73,7 +73,7 @@ public class JwtTokenTests : PlaywrightTest
         await WaitForURLAsync("**/" + startUrl, "AliasVault");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database with a expired JWT token.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database with a expired JWT token.");
     }
 
     /// <summary>
@@ -84,9 +84,9 @@ public class JwtTokenTests : PlaywrightTest
     [Test]
     public async Task RefreshTokenExpiredTest()
     {
-        // Soft navigate to "aliases" page to verify that it works.
-        await NavigateUsingBlazorRouter("aliases");
-        await WaitForURLAsync("**/aliases", "Find all of your aliases below");
+        // Soft navigate to verify that we are logged in.
+        await NavigateUsingBlazorRouter("test/1");
+        await WaitForURLAsync("**/test/1", "Test webapi call 1.");
 
         // Increase the time by 1 year to make the JWT token AND refresh token expire.
         ApiTimeProvider.AdvanceBy(TimeSpan.FromDays(365));
@@ -94,9 +94,7 @@ public class JwtTokenTests : PlaywrightTest
         // Soft navigate to another page to trigger the JWT token refresh
         // and check if the page is loaded successfully.
         // Not all pages do a webapi call on load everytime so we need to navigate to a page that does.
-        await NavigateUsingBlazorRouter("dbtest");
-        await NavigateUsingBlazorRouter("aliases");
-        await NavigateUsingBlazorRouter("dbtest");
+        await NavigateUsingBlazorRouter("test/2");
 
         await WaitForURLAsync("**/user/login", "Login");
 

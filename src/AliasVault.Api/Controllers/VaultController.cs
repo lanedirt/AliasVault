@@ -8,8 +8,8 @@
 namespace AliasVault.Api.Controllers;
 
 using AliasServerDb;
-using AliasVault.Api.Controllers.Vault;
-using AliasVault.Api.Controllers.Vault.RetentionRules;
+using AliasVault.Api.Vault;
+using AliasVault.Api.Vault.RetentionRules;
 using AliasVault.Shared.Providers;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;

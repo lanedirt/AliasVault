@@ -23,7 +23,7 @@ public class UnlockTests : PlaywrightTest
     public async Task UnlockPageTest()
     {
         // Soft navigate to "aliases" page to test the unlock redirect.
-        var startUrl = "aliases";
+        var startUrl = "test/1";
         await NavigateUsingBlazorRouter(startUrl);
 
         // Hard refresh the page.
@@ -42,10 +42,10 @@ public class UnlockTests : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected back to the page we were trying to access.
-        await WaitForURLAsync("**/" + startUrl, "AliasVault");
+        await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database.");
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class UnlockTests : PlaywrightTest
     public async Task UnlockPageRedirect()
     {
         // Soft navigate to "aliases" page to test the unlock redirect.
-        var startUrl = "aliases";
+        var startUrl = "test/1";
         await NavigateUsingBlazorRouter(startUrl);
 
         // Hard refresh the page.
@@ -81,9 +81,9 @@ public class UnlockTests : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected back to the page we were trying to access.
-        await WaitForURLAsync("**/" + startUrl, "AliasVault");
+        await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after unlocking database.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database.");
     }
 }

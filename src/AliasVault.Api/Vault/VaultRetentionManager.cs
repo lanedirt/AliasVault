@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers.Vault;
+namespace AliasVault.Api.Vault;
 
 using System;
 using System.Collections.Generic;
