@@ -141,9 +141,19 @@ public class LoginBase : OwningComponentBase
         // Store the encryption key in memory.
         AuthService.StoreEncryptionKey(passwordHash);
 
-        // Redirect to home page.
         await AuthStateProvider.GetAuthenticationStateAsync();
         GlobalNotificationService.ClearMessages();
-        NavigationManager.NavigateTo("/");
+
+        // Redirect to the page the user was trying to access before if set.
+        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+        if (!string.IsNullOrEmpty(localStorageReturnUrl))
+        {
+            await LocalStorage.RemoveItemAsync("returnUrl");
+            NavigationManager.NavigateTo(localStorageReturnUrl);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
     }
 }
