@@ -1,17 +1,16 @@
-@page "/alias/{id:guid}/delete"
+@page "/login/{id:guid}/delete"
 @inherits PageBase
-@using AliasVault.Shared.Models.WebApi
 @inject AliasService AliasService
 
-<LayoutPageTitle>Delete alias</LayoutPageTitle>
+<LayoutPageTitle>Delete login</LayoutPageTitle>
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Delete alias</h1>
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Delete login</h1>
         </div>
-        <p>You can delete an alias below.</p>
+        <p>You can delete a login below.</p>
     </div>
 </div>
 
@@ -22,8 +21,8 @@
 else
 {
     <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <AlertMessageError Message="Note: removing this alias is permanent and cannot be undone." />
-        <h3 class="mb-4 text-xl font-semibold dark:text-white">Alias</h3>
+        <AlertMessageError Message="Note: removing this login entry is permanent and cannot be undone." />
+        <h3 class="mb-4 text-xl font-semibold dark:text-white">Login</h3>
         <div class="mb-4">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
             <div>@Id</div>
@@ -44,29 +43,31 @@ else
 
 @code {
     /// <summary>
-    /// Gets or sets the alias ID.
+    /// Gets or sets the login ID.
     /// </summary>
     [Parameter]
     public Guid Id { get; set; }
 
     private bool IsLoading { get; set; } = true;
-    private Alias? Obj { get; set; }
+    private Login? Obj { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { Url = "alias/" + Id, DisplayName = "View Alias" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete alias" });
+        BreadcrumbItems.Add(new BreadcrumbItem { Url = "login/" + Id, DisplayName = "View Login" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete login" });
     }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             // Load existing Obj, retrieve from service
-            Obj = await AliasService.LoadAliasAsync(Id);
+            Obj = await AliasService.LoadEntryAsync(Id);
 
             // Hide loading spinner
             IsLoading = false;
@@ -80,17 +81,17 @@ else
     {
         if (Obj is null)
         {
-            GlobalNotificationService.AddErrorMessage("Error deleting. Alias not found.", true);
+            GlobalNotificationService.AddErrorMessage("Error deleting. Login not found.", true);
             return;
         }
 
-        await AliasService.DeleteAliasAsync(Id);
-        GlobalNotificationService.AddSuccessMessage("Alias successfully deleted.");
+        await AliasService.DeleteEntryAsync(Id);
+        GlobalNotificationService.AddSuccessMessage("Login successfully deleted.");
         NavigationManager.NavigateTo("/");
     }
 
     private void Cancel()
     {
-        NavigationManager.NavigateTo("/alias/" + Id);
+        NavigationManager.NavigateTo("/login/" + Id);
     }
 }

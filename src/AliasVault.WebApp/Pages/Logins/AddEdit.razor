@@ -1,19 +1,21 @@
-@page "/add-alias"
-@page "/alias/{id:guid}/edit"
+@page "/add-login"
+@page "/login/{id:guid}/edit"
 @inherits PageBase
 @inject NavigationManager Navigation
 @inject AliasService AliasService
 @using AliasGenerators.Implementations
 @using AliasGenerators.Password.Implementations
-@using AliasVault.Shared.Models.WebApi
-@using System.Globalization
+@using AliasVault.WebApp.Models
+@using Alias = AliasClientDb.Alias
+@using Password = AliasClientDb.Password
+@using Service = AliasClientDb.Service
 
 @if (EditMode)
 {
-    <LayoutPageTitle>Edit alias</LayoutPageTitle>
+    <LayoutPageTitle>Edit login</LayoutPageTitle>
 }
 else {
-    <LayoutPageTitle>Add alias</LayoutPageTitle>
+    <LayoutPageTitle>Add login</LayoutPageTitle>
 }
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
@@ -22,18 +24,18 @@ else {
         <div class="flex items-center justify-between">
             @if (EditMode)
             {
-                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Edit alias</h1>
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Edit login</h1>
             }
             else {
-                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Add alias</h1>
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Add login</h1>
             }
         </div>
         @if (EditMode)
         {
-            <p>Edit the existing alias below.</p>
+            <p>Edit the existing login below.</p>
         }
         else {
-            <p>Create a new alias below.</p>
+            <p>Create a new login below.</p>
         }
     </div>
 </div>
@@ -66,7 +68,7 @@ else
                     <h3 class="mb-4 text-xl font-semibold dark:text-white">Login credentials</h3>
                     <div class="mb-4">
                         <button type="button" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800" @onclick="GenerateRandomIdentity">Generate Random Identity</button>
-                        <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800">Save Alias</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800">Save Login</button>
                         @if (IsIdentityLoading)
                         {
                             <p>Loading...</p>
@@ -74,10 +76,10 @@ else
                     </div>
                     <div class="grid gap-6">
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="email" Label="Email" @bind-Value="Obj.Identity.EmailPrefix"></EditFormRow>
+                            <EditFormRow Id="email" Label="Email" @bind-Value="Obj.Alias.EmailPrefix"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="username" Label="Username" @bind-Value="Obj.Identity.NickName"></EditFormRow>
+                            <EditFormRow Id="username" Label="Username" @bind-Value="Obj.Alias.NickName"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
                             <div class="relative">
@@ -96,48 +98,49 @@ else
                     <h3 class="mb-4 text-xl font-semibold dark:text-white">Identity</h3>
                     <div class="grid gap-6">
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="first-name" Label="First Name" @bind-Value="Obj.Identity.FirstName"></EditFormRow>
+                            <EditFormRow Id="first-name" Label="First Name" @bind-Value="Obj.Alias.FirstName"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="last-name" Label="Last Name" @bind-Value="Obj.Identity.LastName"></EditFormRow>
+                            <EditFormRow Id="last-name" Label="Last Name" @bind-Value="Obj.Alias.LastName"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="gender" Label="Gender" @bind-Value="Obj.Identity.Gender"></EditFormRow>
+                            <EditFormRow Id="gender" Label="Gender" @bind-Value="Obj.Alias.Gender"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="nickname" Label="Nick Name" @bind-Value="Obj.Identity.NickName"></EditFormRow>
+                            <EditFormRow Id="nickname" Label="Nick Name" @bind-Value="Obj.Alias.NickName"></EditFormRow>
+                        </div>
+                        <!--<div class="col-span-6 sm:col-span-3">
+                            <EditFormRow Id="birthdate" Label="Birth Date" @bind-Value="Obj.Alias.BirthDate"></EditFormRow>
+                        </div>
+                        -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <EditFormRow Id="street" Label="Address Street" @bind-Value="Obj.Alias.AddressStreet"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="birthdate" Label="Birth Date" @bind-Value="Obj.Identity.BirthDate"></EditFormRow>
+                            <EditFormRow Id="city" Label="Address City" @bind-Value="Obj.Alias.AddressCity"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="street" Label="Address Street" @bind-Value="Obj.Identity.AddressStreet"></EditFormRow>
+                            <EditFormRow Id="state" Label="Address State" @bind-Value="Obj.Alias.AddressState"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="city" Label="Address City" @bind-Value="Obj.Identity.AddressCity"></EditFormRow>
+                            <EditFormRow Id="zipcode" Label="Address Zip Code" @bind-Value="Obj.Alias.AddressZipCode"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="state" Label="Address State" @bind-Value="Obj.Identity.AddressState"></EditFormRow>
+                            <EditFormRow Id="country" Label="Address Country" @bind-Value="Obj.Alias.AddressCountry"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="zipcode" Label="Address Zip Code" @bind-Value="Obj.Identity.AddressZipCode"></EditFormRow>
+                            <EditFormRow Id="hobbies" Label="Hobbies" @bind-Value="Obj.Alias.Hobbies"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="country" Label="Address Country" @bind-Value="Obj.Identity.AddressCountry"></EditFormRow>
+                            <EditFormRow Id="phone-mobile" Label="Phone Mobile" @bind-Value="Obj.Alias.PhoneMobile"></EditFormRow>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="hobbies" Label="Hobbies" @bind-Value="Obj.Identity.Hobbies"></EditFormRow>
-                        </div>
-                        <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="phone-mobile" Label="Phone Mobile" @bind-Value="Obj.Identity.PhoneMobile"></EditFormRow>
-                        </div>
-                        <div class="col-span-6 sm:col-span-3">
-                            <EditFormRow Id="iban" Label="Bank Account IBAN" @bind-Value="Obj.Identity.BankAccountIBAN"></EditFormRow>
+                            <EditFormRow Id="iban" Label="Bank Account IBAN" @bind-Value="Obj.Alias.BankAccountIBAN"></EditFormRow>
                         </div>
                     </div>
                 </div>
             </div>
-            <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800">Save Alias</button>
+            <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800">Save Login</button>
         </div>
     </EditForm>
 
@@ -150,14 +153,14 @@ else
 
 @code {
     /// <summary>
-    /// Gets or sets the alias ID.
+    /// Gets or sets the login ID.
     /// </summary>
     [Parameter]
     public Guid? Id { get; set; }
 
     private bool EditMode { get; set; }
     private bool Loading { get; set; } = true;
-    private AliasEdit Obj { get; set; } = new();
+    private LoginEdit Obj { get; set; } = new();
     private bool IsIdentityLoading { get; set; }
     private bool IsSaving { get; set; }
 
@@ -183,17 +186,19 @@ else
 
         if (EditMode)
         {
-            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Edit alias" });
+            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Edit login" });
         }
         else
         {
-            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Add new alias" });
+            BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Add new login" });
         }
     }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             if (EditMode)
@@ -201,32 +206,32 @@ else
                 if (Id is null)
                 {
                     // Error loading alias.
-                    GlobalNotificationService.AddErrorMessage("This alias does not exist (anymore). Please try again.");
+                    GlobalNotificationService.AddErrorMessage("This login does not exist (anymore). Please try again.");
                     NavigationManager.NavigateTo("/", false, true);
                     return;
                 }
 
                 // Load existing Obj, retrieve from service
-                var alias = await AliasService.LoadAliasAsync(Id.Value);
+                var alias = await AliasService.LoadEntryAsync(Id.Value);
                 if (alias is null)
                 {
                     // Error loading alias.
-                    GlobalNotificationService.AddErrorMessage("This alias does not exist (anymore). Please try again.");
+                    GlobalNotificationService.AddErrorMessage("This login does not exist (anymore). Please try again.");
                     NavigationManager.NavigateTo("/", false, true);
                     return;
                 }
 
-                Obj = AliasToAliasEdit(alias);
+                Obj = LoginToLoginEdit(alias);
             }
             else
             {
                 // Create new Obj
-                var alias = new Alias();
-                alias.Identity = new Shared.Models.WebApi.Identity();
-                alias.Service = new Shared.Models.WebApi.Service();
-                alias.Password = new Shared.Models.WebApi.Password();
+                var alias = new Login();
+                alias.Alias = new Alias();
+                alias.Service = new Service();
+                alias.Passwords = new List<Password> { new Password() };
 
-                Obj = AliasToAliasEdit(alias);
+                Obj = LoginToLoginEdit(alias);
             }
 
             // Hide loading spinner
@@ -245,20 +250,20 @@ else
         var identity = await AliasService.GenerateRandomIdentityAsync();
 
         // Generate random values for the Identity properties
-        Obj.Identity.FirstName = identity.FirstName;
-        Obj.Identity.LastName = identity.LastName;
-        Obj.Identity.NickName = identity.NickName;
-        Obj.Identity.Gender = identity.Gender == 1 ? "Male" : "Female";
-        Obj.Identity.BirthDate = DateTime.Now.AddYears(-30).ToString("yyyy-MM-dd");
-        Obj.Identity.AddressStreet = identity.Address.Street;
-        Obj.Identity.AddressCity = identity.Address.City;
-        Obj.Identity.AddressState = identity.Address.State;
-        Obj.Identity.AddressZipCode = identity.Address.ZipCode;
-        Obj.Identity.AddressCountry = identity.Address.Country;
-        Obj.Identity.Hobbies = identity.Hobbies[0];
-        Obj.Identity.EmailPrefix = identity.EmailPrefix;
-        Obj.Identity.PhoneMobile = identity.PhoneMobile;
-        Obj.Identity.BankAccountIBAN = identity.BankAccountIBAN;
+        Obj.Alias.FirstName = identity.FirstName;
+        Obj.Alias.LastName = identity.LastName;
+        Obj.Alias.NickName = identity.NickName;
+        Obj.Alias.Gender = identity.Gender == 1 ? "Male" : "Female";
+        Obj.Alias.BirthDate = DateTime.Now.AddYears(-30);
+        Obj.Alias.AddressStreet = identity.Address.Street;
+        Obj.Alias.AddressCity = identity.Address.City;
+        Obj.Alias.AddressState = identity.Address.State;
+        Obj.Alias.AddressZipCode = identity.Address.ZipCode;
+        Obj.Alias.AddressCountry = identity.Address.Country;
+        Obj.Alias.Hobbies = identity.Hobbies[0];
+        Obj.Alias.EmailPrefix = identity.EmailPrefix;
+        Obj.Alias.PhoneMobile = identity.PhoneMobile;
+        Obj.Alias.BankAccountIBAN = identity.BankAccountIBAN;
 
         // Generate password
         GenerateRandomPassword();
@@ -288,28 +293,16 @@ else
 
         // Sanity check for unittest. Delete later if not needed.
         // Try to parse birthdate as datetime. if it fails, set it to empty.
-        if (Obj.Identity.BirthDate != null)
-        {
-            try
-            {
-                DateTime.Parse(Obj.Identity.BirthDate, new CultureInfo("en-US"));
-            }
-            catch (Exception)
-            {
-                Obj.Identity.BirthDate = "1900-01-01";
-            }
-        }
-
         if (EditMode)
         {
             if (Id is not null)
             {
-                Id = await AliasService.UpdateAliasAsync(AliasEditToAlias(Obj), Id.Value);
+                Id = await AliasService.UpdateLoginAsync(LoginEditToLogin(Obj));
             }
         }
         else
         {
-            Id = await AliasService.InsertAliasAsync(AliasEditToAlias(Obj));
+            Id = await AliasService.InsertAliasAsync(LoginEditToLogin(Obj));
         }
 
         IsSaving = false;
@@ -325,42 +318,50 @@ else
         // No error, add success message.
         if (EditMode)
         {
-            GlobalNotificationService.AddSuccessMessage("Alias updated successfully.");
+            GlobalNotificationService.AddSuccessMessage("Login updated successfully.");
         }
         else
         {
-            GlobalNotificationService.AddSuccessMessage("Alias created successfully.");
+            GlobalNotificationService.AddSuccessMessage("Login created successfully.");
         }
 
-        Navigation.NavigateTo("/alias/" + Id);
+        Navigation.NavigateTo("/login/" + Id);
     }
 
-    private AliasEdit AliasToAliasEdit(Alias alias)
+    private LoginEdit LoginToLoginEdit(Login alias)
     {
-        return new AliasEdit
+        return new LoginEdit
         {
-           ServiceName = alias.Service.Name,
-           ServiceUrl = alias.Service.Url,
-           Password = alias.Password,
-           Identity = alias.Identity,
-           CreateDate = alias.CreateDate,
-           LastUpdate = alias.LastUpdate
+            Id = alias.Id,
+            ServiceName = alias.Service.Name ?? string.Empty,
+            ServiceUrl = alias.Service.Url,
+            Password = alias.Passwords.FirstOrDefault() ?? new Password(),
+            Alias = alias.Alias,
+            CreateDate = alias.CreatedAt,
+            LastUpdate = alias.UpdatedAt
         };
     }
 
-    private Alias AliasEditToAlias(AliasEdit alias)
+    private Login LoginEditToLogin(LoginEdit alias)
     {
-        return new Alias
+        return new Login()
         {
+            Id = alias.Id,
             Service = new Service
             {
                 Name = alias.ServiceName,
                 Url = alias.ServiceUrl
             },
-            Password = alias.Password,
-            Identity = alias.Identity,
-            CreateDate = alias.CreateDate,
-            LastUpdate = alias.LastUpdate
+            Passwords = new List<Password>
+            {
+                new Password
+                {
+                    Value = alias.Password.Value ?? string.Empty,
+                    CreatedAt = alias.CreateDate,
+                    UpdatedAt = alias.LastUpdate,
+                },
+            },
+            Alias = alias.Alias,
         };
     }
 }

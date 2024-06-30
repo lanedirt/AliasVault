@@ -28,7 +28,7 @@ public class AliasTests : PlaywrightTest
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain("Find all of your logins below"), "No index content after logging in.");
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class AliasTests : PlaywrightTest
     public async Task EditAliasTest()
     {
         // Create a new alias with service name = "Alias service before".
-        var serviceNameBefore = "Alias service before";
+        var serviceNameBefore = "Login service before";
         await CreateAlias(new Dictionary<string, string>
         {
             { "service-name", serviceNameBefore },
@@ -66,28 +66,28 @@ public class AliasTests : PlaywrightTest
 
         // Check that the service name is present in the content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created alias service name does not appear on alias page.");
+        Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created login service name does not appear on login page.");
 
         // Click the edit button.
-        var editButton = Page.Locator("text=Edit alias").First;
+        var editButton = Page.Locator("text=Edit login").First;
         await editButton.ClickAsync();
-        await WaitForURLAsync("**/edit", "Save Alias");
+        await WaitForURLAsync("**/edit", "Save Login");
 
         // Replace the service name with "Alias service after".
-        var serviceNameAfter = "Alias service after";
+        var serviceNameAfter = "Login service after";
         await InputHelper.FillInputFields(
             fieldValues: new Dictionary<string, string>
             {
                 { "service-name", serviceNameAfter },
             });
 
-        var submitButton = Page.Locator("text=Save Alias").First;
+        var submitButton = Page.Locator("text=Save Login").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/alias/**", "View alias");
+        await WaitForURLAsync("**/login/**", "View Login");
 
         pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Alias updated"), "Alias update confirmation message not shown.");
-        Assert.That(pageContent, Does.Contain(serviceNameAfter), "Alias not updated correctly.");
+        Assert.That(pageContent, Does.Contain("Login updated"), "Login update confirmation message not shown.");
+        Assert.That(pageContent, Does.Contain(serviceNameAfter), "Login not updated correctly.");
     }
 
     /// <summary>
@@ -97,8 +97,8 @@ public class AliasTests : PlaywrightTest
     /// <returns>Async task.</returns>
     private async Task CreateAlias(Dictionary<string, string>? formValues = null)
     {
-        await NavigateUsingBlazorRouter("add-alias");
-        await WaitForURLAsync("**/add-alias", "Add alias");
+        await NavigateUsingBlazorRouter("add-login");
+        await WaitForURLAsync("**/add-login", "Add login");
 
         // Check if a button with text "Generate Random Identity" appears
         var generateButton = Page.Locator("text=Generate Random Identity");
@@ -108,9 +108,9 @@ public class AliasTests : PlaywrightTest
         await InputHelper.FillInputFields(formValues);
         await InputHelper.FillEmptyInputFieldsWithRandom();
 
-        var submitButton = Page.Locator("text=Save Alias").First;
+        var submitButton = Page.Locator("text=Save Login").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/alias/**", "Login credentials");
+        await WaitForURLAsync("**/login/**", "Login credentials");
 
         // Check if the alias was created
         var pageContent = await Page.TextContentAsync("body");

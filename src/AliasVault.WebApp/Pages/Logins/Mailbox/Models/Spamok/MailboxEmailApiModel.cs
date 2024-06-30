@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.WebApp.Pages.Aliases.Models.Spamok;
+namespace AliasVault.WebApp.Pages.Logins.Mailbox.Models.Spamok;
 
 /// <summary>
 /// Represents a mailbox email API model.

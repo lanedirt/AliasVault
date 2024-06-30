@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Password.cs" company="lanedirt">
+// <copyright file="Attachment.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -11,21 +11,26 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /// <summary>
-/// Password entity.
+/// Attachment entity.
 /// </summary>
-public class Password
+public class Attachment
 {
     /// <summary>
-    /// Gets or sets the password primary key.
+    /// Gets or sets the attachment primary key.
     /// </summary>
     [Key]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the password value.
+    /// Gets or sets the filename value.
     /// </summary>
     [StringLength(255)]
-    public string? Value { get; set; }
+    public string Filename { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the file blob.
+    /// </summary>
+    public byte[] Blob { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the created timestamp.

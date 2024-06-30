@@ -17,6 +17,13 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
+builder.Services.AddLogging(logging =>
+{
+    logging.SetMinimumLevel(LogLevel.Information);
+    logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
+    logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
+});
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");

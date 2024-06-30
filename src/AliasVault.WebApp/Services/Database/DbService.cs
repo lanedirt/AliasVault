@@ -170,7 +170,8 @@ public class DbService : IDisposable
         _sqlConnection = new SqliteConnection("Data Source=:memory:");
         _sqlConnection.Open();
 
-        _dbContext = new AliasClientDbContext(_sqlConnection);
+        _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
+
         _isSuccessfullyInitialized = false;
 
         return (_sqlConnection, _dbContext);

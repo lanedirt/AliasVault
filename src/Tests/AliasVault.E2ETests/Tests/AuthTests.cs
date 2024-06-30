@@ -56,6 +56,6 @@ public class AuthTests : PlaywrightTest
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain("Find all of your logins below"), "No index content after logging in.");
     }
 }
