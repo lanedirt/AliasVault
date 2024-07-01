@@ -17,9 +17,6 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public class AliasClientDbContext : DbContext
 {
-    private readonly SqliteConnection? _sqlConnection;
-    private readonly Action<string>? _logAction;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasClientDbContext"/> class.
     /// </summary>
@@ -35,8 +32,6 @@ public class AliasClientDbContext : DbContext
     public AliasClientDbContext(SqliteConnection sqliteConnection, Action<string> logAction)
         : base(GetOptions(sqliteConnection, logAction))
     {
-        _sqlConnection = sqliteConnection;
-        _logAction = logAction ?? Console.WriteLine; // Default to console if no log action provided
     }
 
     /// <summary>
