@@ -132,9 +132,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         login.Alias.PhoneMobile = loginObject.Alias.PhoneMobile;
         login.Alias.BankAccountIBAN = loginObject.Alias.BankAccountIBAN;
 
-        /* login.Passwords.First().Value = model.Password.Value;
-           login.Passwords.First().UpdatedAt = DateTime.UtcNow;
-        */
+        login.Passwords = loginObject.Passwords;
 
         login.Service.Name = loginObject.Service.Name;
         login.Service.Url = loginObject.Service.Url;
