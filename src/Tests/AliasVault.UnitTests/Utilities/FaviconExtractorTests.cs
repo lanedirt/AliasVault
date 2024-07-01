@@ -23,10 +23,33 @@ public class FaviconExtractorTests
     /// <summary>
     /// Test extracting a favicon from a known website.
     /// </summary>
+    /// <returns>Task.</returns>
     [Test]
-    public void ExtractFaviconSpamOK()
+    public async Task ExtractFaviconSpamOK()
     {
-        var faviconBytes = FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://spamok.com");
+        var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://spamok.com");
+        Assert.That(faviconBytes, Is.Not.Null);
+    }
+
+    /// <summary>
+    /// Test extracting a favicon from a known website.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task ExtractFaviconDumpert()
+    {
+        var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://www.dumpert.nl");
+        Assert.That(faviconBytes, Is.Not.Null);
+    }
+
+    /// <summary>
+    /// Test extracting a favicon from a known website.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task ExtractFaviconGoogle()
+    {
+        var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://adsense.google.com/start/");
         Assert.That(faviconBytes, Is.Not.Null);
     }
 }

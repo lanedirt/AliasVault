@@ -23,6 +23,9 @@ namespace AliasServerDb.Migrations
 
             migrationBuilder.DropTable(
                 name: "Services");
+
+            // Delete all rows from the vaults table because datamodel has changed.
+            migrationBuilder.Sql("DELETE FROM Vaults;");
         }
 
         /// <inheritdoc />

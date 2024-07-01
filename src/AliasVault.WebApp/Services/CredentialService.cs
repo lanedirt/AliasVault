@@ -25,7 +25,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
     /// <returns>Identity object.</returns>
     public async Task<Identity> GenerateRandomIdentityAsync()
     {
-        var identity = await httpClient.GetFromJsonAsync<Identity>("api/v1/Identity/generate");
+        var identity = await httpClient.GetFromJsonAsync<Identity>("api/v1/Identity/Generate");
         if (identity is null)
         {
             throw new InvalidOperationException("Failed to generate random identity.");
@@ -72,6 +72,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             {
                 Name = loginObject.Service.Name,
                 Url = loginObject.Service.Url,
+                Logo = loginObject.Service.Logo,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             },
@@ -137,6 +138,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
 
         login.Service.Name = loginObject.Service.Name;
         login.Service.Url = loginObject.Service.Url;
+        login.Service.Logo = loginObject.Service.Logo;
         login.Service.UpdatedAt = DateTime.UtcNow;
 
         await dbService.SaveDatabaseAsync();

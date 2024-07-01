@@ -1,6 +1,6 @@
-@if (faviconBytes != null)
+@if (FaviconBytes != null)
 {
-    <img src="@faviconDataUrl" style="width: 50px;" alt="Favicon" />
+    <img src="@_faviconDataUrl" style="width: 50px;" class="mb-4 rounded-lg w-28 sm:mb-0 xl:mb-4 2xl:mb-0" alt="Favicon" />
 }
 else
 {
@@ -8,17 +8,21 @@ else
 }
 
 @code {
+    /// <summary>
+    /// Byte[] of the favicon.
+    /// </summary>
     [Parameter]
-    public byte[]? faviconBytes { get; set; }
+    public byte[]? FaviconBytes { get; set; }
 
-    private string? faviconDataUrl;
+    private string? _faviconDataUrl;
 
+    /// <inheritdoc />
     protected override void OnParametersSet()
     {
-        if (faviconBytes != null)
+        if (FaviconBytes is not null)
         {
-            string base64String = Convert.ToBase64String(faviconBytes);
-            faviconDataUrl = $"data:image/x-icon;base64,{base64String}";
+            string base64String = Convert.ToBase64String(FaviconBytes);
+            _faviconDataUrl = $"data:image/x-icon;base64,{base64String}";
         }
     }
 }

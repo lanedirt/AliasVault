@@ -34,12 +34,9 @@ public class StringDateFormatAttribute : ValidationAttribute
     /// <returns>ValidationResult.</returns>
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
-        if (value is string dateString)
+        if (value is string dateString && DateTime.TryParseExact(dateString, _format, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
         {
-            if (DateTime.TryParseExact(dateString, _format, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-            {
-                return ValidationResult.Success!;
-            }
+            return ValidationResult.Success!;
         }
 
         return new ValidationResult($"The date must be in the format {_format}.", new List<string> { validationContext.MemberName! });

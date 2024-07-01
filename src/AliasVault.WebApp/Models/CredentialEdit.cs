@@ -38,6 +38,11 @@ public class CredentialEdit
     public string? ServiceUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the logo of the service.
+    /// </summary>
+    public byte[]? ServiceLogo { get; set; } = null;
+
+    /// <summary>
     /// Gets or sets the Alias Identity object.
     /// </summary>
     public Alias Alias { get; set; } = null!;
