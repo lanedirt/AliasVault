@@ -43,11 +43,11 @@
 
         if (firstRender)
         {
-            await LoadAliasesAsync();
+            await LoadCredentialsAsync();
         }
     }
 
-    private async Task LoadAliasesAsync()
+    private async Task LoadCredentialsAsync()
     {
         IsLoading = true;
         StateHasChanged();

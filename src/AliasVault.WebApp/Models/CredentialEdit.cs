@@ -9,6 +9,7 @@ namespace AliasVault.WebApp.Models;
 
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
+using AliasVault.WebApp.Models.FormValidators;
 
 /// <summary>
 /// Credential edit model.
@@ -19,6 +20,11 @@ public class CredentialEdit
     /// Gets or sets the Id of the login.
     /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets notes field (free text input).
+    /// </summary>
+    public string Notes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the name of the service.
@@ -35,6 +41,12 @@ public class CredentialEdit
     /// Gets or sets the Alias Identity object.
     /// </summary>
     public Alias Alias { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the Alias BirthDate.
+    /// </summary>
+    [StringDateFormat("yyyy-MM-dd")]
+    public string AliasBirthDate { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Alias Password object.

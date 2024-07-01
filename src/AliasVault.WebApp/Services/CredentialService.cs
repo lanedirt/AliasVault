@@ -47,6 +47,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         {
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
+            Notes = loginObject.Notes,
             Username = loginObject.Alias.NickName ?? string.Empty, // TODO: refactor to have actual username in UI.
             Alias = new AliasClientDb.Alias()
             {
@@ -114,6 +115,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             .FirstAsync();
 
         login.UpdatedAt = DateTime.UtcNow;
+        login.Notes = loginObject.Notes;
         login.Alias.NickName = loginObject.Alias.NickName;
         login.Alias.FirstName = loginObject.Alias.FirstName;
         login.Alias.LastName = loginObject.Alias.LastName;
@@ -177,7 +179,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             {
                 Id = x.Id,
                 Logo = x.Service.Logo,
-                Service = x.Service.Name ?? "n/a",
+                Service = x.Service.Name,
                 CreateDate = x.CreatedAt,
             })
             .ToListAsync();

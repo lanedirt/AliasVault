@@ -25,7 +25,7 @@ public class CredentialListEntry
     /// <summary>
     /// Gets or sets the alias service name.
     /// </summary>
-    public string Service { get; set; } = null!;
+    public string? Service { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the alias create date.
