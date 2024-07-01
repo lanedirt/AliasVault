@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Login.cs" company="lanedirt">
+// <copyright file="Credential.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 /// <summary>
 /// Login object.
 /// </summary>
-public class Login
+public class Credential
 {
     /// <summary>
     /// Gets or sets Login ID.

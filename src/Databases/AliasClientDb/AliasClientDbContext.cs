@@ -46,27 +46,27 @@ public class AliasClientDbContext : DbContext
     /// <summary>
     /// Gets or sets the Alias DbSet.
     /// </summary>
-    public DbSet<Alias> Aliases { get; set; }
+    public DbSet<Alias> Aliases { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Attachment DbSet.
     /// </summary>
-    public DbSet<Attachment> Attachment { get; set; }
+    public DbSet<Attachment> Attachment { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the Login DbSet.
+    /// Gets or sets the Credential DbSet.
     /// </summary>
-    public DbSet<Login> Logins { get; set; }
+    public DbSet<Credential> Credentials { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Password DbSet.
     /// </summary>
-    public DbSet<Password> Passwords { get; set; }
+    public DbSet<Password> Passwords { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Service DbSet.
     /// </summary>
-    public DbSet<Service> Services { get; set; }
+    public DbSet<Service> Services { get; set; } = null!;
 
     /// <summary>
     /// The OnModelCreating method.
@@ -88,32 +88,32 @@ public class AliasClientDbContext : DbContext
             }
         }
 
-        // Configure Login - Alias relationship
-        modelBuilder.Entity<Login>()
+        // Configure Credential - Alias relationship
+        modelBuilder.Entity<Credential>()
             .HasOne(l => l.Alias)
-            .WithMany()
+            .WithMany(c => c.Credentials)
             .HasForeignKey(l => l.AliasId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure Login - Service relationship
-        modelBuilder.Entity<Login>()
+        // Configure Credential - Service relationship
+        modelBuilder.Entity<Credential>()
             .HasOne(l => l.Service)
-            .WithMany()
+            .WithMany(c => c.Credentials)
             .HasForeignKey(l => l.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure Attachment - Login relationship
+        // Configure Attachment - Credential relationship
         modelBuilder.Entity<Attachment>()
-            .HasOne(l => l.Login)
-            .WithMany()
-            .HasForeignKey(l => l.LoginId)
+            .HasOne(l => l.Credential)
+            .WithMany(c => c.Attachments)
+            .HasForeignKey(l => l.CredentialId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure Password - Login relationship
+        // Configure Password - Credential relationship
         modelBuilder.Entity<Password>()
-            .HasOne(l => l.Login)
-            .WithMany()
-            .HasForeignKey(l => l.LoginId)
+            .HasOne(l => l.Credential)
+            .WithMany(c => c.Passwords)
+            .HasForeignKey(l => l.CredentialId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 

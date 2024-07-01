@@ -121,4 +121,9 @@ public class Alias
     /// Gets or sets the updated timestamp.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the credential objects.
+    /// </summary>
+    public virtual ICollection<Credential> Credentials { get; set; } = new List<Credential>();
 }

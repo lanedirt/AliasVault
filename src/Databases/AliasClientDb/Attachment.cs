@@ -43,13 +43,13 @@ public class Attachment
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the login foreign key.
+    /// Gets or sets the credential foreign key.
     /// </summary>
-    public Guid LoginId { get; set; }
+    public Guid CredentialId { get; set; }
 
     /// <summary>
-    /// Gets or sets the login navigation property.
+    /// Gets or sets the credential navigation property.
     /// </summary>
-    [ForeignKey("LoginId")]
-    public virtual Login Login { get; set; } = null!;
+    [ForeignKey("CredentialId")]
+    public virtual Credential Credential { get; set; } = null!;
 }

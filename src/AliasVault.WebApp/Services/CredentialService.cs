@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AliasService.cs" company="lanedirt">
+// <copyright file="CredentialService.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -9,7 +9,7 @@ namespace AliasVault.WebApp.Services;
 
 using System.Net.Http.Json;
 using AliasClientDb;
-using AliasVault.Shared.Models.WebApi;
+using AliasVault.WebApp.Models;
 using AliasVault.WebApp.Services.Database;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
@@ -17,7 +17,7 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 /// <summary>
 /// Service class for alias operations.
 /// </summary>
-public class AliasService(HttpClient httpClient, DbService dbService)
+public class CredentialService(HttpClient httpClient, DbService dbService)
 {
     /// <summary>
     /// Generate random identity by calling the IdentityGenerator API.
@@ -39,11 +39,11 @@ public class AliasService(HttpClient httpClient, DbService dbService)
     /// </summary>
     /// <param name="loginObject">Login object to insert.</param>
     /// <returns>Guid of inserted entry.</returns>
-    public async Task<Guid> InsertAliasAsync(Login loginObject)
+    public async Task<Guid> InsertEntryAsync(Credential loginObject)
     {
         var context = await dbService.GetDbContextAsync();
 
-        var login = new Login
+        var login = new Credential
         {
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -76,19 +76,18 @@ public class AliasService(HttpClient httpClient, DbService dbService)
             },
         };
 
-        await context.Logins.AddAsync(login);
+        login.Passwords.Add(new Password()
+        {
+            Value = loginObject.Passwords.First().Value,
+        });
+
+        await context.Credentials.AddAsync(login);
 
         await context.SaveChangesAsync();
         Console.WriteLine("Inserted new alias without password.");
 
         // Add password.
-        context.Passwords.Add(new AliasClientDb.Password()
-        {
-            Value = loginObject.Passwords.FirstOrDefault()?.Value,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Login = login,
-        });
+        login.Passwords.Add(loginObject.Passwords.First());
 
         await dbService.SaveDatabaseAsync();
 
@@ -102,12 +101,12 @@ public class AliasService(HttpClient httpClient, DbService dbService)
     /// </summary>
     /// <param name="loginObject">Login object to update.</param>
     /// <returns>Guid of updated entry.</returns>
-    public async Task<Guid> UpdateLoginAsync(Login loginObject)
+    public async Task<Guid> UpdateEntryAsync(Credential loginObject)
     {
         var context = await dbService.GetDbContextAsync();
 
         // Get the existing entry.
-        var login = await context.Logins
+        var login = await context.Credentials
             .Include(x => x.Alias)
             .Include(x => x.Service)
             .Include(x => x.Passwords)
@@ -148,16 +147,16 @@ public class AliasService(HttpClient httpClient, DbService dbService)
     /// </summary>
     /// <param name="loginId">Id of login to load.</param>
     /// <returns>Alias object.</returns>
-    public async Task<Login> LoadEntryAsync(Guid loginId)
+    public async Task<Credential?> LoadEntryAsync(Guid loginId)
     {
         var context = await dbService.GetDbContextAsync();
 
-        var loginObject = await context.Logins
+        var loginObject = await context.Credentials
         .Include(x => x.Passwords)
         .Include(x => x.Alias)
         .Include(x => x.Service)
         .Where(x => x.Id == loginId)
-        .FirstAsync();
+        .FirstOrDefaultAsync();
 
         return loginObject;
     }
@@ -165,16 +164,16 @@ public class AliasService(HttpClient httpClient, DbService dbService)
     /// <summary>
     /// Get list with all login entries.
     /// </summary>
-    /// <returns>List of AliasListEntry objects.</returns>
-    public async Task<List<AliasListEntry>?> GetListAsync()
+    /// <returns>List of CredentialListEntry objects.</returns>
+    public async Task<List<CredentialListEntry>?> GetListAsync()
     {
         var context = await dbService.GetDbContextAsync();
 
         // Retrieve all aliases from client DB.
-        return await context.Logins
+        return await context.Credentials
             .Include(x => x.Alias)
             .Include(x => x.Service)
-            .Select(x => new AliasListEntry
+            .Select(x => new CredentialListEntry
             {
                 Id = x.Id,
                 Logo = x.Service.Logo,
@@ -193,11 +192,11 @@ public class AliasService(HttpClient httpClient, DbService dbService)
     {
         var context = await dbService.GetDbContextAsync();
 
-        var login = await context.Logins
+        var login = await context.Credentials
             .Where(x => x.Id == id)
             .FirstAsync();
 
-        context.Logins.Remove(login);
+        context.Credentials.Remove(login);
         await context.SaveChangesAsync();
         await dbService.SaveDatabaseAsync();
     }
