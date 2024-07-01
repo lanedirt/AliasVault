@@ -1,104 +1,129 @@
 //-----------------------------------------------------------------------
-// <copyright file="Identity.cs" company="lanedirt">
+// <copyright file="Alias.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+namespace AliasClientDb;
 
-namespace AliasVault.Shared.Models.WebApi;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /// <summary>
-/// Identity model.
+/// The alias entity.
 /// </summary>
-public class Identity
+public class Alias
 {
     /// <summary>
-    /// Gets or sets the identity id.
+    /// Gets or sets the alias primary key.
     /// </summary>
+    [Key]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets the gender.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? Gender { get; set; }
 
     /// <summary>
     /// Gets or sets the first name.
     /// </summary>
-    public string? FirstName { get; set; }
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
+    public string? FirstName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the last name.
     /// </summary>
-    public string? LastName { get; set; }
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
+    public string? LastName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the nickname.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? NickName { get; set; }
 
     /// <summary>
-    /// Gets or sets the birth date.
+    /// Gets or sets the birthdate.
     /// </summary>
-    public string? BirthDate { get; set; }
+    public DateTime BirthDate { get; set; }
 
     /// <summary>
-    /// Gets or sets the street address.
+    /// Gets or sets the address street.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? AddressStreet { get; set; }
 
     /// <summary>
-    /// Gets or sets the city.
+    /// Gets or sets the address city.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? AddressCity { get; set; }
 
     /// <summary>
-    /// Gets or sets the state.
+    /// Gets or sets the address state.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? AddressState { get; set; }
 
     /// <summary>
-    /// Gets or sets the zip code.
+    /// Gets or sets the address zip code.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? AddressZipCode { get; set; }
 
     /// <summary>
-    /// Gets or sets the country.
+    /// Gets or sets the address country.
     /// </summary>
+    [StringLength(255)]
+    [Column(TypeName = "VARCHAR")]
     public string? AddressCountry { get; set; }
 
     /// <summary>
-    /// Gets or sets the hobbies.
+    /// Gets or sets the hobbies in CSV format, can contain multiple values separated by ";".
     /// </summary>
+    [StringLength(255)]
     public string? Hobbies { get; set; }
 
     /// <summary>
-    /// Gets or sets the email prefix.
+    /// Gets or sets the generated email prefix.
     /// </summary>
+    [StringLength(255)]
     public string? EmailPrefix { get; set; }
 
     /// <summary>
-    /// Gets or sets the mobile phone number.
+    /// Gets or sets the random generated mobile phone number.
     /// </summary>
+    [StringLength(255)]
     public string? PhoneMobile { get; set; }
 
     /// <summary>
-    /// Gets or sets the bank account IBAN.
+    /// Gets or sets the generated IBAN bank account number.
     /// </summary>
+    [StringLength(255)]
     public string? BankAccountIBAN { get; set; }
 
     /// <summary>
-    /// Gets or sets the date and time of creation.
+    /// Gets or sets the created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the date and time of last update.
+    /// Gets or sets the updated timestamp.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the default password.
+    /// Gets or sets the credential objects.
     /// </summary>
-    public Password? DefaultPassword { get; set; }
+    public virtual ICollection<Credential> Credentials { get; set; } = new List<Credential>();
 }

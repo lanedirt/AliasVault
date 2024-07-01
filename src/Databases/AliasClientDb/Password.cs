@@ -36,4 +36,15 @@ public class Password
     /// Gets or sets the updated timestamp.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the credential foreign key.
+    /// </summary>
+    public Guid CredentialId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the credential navigation property.
+    /// </summary>
+    [ForeignKey("CredentialId")]
+    public virtual Credential Credential { get; set; } = null!;
 }

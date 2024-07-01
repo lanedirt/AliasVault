@@ -75,7 +75,7 @@
 
         try
         {
-            await ProcessLoginAsync(Email, _unlockModel.Password, _serverValidationErrors);
+            await ProcessLoginAsync(Email, _unlockModel.Password);
             StateHasChanged();
         }
 #if DEBUG

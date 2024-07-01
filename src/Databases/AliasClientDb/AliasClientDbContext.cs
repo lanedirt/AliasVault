@@ -10,6 +10,7 @@ namespace AliasClientDb;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// The AliasClientDbContext class.
@@ -27,10 +28,9 @@ public class AliasClientDbContext : DbContext
     /// Initializes a new instance of the <see cref="AliasClientDbContext"/> class.
     /// </summary>
     /// <param name="sqliteConnection">The SQLite connection to use to connect to the SQLite database.</param>
-    public AliasClientDbContext(SqliteConnection sqliteConnection)
-        : this(new DbContextOptionsBuilder<AliasClientDbContext>()
-            .UseSqlite(sqliteConnection)
-            .Options)
+    /// <param name="logAction">The action to perform for logging.</param>
+    public AliasClientDbContext(SqliteConnection sqliteConnection, Action<string> logAction)
+        : base(GetOptions(sqliteConnection, logAction))
     {
     }
 
@@ -44,24 +44,29 @@ public class AliasClientDbContext : DbContext
     }
 
     /// <summary>
-    /// Gets or sets the Passwords DbSet.
+    /// Gets or sets the Alias DbSet.
     /// </summary>
-    public DbSet<Password> Passwords { get; set; }
+    public DbSet<Alias> Aliases { get; set; } = null!;
 
-    /// <inheritdoc />
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        // Insert your custom logic here (before saving changes)
-        Console.WriteLine("Before SaveChangesAsync");
+    /// <summary>
+    /// Gets or sets the Attachment DbSet.
+    /// </summary>
+    public DbSet<Attachment> Attachment { get; set; } = null!;
 
-        // Call the base method to save changes to the database
-        int result = await base.SaveChangesAsync(cancellationToken);
+    /// <summary>
+    /// Gets or sets the Credential DbSet.
+    /// </summary>
+    public DbSet<Credential> Credentials { get; set; } = null!;
 
-        // Insert your custom logic here (after saving changes)
-        Console.WriteLine("After SaveChangesAsync");
+    /// <summary>
+    /// Gets or sets the Password DbSet.
+    /// </summary>
+    public DbSet<Password> Passwords { get; set; } = null!;
 
-        return result;
-    }
+    /// <summary>
+    /// Gets or sets the Service DbSet.
+    /// </summary>
+    public DbSet<Service> Services { get; set; } = null!;
 
     /// <summary>
     /// The OnModelCreating method.
@@ -82,6 +87,34 @@ public class AliasClientDbContext : DbContext
                 }
             }
         }
+
+        // Configure Credential - Alias relationship
+        modelBuilder.Entity<Credential>()
+            .HasOne(l => l.Alias)
+            .WithMany(c => c.Credentials)
+            .HasForeignKey(l => l.AliasId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Credential - Service relationship
+        modelBuilder.Entity<Credential>()
+            .HasOne(l => l.Service)
+            .WithMany(c => c.Credentials)
+            .HasForeignKey(l => l.ServiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Attachment - Credential relationship
+        modelBuilder.Entity<Attachment>()
+            .HasOne(l => l.Credential)
+            .WithMany(c => c.Attachments)
+            .HasForeignKey(l => l.CredentialId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Password - Credential relationship
+        modelBuilder.Entity<Password>()
+            .HasOne(l => l.Credential)
+            .WithMany(c => c.Passwords)
+            .HasForeignKey(l => l.CredentialId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     /// <summary>
@@ -101,6 +134,20 @@ public class AliasClientDbContext : DbContext
             optionsBuilder
                 .UseSqlite(configuration.GetConnectionString("AliasClientDbContext"))
                 .UseLazyLoadingProxies();
+
+            optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         }
+
+        base.OnConfiguring(optionsBuilder);
+    }
+
+    private static DbContextOptions<AliasClientDbContext> GetOptions(SqliteConnection connection, Action<string> logAction)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AliasClientDbContext>();
+        optionsBuilder.UseSqlite(connection);
+
+        optionsBuilder.LogTo(logAction, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+
+        return optionsBuilder.Options;
     }
 }

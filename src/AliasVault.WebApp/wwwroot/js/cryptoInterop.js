@@ -22,7 +22,11 @@ window.cryptoInterop = {
         combined.set(iv, 0);
         combined.set(new Uint8Array(ciphertext), iv.length);
 
-        return btoa(String.fromCharCode.apply(null, combined));
+        return btoa(
+            Array.from(combined)
+                .map(byte => String.fromCharCode(byte))
+                .join('')
+        );
     },
     decrypt: async function (base64Ciphertext, base64Key) {
         const key = await window.crypto.subtle.importKey(

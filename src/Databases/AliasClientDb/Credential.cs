@@ -1,19 +1,18 @@
 //-----------------------------------------------------------------------
-// <copyright file="Login.cs" company="lanedirt">
+// <copyright file="Credential.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace AliasServerDb;
+namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 /// <summary>
 /// Login object.
 /// </summary>
-public class Login
+public class Credential
 {
     /// <summary>
     /// Gets or sets Login ID.
@@ -22,22 +21,35 @@ public class Login
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets user ID foreign key.
+    /// Gets or sets the identity ID foreign key.
     /// </summary>
-    [StringLength(255)]
-    public string UserId { get; set; } = null!;
+    public Guid AliasId { get; set; }
 
     /// <summary>
-    /// Gets or sets foreign key to the AliasVaultUser object.
+    /// Gets or sets the identity object.
     /// </summary>
-    [ForeignKey("UserId")]
-    public virtual AliasVaultUser User { get; set; } = null!;
+    [ForeignKey("AliasId")]
+    public virtual Alias Alias { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets optional login description.
+    /// Gets or sets optional notes field.
     /// </summary>
-    [StringLength(255)]
-    public string? Description { get; set; }
+    public string? Notes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the username field.
+    /// </summary>
+    public string Username { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the password objects.
+    /// </summary>
+    public virtual ICollection<Password> Passwords { get; set; } = new List<Password>();
+
+    /// <summary>
+    /// Gets or sets the attachment objects.
+    /// </summary>
+    public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
 
     /// <summary>
     /// Gets or sets created timestamp.
@@ -50,17 +62,6 @@ public class Login
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the identity ID foreign key.
-    /// </summary>
-    public Guid IdentityId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the identity object.
-    /// </summary>
-    [ForeignKey("IdentityId")]
-    public virtual Identity Identity { get; set; } = null!;
-
-    /// <summary>
     /// Gets or sets the service ID foreign key.
     /// </summary>
     public Guid ServiceId { get; set; }
@@ -70,9 +71,4 @@ public class Login
     /// </summary>
     [ForeignKey("ServiceId")]
     public virtual Service Service { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the password objects.
-    /// </summary>
-    public virtual ICollection<Password> Passwords { get; set; } = new List<Password>();
 }

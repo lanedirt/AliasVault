@@ -9,9 +9,9 @@ namespace AliasVault.WebApp.Auth.Pages.Base;
 
 using System.Net.Http.Json;
 using System.Text.Json;
+using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.WebApp.Auth.Services;
-using AliasVault.WebApp.Components;
 using AliasVault.WebApp.Services;
 using AliasVault.WebApp.Services.Database;
 using Blazored.LocalStorage;
@@ -76,13 +76,33 @@ public class LoginBase : OwningComponentBase
     public ILocalStorageService LocalStorage { get; set; } = null!;
 
     /// <summary>
+    /// Parses the response content and displays the server validation errors.
+    /// </summary>
+    /// <param name="responseContent">Response content.</param>
+    /// <returns>List of errors if something went wrong.</returns>
+    public static List<string> ParseResponse(string responseContent)
+    {
+        var returnErrors = new List<string>();
+
+        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ServerValidationErrorResponse>(responseContent);
+        if (errorResponse is not null)
+        {
+            foreach (var error in errorResponse.Errors)
+            {
+                returnErrors.AddRange(error.Value);
+            }
+        }
+
+        return returnErrors;
+    }
+
+    /// <summary>
     /// Gets the username from the authentication state asynchronously.
     /// </summary>
     /// <param name="email">Email address.</param>
     /// <param name="password">Password.</param>
-    /// <param name="serverValidationErrors">ServerValidationErrors Blazor component reference.</param>
-    /// <returns>The username.</returns>
-    protected async Task ProcessLoginAsync(string email, string password, ServerValidationErrors serverValidationErrors)
+    /// <returns>List of errors if something went wrong.</returns>
+    protected async Task<List<string>> ProcessLoginAsync(string email, string password)
     {
         // Send request to server with email to get server ephemeral public key.
         var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(email));
@@ -90,15 +110,16 @@ public class LoginBase : OwningComponentBase
 
         if (!result.IsSuccessStatusCode)
         {
-            serverValidationErrors.ParseResponse(responseContent);
-            return;
+            return ParseResponse(responseContent);
         }
 
         var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
         if (loginResponse == null)
         {
-            serverValidationErrors.AddError("An error occurred while processing the login request.");
-            return;
+            return new List<string>
+            {
+                "An error occurred while processing the login request.",
+            };
         }
 
         // 3. Client derives shared session key.
@@ -120,15 +141,16 @@ public class LoginBase : OwningComponentBase
 
         if (!result.IsSuccessStatusCode)
         {
-            serverValidationErrors.ParseResponse(responseContent);
-            return;
+            return ParseResponse(responseContent);
         }
 
         var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
         if (validateLoginResponse == null)
         {
-            serverValidationErrors.AddError("An error occurred while processing the login request.");
-            return;
+            return new List<string>
+            {
+                "An error occurred while processing the login request.",
+            };
         }
 
         // 5. Client verifies proof.
@@ -155,5 +177,7 @@ public class LoginBase : OwningComponentBase
         {
             NavigationManager.NavigateTo("/");
         }
+
+        return new List<string>();
     }
 }

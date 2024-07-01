@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AliasTests.cs" company="lanedirt">
+// <copyright file="CredentialTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -8,97 +8,95 @@
 namespace AliasVault.E2ETests.Tests;
 
 /// <summary>
-/// End-to-end tests for the alias management.
+/// End-to-end tests for the credential management.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class AliasTests : PlaywrightTest
+public class CredentialTests : PlaywrightTest
 {
     private static readonly Random Random = new();
 
     /// <summary>
-    /// Test if the alias listing index page works.
+    /// Test if the credential listing index page works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task AliasListingTest()
+    public async Task CredentialListingTest()
     {
-        await NavigateUsingBlazorRouter("aliases");
-        await WaitForURLAsync("**/aliases", "AliasVault");
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForURLAsync("**/credentials", "AliasVault");
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your aliases below"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain("Find all of your credentials below"), "No index content after logging in.");
     }
 
     /// <summary>
-    /// Test if creating a new alias works.
+    /// Test if creating a new credential entry works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task CreateAliasTest()
+    public async Task CreateCredentialTest()
     {
         // Create a new alias with service name = "Test Service".
         var serviceName = "Test Service";
-        await CreateAlias(new Dictionary<string, string>
+        await CreateCredentialEntry(new Dictionary<string, string>
         {
             { "service-name", serviceName },
         });
 
         // Check that the service name is present in the content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain(serviceName), "Created alias service name does not appear on alias page.");
+        Assert.That(pageContent, Does.Contain(serviceName), "Created credential service name does not appear on alias page.");
     }
 
     /// <summary>
-    /// Test if editing a created alias works.
+    /// Test if editing a created credential entry works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task EditAliasTest()
+    public async Task EditCredentialTest()
     {
-        // Create a new alias with service name = "Alias service before".
-        var serviceNameBefore = "Alias service before";
-        await CreateAlias(new Dictionary<string, string>
+        var serviceNameBefore = "Credential service before";
+        await CreateCredentialEntry(new Dictionary<string, string>
         {
             { "service-name", serviceNameBefore },
         });
 
         // Check that the service name is present in the content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created alias service name does not appear on alias page.");
+        Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created credential service name does not appear on login page.");
 
         // Click the edit button.
-        var editButton = Page.Locator("text=Edit alias").First;
+        var editButton = Page.Locator("text=Edit credentials entry").First;
         await editButton.ClickAsync();
-        await WaitForURLAsync("**/edit", "Save Alias");
+        await WaitForURLAsync("**/edit", "Save Credentials");
 
-        // Replace the service name with "Alias service after".
-        var serviceNameAfter = "Alias service after";
+        var serviceNameAfter = "Credential service after";
         await InputHelper.FillInputFields(
             fieldValues: new Dictionary<string, string>
             {
                 { "service-name", serviceNameAfter },
             });
 
-        var submitButton = Page.Locator("text=Save Alias").First;
+        var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/alias/**", "View alias");
+        await WaitForURLAsync("**/credentials/**", "View credentials entry");
 
         pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Alias updated"), "Alias update confirmation message not shown.");
-        Assert.That(pageContent, Does.Contain(serviceNameAfter), "Alias not updated correctly.");
+        Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
+        Assert.That(pageContent, Does.Contain(serviceNameAfter), "Credential not updated correctly.");
     }
 
     /// <summary>
-    /// Create new alias.
+    /// Create new credential entry.
     /// </summary>
     /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
     /// <returns>Async task.</returns>
-    private async Task CreateAlias(Dictionary<string, string>? formValues = null)
+    private async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null)
     {
-        await NavigateUsingBlazorRouter("add-alias");
-        await WaitForURLAsync("**/add-alias", "Add alias");
+        await NavigateUsingBlazorRouter("add-credentials");
+        await WaitForURLAsync("**/add-credentials", "Add credentials");
 
         // Check if a button with text "Generate Random Identity" appears
         var generateButton = Page.Locator("text=Generate Random Identity");
@@ -108,12 +106,12 @@ public class AliasTests : PlaywrightTest
         await InputHelper.FillInputFields(formValues);
         await InputHelper.FillEmptyInputFieldsWithRandom();
 
-        var submitButton = Page.Locator("text=Save Alias").First;
+        var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/alias/**", "Login credentials");
+        await WaitForURLAsync("**/credentials/**", "Login credentials");
 
-        // Check if the alias was created
+        // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Login credentials"), "Alias not created.");
+        Assert.That(pageContent, Does.Contain("Login credentials"), "Credential not created.");
     }
 }

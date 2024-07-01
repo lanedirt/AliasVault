@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
     <PropertyGroup>
+        <RootNamespace>AliasVault.WebApp</RootNamespace>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -60,9 +60,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="Layout\DbStatusIndicator.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
       <Content Update="wwwroot\appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
@@ -84,9 +81,5 @@
       <None Update="nginx.conf">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Pages\Aliases\Mailbox\Models\" />
     </ItemGroup>
 </Project>

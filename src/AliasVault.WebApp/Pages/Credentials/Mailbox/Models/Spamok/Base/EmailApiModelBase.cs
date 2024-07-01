@@ -1,16 +1,16 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="MailboxEmailApiModel.cs" company="lanedirt">
+// <copyright file="EmailApiModelBase.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.WebApp.Pages.Aliases.Models.Spamok;
+namespace AliasVault.WebApp.Pages.Logins.Mailbox.Models.Spamok;
 
 /// <summary>
-/// Represents a mailbox email API model.
+/// Represents a mailbox email API model base.
 /// </summary>
-public class MailboxEmailApiModel
+public abstract class EmailApiModelBase
 {
     /// <summary>
     /// Gets or sets the ID of the email.
@@ -56,11 +56,6 @@ public class MailboxEmailApiModel
     /// Gets or sets the system date of the email.
     /// </summary>
     public DateTime DateSystem { get; set; }
-
-    /// <summary>
-    /// Gets or sets the preview of the email message.
-    /// </summary>
-    public string MessagePreview { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the number of seconds ago the email was received.

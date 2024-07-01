@@ -1,40 +1,36 @@
 //-----------------------------------------------------------------------
-// <copyright file="Service.cs" company="lanedirt">
+// <copyright file="Attachment.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace AliasServerDb;
+
+namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /// <summary>
-/// The service entity.
+/// Attachment entity.
 /// </summary>
-public class Service
+public class Attachment
 {
     /// <summary>
-    /// Gets or sets the service primary key.
+    /// Gets or sets the attachment primary key.
     /// </summary>
     [Key]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the service name.
+    /// Gets or sets the filename value.
     /// </summary>
     [StringLength(255)]
-    public string? Name { get; set; }
+    public string Filename { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the service URL.
+    /// Gets or sets the file blob.
     /// </summary>
-    [StringLength(255)]
-    public string? Url { get; set; }
-
-    /// <summary>
-    /// Gets or sets image logo of the service.
-    /// </summary>
-    public byte[]? Logo { get; set; } = null;
+    public byte[] Blob { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the created timestamp.
@@ -45,4 +41,15 @@ public class Service
     /// Gets or sets the updated timestamp.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the credential foreign key.
+    /// </summary>
+    public Guid CredentialId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the credential navigation property.
+    /// </summary>
+    [ForeignKey("CredentialId")]
+    public virtual Credential Credential { get; set; } = null!;
 }

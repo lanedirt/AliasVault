@@ -1,19 +1,31 @@
 //-----------------------------------------------------------------------
-// <copyright file="AliasEdit.cs" company="lanedirt">
+// <copyright file="CredentialEdit.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi;
+namespace AliasVault.WebApp.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasClientDb;
+using AliasVault.WebApp.Models.FormValidators;
 
 /// <summary>
-/// Alias model.
+/// Credential edit model.
 /// </summary>
-public class AliasEdit
+public class CredentialEdit
 {
+    /// <summary>
+    /// Gets or sets the Id of the login.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets notes field (free text input).
+    /// </summary>
+    public string Notes { get; set; } = null!;
+
     /// <summary>
     /// Gets or sets the name of the service.
     /// </summary>
@@ -26,9 +38,20 @@ public class AliasEdit
     public string? ServiceUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the logo of the service.
+    /// </summary>
+    public byte[]? ServiceLogo { get; set; } = null;
+
+    /// <summary>
     /// Gets or sets the Alias Identity object.
     /// </summary>
-    public Identity Identity { get; set; } = null!;
+    public Alias Alias { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the Alias BirthDate.
+    /// </summary>
+    [StringDateFormat("yyyy-MM-dd")]
+    public string AliasBirthDate { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Alias Password object.

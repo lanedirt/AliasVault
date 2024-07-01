@@ -64,7 +64,11 @@
 
         try
         {
-            await ProcessLoginAsync(_loginModel.Email, _loginModel.Password, _serverValidationErrors);
+            var errors = await ProcessLoginAsync(_loginModel.Email, _loginModel.Password);
+            foreach (var error in errors)
+            {
+                _serverValidationErrors.AddError(error);
+            }
         }
 #if DEBUG
         catch (Exception ex)

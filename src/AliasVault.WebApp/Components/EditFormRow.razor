@@ -1,10 +1,16 @@
-﻿@using AliasVault.WebApp.Services
-@inject ClipboardCopyService ClipboardCopyService
+﻿@inject ClipboardCopyService ClipboardCopyService
 @inject IJSRuntime JsRuntime
 
 <label for="@Id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
 <div class="relative">
-    <input type="text" id="@Id" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
+    @if (Type == "textarea")
+    {
+        <textarea id="@Id" style="height: 200px;" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged"></textarea>
+    }
+    else
+    {
+        <input type="text" id="@Id" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
+    }
 </div>
 
 @code {
@@ -19,6 +25,12 @@
     /// </summary>
     [Parameter]
     public string Label { get; set; } = "Value";
+
+    /// <summary>
+    /// Type of input field.
+    /// </summary>
+    [Parameter]
+    public string Type { get; set; } = "text";
 
     /// <summary>
     /// Value of the input field.
