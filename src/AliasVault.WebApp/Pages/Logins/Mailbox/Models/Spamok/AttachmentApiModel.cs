@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace BlazorServer.Models.Spamok;
+namespace AliasVault.WebApp.Pages.Logins.Mailbox.Models.Spamok;
 
 /// <summary>
 /// Represents an attachment for an email.
