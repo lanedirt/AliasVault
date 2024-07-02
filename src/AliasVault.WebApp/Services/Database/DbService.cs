@@ -28,7 +28,6 @@ public class DbService : IDisposable
     private readonly DbServiceState _state = new();
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
-    private Task _initializationTask;
     private bool _isSuccessfullyInitialized;
     private int _retryCount;
     private bool _disposed;
@@ -46,13 +45,10 @@ public class DbService : IDisposable
         _httpClient = httpClient;
 
         // Set the initial state of the database service.
-        _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
+        _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
 
         // Create an in-memory SQLite database connection which stays open for the lifetime of the service.
         (_sqlConnection, _dbContext) = InitializeEmptyDatabase();
-
-        // Initialize the database asynchronously
-        _initializationTask = InitializeDatabaseAsync();
     }
 
     /// <summary>
@@ -65,12 +61,37 @@ public class DbService : IDisposable
     }
 
     /// <summary>
-    /// Ensures that the service initialization is complete before proceeding.
+    /// Initializes the database, either by creating a new one or loading an existing one from the server.
     /// </summary>
     /// <returns>Task.</returns>
-    public async Task EnsureInitializedAsync()
+    public async Task InitializeDatabaseAsync()
     {
-        await _initializationTask;
+        Console.WriteLine("init db called svc");
+
+        // Check that encryption key is set. If not, do nothing.
+        if (!_authService.IsEncryptionKeySet())
+        {
+            return;
+        }
+
+        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+
+        // Ensure the in-memory database representation is created and has the necessary tables.
+        await _dbContext.Database.EnsureCreatedAsync();
+
+        // Attempt to fill the local database with a previously saved database stored on the server.
+        var loaded = await LoadDatabaseFromServerAsync();
+        if (loaded)
+        {
+            _isSuccessfullyInitialized = true;
+            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
+            Console.WriteLine("Database succesfully loaded from server.");
+        }
+        else
+        {
+            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
+            Console.WriteLine("Failed to load database from server.");
+        }
     }
 
     /// <summary>
@@ -79,15 +100,13 @@ public class DbService : IDisposable
     /// <returns>AliasClientDbContext.</returns>
     public async Task<AliasClientDbContext> GetDbContextAsync()
     {
-        await EnsureInitializedAsync();
         if (!_isSuccessfullyInitialized)
         {
             // Retry initialization up to 5 times before giving up.
             if (_retryCount < 5)
             {
                 _retryCount++;
-                _initializationTask = InitializeDatabaseAsync();
-                await EnsureInitializedAsync();
+                await InitializeDatabaseAsync();
             }
             else
             {
@@ -104,8 +123,6 @@ public class DbService : IDisposable
     /// <returns>Task.</returns>
     public async Task SaveDatabaseAsync()
     {
-        await EnsureInitializedAsync();
-
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Saving);
 
@@ -122,7 +139,7 @@ public class DbService : IDisposable
         if (success)
         {
             Console.WriteLine("Database succesfully saved to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
+            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
         }
         else
         {
@@ -137,6 +154,8 @@ public class DbService : IDisposable
     /// <returns>Base64 encoded string that represents SQLite database.</returns>
     public async Task<string> ExportSqliteToBase64Async()
     {
+        Console.WriteLine("Awaited database initialize...");
+
         var tempFileName = Path.GetRandomFileName();
 
         // Export SQLite memory database to a temp file.
@@ -203,37 +222,6 @@ public class DbService : IDisposable
         }
 
         _disposed = true;
-    }
-
-    /// <summary>
-    /// Initializes the database, either by creating a new one or loading an existing one from the server.
-    /// </summary>
-    private async Task InitializeDatabaseAsync()
-    {
-        // Check that encryption key is set. If not, do nothing.
-        if (!_authService.IsEncryptionKeySet())
-        {
-            return;
-        }
-
-        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
-
-        // Ensure the in-memory database representation is created and has the necessary tables.
-        await _dbContext.Database.EnsureCreatedAsync();
-
-        // Attempt to fill the local database with a previously saved database stored on the server.
-        var loaded = await LoadDatabaseFromServerAsync();
-        if (loaded)
-        {
-            _isSuccessfullyInitialized = true;
-            _state.UpdateState(DbServiceState.DatabaseStatus.Idle);
-            Console.WriteLine("Database succesfully loaded from server.");
-        }
-        else
-        {
-            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
-            Console.WriteLine("Failed to load database from server.");
-        }
     }
 
     /// <summary>

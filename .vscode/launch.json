@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: AliasVault.WebApp [http]",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/src/AliasVault.WebApp/AliasVault.WebApp.csproj",
+            "launchConfigurationId": "TargetFramework=;http"
+        },
+        {
+            "name": "C#: AliasVault.Api [http]",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/src/AliasVault.Api/AliasVault.Api.csproj",
+            "launchConfigurationId": "TargetFramework=;http"
+        }
+    ]
+}
