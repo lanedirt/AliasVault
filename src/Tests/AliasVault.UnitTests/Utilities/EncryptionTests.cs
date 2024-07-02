@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests;
+namespace AliasVault.Tests.Utilities;
 
 using Cryptography;
 using Org.BouncyCastle.Crypto;

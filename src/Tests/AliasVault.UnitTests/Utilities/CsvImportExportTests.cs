@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests;
+namespace AliasVault.Tests.Utilities;
 
 using AliasClientDb;
 using CsvImportExport;
@@ -75,44 +75,47 @@ public class CsvImportExportTests
         var importedCredentials = CredentialCsvService.ImportCredentialsFromCsv(csvString);
 
         // Assert
-        Assert.That(importedCredentials.Count, Is.EqualTo(1));
+        Assert.That(importedCredentials, Has.Count.EqualTo(1));
 
         var importedCredential = importedCredentials[0];
 
-        Assert.That(importedCredential.Id, Is.EqualTo(credential.Id));
-        Assert.That(importedCredential.Username, Is.EqualTo(credential.Username));
-        Assert.That(importedCredential.Notes, Is.EqualTo(credential.Notes));
-        Assert.That(importedCredential.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.CreatedAt.ToString("yyyy-MM-dd")));
-        Assert.That(importedCredential.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.UpdatedAt.ToString("yyyy-MM-dd")));
-        Assert.That(importedCredential.AliasId, Is.EqualTo(credential.AliasId));
-        Assert.That(importedCredential.Alias.Id, Is.EqualTo(credential.Alias.Id));
-        Assert.That(importedCredential.Alias.Gender, Is.EqualTo(credential.Alias.Gender));
-        Assert.That(importedCredential.Alias.FirstName, Is.EqualTo(credential.Alias.FirstName));
-        Assert.That(importedCredential.Alias.LastName, Is.EqualTo(credential.Alias.LastName));
-        Assert.That(importedCredential.Alias.NickName, Is.EqualTo(credential.Alias.NickName));
-        Assert.That(importedCredential.Alias.BirthDate, Is.EqualTo(credential.Alias.BirthDate));
-        Assert.That(importedCredential.Alias.AddressStreet, Is.EqualTo(credential.Alias.AddressStreet));
-        Assert.That(importedCredential.Alias.AddressCity, Is.EqualTo(credential.Alias.AddressCity));
-        Assert.That(importedCredential.Alias.AddressState, Is.EqualTo(credential.Alias.AddressState));
-        Assert.That(importedCredential.Alias.AddressZipCode, Is.EqualTo(credential.Alias.AddressZipCode));
-        Assert.That(importedCredential.Alias.AddressCountry, Is.EqualTo(credential.Alias.AddressCountry));
-        Assert.That(importedCredential.Alias.Hobbies, Is.EqualTo(credential.Alias.Hobbies));
-        Assert.That(importedCredential.Alias.EmailPrefix, Is.EqualTo(credential.Alias.EmailPrefix));
-        Assert.That(importedCredential.Alias.PhoneMobile, Is.EqualTo(credential.Alias.PhoneMobile));
-        Assert.That(importedCredential.Alias.BankAccountIBAN, Is.EqualTo(credential.Alias.BankAccountIBAN));
-        Assert.That(importedCredential.Alias.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.CreatedAt.ToString("yyyy-MM-dd")));
-        Assert.That(importedCredential.Alias.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.UpdatedAt.ToString("yyyy-MM-dd")));
-        Assert.That(importedCredential.ServiceId, Is.EqualTo(credential.ServiceId));
-        Assert.That(importedCredential.Service.Id, Is.EqualTo(credential.Service.Id));
-        Assert.That(importedCredential.Service.Name, Is.EqualTo(credential.Service.Name));
-        Assert.That(importedCredential.Service.Url, Is.EqualTo(credential.Service.Url));
-        Assert.That(importedCredential.Passwords.Count, Is.EqualTo(credential.Passwords.Count));
+        Assert.Multiple(() =>
+        {
+            Assert.That(importedCredential.Id, Is.EqualTo(credential.Id));
+            Assert.That(importedCredential.Username, Is.EqualTo(credential.Username));
+            Assert.That(importedCredential.Notes, Is.EqualTo(credential.Notes));
+            Assert.That(importedCredential.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.CreatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedCredential.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.UpdatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedCredential.AliasId, Is.EqualTo(credential.AliasId));
+            Assert.That(importedCredential.Alias.Id, Is.EqualTo(credential.Alias.Id));
+            Assert.That(importedCredential.Alias.Gender, Is.EqualTo(credential.Alias.Gender));
+            Assert.That(importedCredential.Alias.FirstName, Is.EqualTo(credential.Alias.FirstName));
+            Assert.That(importedCredential.Alias.LastName, Is.EqualTo(credential.Alias.LastName));
+            Assert.That(importedCredential.Alias.NickName, Is.EqualTo(credential.Alias.NickName));
+            Assert.That(importedCredential.Alias.BirthDate, Is.EqualTo(credential.Alias.BirthDate));
+            Assert.That(importedCredential.Alias.AddressStreet, Is.EqualTo(credential.Alias.AddressStreet));
+            Assert.That(importedCredential.Alias.AddressCity, Is.EqualTo(credential.Alias.AddressCity));
+            Assert.That(importedCredential.Alias.AddressState, Is.EqualTo(credential.Alias.AddressState));
+            Assert.That(importedCredential.Alias.AddressZipCode, Is.EqualTo(credential.Alias.AddressZipCode));
+            Assert.That(importedCredential.Alias.AddressCountry, Is.EqualTo(credential.Alias.AddressCountry));
+            Assert.That(importedCredential.Alias.Hobbies, Is.EqualTo(credential.Alias.Hobbies));
+            Assert.That(importedCredential.Alias.EmailPrefix, Is.EqualTo(credential.Alias.EmailPrefix));
+            Assert.That(importedCredential.Alias.PhoneMobile, Is.EqualTo(credential.Alias.PhoneMobile));
+            Assert.That(importedCredential.Alias.BankAccountIBAN, Is.EqualTo(credential.Alias.BankAccountIBAN));
+            Assert.That(importedCredential.Alias.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.CreatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedCredential.Alias.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.UpdatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedCredential.ServiceId, Is.EqualTo(credential.ServiceId));
+            Assert.That(importedCredential.Service.Id, Is.EqualTo(credential.Service.Id));
+            Assert.That(importedCredential.Service.Name, Is.EqualTo(credential.Service.Name));
+            Assert.That(importedCredential.Service.Url, Is.EqualTo(credential.Service.Url));
+            Assert.That(importedCredential.Passwords.Count, Is.EqualTo(credential.Passwords.Count));
 
-        var importedPassword = importedCredential.Passwords.First();
-        var originalPassword = credential.Passwords.First();
+            var importedPassword = importedCredential.Passwords.First();
+            var originalPassword = credential.Passwords.First();
 
-        Assert.That(importedPassword.Value, Is.EqualTo(originalPassword.Value));
-        Assert.That(importedPassword.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.CreatedAt.ToString("yyyy-MM-dd")));
-        Assert.That(importedPassword.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.UpdatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedPassword.Value, Is.EqualTo(originalPassword.Value));
+            Assert.That(importedPassword.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.CreatedAt.ToString("yyyy-MM-dd")));
+            Assert.That(importedPassword.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.UpdatedAt.ToString("yyyy-MM-dd")));
+        });
     }
 }

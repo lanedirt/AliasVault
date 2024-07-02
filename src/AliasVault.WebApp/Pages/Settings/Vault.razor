@@ -15,21 +15,33 @@
     </div>
 </div>
 
-<div>
-    <button @onclick="ExportVaultSqlite" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
-        Export vault to unencrypted SQLite file
-    </button>
-</div>
-<div class="mt-2">
-    <button @onclick="ExportVaultCsv" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
-        Export vault to unencrypted CSV file
-    </button>
+<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
+    <div class="mb-4">
+        <div>
+            <button @onclick="ExportVaultSqlite" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                Export vault to unencrypted SQLite file
+            </button>
+        </div>
+        <div class="mt-6">
+            <button @onclick="ExportVaultCsv" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                Export vault to unencrypted CSV file
+            </button>
+        </div>
+    </div>
 </div>
 
-<div class="mt-2">
-    Import unencrypted CSV file:
-    <InputFile OnChange="@LoadFiles" />
+<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">Import vault</h3>
+    <div class="mb-4">
+        <div>
+            Import unencrypted CSV file:
+            <InputFile OnChange="@LoadFiles" />
+        </div>
+    </div>
 </div>
+
+
 
 @if (IsImporting)
 {
@@ -45,10 +57,16 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
 }
 
 @code {
-    private bool IsLoading { get; set; } = true;
     private bool IsImporting = false;
     private string ImportErrorMessage = string.Empty;
     private string ImportSuccessMessage = string.Empty;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Vault settings" });
+    }
 
     private async Task ExportVaultSqlite()
     {
