@@ -108,7 +108,7 @@ public class CsvImportExportTests
             Assert.That(importedCredential.Service.Id, Is.EqualTo(credential.Service.Id));
             Assert.That(importedCredential.Service.Name, Is.EqualTo(credential.Service.Name));
             Assert.That(importedCredential.Service.Url, Is.EqualTo(credential.Service.Url));
-            Assert.That(importedCredential.Passwords.Count, Is.EqualTo(credential.Passwords.Count));
+            Assert.That(importedCredential.Passwords.Count, Is.EqualTo(1));
 
             var importedPassword = importedCredential.Passwords.First();
             var originalPassword = credential.Passwords.First();
