@@ -1,0 +1,97 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="col">
+    <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <h3 class="mb-4 text-xl font-semibold dark:text-white">Attachments</h3>
+        <div class="grid gap-6">
+            <div class="col-span-6 sm:col-span-3">
+                <InputFile OnChange="@HandleFileSelection" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" />
+                @if (!string.IsNullOrEmpty(statusMessage))
+                {
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@statusMessage</p>
+                }
+                @if (Attachments.Any())
+                {
+                    <div class="mt-4">
+                        <h4 class="mb-2 text-lg font-semibold dark:text-white">Attachments:</h4>
+                        <ul class="list-disc list-inside">
+                            @foreach (var attachment in Attachments)
+                            {
+                                <li class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                                    <span>@attachment.Filename</span>
+                                    <button type="button" @onclick="() => DeleteAttachment(attachment)" class="text-red-500 hover:text-red-700">
+                                        Delete
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+
+    [Parameter]
+    public EventCallback<List<Attachment>> AttachmentsChanged { get; set; }
+
+    [Parameter]
+    public Guid CredentialId { get; set; }
+
+    private string statusMessage = string.Empty;
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        statusMessage = "Uploading...";
+        foreach (var file in e.GetMultipleFiles(int.MaxValue))
+        {
+            try
+            {
+                using var ms = new MemoryStream();
+                await file.OpenReadStream().CopyToAsync(ms);
+
+                var attachment = new Attachment
+                {
+                    Filename = file.Name,
+                    Blob = ms.ToArray(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                };
+        
+                Attachments.Add(attachment);
+                await AttachmentsChanged.InvokeAsync(Attachments);
+
+                statusMessage = "File uploaded successfully.";
+            }
+            catch (Exception ex)
+            {
+                statusMessage = $"Error uploading file: {ex.Message}";
+                await JSRuntime.InvokeVoidAsync("console.error", ex.Message);
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task DeleteAttachment(Attachment attachment)
+    {
+        try
+        {
+            Attachments.Remove(attachment);
+            await AttachmentsChanged.InvokeAsync(Attachments);
+
+            statusMessage = "Attachment deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error deleting attachment: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("console.error", ex.Message);
+        }
+
+        StateHasChanged();
+    }
+}

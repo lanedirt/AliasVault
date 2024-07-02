@@ -83,6 +83,11 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             Value = loginObject.Passwords.First().Value,
         });
 
+        foreach (var attachment in loginObject.Attachments)
+        {
+            login.Attachments.Add(attachment);
+        }
+
         await context.Credentials.AddAsync(login);
 
         await context.SaveChangesAsync();
@@ -108,12 +113,11 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         var context = await dbService.GetDbContextAsync();
 
         // Get the existing entry.
-        var login = await context.Credentials
-            .Include(x => x.Alias)
-            .Include(x => x.Service)
-            .Include(x => x.Passwords)
-            .Where(x => x.Id == loginObject.Id)
-            .FirstAsync();
+        var login = await LoadEntryAsync(loginObject.Id);
+        if (login is null)
+        {
+            throw new InvalidOperationException("Login object not found.");
+        }
 
         login.UpdatedAt = DateTime.UtcNow;
         login.Notes = loginObject.Notes;
@@ -139,6 +143,29 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         login.Service.Logo = loginObject.Service.Logo;
         login.Service.UpdatedAt = DateTime.UtcNow;
 
+        // Remove attachments that are no longer in the list
+        var existingAttachments = login.Attachments.ToList();
+        foreach (var existingAttachment in existingAttachments)
+        {
+            if (!loginObject.Attachments.Any(a => a.Id == existingAttachment.Id))
+            {
+                context.Entry(existingAttachment).State = EntityState.Deleted;
+            }
+        }
+
+        // Add new attachments
+        foreach (var attachment in loginObject.Attachments)
+        {
+            if (!login.Attachments.Any(a => a.Id == attachment.Id))
+            {
+                login.Attachments.Add(attachment);
+            }
+            else
+            {
+                context.Entry(attachment).State = EntityState.Modified;
+            }
+        }
+
         await dbService.SaveDatabaseAsync();
 
         return login.Id;
@@ -157,6 +184,8 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         .Include(x => x.Passwords)
         .Include(x => x.Alias)
         .Include(x => x.Service)
+        .Include(x => x.Attachments)
+        .AsSplitQuery()
         .Where(x => x.Id == loginId)
         .FirstOrDefaultAsync();
 
@@ -164,6 +193,28 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
     }
 
     /// <summary>
+<<<<<<< Updated upstream
+=======
+    /// Load all entries from database.
+    /// </summary>
+    /// <returns>Alias object.</returns>
+    public async Task<List<Credential>> LoadAllAsync()
+    {
+        var context = await dbService.GetDbContextAsync();
+
+        var loginObject = await context.Credentials
+        .Include(x => x.Passwords)
+        .Include(x => x.Alias)
+        .Include(x => x.Service)
+        .Include(x => x.Attachments)
+        .AsSplitQuery()
+        .ToListAsync();
+
+        return loginObject;
+    }
+
+    /// <summary>
+>>>>>>> Stashed changes
     /// Get list with all login entries.
     /// </summary>
     /// <returns>List of CredentialListEntry objects.</returns>
@@ -175,6 +226,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         return await context.Credentials
             .Include(x => x.Alias)
             .Include(x => x.Service)
+            .AsSplitQuery()
             .Select(x => new CredentialListEntry
             {
                 Id = x.Id,

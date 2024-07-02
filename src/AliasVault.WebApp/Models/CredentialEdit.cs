@@ -67,4 +67,9 @@ public class CredentialEdit
     /// Gets or sets the Alias LastUpdate.
     /// </summary>
     public DateTime LastUpdate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Attachment list.
+    /// </summary>
+    public List<Attachment> Attachments { get; set; } = new List<Attachment>();
 }
