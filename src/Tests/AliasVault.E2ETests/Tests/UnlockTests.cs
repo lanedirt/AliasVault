@@ -26,20 +26,7 @@ public class UnlockTests : PlaywrightTest
         var startUrl = "test/1";
         await NavigateUsingBlazorRouter(startUrl);
 
-        // Hard refresh the page.
-        await Page.ReloadAsync();
-
-        // Check if the unlock page is displayed.
-        await WaitForURLAsync("**/unlock", "unlock");
-
-        // Check if by entering password the unlock page is replaced by the alias listing page.
-        await InputHelper.FillInputFields(new Dictionary<string, string>
-        {
-            { "password", TestUserPassword },
-        });
-
-        var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
-        await submitButton.ClickAsync();
+        await RefreshPageAndUnlockVault();
 
         // Check if we get redirected back to the page we were trying to access.
         await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
