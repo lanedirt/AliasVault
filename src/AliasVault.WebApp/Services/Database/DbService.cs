@@ -66,8 +66,6 @@ public class DbService : IDisposable
     /// <returns>Task.</returns>
     public async Task InitializeDatabaseAsync()
     {
-        Console.WriteLine("init db called svc");
-
         // Check that encryption key is set. If not, do nothing.
         if (!_authService.IsEncryptionKeySet())
         {
