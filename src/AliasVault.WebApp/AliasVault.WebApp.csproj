@@ -74,6 +74,7 @@
       <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
       <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
+      <ProjectReference Include="..\Utilities\CsvImportExport\CsvImportExport.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 

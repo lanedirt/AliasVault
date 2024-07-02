@@ -31,9 +31,9 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
-        <PackageReference Include="NUnit" Version="4.1.0"/>
-        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+        <PackageReference Include="NUnit" Version="4.1.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
         <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -50,9 +50,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\AliasVault.Api\AliasVault.Api.csproj" />
+        <ProjectReference Include="..\..\Databases\AliasClientDb\AliasClientDb.csproj" />
         <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
-        <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.csproj"/>
-        <ProjectReference Include="..\..\Utilities\FaviconExtractor\FaviconExtractor.csproj"/>
+        <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.csproj" />
+        <ProjectReference Include="..\..\Utilities\CsvImportExport\CsvImportExport.csproj" />
+        <ProjectReference Include="..\..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
     </ItemGroup>
 
 </Project>

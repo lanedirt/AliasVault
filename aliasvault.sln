@@ -29,9 +29,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasServerDb", "src\Databa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasClientDb", "src\Databases\AliasClientDb\AliasClientDb.csproj", "{FE10F294-817F-477E-A24F-8597A15AF0B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.E2ETests.WebApp.Server", "src\Tests\Server\AliasVault.E2ETests.WebApp.Server\AliasVault.E2ETests.WebApp.Server.csproj", "{DD1F496F-CF10-47D1-A57F-5FA256479332}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.E2ETests.WebApp.Server", "src\Tests\Server\AliasVault.E2ETests.WebApp.Server\AliasVault.E2ETests.WebApp.Server.csproj", "{DD1F496F-CF10-47D1-A57F-5FA256479332}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{607945F3-9896-4544-99EC-F3496CF4D36B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvImportExport", "src\Utilities\CsvImportExport\CsvImportExport.csproj", "{A9C9A606-C87E-4298-AB32-09B1884D7487}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +85,10 @@ Global
 		{DD1F496F-CF10-47D1-A57F-5FA256479332}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD1F496F-CF10-47D1-A57F-5FA256479332}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD1F496F-CF10-47D1-A57F-5FA256479332}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9C9A606-C87E-4298-AB32-09B1884D7487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9C9A606-C87E-4298-AB32-09B1884D7487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C9A606-C87E-4298-AB32-09B1884D7487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9C9A606-C87E-4298-AB32-09B1884D7487}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +102,7 @@ Global
 		{FE10F294-817F-477E-A24F-8597A15AF0B5} = {5F7417F6-4388-49CC-9511-ED63C4A6488A}
 		{DD1F496F-CF10-47D1-A57F-5FA256479332} = {607945F3-9896-4544-99EC-F3496CF4D36B}
 		{607945F3-9896-4544-99EC-F3496CF4D36B} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
+		{A9C9A606-C87E-4298-AB32-09B1884D7487} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}

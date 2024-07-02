@@ -9,6 +9,7 @@ namespace AliasVault.WebApp.Services;
 
 using System.Net.Http.Json;
 using AliasClientDb;
+using AliasVault.Shared.Models;
 using AliasVault.WebApp.Models;
 using AliasVault.WebApp.Services.Database;
 using Microsoft.EntityFrameworkCore;
@@ -38,10 +39,14 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
     /// Insert new entry into database.
     /// </summary>
     /// <param name="loginObject">Login object to insert.</param>
+    /// <param name="saveToDb">Whether to commit changes to database. Defaults to true, but can be set to false if entries are added in bulk by caller.</param>
     /// <returns>Guid of inserted entry.</returns>
-    public async Task<Guid> InsertEntryAsync(Credential loginObject)
+    public async Task<Guid> InsertEntryAsync(Credential loginObject, bool saveToDb = true)
     {
         var context = await dbService.GetDbContextAsync();
+
+        // Try to extract favicon from service URL
+        await ExtractFaviconAsync(loginObject);
 
         var login = new Credential
         {
@@ -107,6 +112,9 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
     {
         var context = await dbService.GetDbContextAsync();
 
+        // Try to extract favicon from service URL
+        await ExtractFaviconAsync(loginObject);
+
         // Get the existing entry.
         var login = await context.Credentials
             .Include(x => x.Alias)
@@ -164,6 +172,23 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
     }
 
     /// <summary>
+    /// Load all entries from database.
+    /// </summary>
+    /// <returns>Alias object.</returns>
+    public async Task<List<Credential>> LoadAllAsync()
+    {
+        var context = await dbService.GetDbContextAsync();
+
+        var loginObject = await context.Credentials
+        .Include(x => x.Passwords)
+        .Include(x => x.Alias)
+        .Include(x => x.Service)
+        .ToListAsync();
+
+        return loginObject;
+    }
+
+    /// <summary>
     /// Get list with all login entries.
     /// </summary>
     /// <returns>List of CredentialListEntry objects.</returns>
@@ -201,5 +226,25 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         context.Credentials.Remove(login);
         await context.SaveChangesAsync();
         await dbService.SaveDatabaseAsync();
+    }
+
+    /// <summary>
+    /// Extract favicon from service URL if available in object. If successful the passed object itself will be updated with the bytes.
+    /// </summary>
+    /// <param name="credentialObject">The Credential object to extract the favicon for.</param>
+    /// <returns>Task.</returns>
+    private async Task ExtractFaviconAsync(Credential credentialObject)
+    {
+        // Try to extract favicon from service URL
+        var url = credentialObject.Service.Url;
+        if (url != null && !string.IsNullOrEmpty(url) && url.Contains("http"))
+        {
+            // Request favicon from from service URL via WebApi
+            var apiReturn = await httpClient.GetFromJsonAsync<FaviconExtractModel>("api/v1/Favicon/Extract?url=" + url);
+            if (apiReturn != null && apiReturn.Image != null)
+            {
+                credentialObject.Service.Logo = apiReturn.Image;
+            }
+        }
     }
 }

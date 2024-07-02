@@ -17,14 +17,6 @@ using SecureRemotePassword;
 public class EncryptionTests
 {
     /// <summary>
-    /// Common setup for all tests.
-    /// </summary>
-    [SetUp]
-    public void Setup()
-    {
-    }
-
-    /// <summary>
     /// Test basic encryption and decryption using default encryption logic (Argon2id and AES-256).
     /// </summary>
     [Test]

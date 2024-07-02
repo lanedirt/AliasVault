@@ -25,9 +25,14 @@ public class DbServiceState
     public enum DatabaseStatus
     {
         /// <summary>
-        /// No database operation is in progress.
+        /// Database not initialized (yet).
         /// </summary>
-        Idle,
+        Uninitialized,
+
+        /// <summary>
+        /// Database is initialized but no task is currently in progress.
+        /// </summary>
+        Initialized,
 
         /// <summary>
         /// Database is loading from server.
@@ -107,7 +112,7 @@ public class DbServiceState
         /// <summary>
         /// Gets or sets the current status of the database.
         /// </summary>
-        public DatabaseStatus Status { get; set; } = DatabaseStatus.Idle;
+        public DatabaseStatus Status { get; set; } = DatabaseStatus.Uninitialized;
 
         /// <summary>
         /// Gets or sets the message associated with the current status.
