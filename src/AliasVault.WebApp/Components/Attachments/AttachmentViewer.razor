@@ -53,13 +53,13 @@
             else
             {
                 // Handle the case where the attachment or its content is not found
-                Console.Error.WriteLine($"Attachment not found or has no content: {attachment.Id}");
+                await Console.Error.WriteLineAsync($"Attachment not found or has no content: {attachment.Id}");
             }
         }
         catch (Exception ex)
         {
             // Handle any exceptions that occur during the download process
-            Console.Error.WriteLine($"Error downloading attachment: {ex.Message}");
+            await Console.Error.WriteLineAsync($"Error downloading attachment: {ex.Message}");
         }
     }
 }
