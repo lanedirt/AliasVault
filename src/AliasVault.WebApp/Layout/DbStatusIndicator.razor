@@ -21,10 +21,13 @@ else
     private bool Loading { get; set; } = false;
     private string Message { get; set; } = "";
     private string LoadingIndicatorMessage { get; set; } = "";
+    private bool DatabaseLoading { get; set; } = false;
 
     /// <inheritdoc />
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
     }
 

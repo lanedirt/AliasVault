@@ -6,7 +6,7 @@
             "type": "dotnet",
             "request": "launch",
             "projectPath": "${workspaceFolder}/src/AliasVault.WebApp/AliasVault.WebApp.csproj",
-            "launchConfigurationId": "TargetFramework=;http",
+            "launchConfigurationId": "TargetFramework=;http"
         },
         {
             "name": "C#: AliasVault.Api [http]",
