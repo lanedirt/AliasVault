@@ -7,6 +7,8 @@
 
 namespace AliasVault.WebApp.Models;
 
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
 using AliasVault.WebApp.Models.FormValidators;

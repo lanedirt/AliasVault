@@ -10,7 +10,6 @@
                     <tr>
                         <th scope="col" class="px-6 py-3">Filename</th>
                         <th scope="col" class="px-6 py-3">Created At</th>
-                        <th scope="col" class="px-6 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -18,13 +17,10 @@
                     {
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                @attachment.Filename
+                                <span @onclick="() => DownloadAttachment(attachment)" class="text-primary cursor-pointer">@attachment.Filename</span>
                             </td>
                             <td class="px-6 py-4">
                                 @attachment.CreatedAt.ToLocalTime().ToString("g")
-                            </td>
-                            <td class="px-6 py-4">
-                                <button @onclick="() => DownloadAttachment(attachment)" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Download</button>
                             </td>
                         </tr>
                     }

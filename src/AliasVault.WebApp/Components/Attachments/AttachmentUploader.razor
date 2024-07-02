@@ -1,4 +1,5 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using System.IO
+@inject IJSRuntime JSRuntime
 
 <div class="col">
     <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -39,9 +40,6 @@
     [Parameter]
     public EventCallback<List<Attachment>> AttachmentsChanged { get; set; }
 
-    [Parameter]
-    public Guid CredentialId { get; set; }
-
     private string statusMessage = string.Empty;
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
@@ -61,7 +59,7 @@
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                 };
-        
+
                 Attachments.Add(attachment);
                 await AttachmentsChanged.InvokeAsync(Attachments);
 

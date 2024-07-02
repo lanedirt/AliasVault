@@ -7,7 +7,12 @@
 
 namespace AliasVault.WebApp.Services;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using AliasClientDb;
 using AliasVault.Shared.Models;
 using AliasVault.WebApp.Models;
@@ -155,7 +160,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         var existingAttachments = login.Attachments.ToList();
         foreach (var existingAttachment in existingAttachments)
         {
-            if (!loginObject.Attachments.Any(a => a.Id == existingAttachment.Id))
+            if (!loginObject.Attachments.Any(a => a.Id != Guid.Empty && a.Id == existingAttachment.Id))
             {
                 context.Entry(existingAttachment).State = EntityState.Deleted;
             }
@@ -164,7 +169,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         // Add new attachments
         foreach (var attachment in loginObject.Attachments)
         {
-            if (!login.Attachments.Any(a => a.Id == attachment.Id))
+            if (!login.Attachments.Any(a => attachment.Id != Guid.Empty && a.Id == attachment.Id))
             {
                 login.Attachments.Add(attachment);
             }
