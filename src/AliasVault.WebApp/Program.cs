@@ -6,10 +6,8 @@
 //-----------------------------------------------------------------------
 
 using AliasVault.WebApp;
-using AliasVault.WebApp.Auth.Providers;
-using AliasVault.WebApp.Auth.Services;
-using AliasVault.WebApp.Services;
-using AliasVault.WebApp.Services.Database;
+using AliasVault.WebApp.Providers;
+using AliasVault.WebApp.Services.Auth;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -25,6 +23,11 @@ builder.Services.AddLogging(logging =>
 });
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+if (builder.HostEnvironment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+}
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient("AliasVault.Api").AddHttpMessageHandler<AliasVaultApiHandlerService>();

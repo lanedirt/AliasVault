@@ -9,7 +9,7 @@ namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
 using AliasServerDb;
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -111,6 +111,10 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
 
         var host = builder.Build();
         host.Start();
+
+        // This delay prevents "ERR_CONNECTION_REFUSED" errors
+        // which happened like 1 out of 10 times when running tests.
+        Thread.Sleep(50);
 
         return dummyHost;
     }

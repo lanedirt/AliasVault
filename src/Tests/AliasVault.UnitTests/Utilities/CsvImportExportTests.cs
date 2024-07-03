@@ -57,18 +57,18 @@ public class CsvImportExportTests
                 Name = "Test Service",
                 Url = "https://testservice.com",
             },
-            Passwords = new List<Password>
-            {
+            Passwords =
+            [
                 new Password
                 {
                     Value = "password123",
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                 },
-            },
+            ],
         };
 
-        var csvContent = CredentialCsvService.ExportCredentialsToCsv(new List<Credential> { credential });
+        var csvContent = CredentialCsvService.ExportCredentialsToCsv([credential]);
         var csvString = System.Text.Encoding.Default.GetString(csvContent);
 
         // Act
@@ -108,7 +108,7 @@ public class CsvImportExportTests
             Assert.That(importedCredential.Service.Id, Is.EqualTo(credential.Service.Id));
             Assert.That(importedCredential.Service.Name, Is.EqualTo(credential.Service.Name));
             Assert.That(importedCredential.Service.Url, Is.EqualTo(credential.Service.Url));
-            Assert.That(importedCredential.Passwords.Count, Is.EqualTo(1));
+            Assert.That(importedCredential.Passwords, Has.Count.EqualTo(1));
 
             var importedPassword = importedCredential.Passwords.First();
             var originalPassword = credential.Passwords.First();

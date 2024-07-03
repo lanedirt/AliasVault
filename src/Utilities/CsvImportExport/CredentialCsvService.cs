@@ -60,14 +60,13 @@ public static class CredentialCsvService
             records.Add(record);
         }
 
-        using (var memoryStream = new MemoryStream())
-        using (var writer = new StreamWriter(memoryStream))
-        using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
-        {
-            csv.WriteRecords(records);
-            writer.Flush();
-            return memoryStream.ToArray();
-        }
+        using var memoryStream = new MemoryStream();
+        using var writer = new StreamWriter(memoryStream);
+        using var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture));
+        
+        csv.WriteRecords(records);
+        writer.Flush();
+        return memoryStream.ToArray();
     }
 
     /// <summary>
@@ -77,76 +76,74 @@ public static class CredentialCsvService
     /// <returns>The imported list of Credential objects.</returns>
     public static List<Credential> ImportCredentialsFromCsv(string fileContent)
     {
-        using (var reader = new StringReader(fileContent))
-        using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+        using var reader = new StringReader(fileContent);
+        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        
+        var records = csv.GetRecords<CredentialCsvRecord>().ToList();
+
+        if (records.Count == 0)
         {
-            var records = csv.GetRecords<CredentialCsvRecord>().ToList();
-
-            if (records.Count == 0)
-            {
-                throw new InvalidOperationException("No records found in the CSV file.");
-            }
-
-            if (records[0].Version != CsvVersionIdentifier)
-            {
-                throw new InvalidOperationException("Invalid CSV file version.");
-            }
-
-            var credentials = new List<Credential>();
-
-            foreach (var record in records)
-            {
-                var credential = new Credential
-                {
-                    Id = record.Id,
-                    Username = record.Username,
-                    Notes = record.Notes,
-                    CreatedAt = record.CreatedAt,
-                    UpdatedAt = record.UpdatedAt,
-                    AliasId = record.AliasId,
-                    Alias = new Alias
-                    {
-                        Id = record.AliasId,
-                        Gender = record.AliasGender,
-                        FirstName = record.AliasFirstName,
-                        LastName = record.AliasLastName,
-                        NickName = record.AliasNickName,
-                        BirthDate = record.AliasBirthDate ?? DateTime.MinValue,
-                        AddressStreet = record.AliasAddressStreet,
-                        AddressCity = record.AliasAddressCity,
-                        AddressState = record.AliasAddressState,
-                        AddressZipCode = record.AliasAddressZipCode,
-                        AddressCountry = record.AliasAddressCountry,
-                        Hobbies = record.AliasHobbies,
-                        EmailPrefix = record.AliasEmailPrefix,
-                        PhoneMobile = record.AliasPhoneMobile,
-                        BankAccountIBAN = record.AliasBankAccountIBAN,
-                        CreatedAt = record.AliasCreatedAt ?? DateTime.UtcNow,
-                        UpdatedAt = record.AliasUpdatedAt ?? DateTime.UtcNow
-                    },
-                    ServiceId = record.ServiceId,
-                    Service = new Service
-                    {
-                        Id = record.ServiceId,
-                        Name = record.ServiceName,
-                        Url = record.ServiceUrl
-                    },
-                    Passwords = new List<Password>
-                    {
-                        new Password
-                        {
-                            Value = record.CurrentPassword,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        }
-                    }
-                };
-
-                credentials.Add(credential);
-            }
-
-            return credentials;
+            throw new InvalidOperationException("No records found in the CSV file.");
         }
+
+        if (records[0].Version != CsvVersionIdentifier)
+        {
+            throw new InvalidOperationException("Invalid CSV file version.");
+        }
+
+        var credentials = new List<Credential>();
+
+        foreach (var record in records)
+        {
+            var credential = new Credential
+            {
+                Id = record.Id,
+                Username = record.Username,
+                Notes = record.Notes,
+                CreatedAt = record.CreatedAt,
+                UpdatedAt = record.UpdatedAt,
+                AliasId = record.AliasId,
+                Alias = new Alias
+                {
+                    Id = record.AliasId,
+                    Gender = record.AliasGender,
+                    FirstName = record.AliasFirstName,
+                    LastName = record.AliasLastName,
+                    NickName = record.AliasNickName,
+                    BirthDate = record.AliasBirthDate ?? DateTime.MinValue,
+                    AddressStreet = record.AliasAddressStreet,
+                    AddressCity = record.AliasAddressCity,
+                    AddressState = record.AliasAddressState,
+                    AddressZipCode = record.AliasAddressZipCode,
+                    AddressCountry = record.AliasAddressCountry,
+                    Hobbies = record.AliasHobbies,
+                    EmailPrefix = record.AliasEmailPrefix,
+                    PhoneMobile = record.AliasPhoneMobile,
+                    BankAccountIBAN = record.AliasBankAccountIBAN,
+                    CreatedAt = record.AliasCreatedAt ?? DateTime.UtcNow,
+                    UpdatedAt = record.AliasUpdatedAt ?? DateTime.UtcNow
+                },
+                ServiceId = record.ServiceId,
+                Service = new Service
+                {
+                    Id = record.ServiceId,
+                    Name = record.ServiceName,
+                    Url = record.ServiceUrl
+                },
+                Passwords = [
+                    new Password
+                    {
+                        Value = record.CurrentPassword,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    }
+                ]
+            };
+
+            credentials.Add(credential);
+        }
+
+        return credentials;
     }
 }
 

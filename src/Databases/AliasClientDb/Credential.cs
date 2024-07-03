@@ -44,12 +44,12 @@ public class Credential
     /// <summary>
     /// Gets or sets the password objects.
     /// </summary>
-    public virtual ICollection<Password> Passwords { get; set; } = new List<Password>();
+    public virtual ICollection<Password> Passwords { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the attachment objects.
     /// </summary>
-    public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public virtual ICollection<Attachment> Attachments { get; set; } = [];
 
     /// <summary>
     /// Gets or sets created timestamp.

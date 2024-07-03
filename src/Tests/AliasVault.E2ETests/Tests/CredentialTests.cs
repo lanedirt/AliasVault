@@ -11,6 +11,7 @@ namespace AliasVault.E2ETests.Tests;
 /// End-to-end tests for the credential management.
 /// </summary>
 [TestFixture]
+[Parallelizable(ParallelScope.Self)]
 public class CredentialTests : PlaywrightTest
 {
     private static readonly Random Random = new();

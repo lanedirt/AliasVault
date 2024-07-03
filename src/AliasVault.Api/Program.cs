@@ -9,7 +9,7 @@ using System.Data.Common;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Jwt;
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

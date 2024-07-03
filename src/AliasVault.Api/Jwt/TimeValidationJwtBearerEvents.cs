@@ -7,7 +7,7 @@
 
 namespace AliasVault.Api.Jwt;
 
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.JsonWebTokens;
 

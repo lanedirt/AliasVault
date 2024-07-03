@@ -68,3 +68,21 @@ dotnet tool install --global Microsoft.Playwright.CLI
 # Note: make sure the E2E test project has been built at least once so the bin dir exists.
 pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install
 ```
+
+### 7. Create AliasVault.WebApp appsettings.Development.json
+The WASM app supports a development specific appsettings.json file. This appsettings file is optional but can override various options to make debugging easier.
+
+
+1. Copy `wwwroot/appsettings.json` to `wwwroot/appsettings.Development.json`
+
+Here is an example file with the various options explained:
+
+```
+{
+    "ApiUrl": "http://localhost:5092",
+    "UseDebugEncryptionKey": "true"
+}
+```
+
+- UseDebugEncryptionKey
+    - This setting will use a static encryption key so that if you login as a user you can refresh the page without needing to unlock the database again. This speeds up development when changing things in the WebApp WASM project. Note: the project needs to be run in "Development" mode for this setting to be used.

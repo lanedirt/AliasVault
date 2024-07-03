@@ -11,7 +11,7 @@ using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
-using AliasVault.WebApp.Auth.Services;
+using AliasVault.WebApp.Services.Auth;
 using Microsoft.Data.Sqlite;
 using Microsoft.JSInterop;
 

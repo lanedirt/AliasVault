@@ -125,5 +125,5 @@ public class Alias
     /// <summary>
     /// Gets or sets the credential objects.
     /// </summary>
-    public virtual ICollection<Credential> Credentials { get; set; } = new List<Credential>();
+    public virtual ICollection<Credential> Credentials { get; set; } = [];
 }
