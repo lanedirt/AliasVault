@@ -52,17 +52,17 @@ public class PlaywrightTest
     /// <summary>
     /// Gets the Playwright browser instance.
     /// </summary>
-    protected IBrowser Browser { get; private set; }
+    protected IBrowser Browser { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Playwright browser context.
     /// </summary>
-    protected IBrowserContext Context { get; private set; }
+    protected IBrowserContext Context { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Playwright page.
     /// </summary>
-    protected IPage Page { get; private set; }
+    protected IPage Page { get; private set; } = null!;
 
     /// <summary>
     /// Gets the input helper for Playwright tests.
@@ -76,65 +76,30 @@ public class PlaywrightTest
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Set the base port for the test starting at 5600. Increase the port by 2 for each test running
-        // in parallel to avoid port conflicts.
-        var apiPort = 0;
-        var appPort = 0;
-        lock (_lock)
+        const int maxRetries = 10;
+        int currentRetry = 0;
+
+        while (currentRetry < maxRetries)
         {
-            apiPort = Interlocked.Increment(ref _currentPort);
-            appPort = Interlocked.Increment(ref _currentPort);
+            try
+            {
+                await SetupEnvironment();
+                await Register();
+                return;
+            }
+            catch (Exception ex)
+            {
+                currentRetry++;
+                Console.WriteLine($"Attempt {currentRetry} failed: {ex.Message}");
+                if (currentRetry >= maxRetries)
+                {
+                    Console.WriteLine($"All {maxRetries} attempts failed. Last exception: {ex}");
+                    throw;
+                }
+
+                await Task.Delay(500);
+            }
         }
-
-        AppBaseUrl = "http://localhost:" + appPort + "/";
-
-        // Start WebAPI in-memory.
-        _apiFactory.HostUrl = "http://localhost:" + apiPort;
-        _apiFactory.CreateDefaultClient();
-
-        // Start Blazor WASM app out-of-process.
-        _wasmFactory.HostUrl = "http://localhost:" + appPort;
-        _wasmFactory.CreateDefaultClient();
-
-        // Set Playwright headless mode true if not in debug mode.
-        bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
-        bool headless = !isDebugMode;
-
-        var playwright = await Playwright.CreateAsync();
-        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
-        Context = await Browser.NewContextAsync();
-
-        // Intercept Blazor WASM app requests to override appsettings.json
-        await Context.RouteAsync("**/appsettings.json", async route =>
-        {
-            var response = new
-            {
-                ApiUrl = "http://localhost:" + apiPort,
-            };
-            await route.FulfillAsync(new RouteFulfillOptions
-            {
-                ContentType = "application/json",
-                Body = System.Text.Json.JsonSerializer.Serialize(response),
-            });
-        });
-        await Context.RouteAsync("**/appsettings.Development.json", async route =>
-        {
-            var response = new
-            {
-                ApiUrl = "http://localhost:" + apiPort,
-            };
-            await route.FulfillAsync(new RouteFulfillOptions
-            {
-                ContentType = "application/json",
-                Body = System.Text.Json.JsonSerializer.Serialize(response),
-            });
-        });
-
-        Page = await Context.NewPageAsync();
-        InputHelper = new(Page);
-
-        // Register a new account via the UI
-        await Register();
     }
 
     /// <summary>
@@ -295,5 +260,75 @@ public class PlaywrightTest
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
         await WaitForURLAsync(AppBaseUrl);
+    }
+
+    private async Task SetupEnvironment()
+    {
+        // Set the base port for the test starting at 5600. Increase the port by 2 for each test running
+        // in parallel to avoid port conflicts.
+        var apiPort = 0;
+        var appPort = 0;
+        lock (_lock)
+        {
+            apiPort = Interlocked.Increment(ref _currentPort);
+            appPort = Interlocked.Increment(ref _currentPort);
+        }
+
+        AppBaseUrl = "http://localhost:" + appPort + "/";
+
+        // Start WebAPI in-memory.
+        _apiFactory.HostUrl = "http://localhost:" + apiPort;
+        var apiClient = _apiFactory.CreateDefaultClient();
+
+        // Start Blazor WASM app out-of-process.
+        _wasmFactory.HostUrl = "http://localhost:" + appPort;
+        var wasmClient = _wasmFactory.CreateDefaultClient();
+
+        // Set Playwright headless mode true if not in debug mode.
+        bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
+        bool headless = !isDebugMode;
+
+        var playwright = await Playwright.CreateAsync();
+        Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
+        Context = await Browser.NewContextAsync();
+
+        // Intercept Blazor WASM app requests to override appsettings.json
+        await Context.RouteAsync(
+            "**/appsettings.json",
+            async route =>
+            {
+                var response = new
+                {
+                    ApiUrl = "http://localhost:" + apiPort,
+                };
+                await route.FulfillAsync(
+                    new RouteFulfillOptions
+                    {
+                        ContentType = "application/json",
+                        Body = System.Text.Json.JsonSerializer.Serialize(response),
+                    });
+            });
+        await Context.RouteAsync(
+            "**/appsettings.Development.json",
+            async route =>
+            {
+                var response = new
+                {
+                    ApiUrl = "http://localhost:" + apiPort,
+                };
+                await route.FulfillAsync(
+                    new RouteFulfillOptions
+                    {
+                        ContentType = "application/json",
+                        Body = System.Text.Json.JsonSerializer.Serialize(response),
+                    });
+            });
+
+        Page = await Context.NewPageAsync();
+        InputHelper = new(Page);
+
+        // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
+        await Page.GotoAsync(AppBaseUrl);
+        await WaitForURLAsync("**/user/login");
     }
 }

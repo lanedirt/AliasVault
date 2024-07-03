@@ -112,6 +112,10 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
         var host = builder.Build();
         host.Start();
 
+        // This delay prevents "ERR_CONNECTION_REFUSED" errors
+        // which happened like 1 out of 10 times when running tests.
+        Thread.Sleep(50);
+
         return dummyHost;
     }
 }
