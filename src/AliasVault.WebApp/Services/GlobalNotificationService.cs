@@ -22,12 +22,12 @@ public class GlobalNotificationService
     /// <summary>
     /// Gets or sets success messages that should be displayed to the user.
     /// </summary>
-    protected List<string> SuccessMessages { get; set; } = new();
+    protected List<string> SuccessMessages { get; set; } = [];
 
     /// <summary>
     /// Gets or sets error messages that should be displayed to the user.
     /// </summary>
-    protected List<string> ErrorMessages { get; set; } = new();
+    protected List<string> ErrorMessages { get; set; } = [];
 
     /// <summary>
     /// Adds a success message to the list of messages that should be displayed to the user.

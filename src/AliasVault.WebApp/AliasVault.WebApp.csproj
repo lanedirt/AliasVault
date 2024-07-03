@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
     <PropertyGroup>
         <RootNamespace>AliasVault.WebApp</RootNamespace>
         <TargetFramework>net8.0</TargetFramework>
@@ -60,6 +60,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <Content Update="wwwroot\appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

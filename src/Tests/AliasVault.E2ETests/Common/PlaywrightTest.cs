@@ -7,7 +7,7 @@
 
 namespace AliasVault.E2ETests.Common;
 
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Microsoft.Playwright;
 
 /// <summary>
@@ -16,7 +16,7 @@ using Microsoft.Playwright;
 public class PlaywrightTest
 {
     private static readonly object _lock = new();
-    private static int _basePort = 5600;
+    private static readonly int _basePort = 5600;
     private static int _currentPort = _basePort;
 
     /// <summary>
@@ -106,6 +106,18 @@ public class PlaywrightTest
 
         // Intercept Blazor WASM app requests to override appsettings.json
         await Context.RouteAsync("**/appsettings.json", async route =>
+        {
+            var response = new
+            {
+                ApiUrl = "http://localhost:" + apiPort,
+            };
+            await route.FulfillAsync(new RouteFulfillOptions
+            {
+                ContentType = "application/json",
+                Body = System.Text.Json.JsonSerializer.Serialize(response),
+            });
+        });
+        await Context.RouteAsync("**/appsettings.Development.json", async route =>
         {
             var response = new
             {
@@ -252,7 +264,7 @@ public class PlaywrightTest
     private async Task Register()
     {
         // Generate random email and password
-        TestUserEmail = $"{Guid.NewGuid().ToString()}@test.com";
+        TestUserEmail = $"{Guid.NewGuid()}@test.com";
         TestUserPassword = Guid.NewGuid().ToString();
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.

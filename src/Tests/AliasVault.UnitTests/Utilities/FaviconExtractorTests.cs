@@ -13,14 +13,6 @@ namespace AliasVault.Tests.Utilities;
 public class FaviconExtractorTests
 {
     /// <summary>
-    /// Common setup for all tests.
-    /// </summary>
-    [SetUp]
-    public void Setup()
-    {
-    }
-
-    /// <summary>
     /// Test extracting a favicon from a known website.
     /// </summary>
     /// <returns>Task.</returns>

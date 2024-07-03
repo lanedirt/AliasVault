@@ -10,7 +10,7 @@ namespace AliasVault.Api.Controllers;
 using AliasServerDb;
 using AliasVault.Api.Vault;
 using AliasVault.Api.Vault.RetentionRules;
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

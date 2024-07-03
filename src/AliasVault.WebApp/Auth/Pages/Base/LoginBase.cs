@@ -11,9 +11,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
-using AliasVault.WebApp.Auth.Services;
-using AliasVault.WebApp.Services;
-using AliasVault.WebApp.Services.Database;
+using AliasVault.WebApp.Services.Auth;
 using Blazored.LocalStorage;
 using Cryptography;
 using Microsoft.AspNetCore.Components;
@@ -116,10 +114,10 @@ public class LoginBase : OwningComponentBase
         var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
         if (loginResponse == null)
         {
-            return new List<string>
-            {
+            return
+            [
                 "An error occurred while processing the login request.",
-            };
+            ];
         }
 
         // 3. Client derives shared session key.
@@ -147,10 +145,10 @@ public class LoginBase : OwningComponentBase
         var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
         if (validateLoginResponse == null)
         {
-            return new List<string>
-            {
+            return
+            [
                 "An error occurred while processing the login request.",
-            };
+            ];
         }
 
         // 5. Client verifies proof.
@@ -178,6 +176,6 @@ public class LoginBase : OwningComponentBase
             NavigationManager.NavigateTo("/");
         }
 
-        return new List<string>();
+        return [];
     }
 }

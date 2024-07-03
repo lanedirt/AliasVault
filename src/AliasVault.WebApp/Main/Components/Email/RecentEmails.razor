@@ -1,0 +1,90 @@
+﻿@using AliasVault.WebApp.Main.Models.Spamok
+@inherits ComponentBase
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="flex justify-between">
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">Email</h3>
+    <button @onclick="LoadRecentEmailsAsync" type="button" class="text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-blue-500">
+        Refresh
+    </button>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else if (MailboxEmails.Count == 0)
+{
+    <div>No emails found.</div>
+}
+else
+{
+    <div class="flex flex-col mt-6">
+        <div class="overflow-x-auto rounded-lg">
+            <div class="inline-block min-w-full align-middle">
+                <div class="overflow-hidden shadow sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
+                                Subject
+                            </th>
+                            <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
+                                Date &amp; Time
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800">
+                        @foreach (var mail in MailboxEmails)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                                    <a target="_blank" href="https://spamok.com/@mail.ToLocal/@mail.Id">@(mail.Subject.Substring(0,mail.Subject.Length > 30 ? 30 : mail.Subject.Length))...</a>
+                                </td>
+                                <td class="p-4 text-sm font-normal text-gray-500 whitespace-nowrap dark:text-gray-400">
+                                    <a target="_blank" href="https://spamok.com/@mail.ToLocal/@mail.Id">@mail.DateSystem</a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string EmailPrefix { get; set; } = string.Empty;
+    [Parameter]
+    public List<MailboxEmailApiModel> MailboxEmails { get; set; } = new List<MailboxEmailApiModel>();
+    public bool IsLoading { get; set; } = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadRecentEmailsAsync();
+        }
+    }
+
+    private async Task LoadRecentEmailsAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        var client = HttpClientFactory.CreateClient("EmailClient");
+        MailboxApiModel? mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{EmailPrefix}");
+
+        if (mailbox?.Mails != null)
+        {
+            MailboxEmails = mailbox.Mails;
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

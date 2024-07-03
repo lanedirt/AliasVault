@@ -9,7 +9,7 @@ namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
 using AliasServerDb;
-using AliasVault.Shared.Providers;
+using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;

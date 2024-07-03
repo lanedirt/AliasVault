@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using AliasClientDb;
 using AliasVault.Shared.Models;
 using AliasVault.WebApp.Models;
-using AliasVault.WebApp.Services.Database;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
 
@@ -58,8 +57,8 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Notes = loginObject.Notes,
-            Username = loginObject.Alias.NickName ?? string.Empty, // TODO: refactor to have actual username in UI.
-            Alias = new AliasClientDb.Alias()
+            Username = loginObject.Username,
+            Alias = new Alias()
             {
                 NickName = loginObject.Alias.NickName,
                 FirstName = loginObject.Alias.FirstName,
@@ -78,7 +77,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             },
-            Service = new AliasClientDb.Service()
+            Service = new Service()
             {
                 Name = loginObject.Service.Name,
                 Url = loginObject.Service.Url,
@@ -100,15 +99,13 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
 
         await context.Credentials.AddAsync(login);
 
-        await context.SaveChangesAsync();
-        Console.WriteLine("Inserted new alias without password.");
-
         // Add password.
         login.Passwords.Add(loginObject.Passwords.First());
 
-        await dbService.SaveDatabaseAsync();
-
-        Console.WriteLine("Password added.");
+        if (saveToDb)
+        {
+            await dbService.SaveDatabaseAsync();
+        }
 
         return login.Id;
     }
@@ -134,6 +131,8 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
 
         login.UpdatedAt = DateTime.UtcNow;
         login.Notes = loginObject.Notes;
+        login.Username = loginObject.Username;
+
         login.Alias.NickName = loginObject.Alias.NickName;
         login.Alias.FirstName = loginObject.Alias.FirstName;
         login.Alias.LastName = loginObject.Alias.LastName;
