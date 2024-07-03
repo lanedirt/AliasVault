@@ -1,0 +1,61 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">Attachments</h3>
+    @if (Attachments.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Filename</th>
+                        <th scope="col" class="px-6 py-3">Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var attachment in Attachments)
+                    {
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <span @onclick="() => DownloadAttachment(attachment)" class="text-primary cursor-pointer">@attachment.Filename</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @attachment.CreatedAt.ToLocalTime().ToString("g")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500 dark:text-gray-400">No attachments available.</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+
+    private async Task DownloadAttachment(Attachment attachment)
+    {
+        try
+        {
+            if (attachment.Blob != null)
+            {
+                await JSRuntime.InvokeVoidAsync("downloadFileFromStream", attachment.Filename, attachment.Blob);
+            }
+            else
+            {
+                // Handle the case where the attachment or its content is not found
+                await Console.Error.WriteLineAsync($"Attachment not found or has no content: {attachment.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle any exceptions that occur during the download process
+            await Console.Error.WriteLineAsync($"Error downloading attachment: {ex.Message}");
+        }
+    }
+}

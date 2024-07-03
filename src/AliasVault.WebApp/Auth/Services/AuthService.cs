@@ -108,6 +108,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     public string GetEncryptionKeyAsBase64Async()
     {
         // Enable this line for debugging to skip unlock screen.
+        // return "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB=";
         return Convert.ToBase64String(GetEncryptionKeyAsync());
     }
 

@@ -197,6 +197,55 @@ public class PlaywrightTest
     }
 
     /// <summary>
+    /// Refresh the page which will lock the vault, then enter password to unlock the vault again.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    protected async Task RefreshPageAndUnlockVault()
+    {
+        // Hard refresh the page.
+        await Page.ReloadAsync();
+
+        // Check if the unlock page is displayed.
+        await WaitForURLAsync("**/unlock", "unlock");
+
+        // Check if by entering password the unlock page is replaced by the alias listing page.
+        await InputHelper.FillInputFields(new Dictionary<string, string>
+        {
+            { "password", TestUserPassword },
+        });
+
+        var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
+        await submitButton.ClickAsync();
+    }
+
+    /// <summary>
+    /// Create new credential entry.
+    /// </summary>
+    /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
+    /// <returns>Async task.</returns>
+    protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null)
+    {
+        await NavigateUsingBlazorRouter("add-credentials");
+        await WaitForURLAsync("**/add-credentials", "Add credentials");
+
+        // Check if a button with text "Generate Random Identity" appears
+        var generateButton = Page.Locator("text=Generate Random Identity");
+        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
+
+        // Fill all input fields with specified values and remaining empty fields with random data.
+        await InputHelper.FillInputFields(formValues);
+        await InputHelper.FillEmptyInputFieldsWithRandom();
+
+        var submitButton = Page.Locator("text=Save Credentials").First;
+        await submitButton.ClickAsync();
+        await WaitForURLAsync("**/credentials/**", "Login credentials");
+
+        // Check if the credential was created
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Login credentials"), "Credential not created.");
+    }
+
+    /// <summary>
     /// Register a new random account.
     /// </summary>
     /// <returns>Async task.</returns>

@@ -7,7 +7,12 @@
 
 namespace AliasVault.WebApp.Services;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using AliasClientDb;
 using AliasVault.Shared.Models;
 using AliasVault.WebApp.Models;
@@ -88,6 +93,11 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             Value = loginObject.Passwords.First().Value,
         });
 
+        foreach (var attachment in loginObject.Attachments)
+        {
+            login.Attachments.Add(attachment);
+        }
+
         await context.Credentials.AddAsync(login);
 
         await context.SaveChangesAsync();
@@ -116,12 +126,11 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         await ExtractFaviconAsync(loginObject);
 
         // Get the existing entry.
-        var login = await context.Credentials
-            .Include(x => x.Alias)
-            .Include(x => x.Service)
-            .Include(x => x.Passwords)
-            .Where(x => x.Id == loginObject.Id)
-            .FirstAsync();
+        var login = await LoadEntryAsync(loginObject.Id);
+        if (login is null)
+        {
+            throw new InvalidOperationException("Login object not found.");
+        }
 
         login.UpdatedAt = DateTime.UtcNow;
         login.Notes = loginObject.Notes;
@@ -147,6 +156,29 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         login.Service.Logo = loginObject.Service.Logo;
         login.Service.UpdatedAt = DateTime.UtcNow;
 
+        // Remove attachments that are no longer in the list
+        var existingAttachments = login.Attachments.ToList();
+        foreach (var existingAttachment in existingAttachments)
+        {
+            if (!loginObject.Attachments.Any(a => a.Id != Guid.Empty && a.Id == existingAttachment.Id))
+            {
+                context.Entry(existingAttachment).State = EntityState.Deleted;
+            }
+        }
+
+        // Add new attachments
+        foreach (var attachment in loginObject.Attachments)
+        {
+            if (!login.Attachments.Any(a => attachment.Id != Guid.Empty && a.Id == attachment.Id))
+            {
+                login.Attachments.Add(attachment);
+            }
+            else
+            {
+                context.Entry(attachment).State = EntityState.Modified;
+            }
+        }
+
         await dbService.SaveDatabaseAsync();
 
         return login.Id;
@@ -165,6 +197,8 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         .Include(x => x.Passwords)
         .Include(x => x.Alias)
         .Include(x => x.Service)
+        .Include(x => x.Attachments)
+        .AsSplitQuery()
         .Where(x => x.Id == loginId)
         .FirstOrDefaultAsync();
 
@@ -183,6 +217,8 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         .Include(x => x.Passwords)
         .Include(x => x.Alias)
         .Include(x => x.Service)
+        .Include(x => x.Attachments)
+        .AsSplitQuery()
         .ToListAsync();
 
         return loginObject;
@@ -200,6 +236,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         return await context.Credentials
             .Include(x => x.Alias)
             .Include(x => x.Service)
+            .AsSplitQuery()
             .Select(x => new CredentialListEntry
             {
                 Id = x.Id,

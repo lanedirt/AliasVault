@@ -98,6 +98,12 @@ public class PlaywrightInputHelper(IPage page)
                 continue;
             }
 
+            // If file, skip.
+            if (inputType == "file")
+            {
+                continue;
+            }
+
             // Generate appropriate random data based on input type.
             string randomData = inputType switch
             {
