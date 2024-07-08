@@ -13,6 +13,7 @@ using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.WebApp.Services.Auth;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -72,22 +73,22 @@ public class DbService : IDisposable
             return;
         }
 
-        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+        _state.UpdateState(DbServiceState.DatabaseStatus.LoadingFromServer);
 
         // Ensure the in-memory database representation is created and has the necessary tables.
-        await _dbContext.Database.EnsureCreatedAsync();
+        await _dbContext.Database.MigrateAsync();
 
         // Attempt to fill the local database with a previously saved database stored on the server.
         var loaded = await LoadDatabaseFromServerAsync();
         if (loaded)
         {
             _isSuccessfullyInitialized = true;
-            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
             Console.WriteLine("Database succesfully loaded from server.");
         }
         else
         {
-            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
+            _state.UpdateState(DbServiceState.DatabaseStatus.DecryptionFailed);
             Console.WriteLine("Failed to load database from server.");
         }
     }
@@ -122,7 +123,7 @@ public class DbService : IDisposable
     public async Task SaveDatabaseAsync()
     {
         // Set the initial state of the database service.
-        _state.UpdateState(DbServiceState.DatabaseStatus.Saving);
+        _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
 
         // Save the actual dbContext.
         await _dbContext.SaveChangesAsync();
@@ -137,12 +138,12 @@ public class DbService : IDisposable
         if (success)
         {
             Console.WriteLine("Database succesfully saved to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
         else
         {
             Console.WriteLine("Failed to save database to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
+            _state.UpdateState(DbServiceState.DatabaseStatus.OperationError);
         }
     }
 
@@ -234,7 +235,7 @@ public class DbService : IDisposable
 
         using (var command = _sqlConnection.CreateCommand())
         {
-            // Drop all tables in the original database
+            // Empty all tables in the original database
             command.CommandText = @"
                 SELECT 'DELETE FROM ' || name || ';'
                 FROM sqlite_master

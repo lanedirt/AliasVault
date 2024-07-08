@@ -30,24 +30,29 @@ public class DbServiceState
         Uninitialized,
 
         /// <summary>
-        /// Database is initialized but no task is currently in progress.
+        /// Database failed to decrypt. No data is accessible.
         /// </summary>
-        Initialized,
+        DecryptionFailed,
+
+        /// <summary>
+        /// Database is ready but no task is currently in progress.
+        /// </summary>
+        Ready,
 
         /// <summary>
         /// Database is loading from server.
         /// </summary>
-        Loading,
+        LoadingFromServer,
 
         /// <summary>
         /// Database is saving to server.
         /// </summary>
-        Saving,
+        SavingToServer,
 
         /// <summary>
         /// An error occurred during a database operation.
         /// </summary>
-        Error,
+        OperationError,
     }
 
     /// <summary>

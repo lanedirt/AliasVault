@@ -34,13 +34,13 @@ else
     private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
     {
         await InvokeAsync(StateHasChanged);
-        if (newState.Status == DbServiceState.DatabaseStatus.Saving)
+        if (newState.Status == DbServiceState.DatabaseStatus.SavingToServer)
         {
             // Show loading indicator for at least 0.5 seconds even if the save operation is faster.
             Message = "Saving...";
             await ShowLoadingIndicatorAsync();
         }
-        else if (newState.Status == DbServiceState.DatabaseStatus.Loading)
+        else if (newState.Status == DbServiceState.DatabaseStatus.LoadingFromServer)
         {
             Message = "Loading...";
             await ShowLoadingIndicatorAsync();

@@ -2,9 +2,7 @@
 @implements IDisposable
 @inject DbService DbService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Components.Authorization
-@using AliasVault.WebApp.Providers
+@using AliasVault.WebApp.Main.Layout.StatusMessages
 
 <CascadingAuthenticationState>
     <AuthorizeView>
@@ -19,20 +17,13 @@
                         </main>
                         <Footer />
                     }
+                    else if(IsDbDecryptionError)
+                    {
+                        <ErrorVaultDecrypt />
+                    }
                     else
                     {
-                        <div class="fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center">
-                            <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
-                                <div class="text-center">
-                                    <svg class="mx-auto animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Vault decryption in progress</h2>
-                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Please wait while your vault is initialized. This may take a moment.</p>
-                                </div>
-                            </div>
-                        </div>
+                        <VaultDecryptionProgress />
                     }
                 </div>
             </div>
@@ -47,6 +38,7 @@
 
 @code {
     private bool IsDbInitialized { get; set; } = false;
+    private bool IsDbDecryptionError { get; set; } = false;
     private const int MinimumLoadingTimeMs = 800;
 
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
@@ -54,6 +46,10 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        // Reset local state
+        IsDbInitialized = false;
+        IsDbDecryptionError = false;
 
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
@@ -90,9 +86,14 @@
         {
             await InitializeDatabaseWithProgress();
         }
-        else if (currentState.Status == DbServiceState.DatabaseStatus.Initialized)
+        else if (currentState.Status == DbServiceState.DatabaseStatus.Ready)
         {
             IsDbInitialized = true;
+            StateHasChanged();
+        }
+        else if (currentState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
+        {
+            IsDbDecryptionError = true;
             StateHasChanged();
         }
     }
@@ -103,9 +104,13 @@
         {
             await InitializeDatabaseWithProgress();
         }
-        else if (newState.Status == DbServiceState.DatabaseStatus.Initialized)
+        else if (newState.Status == DbServiceState.DatabaseStatus.Ready)
         {
             IsDbInitialized = true;
+        }
+        else if (newState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
+        {
+            IsDbDecryptionError = true;
         }
         StateHasChanged();
     }
@@ -127,7 +132,7 @@
             await Task.Delay(MinimumLoadingTimeMs - elapsedMs);
         }
 
-        IsDbInitialized = true;
+        await CheckAndInitializeDatabase();
         StateHasChanged();
     }
 
