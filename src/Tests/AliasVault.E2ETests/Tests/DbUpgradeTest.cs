@@ -58,5 +58,10 @@ public class DbUpgradeTest : PlaywrightTest
         // Wait for two things: either the homepage to show with credentials OR the
         // vault upgrade step to show.
         await WaitForURLAsync("**/sync", "Vault needs to be upgraded");
+
+        var submitButton = Page.Locator("text=Start upgrade process").First;
+        await submitButton.ClickAsync();
+
+        await WaitForURLAsync("**/", "Test credential 1");
     }
 }
