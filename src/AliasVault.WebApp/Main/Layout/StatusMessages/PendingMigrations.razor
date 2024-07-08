@@ -1,0 +1,65 @@
+﻿@inject DbService DbService
+@inject GlobalNotificationService GlobalNotificationService
+
+<div class="fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+        <div class="text-center">
+            <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Vault needs to be upgraded.</h2>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">AliasVault has been updated which requires your vault to be upgraded in order to be compatible with the new datastructure.
+                This upgrade should only take a few seconds.</p>
+
+            <div class="mt-4">
+                @if (ErrorMessage.Length > 0)
+                {
+                    <AlertMessageError Message="@ErrorMessage" />
+                }
+
+                @if (IsPendingMigrations)
+                {
+                    <svg class="mx-auto animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                }
+                else
+                {
+                    <button @onclick="MigrateDatabase" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                        Start upgrade process
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsPendingMigrations { get; set; } = false;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private async Task MigrateDatabase()
+    {
+        // Show loading indicator
+        IsPendingMigrations = true;
+        ErrorMessage = String.Empty;
+        StateHasChanged();
+
+        // Simulate a delay.
+        await Task.Delay(1000);
+
+        // Migrate the database
+        if (await DbService.MigrateDatabaseAsync())
+        {
+            // Migration successful
+            GlobalNotificationService.AddSuccessMessage("Database upgrade successful.", true);
+        }
+        else
+        {
+            // Migration failed
+            ErrorMessage = "Database upgrade failed. Please try again or contact support.";
+        }
+
+        // Reset local state
+        IsPendingMigrations = false;
+        StateHasChanged();
+    }
+}

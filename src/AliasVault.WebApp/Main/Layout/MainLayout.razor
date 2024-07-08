@@ -21,6 +21,10 @@
                     {
                         <ErrorVaultDecrypt />
                     }
+                    else if(IsPendingMigrations)
+                    {
+                        <PendingMigrations />
+                    }
                     else
                     {
                         <VaultDecryptionProgress />
@@ -39,6 +43,7 @@
 @code {
     private bool IsDbInitialized { get; set; } = false;
     private bool IsDbDecryptionError { get; set; } = false;
+    private bool IsPendingMigrations { get; set; } = false;
     private const int MinimumLoadingTimeMs = 800;
 
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
@@ -50,6 +55,7 @@
         // Reset local state
         IsDbInitialized = false;
         IsDbDecryptionError = false;
+        IsPendingMigrations = false;
 
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
@@ -96,6 +102,11 @@
             IsDbDecryptionError = true;
             StateHasChanged();
         }
+        else if (currentState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
+        {
+            IsPendingMigrations = true;
+            StateHasChanged();
+        }
     }
 
     private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
@@ -111,6 +122,10 @@
         else if (newState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
         {
             IsDbDecryptionError = true;
+        }
+        else if (newState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
+        {
+            IsPendingMigrations = true;
         }
         StateHasChanged();
     }

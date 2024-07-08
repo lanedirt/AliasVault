@@ -35,6 +35,11 @@ public class DbServiceState
         DecryptionFailed,
 
         /// <summary>
+        /// Database has been decrypted but has pending migrations and needs to be updated.
+        /// </summary>
+        PendingMigrations,
+
+        /// <summary>
         /// Database is ready but no task is currently in progress.
         /// </summary>
         Ready,

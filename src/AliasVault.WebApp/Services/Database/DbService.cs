@@ -82,9 +82,19 @@ public class DbService : IDisposable
         var loaded = await LoadDatabaseFromServerAsync();
         if (loaded)
         {
-            _isSuccessfullyInitialized = true;
-            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
-            Console.WriteLine("Database succesfully loaded from server.");
+            Console.WriteLine("Database successfully loaded from server.");
+
+            // Check if database is up to date with migrations.
+            var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+            }
+            else
+            {
+                _isSuccessfullyInitialized = true;
+                _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+            }
         }
         else
         {
@@ -175,6 +185,27 @@ public class DbService : IDisposable
     }
 
     /// <summary>
+    /// Migrate the database structure to the latest version.
+    /// </summary>
+    /// <returns>Bool which indicates if migration was succesful.</returns>
+    public async Task<bool> MigrateDatabaseAsync()
+    {
+        try
+        {
+            await _dbContext.Database.MigrateAsync();
+            _isSuccessfullyInitialized = true;
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Clears the database connection and creates a new one so that the database is empty.
     /// </summary>
     /// <returns>SqliteConnection and AliasClientDbContext.</returns>
@@ -233,25 +264,25 @@ public class DbService : IDisposable
         var tempFileName = Path.GetRandomFileName();
         await File.WriteAllBytesAsync(tempFileName, bytes);
 
-        using (var command = _sqlConnection.CreateCommand())
+        /*using (var command = _sqlConnection.CreateCommand())
         {
             // Empty all tables in the original database
             command.CommandText = @"
                 SELECT 'DELETE FROM ' || name || ';'
                 FROM sqlite_master
                 WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
-            var dropTableCommands = new List<string>();
+            var emptyTableCommands = new List<string>();
             using (var reader = await command.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
-                    dropTableCommands.Add(reader.GetString(0));
+                    emptyTableCommands.Add(reader.GetString(0));
                 }
             }
 
-            foreach (var dropTableCommand in dropTableCommands)
+            foreach (var emptyTableCommand in emptyTableCommands)
             {
-                command.CommandText = dropTableCommand;
+                command.CommandText = emptyTableCommand;
                 await command.ExecuteNonQueryAsync();
             }
 
@@ -280,6 +311,98 @@ public class DbService : IDisposable
             }
 
             command.CommandText = "DETACH DATABASE importDb";
+            await command.ExecuteNonQueryAsync();
+        }
+        */
+
+        using (var command = _sqlConnection.CreateCommand())
+        {
+            Console.WriteLine("Dropping main tables..");
+
+            // Disable foreign key constraints
+            command.CommandText = "PRAGMA foreign_keys = OFF;";
+            await command.ExecuteNonQueryAsync();
+
+            // Drop all tables in the original database
+            command.CommandText = @"
+                SELECT 'DROP TABLE IF EXISTS ' || name || ';'
+                FROM sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var dropTableCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    dropTableCommands.Add(reader.GetString(0));
+                }
+            }
+
+            foreach (var dropTableCommand in dropTableCommands)
+            {
+                Console.WriteLine("Dropping table..");
+                Console.WriteLine("Drop command: " + dropTableCommand);
+                command.CommandText = dropTableCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Attach the imported database
+            command.CommandText = "ATTACH DATABASE @fileName AS importDb";
+            command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
+            await command.ExecuteNonQueryAsync();
+
+            Console.WriteLine("Make create table statements from import db..");
+
+            // Get CREATE TABLE statements from the imported database
+            command.CommandText = @"
+                SELECT sql
+                FROM importDb.sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var createTableCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    createTableCommands.Add(reader.GetString(0));
+                }
+            }
+
+            // Create tables in the main database
+            Console.WriteLine("Create tables in main db..");
+
+            foreach (var createTableCommand in createTableCommands)
+            {
+                command.CommandText = createTableCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Copy data from imported database to main database
+            Console.WriteLine("Copy from import to main db.");
+
+            command.CommandText = @"
+                SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
+                FROM importDb.sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var tableInsertCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    tableInsertCommands.Add(reader.GetString(0));
+                }
+            }
+
+            foreach (var tableInsertCommand in tableInsertCommands)
+            {
+                command.CommandText = tableInsertCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Detach the imported database
+            command.CommandText = "DETACH DATABASE importDb";
+            await command.ExecuteNonQueryAsync();
+
+            // Re-enable foreign key constraints
+            command.CommandText = "PRAGMA foreign_keys = ON;";
             await command.ExecuteNonQueryAsync();
         }
 
