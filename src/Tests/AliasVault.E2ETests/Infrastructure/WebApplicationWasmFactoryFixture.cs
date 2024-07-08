@@ -41,7 +41,7 @@ public class WebApplicationWasmFactoryFixture<TEntryPoint> : WebApplicationFacto
 
         // This delay prevents "ERR_CONNECTION_REFUSED" errors
         // which happened like 1 out of 10 times when running tests.
-        Thread.Sleep(50);
+        Thread.Sleep(100);
 
         return dummyHost;
     }
