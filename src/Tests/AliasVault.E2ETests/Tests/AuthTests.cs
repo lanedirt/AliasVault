@@ -91,7 +91,7 @@ public class AuthTests : PlaywrightTest
         // Check if we get redirected when clicking on the login button.
         var loginButton = Page.Locator("button[type='submit']");
         await loginButton.ClickAsync();
-        await WaitForURLAsync(AppBaseUrl);
+        await WaitForURLAsync(AppBaseUrl, "Find all of your credentials below");
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");

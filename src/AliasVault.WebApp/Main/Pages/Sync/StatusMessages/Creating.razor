@@ -47,7 +47,7 @@
     private async Task MigrateDatabase()
     {
         // Simulate a delay.
-        await Task.Delay(3000);
+        await Task.Delay(1500);
 
         // Migrate the database
         if (await DbService.MigrateDatabaseAsync())
