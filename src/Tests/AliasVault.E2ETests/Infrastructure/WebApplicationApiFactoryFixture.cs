@@ -25,6 +25,16 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     where TEntryPoint : class
 {
     /// <summary>
+    /// The DbContext instance that is created for the test.
+    /// </summary>
+    private AliasServerDbContext? _dbContext;
+
+    /// <summary>
+    /// The DbConnection instance that is created for the test.
+    /// </summary>
+    private DbConnection? _dbConnection;
+
+    /// <summary>
     /// Gets or sets the URL the web application host will listen on.
     /// </summary>
     public string HostUrl { get; set; } = "https://localhost:5001";
@@ -33,6 +43,24 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// Gets the time provider instance for mutating the current time in tests.
     /// </summary>
     public TestTimeProvider TimeProvider { get; private set; } = new();
+
+    /// <summary>
+    /// Returns the DbContext instance for the test. This can be used to seed the database with test data.
+    /// </summary>
+    /// <returns>AliasServerDbContext instance.</returns>
+    public AliasServerDbContext GetDbContext()
+    {
+        if (_dbContext == null)
+        {
+            var options = new DbContextOptionsBuilder<AliasServerDbContext>()
+                .UseSqlite(_dbConnection!)
+                .Options;
+
+            _dbContext = new AliasServerDbContext(options);
+        }
+
+        return _dbContext;
+    }
 
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -88,10 +116,10 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
             // Create a new DbConnection and AliasServerDbContext with an in-memory database.
             services.AddSingleton<DbConnection>(container =>
             {
-                var connection = new SqliteConnection("DataSource=:memory:");
-                connection.Open();
+                _dbConnection = new SqliteConnection("DataSource=:memory:");
+                _dbConnection.Open();
 
-                return connection;
+                return _dbConnection;
             });
 
             services.AddDbContext<AliasServerDbContext>((container, options) =>

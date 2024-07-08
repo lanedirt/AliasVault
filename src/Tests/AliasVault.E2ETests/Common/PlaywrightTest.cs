@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Common;
 
+using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
 using Microsoft.Playwright;
 
@@ -42,12 +43,12 @@ public class PlaywrightTest
     /// <summary>
     /// Gets or sets random unique account email that is used for the test.
     /// </summary>
-    protected string TestUserEmail { get; set; } = string.Empty;
+    protected virtual string TestUserEmail { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets random unique account password that is used for the test.
     /// </summary>
-    protected string TestUserPassword { get; set; } = string.Empty;
+    protected virtual string TestUserPassword { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the Playwright browser instance.
@@ -68,6 +69,11 @@ public class PlaywrightTest
     /// Gets the input helper for Playwright tests.
     /// </summary>
     protected PlaywrightInputHelper InputHelper { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the db context for the WebAPI project.
+    /// </summary>
+    protected AliasServerDbContext ApiDbContext => _apiFactory.GetDbContext();
 
     /// <summary>
     /// One time setup for the Playwright test which runs before all tests in the class.
@@ -228,9 +234,11 @@ public class PlaywrightTest
     /// <returns>Async task.</returns>
     private async Task Register()
     {
-        // Generate random email and password
-        TestUserEmail = $"{Guid.NewGuid()}@test.com";
-        TestUserPassword = Guid.NewGuid().ToString();
+        // If email is not set by test explicitly, generate a random email.
+        TestUserEmail = TestUserEmail.Length > 0 ? TestUserEmail : $"{Guid.NewGuid()}@test.com";
+
+        // If password is not set by test explicitly, generate a random password.
+        TestUserPassword = TestUserPassword.Length > 0 ? TestUserPassword : Guid.NewGuid().ToString();
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
@@ -286,6 +294,7 @@ public class PlaywrightTest
         // Set Playwright headless mode true if not in debug mode.
         bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
         bool headless = !isDebugMode;
+        headless = false;
 
         var playwright = await Playwright.CreateAsync();
         Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
