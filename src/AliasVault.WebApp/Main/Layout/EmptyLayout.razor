@@ -1,0 +1,16 @@
+﻿@inherits LayoutComponentBase
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <main>
+                @Body
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <main>
+                @Body
+            </main>
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>

@@ -38,6 +38,12 @@ public class Vault
     public string VaultBlob { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the vault data model version.
+    /// </summary>
+    [StringLength(255)]
+    public string Version { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

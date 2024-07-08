@@ -16,11 +16,13 @@ public class Vault
     /// Initializes a new instance of the <see cref="Vault"/> class.
     /// </summary>
     /// <param name="blob">Blob.</param>
+    /// <param name="version">Version of the vault data model (migration).</param>
     /// <param name="createdAt">CreatedAt.</param>
     /// <param name="updatedAt">UpdatedAt.</param>
-    public Vault(string blob, DateTime createdAt, DateTime updatedAt)
+    public Vault(string blob, string version, DateTime createdAt, DateTime updatedAt)
     {
         Blob = blob;
+        Version = version;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
     }
@@ -29,6 +31,11 @@ public class Vault
     /// Gets or sets the vault blob.
     /// </summary>
     public string Blob { get; set; }
+
+    /// <summary>
+    /// Gets or sets the vault version.
+    /// </summary>
+    public string Version { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time of creation.

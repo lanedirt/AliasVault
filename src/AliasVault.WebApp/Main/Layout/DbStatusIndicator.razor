@@ -40,11 +40,6 @@ else
             Message = "Saving...";
             await ShowLoadingIndicatorAsync();
         }
-        else if (newState.Status == DbServiceState.DatabaseStatus.LoadingFromServer)
-        {
-            Message = "Loading...";
-            await ShowLoadingIndicatorAsync();
-        }
 
         LoadingIndicatorMessage = Message + " - " + newState.LastUpdated;
     }

@@ -91,6 +91,19 @@ public class MainBase : OwningComponentBase
                 await Task.Delay(200);
             }
         }
+
+        // Check if DB is initialized, if not, redirect to setup page.
+        if (!DbService.GetState().CurrentState.IsInitialized())
+        {
+            var currentUrl = NavigationManager.Uri;
+            await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+
+            NavigationManager.NavigateTo("/sync");
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -101,6 +114,19 @@ public class MainBase : OwningComponentBase
         if (willRedirect)
         {
             // Keep the page from loading if a redirect is imminent.
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
+
+        // Check if DB is initialized, if not, redirect to setup page.
+        if (!DbService.GetState().CurrentState.IsInitialized())
+        {
+            var currentUrl = NavigationManager.Uri;
+            await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+
+            NavigationManager.NavigateTo("/sync");
             while (true)
             {
                 await Task.Delay(200);

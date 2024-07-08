@@ -1,8 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@implements IDisposable
-@inject DbService DbService
-@inject AuthenticationStateProvider AuthStateProvider
-@using AliasVault.WebApp.Main.Layout.StatusMessages
 
 <CascadingAuthenticationState>
     <AuthorizeView>
@@ -10,25 +6,10 @@
             <TopMenu />
             <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
                 <div id="main-content" class="relative w-full max-w-screen-2xl mx-auto h-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
-                    @if (IsDbInitialized)
-                    {
-                        <main>
-                            @Body
-                        </main>
-                        <Footer />
-                    }
-                    else if(IsDbDecryptionError)
-                    {
-                        <ErrorVaultDecrypt />
-                    }
-                    else if(IsPendingMigrations)
-                    {
-                        <PendingMigrations />
-                    }
-                    else
-                    {
-                        <VaultDecryptionProgress />
-                    }
+                    <main>
+                        @Body
+                    </main>
+                    <Footer />
                 </div>
             </div>
         </Authorized>
@@ -41,119 +22,5 @@
 </CascadingAuthenticationState>
 
 @code {
-    private bool IsDbInitialized { get; set; } = false;
-    private bool IsDbDecryptionError { get; set; } = false;
-    private bool IsPendingMigrations { get; set; } = false;
-    private const int MinimumLoadingTimeMs = 800;
-
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        // Reset local state
-        IsDbInitialized = false;
-        IsDbDecryptionError = false;
-        IsPendingMigrations = false;
-
-        DbService.GetState().StateChanged += OnDatabaseStateChanged;
-        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-
-        await CheckAndInitializeDatabase();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (AuthState != null)
-        {
-            var authState = await AuthState;
-            if (authState.User.Identity?.IsAuthenticated == true)
-            {
-                await CheckAndInitializeDatabase();
-            }
-        }
-    }
-
-    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
-    {
-        var authState = await task;
-        if (authState.User.Identity?.IsAuthenticated == true)
-        {
-            await CheckAndInitializeDatabase();
-        }
-        StateHasChanged();
-    }
-
-    private async Task CheckAndInitializeDatabase()
-    {
-        var currentState = DbService.GetState().CurrentState;
-        if (currentState.Status == DbServiceState.DatabaseStatus.Uninitialized)
-        {
-            await InitializeDatabaseWithProgress();
-        }
-        else if (currentState.Status == DbServiceState.DatabaseStatus.Ready)
-        {
-            IsDbInitialized = true;
-            StateHasChanged();
-        }
-        else if (currentState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
-        {
-            IsDbDecryptionError = true;
-            StateHasChanged();
-        }
-        else if (currentState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
-        {
-            IsPendingMigrations = true;
-            StateHasChanged();
-        }
-    }
-
-    private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
-    {
-        if (newState.Status == DbServiceState.DatabaseStatus.Uninitialized)
-        {
-            await InitializeDatabaseWithProgress();
-        }
-        else if (newState.Status == DbServiceState.DatabaseStatus.Ready)
-        {
-            IsDbInitialized = true;
-        }
-        else if (newState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
-        {
-            IsDbDecryptionError = true;
-        }
-        else if (newState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
-        {
-            IsPendingMigrations = true;
-        }
-        StateHasChanged();
-    }
-
-    private async Task InitializeDatabaseWithProgress()
-    {
-        IsDbInitialized = false;
-        StateHasChanged();
-
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-        await DbService.InitializeDatabaseAsync();
-
-        stopwatch.Stop();
-        var elapsedMs = (int)stopwatch.ElapsedMilliseconds;
-
-        if (elapsedMs < MinimumLoadingTimeMs)
-        {
-            await Task.Delay(MinimumLoadingTimeMs - elapsedMs);
-        }
-
-        await CheckAndInitializeDatabase();
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        DbService.GetState().StateChanged -= OnDatabaseStateChanged;
-        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
-    }
 }
