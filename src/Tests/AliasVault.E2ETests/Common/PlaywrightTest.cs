@@ -241,7 +241,7 @@ public class PlaywrightTest
         await registerButton.ClickAsync();
         await WaitForURLAsync("**/user/register");
 
-        // Try to login with test credentials.
+        // Try to register an account with the generated test credentials.
         var emailField = Page.Locator("input[id='email']");
         var passwordField = Page.Locator("input[id='password']");
         var password2Field = Page.Locator("input[id='password2']");
@@ -255,7 +255,6 @@ public class PlaywrightTest
 
         // Check if we get redirected when clicking on the register button.
         var submitButton = Page.Locator("button[type='submit']");
-        Console.WriteLine(submitButton);
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
