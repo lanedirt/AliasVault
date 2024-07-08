@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasClientDb.Migrations
 {
     [DbContext(typeof(AliasClientDbContext))]
-    [Migration("20240708083723_100InitialMigration")]
+    [Migration("20240708094944_1.0.0-InitialMigration")]
     partial class _100InitialMigration
     {
         /// <inheritdoc />
