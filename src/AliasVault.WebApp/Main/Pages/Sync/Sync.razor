@@ -1,0 +1,126 @@
+﻿@page "/sync"
+@layout EmptyLayout
+@implements IDisposable
+@using AliasVault.WebApp.Main.Pages.Sync.StatusMessages
+@inject ILocalStorageService LocalStorage
+@inject DbService DbService
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<LayoutPageTitle>Sync</LayoutPageTitle>
+
+<div class="fixed inset-0 overflow-y-auto h-full w-full flex flex-col items-center justify-center">
+    @if (CurrentDbState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
+    {
+        <ErrorVaultDecrypt />
+    }
+    else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
+    {
+        <PendingMigrations />
+    }
+    else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Creating)
+    {
+        <Creating />
+    }
+    else
+    {
+        <VaultDecryptionProgress />
+    }
+
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-6">
+        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Logout</a>
+    </div>
+</div>
+
+
+@code {
+    private const string ReturnUrlKey = "returnUrl";
+    private DbServiceState.DatabaseState CurrentDbState { get; set; } = new();
+    private const int MinimumLoadingTimeMs = 800;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        DbService.GetState().StateChanged += OnDatabaseStateChanged;
+        CurrentDbState = DbService.GetState().CurrentState;
+
+        // Check that encryption key is set. If not, redirect to unlock screen.
+        if (!AuthService.IsEncryptionKeySet())
+        {
+            await LocalStorage.SetItemAsync(ReturnUrlKey, NavigationManager.Uri);
+            NavigationManager.NavigateTo("/unlock");
+        }
+
+        await CheckAndInitializeDatabase();
+    }
+
+    private async Task CheckAndInitializeDatabase()
+    {
+        CurrentDbState = DbService.GetState().CurrentState;
+        if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Uninitialized)
+        {
+            await InitializeDatabaseWithProgress();
+        }
+        else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
+        {
+            await RedirectBackToReturnUrl();
+        }
+
+        StateHasChanged();
+    }
+
+    private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
+    {
+        CurrentDbState = DbService.GetState().CurrentState;
+        if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Uninitialized)
+        {
+            await InitializeDatabaseWithProgress();
+        }
+        else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
+        {
+            await RedirectBackToReturnUrl();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task InitializeDatabaseWithProgress()
+    {
+        StateHasChanged();
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        await DbService.InitializeDatabaseAsync();
+
+        stopwatch.Stop();
+        var elapsedMs = (int)stopwatch.ElapsedMilliseconds;
+
+        if (elapsedMs < MinimumLoadingTimeMs)
+        {
+            await Task.Delay(MinimumLoadingTimeMs - elapsedMs);
+        }
+
+        await CheckAndInitializeDatabase();
+        StateHasChanged();
+    }
+
+    private async Task RedirectBackToReturnUrl()
+    {
+        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
+        if (!string.IsNullOrEmpty(localStorageReturnUrl) && localStorageReturnUrl != "/sync")
+        {
+            await LocalStorage.RemoveItemAsync(ReturnUrlKey);
+            NavigationManager.NavigateTo(localStorageReturnUrl);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    public void Dispose()
+    {
+        DbService.GetState().StateChanged -= OnDatabaseStateChanged;
+    }
+}

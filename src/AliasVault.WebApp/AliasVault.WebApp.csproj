@@ -60,6 +60,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\ErrorVaultDecrypt.razor" />
+      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\PendingMigrations.razor" />
+      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\VaultDecryptionProgress.razor" />
       <None Include="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
@@ -70,6 +73,9 @@
         <Link>.dockerignore</Link>
       </Content>
       <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
+      <Content Update="wwwroot\appsettings.Development.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -85,5 +91,11 @@
       <None Update="nginx.conf">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\ErrorVaultDecrypt.razor" />
+      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\PendingMigrations.razor" />
+      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\VaultDecryptionProgress.razor" />
     </ItemGroup>
 </Project>

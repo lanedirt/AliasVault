@@ -13,6 +13,7 @@ using AliasClientDb;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.WebApp.Services.Auth;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -72,22 +73,14 @@ public class DbService : IDisposable
             return;
         }
 
-        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
-
-        // Ensure the in-memory database representation is created and has the necessary tables.
-        await _dbContext.Database.EnsureCreatedAsync();
-
         // Attempt to fill the local database with a previously saved database stored on the server.
         var loaded = await LoadDatabaseFromServerAsync();
         if (loaded)
         {
-            _isSuccessfullyInitialized = true;
-            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
-            Console.WriteLine("Database succesfully loaded from server.");
+            _retryCount = 0;
         }
         else
         {
-            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
             Console.WriteLine("Failed to load database from server.");
         }
     }
@@ -122,7 +115,7 @@ public class DbService : IDisposable
     public async Task SaveDatabaseAsync()
     {
         // Set the initial state of the database service.
-        _state.UpdateState(DbServiceState.DatabaseStatus.Saving);
+        _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
 
         // Save the actual dbContext.
         await _dbContext.SaveChangesAsync();
@@ -136,13 +129,13 @@ public class DbService : IDisposable
         var success = await SaveToServerAsync(encryptedBase64String);
         if (success)
         {
-            Console.WriteLine("Database succesfully saved to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Initialized);
+            Console.WriteLine("Database successfully saved to server.");
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
         else
         {
             Console.WriteLine("Failed to save database to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Error);
+            _state.UpdateState(DbServiceState.DatabaseStatus.OperationError);
         }
     }
 
@@ -174,12 +167,85 @@ public class DbService : IDisposable
     }
 
     /// <summary>
+    /// Migrate the database structure to the latest version.
+    /// </summary>
+    /// <returns>Bool which indicates if migration was succesful.</returns>
+    public async Task<bool> MigrateDatabaseAsync()
+    {
+        try
+        {
+            await _dbContext.Database.MigrateAsync();
+            _isSuccessfullyInitialized = true;
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Get the current version (applied migration) of the database that is loaded in memory.
+    /// </summary>
+    /// <returns>Version as string.</returns>
+    public async Task<string> GetCurrentDatabaseVersionAsync()
+    {
+        var migrations = await _dbContext.Database.GetAppliedMigrationsAsync();
+        var lastMigration = migrations.LastOrDefault();
+
+        // Convert migration Id in the form of "20240708094944_1.0.0-InitialMigration" to "1.0.0".
+        if (lastMigration is not null)
+        {
+            var parts = lastMigration.Split('_');
+            if (parts.Length > 1)
+            {
+                var versionPart = parts[1].Split('-')[0];
+                if (Version.TryParse(versionPart, out _))
+                {
+                    return versionPart;
+                }
+            }
+        }
+
+        return "Unknown";
+    }
+
+    /// <summary>
+    /// Get the latest available version (EF migration) as defined in code.
+    /// </summary>
+    /// <returns>Version as string.</returns>
+    public async Task<string> GetLatestDatabaseVersionAsync()
+    {
+        var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
+        var lastMigration = migrations.LastOrDefault();
+
+        // Convert migration Id in the form of "20240708094944_1.0.0-InitialMigration" to "1.0.0".
+        if (lastMigration is not null)
+        {
+            var parts = lastMigration.Split('_');
+            if (parts.Length > 1)
+            {
+                var versionPart = parts[1].Split('-')[0];
+                if (Version.TryParse(versionPart, out _))
+                {
+                    return versionPart;
+                }
+            }
+        }
+
+        return "Unknown";
+    }
+
+    /// <summary>
     /// Clears the database connection and creates a new one so that the database is empty.
     /// </summary>
     /// <returns>SqliteConnection and AliasClientDbContext.</returns>
     public (SqliteConnection SqliteConnection, AliasClientDbContext AliasClientDbContext) InitializeEmptyDatabase()
     {
-        if (_isSuccessfullyInitialized && _sqlConnection.State == ConnectionState.Open)
+        if (_sqlConnection is not null && _sqlConnection.State == ConnectionState.Open)
         {
             _sqlConnection.Close();
         }
@@ -189,6 +255,8 @@ public class DbService : IDisposable
 
         _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
 
+        // Reset the database state.
+        _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
         _isSuccessfullyInitialized = false;
 
         return (_sqlConnection, _dbContext);
@@ -234,9 +302,13 @@ public class DbService : IDisposable
 
         using (var command = _sqlConnection.CreateCommand())
         {
+            // Disable foreign key constraints
+            command.CommandText = "PRAGMA foreign_keys = OFF;";
+            await command.ExecuteNonQueryAsync();
+
             // Drop all tables in the original database
             command.CommandText = @"
-                SELECT 'DELETE FROM ' || name || ';'
+                SELECT 'DROP TABLE IF EXISTS ' || name || ';'
                 FROM sqlite_master
                 WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
             var dropTableCommands = new List<string>();
@@ -254,14 +326,36 @@ public class DbService : IDisposable
                 await command.ExecuteNonQueryAsync();
             }
 
-            // Attach the imported database and copy tables
+            // Attach the imported database
             command.CommandText = "ATTACH DATABASE @fileName AS importDb";
             command.Parameters.Add(new SqliteParameter("@fileName", tempFileName));
             await command.ExecuteNonQueryAsync();
 
+            // Get CREATE TABLE statements from the imported database
+            command.CommandText = @"
+                SELECT sql
+                FROM importDb.sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            var createTableCommands = new List<string>();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    createTableCommands.Add(reader.GetString(0));
+                }
+            }
+
+            // Create tables in the main database
+            foreach (var createTableCommand in createTableCommands)
+            {
+                command.CommandText = createTableCommand;
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Copy data from imported database to main database
             command.CommandText = @"
                 SELECT 'INSERT INTO main.' || name || ' SELECT * FROM importDb.' || name || ';'
-                FROM sqlite_master
+                FROM importDb.sqlite_master
                 WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
             var tableInsertCommands = new List<string>();
             using (var reader = await command.ExecuteReaderAsync())
@@ -278,7 +372,12 @@ public class DbService : IDisposable
                 await command.ExecuteNonQueryAsync();
             }
 
+            // Detach the imported database
             command.CommandText = "DETACH DATABASE importDb";
+            await command.ExecuteNonQueryAsync();
+
+            // Re-enable foreign key constraints
+            command.CommandText = "PRAGMA foreign_keys = ON;";
             await command.ExecuteNonQueryAsync();
         }
 
@@ -291,6 +390,8 @@ public class DbService : IDisposable
     /// <returns>Task.</returns>
     private async Task<bool> LoadDatabaseFromServerAsync()
     {
+        _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+
         // Load from webapi.
         try
         {
@@ -301,28 +402,32 @@ public class DbService : IDisposable
                 // on client is sufficient.
                 if (string.IsNullOrEmpty(vault.Blob))
                 {
-                    return true;
-                }
-
-                try
-                {
-                    // Attempt to decrypt the database blob.
-                    string decryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
-                    await ImportDbContextFromBase64Async(decryptedBase64String);
-                }
-                catch (Exception ex)
-                {
-                    // If decryption fails it can indicate that the master password hash is not correct anymore,
-                    // so we logout the user just in case.
-                    Console.WriteLine(ex.Message);
+                    // Create the database structure from scratch to get an empty ready-to-use database.
+                    _state.UpdateState(DbServiceState.DatabaseStatus.Creating);
                     return false;
                 }
 
+                // Attempt to decrypt the database blob.
+                string decryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
+                await ImportDbContextFromBase64Async(decryptedBase64String);
+
+                // Check if database is up to date with migrations.
+                var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+                    return false;
+                }
+
+                _isSuccessfullyInitialized = true;
+                _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
                 return true;
             }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
+            _state.UpdateState(DbServiceState.DatabaseStatus.DecryptionFailed);
             return false;
         }
 
@@ -336,7 +441,8 @@ public class DbService : IDisposable
     /// <returns>True if save action succeeded.</returns>
     private async Task<bool> SaveToServerAsync(string encryptedDatabase)
     {
-        var vaultObject = new Vault(encryptedDatabase, DateTime.Now, DateTime.Now);
+        var databaseVersion = await GetCurrentDatabaseVersionAsync();
+        var vaultObject = new Vault(encryptedDatabase, databaseVersion, DateTime.Now, DateTime.Now);
 
         try
         {

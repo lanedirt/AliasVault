@@ -21,6 +21,7 @@ using Microsoft.JSInterop;
 /// </summary>
 public class MainBase : OwningComponentBase
 {
+    private const string ReturnUrlKey = "returnUrl";
     private bool _parametersInitialSet;
 
     /// <summary>
@@ -91,6 +92,19 @@ public class MainBase : OwningComponentBase
                 await Task.Delay(200);
             }
         }
+
+        // Check if DB is initialized, if not, redirect to setup page.
+        if (!DbService.GetState().CurrentState.IsInitialized())
+        {
+            var currentUrl = NavigationManager.Uri;
+            await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
+
+            NavigationManager.NavigateTo("/sync");
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -101,6 +115,19 @@ public class MainBase : OwningComponentBase
         if (willRedirect)
         {
             // Keep the page from loading if a redirect is imminent.
+            while (true)
+            {
+                await Task.Delay(200);
+            }
+        }
+
+        // Check if DB is initialized, if not, redirect to setup page.
+        if (!DbService.GetState().CurrentState.IsInitialized())
+        {
+            var currentUrl = NavigationManager.Uri;
+            await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
+
+            NavigationManager.NavigateTo("/sync");
             while (true)
             {
                 await Task.Delay(200);
@@ -152,13 +179,13 @@ public class MainBase : OwningComponentBase
         if (!AuthService.IsEncryptionKeySet())
         {
             // If returnUrl is not set and current URL is not unlock page, set it to the current URL.
-            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
             if (string.IsNullOrEmpty(localStorageReturnUrl))
             {
                 var currentUrl = NavigationManager.Uri;
                 if (!currentUrl.Contains("unlock"))
                 {
-                    await LocalStorage.SetItemAsync("returnUrl", currentUrl);
+                    await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
                 }
             }
 

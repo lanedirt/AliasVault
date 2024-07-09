@@ -28,13 +28,14 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
     /// <summary>
     /// Default retention policy for vaults.
     /// </summary>
-    private readonly RetentionPolicy _retentionPolicy = new RetentionPolicy
+    private readonly RetentionPolicy _retentionPolicy = new()
     {
         Rules = new List<IRetentionRule>
         {
-            new DailyRetentionRule() { DaysToKeep = 3 },
-            new WeeklyRetentionRule() { WeeksToKeep = 1 },
-            new MonthlyRetentionRule() { MonthsToKeep = 1 },
+            new DailyRetentionRule { DaysToKeep = 3 },
+            new WeeklyRetentionRule { WeeksToKeep = 1 },
+            new MonthlyRetentionRule { MonthsToKeep = 1 },
+            new VersionRetentionRule { VersionsToKeep = 3 },
         },
     };
 
@@ -61,10 +62,10 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault(string.Empty, DateTime.MinValue, DateTime.MinValue));
+            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, DateTime.MinValue, DateTime.MinValue));
         }
 
-        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.CreatedAt, vault.UpdatedAt));
+        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, vault.CreatedAt, vault.UpdatedAt));
     }
 
     /// <summary>
@@ -86,6 +87,7 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
+            Version = model.Version,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };

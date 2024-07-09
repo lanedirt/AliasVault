@@ -32,14 +32,14 @@ public class Alias
     /// </summary>
     [StringLength(255)]
     [Column(TypeName = "VARCHAR")]
-    public string? FirstName { get; set; } = null!;
+    public string? FirstName { get; set; }
 
     /// <summary>
     /// Gets or sets the last name.
     /// </summary>
     [StringLength(255)]
     [Column(TypeName = "VARCHAR")]
-    public string? LastName { get; set; } = null!;
+    public string? LastName { get; set; }
 
     /// <summary>
     /// Gets or sets the nickname.

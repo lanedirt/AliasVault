@@ -30,24 +30,39 @@ public class DbServiceState
         Uninitialized,
 
         /// <summary>
-        /// Database is initialized but no task is currently in progress.
-        /// </summary>
-        Initialized,
-
-        /// <summary>
         /// Database is loading from server.
         /// </summary>
         Loading,
 
         /// <summary>
+        /// Database is being created.
+        /// </summary>
+        Creating,
+
+        /// <summary>
+        /// Database failed to decrypt. No data is accessible.
+        /// </summary>
+        DecryptionFailed,
+
+        /// <summary>
+        /// Database has been decrypted but has pending migrations and needs to be updated.
+        /// </summary>
+        PendingMigrations,
+
+        /// <summary>
+        /// Database is ready but no task is currently in progress.
+        /// </summary>
+        Ready,
+
+        /// <summary>
         /// Database is saving to server.
         /// </summary>
-        Saving,
+        SavingToServer,
 
         /// <summary>
         /// An error occurred during a database operation.
         /// </summary>
-        Error,
+        OperationError,
     }
 
     /// <summary>
@@ -123,5 +138,22 @@ public class DbServiceState
         /// Gets or sets the last time the state was updated.
         /// </summary>
         public DateTime LastUpdated { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Returns true if the database state represents a initialized state.
+        /// </summary>
+        /// <returns>Bool.</returns>
+        public bool IsInitialized()
+        {
+            if (Status == DatabaseStatus.Uninitialized ||
+                Status == DatabaseStatus.PendingMigrations ||
+                Status == DatabaseStatus.Loading ||
+                Status == DatabaseStatus.DecryptionFailed)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

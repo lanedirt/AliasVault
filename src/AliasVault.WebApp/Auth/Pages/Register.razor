@@ -77,7 +77,10 @@
 
             if (!result.IsSuccessStatusCode)
             {
-                LoginBase.ParseResponse(responseContent);
+                foreach (var error in LoginBase.ParseResponse(responseContent))
+                {
+                    _serverValidationErrors.AddError(error);
+                }
                 StateHasChanged();
                 return;
             }

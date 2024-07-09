@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Common;
 
+using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
 using Microsoft.Playwright;
 
@@ -42,12 +43,12 @@ public class PlaywrightTest
     /// <summary>
     /// Gets or sets random unique account email that is used for the test.
     /// </summary>
-    protected string TestUserEmail { get; set; } = string.Empty;
+    protected virtual string TestUserEmail { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets random unique account password that is used for the test.
     /// </summary>
-    protected string TestUserPassword { get; set; } = string.Empty;
+    protected virtual string TestUserPassword { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the Playwright browser instance.
@@ -68,6 +69,11 @@ public class PlaywrightTest
     /// Gets the input helper for Playwright tests.
     /// </summary>
     protected PlaywrightInputHelper InputHelper { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the db context for the WebAPI project.
+    /// </summary>
+    protected AliasServerDbContext ApiDbContext => _apiFactory.GetDbContext();
 
     /// <summary>
     /// One time setup for the Playwright test which runs before all tests in the class.
@@ -228,9 +234,11 @@ public class PlaywrightTest
     /// <returns>Async task.</returns>
     private async Task Register()
     {
-        // Generate random email and password
-        TestUserEmail = $"{Guid.NewGuid()}@test.com";
-        TestUserPassword = Guid.NewGuid().ToString();
+        // If email is not set by test explicitly, generate a random email.
+        TestUserEmail = TestUserEmail.Length > 0 ? TestUserEmail : $"{Guid.NewGuid()}@test.com";
+
+        // If password is not set by test explicitly, generate a random password.
+        TestUserPassword = TestUserPassword.Length > 0 ? TestUserPassword : Guid.NewGuid().ToString();
 
         // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
@@ -241,7 +249,7 @@ public class PlaywrightTest
         await registerButton.ClickAsync();
         await WaitForURLAsync("**/user/register");
 
-        // Try to login with test credentials.
+        // Try to register an account with the generated test credentials.
         var emailField = Page.Locator("input[id='email']");
         var passwordField = Page.Locator("input[id='password']");
         var password2Field = Page.Locator("input[id='password2']");
@@ -255,11 +263,10 @@ public class PlaywrightTest
 
         // Check if we get redirected when clicking on the register button.
         var submitButton = Page.Locator("button[type='submit']");
-        Console.WriteLine(submitButton);
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
-        await WaitForURLAsync(AppBaseUrl);
+        await WaitForURLAsync(AppBaseUrl, "Find all of your credentials below");
     }
 
     private async Task SetupEnvironment()
@@ -278,11 +285,11 @@ public class PlaywrightTest
 
         // Start WebAPI in-memory.
         _apiFactory.HostUrl = "http://localhost:" + apiPort;
-        var apiClient = _apiFactory.CreateDefaultClient();
+        _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM app out-of-process.
         _wasmFactory.HostUrl = "http://localhost:" + appPort;
-        var wasmClient = _wasmFactory.CreateDefaultClient();
+        _wasmFactory.CreateDefaultClient();
 
         // Set Playwright headless mode true if not in debug mode.
         bool isDebugMode = System.Diagnostics.Debugger.IsAttached;

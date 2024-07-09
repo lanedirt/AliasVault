@@ -163,19 +163,19 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task RemoveTokensAsync()
     {
-        await localStorage.RemoveItemAsync(AccessTokenKey);
-        await localStorage.RemoveItemAsync(RefreshTokenKey);
-
-        // If the remote call fails we catch the exception and ignore it.
-        // This is because the user is already logged out and we don't want to trigger another refresh token request.
+        // Revoke the tokens from the server by calling the webapi.
         try
         {
             await RevokeTokenAsync();
         }
         catch (Exception)
         {
-            // Ignore the exception
+            // If an exception occurs we ignore it and continue with removing the tokens from local storage.
         }
+
+        // Remove the tokens from local storage.
+        await localStorage.RemoveItemAsync(AccessTokenKey);
+        await localStorage.RemoveItemAsync(RefreshTokenKey);
     }
 
     /// <summary>

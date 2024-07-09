@@ -1,0 +1,92 @@
+﻿@inject DbService DbService
+@inject GlobalNotificationService GlobalNotificationService
+
+<div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+    <div class="text-center">
+        <div class="space-y-4">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Vault needs to be upgraded.</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                AliasVault has been updated. Your personal vault needs to be upgraded in order to be compatible with the new data model.
+                This upgrade should only take a few seconds.
+            </p>
+            <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Version Information</h3>
+                <div class="space-y-2">
+                    <p class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Your vault:</span>
+                        <span class="text-base font-bold text-blue-600 dark:text-blue-400">@CurrentVersion</span>
+                    </p>
+                    <p class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">AliasVault latest version:</span>
+                        <span class="text-base font-bold text-green-600 dark:text-green-400">@LatestVersion</span>
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                @if (ErrorMessage.Length > 0)
+                {
+                    <AlertMessageError Message="@ErrorMessage" />
+                }
+
+                @if (IsPendingMigrations)
+                {
+                    <svg class="mx-auto animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                }
+                else
+                {
+                    <button @onclick="MigrateDatabase" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
+                        Start upgrade process
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsPendingMigrations { get; set; } = false;
+    private string ErrorMessage { get; set; } = string.Empty;
+    private string CurrentVersion { get; set; } = string.Empty;
+    private string LatestVersion { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Get current and latest available database version
+        CurrentVersion = await DbService.GetCurrentDatabaseVersionAsync();
+        LatestVersion = await DbService.GetLatestDatabaseVersionAsync();
+    }
+
+    private async Task MigrateDatabase()
+    {
+        // Show loading indicator
+        IsPendingMigrations = true;
+        ErrorMessage = String.Empty;
+        StateHasChanged();
+
+        // Simulate a delay.
+        await Task.Delay(1000);
+
+        // Migrate the database
+        if (await DbService.MigrateDatabaseAsync())
+        {
+            // Migration successful
+            GlobalNotificationService.AddSuccessMessage("Vault upgrade successful.", true);
+        }
+        else
+        {
+            // Migration failed
+            ErrorMessage = "Database upgrade failed. Please try again or contact support.";
+        }
+
+        // Reset local state
+        IsPendingMigrations = false;
+        StateHasChanged();
+    }
+}

@@ -30,15 +30,15 @@ public class VaultRetentionManagerTests
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
         testVaults =
         [
-            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0) },
-            new Vault { UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0) },
-            new Vault { UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0) }, // 2 days ago
-            new Vault { UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0) }, // 3 days ago
-            new Vault { UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0) }, // 4 days ago
-            new Vault { UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0) }, // 2 weeks ago
-            new Vault { UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0) }, // 3 weeks ago
-            new Vault { UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0) }, // 1 month ago
-            new Vault { UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0) }, // 2 months ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0) },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0) },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0) }, // 2 days ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0) }, // 3 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0) }, // 4 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0) }, // 2 weeks ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0) }, // 3 weeks ago
+            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0) }, // 1 month ago
+            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0) }, // 2 months ago
         ];
     }
 
@@ -102,6 +102,23 @@ public class VaultRetentionManagerTests
     }
 
     /// <summary>
+    /// Test the VersionRetentionRule.
+    /// </summary>
+    [Test]
+    public void VersionRetentionRuleTest()
+    {
+        var rule = new VersionRetentionRule { VersionsToKeep = 2 };
+        var result = rule.ApplyRule(testVaults, now).ToList();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+        });
+    }
+
+    /// <summary>
     /// Test the RetentionPolicy object.
     /// </summary>
     [Test]
@@ -114,6 +131,7 @@ public class VaultRetentionManagerTests
                 new DailyRetentionRule { DaysToKeep = 2 },
                 new WeeklyRetentionRule { WeeksToKeep = 2 },
                 new MonthlyRetentionRule { MonthsToKeep = 1 },
+                new VersionRetentionRule { VersionsToKeep = 3 },
             },
         };
 
@@ -130,11 +148,12 @@ public class VaultRetentionManagerTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(vaultsToKeep, Has.Count.EqualTo(3));
-            Assert.That(vaultsToDelete, Has.Count.EqualTo(6));
+            Assert.That(vaultsToKeep, Has.Count.EqualTo(4));
+            Assert.That(vaultsToDelete, Has.Count.EqualTo(5));
             Assert.That(vaultsToKeep[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
             Assert.That(vaultsToKeep[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 30, 12, 0, 0)));
             Assert.That(vaultsToKeep[2].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+            Assert.That(vaultsToKeep[3].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 1, 12, 0, 0)));
         });
     }
 
