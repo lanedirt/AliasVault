@@ -285,11 +285,11 @@ public class PlaywrightTest
 
         // Start WebAPI in-memory.
         _apiFactory.HostUrl = "http://localhost:" + apiPort;
-        var apiClient = _apiFactory.CreateDefaultClient();
+        _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM app out-of-process.
         _wasmFactory.HostUrl = "http://localhost:" + appPort;
-        var wasmClient = _wasmFactory.CreateDefaultClient();
+        _wasmFactory.CreateDefaultClient();
 
         // Set Playwright headless mode true if not in debug mode.
         bool isDebugMode = System.Diagnostics.Debugger.IsAttached;

@@ -33,6 +33,13 @@ public class DbUpgradeTest : PlaywrightTest
     [Test]
     public async Task DbUpgrade100Test()
     {
+        // Define service names that are stored in the vault and expected to be shown after upgrade.
+        List<string> expectedServiceNamesInVault =
+        [
+            "Test credential 1",
+            "Test credential 2",
+        ];
+
         // Update salt and verifier for the test user so the key derivation is deterministic.
         var user = ApiDbContext.Users.First();
         user.Salt = "1a73a8ef3a1c6dd891674c415962d87246450f8ca5004ecca24be770a4d7b1f7";
@@ -63,5 +70,29 @@ public class DbUpgradeTest : PlaywrightTest
         await submitButton.ClickAsync();
 
         await WaitForURLAsync("**/", "Test credential 1");
+
+        // Check if the expected service names still appear on the index page and are still accessible.
+        var pageContent = await Page.TextContentAsync("body");
+        foreach (var serviceName in expectedServiceNamesInVault)
+        {
+            Assert.That(pageContent, Does.Contain(serviceName), $"Credential name '{serviceName}' which existed in 1.0.0 encrypted vault does not appear on index page after database upgrade. Check client DB migration logic for potential data loss.");
+
+            // Find the clickable div with class "credential-card" containing the service name
+            var credentialCard = await Page.WaitForSelectorAsync($".credential-card:has-text('{serviceName}')");
+            Assert.That(credentialCard, Is.Not.Null, $"Could not find credential card for service '{serviceName}'");
+
+            // Click on the credential card
+            await credentialCard.ClickAsync();
+
+            // Wait for navigation to complete
+            await WaitForURLAsync("**/credentials/**");
+
+            // Check if the service name appears in the body of the new page
+            var credentialPageContent = await Page.TextContentAsync("body");
+            Assert.That(credentialPageContent, Does.Contain(serviceName), $"Service name '{serviceName}' not found on the credential details page");
+
+            // Navigate back to the index page for the next iteration
+            await Page.GoBackAsync();
+        }
     }
 }
