@@ -34,6 +34,7 @@ public class FaviconController(UserManager<AliasVaultUser> userManager) : Authen
             return Unauthorized();
         }
 
+        // Get the favicon from the URL.
         var image = await FaviconExtractor.FaviconExtractor.GetFaviconAsync(url);
 
         // Return the favicon as base64 string of image representation.

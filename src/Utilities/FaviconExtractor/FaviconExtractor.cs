@@ -30,7 +30,10 @@ public static class FaviconExtractor
             MaxAutomaticRedirections = 10,
         });
 
-        // Add headers to mimic a browser
+        // Set a timeout for the HTTP request to prevent long-running jobs which block the client UI.
+        client.Timeout = TimeSpan.FromSeconds(5);
+
+        // Add headers to mimic a browser.
         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
         client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
