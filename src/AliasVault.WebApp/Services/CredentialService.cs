@@ -275,11 +275,24 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         var url = credentialObject.Service.Url;
         if (url != null && !string.IsNullOrEmpty(url) && url.Contains("http"))
         {
-            // Request favicon from from service URL via WebApi
-            var apiReturn = await httpClient.GetFromJsonAsync<FaviconExtractModel>("api/v1/Favicon/Extract?url=" + url);
-            if (apiReturn != null && apiReturn.Image != null)
+            // Set timeout to 3 seconds for favicon extraction.
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+            try
             {
-                credentialObject.Service.Logo = apiReturn.Image;
+                // If an exception occurs during favicon extraction, we will ignore it and continue execution.
+                var apiReturn = await httpClient.GetFromJsonAsync<FaviconExtractModel>(
+                    "api/v1/Favicon/Extract?url=" + url,
+                    cts.Token);
+
+                if (apiReturn != null && apiReturn.Image != null)
+                {
+                    credentialObject.Service.Logo = apiReturn.Image;
+                }
+            }
+            finally
+            {
+                cts.Dispose();
             }
         }
     }
