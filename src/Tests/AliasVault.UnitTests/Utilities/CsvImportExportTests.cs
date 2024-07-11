@@ -44,7 +44,7 @@ public class CsvImportExportTests
                 AddressZipCode = "12345",
                 AddressCountry = "USA",
                 Hobbies = "Reading, Writing",
-                EmailPrefix = "johndoe",
+                Email = "johndoe",
                 PhoneMobile = "123-456-7890",
                 BankAccountIBAN = "US1234567890",
                 CreatedAt = DateTime.Now,
@@ -99,7 +99,7 @@ public class CsvImportExportTests
             Assert.That(importedCredential.Alias.AddressZipCode, Is.EqualTo(credential.Alias.AddressZipCode));
             Assert.That(importedCredential.Alias.AddressCountry, Is.EqualTo(credential.Alias.AddressCountry));
             Assert.That(importedCredential.Alias.Hobbies, Is.EqualTo(credential.Alias.Hobbies));
-            Assert.That(importedCredential.Alias.EmailPrefix, Is.EqualTo(credential.Alias.EmailPrefix));
+            Assert.That(importedCredential.Alias.Email, Is.EqualTo(credential.Alias.Email));
             Assert.That(importedCredential.Alias.PhoneMobile, Is.EqualTo(credential.Alias.PhoneMobile));
             Assert.That(importedCredential.Alias.BankAccountIBAN, Is.EqualTo(credential.Alias.BankAccountIBAN));
             Assert.That(importedCredential.Alias.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.CreatedAt.ToString("yyyy-MM-dd")));
