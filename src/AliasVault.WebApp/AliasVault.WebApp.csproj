@@ -73,9 +73,6 @@
         <Link>.dockerignore</Link>
       </Content>
       <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
-      <Content Update="wwwroot\appsettings.Development.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>
