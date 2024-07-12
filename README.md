@@ -12,7 +12,7 @@
 
 AliasVault is an open-source password and identity manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
 
-**The features that make AliasVault unique:**
+### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
 - **Virtual identities**: Generate virtual identities with virtual (working) email addresses that are assigned to one or more passwords.
 - **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
@@ -21,6 +21,8 @@ AliasVault is an open-source password and identity manager built with C# ASP.NET
 
 ## Live demo
 A live demo of the app is available at [main.aliasvault.net](https://main.aliasvault.net) (nightly builds). You can create a free account to try it out yourself.
+
+<img width="700" alt="Screenshot 2024-07-12 at 14 58 29" src="https://github.com/user-attachments/assets/57103f67-dff0-4124-9b33-62137aab5578">
 
 ## Installation on your own machine
 To install AliasVault on your own machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
