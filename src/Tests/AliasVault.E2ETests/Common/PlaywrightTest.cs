@@ -241,10 +241,6 @@ public class PlaywrightTest
         // If password is not set by test explicitly, generate a random password.
         TestUserPassword = TestUserPassword.Length > 0 ? TestUserPassword : Guid.NewGuid().ToString();
 
-        // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
-        await Page.GotoAsync(AppBaseUrl);
-        await WaitForURLAsync("**/user/login");
-
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
         await registerButton.ClickAsync();

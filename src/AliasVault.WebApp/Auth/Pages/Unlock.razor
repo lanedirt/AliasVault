@@ -14,7 +14,7 @@
 </p>
 
 <FullScreenLoadingIndicator @ref="LoadingIndicator" />
-<ServerValidationErrors @ref="_serverValidationErrors" />
+<ServerValidationErrors @ref="ServerValidationErrors" />
 
 <EditForm Model="UnlockModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
@@ -38,7 +38,7 @@
     private string? Email { get; set; }
     private readonly UnlockModel UnlockModel = new();
     private FullScreenLoadingIndicator LoadingIndicator = new();
-    private ServerValidationErrors _serverValidationErrors = new();
+    private ServerValidationErrors ServerValidationErrors = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -71,14 +71,14 @@
         }
 
         LoadingIndicator.Show();
-        _serverValidationErrors.Clear();
+        ServerValidationErrors.Clear();
 
         try
         {
             var errors = await ProcessLoginAsync(Email, UnlockModel.Password);
             foreach (var error in errors)
             {
-                _serverValidationErrors.AddError(error);
+                ServerValidationErrors.AddError(error);
             }
             StateHasChanged();
         }
@@ -86,13 +86,13 @@
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            _serverValidationErrors.AddError(ex.ToString());
+            ServerValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally

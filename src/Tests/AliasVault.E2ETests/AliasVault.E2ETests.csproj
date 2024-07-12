@@ -53,7 +53,7 @@
       <Content Include="appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Update="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
+      <Content Include="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

@@ -60,9 +60,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\ErrorVaultDecrypt.razor" />
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\PendingMigrations.razor" />
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\VaultDecryptionProgress.razor" />
       <Content Update="wwwroot\appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
@@ -82,17 +79,5 @@
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\CsvImportExport\CsvImportExport.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="nginx.conf">
-        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\ErrorVaultDecrypt.razor" />
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\PendingMigrations.razor" />
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\VaultDecryptionProgress.razor" />
     </ItemGroup>
 </Project>
