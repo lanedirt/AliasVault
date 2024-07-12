@@ -13,15 +13,15 @@
     Enter your master password in order to unlock your database.
 </p>
 
-<FullScreenLoadingIndicator @ref="_loadingIndicator" />
+<FullScreenLoadingIndicator @ref="LoadingIndicator" />
 <ServerValidationErrors @ref="_serverValidationErrors" />
 
-<EditForm Model="_unlockModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+<EditForm Model="UnlockModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => _unlockModel.Password"/>
+        <InputTextField id="password" @bind-Value="UnlockModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => UnlockModel.Password"/>
     </div>
 
     <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
@@ -36,8 +36,8 @@
 
 @code {
     private string? Email { get; set; }
-    private readonly UnlockModel _unlockModel = new();
-    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private readonly UnlockModel UnlockModel = new();
+    private FullScreenLoadingIndicator LoadingIndicator = new();
     private ServerValidationErrors _serverValidationErrors = new();
 
     /// <inheritdoc />
@@ -70,12 +70,12 @@
             return;
         }
 
-        _loadingIndicator.Show();
+        LoadingIndicator.Show();
         _serverValidationErrors.Clear();
 
         try
         {
-            var errors = await ProcessLoginAsync(Email, _unlockModel.Password);
+            var errors = await ProcessLoginAsync(Email, UnlockModel.Password);
             foreach (var error in errors)
             {
                 _serverValidationErrors.AddError(error);
@@ -97,7 +97,7 @@
 #endif
         finally
         {
-            _loadingIndicator.Hide();
+            LoadingIndicator.Hide();
         }
     }
 }
