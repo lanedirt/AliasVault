@@ -71,7 +71,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
                 AddressZipCode = loginObject.Alias.AddressZipCode,
                 AddressCountry = loginObject.Alias.AddressCountry,
                 Hobbies = loginObject.Alias.Hobbies,
-                EmailPrefix = loginObject.Alias.EmailPrefix,
+                Email = loginObject.Alias.Email,
                 PhoneMobile = loginObject.Alias.PhoneMobile,
                 BankAccountIBAN = loginObject.Alias.BankAccountIBAN,
                 CreatedAt = DateTime.UtcNow,
@@ -144,7 +144,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         login.Alias.AddressZipCode = loginObject.Alias.AddressZipCode;
         login.Alias.AddressCountry = loginObject.Alias.AddressCountry;
         login.Alias.Hobbies = loginObject.Alias.Hobbies;
-        login.Alias.EmailPrefix = loginObject.Alias.EmailPrefix;
+        login.Alias.Email = loginObject.Alias.Email;
         login.Alias.PhoneMobile = loginObject.Alias.PhoneMobile;
         login.Alias.BankAccountIBAN = loginObject.Alias.BankAccountIBAN;
 

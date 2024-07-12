@@ -43,6 +43,12 @@ public class MainBase : OwningComponentBase
     public GlobalNotificationService GlobalNotificationService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the GlobalLoadingService in order to manipulate the global loading spinner animation.
+    /// </summary>
+    [Inject]
+    public GlobalLoadingService GlobalLoadingSpinner { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the IJSRuntime.
     /// </summary>
     [Inject]

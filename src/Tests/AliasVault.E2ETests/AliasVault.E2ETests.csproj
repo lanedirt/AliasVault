@@ -49,4 +49,13 @@
       <ProjectReference Include="..\Server\AliasVault.E2ETests.WebApp.Server\AliasVault.E2ETests.WebApp.Server.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

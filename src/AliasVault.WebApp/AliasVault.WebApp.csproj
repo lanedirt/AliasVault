@@ -60,22 +60,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\ErrorVaultDecrypt.razor" />
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\PendingMigrations.razor" />
-      <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\VaultDecryptionProgress.razor" />
-      <None Include="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <Content Update="wwwroot\appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
       <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
-      <Content Update="wwwroot\appsettings.Development.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -85,17 +79,5 @@
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
       <ProjectReference Include="..\Utilities\CsvImportExport\CsvImportExport.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="nginx.conf">
-        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\ErrorVaultDecrypt.razor" />
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\PendingMigrations.razor" />
-      <_ContentIncludedByDefault Remove="Main\Layout\StatusMessages\VaultDecryptionProgress.razor" />
     </ItemGroup>
 </Project>

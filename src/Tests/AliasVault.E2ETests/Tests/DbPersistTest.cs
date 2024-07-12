@@ -37,7 +37,7 @@ public class DbPersistTest : PlaywrightTest
         await RefreshPageAndUnlockVault();
 
         // Wait for the credentials page to load again.
-        await WaitForURLAsync("**/credentials/**", "View credentials entry");
+        await WaitForURLAsync("**/credentials/**", serviceNameBefore);
 
         // Check if the service name is still present in the content.
         pageContent = await Page.TextContentAsync("body");

@@ -145,8 +145,7 @@ public class AliasClientDbContext : DbContext
     {
         var optionsBuilder = new DbContextOptionsBuilder<AliasClientDbContext>();
         optionsBuilder.UseSqlite(connection);
-
-        optionsBuilder.LogTo(logAction, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+        optionsBuilder.LogTo(logAction, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Warning);
 
         return optionsBuilder.Options;
     }

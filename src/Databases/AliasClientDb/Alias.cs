@@ -95,10 +95,10 @@ public class Alias
     public string? Hobbies { get; set; }
 
     /// <summary>
-    /// Gets or sets the generated email prefix.
+    /// Gets or sets the generated email.
     /// </summary>
     [StringLength(255)]
-    public string? EmailPrefix { get; set; }
+    public string? Email { get; set; }
 
     /// <summary>
     /// Gets or sets the random generated mobile phone number.

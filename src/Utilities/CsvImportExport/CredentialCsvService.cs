@@ -46,7 +46,7 @@ public static class CredentialCsvService
                 AliasAddressZipCode = credential.Alias?.AddressZipCode ?? string.Empty,
                 AliasAddressCountry = credential.Alias?.AddressCountry ?? string.Empty,
                 AliasHobbies = credential.Alias?.Hobbies ?? string.Empty,
-                AliasEmailPrefix = credential.Alias?.EmailPrefix ?? string.Empty,
+                AliasEmail = credential.Alias?.Email ?? string.Empty,
                 AliasPhoneMobile = credential.Alias?.PhoneMobile ?? string.Empty,
                 AliasBankAccountIBAN = credential.Alias?.BankAccountIBAN ?? string.Empty,
                 AliasCreatedAt = credential.Alias?.CreatedAt,
@@ -63,7 +63,7 @@ public static class CredentialCsvService
         using var memoryStream = new MemoryStream();
         using var writer = new StreamWriter(memoryStream);
         using var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture));
-        
+
         csv.WriteRecords(records);
         writer.Flush();
         return memoryStream.ToArray();
@@ -78,7 +78,7 @@ public static class CredentialCsvService
     {
         using var reader = new StringReader(fileContent);
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-        
+
         var records = csv.GetRecords<CredentialCsvRecord>().ToList();
 
         if (records.Count == 0)
@@ -117,7 +117,7 @@ public static class CredentialCsvService
                     AddressZipCode = record.AliasAddressZipCode,
                     AddressCountry = record.AliasAddressCountry,
                     Hobbies = record.AliasHobbies,
-                    EmailPrefix = record.AliasEmailPrefix,
+                    Email = record.AliasEmail,
                     PhoneMobile = record.AliasPhoneMobile,
                     BankAccountIBAN = record.AliasBankAccountIBAN,
                     CreatedAt = record.AliasCreatedAt ?? DateTime.UtcNow,
@@ -170,7 +170,7 @@ public class CredentialCsvRecord
     public string AliasAddressZipCode { get; set; } = string.Empty;
     public string AliasAddressCountry { get; set; } = string.Empty;
     public string AliasHobbies { get; set; } = string.Empty;
-    public string AliasEmailPrefix { get; set; } = string.Empty;
+    public string AliasEmail { get; set; } = string.Empty;
     public string AliasPhoneMobile { get; set; } = string.Empty;
     public string AliasBankAccountIBAN { get; set; } = string.Empty;
     public DateTime? AliasCreatedAt { get; set; } = null;

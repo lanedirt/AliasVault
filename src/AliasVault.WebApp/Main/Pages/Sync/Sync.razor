@@ -48,7 +48,6 @@
         // Check that encryption key is set. If not, redirect to unlock screen.
         if (!AuthService.IsEncryptionKeySet())
         {
-            await LocalStorage.SetItemAsync(ReturnUrlKey, NavigationManager.Uri);
             NavigationManager.NavigateTo("/unlock");
         }
 

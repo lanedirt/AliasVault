@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Common;
 
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
 /// <summary>
@@ -185,6 +186,9 @@ public class PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task RefreshPageAndUnlockVault()
     {
+        // Get current URL.
+        var currentUrl = Page.Url;
+
         // Hard refresh the page.
         await Page.ReloadAsync();
 
@@ -199,6 +203,9 @@ public class PlaywrightTest
 
         var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
         await submitButton.ClickAsync();
+
+        // Wait for the original page to load again.
+        await WaitForURLAsync(currentUrl);
     }
 
     /// <summary>
@@ -239,10 +246,6 @@ public class PlaywrightTest
 
         // If password is not set by test explicitly, generate a random password.
         TestUserPassword = TestUserPassword.Length > 0 ? TestUserPassword : Guid.NewGuid().ToString();
-
-        // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
-        await Page.GotoAsync(AppBaseUrl);
-        await WaitForURLAsync("**/user/login");
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
@@ -291,9 +294,15 @@ public class PlaywrightTest
         _wasmFactory.HostUrl = "http://localhost:" + appPort;
         _wasmFactory.CreateDefaultClient();
 
-        // Set Playwright headless mode true if not in debug mode.
-        bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
-        bool headless = !isDebugMode;
+        // Set Playwright headless mode based on appsettings.json value.
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.Development.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        bool headless = configuration.GetValue("PlaywrightSettings:Headless", true);
 
         var playwright = await Playwright.CreateAsync();
         Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });

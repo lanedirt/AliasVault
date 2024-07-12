@@ -9,20 +9,20 @@
     Sign in to AliasVault
 </h2>
 
-<FullScreenLoadingIndicator @ref="_loadingIndicator" />
-<ServerValidationErrors @ref="_serverValidationErrors" />
+<FullScreenLoadingIndicator @ref="LoadingIndicator" />
+<ServerValidationErrors @ref="ServerValidationErrors" />
 
-<EditForm Model="_loginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+<EditForm Model="LoginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="_loginModel.Email" placeholder="name@company.com" />
-        <ValidationMessage For="() => _loginModel.Email"/>
+        <InputTextField id="email" @bind-Value="LoginModel.Email" placeholder="name@company.com" />
+        <ValidationMessage For="() => LoginModel.Email"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="_loginModel.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => _loginModel.Password"/>
+        <InputTextField id="password" @bind-Value="LoginModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => LoginModel.Password"/>
     </div>
 
     <div class="flex items-start">
@@ -42,9 +42,9 @@
 </EditForm>
 
 @code {
-    private readonly LoginModel _loginModel = new();
-    private FullScreenLoadingIndicator _loadingIndicator = new();
-    private ServerValidationErrors _serverValidationErrors = new();
+    private readonly LoginModel LoginModel = new();
+    private FullScreenLoadingIndicator LoadingIndicator = new();
+    private ServerValidationErrors ServerValidationErrors = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -59,33 +59,33 @@
 
     private async Task HandleLogin()
     {
-        _loadingIndicator.Show();
-        _serverValidationErrors.Clear();
+        LoadingIndicator.Show();
+        ServerValidationErrors.Clear();
 
         try
         {
-            var errors = await ProcessLoginAsync(_loginModel.Email, _loginModel.Password);
+            var errors = await ProcessLoginAsync(LoginModel.Email, LoginModel.Password);
             foreach (var error in errors)
             {
-                _serverValidationErrors.AddError(error);
+                ServerValidationErrors.AddError(error);
             }
         }
 #if DEBUG
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            _serverValidationErrors.AddError(ex.ToString());
+            ServerValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally
         {
-            _loadingIndicator.Hide();
+            LoadingIndicator.Hide();
         }
     }
 }

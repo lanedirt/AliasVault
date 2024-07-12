@@ -168,7 +168,6 @@ public class LoginBase : OwningComponentBase
         var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
         if (!string.IsNullOrEmpty(localStorageReturnUrl))
         {
-            await LocalStorage.RemoveItemAsync("returnUrl");
             NavigationManager.NavigateTo(localStorageReturnUrl);
         }
         else

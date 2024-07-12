@@ -7,7 +7,6 @@
 
 using AliasVault.WebApp;
 using AliasVault.WebApp.Providers;
-using AliasVault.WebApp.Services.Auth;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -17,7 +16,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddLogging(logging =>
 {
-    logging.SetMinimumLevel(LogLevel.Information);
+    logging.SetMinimumLevel(LogLevel.Warning);
     logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
 });
@@ -49,6 +48,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<CredentialService>();
 builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
+builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 
 builder.Services.AddAuthorizationCore();

@@ -13,37 +13,37 @@
 @using SecureRemotePassword
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-    Create a Free Account
+    Create a new AliasVault account
 </h2>
 
-<FullScreenLoadingIndicator @ref="_loadingIndicator" />
-<ServerValidationErrors @ref="_serverValidationErrors" />
+<FullScreenLoadingIndicator @ref="LoadingIndicator" />
+<ServerValidationErrors @ref="ServerValidationErrors" />
 
-<EditForm Model="_registerModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
+<EditForm Model="RegisterModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="_registerModel.Email" placeholder="name@company.com" />
-        <ValidationMessage For="() => _registerModel.Email"/>
+        <InputTextField id="email" @bind-Value="RegisterModel.Email" placeholder="name@company.com" />
+        <ValidationMessage For="() => RegisterModel.Email"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="_registerModel.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => _registerModel.Password"/>
+        <InputTextField id="password" @bind-Value="RegisterModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => RegisterModel.Password"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
-        <InputTextField id="password2" @bind-Value="_registerModel.PasswordConfirm" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => _registerModel.PasswordConfirm"/>
+        <InputTextField id="password2" @bind-Value="RegisterModel.PasswordConfirm" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => RegisterModel.PasswordConfirm"/>
     </div>
 
     <div class="flex items-start">
         <div class="flex items-center h-5">
-            <InputCheckbox id="terms" @bind-Value="_registerModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
+            <InputCheckbox id="terms" @bind-Value="RegisterModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
         </div>
         <div class="ml-3 text-sm">
             <label for="terms" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
-            <ValidationMessage For="() => _registerModel.AcceptTerms"/>
+            <ValidationMessage For="() => RegisterModel.AcceptTerms"/>
         </div>
     </div>
 
@@ -54,24 +54,24 @@
 </EditForm>
 
 @code {
-    private readonly RegisterModel _registerModel = new();
-    private FullScreenLoadingIndicator _loadingIndicator = new();
-    private ServerValidationErrors _serverValidationErrors = new();
+    private readonly RegisterModel RegisterModel = new();
+    private FullScreenLoadingIndicator LoadingIndicator = new();
+    private ServerValidationErrors ServerValidationErrors = new();
 
     async Task HandleRegister()
     {
-        _loadingIndicator.Show();
-        _serverValidationErrors.Clear();
+        LoadingIndicator.Show();
+        ServerValidationErrors.Clear();
 
         try
         {
             var client = new SrpClient();
             var salt = client.GenerateSalt();
 
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_registerModel.Password, salt);
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt);
             var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
-            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, _registerModel.Email, passwordHashString);
+            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, RegisterModel.Email, passwordHashString);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
             var responseContent = await result.Content.ReadAsStringAsync();
 
@@ -79,7 +79,7 @@
             {
                 foreach (var error in LoginBase.ParseResponse(responseContent))
                 {
-                    _serverValidationErrors.AddError(error);
+                    ServerValidationErrors.AddError(error);
                 }
                 StateHasChanged();
                 return;
@@ -107,7 +107,7 @@
         }
         finally
         {
-            _loadingIndicator.Hide();
+            LoadingIndicator.Hide();
         }
     }
 }
