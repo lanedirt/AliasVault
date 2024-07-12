@@ -186,6 +186,9 @@ public class PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task RefreshPageAndUnlockVault()
     {
+        // Get current URL.
+        var currentUrl = Page.Url;
+
         // Hard refresh the page.
         await Page.ReloadAsync();
 
@@ -200,6 +203,9 @@ public class PlaywrightTest
 
         var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
         await submitButton.ClickAsync();
+
+        // Wait for the original page to load again.
+        await WaitForURLAsync(currentUrl);
     }
 
     /// <summary>
