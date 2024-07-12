@@ -39,7 +39,7 @@ To install AliasVault on your own machine, follow the steps below. Note: the ins
 $ git clone https://github.com/lanedirt/AliasVault.git
 ```
 
-### 2. Run the init script to set up the .env file and generate a random encryption secret.
+### 2. Run the init script.
 This script will create a .env file in the root directory of the project if it does not yet exist and populate it with a random encryption secret.
 ```bash
 # Go to the project directory
