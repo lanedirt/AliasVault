@@ -10,16 +10,27 @@
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 </div>
 
-> Disclaimer: This repository is currently in an alpha state and is NOT ready for production use. Critical features, such as encryption, are not yet fully implemented. AliasVault is a work in progress and as of this moment serves as a research playground. Users are welcome to explore and use this project, but please be aware that there are no guarantees regarding its security or stability. Use at your own risk!
+AliasVault is an open-source password and identity manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
 
-AliasVault is an open-source password manager that can generate virtual identities complete with virtual email addresses. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
+### What makes AliasVault unique:
+- **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
+- **Virtual identities**: Generate virtual identities with virtual (working) email addresses that are assigned to one or more passwords.
+- **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
 
-## Features
-- **Password Management:** Securely store and manage your passwords.
-- **Virtual Identities:** Generate virtual identities with virtual (working) email addresses that are assigned to one or more passwords.
-- **Zero-knowledge architecture:** Ensures that all sensitive data is end-to-end encrypted on the client and stored in encrypted state on the database. The server never has access to your data.
+> Note: AliasVault is currently in development and not yet ready for production use. The project is still in the early stages and many features are not yet implemented. You are welcome to contribute to the project by submitting pull requests or opening issues.
 
-## Installation
+## Live demo
+A live demo of the app is available at [main.aliasvault.net](https://main.aliasvault.net) (nightly builds). You can create a free account to try it out yourself.
+
+<img width="700" alt="Screenshot 2024-07-12 at 14 58 29" src="https://github.com/user-attachments/assets/57103f67-dff0-4124-9b33-62137aab5578">
+
+## Installation on your own machine
+To install AliasVault on your own machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
+
+### Requirements:
+- Access to a terminal
+- Docker
+- Git
 
 ### 1. Clone this repository.
 
@@ -28,7 +39,7 @@ AliasVault is an open-source password manager that can generate virtual identiti
 $ git clone https://github.com/lanedirt/AliasVault.git
 ```
 
-### 2. Run the init script to set up the .env file and generate a random encryption secret.
+### 2. Run the init script.
 This script will create a .env file in the root directory of the project if it does not yet exist and populate it with a random encryption secret.
 ```bash
 # Go to the project directory
@@ -49,10 +60,9 @@ $ docker compose up -d --build --force-recreate
 ```
 > Note: the container binds to port 80 by default. If you have another service running on port 80, you can change the port in the `docker-compose.yml` file.
 
-
 #### Note for first time build:
-- When running the app for the first time, it may take a few minutes to build the Docker image.
-- A SQLite database file will be created in `./database/aliasdb.sqlite`. This file will store all (encrypted) password vaults. It should be kept secure and not shared.
+- When running the docker compose command for the first time, it may take a few minutes to build the Docker image.
+- A SQLite database file will be created in `./database/AliasServerDb.sqlite`. This file will store all (encrypted) password vaults. It should be kept secure and not shared.
 
 After the Docker containers have started the app will be available at http://localhost:80
 
