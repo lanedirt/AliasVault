@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Common;
 
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
 /// <summary>
@@ -291,10 +292,15 @@ public class PlaywrightTest
         _wasmFactory.HostUrl = "http://localhost:" + appPort;
         _wasmFactory.CreateDefaultClient();
 
-        // Set Playwright headless mode true if not in debug mode.
-        bool isDebugMode = System.Diagnostics.Debugger.IsAttached;
-        bool headless = !isDebugMode;
-        headless = false;
+        // Set Playwright headless mode based on appsettings.json value.
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.Development.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        bool headless = configuration.GetValue("PlaywrightSettings:Headless", true);
 
         var playwright = await Playwright.CreateAsync();
         Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
