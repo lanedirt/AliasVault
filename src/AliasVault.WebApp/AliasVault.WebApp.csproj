@@ -63,10 +63,10 @@
       <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\ErrorVaultDecrypt.razor" />
       <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\PendingMigrations.razor" />
       <AdditionalFiles Include="Main\Pages\Sync\StatusMessages\VaultDecryptionProgress.razor" />
-      <None Include="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <Content Update="wwwroot\appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\appsettings.Development.json" Condition="Exists('wwwroot\appsettings.Development.json')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\.dockerignore">
