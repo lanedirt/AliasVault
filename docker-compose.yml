@@ -1,5 +1,5 @@
 services:
-    wasm:
+    client:
         image: aliasvault-client
         build:
             context: .
@@ -21,4 +21,13 @@ services:
             - ./database:/database
         env_file:
             - .env
+        restart: always
+
+    smtp:
+        image: aliasvault-smtp
+        build:
+            context: .
+            dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
+        ports:
+            - "25:25"
         restart: always
