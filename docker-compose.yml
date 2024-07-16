@@ -30,4 +30,5 @@ services:
             dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
         ports:
             - "25:25"
+            - "587:587"
         restart: always
