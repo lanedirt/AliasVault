@@ -72,11 +72,11 @@ public static class Encryption
     public static string Encrypt(string plaintext, byte[] key)
     {
         byte[] iv = new byte[12];
-        SecureRandom random = new SecureRandom();
+        SecureRandom random = new();
         random.NextBytes(iv);
 
-        GcmBlockCipher gcm = new GcmBlockCipher(new AesEngine());
-        AeadParameters parameters = new AeadParameters(new KeyParameter(key), 128, iv, null);
+        GcmBlockCipher gcm = new(new AesEngine());
+        AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
         gcm.Init(true, parameters);
 
         byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
@@ -107,8 +107,8 @@ public static class Encryption
         Array.Copy(fullCipher, 0, iv, 0, iv.Length);
         Array.Copy(fullCipher, iv.Length, cipherBytes, 0, cipherBytes.Length);
 
-        GcmBlockCipher gcm = new GcmBlockCipher(new AesEngine());
-        AeadParameters parameters = new AeadParameters(new KeyParameter(key), 128, iv, null);
+        GcmBlockCipher gcm = new(new AesEngine());
+        AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
         gcm.Init(false, parameters);
 
         byte[] plaintextBytes = new byte[gcm.GetOutputSize(cipherBytes.Length)];

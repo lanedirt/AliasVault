@@ -30,13 +30,13 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
     /// </summary>
     private readonly RetentionPolicy _retentionPolicy = new()
     {
-        Rules = new List<IRetentionRule>
-        {
+        Rules =
+        [
             new DailyRetentionRule { DaysToKeep = 3 },
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
             new VersionRetentionRule { VersionsToKeep = 3 },
-        },
+        ],
     };
 
     /// <summary>

@@ -1,9 +1,9 @@
 services:
     wasm:
-        image: aliasvault
+        image: aliasvault-client
         build:
             context: .
-            dockerfile: src/AliasVault.WebApp/Dockerfile
+            dockerfile: src/AliasVault.Client/Dockerfile
         ports:
             - "80:8080"
         restart: always

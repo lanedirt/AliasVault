@@ -27,9 +27,9 @@ public class PlaywrightTest
     private readonly WebApplicationApiFactoryFixture<AliasVault.Api.Program> _apiFactory = new();
 
     /// <summary>
-    /// For starting the WASM WebApp project in-memory.
+    /// For starting the Client project in-memory.
     /// </summary>
-    private readonly WebApplicationWasmFactoryFixture<AliasVault.E2ETests.WebApp.Server.Program> _wasmFactory = new();
+    private readonly WebApplicationClientFactoryFixture<AliasVault.E2ETests.Client.Server.Program> _clientFactory = new();
 
     /// <summary>
     /// Gets the time provider instance for mutating the current WebApi time in tests.
@@ -101,7 +101,6 @@ public class PlaywrightTest
                 if (currentRetry >= maxRetries)
                 {
                     Console.WriteLine($"All {maxRetries} attempts failed. Last exception: {ex}");
-                    throw;
                 }
 
                 await Task.Delay(500);
@@ -121,7 +120,7 @@ public class PlaywrightTest
         await Browser.CloseAsync();
 
         await _apiFactory.DisposeAsync();
-        await _wasmFactory.DisposeAsync();
+        await _clientFactory.DisposeAsync();
     }
 
     /// <summary>
@@ -291,8 +290,8 @@ public class PlaywrightTest
         _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM app out-of-process.
-        _wasmFactory.HostUrl = "http://localhost:" + appPort;
-        _wasmFactory.CreateDefaultClient();
+        _clientFactory.HostUrl = "http://localhost:" + appPort;
+        _clientFactory.CreateDefaultClient();
 
         // Set Playwright headless mode based on appsettings.json value.
         var configuration = new ConfigurationBuilder()

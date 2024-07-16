@@ -69,8 +69,8 @@ dotnet tool install --global Microsoft.Playwright.CLI
 pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install
 ```
 
-### 7. Create AliasVault.WebApp appsettings.Development.json
-The WASM app supports a development specific appsettings.json file. This appsettings file is optional but can override various options to make debugging easier.
+### 7. Create AliasVault.Client appsettings.Development.json
+The WASM client app supports a development specific appsettings.json file. This appsettings file is optional but can override various options to make debugging easier.
 
 
 1. Copy `wwwroot/appsettings.json` to `wwwroot/appsettings.Development.json`
