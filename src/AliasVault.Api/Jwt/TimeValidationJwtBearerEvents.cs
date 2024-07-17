@@ -25,8 +25,7 @@ public class TimeValidationJwtBearerEvents(ITimeProvider timeProvider) : JwtBear
     /// <returns>Async task.</returns>
     public override Task TokenValidated(TokenValidatedContext context)
     {
-        var jwtToken = context.SecurityToken as JsonWebToken;
-        if (jwtToken != null)
+        if (context.SecurityToken is JsonWebToken jwtToken)
         {
             var now = timeProvider.UtcNow;
             if (jwtToken.ValidTo < now)

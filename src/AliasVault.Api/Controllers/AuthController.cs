@@ -40,7 +40,7 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     /// <summary>
     /// Error message for invalid email or password.
     /// </summary>
-    public static readonly string[] InvalidEmailOrPasswordError = { "Invalid email or password. Please try again." };
+    public static readonly string[] InvalidEmailOrPasswordError = ["Invalid email or password. Please try again."];
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -79,7 +79,7 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
             return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }
 
-        if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || !(serverSecretEphemeral is string))
+        if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
         {
             return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
         }

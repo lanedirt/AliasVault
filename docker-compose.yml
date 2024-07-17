@@ -1,9 +1,9 @@
 services:
-    wasm:
-        image: aliasvault
+    client:
+        image: aliasvault-client
         build:
             context: .
-            dockerfile: src/AliasVault.WebApp/Dockerfile
+            dockerfile: src/AliasVault.Client/Dockerfile
         ports:
             - "80:8080"
         restart: always
@@ -21,4 +21,14 @@ services:
             - ./database:/database
         env_file:
             - .env
+        restart: always
+
+    smtp:
+        image: aliasvault-smtp
+        build:
+            context: .
+            dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
+        ports:
+            - "25:25"
+            - "587:587"
         restart: always
