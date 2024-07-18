@@ -16,9 +16,15 @@ using SmtpServer.Storage;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Read settings from appsettings.json.
-ConfigurationManager configuration = builder.Configuration;
-Config config = configuration.GetSection("Config").Get<Config>()!;
+// Create global config object, get values from environment variables.
+Config config = new Config();
+var emailDomains = Environment.GetEnvironmentVariable("SMTP_ALLOWED_DOMAINS")
+                   ?? throw new KeyNotFoundException("SMTP_ALLOWED_DOMAINS environment variable is not set.");
+config.AllowedToDomains = emailDomains.Split(',').ToList();
+
+var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")
+                 ?? throw new KeyNotFoundException("SMTP_TLS_ENABLED environment variable is not set.");
+config.SmtpTlsEnabled = tlsEnabled;
 builder.Services.AddSingleton(config);
 
 builder.Services.AddSingleton<DbConnection>(container =>

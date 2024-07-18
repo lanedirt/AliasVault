@@ -31,4 +31,6 @@ services:
         ports:
             - "25:25"
             - "587:587"
+        env_file:
+            - .env
         restart: always

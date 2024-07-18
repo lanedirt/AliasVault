@@ -49,6 +49,44 @@ populate_jwt_key() {
   fi
 }
 
+# Function to ask the user for SMTP_ALLOWED_DOMAINS
+set_smtp_allowed_domains() {
+  if ! grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    printf "${YELLOW}Please enter the domains that should be allowed to send email, separated by commas:${NC}\n"
+    read -r smtp_allowed_domains
+    if grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE"; then
+      awk -v domains="$smtp_allowed_domains" '/^SMTP_ALLOWED_DOMAINS=/ {$0="SMTP_ALLOWED_DOMAINS="domains} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    else
+      printf "SMTP_ALLOWED_DOMAINS=${smtp_allowed_domains}\n" >> "$ENV_FILE"
+    fi
+    printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set in $ENV_FILE.${NC}\n"
+  else
+    printf "${CYAN}> SMTP_ALLOWED_DOMAINS already exists and has a value in $ENV_FILE.${NC}\n"
+  fi
+}
+
+# Function to ask the user if TLS should be enabled for email
+set_smtp_tls_enabled() {
+  if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    printf "${YELLOW}Do you want TLS enabled for email? (yes/no):${NC}\n"
+    read -r tls_enabled
+    tls_enabled=$(echo "$tls_enabled" | tr '[:upper:]' '[:lower:]')
+    if [ "$tls_enabled" = "yes" ] || [ "$tls_enabled" = "y" ]; then
+      tls_enabled="true"
+    else
+      tls_enabled="false"
+    fi
+    if grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
+      awk -v tls="$tls_enabled" '/^SMTP_TLS_ENABLED=/ {$0="SMTP_TLS_ENABLED="tls} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    else
+      printf "SMTP_TLS_ENABLED=${tls_enabled}\n" >> "$ENV_FILE"
+    fi
+    printf "${GREEN}> SMTP_TLS_ENABLED has been set to ${tls_enabled} in $ENV_FILE.${NC}\n"
+  else
+    printf "${CYAN}> SMTP_TLS_ENABLED already exists and has a value in $ENV_FILE.${NC}\n"
+  fi
+}
+
 # Function to print the CLI logo
 print_logo() {
   printf "${MAGENTA}\n"
@@ -69,6 +107,8 @@ print_logo
 printf "${BLUE}Initializing AliasVault...${NC}\n"
 create_env_file
 populate_jwt_key
+set_smtp_allowed_domains
+set_smtp_tls_enabled
 printf "${BLUE}Initialization complete.${NC}\n"
 printf "\n"
 printf "To build the images and start the containers, run the following command:\n"

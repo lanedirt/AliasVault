@@ -200,16 +200,16 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             if (email.MessagePlain != null && !String.IsNullOrEmpty(email.MessagePlain) && email.MessagePlain.Length > 3)
             {
                 // Replace any newline characters with a space
-                string plainToPlainText = Regex.Replace(email.MessagePlain, @"\t|\n|\r", " ");
+                string plainToPlainText = Regex.Replace(email.MessagePlain, @"\t|\n|\r", " ", RegexOptions.NonBacktracking);
 
                 // Remove all "-" or "=" characters if there are 3 or more in a row
-                plainToPlainText = Regex.Replace(plainToPlainText, @"-{3,}|\={3,}", "");
+                plainToPlainText = Regex.Replace(plainToPlainText, @"-{3,}|\={3,}", "", RegexOptions.NonBacktracking);
 
                 // Remove any non-printable characters
-                plainToPlainText = Regex.Replace(plainToPlainText, @"[^\u0020-\u007E]", "");
+                plainToPlainText = Regex.Replace(plainToPlainText, @"[^\u0020-\u007E]", "", RegexOptions.NonBacktracking);
 
                 // Replace multiple spaces with a single space
-                plainToPlainText = Regex.Replace(plainToPlainText, @"\s+", " ");
+                plainToPlainText = Regex.Replace(plainToPlainText, @"\s+", " ", RegexOptions.NonBacktracking);
 
                 // Trim start and end of string
                 plainToPlainText = plainToPlainText.Trim();
@@ -223,16 +223,16 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 string htmlToPlainText = Uglify.HtmlToText(email.MessageHtml).ToString();
 
                 // Replace any newline characters with a space
-                htmlToPlainText = Regex.Replace(htmlToPlainText, @"\t|\n|\r", " ");
+                htmlToPlainText = Regex.Replace(htmlToPlainText, @"\t|\n|\r", " ", RegexOptions.NonBacktracking);
 
                 // Remove all "-" or "=" characters if there are 3 or more in a row
-                htmlToPlainText = Regex.Replace(htmlToPlainText, @"-{3,}|\={3,}", "");
+                htmlToPlainText = Regex.Replace(htmlToPlainText, @"-{3,}|\={3,}", "", RegexOptions.NonBacktracking);
 
                 // Remove any non-printable characters
-                htmlToPlainText = Regex.Replace(htmlToPlainText, @"[^\u0020-\u007E]", "");
+                htmlToPlainText = Regex.Replace(htmlToPlainText, @"[^\u0020-\u007E]", "", RegexOptions.NonBacktracking);
 
                 // Replace multiple spaces with a single space
-                htmlToPlainText = Regex.Replace(htmlToPlainText, @"\s+", " ");
+                htmlToPlainText = Regex.Replace(htmlToPlainText, @"\s+", " ", RegexOptions.NonBacktracking);
 
                 // Trim start and end of string
                 htmlToPlainText = htmlToPlainText.Trim();

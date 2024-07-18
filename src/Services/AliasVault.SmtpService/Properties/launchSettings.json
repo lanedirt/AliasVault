@@ -3,7 +3,9 @@
     "AliasVault.SmtpService": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "SMTP_ALLOWED_DOMAINS": "example.tld",
+        "SMTP_TLS_ENABLED": "false"
       },
       "dotnetRunMessages": true
     },

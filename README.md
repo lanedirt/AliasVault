@@ -48,7 +48,7 @@ $ cd AliasVault
 # Make init script executable
 $ chmod +x init.sh
 
-# Run the init script
+# Run the init script and follow the steps
 $ ./init.sh
 ```
 
