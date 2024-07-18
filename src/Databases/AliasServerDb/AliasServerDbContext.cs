@@ -48,6 +48,16 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
     public DbSet<Vault> Vaults { get; set; }
 
     /// <summary>
+    /// Gets or sets the Emails DbSet.
+    /// </summary>
+    public DbSet<Email> Emails { get; set; }
+
+    /// <summary>
+    /// Gets or sets the EmailAttachments DbSet.
+    /// </summary>
+    public DbSet<EmailAttachment> EmailAttachments { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="builder">ModelBuilder instance.</param>
@@ -69,19 +79,24 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
             }
         }
 
-        // Configure the User - AspNetUserRefreshToken entity
+        // Configure the User - AspNetUserRefreshToken entity.
         builder.Entity<AspNetUserRefreshToken>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .IsRequired();
 
-        // Configure the Vault - UserId entity
+        // Configure the Vault - UserId entity.
         builder.Entity<Vault>()
             .HasOne(p => p.User)
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .IsRequired();
+
+        // Configure the Email - Attachments entity.
+        builder.Entity<EmailAttachment>().HasOne(d => d.Email)
+            .WithMany(p => p.Attachments)
+            .HasForeignKey(d => d.EmailId);
     }
 
     /// <summary>
