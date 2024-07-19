@@ -31,8 +31,6 @@ services:
         ports:
             - "25:25"
             - "587:587"
-        volumes:
-            - ./database:/database
         env_file:
             - .env
         restart: always
