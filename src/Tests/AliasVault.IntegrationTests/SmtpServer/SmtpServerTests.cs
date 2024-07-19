@@ -178,7 +178,7 @@ public class SmtpServerTests
     {
         using var client = new SmtpClient();
 
-        await client.ConnectAsync("localhost", 25, SecureSocketOptions.None);
+        await client.ConnectAsync("localhost", 2525, SecureSocketOptions.None);
         try
         {
             await client.SendAsync(message);

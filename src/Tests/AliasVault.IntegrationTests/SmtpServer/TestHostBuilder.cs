@@ -83,13 +83,15 @@ public class TestHostBuilder
                         var options = new SmtpServerOptionsBuilder()
                             .ServerName("aliasvault");
 
-                        // No TLS
+                        // Note: port 25 doesn't work in GitHub actions so we use these instead for the integration tests:
+                        // - 2525 for the SMTP server
+                        // - 5870 for the submission server
                         options.Endpoint(serverBuilder =>
                                 serverBuilder
-                                    .Port(25, false))
+                                    .Port(2525, false))
                             .Endpoint(serverBuilder =>
                                 serverBuilder
-                                    .Port(587, false)
+                                    .Port(5870, false)
                             );
 
                         return new SmtpServer(options.Build(), provider.GetRequiredService<IServiceProvider>());
