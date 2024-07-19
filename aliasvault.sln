@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.SmtpService", "src\Services\AliasVault.SmtpService\AliasVault.SmtpService.csproj", "{B095A174-E528-4D38-BEC1-D1D38B3B30C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.IntegrationTests", "src\Tests\AliasVault.IntegrationTests\AliasVault.IntegrationTests.csproj", "{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{B095A174-E528-4D38-BEC1-D1D38B3B30C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B095A174-E528-4D38-BEC1-D1D38B3B30C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B095A174-E528-4D38-BEC1-D1D38B3B30C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +118,7 @@ Global
 		{607945F3-9896-4544-99EC-F3496CF4D36B} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
 		{A9C9A606-C87E-4298-AB32-09B1884D7487} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{B095A174-E528-4D38-BEC1-D1D38B3B30C0} = {8A477241-B96C-4174-968D-D40CB77F1ECD}
+		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}
