@@ -22,7 +22,7 @@ jobs:
       - name: Set up Docker Compose
         run: |
             # Change the exposed host port of the SmtpService from 25 to 2525 because port 25 is not allowed in GitHub Actions
-            sed -i 's/25:25/2525:25/' docker-compose.yml
+            sed -i '' 's/25\:25/2525\:25/g' docker-compose.yml
             docker compose -f docker-compose.yml up -d
       - name: Wait for services to be up
         run: |
