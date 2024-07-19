@@ -21,13 +21,13 @@ public class SmtpServerTests
 {
     private IHost _testHost;
 
+    private TestHostBuilder _testHostBuilder;
+
     [SetUp]
     public async Task Setup()
     {
-        _testHost = new TestHostBuilder().Build(services =>
-        {
-            // Here you can override services or add mocks as needed
-        });
+        _testHostBuilder = new TestHostBuilder();
+        _testHost = _testHostBuilder.Build();
 
         await _testHost.StartAsync();
     }
@@ -53,7 +53,7 @@ public class SmtpServerTests
         message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
         message.To.Add(new MailboxAddress("Test Recipient", "recipient.to@example.tld"));
         message.Cc.Add(new MailboxAddress("Test Recipient 2", "recipient.cc@example.tld"));
-        message.Subject = "Test Email with multiple recipients.";
+        message.Subject = "Test Email";
         message.Body = new TextPart("plain")
         {
             Text = "This is a test email."
@@ -78,22 +78,10 @@ public class SmtpServerTests
             await client.DisconnectAsync(true);
         }
 
-        // Act
-        // Wait for the worker to process the email
-        await Task.Delay(1000); // Adjust as needed
+        var dbContext = _testHostBuilder.GetDbContext();
 
-        // Assert
-        using (var scope = _testHost.Services.CreateScope())
-        {
-            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
-            var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-            // Check the database for the expected results
-            var processedEmail = await dbContext.Emails.FirstOrDefaultAsync(e => e.Subject == "Test Email");
-            Assert.That(processedEmail, Is.Not.Null);
-            Assert.That(processedEmail.To, Is.EqualTo("test@test.com"));
-            // Add more assertions as needed
-        }
-
+        var processedEmail = await dbContext.Emails.FirstOrDefaultAsync(e => e.Subject == "Test Email");
+        Assert.That(processedEmail, Is.Not.Null);
+        Assert.That(processedEmail.To, Is.EqualTo("recipient.to@example.tld"));
     }
 }

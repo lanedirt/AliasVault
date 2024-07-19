@@ -43,7 +43,7 @@ builder.Services.AddSingleton<DbConnection>(container =>
 builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
 {
     var connection = container.GetRequiredService<DbConnection>();
-    options.UseSqlite(connection).UseLazyLoadingProxies();
+    options.UseSqlite(connection);
 });
 
 builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();

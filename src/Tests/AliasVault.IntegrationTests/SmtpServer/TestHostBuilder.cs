@@ -19,29 +19,59 @@ using global::SmtpServer.Storage;
 
 public class TestHostBuilder
 {
-    public IHost Build(Action<IServiceCollection> configureServices = null)
+    /// <summary>
+    /// The DbConnection instance that is created for the test.
+    /// </summary>
+    private DbConnection? _dbConnection;
+
+    /// <summary>
+    /// The DbContext instance that is created for the test.
+    /// </summary>
+    private AliasServerDbContext? _dbContext;
+
+    /// <summary>
+    /// Returns the DbContext instance for the test. This can be used to seed the database with test data.
+    /// </summary>
+    /// <returns>AliasServerDbContext instance.</returns>
+    public AliasServerDbContext GetDbContext()
     {
+        if (_dbContext == null)
+        {
+            var options = new DbContextOptionsBuilder<AliasServerDbContext>()
+                .UseSqlite(_dbConnection!)
+                .Options;
+
+            _dbContext = new AliasServerDbContext(options);
+        }
+
+        return _dbContext;
+    }
+
+    /// <summary>
+    /// Builds the SmtpService test host.
+    /// </summary>
+    /// <returns></returns>
+    public IHost Build()
+    {
+        // Create a persistent in-memory database for the duration of the test.
+        _dbConnection = new SqliteConnection("DataSource=:memory:");
+        _dbConnection.Open();
+
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                // Add your services here, similar to your Program.cs
                 services.AddSingleton(new Config
                 {
                     AllowedToDomains = new List<string> { "example.tld" },
                     SmtpTlsEnabled = "false"
                 });
 
-                services.AddSingleton<DbConnection>(sp =>
-                {
-                    var connection = new SqliteConnection("DataSource=:memory:");
-                    connection.Open();
-                    return connection;
-                });
+                services.AddSingleton(_dbConnection);
 
                 services.AddDbContextFactory<AliasServerDbContext>((sp, options) =>
                 {
                     var connection = sp.GetRequiredService<DbConnection>();
-                    options.UseSqlite(connection).UseLazyLoadingProxies();
+                    options.UseSqlite(connection);
                 });
 
                 services.AddTransient<IMessageStore, DatabaseMessageStore>();
@@ -76,9 +106,6 @@ public class TestHostBuilder
                     var dbContext = dbContextFactory.CreateDbContext();
                     dbContext.Database.Migrate();
                 }
-
-                // Allow additional service configuration from the test
-                configureServices.Invoke(services);
             });
 
         return builder.Build();
