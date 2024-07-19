@@ -10,13 +10,13 @@ namespace AliasVault.SmtpService
     public class Worker(ILogger<Worker> logger, SmtpServer.SmtpServer smtpServer) : BackgroundService
     {
         /// <inheritdoc />
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             if (logger.IsEnabled(LogLevel.Information))
             {
                 logger.LogInformation("AliasVault.SmtpService running at: {Time}", DateTimeOffset.Now);
             }
-            await smtpServer.StartAsync(stoppingToken);
+            return smtpServer.StartAsync(stoppingToken);
         }
     }
 }

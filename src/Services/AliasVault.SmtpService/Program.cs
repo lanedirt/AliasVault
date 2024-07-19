@@ -5,17 +5,49 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Data.Common;
 using AliasVault.SmtpService;
 using SmtpServer;
 using System.Security.Cryptography.X509Certificates;
+using AliasServerDb;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using SmtpServer.Storage;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
 
-// Read settings from appsettings.json.
-ConfigurationManager configuration = builder.Configuration;
-Config config = configuration.GetSection("Config").Get<Config>()!;
+// Create global config object, get values from environment variables.
+Config config = new Config();
+var emailDomains = Environment.GetEnvironmentVariable("SMTP_ALLOWED_DOMAINS")
+                   ?? throw new KeyNotFoundException("SMTP_ALLOWED_DOMAINS environment variable is not set.");
+config.AllowedToDomains = emailDomains.Split(',').ToList();
+
+var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")
+                 ?? throw new KeyNotFoundException("SMTP_TLS_ENABLED environment variable is not set.");
+config.SmtpTlsEnabled = tlsEnabled;
 builder.Services.AddSingleton(config);
+
+builder.Services.AddSingleton<DbConnection>(container =>
+{
+    var configFile = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json")
+        .Build();
+
+    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
+    connection.Open();
+
+    return connection;
+});
+
+builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
+{
+    var connection = container.GetRequiredService<DbConnection>();
+    options.UseSqlite(connection).UseLazyLoadingProxies();
+});
+
+builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();
+builder.Services.AddTransient<IMailboxFilter, AllowedDomainsFilter>();
 
 builder.Services.AddSingleton(
     provider =>
@@ -26,16 +58,16 @@ builder.Services.AddSingleton(
         if (config.SmtpTlsEnabled == "true")
         {
             // With TLS and certificate support.
-            options.Endpoint(builder =>
-                    builder
+            options.Endpoint(serverBuilder =>
+                    serverBuilder
                         .Port(25, false)
-                        .AllowUnsecureAuthentication(true)
+                        .AllowUnsecureAuthentication()
                         .Certificate(CreateCertificate())
                         .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls12))
-                .Endpoint(builder =>
-                    builder
+                .Endpoint(serverBuilder =>
+                    serverBuilder
                         .Port(587, false)
-                        .AllowUnsecureAuthentication(true)
+                        .AllowUnsecureAuthentication()
                         .Certificate(CreateCertificate())
                         .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                 );
@@ -43,18 +75,17 @@ builder.Services.AddSingleton(
         else
         {
             // No TLS
-            options.Endpoint(builder =>
-                    builder
+            options.Endpoint(serverBuilder =>
+                    serverBuilder
                         .Port(25, false))
-                .Endpoint(builder =>
-                    builder
+                .Endpoint(serverBuilder =>
+                    serverBuilder
                         .Port(587, false)
                 );
         }
 
-        /// <summary>
-        /// Helper method to create an X509Certificate2 object from a PEM file.
-        /// </summary>
+        return new SmtpServer.SmtpServer(options.Build(), provider.GetRequiredService<IServiceProvider>());
+
         static X509Certificate2 CreateCertificate()
         {
             // Specify the directory where PEM files are stored.
@@ -79,16 +110,16 @@ builder.Services.AddSingleton(
             // NOTE: this is important because saving the object to a PFX file to disk for a brief
             // second will allow Windows to correctly load the certificate with the private key.
             // If we don't do this, the certificate will be loaded without the private key and
-            // will throw error on Windows: 
+            // will throw error on Windows:
             // "The TLS server credential's certificate does not have a private key information property attached to it"
             cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
 
             return cert;
         }
-
-        return new SmtpServer.SmtpServer(options.Build(), provider.GetRequiredService<IServiceProvider>());
     }
 );
+
+builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
 await host.RunAsync();

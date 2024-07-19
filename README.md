@@ -48,7 +48,7 @@ $ cd AliasVault
 # Make init script executable
 $ chmod +x init.sh
 
-# Run the init script
+# Run the init script and follow the steps
 $ ./init.sh
 ```
 
@@ -80,4 +80,5 @@ The following technologies, frameworks and libraries are used in this project:
 - [Flowbite](https://flowbite.com/) - A free and open-source UI component library based on Tailwind CSS.
 - [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.
 - [SRP.net](https://github.com/secure-remote-password/srp.net) - SRP6a Secure Remote Password protocol for secure password authentication.
-- [SqliteWasmHelper](https://github.com/JeremyLikness/SqliteWasmHelper) - The AliasVault SQLite WASM implementation is loosely based on this library.
+- [SmtpServer](https://github.com/cosullivan/SmtpServer) - A SMTP server library for .NET that is used for the virtual email address feature.
+- [MimeKit](https://github.com/jstedfast/MimeKit) - A .NET MIME creation and parser library used for the virtual email address feature.
