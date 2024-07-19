@@ -30,6 +30,14 @@ public class EmailParseMissingToException(string message) : Exception(message);
 /// <param name="config">Config instance.</param>
 public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config config, IDbContextFactory<AliasServerDbContext> dbContextFactory) : MessageStore
 {
+    /// <summary>
+    /// Override the SaveAsync method to save the email into the database.
+    /// </summary>
+    /// <param name="context">ISessionContext instance.</param>
+    /// <param name="transaction">IMessageTransaction instance.</param>
+    /// <param name="buffer">Buffer which contains the email contents.</param>
+    /// <param name="cancellationToken">CancellationToken instance.</param>
+    /// <returns>SmtpResponse.</returns>
     public override async Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction, ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
     {
         await using var stream = new MemoryStream();
@@ -81,9 +89,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             message.Headers.Add("x-receiver", toAddress.User + "@" + toAddress.Host);
             message.Headers.Add("x-sender", transaction.From.User + "@" + transaction.From.Host);
 
-            // Insert into database.
             var insertedId = await InsertEmailIntoDatabase(message);
-
             logger.LogInformation("Email saved into database with ID {insertedId}.", insertedId);
         }
 
@@ -93,14 +99,13 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <summary>
     /// Insert email into database.
     /// </summary>
-    /// <param name="context">ISessionContext instance.</param>
     /// <param name="message">MimeMessage to save into database.</param>
     private async Task<int> InsertEmailIntoDatabase(MimeMessage message)
     {
         var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Add the new vault and commit to database.
         var newEmail = ConvertMimeMessageToEmail(message);
+
         await dbContext.Emails.AddAsync(newEmail);
         await dbContext.SaveChangesAsync();
 
@@ -113,7 +118,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <param name="message"></param>
     /// <returns></returns>
     /// <exception cref="EmailParseMissingToException"></exception>
-    private Email ConvertMimeMessageToEmail(MimeMessage message)
+    private static Email ConvertMimeMessageToEmail(MimeMessage message)
     {
         string from = "";
 
@@ -159,7 +164,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         // Try to extract to address firstly from x-receiver address..
         try
         {
-            to = message.Headers.Where(x => x.Field == "x-receiver").First().Value.ToString();
+            to = message.Headers.First(x => x.Field == "x-receiver").Value.ToString();
             toAddress = new MailAddress(to);
         }
         catch
@@ -193,8 +198,34 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         email.MessagePlain = message.TextBody;
         email.MessageSource = message.ToString();
 
-        // Extract first 180 characters from plain text message, and if its null, then extract from html message but remove all html tags
-        email.MessagePreview = "";
+        // Extract message preview text based on body contents.
+        email.MessagePreview = ExtractMessagePreview(email);
+
+        email.Date = message.Date.DateTime;
+        email.DateSystem = DateTime.UtcNow;
+        email.Visible = true;
+
+        // Parse attachments from email, and create separate attachment records in database for each attachment
+        foreach (var attachment in message.Attachments)
+        {
+            var emailAttachment = CreateEmailAttachment(attachment);
+            email.Attachments.Add(emailAttachment);
+        }
+
+        return email;
+    }
+
+    /// <summary>
+    /// Extracts a preview of the email message body to be used in the email listing preview in the UI.
+    /// This so the client does not need to load the full email body.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    private static string ExtractMessagePreview(Email email)
+    {
+        var messagePreview = string.Empty;
+        const int maxPreviewLength = 180;
+
         try
         {
             if (email.MessagePlain != null && !String.IsNullOrEmpty(email.MessagePlain) && email.MessagePlain.Length > 3)
@@ -214,8 +245,8 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 // Trim start and end of string
                 plainToPlainText = plainToPlainText.Trim();
 
-                email.MessagePreview = plainToPlainText.Length > 180
-                    ? plainToPlainText.Substring(0, 180)
+                messagePreview = plainToPlainText.Length > maxPreviewLength
+                    ? plainToPlainText.Substring(0, maxPreviewLength)
                     : plainToPlainText;
             }
             else if (email.MessageHtml != null)
@@ -237,8 +268,8 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 // Trim start and end of string
                 htmlToPlainText = htmlToPlainText.Trim();
 
-                email.MessagePreview =
-                    htmlToPlainText.Length > 180 ? htmlToPlainText.Substring(0, 180) : htmlToPlainText;
+                messagePreview =
+                    htmlToPlainText.Length > maxPreviewLength ? htmlToPlainText.Substring(0, maxPreviewLength) : htmlToPlainText;
             }
         }
         catch
@@ -246,38 +277,47 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             // Extracting useful words from email failed.. Skip the step, do nothing..
         }
 
-        email.Date = message.Date.DateTime;
-        email.DateSystem = DateTime.UtcNow;
-        email.Visible = true;
+        return messagePreview;
+    }
 
-        // Parse attachments from email, and create separate attachment records in database for each attachment
-        foreach (var attachment in message.Attachments)
+    /// <summary>
+    /// Create an EmailAttachment object from a MimeEntity attachment.
+    /// </summary>
+    /// <param name="attachment"></param>
+    /// <returns></returns>
+    private static EmailAttachment CreateEmailAttachment(MimeEntity attachment)
+    {
+        byte[] fileBytes = GetAttachmentBytes(attachment);
+
+        return new EmailAttachment
         {
-            byte[] fileBytes;
-            using (var memory = new MemoryStream ())
-            {
-                if (attachment is MimePart)
-                {
-                    ((MimePart)attachment).Content.DecodeTo(memory);
-                }
-                else
-                {
-                    ((MessagePart) attachment).Message.WriteTo(memory);
-                }
+            Bytes = fileBytes,
+            Filename = attachment.ContentDisposition?.FileName ?? "",
+            MimeType = attachment.ContentType.MimeType,
+            Filesize = fileBytes.Length,
+            Date = DateTime.Now
+        };
+    }
 
-                fileBytes = memory.ToArray();
+    /// <summary>
+    /// Get the attachment bytes from a MimeEntity attachment.
+    /// </summary>
+    /// <param name="attachment"></param>
+    /// <returns></returns>
+    private static byte[] GetAttachmentBytes(MimeEntity attachment)
+    {
+        using (var memory = new MemoryStream())
+        {
+            if (attachment is MimePart mimePartAttachment)
+            {
+                mimePartAttachment.Content.DecodeTo(memory);
+            }
+            else
+            {
+                ((MessagePart)attachment).Message.WriteTo(memory);
             }
 
-            email.Attachments.Add(new EmailAttachment
-            {
-                Bytes = fileBytes,
-                Filename = attachment.ContentDisposition?.FileName ?? "",
-                MimeType = attachment.ContentType.MimeType,
-                Filesize = fileBytes.Length,
-                Date = DateTime.Now
-            });
+            return memory.ToArray();
         }
-
-        return email;
     }
 }
