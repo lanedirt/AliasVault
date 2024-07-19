@@ -6,12 +6,13 @@
 //-----------------------------------------------------------------------
 
 using System.Data.Common;
-using AliasVault.SmtpService;
-using SmtpServer;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
+using AliasVault.SmtpService;
+using AliasVault.SmtpService.Handlers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using SmtpServer;
 using SmtpServer.Storage;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -43,11 +44,10 @@ builder.Services.AddSingleton<DbConnection>(container =>
 builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
 {
     var connection = container.GetRequiredService<DbConnection>();
-    options.UseSqlite(connection).UseLazyLoadingProxies();
+    options.UseSqlite(connection);
 });
 
 builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();
-builder.Services.AddTransient<IMailboxFilter, AllowedDomainsFilter>();
 
 builder.Services.AddSingleton(
     provider =>
@@ -120,6 +120,14 @@ builder.Services.AddSingleton(
 );
 
 builder.Services.AddHostedService<Worker>();
-
 var host = builder.Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var container = scope.ServiceProvider;
+    var db = container.GetRequiredService<AliasServerDbContext>();
+
+    await db.Database.MigrateAsync();
+}
+
 await host.RunAsync();

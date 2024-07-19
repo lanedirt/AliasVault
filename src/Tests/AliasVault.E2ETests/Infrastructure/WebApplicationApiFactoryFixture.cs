@@ -25,14 +25,14 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     where TEntryPoint : class
 {
     /// <summary>
-    /// The DbContext instance that is created for the test.
-    /// </summary>
-    private AliasServerDbContext? _dbContext;
-
-    /// <summary>
     /// The DbConnection instance that is created for the test.
     /// </summary>
     private DbConnection? _dbConnection;
+
+    /// <summary>
+    /// The DbContext instance that is created for the test.
+    /// </summary>
+    private AliasServerDbContext? _dbContext;
 
     /// <summary>
     /// Gets or sets the URL the web application host will listen on.

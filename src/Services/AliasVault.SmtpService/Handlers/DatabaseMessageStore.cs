@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+namespace AliasVault.SmtpService.Handlers;
+
 using System.Buffers;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -15,8 +17,6 @@ using NUglify;
 using SmtpServer;
 using SmtpServer.Protocol;
 using SmtpServer.Storage;
-
-namespace AliasVault.SmtpService;
 
 /// <summary>
 /// Custom exception for when the email parsing fails to find the "to" address in the email.
@@ -58,7 +58,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
 
         stream.Position = 0;
-        var message = await MimeKit.MimeMessage.LoadAsync(stream, cancellationToken);
+        var message = await MimeMessage.LoadAsync(stream, cancellationToken);
         // Retrieve all addresses from the SMTP transaction which should contain all recipients for this mail instance.
         var allAddresses =  transaction.To
             .Distinct()
@@ -76,18 +76,17 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             }
             if (!config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
             {
-                // ToAddress domain is not allowed, return error to sender.
+                // ToAddress domain is not allowed.
+                if (toAddresses.Count > 1)
+                {
+                    // If more recipients, silently skip this one.
+                    continue;
+                }
+
+                // If only one recipient, return error.
                 logger.LogWarning("Email to {ToAddress} is not allowed", toAddress.User + "@" + toAddress.Host);
                 return SmtpResponse.NoValidRecipientsGiven;
             }
-
-            // Remove existing x-receiver and x-sender headers to avoid duplication.
-            message.Headers.RemoveAll("x-receiver");
-            message.Headers.RemoveAll("x-sender");
-
-            // Add new x-receiver and x-sender headers.
-            message.Headers.Add("x-receiver", toAddress.User + "@" + toAddress.Host);
-            message.Headers.Add("x-sender", transaction.From.User + "@" + transaction.From.Host);
 
             var insertedId = await InsertEmailIntoDatabase(message);
             logger.LogInformation("Email saved into database with ID {insertedId}.", insertedId);
@@ -115,8 +114,8 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <summary>
     /// Convert MimeMessage to Email database object.
     /// </summary>
-    /// <param name="message"></param>
-    /// <returns></returns>
+    /// <param name="message">MimeMessage object.</param>
+    /// <returns>Email object.</returns>
     /// <exception cref="EmailParseMissingToException"></exception>
     private static Email ConvertMimeMessageToEmail(MimeMessage message)
     {
