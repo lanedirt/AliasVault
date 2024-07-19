@@ -71,14 +71,17 @@ public class SmtpServerTests
 
         // Check if the email is in the database.
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
-        Assert.That(processedEmail, Is.Not.Null);
-        Assert.That(processedEmail.From, Is.EqualTo("\"Test Sender\" <sender@example.com>"));
-        Assert.That(processedEmail.FromLocal, Is.EqualTo("sender"));
-        Assert.That(processedEmail.FromDomain, Is.EqualTo("example.com"));
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
-        Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email plain."));
-        Assert.That(processedEmail.MessagePlain, Is.EqualTo("This is a test email plain."));
-        Assert.That(processedEmail.MessageHtml, Is.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(processedEmail, Is.Not.Null);
+            Assert.That(processedEmail.From, Is.EqualTo("\"Test Sender\" <sender@example.com>"));
+            Assert.That(processedEmail.FromLocal, Is.EqualTo("sender"));
+            Assert.That(processedEmail.FromDomain, Is.EqualTo("example.com"));
+            Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
+            Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email plain."));
+            Assert.That(processedEmail.MessagePlain, Is.EqualTo("This is a test email plain."));
+            Assert.That(processedEmail.MessageHtml, Is.Null);
+        });
     }
 
     /// <summary>
@@ -98,11 +101,14 @@ public class SmtpServerTests
 
         // Check if the email is in the database.
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
-        Assert.That(processedEmail, Is.Not.Null);
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
-        Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email html."));
-        Assert.That(processedEmail.MessagePlain, Is.Null);
-        Assert.That(processedEmail.MessageHtml, Is.EqualTo(htmlBody));
+        Assert.Multiple(() =>
+        {
+            Assert.That(processedEmail, Is.Not.Null);
+            Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
+            Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email html."));
+            Assert.That(processedEmail.MessagePlain, Is.Null);
+            Assert.That(processedEmail.MessageHtml, Is.EqualTo(htmlBody));
+        });
     }
 
     /// <summary>
@@ -123,11 +129,14 @@ public class SmtpServerTests
 
         // Check if the email is in the database.
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
-        Assert.That(processedEmail, Is.Not.Null);
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
-        Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email multipart."));
-        Assert.That(processedEmail.MessagePlain, Is.EqualTo("This is a test email multipart."));
-        Assert.That(processedEmail.MessageHtml, Is.EqualTo(htmlBody));
+        Assert.Multiple(() =>
+        {
+            Assert.That(processedEmail, Is.Not.Null);
+            Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <recipient@example.tld>"));
+            Assert.That(processedEmail.MessagePreview, Is.EqualTo("This is a test email multipart."));
+            Assert.That(processedEmail.MessagePlain, Is.EqualTo("This is a test email multipart."));
+            Assert.That(processedEmail.MessageHtml, Is.EqualTo(htmlBody));
+        });
     }
 
     /// <summary>
@@ -174,7 +183,7 @@ public class SmtpServerTests
     /// Sends a message to the SMTP server.
     /// </summary>
     /// <param name="message"></param>
-    private async Task SendMessageToSmtpServer(MimeMessage message)
+    private static async Task SendMessageToSmtpServer(MimeMessage message)
     {
         using var client = new SmtpClient();
 
