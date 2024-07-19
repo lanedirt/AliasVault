@@ -120,6 +120,14 @@ builder.Services.AddSingleton(
 );
 
 builder.Services.AddHostedService<Worker>();
-
 var host = builder.Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var container = scope.ServiceProvider;
+    var db = container.GetRequiredService<AliasServerDbContext>();
+
+    await db.Database.MigrateAsync();
+}
+
 await host.RunAsync();
