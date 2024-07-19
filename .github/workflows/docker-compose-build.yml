@@ -47,3 +47,14 @@ jobs:
             else
                 echo "Service responded with $http_code"
             fi
+            - name: Test if localhost:2525 (Email Service) responds
+      - name: Test if SmtpService responds
+        run: |
+              # Test if the service on localhost:25 responds
+              response=$(curl -s --connect-timeout 5 localhost:2525)
+              if [ -z "$response" ]; then
+                  echo "SmtpService did not respond on port 25. Check if the SmtpService service is running."
+                  exit 1
+              else
+                  echo "SmtpService responded on port 25"
+              fi
