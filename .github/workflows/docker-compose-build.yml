@@ -21,7 +21,8 @@ jobs:
           ./init.sh
       - name: Set up Docker Compose
         run: |
-            # Build the images and start the services
+            # Change the exposed host port of the SmtpService from 25 to 2525 because port 25 is not allowed in GitHub Actions
+            sed -i 's/25\:25/2525\:25/g' docker-compose.yml
             docker compose -f docker-compose.yml up -d
       - name: Wait for services to be up
         run: |
@@ -46,4 +47,13 @@ jobs:
                 exit 1
             else
                 echo "Service responded with $http_code"
+            fi
+      - name: Test if localhost:2525 (SmtpService) responds
+        run: |
+            # Test if the service on localhost:2525 responds
+            if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+                echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
+                exit 1
+            else
+                echo "SmtpService responded on port 2525"
             fi
