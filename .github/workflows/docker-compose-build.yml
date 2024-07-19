@@ -51,7 +51,7 @@ jobs:
       - name: Test if localhost:2525 (SmtpService) responds
         run: |
             # Test if the service on localhost:2525 responds
-            if nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+            if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
                 echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
                 exit 1
             else
