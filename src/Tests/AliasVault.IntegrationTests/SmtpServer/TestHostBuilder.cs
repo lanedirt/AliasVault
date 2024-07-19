@@ -5,11 +5,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using AliasVault.SmtpService.Handlers;
+
 namespace AliasVault.IntegrationTests.SmtpServer;
 
 using System.Data.Common;
 using AliasServerDb;
-using AliasVault.SmtpService;
+using SmtpService;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Data.Sqlite;
@@ -75,8 +77,6 @@ public class TestHostBuilder
                 });
 
                 services.AddTransient<IMessageStore, DatabaseMessageStore>();
-                services.AddTransient<IMailboxFilter, AllowedDomainsFilter>();
-
                 services.AddSingleton<global::SmtpServer.SmtpServer>(
                     provider =>
                     {
