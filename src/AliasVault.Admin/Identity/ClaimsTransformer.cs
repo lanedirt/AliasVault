@@ -34,13 +34,13 @@ public class ClaimsTransformer : IClaimsTransformation
 
             // Get the user's roles and claims in a single database call
             var userRolesAndClaims = await (
-                from userRole in dbContext.AdminUserRoles
+                from userRole in dbContext.UserRoles
                 join role in dbContext.AdminRoles on userRole.RoleId equals role.Id
                 where userRole.UserId == user.Id
                 select new { userRole, role }
             ).ToListAsync();
 
-            var userClaims = await dbContext.AdminUserClaims.Where(x => x.UserId == user.Id).ToListAsync();
+            var userClaims = await dbContext.UserClaims.Where(x => x.UserId == user.Id).ToListAsync();
 
             // Convert roles to claims
             var roleClaims = userRolesAndClaims
