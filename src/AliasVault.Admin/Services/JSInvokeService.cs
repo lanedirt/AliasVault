@@ -32,7 +32,7 @@ public class JsInvokeService
                     return; // Successfully called the JS function, exit the method
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 // Optionally log the exception
             }

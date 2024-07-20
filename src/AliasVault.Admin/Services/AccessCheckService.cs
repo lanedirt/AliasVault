@@ -1,8 +1,10 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-
 namespace AliasVault.Admin.Services;
 
+using Microsoft.AspNetCore.Components;
+
+/// <summary>
+/// Access check service to verify if the user is logged in and has a confirmed email.
+/// </summary>
 public class AccessCheckService
 {
     public static async Task<bool> GenericAccessCheckAsync(NavigationManager navigationManager, UserService userService)

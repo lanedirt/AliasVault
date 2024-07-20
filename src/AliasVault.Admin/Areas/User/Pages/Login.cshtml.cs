@@ -1,12 +1,12 @@
+namespace AliasVault.Areas.User.Pages;
+
 using System.ComponentModel.DataAnnotations;
 using AliasServerDb;
+using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
-using AliasVault.Admin.Services;
-
-namespace AliasVault.Areas.User.Pages;
 
 public class LoginModel : PageModel
 {
@@ -21,8 +21,10 @@ public class LoginModel : PageModel
 
     [BindProperty]
     public InputModel Input { get; set; } = new();
+
     public string? ReturnUrl { get; set; }
-    public string SuccessMessage { get; set; } = "";
+
+    public string SuccessMessage { get; set; } = string.Empty;
 
     public void OnGet()
     {

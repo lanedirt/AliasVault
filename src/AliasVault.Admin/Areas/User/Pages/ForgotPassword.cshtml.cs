@@ -1,39 +1,38 @@
+namespace AliasVault.Areas.User.Pages;
+
 using System.ComponentModel.DataAnnotations;
 using System.Web;
 using AliasServerDb;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-//using SendgridEmail;
 
-namespace AliasVault.Areas.User.Pages;
-
+/// <summary>
+/// Forgot password page model.
+/// </summary>
 public class ForgotPasswordModel : PageModel
 {
     private readonly UserManager<AdminUser> _userManager;
     private readonly IConfiguration _configuration;
-    //private readonly EmailService _emailService;
 
-    public ForgotPasswordModel(SignInManager<AdminUser> signInManager, UserManager<AdminUser> userManager, IConfiguration configuration
-        //EmailService emailService
-        )
+    public ForgotPasswordModel(SignInManager<AdminUser> signInManager, UserManager<AdminUser> userManager, IConfiguration configuration)
     {
         _userManager = userManager;
         _configuration = configuration;
-        //_emailService = emailService;
     }
 
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    /// <summary>
+    /// Get method for the page.
+    /// </summary>
     public void OnGet()
     {
-
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-
         if (ModelState.IsValid)
         {
             var user = await _userManager.FindByEmailAsync(Input.Email);
@@ -51,7 +50,6 @@ public class ForgotPasswordModel : PageModel
             string scheme = HttpContext.Request.Scheme; // "http" or "https"
             string host = HttpContext.Request.Host.Value; // the host name and port
             string baseUrl = $"{scheme}://{host}/";
-            //await _emailService.SendUserPasswordForgotMailAsync(user, "UserEmailConfirm", baseUrl, encodedToken, _configuration["SendGridApiKey"] ?? "");
 
             return LocalRedirect("/user/login?passwordReset=true");
 

@@ -1,6 +1,6 @@
-using System.Security.Cryptography;
-
 namespace AliasVault.Admin.Services;
+
+using System.Security.Cryptography;
 
 /// <summary>
 /// Service to provide versioned content paths for cache busting of static files.
@@ -9,12 +9,12 @@ public class VersionedContentService
 {
     private readonly string _webRootPath;
 
+    private Dictionary<string, string> _hashCache = new Dictionary<string, string>();
+
     public VersionedContentService(string webRootPath)
     {
         _webRootPath = webRootPath ?? throw new ArgumentNullException(nameof(webRootPath));
     }
-
-    private Dictionary<string, string> _hashCache = new Dictionary<string, string>();
 
     public string GetVersionedPath(string contentPath)
     {

@@ -1,8 +1,8 @@
-﻿using AliasVault.Admin.Services;
+﻿namespace AliasVault.Components.Layouts.Base;
+
+using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-
-namespace AliasVault.Components.Layouts.Base;
 
 /// <summary>
 /// Checks whether the current event has the Faqs plugin enabled. If not, user is redirected

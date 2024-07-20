@@ -1,11 +1,9 @@
-﻿using AliasVault.Admin.Models;
+﻿namespace AliasVault.Admin.Components.Pages;
+
+using AliasVault.Admin.Models;
 using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
-
-namespace AliasVault.Admin.Components.Pages;
 
 /// <summary>
 /// Base authorize page that all pages that are part of the logged in website should inherit from.
@@ -14,10 +12,14 @@ namespace AliasVault.Admin.Components.Pages;
 /// </summary>
 public class AuthorizePageBase : OwningComponentBase
 {
+    private bool _parametersInitialSet;
+
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
+
     [Inject]
     protected UserService UserService { get; set; } = null!;
+
     [Inject]
     protected PortalMessageService PortalMessageService { get; set; } = null!;
 
@@ -32,11 +34,13 @@ public class AuthorizePageBase : OwningComponentBase
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = new List<BreadcrumbItem>();
 
-    private bool _parametersInitialSet;
-
     protected override async Task OnInitializedAsync()
     {
-        if (!await AccessCheck()) return;
+        if (!await AccessCheck())
+        {
+            return;
+        }
+
         await base.OnInitializedAsync();
         _parametersInitialSet = false;
 
@@ -63,7 +67,7 @@ public class AuthorizePageBase : OwningComponentBase
     /// <summary>
     /// Issue a redirect to the login page if the user is not logged in.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Boolean whether user has access to the current page.</returns>
     protected async Task<bool> AccessCheck()
     {
         // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.

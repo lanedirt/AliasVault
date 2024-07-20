@@ -1,3 +1,5 @@
+namespace AliasVault.Areas.User.Pages;
+
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using AliasServerDb;
@@ -5,8 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace AliasVault.Areas.User.Pages;
-
+/// <summary>
+/// Register page model.
+/// </summary>
 public class RegisterModel : PageModel
 {
     private readonly SignInManager<AdminUser> _signInManager;

@@ -1,6 +1,6 @@
-using System.Web;
-
 namespace AliasVault.Admin.Services;
+
+using System.Web;
 
 /// <summary>
 /// Handles portal messages that should be displayed to the user, such as success or error messages. These messages
