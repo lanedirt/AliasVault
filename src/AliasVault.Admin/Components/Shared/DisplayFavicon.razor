@@ -1,0 +1,24 @@
+@if (faviconBytes != null)
+{
+    <img src="@faviconDataUrl" style="width: 50px;" alt="Favicon" />
+}
+else
+{
+    <img src="img/service-placeholder.webp" style="width: 50px;" alt="Favicon" />
+}
+
+@code {
+    [Parameter]
+    public byte[]? faviconBytes { get; set; }
+
+    private string? faviconDataUrl;
+
+    protected override void OnParametersSet()
+    {
+        if (faviconBytes != null)
+        {
+            string base64String = Convert.ToBase64String(faviconBytes);
+            faviconDataUrl = $"data:image/x-icon;base64,{base64String}";
+        }
+    }
+}

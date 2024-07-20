@@ -7,14 +7,16 @@
 
 namespace AliasServerDb;
 
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
-/// The AliasServerDbContext class.
+/// The AliasServerDbContext class. Note: we  are using DbContext instead of IdentityDbContext because
+/// we have two separate user objects, one for the admin panel and one for the vault. We manually
+/// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
+public class AliasServerDbContext : DbContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
@@ -33,14 +35,79 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
     }
 
     /// <summary>
-    /// Gets or sets the AspNetUserRefreshTokens DbSet.
-    /// </summary>
-    public DbSet<AspNetUserRefreshToken> AspNetUserRefreshTokens { get; set; }
-
-    /// <summary>
     /// Gets or sets the AliasVaultUser DbSet.
     /// </summary>
     public DbSet<AliasVaultUser> AliasVaultUsers { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultRoles DbSet.
+    /// </summary>
+    public DbSet<AliasVaultRole> AliasVaultRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultUserRoles DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserRole> AliasVaultUserRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultUserClaims DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserClaim> AliasVaultUserClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultUserLogins DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserLogin> AliasVaultUserLogins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultRoleClaims DbSet.
+    /// </summary>
+    public DbSet<AliasVaultRoleClaim> AliasVaultRoleClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultUserTokens DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserToken> AliasVaultUserTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserRefreshTokens DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserRefreshToken> AliasVaultUserRefreshTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUser DbSet.
+    /// </summary>
+    public DbSet<AdminUser> AdminUsers { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminRoles DbSet.
+    /// </summary>
+    public DbSet<AdminRole> AdminRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUserRoles DbSet.
+    /// </summary>
+    public DbSet<AdminUserRole> AdminUserRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUserClaims DbSet.
+    /// </summary>
+    public DbSet<AdminUserClaim> AdminUserClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUserLogins DbSet.
+    /// </summary>
+    public DbSet<AdminUserLogin> AdminUserLogins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminRoleClaims DbSet.
+    /// </summary>
+    public DbSet<AdminRoleClaim> AdminRoleClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUserTokens DbSet.
+    /// </summary>
+    public DbSet<AdminUserToken> AdminUserTokens { get; set; }
 
     /// <summary>
     /// Gets or sets the Vaults DbSet.
@@ -79,24 +146,120 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
             }
         }
 
-        // Configure the User - AspNetUserRefreshToken entity.
-        builder.Entity<AspNetUserRefreshToken>()
-            .HasOne(p => p.User)
-            .WithMany()
-            .HasForeignKey(p => p.UserId)
-            .IsRequired();
+        // Configure AspNetIdentity tables manually.
+         // AliasVaultUser tables
+        builder.Entity<AliasVaultUser>(entity =>
+        {
+            entity.ToTable("AliasVaultUsers");
+        });
 
-        // Configure the Vault - UserId entity.
-        builder.Entity<Vault>()
-            .HasOne(p => p.User)
-            .WithMany()
-            .HasForeignKey(p => p.UserId)
-            .IsRequired();
+        builder.Entity<AliasVaultRole>(entity =>
+        {
+            entity.ToTable("AliasVaultRoles");
+        });
 
-        // Configure the Email - Attachments entity.
-        builder.Entity<EmailAttachment>().HasOne(d => d.Email)
-            .WithMany(p => p.Attachments)
-            .HasForeignKey(d => d.EmailId);
+        builder.Entity<AliasVaultUserRole>(entity =>
+        {
+            entity.HasKey(r => new { r.UserId, r.RoleId });
+            entity.ToTable("AliasVaultUserRoles");
+            entity.HasOne<AliasVaultUser>()
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AliasVaultUserClaim>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.ToTable("AliasVaultUserClaims");
+            entity.HasOne<AliasVaultUser>()
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AliasVaultUserLogin>(entity =>
+        {
+            entity.HasKey(l => new { l.LoginProvider, l.ProviderKey });
+            entity.ToTable("AliasVaultUserLogins");
+            entity.HasOne<AliasVaultUser>()
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AliasVaultRoleClaim>(entity =>
+        {
+            entity.HasKey(rc => rc.Id);
+            entity.ToTable("AliasVaultRoleClaims");
+        });
+
+        builder.Entity<AliasVaultUserToken>(entity =>
+        {
+            entity.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+            entity.ToTable("AliasVaultUserTokens");
+            entity.HasOne<AliasVaultUser>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .IsRequired();
+        });
+
+        // AdminUser tables
+        builder.Entity<AdminUser>(entity =>
+        {
+            entity.ToTable("AdminUsers");
+        });
+
+        builder.Entity<AdminUserRole>(entity =>
+        {
+            entity.ToTable("AdminRoles");
+        });
+
+        builder.Entity<AdminUserRole>(entity =>
+        {
+            entity.HasKey(r => new { r.UserId, r.RoleId });
+            entity.ToTable("AdminUserRoles");
+            entity.HasOne<AdminUser>()
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AdminUserClaim>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.ToTable("AdminUserClaims");
+            entity.HasOne<AdminUser>()
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AdminUserLogin>(entity =>
+        {
+            entity.HasKey(l => new { l.LoginProvider, l.ProviderKey });
+            entity.ToTable("AdminUserLogins");
+            entity.HasOne<AdminUser>()
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .IsRequired();
+        });
+
+        builder.Entity<AdminRoleClaim>(entity =>
+        {
+            entity.HasKey(rc => rc.Id);
+            entity.ToTable("AdminRoleClaims");
+        });
+
+        builder.Entity<AdminUserToken>(entity =>
+        {
+            entity.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+            entity.ToTable("AdminUserTokens");
+            entity.HasOne<AdminUser>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .IsRequired();
+        });
     }
 
     /// <summary>

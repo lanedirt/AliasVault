@@ -129,20 +129,20 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
         // Check if the refresh token is valid.
         // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             return Unauthorized("Refresh token expired");
         }
 
         // Remove the existing refresh token.
-        context.AspNetUserRefreshTokens.Remove(existingToken);
+        context.AliasVaultUserRefreshTokens.Remove(existingToken);
 
         // Generate a new refresh token to replace the old one.
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -178,14 +178,14 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             return Unauthorized("Invalid refresh token");
         }
 
         // Remove the existing refresh token.
-        context.AspNetUserRefreshTokens.Remove(existingToken);
+        context.AliasVaultUserRefreshTokens.Remove(existingToken);
         await context.SaveChangesAsync();
 
         return Ok("Refresh token revoked successfully");
@@ -338,11 +338,11 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
 
         // Save refresh token to database.
         // Remove any existing refresh tokens for this user and device.
-        var existingTokens = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
+        var existingTokens = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        context.AliasVaultUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -352,6 +352,6 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
         });
         await context.SaveChangesAsync();
 
-        return new TokenModel() { Token = token, RefreshToken = refreshToken };
+        return new TokenModel { Token = token, RefreshToken = refreshToken };
     }
 }

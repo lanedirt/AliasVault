@@ -1,0 +1,31 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="mb-3 row">
+    <label for="inputEmail3" class="col-sm-2 col-form-label">@Label</label>
+    <div class="col-sm-10">
+        <input type="text" readonly="readonly" aria-readonly="true" class="form-control @(_copied ? "is-valid" : "")" value="@Value" onclick="@CopyToClipboard">
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string Value { get; set; }
+
+    private bool _copied = false;
+
+    public async Task CopyToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("window.clipboardCopy.copyText", Value);
+        _copied = true;
+
+        StateHasChanged();
+
+        // After 2 seconds, remove the success class again
+        await Task.Delay(2000);
+        _copied = false;
+
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,65 @@
+﻿@using AliasServerDb
+@using Microsoft.EntityFrameworkCore
+@inherits AuthorizePageBase
+@inject AliasServerDbContext dbContext
+@page "/"
+
+<PageTitle>Emails</PageTitle>
+
+<div class="row align-items-center">
+    <div class="col">
+        <h1>Emails</h1>
+    </div>
+    <div class="col-auto">
+        <a href="/add-alias" class="btn btn-success">
+            <span class="bi bi-file-earmark-plus" aria-hidden="true"></span> + Add new alias
+        </a>
+    </div>
+</div>
+<p>Find all received emails below.</p>
+
+@if (IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var email in Emails)
+        {
+            <div>
+                <div>@email.From</div>
+                <div>@email.MessagePreview</div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private List<Email> Emails { get; set; } = new List<Email>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAliasesAsync();
+        }
+    }
+
+    private async Task LoadAliasesAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        // Load the aliases from the database.
+        var user = UserService.User();
+        Emails = await dbContext.Emails
+            .ToListAsync();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

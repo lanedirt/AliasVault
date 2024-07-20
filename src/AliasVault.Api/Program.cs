@@ -57,7 +57,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     options.TokenLifespan = TimeSpan.FromDays(30);
     options.Name = "AliasVault";
 });
-builder.Services.AddIdentity<AliasVaultUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
