@@ -14,44 +14,35 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitleLayout>Register</PageTitleLayout>
+<LayoutPageTitle>Register</LayoutPageTitle>
 
-<h1>Register</h1>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+    Register admin account
+</h2>
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message"/>
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator/>
-            <h2>Create a new account.</h2>
-            <hr/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                <label for="email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger"/>
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                <label for="password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger"/>
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
-                <label for="confirm-password">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger"/>
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
+<EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register" class="mt-8 space-y-6">
+    <DataAnnotationsValidator/>
+    <div>
+        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
+        <InputTextField id="email" @bind-Value="Input.Email" placeholder="name@company.com" />
+        <ValidationMessage For="() => Input.Email"/>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr/>
-            <ExternalLoginPicker/>
-        </section>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+        <InputTextField id="password" @bind-Value="Input.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => Input.Password"/>
     </div>
-</div>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
+        <InputTextField id="password2" @bind-Value="Input.ConfirmPassword" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => Input.ConfirmPassword"/>
+    </div>
+
+    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Create account</button>
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+        Already registered? <a href="/user/login" class="text-primary-700 hover:underline dark:text-primary-500">Login here</a>
+    </div>
+</EditForm>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;

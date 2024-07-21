@@ -1,10 +1,9 @@
-﻿using AliasServerDb;
-using Microsoft.AspNetCore.Authorization;
+﻿namespace AliasVault.Admin2.Main.Pages;
 
-namespace AliasVault.Admin2.Main.Pages;
-
+using AliasServerDb;
 using AliasVault.Admin2.Main.Models;
 using AliasVault.Admin2.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 

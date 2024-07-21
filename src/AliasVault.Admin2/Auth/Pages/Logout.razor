@@ -1,0 +1,38 @@
+@page "/user/logout"
+@using AliasVault.Admin2.Services
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AdminUser> SignInManager
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Sign out the user.
+        // NOTE: the try/catch below is a workaround for the issue that the sign out does not work when
+        // the server session is already started.
+        try
+        {
+            try
+            {
+                await SignInManager.SignOutAsync();
+                GlobalNotificationService.ClearMessages();
+
+                // Redirect to the home page with hard refresh.
+                NavigationManager.NavigateTo("/", true);
+            }
+            catch
+            {
+                // Hard refresh current page if sign out fails. When an interactive server session is already started
+                // the sign out will fail because it tries to mutate cookies which is only possible when the server
+                // session is not started yet.
+                NavigationManager.NavigateTo(NavigationManager.Uri, true);
+            }
+        }
+        catch
+        {
+            // Redirect to the home page with hard refresh.
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+}

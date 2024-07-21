@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components;
 
-namespace AliasVault.Admin2.Account;
+namespace AliasVault.Admin2.Auth;
 
 internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {

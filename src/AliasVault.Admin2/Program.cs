@@ -3,7 +3,7 @@ using AliasServerDb;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AliasVault.Admin2.Account;
+using AliasVault.Admin2.Auth;
 using AliasVault.Admin2.Main;
 using AliasVault.Admin2.Services;
 using Microsoft.Data.Sqlite;

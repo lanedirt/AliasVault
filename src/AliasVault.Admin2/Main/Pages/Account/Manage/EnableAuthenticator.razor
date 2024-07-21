@@ -8,7 +8,6 @@
 
 @inject UserManager<AdminUser> UserManager
 @inject UrlEncoder UrlEncoder
-@inject IdentityRedirectManager RedirectManager
 @inject ILogger<EnableAuthenticator> Logger
 
 <PageTitleLayout>Configure authenticator app</PageTitleLayout>
@@ -38,7 +37,7 @@ else
                 <p>Scan the QR Code or enter this key <kbd>@sharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
                 <div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>
                 <div></div>
-                <div data-url="@authenticatorUri"></div>
+                <div id="authenticator-uri" data-url="@authenticatorUri"></div>
             </li>
             <li>
                 <p>
@@ -79,6 +78,8 @@ else
         await base.OnInitializedAsync();
 
         await LoadSharedKeyAndQrCodeUriAsync(UserService.User());
+
+        await JsInvokeService.RetryInvokeAsync("generateQrCode", TimeSpan.Zero, 5, "authenticator-uri");
     }
 
     private async Task OnValidSubmitAsync()
@@ -151,7 +152,7 @@ else
         return string.Format(
             CultureInfo.InvariantCulture,
             AuthenticatorUriFormat,
-            UrlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
+            UrlEncoder.Encode("AliasVault Admin"),
             UrlEncoder.Encode(email),
             unformattedKey);
     }

@@ -1,13 +1,9 @@
 using System.Security.Claims;
 using System.Text.Json;
 using AliasServerDb;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
-using AliasVault.Admin2.Account.Pages;
 
 namespace Microsoft.AspNetCore.Routing;
 
