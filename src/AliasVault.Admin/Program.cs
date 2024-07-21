@@ -1,7 +1,7 @@
 using System.Data.Common;
 using AliasServerDb;
 using AliasVault.Admin;
-using AliasVault.Admin.Identity;
+using AliasVault.Admin.Auth;
 using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -90,6 +90,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapBlazorHub();
+
 app.MapFallbackToPage("/_Host");
 
 using (var scope = app.Services.CreateScope())

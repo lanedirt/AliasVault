@@ -1,6 +1,6 @@
 ﻿namespace AliasVault.Admin.Components.Pages;
 
-using AliasVault.Admin.Models;
+using AliasVault.Admin.Main.Models;
 using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;

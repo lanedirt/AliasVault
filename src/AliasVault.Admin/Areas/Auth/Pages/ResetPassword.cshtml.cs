@@ -1,4 +1,4 @@
-namespace AliasVault.Areas.User.Pages;
+namespace AliasVault.Admin.Areas.Auth.Pages;
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;

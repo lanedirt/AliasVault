@@ -1,4 +1,4 @@
-namespace AliasVault.Admin.Identity;
+namespace AliasVault.Admin.Auth;
 
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;

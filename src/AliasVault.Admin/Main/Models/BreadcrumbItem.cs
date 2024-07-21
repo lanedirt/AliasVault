@@ -1,4 +1,4 @@
-namespace AliasVault.Admin.Models;
+namespace AliasVault.Admin.Main.Models;
 
 public class BreadcrumbItem
 {

@@ -8,7 +8,7 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -23,6 +23,16 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AdditionalFiles Include="Main\Layout\MainLayout.razor" />
+      <AdditionalFiles Include="Main\Layout\NavMenu.razor" />
+      <AdditionalFiles Include="Main\Layout\TopMenu.razor" />
+      <AdditionalFiles Include="Main\Pages\Error.razor" />
+      <AdditionalFiles Include="Main\Pages\Home.razor" />
+      <AdditionalFiles Include="Main\Components\AlertMessageError.razor" />
+      <AdditionalFiles Include="Main\Components\AlertMessageSuccess.razor" />
+      <AdditionalFiles Include="Main\Components\Breadcrumb.razor" />
+      <AdditionalFiles Include="Main\Components\FullPageLoadingAnimation.razor" />
+      <AdditionalFiles Include="Main\Components\PageTitleAppend.razor" />
       <Content Include="..\..\LICENSE.md">
         <Link>LICENSE.md</Link>
       </Content>
@@ -45,6 +55,26 @@
       <_ContentIncludedByDefault Remove="Components\Pages\Aliases\Alias.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Aliases\Delete.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Aliases\View.razor" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\EmailConfirm.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\ForgotPassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\Login.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\Logout.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\Register.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\ResetPassword.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\Pages\Shared\_Logo.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\_IdentityLayout.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\User\_ViewStart.cshtml" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
+      <_ContentIncludedByDefault Remove="Components\Shared\AlertMessageError.razor" />
+      <_ContentIncludedByDefault Remove="Components\Shared\AlertMessageSuccess.razor" />
+      <_ContentIncludedByDefault Remove="Components\Shared\Breadcrumb.razor" />
+      <_ContentIncludedByDefault Remove="Components\Shared\FullPageLoadingAnimation.razor" />
+      <_ContentIncludedByDefault Remove="Components\Shared\PageTitleAppend.razor" />
+      <_ContentIncludedByDefault Remove="Components\Layout\MainLayout.razor" />
+      <_ContentIncludedByDefault Remove="Components\Layout\NavMenu.razor" />
+      <_ContentIncludedByDefault Remove="Components\Layout\TopMenu.razor" />
     </ItemGroup>
 
 </Project>

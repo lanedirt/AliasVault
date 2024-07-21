@@ -1,9 +1,9 @@
+namespace AliasVault.Admin.Auth;
+
 using System.Security.Claims;
 using AliasServerDb;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-
-namespace AliasVault.Admin.Identity;
 
 public class ClaimsTransformer : IClaimsTransformation
 {
