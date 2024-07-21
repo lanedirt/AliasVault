@@ -1,0 +1,110 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>aspnet-AliasVault.Admin2-1DAADE35-C01B-43BB-B440-AA5E1E0B672D</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\AccessDenied.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ConfirmEmail.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ConfirmEmailChange.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ExternalLogin.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ForgotPassword.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ForgotPasswordConfirmation.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\InvalidPasswordReset.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\InvalidUser.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Lockout.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Login.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\LoginWith2fa.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\LoginWithRecoveryCode.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\ChangePassword.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\DeletePersonalData.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\Disable2fa.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\Email.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\EnableAuthenticator.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\ExternalLogins.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\GenerateRecoveryCodes.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\Index.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\PersonalData.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\ResetAuthenticator.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\SetPassword.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\TwoFactorAuthentication.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Manage\_Imports.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Register.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\RegisterConfirmation.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ResendEmailConfirmation.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ResetPassword.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ResetPasswordConfirmation.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\_Imports.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\AccountLayout.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\ExternalLoginPicker.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\ManageLayout.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\ManageNavMenu.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\RedirectToLogin.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\ShowRecoveryCodes.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Shared\StatusMessage.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Account\Pages\AccessDenied.razor" />
+      <AdditionalFiles Include="Account\Pages\ConfirmEmail.razor" />
+      <AdditionalFiles Include="Account\Pages\ConfirmEmailChange.razor" />
+      <AdditionalFiles Include="Account\Pages\ExternalLogin.razor" />
+      <AdditionalFiles Include="Account\Pages\ForgotPassword.razor" />
+      <AdditionalFiles Include="Account\Pages\ForgotPasswordConfirmation.razor" />
+      <AdditionalFiles Include="Account\Pages\InvalidPasswordReset.razor" />
+      <AdditionalFiles Include="Account\Pages\InvalidUser.razor" />
+      <AdditionalFiles Include="Account\Pages\Lockout.razor" />
+      <AdditionalFiles Include="Account\Pages\Login.razor" />
+      <AdditionalFiles Include="Account\Pages\LoginWith2fa.razor" />
+      <AdditionalFiles Include="Account\Pages\LoginWithRecoveryCode.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\ChangePassword.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\DeletePersonalData.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\Disable2fa.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\Email.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\EnableAuthenticator.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\ExternalLogins.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\GenerateRecoveryCodes.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\Index.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\PersonalData.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\ResetAuthenticator.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\SetPassword.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\TwoFactorAuthentication.razor" />
+      <AdditionalFiles Include="Account\Pages\Manage\_Imports.razor" />
+      <AdditionalFiles Include="Account\Pages\Register.razor" />
+      <AdditionalFiles Include="Account\Pages\RegisterConfirmation.razor" />
+      <AdditionalFiles Include="Account\Pages\ResendEmailConfirmation.razor" />
+      <AdditionalFiles Include="Account\Pages\ResetPassword.razor" />
+      <AdditionalFiles Include="Account\Pages\ResetPasswordConfirmation.razor" />
+      <AdditionalFiles Include="Account\Pages\_Imports.razor" />
+      <AdditionalFiles Include="Account\Shared\AccountLayout.razor" />
+      <AdditionalFiles Include="Account\Shared\ExternalLoginPicker.razor" />
+      <AdditionalFiles Include="Account\Shared\ManageLayout.razor" />
+      <AdditionalFiles Include="Account\Shared\ManageNavMenu.razor" />
+      <AdditionalFiles Include="Account\Shared\RedirectToLogin.razor" />
+      <AdditionalFiles Include="Account\Shared\ShowRecoveryCodes.razor" />
+      <AdditionalFiles Include="Account\Shared\StatusMessage.razor" />
+    </ItemGroup>
+
+</Project>
