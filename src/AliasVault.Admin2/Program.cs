@@ -3,8 +3,8 @@ using AliasServerDb;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AliasVault.Admin2.Components;
 using AliasVault.Admin2.Account;
+using AliasVault.Admin2.Main;
 using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +24,12 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Change the login path to /user/login
+    options.LoginPath = "/user/login";
+});
 
 // We use dbContextFactory to create a new instance of the DbContext for every place that needs it
 // as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
