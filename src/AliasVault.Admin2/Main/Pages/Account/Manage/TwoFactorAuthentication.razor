@@ -1,0 +1,73 @@
+﻿@page "/account/manage/TwoFactorAuthentication"
+
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AdminUser> UserManager
+@inject SignInManager<AdminUser> SignInManager
+
+<PageTitle>Two-factor authentication (2FA)</PageTitle>
+
+<h3>Two-factor authentication (2FA)</h3>
+
+@if (is2faEnabled)
+{
+    if (recoveryCodesLeft == 0)
+    {
+        <div class="alert alert-danger">
+            <strong>You have no recovery codes left.</strong>
+            <p>You must <a href="account/manage/GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
+        </div>
+    }
+    else if (recoveryCodesLeft == 1)
+    {
+        <div class="alert alert-danger">
+            <strong>You have 1 recovery code left.</strong>
+            <p>You can <a href="account/manage/GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+        </div>
+    }
+    else if (recoveryCodesLeft <= 3)
+    {
+        <div class="alert alert-warning">
+            <strong>You have @recoveryCodesLeft recovery codes left.</strong>
+            <p>You should <a href="account/manage/GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+        </div>
+    }
+
+    <a href="account/manage/Disable2fa" class="btn btn-primary">Disable 2FA</a>
+    <a href="account/manage/GenerateRecoveryCodes" class="btn btn-primary">Reset recovery codes</a>
+}
+
+<h4>Authenticator app</h4>
+@if (!hasAuthenticator)
+{
+    <a href="account/manage/EnableAuthenticator" class="btn btn-primary">Add authenticator app</a>
+}
+else
+{
+    <a href="account/manage/EnableAuthenticator" class="btn btn-primary">Set up authenticator app</a>
+    <a href="account/manage/ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
+}
+
+@code {
+    private bool hasAuthenticator;
+    private int recoveryCodesLeft;
+    private bool is2faEnabled;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(UserService.User()) is not null;
+        is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
+        recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(UserService.User());
+    }
+
+    private async Task OnSubmitForgetBrowserAsync()
+    {
+        await SignInManager.ForgetTwoFactorClientAsync();
+
+        // Refresh current page.
+        NavigationManager.NavigateTo(string.Empty, true);
+    }
+
+}

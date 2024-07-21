@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/EnableAuthenticator"
+﻿@page "/account/manage/EnableAuthenticator"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
@@ -7,7 +7,6 @@
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
-@inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<EnableAuthenticator> Logger
@@ -69,20 +68,17 @@ else
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     private string? message;
-    private AdminUser user = default!;
     private string? sharedKey;
     private string? authenticatorUri;
     private IEnumerable<string>? recoveryCodes;
-
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        await base.OnInitializedAsync();
 
-        await LoadSharedKeyAndQrCodeUriAsync(user);
+        await LoadSharedKeyAndQrCodeUriAsync(UserService.User());
     }
 
     private async Task OnValidSubmitAsync()
@@ -91,7 +87,7 @@ else
         var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
         var is2faTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
-            user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            UserService.User(), UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
         if (!is2faTokenValid)
         {
@@ -99,19 +95,20 @@ else
             return;
         }
 
-        await UserManager.SetTwoFactorEnabledAsync(user, true);
-        var userId = await UserManager.GetUserIdAsync(user);
+        await UserManager.SetTwoFactorEnabledAsync(UserService.User(), true);
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
         Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
         message = "Your authenticator app has been verified.";
 
-        if (await UserManager.CountRecoveryCodesAsync(user) == 0)
+        if (await UserManager.CountRecoveryCodesAsync(UserService.User()) == 0)
         {
-            recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(UserService.User(), 10);
         }
         else
         {
-            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", message, HttpContext);
+            // Navigate back to the two factor authentication page.
+            NavigationManager.NavigateTo("account/manage/TwoFactorAuthentication", forceLoad: true);
         }
     }
 

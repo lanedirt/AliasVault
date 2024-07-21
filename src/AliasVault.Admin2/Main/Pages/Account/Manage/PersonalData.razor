@@ -1,6 +1,4 @@
-﻿@page "/Account/Manage/PersonalData"
-
-@inject IdentityUserAccessor UserAccessor
+﻿@page "/account/manage/PersonalData"
 
 <PageTitle>Personal Data</PageTitle>
 
@@ -13,22 +11,12 @@
         <p>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
         </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
+        <form action="account/manage/DownloadPersonalData" method="post">
             <AntiforgeryToken/>
             <button class="btn btn-primary" type="submit">Download</button>
         </form>
         <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger">Delete</a>
+            <a href="account/manage/DeletePersonalData" class="btn btn-danger">Delete</a>
         </p>
     </div>
 </div>
-
-@code {
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
-    }
-
-}

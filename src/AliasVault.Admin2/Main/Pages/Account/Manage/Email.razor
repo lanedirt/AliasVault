@@ -1,4 +1,4 @@
-﻿@page "/Account/Manage/Email"
+﻿@page "/account/manage/Email"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -8,7 +8,6 @@
 
 @inject UserManager<AdminUser> UserManager
 @inject IEmailSender<AdminUser> EmailSender
-@inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
 
 <PageTitle>Manage email</PageTitle>
@@ -54,7 +53,6 @@
 
 @code {
     private string? message;
-    private AdminUser user = default!;
     private string? email;
     private bool isEmailConfirmed;
 
@@ -65,9 +63,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        email = await UserManager.GetEmailAsync(user);
-        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
+        email = await UserManager.GetEmailAsync(UserService.User());
+        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(UserService.User());
 
         Input.NewEmail ??= email;
     }
@@ -80,14 +77,14 @@
             return;
         }
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
+        var code = await UserManager.GenerateChangeEmailTokenAsync(UserService.User(), Input.NewEmail);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["email"] = Input.NewEmail, ["code"] = code });
 
-        await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
+        await EmailSender.SendConfirmationLinkAsync(UserService.User(), Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Confirmation link to change email sent. Please check your email.";
     }
@@ -99,14 +96,14 @@
             return;
         }
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(UserService.User());
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
 
-        await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
+        await EmailSender.SendConfirmationLinkAsync(UserService.User(), email, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Verification email sent. Please check your email.";
     }

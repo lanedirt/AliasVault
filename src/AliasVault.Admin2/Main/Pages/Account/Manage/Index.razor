@@ -1,12 +1,12 @@
-﻿@page "/Account/Manage"
-
+﻿@page "/account/manage"
 @using System.ComponentModel.DataAnnotations
+@using AliasVault.Admin2.Services
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
 @inject SignInManager<AdminUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
+@inject UserService UserService
 
 <PageTitle>Profile</PageTitle>
 
@@ -15,7 +15,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
@@ -33,19 +33,16 @@
 </div>
 
 @code {
-    private AdminUser user = default!;
     private string? username;
     private string? phoneNumber;
-
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        await base.OnInitializedAsync();
+        username = await UserManager.GetUserNameAsync(UserService.User());
+        phoneNumber = await UserManager.GetPhoneNumberAsync(UserService.User());
 
         Input.PhoneNumber ??= phoneNumber;
     }
@@ -54,15 +51,16 @@
     {
         if (Input.PhoneNumber != phoneNumber)
         {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+            var setPhoneResult = await UserManager.SetPhoneNumberAsync(UserService.User(), Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                // TODO: show error that phone number could not be set, use proper form validation?
+                GlobalNotificationService.AddErrorMessage("Phone number could not be set", true);
             }
         }
 
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+        // await SignInManager.RefreshSignInAsync(UserService.User());
+        GlobalNotificationService.AddSuccessMessage("Your profile has been updated", true);
     }
 
     private sealed class InputModel

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AliasVault.Admin2.Account;
 using AliasVault.Admin2.Main;
+using AliasVault.Admin2.Services;
 using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +15,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<JsInvokeService>();
+builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
@@ -63,6 +66,7 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
     })
+    .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();

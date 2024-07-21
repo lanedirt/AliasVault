@@ -64,6 +64,18 @@
       <_ContentIncludedByDefault Remove="Components\Account\Shared\RedirectToLogin.razor" />
       <_ContentIncludedByDefault Remove="Components\Account\Shared\ShowRecoveryCodes.razor" />
       <_ContentIncludedByDefault Remove="Components\Account\Shared\StatusMessage.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\ChangePassword.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\DeletePersonalData.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\Disable2fa.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\Email.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\EnableAuthenticator.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\GenerateRecoveryCodes.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\Index.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\PersonalData.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\ResetAuthenticator.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\SetPassword.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\TwoFactorAuthentication.razor" />
+      <_ContentIncludedByDefault Remove="Account\Pages\Manage\_Imports.razor" />
     </ItemGroup>
 
     <ItemGroup>
@@ -79,32 +91,35 @@
       <AdditionalFiles Include="Account\Pages\Login.razor" />
       <AdditionalFiles Include="Account\Pages\LoginWith2fa.razor" />
       <AdditionalFiles Include="Account\Pages\LoginWithRecoveryCode.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\ChangePassword.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\DeletePersonalData.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\Disable2fa.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\Email.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\EnableAuthenticator.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\ExternalLogins.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\GenerateRecoveryCodes.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\Index.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\PersonalData.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\ResetAuthenticator.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\SetPassword.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\TwoFactorAuthentication.razor" />
-      <AdditionalFiles Include="Account\Pages\Manage\_Imports.razor" />
       <AdditionalFiles Include="Account\Pages\Register.razor" />
       <AdditionalFiles Include="Account\Pages\RegisterConfirmation.razor" />
       <AdditionalFiles Include="Account\Pages\ResendEmailConfirmation.razor" />
       <AdditionalFiles Include="Account\Pages\ResetPassword.razor" />
       <AdditionalFiles Include="Account\Pages\ResetPasswordConfirmation.razor" />
       <AdditionalFiles Include="Account\Pages\_Imports.razor" />
-      <AdditionalFiles Include="Account\Shared\AccountLayout.razor" />
+      <AdditionalFiles Include="Account\Shared\AuthLayout.razor" />
       <AdditionalFiles Include="Account\Shared\ExternalLoginPicker.razor" />
       <AdditionalFiles Include="Account\Shared\ManageLayout.razor" />
       <AdditionalFiles Include="Account\Shared\ManageNavMenu.razor" />
       <AdditionalFiles Include="Account\Shared\RedirectToLogin.razor" />
       <AdditionalFiles Include="Account\Shared\ShowRecoveryCodes.razor" />
       <AdditionalFiles Include="Account\Shared\StatusMessage.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageError.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageSuccess.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\GlobalNotificationDisplay.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\ServerValidationErrors.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\ChangePassword.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\DeletePersonalData.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\Disable2fa.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\Email.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\EnableAuthenticator.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\GenerateRecoveryCodes.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\Index.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\PersonalData.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\ResetAuthenticator.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\SetPassword.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\TwoFactorAuthentication.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\_Imports.razor" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,72 @@
+﻿@inject GlobalNotificationService GlobalNotificationService
+@implements IDisposable
+
+@foreach (var message in Messages)
+{
+    if (message.Key == "success")
+    {
+        <AlertMessageSuccess Message="@message.Value" />
+    }
+}
+@foreach (var message in Messages)
+{
+    if (message.Key == "error")
+    {
+        <AlertMessageError Message="@message.Value" />
+    }
+}
+
+@code {
+    private List<KeyValuePair<string, string>> Messages { get; set; } = new();
+    private bool _onChangeSubscribed = false;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            // We subscribe to the OnChange event of the PortalMessageService to update the UI when a new message is added
+            RefreshAddMessages();
+            GlobalNotificationService.OnChange += RefreshAddMessages;
+            _onChangeSubscribed = true;
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // We unsubscribe from the OnChange event of the PortalMessageService when the component is disposed
+        if (_onChangeSubscribed)
+        {
+            GlobalNotificationService.OnChange -= RefreshAddMessages;
+            _onChangeSubscribed = false;
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the messages by adding any new messages from the PortalMessageService.
+    /// </summary>
+    private void RefreshAddMessages()
+    {
+        // We retrieve any additional messages from the GlobalNotificationService that we do not yet have.
+        var newMessages = GlobalNotificationService.GetMessagesForDisplay();
+        foreach (var message in newMessages)
+        {
+            if (!Messages.Exists(m => m.Key == message.Key && m.Value == message.Value))
+            {
+                Messages.Add(message);
+            }
+        }
+
+        // Remove messages that are no longer in the GlobalNotificationService and have already been displayed.
+        var messagesToRemove = Messages.Where(m => !newMessages.Exists(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
+        foreach (var message in messagesToRemove)
+        {
+            Messages.Remove(message);
+        }
+
+        StateHasChanged();
+    }
+}

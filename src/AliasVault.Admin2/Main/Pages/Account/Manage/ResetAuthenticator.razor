@@ -1,10 +1,9 @@
-﻿@page "/Account/Manage/ResetAuthenticator"
+﻿@page "/account/manage/ResetAuthenticator"
 
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
 @inject SignInManager<AdminUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger
 
@@ -34,16 +33,15 @@
 
     private async Task OnSubmitAsync()
     {
-        var user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        await UserManager.SetTwoFactorEnabledAsync(user, false);
-        await UserManager.ResetAuthenticatorKeyAsync(user);
-        var userId = await UserManager.GetUserIdAsync(user);
+        await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
+        await UserManager.ResetAuthenticatorKeyAsync(UserService.User());
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
         Logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", userId);
 
-        await SignInManager.RefreshSignInAsync(user);
+        await SignInManager.RefreshSignInAsync(UserService.User());
 
         RedirectManager.RedirectToWithStatus(
-            "Account/Manage/EnableAuthenticator",
+            "account/manage/EnableAuthenticator",
             "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
             HttpContext);
     }
