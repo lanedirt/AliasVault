@@ -2,7 +2,15 @@
 
 <PageTitle>Emails</PageTitle>
 
-<h1>Emails</h1>
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Emails</h1>
+        </div>
+        <p>This page gives an overview of recently received mails by this AliasVault server.</p>
+    </div>
+</div>
 
 @if (IsLoading)
 {
@@ -12,14 +20,44 @@
 }
 else
 {
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-        @foreach (var email in EmailList)
-        {
-            <div>
-                <div>@email.From</div>
-                <div>@email.MessagePreview</div>
-            </div>
-        }
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-4 py-3">ID</th>
+                    <th scope="col" class="px-4 py-3">Subject</th>
+                    <th scope="col" class="px-4 py-3">From</th>
+                    <th scope="col" class="px-4 py-3">To</th>
+                    <th scope="col" class="px-4 py-3">Date</th>
+                    <th scope="col" class="px-4 py-3">System Date</th>
+                    <th scope="col" class="px-4 py-3">Preview</th>
+                    <th scope="col" class="px-4 py-3">Attachments</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var email in EmailList)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">@email.Id</td>
+                        <td class="px-4 py-3">@email.Subject</td>
+                        <td class="px-4 py-3">
+                            <span class="font-medium">@email.FromLocal</span>@@@email.FromDomain
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="font-medium">@email.ToLocal</span>@@@email.ToDomain
+                        </td>
+                        <td class="px-4 py-3">@email.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">@email.DateSystem.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">
+                            <span class="line-clamp-1">@email.MessagePreview</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            @email.Attachments.Count
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 }
 
@@ -43,6 +81,7 @@ else
         // Load the aliases from the database.
         var user = UserService.User();
         EmailList = await DbContext.Emails
+            .OrderByDescending(x => x.DateSystem)
             .ToListAsync();
 
         IsLoading = false;

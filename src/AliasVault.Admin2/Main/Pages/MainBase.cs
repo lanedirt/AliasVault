@@ -118,4 +118,13 @@ public class MainBase : OwningComponentBase
             }
         }
     }
+
+    /// <summary>
+    /// Gets the username from the authentication state asynchronously.
+    /// </summary>
+    /// <returns>The username.</returns>
+    protected string GetUsername()
+    {
+        return UserService.User().UserName ?? "[Unknown]";
+    }
 }

@@ -11,23 +11,22 @@
 <PageTitle>Profile</PageTitle>
 
 <h3>Profile</h3>
-<StatusMessage/>
 
-<div class="row">
-    <div class="col-md-6">
+<div class="flex flex-wrap -mx-3">
+    <div class="w-full md:w-1/2 px-3">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync">
             <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled/>
-                <label for="username" class="form-label">Username</label>
+            <ValidationSummary class="text-red-500 mb-4" role="alert"/>
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" value="@username" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-gray-100 cursor-not-allowed" placeholder="Please choose your username." disabled/>
             </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label for="phone-number" class="form-label">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger"/>
+            <div class="mb-4">
+                <label for="phone-number" class="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
+                <InputText @bind-Value="Input.PhoneNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Please enter your phone number."/>
+                <ValidationMessage For="() => Input.PhoneNumber" class="text-red-500 text-sm mt-1"/>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Save</button>
         </EditForm>
     </div>
 </div>

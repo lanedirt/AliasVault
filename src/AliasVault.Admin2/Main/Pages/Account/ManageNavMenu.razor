@@ -2,27 +2,27 @@
 
 @inject SignInManager<AdminUser> SignInManager
 
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="account/manage" Match="NavLinkMatch.All">Profile</NavLink>
+<ul class="flex flex-col space-y-1">
+    <li>
+        <NavLink href="account/manage" Match="NavLinkMatch.All" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">Profile</NavLink>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="account/manage/Email">Email</NavLink>
+    <li>
+        <NavLink href="account/manage/Email" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">Email</NavLink>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="account/manage/ChangePassword">Password</NavLink>
+    <li>
+        <NavLink href="account/manage/ChangePassword" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">Password</NavLink>
     </li>
     @if (hasExternalLogins)
     {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="account/manage/ExternalLogins">External logins</NavLink>
-        </li>
-    }
-    <li class="nav-item">
-        <NavLink class="nav-link" href="account/manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+    <li>
+        <NavLink href="account/manage/ExternalLogins" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">External logins</NavLink>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="account/manage/PersonalData">Personal data</NavLink>
+    }
+    <li>
+        <NavLink href="account/manage/TwoFactorAuthentication" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">Two-factor authentication</NavLink>
+    </li>
+    <li>
+        <NavLink href="account/manage/PersonalData" class="block px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">Personal data</NavLink>
     </li>
 </ul>
 
