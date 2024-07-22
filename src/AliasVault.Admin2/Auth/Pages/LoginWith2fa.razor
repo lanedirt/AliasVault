@@ -74,7 +74,7 @@
         else if (result.IsLockedOut)
         {
             Logger.LogWarning("User with ID '{UserId}' account locked out.", userId);
-            NavigationService.RedirectTo("Account/Lockout");
+            NavigationService.RedirectTo("user/lockout");
         }
         else
         {

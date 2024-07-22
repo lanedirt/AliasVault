@@ -6,12 +6,23 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Revalidating identity authentication state provider.
+/// </summary>
+/// <typeparam name="TUser">The user object.</typeparam>
 public class RevalidatingIdentityAuthenticationStateProvider<TUser>
-    : RevalidatingServerAuthenticationStateProvider where TUser : class
+    : RevalidatingServerAuthenticationStateProvider
+    where TUser : class
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IdentityOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RevalidatingIdentityAuthenticationStateProvider{TUser}"/> class.
+    /// </summary>
+    /// <param name="loggerFactory">ILoggerFactory instance.</param>
+    /// <param name="scopeFactory">IServiceScopeFactory instance.</param>
+    /// <param name="optionsAccessor">IOptions instance.</param>
     public RevalidatingIdentityAuthenticationStateProvider(
         ILoggerFactory loggerFactory,
         IServiceScopeFactory scopeFactory,
@@ -22,8 +33,17 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         _options = optionsAccessor.Value;
     }
 
+    /// <summary>
+    /// The revalidation interval.
+    /// </summary>
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
 
+    /// <summary>
+    /// Validate the authentication state.
+    /// </summary>
+    /// <param name="authenticationState">AuthenticationState instance.</param>
+    /// <param name="cancellationToken">CancellationToken.</param>
+    /// <returns>Boolean indicating whether the currently logged on user is still valid.</returns>
     protected override async Task<bool> ValidateAuthenticationStateAsync(
         AuthenticationState authenticationState, CancellationToken cancellationToken)
     {

@@ -3,10 +3,9 @@ using AliasServerDb;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AliasVault.Admin2.Auth;
+using AliasVault.Admin2.Auth.Providers;
 using AliasVault.Admin2.Main;
 using AliasVault.Admin2.Services;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +19,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsInvokeService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<NavigationService>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
     {
