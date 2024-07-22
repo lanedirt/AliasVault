@@ -127,7 +127,7 @@ generate_admin_password() {
 
   ADMIN_PASSWORD=$(openssl rand -base64 12)
   printf "\n"
-  printf "${BLUE}   Building Docker image for password generation...${NC}\n"
+  printf "${BLUE}   Building Docker image for password generation...${NC}\n   "
   if [ "$VERBOSE" = true ]; then
     docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile .
   else

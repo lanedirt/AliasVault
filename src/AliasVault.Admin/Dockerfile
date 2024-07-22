@@ -1,33 +1,32 @@
-﻿# Use the official .NET 8 SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0  AS build
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8082
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+
 WORKDIR /src
 
-# Copy the solution file to the /src directory in the container
-COPY aliasvault.sln ./
+# Copy the project files and restore dependencies
+COPY ["src/AliasVault.Admin/AliasVault.Admin.csproj", "src/AliasVault.Admin/"]
+COPY ["src/Databases/AliasServerDb/AliasServerDb.csproj", "src/Databases/AliasServerDb/"]
+RUN dotnet restore "src/AliasVault.Admin/AliasVault.Admin.csproj"
 
-# Copy the project file to the /src/AliasVault directory in the container
-COPY src/AliasVault.Admin/AliasVault.Admin.csproj ./AliasVault.Admin/
+# Copy the rest of the application code
+COPY . .
 
-# Restore dependencies for the AliasVault project
-RUN dotnet restore "./AliasVault.Admin/AliasVault.Admin.csproj" --verbosity detailed
-
-# Copy the rest of the application code to the /src directory in the container
-COPY src/. ./
+# Build the WebApi project
+WORKDIR "/src/src/AliasVault.Admin"
+RUN dotnet build "AliasVault.Admin.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 # Publish the application to the /app/publish directory in the container
-WORKDIR /src/AliasVault.Admin
-RUN dotnet publish -c Release -o /app --verbosity detailed
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "AliasVault.Admin.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
-# Use the official ASP.NET Core runtime image to run the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-WORKDIR /app/AliasVault.Admin
-
-# Copy the published output from the build stage to the runtime stage
-COPY --from=build /app ./
-
-# Expose the port the app runs on
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
 EXPOSE 8082
 ENV ASPNETCORE_URLS=http://+:8082
-
 ENTRYPOINT ["dotnet", "AliasVault.Admin.dll"]
-

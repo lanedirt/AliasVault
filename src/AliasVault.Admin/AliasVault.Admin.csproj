@@ -40,9 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="..\stylecop.json">
-        <Link>stylecop.json</Link>
-      </AdditionalFiles>
+        <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
 
 </Project>
