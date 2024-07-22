@@ -70,17 +70,16 @@ else
     {
         if (firstRender)
         {
-            await LoadAliasesAsync();
+            await LoadEmailsAsync();
         }
     }
 
-    private async Task LoadAliasesAsync()
+    private async Task LoadEmailsAsync()
     {
         IsLoading = true;
         StateHasChanged();
 
-        // Load the aliases from the database.
-        var user = UserService.User();
+        // Load the emails from the database.
         EmailList = await DbContext.Emails
             .OrderByDescending(x => x.DateSystem)
             .ToListAsync();

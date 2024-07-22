@@ -102,11 +102,11 @@ public class AliasServerDbContext : DbContext
     /// <summary>
     /// The OnModelCreating method.
     /// </summary>
-    /// <param name="builder">ModelBuilder instance.</param>
-    protected override void OnModelCreating(ModelBuilder builder)
+    /// <param name="modelBuilder">ModelBuilder instance.</param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
-        foreach (var entity in builder.Model.GetEntityTypes())
+        base.OnModelCreating(modelBuilder);
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entity.GetProperties())
             {
@@ -122,31 +122,31 @@ public class AliasServerDbContext : DbContext
         }
 
         // Configure AspNetIdentity tables manually.
-        builder.Entity<IdentityUserRole<string>>(entity =>
+        modelBuilder.Entity<IdentityUserRole<string>>(entity =>
         {
             entity.HasKey(r => new { r.UserId, r.RoleId });
             entity.ToTable("UserRoles");
         });
 
-        builder.Entity<IdentityUserClaim<string>>(entity =>
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity =>
         {
             entity.HasKey(c => c.Id);
             entity.ToTable("UserClaims");
         });
 
-        builder.Entity<IdentityUserLogin<string>>(entity =>
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity =>
         {
             entity.HasKey(l => new { l.LoginProvider, l.ProviderKey });
             entity.ToTable("UserLogins");
         });
 
-        builder.Entity<IdentityRoleClaim<string>>(entity =>
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity =>
         {
             entity.HasKey(rc => rc.Id);
             entity.ToTable("RoleClaims");
         });
 
-        builder.Entity<IdentityUserToken<string>>(entity =>
+        modelBuilder.Entity<IdentityUserToken<string>>(entity =>
         {
             entity.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
             entity.ToTable("UserTokens");

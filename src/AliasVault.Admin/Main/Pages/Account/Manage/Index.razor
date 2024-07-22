@@ -52,12 +52,10 @@
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(UserService.User(), Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                // TODO: show error that phone number could not be set, use proper form validation?
                 GlobalNotificationService.AddErrorMessage("Phone number could not be set", true);
             }
         }
 
-        // await SignInManager.RefreshSignInAsync(UserService.User());
         GlobalNotificationService.AddSuccessMessage("Your profile has been updated", true);
     }
 

@@ -26,7 +26,7 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
     /// <summary>
     /// The roles of the current user.
     /// </summary>
-    private IList<string> _userRoles = new List<string>();
+    private List<string> _userRoles = [];
 
     /// <summary>
     /// Whether the current user is an admin or not.
@@ -64,7 +64,7 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
-            throw new Exception($"User with id {userId} not found.");
+            throw new ArgumentException($"User with id {userId} not found.");
         }
 
         return user;
@@ -78,7 +78,7 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
     {
         if (_user == null)
         {
-            throw new Exception("Trying to access User object which is null.");
+            throw new ArgumentException("Trying to access User object which is null.");
         }
 
         return _user;
@@ -110,7 +110,8 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
                 _user = user;
 
                 // Load all roles for current user.
-                _userRoles = await userManager.GetRolesAsync(User());
+                var roles = await userManager.GetRolesAsync(User());
+                _userRoles = roles.ToList();
 
                 // Define if current user is admin.
                 _isAdmin = _userRoles.Contains(AdminRole);

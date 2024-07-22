@@ -58,25 +58,23 @@ public static class StartupTasks
         }
         else
         {
-            // Check if the password hash is correct, if not, update it to the .env value.
-            if (adminUser.PasswordHash != config.AdminPasswordHash)
+            // Check if the password hash is different AND the password in .env file is newer than the password of user.
+            // If so, update the password hash of the user in the database so it matches the one in the .env file.
+            if (adminUser.PasswordHash != config.AdminPasswordHash && config.LastPasswordChanged > adminUser.LastPasswordChanged)
             {
-                if (config.LastPasswordChanged > adminUser.LastPasswordChanged)
-                {
-                    // The password has been changed in the .env file, update the user's password hash.
-                    adminUser.PasswordHash = config.AdminPasswordHash;
-                    adminUser.LastPasswordChanged = DateTime.UtcNow;
+                // The password has been changed in the .env file, update the user's password hash.
+                adminUser.PasswordHash = config.AdminPasswordHash;
+                adminUser.LastPasswordChanged = DateTime.UtcNow;
 
-                    // Reset 2FA settings
-                    adminUser.TwoFactorEnabled = false;
+                // Reset 2FA settings
+                adminUser.TwoFactorEnabled = false;
 
-                    // Clear existing recovery codes
-                    await userManager.GenerateNewTwoFactorRecoveryCodesAsync(adminUser, 0);
+                // Clear existing recovery codes
+                await userManager.GenerateNewTwoFactorRecoveryCodesAsync(adminUser, 0);
 
-                    await userManager.UpdateAsync(adminUser);
+                await userManager.UpdateAsync(adminUser);
 
-                    Console.WriteLine("Admin password hash updated.");
-                }
+                Console.WriteLine("Admin password hash updated.");
             }
         }
     }

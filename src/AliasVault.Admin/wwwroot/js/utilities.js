@@ -40,7 +40,7 @@ function generateQrCode(id) {
     element.appendChild(qrContainer);
 
     // Initialize QRCode object
-    const qrcode = new QRCode(qrContainer, {
+    new QRCode(qrContainer, {
         text: dataUrl,
         width: 256,
         height: 256,

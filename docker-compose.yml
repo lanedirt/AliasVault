@@ -3,7 +3,7 @@ services:
         image: aliasvault-admin
         build:
             context: .
-            dockerfile: src/AliasVault.Admin2/Dockerfile
+            dockerfile: src/AliasVault.Admin/Dockerfile
         ports:
             - "8080:8082"
         volumes:

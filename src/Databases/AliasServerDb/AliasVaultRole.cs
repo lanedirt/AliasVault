@@ -14,4 +14,20 @@ using Microsoft.AspNetCore.Identity;
 /// </summary>
 public class AliasVaultRole : IdentityRole
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AliasVaultRole"/> class.
+    /// </summary>
+    public AliasVaultRole()
+        : base()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AliasVaultRole"/> class.
+    /// </summary>
+    /// <param name="roleName">Role name.</param>
+    public AliasVaultRole(string roleName)
+        : base(roleName)
+    {
+    }
 }

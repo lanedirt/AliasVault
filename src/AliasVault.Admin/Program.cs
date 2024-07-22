@@ -124,4 +124,4 @@ using (var scope = app.Services.CreateScope())
     await StartupTasks.SetAdminUser(scope.ServiceProvider);
 }
 
-app.Run();
+await app.RunAsync();
