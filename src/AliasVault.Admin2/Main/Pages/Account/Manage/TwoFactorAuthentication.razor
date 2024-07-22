@@ -67,7 +67,7 @@ else
         await SignInManager.ForgetTwoFactorClientAsync();
 
         // Refresh current page.
-        NavigationManager.NavigateTo(string.Empty, true);
+        NavigationService.RedirectTo(string.Empty, true);
     }
 
 }

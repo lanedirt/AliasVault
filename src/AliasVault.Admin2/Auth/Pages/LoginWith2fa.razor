@@ -5,7 +5,7 @@
 
 @inject SignInManager<AdminUser> SignInManager
 @inject UserManager<AdminUser> UserManager
-@inject IdentityRedirectManager RedirectManager
+@inject NavigationService NavigationService
 @inject ILogger<LoginWith2fa> Logger
 
 <LayoutPageTitle>Two-factor authentication</LayoutPageTitle>
@@ -69,12 +69,12 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", userId);
-            RedirectManager.RedirectTo(ReturnUrl);
+            NavigationService.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut)
         {
             Logger.LogWarning("User with ID '{UserId}' account locked out.", userId);
-            RedirectManager.RedirectTo("Account/Lockout");
+            NavigationService.RedirectTo("Account/Lockout");
         }
         else
         {

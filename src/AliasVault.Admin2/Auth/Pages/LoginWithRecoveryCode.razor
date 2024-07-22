@@ -5,7 +5,7 @@
 
 @inject SignInManager<AdminUser> SignInManager
 @inject UserManager<AdminUser> UserManager
-@inject IdentityRedirectManager RedirectManager
+@inject NavigationService NavigationService
 @inject ILogger<LoginWithRecoveryCode> Logger
 
 <LayoutPageTitle>Recovery code verification</LayoutPageTitle>
@@ -58,12 +58,12 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", userId);
-            RedirectManager.RedirectTo(ReturnUrl);
+            NavigationService.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut)
         {
             Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
+            NavigationService.RedirectTo("Account/Lockout");
         }
         else
         {

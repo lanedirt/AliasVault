@@ -109,7 +109,7 @@ else
         else
         {
             // Navigate back to the two factor authentication page.
-            NavigationManager.NavigateTo("account/manage/TwoFactorAuthentication", forceLoad: true);
+            NavigationService.RedirectTo("account/manage/TwoFactorAuthentication", forceLoad: true);
         }
     }
 

@@ -7,7 +7,6 @@
 @using Microsoft.AspNetCore.WebUtilities
 
 @inject UserManager<AdminUser> UserManager
-@inject IEmailSender<AdminUser> EmailSender
 @inject NavigationManager NavigationManager
 
 <PageTitleLayout>Manage email</PageTitleLayout>
@@ -84,7 +83,7 @@
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["email"] = Input.NewEmail, ["code"] = code });
 
-        await EmailSender.SendConfirmationLinkAsync(UserService.User(), Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
+        // await EmailSender.SendConfirmationLinkAsync(UserService.User(), Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Confirmation link to change email sent. Please check your email.";
     }
@@ -103,7 +102,7 @@
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
 
-        await EmailSender.SendConfirmationLinkAsync(UserService.User(), email, HtmlEncoder.Default.Encode(callbackUrl));
+        // await EmailSender.SendConfirmationLinkAsync(UserService.User(), email, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Verification email sent. Please check your email.";
     }

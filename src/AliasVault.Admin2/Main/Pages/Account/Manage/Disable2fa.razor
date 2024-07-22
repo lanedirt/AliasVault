@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
-@inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
 
 <PageTitleLayout>Disable two-factor authentication (2FA)</PageTitleLayout>
@@ -48,7 +47,7 @@
         Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userId);
 
         // Reload current page.
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        NavigationService.RedirectTo(NavigationService.Uri, forceLoad: true);
     }
 
 }

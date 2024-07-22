@@ -100,7 +100,7 @@
     /// </summary>
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= LocationChanged;
+        NavigationService.LocationChanged -= LocationChanged;
     }
 
     /// <inheritdoc />
@@ -108,7 +108,7 @@
     {
         await base.OnInitializedAsync();
         _username = GetUsername();
-        NavigationManager.LocationChanged += LocationChanged;
+        NavigationService.LocationChanged += LocationChanged;
     }
 
     /// <inheritdoc />

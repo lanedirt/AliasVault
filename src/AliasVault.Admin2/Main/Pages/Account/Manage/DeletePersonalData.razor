@@ -5,7 +5,6 @@
 
 @inject UserManager<AdminUser> UserManager
 @inject SignInManager<AdminUser> SignInManager
-@inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
 
 <PageTitleLayout>Delete Personal Data</PageTitleLayout>
@@ -68,8 +67,6 @@
 
         var userId = await UserManager.GetUserIdAsync(UserService.User());
         Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
-
-        RedirectManager.RedirectToCurrentPage();
     }
 
     private sealed class InputModel

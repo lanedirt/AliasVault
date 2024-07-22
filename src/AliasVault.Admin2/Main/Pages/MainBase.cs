@@ -18,7 +18,7 @@ public class MainBase : OwningComponentBase
     private bool _parametersInitialSet;
 
     [Inject]
-    public NavigationManager NavigationManager { get; set; } = null!;
+    public NavigationService NavigationService { get; set; } = null!;
 
     [Inject]
     protected UserService UserService { get; set; } = null!;
@@ -51,10 +51,10 @@ public class MainBase : OwningComponentBase
         _parametersInitialSet = false;
 
         // Add base breadcrumbs
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationManager.BaseUri });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationService.BaseUri });
 
         // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(NavigationManager, UserService);
+        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
         if (verifyAccessCheckTask != true)
         {
             // Keep the page from loading if the user is not authorized by calling an infinite loop.
@@ -79,7 +79,7 @@ public class MainBase : OwningComponentBase
     protected async Task<bool> AccessCheck()
     {
         // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(NavigationManager, UserService);
+        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
         if (verifyAccessCheckTask != true)
         {
             // Keep the page from loading if the user is not authorized by calling an infinite loop.
@@ -106,7 +106,7 @@ public class MainBase : OwningComponentBase
         }
 
         // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(NavigationManager, UserService);
+        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
         if (verifyAccessCheckTask != true)
         {
             // Keep the page from loading if the user is not authorized by calling an infinite loop.

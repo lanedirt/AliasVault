@@ -4,7 +4,6 @@
 
 @inject UserManager<AdminUser> UserManager
 @inject SignInManager<AdminUser> SignInManager
-@inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger
 
 <PageTitleLayout>Reset authenticator key</PageTitleLayout>
@@ -29,8 +28,6 @@
 </div>
 
 @code {
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-
     private async Task OnSubmitAsync()
     {
         await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
@@ -40,10 +37,10 @@
 
         await SignInManager.RefreshSignInAsync(UserService.User());
 
-        RedirectManager.RedirectToWithStatus(
-            "account/manage/EnableAuthenticator",
-            "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
-            HttpContext);
+        GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.");
+
+        NavigationService.RedirectTo(
+            "account/manage/EnableAuthenticator");
     }
 
 }

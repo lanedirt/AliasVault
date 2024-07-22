@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using AliasVault.Admin2.Auth;
 using AliasVault.Admin2.Main;
 using AliasVault.Admin2.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsInvokeService>();
 builder.Services.AddScoped<GlobalNotificationService>();
-builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<NavigationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
@@ -30,7 +31,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Change the login path to /user/login
     options.LoginPath = "/user/login";
 });
 
@@ -71,8 +71,6 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<AdminUser>, IdentityNoOpEmailSender>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -94,8 +92,5 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
 
 app.Run();

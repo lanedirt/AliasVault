@@ -1,8 +1,7 @@
 @page "/user/logout"
-@using AliasVault.Admin2.Services
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<AdminUser> SignInManager
-@inject NavigationManager NavigationManager
+@inject NavigationService NavigationService
 @inject GlobalNotificationService GlobalNotificationService
 
 @code {
@@ -19,20 +18,20 @@
                 GlobalNotificationService.ClearMessages();
 
                 // Redirect to the home page with hard refresh.
-                NavigationManager.NavigateTo("/", true);
+                NavigationService.RedirectTo("/", true);
             }
             catch
             {
                 // Hard refresh current page if sign out fails. When an interactive server session is already started
                 // the sign out will fail because it tries to mutate cookies which is only possible when the server
                 // session is not started yet.
-                NavigationManager.NavigateTo(NavigationManager.Uri, true);
+                NavigationService.RedirectTo(NavigationService.Uri, true);
             }
         }
         catch
         {
             // Redirect to the home page with hard refresh.
-            NavigationManager.NavigateTo("/", true);
+            NavigationService.RedirectTo("/", true);
         }
     }
 }
