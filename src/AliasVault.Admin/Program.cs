@@ -1,16 +1,51 @@
 using System.Data.Common;
+using System.Globalization;
 using AliasServerDb;
 using AliasVault.Admin;
-using AliasVault.Admin.Auth;
-using AliasVault.Admin.Main;
-using AliasVault.Admin.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using AliasVault.Admin.Auth.Providers;
+using AliasVault.Admin.Main;
+using AliasVault.Admin.Services;
+using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Create global config object, get values from environment variables.
+Config config = new Config();
+var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH")
+                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
+config.AdminPasswordHash = adminPasswordHash;
+
+var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED")
+                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
+config.LastPasswordChanged = DateTime.ParseExact(lastPasswordChanged, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+
+builder.Services.AddSingleton(config);
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<JsInvokeService>();
+builder.Services.AddScoped<GlobalNotificationService>();
+builder.Services.AddScoped<NavigationService>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/user/login";
+});
 
 // We use dbContextFactory to create a new instance of the DbContext for every place that needs it
 // as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
@@ -33,11 +68,8 @@ builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) 
     options.UseSqlite(connection).UseLazyLoadingProxies();
 });
 
-builder.Services.AddDataProtection();
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-    options.TokenLifespan = TimeSpan.FromHours(12));
-
-builder.Services.AddIdentity<AdminUser, AdminRole>(options =>
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddIdentityCore<AdminUser>(options =>
     {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
@@ -46,51 +78,31 @@ builder.Services.AddIdentity<AdminUser, AdminRole>(options =>
         options.Password.RequiredLength = 8;
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = false;
     })
+    .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()
+    .AddSignInManager()
     .AddDefaultTokenProviders();
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-builder.Services.AddScoped<JsInvokeService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<PortalMessageService>();
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<AdminUser>>();
-builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
-builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 
-// Force all app generated URLs to be lowercase as this improves SEO.
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
+var app = builder.Build();
 
-// Add services to the container.
-if (!builder.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    // Normal production use
-    builder.Services.AddServerSideBlazor();
+    app.UseMigrationsEndPoint();
 }
 else
 {
-    // Dev use
-    builder.Services.AddServerSideBlazor()
-        .AddCircuitOptions(e => {
-            e.DetailedErrors = true;
-        });
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddRazorPages();
-
-var app = builder.Build();
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
-
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-app.MapBlazorHub();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
@@ -98,6 +110,7 @@ app.MapRazorComponents<App>()
 using (var scope = app.Services.CreateScope())
 {
     await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);
+    await StartupTasks.SetAdminUser(scope.ServiceProvider);
 }
 
 app.Run();

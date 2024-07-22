@@ -1,66 +1,15 @@
-﻿@using AliasServerDb
-@using AliasVault.Admin.Services
-@using Microsoft.EntityFrameworkCore
-@inherits AliasVault.Admin.Components.Pages.AuthorizePageBase
-@inject AliasServerDbContext dbContext
-@page "/"
+﻿@page "/"
+@inherits MainBase
 
-<PageTitle>Emails</PageTitle>
+<LayoutPageTitle>Home</LayoutPageTitle>
 
-<div class="row align-items-center">
-    <div class="col">
-        <h1>Emails</h1>
-    </div>
-    <div class="col-auto">
-        <a href="/add-alias" class="btn btn-success">
-            <span class="bi bi-file-earmark-plus" aria-hidden="true"></span> + Add new alias
-        </a>
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">AliasVault Admin</h1>
+        </div>
+        <p>Welcome to the AliasVault admin portal.</p>
     </div>
 </div>
-<p>Find all received emails below.</p>
 
-@if (IsLoading)
-{
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-        @foreach (var email in Emails)
-        {
-            <div>
-                <div>@email.From</div>
-                <div>@email.MessagePreview</div>
-            </div>
-        }
-    </div>
-}
-
-@code {
-    private bool IsLoading { get; set; } = true;
-    private List<Email> Emails { get; set; } = new List<Email>();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await LoadAliasesAsync();
-        }
-    }
-
-    private async Task LoadAliasesAsync()
-    {
-        IsLoading = true;
-        StateHasChanged();
-
-        // Load the aliases from the database.
-        var user = UserService.User();
-        Emails = await dbContext.Emails
-            .ToListAsync();
-
-        IsLoading = false;
-        StateHasChanged();
-    }
-}

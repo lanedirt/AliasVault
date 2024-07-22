@@ -1,14 +1,12 @@
 ﻿@inherits LayoutComponentBase
+@using AliasVault.Admin.Auth.Components
 @implements IDisposable
 @inject NavigationManager NavigationManager
 
-<TopMenu />
-<div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
-    <div id="main-content" class="relative w-full max-w-screen-2xl mx-auto h-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
-        <main>
-            @Body
-        </main>
-        <Footer />
+<div class="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
+    <Logo />
+    <div class="w-full max-w-xl p-6 space-y-4 sm:p-8 bg-white rounded-lg shadow dark:bg-gray-800">
+        @Body
     </div>
 </div>
 
@@ -19,17 +17,13 @@
 </div>
 
 @code {
-    private string? currentUrl;
-
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
@@ -38,4 +32,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-

@@ -41,9 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.SmtpService", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.IntegrationTests", "src\Tests\AliasVault.IntegrationTests\AliasVault.IntegrationTests.csproj", "{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin", "src\AliasVault.Admin\AliasVault.Admin.csproj", "{7D21383B-7B47-4CE6-92D9-BB2A99AE3E50}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin2", "src\AliasVault.Admin2\AliasVault.Admin2.csproj", "{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin", "src\AliasVault.Admin\AliasVault.Admin.csproj", "{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitializationCLI", "src\Utilities\InitializationCLI\InitializationCLI.csproj", "{857BCD0E-753F-437A-AF75-B995B4D9A5FE}"
 EndProject
@@ -109,10 +107,6 @@ Global
 		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D21383B-7B47-4CE6-92D9-BB2A99AE3E50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D21383B-7B47-4CE6-92D9-BB2A99AE3E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D21383B-7B47-4CE6-92D9-BB2A99AE3E50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D21383B-7B47-4CE6-92D9-BB2A99AE3E50}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Release|Any CPU.ActiveCfg = Release|Any CPU

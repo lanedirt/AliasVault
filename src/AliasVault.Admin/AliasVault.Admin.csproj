@@ -4,77 +4,64 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>aspnet-AliasVault.Admin-1DAADE35-C01B-43BB-B440-AA5E1E0B672D</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net8.0\AliasVault.xml</DocumentationFile>
-      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Debug\net8.0\AliasVault.Admin.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net8.0\AliasVault.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <DocumentationFile>bin\Release\net8.0\AliasVault.Admin.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AliasGenerators\AliasGenerators.csproj" />
-      <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
-      <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6"/>
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Main\Layout\MainLayout.razor" />
-      <AdditionalFiles Include="Main\Layout\NavMenu.razor" />
-      <AdditionalFiles Include="Main\Layout\TopMenu.razor" />
-      <AdditionalFiles Include="Main\Pages\Error.razor" />
-      <AdditionalFiles Include="Main\Pages\Home.razor" />
-      <AdditionalFiles Include="Main\Components\AlertMessageError.razor" />
-      <AdditionalFiles Include="Main\Components\AlertMessageSuccess.razor" />
-      <AdditionalFiles Include="Main\Components\Breadcrumb.razor" />
-      <AdditionalFiles Include="Main\Components\FullPageLoadingAnimation.razor" />
-      <AdditionalFiles Include="Main\Components\PageTitleAppend.razor" />
-      <Content Include="..\..\LICENSE.md">
-        <Link>LICENSE.md</Link>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
       </Content>
-      <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
+      <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="Components\Pages\Aliases\AddEdit.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Aliases\Alias.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Aliases\Delete.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Aliases\View.razor" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\EmailConfirm.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\ForgotPassword.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\Login.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\Logout.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\Register.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\ResetPassword.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\Pages\Shared\_Logo.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\_IdentityLayout.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\_ViewImports.cshtml" />
-      <_ContentIncludedByDefault Remove="Areas\User\_ViewStart.cshtml" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
-      <_ContentIncludedByDefault Remove="Components\Shared\AlertMessageError.razor" />
-      <_ContentIncludedByDefault Remove="Components\Shared\AlertMessageSuccess.razor" />
-      <_ContentIncludedByDefault Remove="Components\Shared\Breadcrumb.razor" />
-      <_ContentIncludedByDefault Remove="Components\Shared\FullPageLoadingAnimation.razor" />
-      <_ContentIncludedByDefault Remove="Components\Shared\PageTitleAppend.razor" />
-      <_ContentIncludedByDefault Remove="Components\Layout\MainLayout.razor" />
-      <_ContentIncludedByDefault Remove="Components\Layout\NavMenu.razor" />
-      <_ContentIncludedByDefault Remove="Components\Layout\TopMenu.razor" />
+      <AdditionalFiles Include="..\stylecop.json">
+        <Link>stylecop.json</Link>
+      </AdditionalFiles>
+      <AdditionalFiles Include="Auth\Pages\ForgotPassword.razor" />
+      <AdditionalFiles Include="Auth\Pages\Lockout.razor" />
+      <AdditionalFiles Include="Auth\Pages\Login.razor" />
+      <AdditionalFiles Include="Auth\Pages\LoginWith2fa.razor" />
+      <AdditionalFiles Include="Auth\Pages\LoginWithRecoveryCode.razor" />
+      <AdditionalFiles Include="Auth\Pages\ResetPassword.razor" />
+      <AdditionalFiles Include="Auth\Pages\ResetPasswordConfirmation.razor" />
+      <AdditionalFiles Include="Auth\Pages\_Imports.razor" />
+      <AdditionalFiles Include="Auth\Layout\AuthLayout.razor" />
+      <AdditionalFiles Include="Auth\Layout\RedirectToLogin.razor" />
+      <AdditionalFiles Include="Auth\Layout\ShowRecoveryCodes.razor" />
+      <AdditionalFiles Include="Auth\Layout\StatusMessage.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageError.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageSuccess.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\GlobalNotificationDisplay.razor" />
+      <AdditionalFiles Include="Main\Components\Alerts\ServerValidationErrors.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\ChangePassword.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\Disable2fa.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\EnableAuthenticator.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\GenerateRecoveryCodes.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\Index.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\ResetAuthenticator.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\SetPassword.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\TwoFactorAuthentication.razor" />
+      <AdditionalFiles Include="Main\Pages\Account\Manage\_Imports.razor" />
     </ItemGroup>
 
 </Project>

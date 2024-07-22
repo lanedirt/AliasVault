@@ -41,7 +41,7 @@ public class DbUpgradeTest : PlaywrightTest
         ];
 
         // Update salt and verifier for the test user so the key derivation is deterministic.
-        var user = ApiDbContext.Users.First();
+        var user = ApiDbContext.AliasVaultUsers.First();
         user.Salt = "1a73a8ef3a1c6dd891674c415962d87246450f8ca5004ecca24be770a4d7b1f7";
         user.Verifier = "ab284d4e6da07a2bc95fb4b9dcd0e192988cc45f51e4c51605e42d4fc1055f8398e579755f4772a045abdbded8ae47ae861faa9ff7cb98155103d7038b9713b12d80dff9134067f02564230ab2f5a550ae293b8b7049516a7dc3f918156cde7190bee7e9c84398b2b5b63aeea763cd776b3e9708fb1f66884340451187ca8aacfced19ea28bc94ae28eefa720aae7a3185b139cf6349c2d43e8147f1edadd249c7e125ce15e775c45694d9796ee3f9b8c5beacd37e777a2ea1e745c781b5c085b7e3826f6abe303a14f539cd8d9519661a91cc4e7d44111b8bc9aac1cf1a51ad76658502b436da746844348dfcfb2581c4e4c340058c116a06f975f57a689df4";
 
@@ -50,7 +50,7 @@ public class DbUpgradeTest : PlaywrightTest
             new Vault
             {
                 Id = Guid.NewGuid(),
-                UserId = ApiDbContext.Users.First().Id,
+                UserId = ApiDbContext.AliasVaultUsers.First().Id,
                 Version = "1.0.0",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
