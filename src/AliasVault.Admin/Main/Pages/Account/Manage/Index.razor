@@ -33,7 +33,7 @@
     private string? username;
     private string? phoneNumber;
 
-    [SupplyParameterFromForm] private InputModel Input { get; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()

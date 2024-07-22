@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
-@inject SignInManager<AdminUser> SignInManager
 @inject ILogger<ResetAuthenticator> Logger
 
 <LayoutPageTitle>Reset authenticator key</LayoutPageTitle>
@@ -36,12 +35,10 @@
         var userId = await UserManager.GetUserIdAsync(UserService.User());
         Logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", userId);
 
-        await SignInManager.RefreshSignInAsync(UserService.User());
-
-        GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.");
+        GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to re-configure your authenticator app using the new key.", true);
 
         NavigationService.RedirectTo(
-            "account/manage/enable-authenticator");
+            "account/manage/2fa");
     }
 
 }

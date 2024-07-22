@@ -52,6 +52,7 @@ public static class StartupTasks
 
             await userManager.CreateAsync(adminUser);
             adminUser.PasswordHash = adminPasswordHash;
+            adminUser.LastPasswordChanged = DateTime.UtcNow;
             await userManager.UpdateAsync(adminUser);
 
             Console.WriteLine("Admin user created.");
@@ -60,7 +61,7 @@ public static class StartupTasks
         {
             // Check if the password hash is different AND the password in .env file is newer than the password of user.
             // If so, update the password hash of the user in the database so it matches the one in the .env file.
-            if (adminUser.PasswordHash != config.AdminPasswordHash && config.LastPasswordChanged > adminUser.LastPasswordChanged)
+            if (adminUser.PasswordHash != config.AdminPasswordHash && (adminUser.LastPasswordChanged is null || config.LastPasswordChanged > adminUser.LastPasswordChanged))
             {
                 // The password has been changed in the .env file, update the user's password hash.
                 adminUser.PasswordHash = config.AdminPasswordHash;
