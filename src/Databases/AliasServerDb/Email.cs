@@ -20,14 +20,6 @@ using Microsoft.EntityFrameworkCore;
 public class Email
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Email"/> class.
-    /// </summary>
-    public Email()
-    {
-        Attachments = new HashSet<EmailAttachment>();
-    }
-
-    /// <summary>
     /// Gets or sets the ID of the email.
     /// </summary>
     public int Id { get; set; }
@@ -110,5 +102,5 @@ public class Email
     /// <summary>
     /// Gets or sets the collection of email attachments.
     /// </summary>
-    public virtual ICollection<EmailAttachment> Attachments { get; set; }
+    public virtual ICollection<EmailAttachment> Attachments { get; set; } = [];
 }

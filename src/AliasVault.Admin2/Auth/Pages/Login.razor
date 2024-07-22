@@ -11,9 +11,9 @@
 <EditForm Model="Input" FormName="LoginForm" OnValidSubmit="LoginUser" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
-        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="Input.Email" placeholder="name@company.com" />
-        <ValidationMessage For="() => Input.Email"/>
+        <label asp-for="Input.UserName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
+        <InputTextField id="username" @bind-Value="Input.UserName" placeholder="username" />
+        <ValidationMessage For="() => Input.UserName"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
@@ -56,7 +56,7 @@
     {
         ServerValidationErrors.Clear();
 
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+        var result = await SignInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
@@ -81,7 +81,7 @@
 
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required] public string UserName { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]

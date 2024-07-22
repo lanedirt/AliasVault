@@ -187,9 +187,9 @@ public class UserService
     /// Update user.
     /// </summary>
     /// <param name="user">User object.</param>
-    /// <param name="newPassword">New password for the user.</param>
+    /// <param name="newPassword">Optional parameter for new password for the user.</param>
     /// <returns>List of errors if any.</returns>
-    public async Task<List<string>> UpdateUserAsync(AdminUser user, string newPassword)
+    public async Task<List<string>> UpdateUserAsync(AdminUser user, string newPassword = "")
     {
         var errors = await ValidateUser(user, newPassword, isUpdate: true);
         if (errors.Count > 0)

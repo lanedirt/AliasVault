@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin", "src\Ali
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin2", "src\AliasVault.Admin2\AliasVault.Admin2.csproj", "{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitializationCLI", "src\Utilities\InitializationCLI\InitializationCLI.csproj", "{857BCD0E-753F-437A-AF75-B995B4D9A5FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,10 @@ Global
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{857BCD0E-753F-437A-AF75-B995B4D9A5FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{857BCD0E-753F-437A-AF75-B995B4D9A5FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{857BCD0E-753F-437A-AF75-B995B4D9A5FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{857BCD0E-753F-437A-AF75-B995B4D9A5FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +137,7 @@ Global
 		{A9C9A606-C87E-4298-AB32-09B1884D7487} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{B095A174-E528-4D38-BEC1-D1D38B3B30C0} = {8A477241-B96C-4174-968D-D40CB77F1ECD}
 		{1C7C8DE9-5F2A-43DB-A25E-33319E80A509} = {29DE523D-EEF2-41E9-AC12-F20D8D02BEBB}
+		{857BCD0E-753F-437A-AF75-B995B4D9A5FE} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}

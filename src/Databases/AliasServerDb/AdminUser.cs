@@ -14,4 +14,8 @@ using Microsoft.AspNetCore.Identity;
 /// </summary>
 public class AdminUser : IdentityUser
 {
+    /// <summary>
+    /// Gets or sets the last time the password was changed.
+    /// </summary>
+    public DateTime? LastPasswordChanged { get; set; }
 }

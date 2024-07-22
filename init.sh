@@ -13,6 +13,25 @@ NC='\033[0m' # No Color
 ENV_FILE=".env"
 ENV_EXAMPLE_FILE=".env.example"
 
+# Define verbose flag
+VERBOSE=false
+
+# Function to parse command-line arguments
+parse_args() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --verbose)
+        VERBOSE=true
+        ;;
+      *)
+        printf "${RED}Unknown argument: $1${NC}\n"
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
+
 # Function to generate a new 32-character JWT key
 generate_jwt_key() {
   dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | head -c 32
@@ -87,6 +106,125 @@ set_smtp_tls_enabled() {
   fi
 }
 
+# Function to generate a random admin password and store its hash in the .env file with progress indication
+generate_admin_password() {
+  if grep -q "^ADMIN_PASSWORD_HASH=" ".env"; then
+    ADMIN_PASSWORD_GENERATED=$(grep "^ADMIN_PASSWORD_GENERATED=" ".env" | cut -d '=' -f2)
+
+    printf "${CYAN}> ADMIN_PASSWORD_HASH already exists in .env. Last generated at ${ADMIN_PASSWORD_GENERATED}.${NC}\n"
+
+    printf "\n"
+    read -p "   Do you want to update the admin password? (yes/no): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+      printf "${CYAN}> Admin password will not be changed.${NC}\n"
+      return 0
+    fi
+
+    # Remove existing entries
+    sed -i '' '/^ADMIN_PASSWORD_HASH=/d' .env
+    sed -i '' '/^ADMIN_PASSWORD_GENERATED=/d' .env
+  fi
+
+  ADMIN_PASSWORD=$(openssl rand -base64 12)
+  printf "\n"
+  printf "${BLUE}   Building Docker image for password generation...${NC}\n"
+  if [ "$VERBOSE" = true ]; then
+    docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile .
+  else
+    {
+      docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile . | while IFS= read -r line; do
+        printf "."
+      done
+    } > init_build_output.log 2>&1 &
+    BUILD_PID=$!
+    while kill -0 $BUILD_PID 2> /dev/null; do
+      printf "."
+      sleep 1
+    done
+    wait $BUILD_PID
+    BUILD_EXIT_CODE=$?
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then
+      printf "\n${RED}  Error occurred while building Docker image:${NC}\n"
+      cat init_build_output.log
+      return 1
+    fi
+  fi
+
+  printf "\n"
+  printf "${BLUE}   Running Docker container to generate admin password hash...${NC}\n"
+  {
+    ADMIN_PASSWORD_HASH=$(docker run --rm initcli "$ADMIN_PASSWORD")
+  } &> init_run_output.log
+  if [ $? -ne 0 ]; then
+    printf "${RED}  Error occurred while running Docker container:${NC}\n"
+    cat init_run_output.log
+    return 1
+  fi
+
+  CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  # Append new entries
+  echo "ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH" >> .env
+  echo "ADMIN_PASSWORD_GENERATED=$CURRENT_TIME" >> .env
+
+  printf "\n"
+  printf "${CYAN}> New admin password generated successfully.${NC}\n"
+}
+
+# Function to build and run the Docker Compose stack with muted output unless an error occurs, showing progress indication
+build_and_run_docker_compose() {
+  printf "\n"
+  printf "${BLUE}Building Docker Compose stack...${NC}\n"
+  if [ "$VERBOSE" = true ]; then
+    docker-compose build
+  else
+    {
+      docker-compose build | while IFS= read -r line; do
+        printf "."
+      done
+    } > compose_build_output.log 2>&1 &
+    BUILD_PID=$!
+    while kill -0 $BUILD_PID 2> /dev/null; do
+      printf "."
+      sleep 1
+    done
+    wait $BUILD_PID
+    BUILD_EXIT_CODE=$?
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then
+      printf "\n${RED}Error occurred while building Docker Compose stack:${NC}\n"
+      cat compose_build_output.log
+      return 1
+    fi
+  fi
+
+  printf "\n"
+  printf "\n${BLUE}Starting Docker Compose stack...${NC}\n"
+  if [ "$VERBOSE" = true ]; then
+    docker-compose up -d
+  else
+    {
+      docker-compose up -d | while IFS= read -r line; do
+        printf "."
+      done
+    } > compose_up_output.log 2>&1 &
+    UP_PID=$!
+    while kill -0 $UP_PID 2> /dev/null; do
+      printf "."
+      sleep 1
+    done
+    wait $UP_PID
+    UP_EXIT_CODE=$?
+    if [ $UP_EXIT_CODE -ne 0 ]; then
+      printf "\n${RED}Error occurred while starting Docker Compose stack:${NC}\n"
+      cat compose_up_output.log
+      return 1
+    fi
+  fi
+
+  printf "\n${GREEN}Docker Compose stack built and started successfully.${NC}\n"
+}
+
+
 # Function to print the CLI logo
 print_logo() {
   printf "${MAGENTA}\n"
@@ -104,15 +242,35 @@ print_logo() {
 
 # Run the functions and print status
 print_logo
-printf "${BLUE}Initializing AliasVault...${NC}\n"
+printf "${BLUE}+++ Initializing .env file...${NC}\n"
+printf "\n"
 create_env_file
 populate_jwt_key
 set_smtp_allowed_domains
 set_smtp_tls_enabled
-printf "${BLUE}Initialization complete.${NC}\n"
+generate_admin_password
+printf "\n${BLUE}+++ Finish initializing .env file...${NC}\n"
+build_and_run_docker_compose
+printf "${BLUE}If no errors are reported, the AliasVault Docker containers should have started successfully.${NC}\n"
 printf "\n"
-printf "To build the images and start the containers, run the following command:\n"
+printf "${MAGENTA}=========================================================${NC}\n"
 printf "\n"
-printf "${CYAN}$ docker compose up -d --build --force-recreate${NC}\n"
+printf "AliasVault is successfully initialized!\n"
 printf "\n"
+printf "You can now login to the admin panel:\n"
 printf "\n"
+if [ "$ADMIN_PASSWORD" != "" ]; then
+  printf "${CYAN}Admin Panel: http://localhost:8080/${NC}\n"
+  printf "${CYAN}Username: admin${NC}\n"
+  printf "${CYAN}Password: $ADMIN_PASSWORD${NC}\n"
+  printf "\n"
+  printf "(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!\n"
+  printf "\n"
+else
+  printf "${CYAN}Admin Panel: http://localhost:8080/${NC}\n"
+  printf "${CYAN}Username: admin${NC}\n"
+  printf "${CYAN}Password: (Previously set.)${NC}\n"
+  printf "\n"
+  printf "\n"
+fi
+

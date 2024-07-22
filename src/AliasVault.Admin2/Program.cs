@@ -1,5 +1,7 @@
 using System.Data.Common;
+using System.Globalization;
 using AliasServerDb;
+using AliasVault.Admin2;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,18 @@ using AliasVault.Admin2.Services;
 using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Create global config object, get values from environment variables.
+Config config = new Config();
+var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH")
+                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
+config.AdminPasswordHash = adminPasswordHash;
+
+var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED")
+                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
+config.LastPasswordChanged = DateTime.ParseExact(lastPasswordChanged, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+
+builder.Services.AddSingleton(config);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -64,6 +78,7 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
         options.Password.RequiredLength = 8;
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = false;
     })
     .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()
@@ -91,5 +106,11 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+using (var scope = app.Services.CreateScope())
+{
+    await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);
+    await StartupTasks.SetAdminUser(scope.ServiceProvider);
+}
 
 app.Run();

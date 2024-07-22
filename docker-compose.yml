@@ -1,4 +1,16 @@
 services:
+    admin:
+        image: aliasvault-admin
+        build:
+            context: .
+            dockerfile: src/AliasVault.Admin2/Dockerfile
+        ports:
+            - "8080:8082"
+        volumes:
+            - ./database:/database
+        restart: always
+        env_file:
+            - .env
     client:
         image: aliasvault-client
         build:
