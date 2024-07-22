@@ -6,6 +6,8 @@
     Sign in to AliasVault Admin
 </h2>
 
+<ServerValidationErrors @ref="ServerValidationErrors" />
+
 <EditForm Model="Input" FormName="LoginForm" OnValidSubmit="LoginUser" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
@@ -34,8 +36,6 @@
 
 
 @code {
-    private string? errorMessage;
-
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
@@ -54,6 +54,8 @@
 
     public async Task LoginUser()
     {
+        ServerValidationErrors.Clear();
+
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
@@ -73,7 +75,7 @@
         }
         else
         {
-            errorMessage = "Error: Invalid login attempt.";
+            ServerValidationErrors.AddError("Error: Invalid login attempt.");
         }
     }
 

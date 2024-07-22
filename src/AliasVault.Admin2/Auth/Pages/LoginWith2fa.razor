@@ -5,8 +5,9 @@
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
     Two-factor authentication
 </h2>
-<hr class="mb-4"/>
-<StatusMessage Message="@message" class="mb-4"/>
+
+<ServerValidationErrors @ref="ServerValidationErrors" />
+
 <p class="text-gray-700 dark:text-gray-300 mb-6">Your login is protected with an authenticator app. Enter your authenticator code below.</p>
 <div class="w-full max-w-md">
     <EditForm Model="Input" FormName="login-with-2fa" OnValidSubmit="OnValidSubmitAsync" method="post" class="space-y-6">
@@ -36,7 +37,6 @@
 </p>
 
 @code {
-    private string? message;
     private AdminUser user = default!;
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
@@ -56,6 +56,8 @@
 
     private async Task OnValidSubmitAsync()
     {
+        ServerValidationErrors.Clear();
+
         var authenticatorCode = Input.TwoFactorCode!.Replace(" ", string.Empty).Replace("-", string.Empty);
         var result = await SignInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, RememberMe, Input.RememberMachine);
         var userId = await UserManager.GetUserIdAsync(user);
@@ -73,7 +75,7 @@
         else
         {
             Logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", userId);
-            message = "Error: Invalid authenticator code.";
+            ServerValidationErrors.AddError("Error: Invalid authenticator code.");
         }
     }
 

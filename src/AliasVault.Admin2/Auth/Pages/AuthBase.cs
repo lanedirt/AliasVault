@@ -1,4 +1,6 @@
-﻿namespace AliasVault.Admin2.Auth.Pages;
+﻿using AliasVault.Admin2.Main.Components.Alerts;
+
+namespace AliasVault.Admin2.Auth.Pages;
 
 using AliasServerDb;
 using AliasVault.Admin2.Services;
@@ -12,23 +14,24 @@ using Microsoft.AspNetCore.Identity;
 /// All pages that inherit from this class will require the user to be logged out. If user is logged in they
 /// are automatically redirected to index page.
 /// </summary>
-[Authorize]
 public class AuthBase : OwningComponentBase
 {
     [Inject]
+    protected ILogger<Login> Logger { get; set; } = null!;
+
+    [Inject]
+    protected NavigationService NavigationService { get; set; } = null!;
+
+    [Inject]
     protected SignInManager<AdminUser> SignInManager { get; set; } = null!;
-    
+
     [Inject]
     protected UserManager<AdminUser> UserManager { get; set; } = null!;
 
     [Inject]
     protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
-    [Inject]
-    public ILogger<Login> Logger { get; set; } = null!;
-
-    [Inject]
-    public NavigationService NavigationService { get; set; } = null!;
+    protected ServerValidationErrors ServerValidationErrors = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
