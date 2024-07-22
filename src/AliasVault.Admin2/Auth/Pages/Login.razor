@@ -1,14 +1,5 @@
 ﻿@page "/user/login"
 
-@using System.ComponentModel.DataAnnotations
-@using AliasVault.Admin2.Services
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-
-@inject SignInManager<AdminUser> SignInManager
-@inject ILogger<Login> Logger
-@inject NavigationService NavigationService
-
 <LayoutPageTitle>Log in</LayoutPageTitle>
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -53,6 +44,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookie to ensure a clean login process

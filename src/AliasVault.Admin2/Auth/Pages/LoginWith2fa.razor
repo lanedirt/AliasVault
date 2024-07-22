@@ -1,13 +1,5 @@
 ﻿@page "/user/loginWith2fa"
 
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
-
-@inject SignInManager<AdminUser> SignInManager
-@inject UserManager<AdminUser> UserManager
-@inject NavigationService NavigationService
-@inject ILogger<LoginWith2fa> Logger
-
 <LayoutPageTitle>Two-factor authentication</LayoutPageTitle>
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -55,6 +47,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         // Ensure the user has gone through the username & password screen first
         user = await SignInManager.GetTwoFactorAuthenticationUserAsync() ??
                throw new InvalidOperationException("Unable to load two-factor authentication user.");
