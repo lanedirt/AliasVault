@@ -58,8 +58,14 @@ public static class StartupTasks
                 {
                     // The password has been changed in the .env file, update the user's password hash.
                     adminUser.PasswordHash = config.AdminPasswordHash;
-
                     adminUser.LastPasswordChanged = DateTime.UtcNow;
+
+                    // Reset 2FA settings
+                    adminUser.TwoFactorEnabled = false;
+
+                    // Clear existing recovery codes
+                    await userManager.GenerateNewTwoFactorRecoveryCodesAsync(adminUser, 0);
+
                     await userManager.UpdateAsync(adminUser);
 
                     Console.WriteLine("Admin password hash updated.");

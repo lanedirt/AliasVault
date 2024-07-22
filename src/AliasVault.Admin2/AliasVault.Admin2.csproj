@@ -37,20 +37,11 @@
       <AdditionalFiles Include="..\stylecop.json">
         <Link>stylecop.json</Link>
       </AdditionalFiles>
-      <AdditionalFiles Include="Auth\Pages\AccessDenied.razor" />
-      <AdditionalFiles Include="Auth\Pages\ConfirmEmail.razor" />
-      <AdditionalFiles Include="Auth\Pages\ConfirmEmailChange.razor" />
       <AdditionalFiles Include="Auth\Pages\ForgotPassword.razor" />
-      <AdditionalFiles Include="Auth\Pages\ForgotPasswordConfirmation.razor" />
-      <AdditionalFiles Include="Auth\Pages\InvalidPasswordReset.razor" />
-      <AdditionalFiles Include="Auth\Pages\InvalidUser.razor" />
       <AdditionalFiles Include="Auth\Pages\Lockout.razor" />
       <AdditionalFiles Include="Auth\Pages\Login.razor" />
       <AdditionalFiles Include="Auth\Pages\LoginWith2fa.razor" />
       <AdditionalFiles Include="Auth\Pages\LoginWithRecoveryCode.razor" />
-      <AdditionalFiles Include="Auth\Pages\Register.razor" />
-      <AdditionalFiles Include="Auth\Pages\RegisterConfirmation.razor" />
-      <AdditionalFiles Include="Auth\Pages\ResendEmailConfirmation.razor" />
       <AdditionalFiles Include="Auth\Pages\ResetPassword.razor" />
       <AdditionalFiles Include="Auth\Pages\ResetPasswordConfirmation.razor" />
       <AdditionalFiles Include="Auth\Pages\_Imports.razor" />

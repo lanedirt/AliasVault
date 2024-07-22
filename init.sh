@@ -240,6 +240,9 @@ print_logo() {
   printf "${NC}\n"
 }
 
+# Parse arguments
+parse_args "$@"
+
 # Run the functions and print status
 print_logo
 printf "${BLUE}+++ Initializing .env file...${NC}\n"
