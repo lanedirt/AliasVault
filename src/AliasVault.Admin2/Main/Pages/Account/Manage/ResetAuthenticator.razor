@@ -1,4 +1,4 @@
-﻿@page "/account/manage/ResetAuthenticator"
+﻿@page "/account/manage/reset-authenticator"
 
 @using Microsoft.AspNetCore.Identity
 
@@ -41,7 +41,7 @@
         GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.");
 
         NavigationService.RedirectTo(
-            "account/manage/EnableAuthenticator");
+            "account/manage/enable-authenticator");
     }
 
 }

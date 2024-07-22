@@ -1,4 +1,4 @@
-﻿@page "/account/manage/EnableAuthenticator"
+﻿@page "/account/manage/enable-authenticator"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
@@ -114,7 +114,7 @@ else
         else
         {
             // Navigate back to the two factor authentication page.
-            NavigationService.RedirectTo("account/manage/TwoFactorAuthentication", forceLoad: true);
+            NavigationService.RedirectTo("account/manage/2fa", forceLoad: true);
         }
     }
 

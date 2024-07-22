@@ -1,7 +1,5 @@
 namespace AliasVault.Admin2.Services;
 
-using Microsoft.AspNetCore.Components;
-
 /// <summary>
 /// Access check service to verify if the user is logged in and has a confirmed email.
 /// </summary>

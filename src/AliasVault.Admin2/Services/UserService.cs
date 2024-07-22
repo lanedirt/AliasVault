@@ -24,11 +24,6 @@ public class UserService
     public event Action OnChange = () => { };
 
     /// <summary>
-    /// The Event Ids that the current user is allowed to manage.
-    /// </summary>
-    private List<Guid> _managedEventIds = new();
-
-    /// <summary>
     /// The roles of the current user
     /// </summary>
     private IList<string> _userRoles = new List<string>();
@@ -39,7 +34,7 @@ public class UserService
     private bool _isAdmin;
 
     /// <summary>
-    /// Gets a value indicating whether an event is loaded and available, false if not. Use this before accessing Event() method.
+    /// Gets a value indicating whether the User is loaded and available, false if not. Use this before accessing User() method.
     /// </summary>
     public bool UserLoaded => _user != null;
 
@@ -88,7 +83,7 @@ public class UserService
     }
 
     /// <summary>
-    /// Returns inner event EF object.
+    /// Returns inner User EF object.
     /// </summary>
     /// <returns></returns>
     public AdminUser User()
@@ -99,15 +94,6 @@ public class UserService
         }
 
         return _user;
-    }
-
-    /// <summary>
-    /// Returns managed Event ids list.
-    /// </summary>
-    /// <returns></returns>
-    public List<Guid> UserAllowedEventIds()
-    {
-        return _managedEventIds;
     }
 
     /// <summary>
@@ -134,42 +120,15 @@ public class UserService
                 _user = user;
 
                 // Load all roles for current user.
-                _userRoles = await _userManager.GetRolesAsync(this.User());
-
-                // Define if current user is admin.
-                _isAdmin = _userRoles.Contains(AdminRole);
-            }
-
-            // UserManager implementation: throughout Blazor server session user is not updated when user is updated in database
-            // because of UserManager EF cache. That's why we load it ourselves straight from the database via new DbContext
-            // to ensure we get the latest data everytime.
-            /*var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
-            if (currentUser != null)
-            {
-                _user = currentUser;
-
-                // Load managed event ids for current user.
-                _managedEventIds = await GetUserAllowedEventIdsAsync(_user);
-
-                // Load all roles for current user.
                 _userRoles = await _userManager.GetRolesAsync(User());
 
                 // Define if current user is admin.
                 _isAdmin = _userRoles.Contains(AdminRole);
-            }*/
+            }
         }
 
         // Notify listeners that the user has been loaded.
         NotifyStateChanged();
-    }
-
-    /// <summary>
-    /// Generate email confirmation token for current user.
-    /// </summary>
-    /// <returns>Email confirmation token.</returns>
-    public async Task<string> GenerateEmailConfirmTokenAsync()
-    {
-        return await _userManager.GenerateEmailConfirmationTokenAsync(User());
     }
 
     /// <summary>
@@ -191,15 +150,6 @@ public class UserService
     public async Task<List<AdminUser>> SearchUsersAsync(string searchTerm)
     {
         return await _userManager.Users.Where(x => x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
-    }
-
-    /// <summary>
-    /// Sign out the current user.
-    /// </summary>
-    /// <returns>Async task.</returns>
-    public async Task SignOutAsync()
-    {
-        await _signInManager.SignOutAsync();
     }
 
     /// <summary>
@@ -250,7 +200,7 @@ public class UserService
         // Update password if necessary
         if (!string.IsNullOrEmpty(newPassword))
         {
-            var passwordRemoveResult = await this._userManager.RemovePasswordAsync(user);
+            var passwordRemoveResult = await _userManager.RemovePasswordAsync(user);
             if (!passwordRemoveResult.Succeeded)
             {
                 foreach (var error in passwordRemoveResult.Errors)
@@ -260,7 +210,7 @@ public class UserService
                 return errors;
             }
 
-            var passwordAddResult = await this._userManager.AddPasswordAsync(user, newPassword);
+            var passwordAddResult = await _userManager.AddPasswordAsync(user, newPassword);
             if (!passwordAddResult.Succeeded)
             {
                 foreach (var error in passwordAddResult.Errors)
@@ -271,7 +221,7 @@ public class UserService
             }
         }
 
-        var result = await this._userManager.UpdateAsync(user);
+        var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -305,8 +255,8 @@ public class UserService
         var rolesToAdd = roles.Except(currentRoles).ToList();
         var rolesToRemove = currentRoles.Except(roles).ToList();
 
-        await this._userManager.AddToRolesAsync(user, rolesToAdd);
-        await this._userManager.RemoveFromRolesAsync(user, rolesToRemove);
+        await _userManager.AddToRolesAsync(user, rolesToAdd);
+        await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
         return errors;
     }
@@ -339,7 +289,7 @@ public class UserService
 
         if (isUpdate)
         {
-            var originalUser = await this._userManager.FindByIdAsync(user.Id);
+            var originalUser = await _userManager.FindByIdAsync(user.Id);
             if (user.UserName != originalUser.UserName)
             {
                 errors.Add("Username cannot be changed for existing users.");
@@ -347,13 +297,13 @@ public class UserService
         }
         else
         {
-            var existingUser = await this._userManager.FindByNameAsync(user.UserName);
+            var existingUser = await _userManager.FindByNameAsync(user.UserName);
             if (existingUser != null)
             {
                 errors.Add("Username is already in use.");
             }
 
-            var existingEmail = await this._userManager.FindByEmailAsync(user.Email);
+            var existingEmail = await _userManager.FindByEmailAsync(user.Email);
             if (existingEmail != null)
             {
                 errors.Add("Email is already in use.");
