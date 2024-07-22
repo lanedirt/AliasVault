@@ -1,4 +1,11 @@
-﻿namespace AliasVault.Admin.Main.Pages;
+﻿//-----------------------------------------------------------------------
+// <copyright file="MainBase.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.Admin.Main.Pages;
 
 using AliasServerDb;
 using AliasVault.Admin.Main.Models;
@@ -15,107 +22,63 @@ using Microsoft.JSInterop;
 [Authorize]
 public class MainBase : OwningComponentBase
 {
-    private bool _parametersInitialSet;
-
+    /// <summary>
+    /// Gets or sets the NavigationService instance responsible for handling navigation, replaces the default NavigationManager.
+    /// </summary>
     [Inject]
     public NavigationService NavigationService { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the UserService instance responsible for handling user data.
+    /// </summary>
     [Inject]
     protected UserService UserService { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the global notification service for showing notifications throughout the app.
+    /// </summary>
     [Inject]
     protected GlobalNotificationService GlobalNotificationService { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the JS invoke service for calling JS functions from C#.
+    /// </summary>
     [Inject]
-    public JsInvokeService JsInvokeService { get; set; } = null!;
-
-    [Inject]
-    public AliasServerDbContext DbContext { get; set; } = null!;
-
-    [Inject]
-    public IJSRuntime Js { get; set; } = null!;
+    protected JsInvokeService JsInvokeService { get; set; } = null!;
 
     /// <summary>
-    /// Contains the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
+    /// Gets or sets the AliasServerDbContext instance.
     /// </summary>
-    protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = new List<BreadcrumbItem>();
+    [Inject]
+    protected AliasServerDbContext DbContext { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the injected JSRuntime instance.
+    /// </summary>
+    [Inject]
+    protected IJSRuntime Js { get; set; } = null!;
+
+    /// <summary>
+    /// Gets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
+    /// </summary>
+    protected List<BreadcrumbItem> BreadcrumbItems { get; } = new();
+
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        if (!await AccessCheck())
-        {
-            return;
-        }
-
         await base.OnInitializedAsync();
-        _parametersInitialSet = false;
 
-        // Add base breadcrumbs
+        // Load the current user.
+        await UserService.LoadCurrentUserAsync();
+
+        // Add base breadcrumbs.
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationService.BaseUri });
-
-        // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
-        if (verifyAccessCheckTask != true)
-        {
-            // Keep the page from loading if the user is not authorized by calling an infinite loop.
-            // We wait for navigation to happen during the infinite loop.
-            while (true)
-            {
-                await Task.Delay(1000);
-            }
-        }
     }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-    }
-
-    /// <summary>
-    /// Issue a redirect to the login page if the user is not logged in.
-    /// </summary>
-    /// <returns>Boolean whether user has access to the current page.</returns>
-    protected async Task<bool> AccessCheck()
-    {
-        // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
-        if (verifyAccessCheckTask != true)
-        {
-            // Keep the page from loading if the user is not authorized by calling an infinite loop.
-            // We wait for navigation to happen during the infinite loop.
-            while (true)
-            {
-                await Task.Delay(1000);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-
-        // This is needed to prevent the OnParametersSetAsync method from running together with OnInitialized on initial page load.
-        if (!_parametersInitialSet)
-        {
-            _parametersInitialSet = true;
-            return;
-        }
-
-        // Call the GenericAccessCheckAsync method and halt execution if a redirect is required.
-        var verifyAccessCheckTask = await AccessCheckService.GenericAccessCheckAsync(UserService);
-        if (verifyAccessCheckTask != true)
-        {
-            // Keep the page from loading if the user is not authorized by calling an infinite loop.
-            // We wait for navigation to happen during the infinite loop.
-            while (true)
-            {
-                await Task.Delay(1000);
-            }
-        }
     }
 
     /// <summary>

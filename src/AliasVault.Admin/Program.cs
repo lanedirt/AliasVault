@@ -1,14 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 using System.Data.Common;
 using System.Globalization;
 using AliasServerDb;
 using AliasVault.Admin;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,7 +102,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -109,6 +115,11 @@ app.MapRazorComponents<App>()
 
 using (var scope = app.Services.CreateScope())
 {
+    var container = scope.ServiceProvider;
+    var db = container.GetRequiredService<AliasServerDbContext>();
+
+    await db.Database.MigrateAsync();
+
     await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);
     await StartupTasks.SetAdminUser(scope.ServiceProvider);
 }

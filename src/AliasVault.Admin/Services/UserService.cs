@@ -1,7 +1,13 @@
+//-----------------------------------------------------------------------
+// <copyright file="UserService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 namespace AliasVault.Admin.Services;
 
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using AliasServerDb;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,22 +15,16 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// User service for managing users.
 /// </summary>
-public class UserService
+/// <param name="dbContext">AliasServerDbContext instance.</param>
+/// <param name="userManager">UserManager instance.</param>
+/// <param name="httpContextAccessor">HttpContextManager instance.</param>
+public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> userManager, IHttpContextAccessor httpContextAccessor)
 {
-    private readonly AliasServerDbContext _dbContext;
-    private readonly UserManager<AdminUser> _userManager;
-    private readonly SignInManager<AdminUser> _signInManager;
-    private AdminUser? _user;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private const string AdminRole = "Admin";
+    private AdminUser? _user;
 
     /// <summary>
-    /// Allow other components to subscribe to changes in the event object.
-    /// </summary>
-    public event Action OnChange = () => { };
-
-    /// <summary>
-    /// The roles of the current user
+    /// The roles of the current user.
     /// </summary>
     private IList<string> _userRoles = new List<string>();
 
@@ -34,26 +34,14 @@ public class UserService
     private bool _isAdmin;
 
     /// <summary>
+    /// Allow other components to subscribe to changes in the event object.
+    /// </summary>
+    public event Action OnChange = () => { };
+
+    /// <summary>
     /// Gets a value indicating whether the User is loaded and available, false if not. Use this before accessing User() method.
     /// </summary>
     public bool UserLoaded => _user != null;
-
-    private void NotifyStateChanged() => OnChange.Invoke();
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UserService"/> class.
-    /// </summary>
-    /// <param name="dbContext">AliasServerDbContext instance.</param>
-    /// <param name="userManager">UserManager instance.</param>
-    /// <param name="signInManager">SignInManager instance.</param>
-    /// <param name="httpContextAccessor">HttpContextManager instance.</param>
-    public UserService(AliasServerDbContext dbContext, UserManager<AdminUser> userManager, SignInManager<AdminUser> signInManager, IHttpContextAccessor httpContextAccessor)
-    {
-        _dbContext = dbContext;
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _httpContextAccessor = httpContextAccessor;
-    }
 
     /// <summary>
     /// Returns all users.
@@ -61,19 +49,19 @@ public class UserService
     /// <returns>List of users.</returns>
     public async Task<List<AdminUser>> GetAllUsersAsync()
     {
-        var userList = await _userManager.Users.ToListAsync();
+        var userList = await userManager.Users.ToListAsync();
         return userList;
     }
 
     /// <summary>
-    /// Finds and returns user by id, using the _userManager instead of the _dbContext.
+    /// Finds and returns user by id, using the userManager instead of the dbContext.
     /// This is necessary when performing actions on the user, such as changing password or deleting the object.
     /// </summary>
     /// <param name="userId">User ID.</param>
     /// <returns>AdminUser object.</returns>
     public async Task<AdminUser> GetUserByIdUserManagerAsync(Guid userId)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
             throw new Exception($"User with id {userId} not found.");
@@ -85,7 +73,7 @@ public class UserService
     /// <summary>
     /// Returns inner User EF object.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>User object.</returns>
     public AdminUser User()
     {
         if (_user == null)
@@ -111,18 +99,18 @@ public class UserService
     /// <returns>Async task.</returns>
     public async Task LoadCurrentUserAsync()
     {
-        if (_httpContextAccessor.HttpContext != null)
+        if (httpContextAccessor.HttpContext != null)
         {
             // Load user from database. Use a new context everytime to ensure we get the latest data.
-            var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+            var userName = httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
 
-            var user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
+            var user = await dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
             if (user != null)
             {
                 _user = user;
 
                 // Load all roles for current user.
-                _userRoles = await _userManager.GetRolesAsync(User());
+                _userRoles = await userManager.GetRolesAsync(User());
 
                 // Define if current user is admin.
                 _isAdmin = _userRoles.Contains(AdminRole);
@@ -139,7 +127,7 @@ public class UserService
     /// <returns>List of roles.</returns>
     public async Task<List<string>> GetCurrentUserRolesAsync()
     {
-        var roles = await _userManager.GetRolesAsync(User());
+        var roles = await userManager.GetRolesAsync(User());
 
         return roles.ToList();
     }
@@ -151,7 +139,7 @@ public class UserService
     /// <returns>List of users matching the search term.</returns>
     public async Task<List<AdminUser>> SearchUsersAsync(string searchTerm)
     {
-        return await _userManager.Users.Where(x => x.UserName != null && x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
+        return await userManager.Users.Where(x => x.UserName != null && x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
     }
 
     /// <summary>
@@ -169,7 +157,7 @@ public class UserService
             return errors;
         }
 
-        var result = await _userManager.CreateAsync(user, password);
+        var result = await userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -202,28 +190,30 @@ public class UserService
         // Update password if necessary
         if (!string.IsNullOrEmpty(newPassword))
         {
-            var passwordRemoveResult = await _userManager.RemovePasswordAsync(user);
+            var passwordRemoveResult = await userManager.RemovePasswordAsync(user);
             if (!passwordRemoveResult.Succeeded)
             {
                 foreach (var error in passwordRemoveResult.Errors)
                 {
                     errors.Add(error.Description);
                 }
+
                 return errors;
             }
 
-            var passwordAddResult = await _userManager.AddPasswordAsync(user, newPassword);
+            var passwordAddResult = await userManager.AddPasswordAsync(user, newPassword);
             if (!passwordAddResult.Succeeded)
             {
                 foreach (var error in passwordAddResult.Errors)
                 {
                     errors.Add(error.Description);
                 }
+
                 return errors;
             }
         }
 
-        var result = await _userManager.UpdateAsync(user);
+        var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -247,7 +237,7 @@ public class UserService
     {
         List<string> errors = new();
 
-        var currentRoles = await _userManager.GetRolesAsync(user);
+        var currentRoles = await userManager.GetRolesAsync(user);
         if (user.Id == User().Id && currentRoles.Contains(AdminRole) && !roles.Contains(AdminRole))
         {
             errors.Add("You cannot remove the Admin role from yourself if you are an Admin.");
@@ -257,10 +247,26 @@ public class UserService
         var rolesToAdd = roles.Except(currentRoles).ToList();
         var rolesToRemove = currentRoles.Except(roles).ToList();
 
-        await _userManager.AddToRolesAsync(user, rolesToAdd);
-        await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+        await userManager.AddToRolesAsync(user, rolesToAdd);
+        await userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
         return errors;
+    }
+
+    /// <summary>
+    /// Checks if supplied password is correct for the user.
+    /// </summary>
+    /// <param name="user">User object.</param>
+    /// <param name="password">The password to check.</param>
+    /// <returns>Boolean indicating whether supplied password is valid and matches what is stored in the database..</returns>
+    public async Task<bool> CheckPasswordAsync(AdminUser user, string password)
+    {
+        if (password.Length == 0)
+        {
+            return false;
+        }
+
+        return await userManager.CheckPasswordAsync(user, password);
     }
 
     /// <summary>
@@ -291,7 +297,7 @@ public class UserService
 
         if (isUpdate)
         {
-            var originalUser = await _userManager.FindByIdAsync(user.Id);
+            var originalUser = await userManager.FindByIdAsync(user.Id);
             if (originalUser != null && user.UserName != originalUser.UserName)
             {
                 errors.Add("Username cannot be changed for existing users.");
@@ -299,13 +305,13 @@ public class UserService
         }
         else
         {
-            var existingUser = await _userManager.FindByNameAsync(user.UserName);
+            var existingUser = await userManager.FindByNameAsync(user.UserName);
             if (existingUser != null)
             {
                 errors.Add("Username is already in use.");
             }
 
-            var existingEmail = await _userManager.FindByEmailAsync(user.Email);
+            var existingEmail = await userManager.FindByEmailAsync(user.Email);
             if (existingEmail != null)
             {
                 errors.Add("Email is already in use.");
@@ -320,45 +326,5 @@ public class UserService
         return errors;
     }
 
-    public async Task<List<string>> DeleteUserAsync(AdminUser user, bool forceDelete = false)
-    {
-        var errors = new List<string>();
-
-        // Disallow deleting yourself, except when forceDelete is true
-        if (user.Id == User().Id && !forceDelete)
-        {
-            errors.Add("You cannot delete yourself.");
-            return errors;
-        }
-
-        // First delete all related data...
-        // @TODO: do we not want to preserve certain anonymized data?
-
-
-        // ...then delete the user
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            // Handle error, e.g. show error messages
-            errors.Add("Unable to delete user.");
-        }
-
-        return errors;
-    }
-
-    /// <summary>
-    /// Checks if supplied password is correct for the user.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <param name="password">The password to check.</param>
-    /// <returns>Boolean indicating whether supplied password is valid and matches what is stored in the database..</returns>
-    public async Task<bool> CheckPasswordAsync(AdminUser user, string password)
-    {
-        if (password.Length == 0)
-        {
-            return false;
-        }
-
-        return await _userManager.CheckPasswordAsync(user, password);
-    }
+    private void NotifyStateChanged() => OnChange.Invoke();
 }

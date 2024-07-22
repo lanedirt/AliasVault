@@ -7,7 +7,7 @@
 
 <LayoutPageTitle>Two-factor authentication (2FA)</LayoutPageTitle>
 
-@if (is2faEnabled)
+@if (is2FaEnabled)
 {
     <div class="mx-auto mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Two-factor authentication (2FA)</h3>
@@ -65,23 +65,15 @@
 @code {
     private bool hasAuthenticator;
     private int recoveryCodesLeft;
-    private bool is2faEnabled;
+    private bool is2FaEnabled;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(UserService.User()) is not null;
-        is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
+        is2FaEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
         recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(UserService.User());
     }
-
-    private async Task OnSubmitForgetBrowserAsync()
-    {
-        await SignInManager.ForgetTwoFactorClientAsync();
-
-        // Refresh current page.
-        NavigationService.RedirectTo(string.Empty, true);
-    }
-
 }

@@ -9,7 +9,7 @@
 
 @if (recoveryCodes is not null)
 {
-    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()" StatusMessage="@message"/>
+    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()"/>
 }
 else
 {
@@ -35,9 +35,9 @@ else
 }
 
 @code {
-    private string? message;
     private IEnumerable<string>? recoveryCodes;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -53,7 +53,7 @@ else
     {
         var userId = await UserManager.GetUserIdAsync(UserService.User());
         recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(UserService.User(), 10);
-        message = "You have generated new recovery codes.";
+        GlobalNotificationService.AddSuccessMessage("You have generated new recovery codes.");
 
         Logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", userId);
     }

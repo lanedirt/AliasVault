@@ -42,6 +42,7 @@
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -52,7 +53,10 @@
         }
     }
 
-    public async Task LoginUser()
+    /// <summary>
+    /// Logs in the user.
+    /// </summary>
+    protected async Task LoginUser()
     {
         ServerValidationErrors.Clear();
 

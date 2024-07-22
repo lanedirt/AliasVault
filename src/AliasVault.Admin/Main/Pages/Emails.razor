@@ -63,8 +63,9 @@ else
 
 @code {
     private bool IsLoading { get; set; } = true;
-    private List<Email> EmailList { get; set; } = new List<Email>();
+    private List<Email> EmailList { get; set; } = [];
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

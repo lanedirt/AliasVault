@@ -45,6 +45,7 @@
 
     [SupplyParameterFromQuery] private bool RememberMe { get; set; }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -54,6 +55,9 @@
                throw new InvalidOperationException("Unable to load two-factor authentication user.");
     }
 
+    /// <summary>
+    /// Submits the form.
+    /// </summary>
     private async Task OnValidSubmitAsync()
     {
         ServerValidationErrors.Clear();

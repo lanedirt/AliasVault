@@ -1,10 +1,15 @@
-﻿using AliasVault.Admin.Main.Components.Alerts;
+﻿//-----------------------------------------------------------------------
+// <copyright file="AuthBase.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace AliasVault.Admin.Auth.Pages;
 
 using AliasServerDb;
+using AliasVault.Admin.Main.Components.Alerts;
 using AliasVault.Admin.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -47,9 +52,9 @@ public class AuthBase : OwningComponentBase
     protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     /// <summary>
-    /// Object which holds server validation errors to show in the UI.
+    /// Gets or sets object which holds server validation errors to show in the UI.
     /// </summary>
-    protected ServerValidationErrors ServerValidationErrors = new();
+    protected ServerValidationErrors ServerValidationErrors { get; set; } = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()

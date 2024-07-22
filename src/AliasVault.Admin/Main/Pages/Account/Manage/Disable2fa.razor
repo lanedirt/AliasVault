@@ -27,6 +27,7 @@
 </div>
 
 @code {
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         if (!await UserManager.GetTwoFactorEnabledAsync(UserService.User()))
@@ -37,8 +38,8 @@
 
     private async Task OnSubmitAsync()
     {
-        var disable2faResult = await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
-        if (!disable2faResult.Succeeded)
+        var disable2FaResult = await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
+        if (!disable2FaResult.Succeeded)
         {
             throw new InvalidOperationException("Unexpected error occurred disabling 2FA.");
         }

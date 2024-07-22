@@ -38,6 +38,7 @@
     private DbServiceState.DatabaseState CurrentDbState { get; set; } = new();
     private const int MinimumLoadingTimeMs = 800;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -118,6 +119,7 @@
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         DbService.GetState().StateChanged -= OnDatabaseStateChanged;

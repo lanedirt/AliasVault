@@ -17,6 +17,13 @@
 </div>
 
 @code {
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
@@ -25,10 +32,5 @@
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

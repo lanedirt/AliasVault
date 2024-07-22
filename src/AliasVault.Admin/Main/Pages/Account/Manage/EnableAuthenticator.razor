@@ -76,6 +76,7 @@ else
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();

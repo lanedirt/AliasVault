@@ -1,3 +1,10 @@
+//-----------------------------------------------------------------------
+// <copyright file="StartupTasks.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 namespace AliasVault.Admin;
 
 using AliasServerDb;
@@ -28,7 +35,7 @@ public static class StartupTasks
     /// <summary>
     /// Creates the admin user if it does not exist.
     /// </summary>
-    /// <param name="serviceProvider"></param>
+    /// <param name="serviceProvider">IServiceProvider instance.</param>
     /// <returns>Async Task.</returns>
     public static async Task SetAdminUser(IServiceProvider serviceProvider)
     {

@@ -1,3 +1,10 @@
+//-----------------------------------------------------------------------
+// <copyright file="JSInvokeService.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
 namespace AliasVault.Admin.Services;
 
 using Microsoft.JSInterop;
@@ -5,19 +12,16 @@ using Microsoft.JSInterop;
 /// <summary>
 /// Service for invoking JavaScript functions from C#.
 /// </summary>
-public class JsInvokeService
+public class JsInvokeService(IJSRuntime js)
 {
-    private IJSRuntime Js { get; }
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="JsInvokeService"/> class.
+    /// Invoke a JavaScript function with retry and exponential backoff.
     /// </summary>
-    /// <param name="js">The IJSRuntime object.</param>
-    public JsInvokeService(IJSRuntime js)
-    {
-        Js = js;
-    }
-
+    /// <param name="functionName">The JS function name to call.</param>
+    /// <param name="initialDelay">Initial delay before calling the function.</param>
+    /// <param name="maxAttempts">Maximum attempts before giving up.</param>
+    /// <param name="args">Arguments to pass on to the javascript function.</param>
+    /// <returns>Async Task.</returns>
     public async Task RetryInvokeAsync(string functionName, TimeSpan initialDelay, int maxAttempts, params object[] args)
     {
         TimeSpan delay = initialDelay;
@@ -25,10 +29,10 @@ public class JsInvokeService
         {
             try
             {
-                bool isDefined = await this.Js.InvokeAsync<bool>("isFunctionDefined", functionName);
+                bool isDefined = await js.InvokeAsync<bool>("isFunctionDefined", functionName);
                 if (isDefined)
                 {
-                    await this.Js.InvokeVoidAsync(functionName, args);
+                    await js.InvokeVoidAsync(functionName, args);
                     return; // Successfully called the JS function, exit the method
                 }
             }

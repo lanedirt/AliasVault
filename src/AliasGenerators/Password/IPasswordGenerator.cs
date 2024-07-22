@@ -4,7 +4,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace AliasGenerators.Implementations;
+namespace AliasGenerators.Password;
 
 /// <summary>
 /// Interface for password generators.
