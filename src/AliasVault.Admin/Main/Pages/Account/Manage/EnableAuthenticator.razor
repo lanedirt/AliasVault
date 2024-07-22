@@ -14,12 +14,11 @@
 
 @if (recoveryCodes is not null)
 {
-    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()" StatusMessage="@message"/>
+    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()"/>
 }
 else
 {
     <div class="max-w-2xl mx-auto">
-        <StatusMessage Message="@message" class="mb-6"/>
         <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Configure authenticator app</h3>
         <div class="space-y-6">
             <p class="text-gray-700 dark:text-gray-300">To use an authenticator app go through the following steps:</p>
@@ -71,7 +70,6 @@ else
 @code {
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-    private string? message;
     private string? sharedKey;
     private string? authenticatorUri;
     private IEnumerable<string>? recoveryCodes;
@@ -97,7 +95,7 @@ else
 
         if (!is2faTokenValid)
         {
-            message = "Error: Verification code is invalid.";
+            GlobalNotificationService.AddErrorMessage("Error: Verification code is invalid.");
             return;
         }
 
@@ -105,7 +103,7 @@ else
         var userId = await UserManager.GetUserIdAsync(UserService.User());
         Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
-        message = "Your authenticator app has been verified.";
+        GlobalNotificationService.AddSuccessMessage("Your authenticator app has been verified.");
 
         if (await UserManager.CountRecoveryCodesAsync(UserService.User()) == 0)
         {

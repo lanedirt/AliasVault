@@ -16,21 +16,39 @@ using Microsoft.AspNetCore.Identity;
 /// </summary>
 public class AuthBase : OwningComponentBase
 {
+    /// <summary>
+    /// Gets or sets the logger.
+    /// </summary>
     [Inject]
     protected ILogger<Login> Logger { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the navigation service.
+    /// </summary>
     [Inject]
     protected NavigationService NavigationService { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the sign in manager.
+    /// </summary>
     [Inject]
     protected SignInManager<AdminUser> SignInManager { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the user manager.
+    /// </summary>
     [Inject]
     protected UserManager<AdminUser> UserManager { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the authentication state provider.
+    /// </summary>
     [Inject]
     protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
+    /// <summary>
+    /// Object which holds server validation errors to show in the UI.
+    /// </summary>
     protected ServerValidationErrors ServerValidationErrors = new();
 
     /// <inheritdoc />

@@ -114,7 +114,9 @@ public class UserService
         if (_httpContextAccessor.HttpContext != null)
         {
             // Load user from database. Use a new context everytime to ensure we get the latest data.
-            var user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == _httpContextAccessor.HttpContext.User.Identity.Name);
+            var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+
+            var user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
             if (user != null)
             {
                 _user = user;
@@ -149,7 +151,7 @@ public class UserService
     /// <returns>List of users matching the search term.</returns>
     public async Task<List<AdminUser>> SearchUsersAsync(string searchTerm)
     {
-        return await _userManager.Users.Where(x => x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
+        return await _userManager.Users.Where(x => x.UserName != null && x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
     }
 
     /// <summary>
@@ -290,7 +292,7 @@ public class UserService
         if (isUpdate)
         {
             var originalUser = await _userManager.FindByIdAsync(user.Id);
-            if (user.UserName != originalUser.UserName)
+            if (originalUser != null && user.UserName != originalUser.UserName)
             {
                 errors.Add("Username cannot be changed for existing users.");
             }

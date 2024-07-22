@@ -10,10 +10,12 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DocumentationFile>bin\Debug\net8.0\AliasVault.Admin.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DocumentationFile>bin\Release\net8.0\AliasVault.Admin.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,31 +39,6 @@
       <AdditionalFiles Include="..\stylecop.json">
         <Link>stylecop.json</Link>
       </AdditionalFiles>
-      <AdditionalFiles Include="Auth\Pages\ForgotPassword.razor" />
-      <AdditionalFiles Include="Auth\Pages\Lockout.razor" />
-      <AdditionalFiles Include="Auth\Pages\Login.razor" />
-      <AdditionalFiles Include="Auth\Pages\LoginWith2fa.razor" />
-      <AdditionalFiles Include="Auth\Pages\LoginWithRecoveryCode.razor" />
-      <AdditionalFiles Include="Auth\Pages\ResetPassword.razor" />
-      <AdditionalFiles Include="Auth\Pages\ResetPasswordConfirmation.razor" />
-      <AdditionalFiles Include="Auth\Pages\_Imports.razor" />
-      <AdditionalFiles Include="Auth\Layout\AuthLayout.razor" />
-      <AdditionalFiles Include="Auth\Layout\RedirectToLogin.razor" />
-      <AdditionalFiles Include="Auth\Layout\ShowRecoveryCodes.razor" />
-      <AdditionalFiles Include="Auth\Layout\StatusMessage.razor" />
-      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageError.razor" />
-      <AdditionalFiles Include="Main\Components\Alerts\AlertMessageSuccess.razor" />
-      <AdditionalFiles Include="Main\Components\Alerts\GlobalNotificationDisplay.razor" />
-      <AdditionalFiles Include="Main\Components\Alerts\ServerValidationErrors.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\ChangePassword.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\Disable2fa.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\EnableAuthenticator.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\GenerateRecoveryCodes.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\Index.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\ResetAuthenticator.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\SetPassword.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\TwoFactorAuthentication.razor" />
-      <AdditionalFiles Include="Main\Pages\Account\Manage\_Imports.razor" />
     </ItemGroup>
 
 </Project>
