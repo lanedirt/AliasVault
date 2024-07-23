@@ -15,10 +15,10 @@ jobs:
         options: --privileged
     steps:
       - uses: actions/checkout@v2
-      - name: Set permissions and run init.sh
+      - name: Set permissions and run install.sh
         run: |
-          chmod +x init.sh
-          ./init.sh
+          chmod +x install.sh
+          ./install.sh
       - name: Set up Docker Compose
         run: |
             # Change the exposed host port of the SmtpService from 25 to 2525 because port 25 is not allowed in GitHub Actions
