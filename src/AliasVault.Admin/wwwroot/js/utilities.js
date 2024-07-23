@@ -40,8 +40,7 @@ function generateQrCode(id) {
     element.appendChild(qrContainer);
 
     // Initialize QRCode object
-    new QRCode(qrContainer, {
-        text: dataUrl,
+    let qrcode = new QRCode(qrContainer, {
         width: 256,
         height: 256,
         colorDark : "#000000",
@@ -49,6 +48,6 @@ function generateQrCode(id) {
         correctLevel : QRCode.CorrectLevel.H
     });
 
-    console.log(`QR code generated successfully for element with id "${id}".`);
+    qrcode.makeCode(dataUrl);
 }
 
