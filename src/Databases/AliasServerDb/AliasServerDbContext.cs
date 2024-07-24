@@ -100,6 +100,11 @@ public class AliasServerDbContext : DbContext
     public DbSet<EmailAttachment> EmailAttachments { get; set; }
 
     /// <summary>
+    /// Gets or sets the Logs DbSet.
+    /// </summary>
+    public DbSet<Log> Logs { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>
@@ -150,6 +155,24 @@ public class AliasServerDbContext : DbContext
         {
             entity.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
             entity.ToTable("UserTokens");
+        });
+
+        // Configure Log entity
+        modelBuilder.Entity<Log>(builder =>
+        {
+            builder.ToTable("Logs");
+            builder.Property(e => e.Application).HasMaxLength(50).IsRequired();
+            builder.Property(e => e.Message);
+            builder.Property(e => e.MessageTemplate);
+            builder.Property(e => e.Level).HasMaxLength(128);
+            builder.Property(e => e.TimeStamp);
+            builder.Property(e => e.Exception);
+            builder.Property(e => e.Properties);
+            builder.Property(e => e.LogEvent);
+
+            // Indexes for faster querying
+            builder.HasIndex(e => e.TimeStamp);
+            builder.HasIndex(e => e.Application);
         });
     }
 

@@ -13,19 +13,23 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.HostEnvironment.Environment}.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddLogging(logging =>
 {
-    logging.SetMinimumLevel(LogLevel.Warning);
+    if (builder.HostEnvironment.IsDevelopment())
+    {
+        logging.SetMinimumLevel(LogLevel.Debug);
+    }
+    else
+    {
+        logging.SetMinimumLevel(LogLevel.Warning);
+    }
+
     logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
 });
-
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-if (builder.HostEnvironment.IsDevelopment())
-{
-    builder.Configuration.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
-}
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");

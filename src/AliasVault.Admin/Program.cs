@@ -18,6 +18,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
@@ -58,12 +60,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 // as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
 builder.Services.AddSingleton<DbConnection>(container =>
 {
-    var configFile = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json")
-        .Build();
-
-    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
+    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
     connection.Open();
 
     return connection;
@@ -106,7 +103,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 

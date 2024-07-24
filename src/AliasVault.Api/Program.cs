@@ -19,7 +19,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
@@ -34,12 +35,7 @@ builder.Services.AddLogging(logging =>
 
 builder.Services.AddSingleton<DbConnection>(container =>
 {
-    var configFile = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json")
-        .Build();
-
-    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
+    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
     connection.Open();
 
     return connection;
@@ -92,8 +88,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         RequireExpirationTime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Issuer"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero,
     };

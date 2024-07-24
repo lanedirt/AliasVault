@@ -135,7 +135,8 @@ public class AliasClientDbContext : DbContext
                 .UseSqlite(configuration.GetConnectionString("AliasClientDbContext"))
                 .UseLazyLoadingProxies();
 
-            optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+            // Log queries made as debug output.
+            optionsBuilder.LogTo(Console.WriteLine);
         }
 
         base.OnConfiguring(optionsBuilder);

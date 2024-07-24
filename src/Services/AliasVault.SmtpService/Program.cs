@@ -14,8 +14,12 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmtpServer;
 using SmtpServer.Storage;
+using AliasVault.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Services.ConfigureLogging(builder.Configuration, "SmtpService");
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
@@ -30,12 +34,7 @@ builder.Services.AddSingleton(config);
 
 builder.Services.AddSingleton<DbConnection>(container =>
 {
-    var configFile = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json")
-        .Build();
-
-    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
+    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
     connection.Open();
 
     return connection;
@@ -125,9 +124,9 @@ var host = builder.Build();
 using (var scope = host.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<AliasServerDbContext>();
-
-    await db.Database.MigrateAsync();
+    var factory = container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
+    await using var context = await factory.CreateDbContextAsync();
+    await context.Database.MigrateAsync();
 }
 
 await host.RunAsync();
