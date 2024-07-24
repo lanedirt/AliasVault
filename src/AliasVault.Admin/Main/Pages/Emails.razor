@@ -1,4 +1,6 @@
 ﻿@page "/emails"
+@using AliasVault.RazorComponents
+@using Azure
 
 <LayoutPageTitle>Emails</LayoutPageTitle>
 
@@ -20,16 +22,17 @@
 }
 else
 {
-    <div class="overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
+    <div class="overflow-x-auto px-4">
+        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+
+        <table class="w-full text-sm text-left text-gray-500 shadow rounded border mt-8">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <tr>
                     <th scope="col" class="px-4 py-3">ID</th>
-                    <th scope="col" class="px-4 py-3">Subject</th>
+                    <th scope="col" class="px-4 py-3">Time</th>
                     <th scope="col" class="px-4 py-3">From</th>
                     <th scope="col" class="px-4 py-3">To</th>
-                    <th scope="col" class="px-4 py-3">Date</th>
-                    <th scope="col" class="px-4 py-3">System Date</th>
+                    <th scope="col" class="px-4 py-3">Subject</th>
                     <th scope="col" class="px-4 py-3">Preview</th>
                     <th scope="col" class="px-4 py-3">Attachments</th>
                 </tr>
@@ -39,15 +42,14 @@ else
                 {
                     <tr class="bg-white border-b hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900">@email.Id</td>
-                        <td class="px-4 py-3">@email.Subject</td>
+                        <td class="px-4 py-3">@email.DateSystem.ToString("yyyy-MM-dd HH:mm")</td>
                         <td class="px-4 py-3">
                             <span class="font-medium">@email.FromLocal</span>@@@email.FromDomain
                         </td>
                         <td class="px-4 py-3">
                             <span class="font-medium">@email.ToLocal</span>@@@email.ToDomain
                         </td>
-                        <td class="px-4 py-3">@email.Date.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="px-4 py-3">@email.DateSystem.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">@email.Subject</td>
                         <td class="px-4 py-3">
                             <span class="line-clamp-1">@email.MessagePreview</span>
                         </td>
@@ -62,26 +64,37 @@ else
 }
 
 @code {
-    private bool IsLoading { get; set; } = true;
     private List<Email> EmailList { get; set; } = [];
+    private bool IsLoading { get; set; } = true;
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 50;
+    private int TotalRecords { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await LoadEmailsAsync();
+            await RefreshData();
         }
     }
 
-    private async Task LoadEmailsAsync()
+    private void HandlePageChanged(int newPage)
+    {
+        CurrentPage = newPage;
+        _ = RefreshData();
+    }
+
+    private async Task RefreshData()
     {
         IsLoading = true;
         StateHasChanged();
 
-        // Load the emails from the database.
+        TotalRecords = await DbContext.Emails.CountAsync();
         EmailList = await DbContext.Emails
             .OrderByDescending(x => x.DateSystem)
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
             .ToListAsync();
 
         IsLoading = false;

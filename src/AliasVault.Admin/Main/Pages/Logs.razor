@@ -1,0 +1,151 @@
+﻿@page "/logs"
+@using AliasVault.RazorComponents
+
+<LayoutPageTitle>Logs</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Logs</h1>
+        </div>
+        <p>This page gives an overview of recent system logs.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="overflow-x-auto px-4">
+        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+
+        <div class="mb-4">
+            <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th scope="col" class="px-4 py-3">ID</th>
+                <th scope="col" class="px-4 py-3">Time</th>
+                <th scope="col" class="px-4 py-3">Application</th>
+                <th scope="col" class="px-4 py-3">Level</th>
+                <th scope="col" class="px-4 py-3">Message</th>
+            </tr>
+            </thead>
+            <tbody id="logTableBody">
+                @foreach (var log in LogList)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
+                        <td class="px-4 py-3">@log.TimeStamp.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">@log.Application</td>
+
+                        @{
+                            string bgColor;
+
+                            switch (log.Level)
+                            {
+                                case "Information":
+                                bgColor = "bg-blue-500";
+                                break;
+                                case "Error":
+                                bgColor = "bg-red-500";
+                                break;
+                                case "Warning":
+                                bgColor = "bg-yellow-500";
+                                break;
+                                case "Debug":
+                                bgColor = "bg-green-500";
+                                break;
+                                default:
+                                bgColor = "bg-gray-500";
+                                break;
+                            }
+                        }
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-white @bgColor">
+                                @log.Level
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 line-clamp-1" title="@log.Exception">@log.Message</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Log> LogList { get; set; } = [];
+    private bool IsLoading { get; set; } = true;
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 50;
+    private int TotalRecords { get; set; }
+
+    private string _searchTerm = string.Empty;
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            if (_searchTerm != value)
+            {
+                _searchTerm = value;
+                _ = RefreshData();
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshData();
+        }
+    }
+
+    private void HandlePageChanged(int newPage)
+    {
+        CurrentPage = newPage;
+        _ = RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        if (SearchTerm.Length > 0)
+        {
+            var filteredQuery = DbContext.Logs
+                .Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                            EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                            x.Level.ToLower() == SearchTerm.ToLower());
+
+            TotalRecords = await filteredQuery.CountAsync();
+            LogList = await filteredQuery
+                .OrderByDescending(x => x.Id)
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+        }
+        else
+        {
+            TotalRecords = await DbContext.Logs.CountAsync();
+            LogList = await DbContext.Logs
+                .OrderByDescending(x => x.Id)
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}
