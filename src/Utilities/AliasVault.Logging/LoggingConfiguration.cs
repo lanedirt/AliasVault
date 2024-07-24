@@ -87,16 +87,15 @@ public static class LoggingConfiguration
     {
         var logLevels = configuration.GetSection("Logging:LogLevel");
 
-        // Check if this specific source context has an override level defined in appsettings.json.
-        foreach (var logLevel in logLevels.GetChildren())
+        // If this specific source context has an override level defined in appsettings.json, return that.
+        var logLevel = logLevels.GetChildren()
+            .FirstOrDefault(ll => sourceContext.Contains(ll.Key, StringComparison.OrdinalIgnoreCase));
+        if (logLevel != null)
         {
-            if (sourceContext.Contains(logLevel.Key, StringComparison.OrdinalIgnoreCase))
-            {
-                return Enum.Parse<LogEventLevel>(logLevel.Value ?? "Information", true);
-            }
+            return Enum.Parse<LogEventLevel>(logLevel.Value ?? "Information", true);
         }
 
-        // If no specific override, use the default.
+        // If there is no specific override, use the default.
         var defaultLevel = logLevels["Default"] ?? "Information";
         return Enum.Parse<LogEventLevel>(defaultLevel, true);
     }

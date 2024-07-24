@@ -5,12 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasServerDb;
-using Microsoft.EntityFrameworkCore;
-
 namespace AliasVault.SmtpService;
 
-public class Worker(ILogger<Worker> logger, SmtpServer.SmtpServer smtpServer, IDbContextFactory<AliasServerDbContext> contextFactory) : BackgroundService
+public class Worker(ILogger<Worker> logger, SmtpServer.SmtpServer smtpServer) : BackgroundService
 {
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,11 +22,11 @@ public class Worker(ILogger<Worker> logger, SmtpServer.SmtpServer smtpServer, ID
             // Wait for the cancellation token to be triggered
             await Task.Delay(Timeout.Infinite, stoppingToken);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
             // This exception is thrown when the stoppingToken is canceled
             // It's expected behavior, so we can just log it
-            logger.LogWarning("AliasVault.SmtpService is stopping due to a cancellation request");
+            logger.LogWarning(ex, "AliasVault.SmtpService is stopping due to a cancellation request.");
         }
         catch (Exception ex)
         {

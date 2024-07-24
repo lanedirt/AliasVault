@@ -10,6 +10,7 @@ namespace AliasVault.Logging;
 using System;
 using AliasServerDb;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -33,9 +34,9 @@ public class DatabaseSink(IFormatProvider formatProvider, Func<IDbContextFactory
             Level = logEvent.Level.ToString(),
             Message = logEvent.RenderMessage(formatProvider),
             Exception = logEvent.Exception?.ToString() ?? string.Empty,
-            Properties = logEvent.Properties.ToString() ?? string.Empty,
-            LogEvent = string.Empty,
-            MessageTemplate = string.Empty,
+            Properties = JsonConvert.SerializeObject(logEvent.Properties),
+            LogEvent = (logEvent.Level >= LogEventLevel.Error) ? JsonConvert.SerializeObject(logEvent) : string.Empty,
+            MessageTemplate = logEvent.MessageTemplate.Text,
             Application = applicationName,
         };
 

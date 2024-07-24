@@ -22,6 +22,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="Serilog" Version="4.0.0" />
       <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
       <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.2" />
