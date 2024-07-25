@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Data.Common;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
 using AliasVault.SmtpService;
@@ -15,11 +16,14 @@ using Microsoft.EntityFrameworkCore;
 using SmtpServer;
 using SmtpServer.Storage;
 using AliasVault.Logging;
+using AliasVault.SmtpService.Workers;
+using AliasVault.WorkerStatus;
+using AliasVault.WorkerStatus.Database;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
-builder.Services.ConfigureLogging(builder.Configuration, "SmtpService");
+builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!);
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
@@ -118,7 +122,33 @@ builder.Services.AddSingleton(
     }
 );
 
-builder.Services.AddHostedService<Worker>();
+// -----------------------------------------------------------------------
+// Worker status service registration.
+// -----------------------------------------------------------------------
+var globalServiceStatus = new GlobalServiceStatus();
+builder.Services.AddSingleton(globalServiceStatus);
+
+builder.Services.AddSingleton<Func<IWorkerStatusDbContext>>(sp =>
+{
+    var factory = sp.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
+    return () => factory.CreateDbContext();
+});
+
+builder.Services.AddSingleton(sp => new WorkerStatusConfiguration
+{
+    ServiceName = Assembly.GetExecutingAssembly().GetName().Name!,
+    GlobalServiceStatus = sp.GetRequiredService<GlobalServiceStatus>(),
+});
+
+builder.Services.AddHostedService<StatusWorker>();
+
+// Register the names of the various worker services here so their status can be monitored.
+globalServiceStatus.RegisterWorker(nameof(SmtpServerWorker));
+// -----------------------------------------------------------------------
+
+builder.Services.AddHostedService<SmtpServerWorker>();
+
+
 var host = builder.Build();
 
 using (var scope = host.Services.CreateScope())

@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [ApiController]
 [Route("/")]
-public class RootController : ControllerBase
+public class RootController(AliasServerDbContext context) : ControllerBase
 {
     /// <summary>
     /// Root endpoint that returns a 200 OK if the database connection is successful
@@ -30,20 +30,17 @@ public class RootController : ControllerBase
     {
         try
         {
-            using (var dbContext = new AliasServerDbContext())
+            var appliedMigrations = context.Database.GetAppliedMigrations();
+            var allMigrations = context.Database.GetMigrations();
+
+            if (allMigrations.Except(appliedMigrations).Any())
             {
-                var appliedMigrations = dbContext.Database.GetAppliedMigrations();
-                var allMigrations = dbContext.Database.GetMigrations();
-
-                if (allMigrations.Except(appliedMigrations).Any())
-                {
-                    // There are pending migrations
-                    return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
-                }
-
-                // Database is up to date
-                return Ok("OK");
+                // There are pending migrations
+                return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
             }
+
+            // Database is up to date
+            return Ok("OK");
         }
         catch
         {

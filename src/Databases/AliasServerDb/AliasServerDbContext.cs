@@ -7,6 +7,7 @@
 
 namespace AliasServerDb;
 
+using AliasVault.WorkerStatus.Database;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +17,7 @@ using Microsoft.Extensions.Configuration;
 /// we have two separate user objects, one for the admin panel and one for the vault. We manually
 /// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public class AliasServerDbContext : DbContext
+public class AliasServerDbContext : WorkerStatusDbContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.

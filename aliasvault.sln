@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Logging", "src\U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.RazorComponents", "src\Utilities\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj", "{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.WorkerStatus", "src\Utilities\AliasVault.WorkerStatus\AliasVault.WorkerStatus.csproj", "{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +129,10 @@ Global
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,6 +152,7 @@ Global
 		{857BCD0E-753F-437A-AF75-B995B4D9A5FE} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{FF0B0E64-1AE2-415C-A404-0EB78010821A} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
+		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}
