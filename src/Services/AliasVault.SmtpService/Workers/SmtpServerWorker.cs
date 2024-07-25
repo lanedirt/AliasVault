@@ -12,31 +12,42 @@ using AliasVault.WorkerStatus;
 public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, GlobalServiceStatus globalServiceStatus, SmtpServer.SmtpServer smtpServer) : BackgroundService
 {
     private Task? _workerTask;
-    private readonly object _taskLock = new object();
+    private readonly object _taskLock = new();
 
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken serviceCancellationToken)
     {
         logger.LogInformation("AliasVault.SmtpService.SmtpServerWorker ExecuteAsync called.");
 
-        // Create a new cancellation token source for worker.
-        using var workerCancellationTokenSource = new CancellationTokenSource();
-        var workerCancellationToken = workerCancellationTokenSource.Token;
-
         while (!serviceCancellationToken.IsCancellationRequested)
+        {
+            var workerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(serviceCancellationToken);
+
+            await ExecuteInnerAsync(workerCancellationTokenSource);
+            _workerTask = null;
+
+            await Task.Delay(1000, serviceCancellationToken);
+        }
+    }
+
+    private async Task ExecuteInnerAsync(CancellationTokenSource workerCancellationTokenSource)
+    {
+        // Shutdown the SMTP server if it's running.
+        //smtpServer.Shutdown();
+        _workerTask = null;
+
+        while (!workerCancellationTokenSource.IsCancellationRequested)
         {
             if (globalServiceStatus.CurrentStatus == "Started" || globalServiceStatus.CurrentStatus == "Starting")
             {
-                // Set worker status to true for acknowledgement.
-                globalServiceStatus.SetWorkerStatus(nameof(SmtpServerWorker), true);
-
-                // Start the worker in the background.
+                // Start the worker in the background with the cancellation token so we can stop it later.
                 lock (_taskLock)
                 {
                     if (_workerTask == null)
                     {
-                        // Reset the worker cancellation token if it was canceled before
-                        _workerTask = Task.Run(() => WorkerLogic(workerCancellationToken), workerCancellationToken);
+                        // Create a new cancellation token source for worker.
+                        _workerTask = Task.Run(() => WorkerLogic(workerCancellationTokenSource.Token),
+                            workerCancellationTokenSource.Token);
                     }
                 }
             }
@@ -47,27 +58,11 @@ public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, GlobalServiceSta
             }
             else if (globalServiceStatus.CurrentStatus == "Stopped")
             {
-                // Ensure worker task is completed and reset it so it can be started again.
-                if (_workerTask != null)
-                {
-                    try
-                    {
-                        await _workerTask;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // Task was cancelled, handle if needed.
-                    }
-                    _workerTask = null;
-                }
+                // Reset the worker task if the service is stopped so it can be started again later.
+                _workerTask = null;
+                break;
             }
-
-            await Task.Delay(1000, serviceCancellationToken);
         }
-
-        // If we reach this point, the service is hard stopping: not in software but on OS level.
-        // Request the actual worker to stop.
-        await workerCancellationTokenSource.CancelAsync();
     }
 
     /// <summary>
@@ -79,6 +74,9 @@ public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, GlobalServiceSta
         try
         {
             logger.LogWarning("AliasVault.SmtpService starting at: {Time}", DateTimeOffset.Now);
+
+            // Set worker status to true for acknowledgement.
+            globalServiceStatus.SetWorkerStatus(nameof(SmtpServerWorker), true);
 
             // Start the SMTP server
             await smtpServer.StartAsync(stoppingToken);
@@ -101,9 +99,6 @@ public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, GlobalServiceSta
         {
             // Log that the service is stopping, whether it's due to cancellation or an error
             logger.LogWarning("AliasVault.SmtpService stopped at: {Time}", DateTimeOffset.Now);
-
-            // Ensure the SMTP server is stopped
-            smtpServer.Shutdown();
 
             // Set worker status to false for acknowledgement.
             globalServiceStatus.SetWorkerStatus(nameof(SmtpServerWorker), false);
