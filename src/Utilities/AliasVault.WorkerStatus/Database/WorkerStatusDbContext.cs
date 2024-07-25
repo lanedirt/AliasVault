@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Microsoft.EntityFrameworkCore;
-
 namespace AliasVault.WorkerStatus.Database;
+
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// WorkerStatusDbContext class.
@@ -35,4 +35,3 @@ public class WorkerStatusDbContext : DbContext, IWorkerStatusDbContext
     /// </summary>
     public DbSet<WorkerServiceStatus> WorkerServiceStatuses { get; set; }
 }
-

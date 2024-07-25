@@ -5,10 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasVault.WorkerStatus.Database;
-
 namespace AliasVault.WorkerStatus;
 
+using AliasVault.WorkerStatus.Database;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

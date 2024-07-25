@@ -22,5 +22,3 @@ public class WorkerStatusConfiguration
     /// </summary>
     public string ServiceName { get; set; } = null!;
 }
-
-

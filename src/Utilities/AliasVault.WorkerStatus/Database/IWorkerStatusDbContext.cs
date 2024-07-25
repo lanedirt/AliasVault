@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Microsoft.EntityFrameworkCore;
-
 namespace AliasVault.WorkerStatus.Database;
+
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Interface for the WorkerStatusDbContext. Inherit from this interface to include the WorkerServiceStatus DbSet
@@ -33,5 +33,3 @@ public interface IWorkerStatusDbContext : IDisposable
     /// <returns>Task.</returns>
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-
-

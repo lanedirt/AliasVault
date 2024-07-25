@@ -5,10 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+namespace AliasVault.WorkerStatus.Database;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-namespace AliasVault.WorkerStatus.Database;
 
 /// <summary>
 /// Represents the status of a worker service for monitoring and control.

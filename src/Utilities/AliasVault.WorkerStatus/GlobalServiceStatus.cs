@@ -29,7 +29,7 @@ public class GlobalServiceStatus
     /// <summary>
     /// Register a worker with the service.
     /// </summary>
-    /// <param name="workerName">Name of the worker</param>
+    /// <param name="workerName">Name of the worker.</param>
     public void RegisterWorker(string workerName)
     {
         _workerStatuses[workerName] = false;
