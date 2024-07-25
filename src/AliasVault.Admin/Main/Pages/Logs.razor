@@ -21,7 +21,7 @@
 }
 else
 {
-    <div class="overflow-x-auto px-4">
+    <div class="px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
         <div class="mb-4">
@@ -126,7 +126,7 @@ else
             var filteredQuery = DbContext.Logs
                 .Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
                             EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                            x.Level.ToLower() == SearchTerm.ToLower());
+                            EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%"));
 
             TotalRecords = await filteredQuery.CountAsync();
             LogList = await filteredQuery
