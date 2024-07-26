@@ -7,11 +7,13 @@
 
 using System.Data.Common;
 using System.Globalization;
+using System.Reflection;
 using AliasServerDb;
 using AliasVault.Admin;
 using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
+using AliasVault.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -20,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!);
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
@@ -96,11 +99,11 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseHttpsRedirection();
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 

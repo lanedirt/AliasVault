@@ -40,6 +40,11 @@ public class ClientPlaywrightTest : PlaywrightTest
     protected AliasServerDbContext ApiDbContext => _apiFactory.GetDbContext();
 
     /// <summary>
+    /// Gets or sets the base URL where the WebAPI project runs on including random port.
+    /// </summary>
+    protected string ApiBaseUrl { get; set; } = string.Empty;
+
+    /// <summary>
     /// Tear down the Playwright test which runs after all tests are done in the class.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -71,6 +76,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         }
 
         AppBaseUrl = "http://localhost:" + appPort + "/";
+        ApiBaseUrl = "http://localhost:" + apiPort + "/";
 
         // Start WebAPI in-memory.
         _apiFactory.HostUrl = "http://localhost:" + apiPort;
@@ -89,7 +95,7 @@ public class ClientPlaywrightTest : PlaywrightTest
             {
                 var response = new
                 {
-                    ApiUrl = "http://localhost:" + apiPort,
+                    ApiUrl = ApiBaseUrl.TrimEnd('/'),
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
@@ -104,7 +110,7 @@ public class ClientPlaywrightTest : PlaywrightTest
             {
                 var response = new
                 {
-                    ApiUrl = "http://localhost:" + apiPort,
+                    ApiUrl = ApiBaseUrl.TrimEnd('/'),
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions

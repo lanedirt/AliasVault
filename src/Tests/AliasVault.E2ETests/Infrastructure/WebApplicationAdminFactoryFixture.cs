@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -27,12 +26,26 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     /// <summary>
     /// The DbConnection instance that is created for the test.
     /// </summary>
-    private DbConnection? _dbConnection;
+    private DbConnection _dbConnection;
 
     /// <summary>
-    /// The DbContext instance that is created for the test.
+    /// The DbContextFactory instance that is created for the test.
+    /// </summary>
+    private IDbContextFactory<AliasServerDbContext> _dbContextFactory = null!;
+
+    /// <summary>
+    /// The cached DbContext instance that can be used during the test.
     /// </summary>
     private AliasServerDbContext? _dbContext;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WebApplicationAdminFactoryFixture{TEntryPoint}"/> class.
+    /// </summary>
+    public WebApplicationAdminFactoryFixture()
+    {
+        _dbConnection = new SqliteConnection("DataSource=:memory:");
+        _dbConnection.Open();
+    }
 
     /// <summary>
     /// Gets or sets the URL the web application host will listen on.
@@ -45,16 +58,23 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     /// <returns>AliasServerDbContext instance.</returns>
     public AliasServerDbContext GetDbContext()
     {
-        if (_dbContext == null)
+        if (_dbContext != null)
         {
-            var options = new DbContextOptionsBuilder<AliasServerDbContext>()
-                .UseSqlite(_dbConnection!)
-                .Options;
-
-            _dbContext = new AliasServerDbContext(options);
+            return _dbContext;
         }
 
+        _dbContext = _dbContextFactory.CreateDbContext();
         return _dbContext;
+    }
+
+    /// <summary>
+    /// Disposes the DbConnection instance.
+    /// </summary>
+    /// <returns>ValueTask.</returns>
+    public override ValueTask DisposeAsync()
+    {
+        _dbConnection.Dispose();
+        return base.DisposeAsync();
     }
 
     /// <inheritdoc />
@@ -70,62 +90,27 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
 
         builder.ConfigureServices((context, services) =>
         {
-            // Remove the existing AliasServerDbContext registration.
-            var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbContextOptions<AliasServerDbContext>));
-
-            if (dbContextDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No DbContextOptions<AliasServerDbContext> registered.");
-            }
-
-            services.Remove(dbContextDescriptor);
-
-            // Remove the existing AliasServerDbContextFactory registration.
+            // Remove the existing DbContextFactory registration
             var dbContextFactoryDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(IDbContextFactory<AliasServerDbContext>));
+                d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>));
 
-            if (dbContextFactoryDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No IDbContextFactory<AliasServerDbContext> registered.");
-            }
-
-            services.Remove(dbContextFactoryDescriptor);
+            services.Remove(dbContextFactoryDescriptor ?? throw new InvalidOperationException("No IDbContextFactory<AliasServerDbContext> registered."));
 
             // Remove the existing DbConnection registration.
             var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbConnection));
+                d => d.ServiceType == typeof(DbConnection));
 
-            if (dbConnectionDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No DbContextOptions<AliasServerDbContext> registered.");
-            }
+            services.Remove(dbConnectionDescriptor ?? throw new InvalidOperationException("No DbContextOptions<AliasServerDbContext> registered."));
 
-            services.Remove(dbConnectionDescriptor);
+            // Add the DbConnection as a singleton
+            services.AddSingleton(_dbConnection);
 
-            // Create a new DbConnection and AliasServerDbContext with an in-memory database.
-            services.AddSingleton<DbConnection>(container =>
-            {
-                _dbConnection = new SqliteConnection("DataSource=:memory:");
-                _dbConnection.Open();
-
-                return _dbConnection;
-            });
-
-            services.AddDbContext<AliasServerDbContext>((container, options) =>
+            // Add the DbContextFactory
+            services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
             {
                 var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection);
+                options.UseSqlite(connection).UseLazyLoadingProxies();
             });
-
-            // Add the IDbContextFactory<AliasServerDbContext> as a scoped service
-            services.AddScoped<IDbContextFactory<AliasServerDbContext>, PooledDbContextFactory<AliasServerDbContext>>();
 
             // Enable detailed errors for server-side Blazor.
             services.AddServerSideBlazor()
@@ -145,6 +130,9 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
 
         var host = builder.Build();
         host.Start();
+
+        // Get the DbContextFactory instance and store it for later use during tests.
+        _dbContextFactory = host.Services.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
 
         // This delay prevents "ERR_CONNECTION_REFUSED" errors
         // which happened like 1 out of 10 times when running tests.

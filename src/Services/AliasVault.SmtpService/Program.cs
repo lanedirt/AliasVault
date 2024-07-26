@@ -50,7 +50,6 @@ builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) 
 });
 
 builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();
-
 builder.Services.AddSingleton(
     provider =>
     {

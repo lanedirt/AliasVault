@@ -20,13 +20,14 @@ using Asp.Versioning;
 using Cryptography.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
 /// Auth controller for handling authentication.
 /// </summary>
-/// <param name="context">AliasServerDbContext instance.</param>
+/// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
@@ -35,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
+public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid email or password.
@@ -114,6 +115,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] TokenModel tokenModel)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var principal = GetPrincipalFromExpiredToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
@@ -164,6 +167,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     [HttpPost("revoke")]
     public async Task<IActionResult> Revoke([FromBody] TokenModel model)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var principal = GetPrincipalFromExpiredToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
@@ -330,6 +335,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     /// <returns>TokenModel which includes new access and refresh token.</returns>
     private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
 

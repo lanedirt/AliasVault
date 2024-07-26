@@ -69,5 +69,4 @@
     private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/user")
         ? null
         : InteractiveServer;
-
 }

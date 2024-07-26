@@ -5,10 +5,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+/*
+ * Note: this file is used for E2E testing purposes only. It contains test endpoints that are called by pages on
+ * the client for testing purposes. Because certain endpoints that simulate exceptions are prone to Denial-Of-Service
+ * attack surfaces we don't include this file in the production build.
+ */
+
 namespace AliasVault.Api.Controllers;
 
 using AliasServerDb;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,10 +29,22 @@ public class TestController(UserManager<AliasVaultUser> userManager) : Authentic
     /// <summary>
     /// Authenticated test request.
     /// </summary>
-    /// <returns>List of aliases in JSON format.</returns>
+    /// <returns>Static OK.</returns>
     [HttpGet("")]
     public IActionResult TestCall()
     {
         return Ok();
+    }
+
+    /// <summary>
+    /// Test request that throws an exception. Used for testing error handling.
+    /// </summary>
+    /// <returns>Static OK.</returns>
+    [AllowAnonymous]
+    [HttpGet("Error")]
+    public IActionResult TestCallError()
+    {
+        // Throw an exception here to test error handling.
+        throw new Exception("Test error");
     }
 }

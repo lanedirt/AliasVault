@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [ApiController]
 [Route("/")]
-public class RootController(AliasServerDbContext context) : ControllerBase
+public class RootController(IDbContextFactory<AliasServerDbContext> dbContextFactory) : ControllerBase
 {
     /// <summary>
     /// Root endpoint that returns a 200 OK if the database connection is successful
@@ -26,8 +26,10 @@ public class RootController(AliasServerDbContext context) : ControllerBase
     [HttpGet]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<int>(StatusCodes.Status500InternalServerError)]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         try
         {
             var appliedMigrations = context.Database.GetAppliedMigrations();

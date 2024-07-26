@@ -10,7 +10,7 @@ namespace AliasVault.E2ETests.Tests.Client;
 using AliasServerDb;
 
 /// <summary>
-/// End-to-end tests for the credential management.
+/// End-to-end tests for upgrading client databases.
 /// </summary>
 [TestFixture]
 [NonParallelizable]

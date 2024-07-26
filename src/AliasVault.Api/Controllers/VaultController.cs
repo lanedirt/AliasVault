@@ -19,11 +19,11 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// Vault controller for handling CRUD operations on the database for encrypted vault entities.
 /// </summary>
-/// <param name="context">DbContext instance.</param>
+/// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="timeProvider">ITimeProvider instance.</param>
 [ApiVersion("1")]
-public class VaultController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider) : AuthenticatedRequestController(userManager)
+public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Default retention policy for vaults.
@@ -46,6 +46,8 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
     [HttpGet("")]
     public async Task<IActionResult> GetVault()
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var user = await GetCurrentUserAsync();
         if (user == null)
         {
@@ -76,6 +78,8 @@ public class VaultController(AliasServerDbContext context, UserManager<AliasVaul
     [HttpPost("")]
     public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault model)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var user = await GetCurrentUserAsync();
         if (user == null)
         {

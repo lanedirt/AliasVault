@@ -6,9 +6,11 @@
 //-----------------------------------------------------------------------
 
 using System.Data.Common;
+using System.Reflection;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Jwt;
+using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,6 +23,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!);
 
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
@@ -41,7 +44,7 @@ builder.Services.AddSingleton<DbConnection>(container =>
     return connection;
 });
 
-builder.Services.AddDbContext<AliasServerDbContext>((container, options) =>
+builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
 {
     var connection = container.GetRequiredService<DbConnection>();
     options.UseSqlite(connection).UseLazyLoadingProxies();
@@ -163,8 +166,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
@@ -175,7 +181,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<AliasServerDbContext>();
+    var db = container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContext();
 
     await db.Database.MigrateAsync();
 }

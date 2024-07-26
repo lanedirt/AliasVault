@@ -27,12 +27,26 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <summary>
     /// The DbConnection instance that is created for the test.
     /// </summary>
-    private DbConnection? _dbConnection;
+    private DbConnection _dbConnection;
 
     /// <summary>
-    /// The DbContext instance that is created for the test.
+    /// The DbContextFactory instance that is created for the test.
+    /// </summary>
+    private IDbContextFactory<AliasServerDbContext> _dbContextFactory = null!;
+
+    /// <summary>
+    /// The cached DbContext instance that can be used during the test.
     /// </summary>
     private AliasServerDbContext? _dbContext;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WebApplicationApiFactoryFixture{TEntryPoint}"/> class.
+    /// </summary>
+    public WebApplicationApiFactoryFixture()
+    {
+        _dbConnection = new SqliteConnection("DataSource=:memory:");
+        _dbConnection.Open();
+    }
 
     /// <summary>
     /// Gets or sets the URL the web application host will listen on.
@@ -50,16 +64,23 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <returns>AliasServerDbContext instance.</returns>
     public AliasServerDbContext GetDbContext()
     {
-        if (_dbContext == null)
+        if (_dbContext != null)
         {
-            var options = new DbContextOptionsBuilder<AliasServerDbContext>()
-                .UseSqlite(_dbConnection!)
-                .Options;
-
-            _dbContext = new AliasServerDbContext(options);
+            return _dbContext;
         }
 
+        _dbContext = _dbContextFactory.CreateDbContext();
         return _dbContext;
+    }
+
+    /// <summary>
+    /// Disposes the DbConnection instance.
+    /// </summary>
+    /// <returns>ValueTask.</returns>
+    public override ValueTask DisposeAsync()
+    {
+        _dbConnection.Dispose();
+        return base.DisposeAsync();
     }
 
     /// <inheritdoc />
@@ -72,61 +93,36 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
 
         builder.ConfigureServices((context, services) =>
         {
-            // Replace the ITimeProvider registration with a TestTimeProvider.
+            // Remove the existing DbContextFactory registration
             var timeProviderDescriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(ITimeProvider));
 
-            if (timeProviderDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No ITimeProvider registered.");
-            }
+            services.Remove(timeProviderDescriptor ?? throw new InvalidOperationException("No ITimeProvider registered."));
 
-            services.Remove(timeProviderDescriptor);
+            // Remove the existing DbContextFactory registration
+            var dbContextFactoryDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>));
 
-            // Add TestTimeProvider
-            services.AddSingleton<ITimeProvider>(TimeProvider);
-
-            // Remove the existing AliasServerDbContext registration.
-            var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbContextOptions<AliasServerDbContext>));
-
-            if (dbContextDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No DbContextOptions<AliasServerDbContext> registered.");
-            }
-
-            services.Remove(dbContextDescriptor);
+            services.Remove(dbContextFactoryDescriptor ?? throw new InvalidOperationException("No IDbContextFactory<AliasServerDbContext> registered."));
 
             // Remove the existing DbConnection registration.
             var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbConnection));
+                d => d.ServiceType == typeof(DbConnection));
 
-            if (dbConnectionDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No DbContextOptions<AliasServerDbContext> registered.");
-            }
+            services.Remove(dbConnectionDescriptor ?? throw new InvalidOperationException("No DbContextOptions<AliasServerDbContext> registered."));
 
-            services.Remove(dbConnectionDescriptor);
+            // Add the DbConnection as a singleton
+            services.AddSingleton(_dbConnection);
 
-            // Create a new DbConnection and AliasServerDbContext with an in-memory database.
-            services.AddSingleton<DbConnection>(container =>
-            {
-                _dbConnection = new SqliteConnection("DataSource=:memory:");
-                _dbConnection.Open();
-
-                return _dbConnection;
-            });
-
-            services.AddDbContext<AliasServerDbContext>((container, options) =>
+            // Add the DbContextFactory
+            services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
             {
                 var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection);
+                options.UseSqlite(connection).UseLazyLoadingProxies();
             });
+
+            // Add TestTimeProvider
+            services.AddSingleton<ITimeProvider>(TimeProvider);
         });
     }
 
@@ -139,6 +135,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
 
         var host = builder.Build();
         host.Start();
+
+        // Get the DbContextFactory instance and store it for later use during tests.
+        _dbContextFactory = host.Services.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
 
         // This delay prevents "ERR_CONNECTION_REFUSED" errors
         // which happened like 1 out of 10 times when running tests.
