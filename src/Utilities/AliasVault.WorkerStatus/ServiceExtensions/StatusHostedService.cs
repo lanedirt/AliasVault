@@ -18,11 +18,6 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     where T : IHostedService
 {
     /// <summary>
-    /// Lock object to prevent multiple tasks from starting the worker at the same time.
-    /// </summary>
-    private readonly object _taskLock = new();
-
-    /// <summary>
     /// A minimum delay that is used to wait before restarting the worker after a fault in the innerService.
     /// This delay is increased exponentially with a maximum delay of <see cref="_restartMaxDelayInMs"/>.
     /// </summary>
@@ -32,6 +27,11 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     /// Maximum delay before restarting the worker.
     /// </summary>
     private const int _restartMaxDelayInMs = 300000;
+
+    /// <summary>
+    /// Lock object to prevent multiple tasks from starting the worker at the same time.
+    /// </summary>
+    private readonly object _taskLock = new();
 
     /// <summary>
     /// Current delay before restarting the worker.

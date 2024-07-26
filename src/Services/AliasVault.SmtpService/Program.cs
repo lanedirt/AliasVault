@@ -17,7 +17,6 @@ using SmtpServer;
 using SmtpServer.Storage;
 using AliasVault.Logging;
 using AliasVault.SmtpService.Workers;
-using AliasVault.WorkerStatus.Database;
 using AliasVault.WorkerStatus.ServiceExtensions;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -127,9 +126,6 @@ builder.Services.AddSingleton(
 // -----------------------------------------------------------------------
 builder.Services.AddStatusHostedService<SmtpServerWorker, AliasServerDbContext>(Assembly.GetExecutingAssembly().GetName().Name!);
 // -----------------------------------------------------------------------
-// vs:
-// builder.Services.AddHostedService<SmtpServerWorker>();
-
 
 var host = builder.Build();
 

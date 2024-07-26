@@ -12,6 +12,7 @@ using AliasVault.Admin.Main.Models;
 using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -51,6 +52,12 @@ public class MainBase : OwningComponentBase
     /// </summary>
     [Inject]
     protected AliasServerDbContext DbContext { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the AliasServerDbContextFactory instance.
+    /// </summary>
+    [Inject]
+    protected IDbContextFactory<AliasServerDbContext> DbContextFactory { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the injected JSRuntime instance.
