@@ -1,0 +1,41 @@
+@using System.Linq.Expressions
+
+<InputText @attributes="AdditionalAttributes"
+           id="@Id"
+           Value="@Value"
+           ValueChanged="ValueChanged"
+           ValueExpression="ValueExpression"
+           placeholder="@Placeholder"
+           class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+
+@code {
+    /// <summary>
+    /// Gets or sets the ID of the input field.
+    /// </summary>
+    [Parameter] public string Id { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the value of the input field.
+    /// </summary>
+    [Parameter] public string Value { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the event callback that is triggered when the value changes.
+    /// </summary>
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the expression that identifies the value property.
+    /// </summary>
+    [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the placeholder text for the input field.
+    /// </summary>
+    [Parameter] public string Placeholder { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets additional attributes for the input field.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object?>? AdditionalAttributes { get; set; } = new();
+}

@@ -71,7 +71,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             if (toAddress == null)
             {
                 // No toAddress, skip.
-                logger.LogWarning("Skip email, no toAddress available");
+                logger.LogWarning("Skip email, no toAddress available.");
                 return SmtpResponse.NoValidRecipientsGiven;
             }
             if (!config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
@@ -84,12 +84,12 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 }
 
                 // If only one recipient, return error.
-                logger.LogWarning("Email to {ToAddress} is not allowed", toAddress.User + "@" + toAddress.Host);
+                logger.LogWarning("Rejected email: email for {ToAddress} is not allowed.", toAddress.User + "@" + toAddress.Host);
                 return SmtpResponse.NoValidRecipientsGiven;
             }
 
             var insertedId = await InsertEmailIntoDatabase(message);
-            logger.LogInformation("Email saved into database with ID {insertedId}.", insertedId);
+            logger.LogInformation("Email for {ToAddress} successfully saved into database with ID {insertedId}.", toAddress.User + "@" + toAddress.Host, insertedId);
         }
 
         return SmtpResponse.Ok;

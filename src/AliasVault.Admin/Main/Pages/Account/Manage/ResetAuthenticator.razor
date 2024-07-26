@@ -1,0 +1,44 @@
+﻿@page "/account/manage/reset-authenticator"
+
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AdminUser> UserManager
+@inject ILogger<ResetAuthenticator> Logger
+
+<LayoutPageTitle>Reset authenticator key</LayoutPageTitle>
+
+<h3 class="text-xl font-bold mb-4">Reset authenticator key</h3>
+<div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4" role="alert">
+    <p class="mb-2">
+        <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
+    </p>
+    <p>
+        This process disables 2FA until you verify your authenticator app.
+        If you do not complete your authenticator app configuration you may lose access to your account.
+    </p>
+</div>
+<div>
+    <form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
+        <AntiforgeryToken/>
+        <button class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded" type="submit">Reset authenticator key</button>
+    </form>
+</div>
+
+@code {
+    private async Task OnSubmitAsync()
+    {
+        await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
+        await UserManager.ResetAuthenticatorKeyAsync(UserService.User());
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
+        Logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", userId);
+
+        GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to re-configure your authenticator app using the new key.", true);
+
+        NavigationService.RedirectTo(
+            "account/manage/2fa");
+    }
+
+}

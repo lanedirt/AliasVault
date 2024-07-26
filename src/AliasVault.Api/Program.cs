@@ -6,9 +6,11 @@
 //-----------------------------------------------------------------------
 
 using System.Data.Common;
+using System.Reflection;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Jwt;
+using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,7 +21,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
@@ -34,18 +38,13 @@ builder.Services.AddLogging(logging =>
 
 builder.Services.AddSingleton<DbConnection>(container =>
 {
-    var configFile = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json")
-        .Build();
-
-    var connection = new SqliteConnection(configFile.GetConnectionString("AliasServerDbContext"));
+    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
     connection.Open();
 
     return connection;
 });
 
-builder.Services.AddDbContext<AliasServerDbContext>((container, options) =>
+builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
 {
     var connection = container.GetRequiredService<DbConnection>();
     options.UseSqlite(connection).UseLazyLoadingProxies();
@@ -57,7 +56,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     options.TokenLifespan = TimeSpan.FromDays(30);
     options.Name = "AliasVault";
 });
-builder.Services.AddIdentity<AliasVaultUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
@@ -92,8 +91,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         RequireExpirationTime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Issuer"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero,
     };
@@ -167,8 +166,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
@@ -179,7 +181,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<AliasServerDbContext>();
+    var db = await container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContextAsync();
 
     await db.Database.MigrateAsync();
 }

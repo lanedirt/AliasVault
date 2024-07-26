@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [ApiController]
 [Route("/")]
-public class RootController : ControllerBase
+public class RootController(IDbContextFactory<AliasServerDbContext> dbContextFactory) : ControllerBase
 {
     /// <summary>
     /// Root endpoint that returns a 200 OK if the database connection is successful
@@ -26,24 +26,23 @@ public class RootController : ControllerBase
     [HttpGet]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<int>(StatusCodes.Status500InternalServerError)]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         try
         {
-            using (var dbContext = new AliasServerDbContext())
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+            var allMigrations = context.Database.GetMigrations();
+
+            if (allMigrations.Except(appliedMigrations).Any())
             {
-                var appliedMigrations = dbContext.Database.GetAppliedMigrations();
-                var allMigrations = dbContext.Database.GetMigrations();
-
-                if (allMigrations.Except(appliedMigrations).Any())
-                {
-                    // There are pending migrations
-                    return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
-                }
-
-                // Database is up to date
-                return Ok("OK");
+                // There are pending migrations
+                return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
             }
+
+            // Database is up to date
+            return Ok("OK");
         }
         catch
         {

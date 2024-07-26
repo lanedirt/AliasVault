@@ -1,0 +1,54 @@
+﻿@page "/account/manage/disable-2fa"
+
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AdminUser> UserManager
+@inject ILogger<Disable2fa> Logger
+
+<LayoutPageTitle>Disable two-factor authentication (2FA)</LayoutPageTitle>
+
+<h3 class="text-xl font-bold mb-4">Disable two-factor authentication (2FA)</h3>
+
+<div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4" role="alert">
+    <p class="font-bold mb-2">
+        This action only disables 2FA.
+    </p>
+    <p>
+        Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
+        used in an authenticator app you should <a href="account/manage/reset-authenticator" class="text-primary-600 hover:text-primary-800 underline">reset your authenticator keys.</a>
+    </p>
+</div>
+
+<div>
+    <form @formname="disable-2fa" @onsubmit="OnSubmitAsync" method="post">
+        <AntiforgeryToken/>
+        <button class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded" type="submit">Disable 2FA</button>
+    </form>
+</div>
+
+@code {
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await UserManager.GetTwoFactorEnabledAsync(UserService.User()))
+        {
+            throw new InvalidOperationException("Cannot disable 2FA for user as it's not currently enabled.");
+        }
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        var disable2FaResult = await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
+        if (!disable2FaResult.Succeeded)
+        {
+            throw new InvalidOperationException("Unexpected error occurred disabling 2FA.");
+        }
+
+        var userId = await UserManager.GetUserIdAsync(UserService.User());
+        Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userId);
+
+        // Reload current page.
+        NavigationService.RedirectTo(NavigationService.Uri, forceLoad: true);
+    }
+
+}

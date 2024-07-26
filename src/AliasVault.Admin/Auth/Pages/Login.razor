@@ -1,0 +1,97 @@
+﻿@page "/user/login"
+
+<LayoutPageTitle>Log in</LayoutPageTitle>
+
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+    Sign in to AliasVault Admin
+</h2>
+
+<ServerValidationErrors @ref="ServerValidationErrors" />
+
+<EditForm Model="Input" FormName="LoginForm" OnValidSubmit="LoginUser" class="mt-8 space-y-6">
+    <DataAnnotationsValidator/>
+    <div>
+        <label asp-for="Input.UserName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
+        <InputTextField id="username" @bind-Value="Input.UserName" placeholder="username" />
+        <ValidationMessage For="() => Input.UserName"/>
+    </div>
+    <div>
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+        <InputTextField id="password" @bind-Value="Input.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => Input.Password"/>
+    </div>
+
+    <div class="flex items-start">
+        <div class="flex items-center h-5">
+            <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+        </div>
+        <div class="ml-3 text-sm">
+            <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
+        </div>
+        <a href="/user/forgot-password" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</a>
+    </div>
+
+    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
+</EditForm>
+
+
+@code {
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    /// <summary>
+    /// Logs in the user.
+    /// </summary>
+    protected async Task LoginUser()
+    {
+        ServerValidationErrors.Clear();
+
+        var result = await SignInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            NavigationService.RedirectTo(ReturnUrl ?? "/");
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            NavigationService.RedirectTo(
+                "user/loginWith2fa",
+                new Dictionary<string, object?> { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            NavigationService.RedirectTo("user/lockout");
+        }
+        else
+        {
+            ServerValidationErrors.AddError("Error: Invalid login attempt.");
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required] public string UserName { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")] public bool RememberMe { get; set; }
+    }
+
+}

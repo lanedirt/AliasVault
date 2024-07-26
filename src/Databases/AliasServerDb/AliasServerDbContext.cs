@@ -7,14 +7,17 @@
 
 namespace AliasServerDb;
 
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using AliasVault.WorkerStatus.Database;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
-/// The AliasServerDbContext class.
+/// The AliasServerDbContext class. Note: we  are using DbContext instead of IdentityDbContext because
+/// we have two separate user objects, one for the admin panel and one for the vault. We manually
+/// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
+public class AliasServerDbContext : WorkerStatusDbContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
@@ -33,14 +36,54 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
     }
 
     /// <summary>
-    /// Gets or sets the AspNetUserRefreshTokens DbSet.
-    /// </summary>
-    public DbSet<AspNetUserRefreshToken> AspNetUserRefreshTokens { get; set; }
-
-    /// <summary>
     /// Gets or sets the AliasVaultUser DbSet.
     /// </summary>
     public DbSet<AliasVaultUser> AliasVaultUsers { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AliasVaultRoles DbSet.
+    /// </summary>
+    public DbSet<AliasVaultRole> AliasVaultRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserRoles DbSet.
+    /// </summary>
+    public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserClaims DbSet.
+    /// </summary>
+    public DbSet<IdentityUserClaim<string>> UserClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserLogin DbSet.
+    /// </summary>
+    public DbSet<IdentityUserLogin<string>> UserLogin { get; set; }
+
+    /// <summary>
+    /// Gets or sets the RoleClaims DbSet.
+    /// </summary>
+    public DbSet<IdentityRoleClaim<string>> RoleClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserTokens DbSet.
+    /// </summary>
+    public DbSet<IdentityUserToken<string>> UserTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserRefreshTokens DbSet.
+    /// </summary>
+    public DbSet<AliasVaultUserRefreshToken> AliasVaultUserRefreshTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminUser DbSet.
+    /// </summary>
+    public DbSet<AdminUser> AdminUsers { get; set; }
+
+    /// <summary>
+    /// Gets or sets the AdminRoles DbSet.
+    /// </summary>
+    public DbSet<AdminRole> AdminRoles { get; set; }
 
     /// <summary>
     /// Gets or sets the Vaults DbSet.
@@ -58,13 +101,18 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
     public DbSet<EmailAttachment> EmailAttachments { get; set; }
 
     /// <summary>
+    /// Gets or sets the Logs DbSet.
+    /// </summary>
+    public DbSet<Log> Logs { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
-    /// <param name="builder">ModelBuilder instance.</param>
-    protected override void OnModelCreating(ModelBuilder builder)
+    /// <param name="modelBuilder">ModelBuilder instance.</param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
-        foreach (var entity in builder.Model.GetEntityTypes())
+        base.OnModelCreating(modelBuilder);
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entity.GetProperties())
             {
@@ -79,24 +127,54 @@ public class AliasServerDbContext : IdentityDbContext<AliasVaultUser>
             }
         }
 
-        // Configure the User - AspNetUserRefreshToken entity.
-        builder.Entity<AspNetUserRefreshToken>()
-            .HasOne(p => p.User)
-            .WithMany()
-            .HasForeignKey(p => p.UserId)
-            .IsRequired();
+        // Configure AspNetIdentity tables manually.
+        modelBuilder.Entity<IdentityUserRole<string>>(entity =>
+        {
+            entity.HasKey(r => new { r.UserId, r.RoleId });
+            entity.ToTable("UserRoles");
+        });
 
-        // Configure the Vault - UserId entity.
-        builder.Entity<Vault>()
-            .HasOne(p => p.User)
-            .WithMany()
-            .HasForeignKey(p => p.UserId)
-            .IsRequired();
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.ToTable("UserClaims");
+        });
 
-        // Configure the Email - Attachments entity.
-        builder.Entity<EmailAttachment>().HasOne(d => d.Email)
-            .WithMany(p => p.Attachments)
-            .HasForeignKey(d => d.EmailId);
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity =>
+        {
+            entity.HasKey(l => new { l.LoginProvider, l.ProviderKey });
+            entity.ToTable("UserLogins");
+        });
+
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity =>
+        {
+            entity.HasKey(rc => rc.Id);
+            entity.ToTable("RoleClaims");
+        });
+
+        modelBuilder.Entity<IdentityUserToken<string>>(entity =>
+        {
+            entity.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+            entity.ToTable("UserTokens");
+        });
+
+        // Configure Log entity
+        modelBuilder.Entity<Log>(builder =>
+        {
+            builder.ToTable("Logs");
+            builder.Property(e => e.Application).HasMaxLength(50).IsRequired();
+            builder.Property(e => e.Message);
+            builder.Property(e => e.MessageTemplate);
+            builder.Property(e => e.Level).HasMaxLength(128);
+            builder.Property(e => e.TimeStamp);
+            builder.Property(e => e.Exception);
+            builder.Property(e => e.Properties);
+            builder.Property(e => e.LogEvent);
+
+            // Indexes for faster querying
+            builder.HasIndex(e => e.TimeStamp);
+            builder.HasIndex(e => e.Application);
+        });
     }
 
     /// <summary>

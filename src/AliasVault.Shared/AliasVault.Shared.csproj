@@ -27,4 +27,8 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Components\Paginator.razor" />
+    </ItemGroup>
+
 </Project>

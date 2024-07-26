@@ -20,13 +20,14 @@ using Asp.Versioning;
 using Cryptography.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
 /// Auth controller for handling authentication.
 /// </summary>
-/// <param name="context">AliasServerDbContext instance.</param>
+/// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
@@ -35,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(AliasServerDbContext context, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
+public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid email or password.
@@ -114,6 +115,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] TokenModel tokenModel)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var principal = GetPrincipalFromExpiredToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
@@ -129,20 +132,20 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
         // Check if the refresh token is valid.
         // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             return Unauthorized("Refresh token expired");
         }
 
         // Remove the existing refresh token.
-        context.AspNetUserRefreshTokens.Remove(existingToken);
+        context.AliasVaultUserRefreshTokens.Remove(existingToken);
 
         // Generate a new refresh token to replace the old one.
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -164,6 +167,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     [HttpPost("revoke")]
     public async Task<IActionResult> Revoke([FromBody] TokenModel model)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var principal = GetPrincipalFromExpiredToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
@@ -178,14 +183,14 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             return Unauthorized("Invalid refresh token");
         }
 
         // Remove the existing refresh token.
-        context.AspNetUserRefreshTokens.Remove(existingToken);
+        context.AliasVaultUserRefreshTokens.Remove(existingToken);
         await context.SaveChangesAsync();
 
         return Ok("Refresh token revoked successfully");
@@ -330,6 +335,8 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
     /// <returns>TokenModel which includes new access and refresh token.</returns>
     private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
 
@@ -338,11 +345,11 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
 
         // Save refresh token to database.
         // Remove any existing refresh tokens for this user and device.
-        var existingTokens = context.AspNetUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        context.AspNetUserRefreshTokens.RemoveRange(existingTokens);
+        var existingTokens = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        context.AliasVaultUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        await context.AspNetUserRefreshTokens.AddAsync(new AspNetUserRefreshToken
+        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -352,6 +359,6 @@ public class AuthController(AliasServerDbContext context, UserManager<AliasVault
         });
         await context.SaveChangesAsync();
 
-        return new TokenModel() { Token = token, RefreshToken = refreshToken };
+        return new TokenModel { Token = token, RefreshToken = refreshToken };
     }
 }

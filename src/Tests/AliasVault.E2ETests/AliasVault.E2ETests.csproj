@@ -12,11 +12,13 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
       <DocumentationFile>bin\Debug\net8.0\AliasVault.E2ETests.xml</DocumentationFile>
+      <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
       <DocumentationFile>bin\Release\net8.0\AliasVault.E2ETests.xml</DocumentationFile>
+      <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,15 +26,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.7" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
         <PackageReference Include="NUnit" Version="4.1.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
         <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.44.0" />
+        <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.45.1" />
         <PackageReference Include="coverlet.collector" Version="6.0.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -44,6 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\AliasVault.Admin\AliasVault.Admin.csproj" />
       <ProjectReference Include="..\..\AliasVault.Api\AliasVault.Api.csproj" />
       <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
       <ProjectReference Include="..\Server\AliasVault.E2ETests.Client.Server\AliasVault.E2ETests.Client.Server.csproj" />

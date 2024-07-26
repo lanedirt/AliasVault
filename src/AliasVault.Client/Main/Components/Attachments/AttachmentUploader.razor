@@ -34,9 +34,15 @@
 </div>
 
 @code {
+    /// <summary>
+    /// Attachments to be uploaded.
+    /// </summary>
     [Parameter]
-    public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public List<Attachment> Attachments { get; set; } = [];
 
+    /// <summary>
+    /// Callback that is invoked when the attachments are changed.
+    /// </summary>
     [Parameter]
     public EventCallback<List<Attachment>> AttachmentsChanged { get; set; }
 

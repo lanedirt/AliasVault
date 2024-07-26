@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------
 
 using AliasVault.SmtpService.Handlers;
+using AliasVault.SmtpService.Workers;
 
 namespace AliasVault.IntegrationTests.SmtpServer;
 
@@ -19,6 +20,9 @@ using Microsoft.EntityFrameworkCore;
 using global::SmtpServer;
 using global::SmtpServer.Storage;
 
+/// <summary>
+/// Builder class for creating a test host for the SmtpServiceWorker in order to run integration tests against it.
+/// </summary>
 public class TestHostBuilder
 {
     /// <summary>
@@ -98,7 +102,7 @@ public class TestHostBuilder
                     }
                 );
 
-                services.AddHostedService<Worker>();
+                services.AddHostedService<SmtpServerWorker>();
 
                 // Ensure the in-memory database is populated with tables
                 var serviceProvider = services.BuildServiceProvider();

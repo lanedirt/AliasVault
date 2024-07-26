@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <link rel="stylesheet" href="css/tailwind.css"/>
+    <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="AliasVault.Admin.styles.css"/>
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <HeadOutlet @rendermode="RenderModeForPage"/>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-800">
+<Routes @rendermode="RenderModeForPage"/>
+<script src="lib/qrcode.min.js?v=dev"></script>
+<script src="js/dark-mode.js?v=dev"></script>
+<script src="js/utilities.js?v=dev"></script>
+
+<script>
+    window.initTopMenu = function() {
+        initDarkModeSwitcher();
+    };
+
+    window.registerClickOutsideHandler = (dotNetHelper) => {
+        document.addEventListener('click', (event) => {
+            const menu = document.getElementById('userMenuDropdown');
+            const menuButton = document.getElementById('userMenuDropdownButton');
+            if (menu && !menu.contains(event.target) && !menuButton.contains(event.target)) {
+                dotNetHelper.invokeMethodAsync('CloseMenu');
+            }
+
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.getElementById('toggleMobileMenuButton');
+            if (mobileMenu && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                dotNetHelper.invokeMethodAsync('CloseMenu');
+            }
+        });
+    };
+
+    window.clipboardCopy = {
+        copyText: function (text) {
+            navigator.clipboard.writeText(text).then(function () { })
+                .catch(function (error) {
+                    alert(error);
+                });
+        }
+    };
+
+    window.isFunctionDefined = function(functionName) {
+        return typeof window[functionName] === 'function';
+    };
+
+    // Primarily used by E2E tests.
+    window.blazorNavigate = (url) => {
+        Blazor.navigateTo(url);
+    };
+</script>
+
+<script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>
+
+@code {
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/user")
+        ? null
+        : InteractiveServer;
+}

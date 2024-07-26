@@ -1,7 +1,4 @@
-﻿@using AliasVault.Client.Services
-
-<!-- CopyPasteFormRow.razor -->
-@inject ClipboardCopyService ClipboardCopyService
+﻿@inject ClipboardCopyService ClipboardCopyService
 @inject IJSRuntime JsRuntime
 @implements IDisposable
 
@@ -17,12 +14,22 @@
 </div>
 
 @code {
-    [Parameter] public string Label { get; set; } = "Value";
-    [Parameter] public string Value { get; set; } = string.Empty;
+    /// <summary>
+    /// The label for the input.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Value";
+
+    /// <summary>
+    /// The value to copy to the clipboard.
+    /// </summary>
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
 
     private bool _copied => ClipboardCopyService.GetCopiedId() == _inputId;
     private readonly string _inputId = Guid.NewGuid().ToString();
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         ClipboardCopyService.OnCopy += HandleCopy;
@@ -46,6 +53,7 @@
         StateHasChanged();
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         ClipboardCopyService.OnCopy -= HandleCopy;

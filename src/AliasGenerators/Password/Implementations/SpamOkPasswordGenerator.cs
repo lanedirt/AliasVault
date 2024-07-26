@@ -4,9 +4,10 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasGenerators.Password.Implementations;
 
-using AliasGenerators.Implementations;
+using AliasGenerators.Password;
 
 /// <summary>
 /// Implementation of IPasswordGenerator which generates passwords using the SpamOK library.

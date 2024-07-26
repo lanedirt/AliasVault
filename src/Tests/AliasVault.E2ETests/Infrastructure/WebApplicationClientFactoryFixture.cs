@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 
 /// <summary>
-/// Web application factory fixture for integration tests.
+/// Client web application factory fixture for integration tests.
 /// </summary>
 /// <typeparam name="TEntryPoint">The entry point.</typeparam>
 public class WebApplicationClientFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>

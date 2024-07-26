@@ -1,0 +1,79 @@
+﻿@page "/account/manage/2fa"
+
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<AdminUser> UserManager
+@inject SignInManager<AdminUser> SignInManager
+
+<LayoutPageTitle>Two-factor authentication (2FA)</LayoutPageTitle>
+
+@if (is2FaEnabled)
+{
+    <div class="mx-auto mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Two-factor authentication (2FA)</h3>
+
+        @if (recoveryCodesLeft == 0)
+        {
+            <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900 dark:text-red-100">
+                <p class="font-bold">You have no recovery codes left.</p>
+                <p>You must <a href="account/manage/generate-recovery-codes" class="text-red-800 dark:text-red-200 underline">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
+            </div>
+        }
+        else if (recoveryCodesLeft == 1)
+        {
+            <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900 dark:text-red-100">
+                <p class="font-bold">You have 1 recovery code left.</p>
+                <p>You can <a href="account/manage/generate-recovery-codes" class="text-red-800 dark:text-red-200 underline">generate a new set of recovery codes</a>.</p>
+            </div>
+        }
+        else if (recoveryCodesLeft <= 3)
+        {
+            <div class="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100">
+                <p class="font-bold">You have @recoveryCodesLeft recovery codes left.</p>
+                <p>You should <a href="account/manage/generate-recovery-codes" class="text-yellow-800 dark:text-yellow-200 underline">generate a new set of recovery codes</a>.</p>
+            </div>
+        }
+
+        <div class="flex space-x-4">
+            <a href="account/manage/disable-2fa" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Disable 2FA</a>
+            <a href="account/manage/generate-recovery-codes" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Reset recovery codes</a>
+        </div>
+    </div>
+}
+
+<div class="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Authenticator app</h4>
+    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+        @if (!hasAuthenticator)
+        {
+            <a href="account/manage/enable-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                Add authenticator app
+            </a>
+        }
+        else
+        {
+            <a href="account/manage/enable-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                Set up authenticator app
+            </a>
+            <a href="account/manage/reset-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                Reset authenticator app
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    private bool hasAuthenticator;
+    private int recoveryCodesLeft;
+    private bool is2FaEnabled;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(UserService.User()) is not null;
+        is2FaEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
+        recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(UserService.User());
+    }
+}
