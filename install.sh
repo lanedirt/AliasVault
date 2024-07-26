@@ -47,18 +47,39 @@ generate_admin_password() {
     printf "${CYAN}> Generating new admin password...${NC}\n"
 
     ADMIN_PASSWORD=$(openssl rand -base64 12)
-    printf "${CYAN}> Building Docker image for password generation...${NC}\n"
+    printf "${CYAN}> Building Docker image for password generation...${NC}"
 
     if [ "$VERBOSE" = true ]; then
+      printf "\n"
       docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile .
     else
-      docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile . > install_build_output.log 2>&1
-    fi
-    BUILD_EXIT_CODE=$?
+    (
+        # Run docker build and capture its output
+        docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile . > install_build_output.log 2>&1 &
+        BUILD_PID=$!
 
-    if [ $BUILD_EXIT_CODE -ne 0 ]; then
-      printf "${RED}> An error occurred while building the Docker image for password generation. Check install_build_output.log for details.${NC}\n"
-      exit $BUILD_EXIT_CODE
+        printf "${CYAN}"
+
+        # Print dots while the build is running
+        while kill -0 $BUILD_PID 2>/dev/null; do
+          printf "."
+          sleep 1
+        done
+
+        printf "${NC}\n"
+
+        # Wait for the build to finish and capture its exit code
+        wait $BUILD_PID
+        BUILD_EXIT_CODE=$?
+
+        # If there was an error, display it
+        if [ $BUILD_EXIT_CODE -ne 0 ]; then
+          printf "\n${RED}  An error occurred while building the Docker image for password generation. Check the output above.${NC}\n"
+          printf "\n"
+          cat install_build_output.log
+          exit $BUILD_EXIT_CODE
+        fi
+    )
     fi
 
     printf "${GREEN}> Docker image built successfully.${NC}\n"
@@ -245,6 +266,14 @@ main() {
         if [ $? -eq 0 ]; then
             restart_docker_containers
         fi
+
+        printf "\n"
+        printf "${MAGENTA}=========================================================${NC}\n"
+        printf "\n"
+        printf "${GREEN}The admin password is successfully reset!${NC}\n"
+        printf "\n"
+        printf "${MAGENTA}=========================================================${NC}\n"
+        printf "\n"
     else
         # Run the original initialization process
         print_logo
@@ -264,30 +293,33 @@ main() {
         printf "\n"
         printf "${GREEN}AliasVault is successfully installed!${NC}\n"
         printf "\n"
-        printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
-        printf "\n"
-        if [ "$ADMIN_PASSWORD" != "" ]; then
-          printf "Admin Panel: http://localhost:8080/\n"
-          printf "Username: admin\n"
-          printf "Password: $ADMIN_PASSWORD\n"
-          printf "\n"
-          printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
-          printf "\n"
-        else
-          printf "Admin Panel: http://localhost:8080/\n"
-          printf "Username: admin\n"
-          printf "Password: (Previously set. Run this command with --reset-password to generate a new one.)\n"
-          printf "\n"
-        fi
-        printf "${CYAN}===========================${NC}\n"
-        printf "\n"
-        printf "${CYAN}In order to start using AliasVault and create your own vault, log into the client website:${NC}\n"
-        printf "\n"
-        printf "Client Website: http://localhost:80/\n"
-        printf "You can create your own account from there.\n"
-        printf "\n"
         printf "${MAGENTA}=========================================================${NC}\n"
+        printf "\n"
     fi
+
+    printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
+    printf "\n"
+    if [ "$ADMIN_PASSWORD" != "" ]; then
+      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Username: admin\n"
+      printf "Password: $ADMIN_PASSWORD\n"
+      printf "\n"
+      printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
+      printf "\n"
+    else
+      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Username: admin\n"
+      printf "Password: (Previously set. Run this command with --reset-password to generate a new one.)\n"
+      printf "\n"
+    fi
+    printf "${CYAN}===========================${NC}\n"
+    printf "\n"
+    printf "${CYAN}In order to start using AliasVault and create your own vault, log into the client website:${NC}\n"
+    printf "\n"
+    printf "Client Website: http://localhost:80/\n"
+    printf "You can create your own account from there.\n"
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
 }
 
 # Run the main function
