@@ -17,6 +17,15 @@ public class GlobalServiceStatus
     private readonly ConcurrentDictionary<string, bool> _workerStatuses = new();
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="GlobalServiceStatus"/> class.
+    /// </summary>
+    /// <param name="serviceName">Name of the service that we are keeping track of.</param>
+    public GlobalServiceStatus(string serviceName)
+    {
+        ServiceName = serviceName;
+    }
+
+    /// <summary>
     /// Gets or sets the status of the service.
     /// </summary>
     public string Status { get; set; } = "Stopped";
@@ -25,6 +34,11 @@ public class GlobalServiceStatus
     /// Gets or sets the current status of the service.
     /// </summary>
     public string CurrentStatus { get; set; } = "Stopped";
+
+    /// <summary>
+    /// Gets or sets the ServiceName in order to identify the service and its workers in the database.
+    /// </summary>
+    public string ServiceName { get; set; } = null!;
 
     /// <summary>
     /// Register a worker with the service.

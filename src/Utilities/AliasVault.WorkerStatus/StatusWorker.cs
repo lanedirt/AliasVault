@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// StatusWorker class for monitoring and controlling the status of the worker services.
 /// </summary>
-public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguration config, Func<IWorkerStatusDbContext> createDbContext) : BackgroundService
+public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbContext> createDbContext, GlobalServiceStatus globalServiceStatus) : BackgroundService
 {
     private IWorkerStatusDbContext _dbContext = null!;
 
@@ -34,6 +34,15 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
                 var statusEntry = await GetServiceStatus();
                 switch (statusEntry.CurrentStatus)
                 {
+                    case "Started":
+                        // Ensure that all workers are running, if not, revert to "Starting" CurrentStatus.
+                        if (!globalServiceStatus.AreAllWorkersRunning())
+                        {
+                            await SetServiceStatus(statusEntry, "Starting");
+                            logger.LogInformation("Not all workers are running (yet). Reverting to Starting.");
+                        }
+
+                        break;
                     case "Starting":
                         await WaitForAllWorkersToStart(stoppingToken);
                         await SetServiceStatus(statusEntry, "Started");
@@ -81,8 +90,8 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
             };
         }
 
-        config.GlobalServiceStatus.Status = entry.CurrentStatus;
-        config.GlobalServiceStatus.CurrentStatus = entry.CurrentStatus;
+        globalServiceStatus.Status = entry.CurrentStatus;
+        globalServiceStatus.CurrentStatus = entry.CurrentStatus;
 
         entry.Heartbeat = DateTime.Now;
         await _dbContext.SaveChangesAsync();
@@ -104,8 +113,8 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
         }
 
         var status = statusEntry.CurrentStatus;
-        config.GlobalServiceStatus.Status = status;
-        config.GlobalServiceStatus.CurrentStatus = status;
+        globalServiceStatus.Status = status;
+        globalServiceStatus.CurrentStatus = status;
 
         statusEntry.Heartbeat = DateTime.Now;
         await _dbContext.SaveChangesAsync();
@@ -117,7 +126,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
     /// <param name="stoppingToken">CancellationToken.</param>
     private async Task WaitForAllWorkersToStart(CancellationToken stoppingToken)
     {
-        while (!config.GlobalServiceStatus.AreAllWorkersRunning())
+        while (!globalServiceStatus.AreAllWorkersRunning())
         {
             logger.LogInformation("Waiting for all workers to start...");
             await Task.Delay(1000, stoppingToken);
@@ -130,7 +139,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
     /// <param name="stoppingToken">CancellationToken.</param>
     private async Task WaitForAllWorkersToStop(CancellationToken stoppingToken)
     {
-        while (!config.GlobalServiceStatus.AreAllWorkersStopped())
+        while (!globalServiceStatus.AreAllWorkersStopped())
         {
             logger.LogInformation("Waiting for all workers to stop...");
             await Task.Delay(1000, stoppingToken);
@@ -142,7 +151,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
     /// </summary>
     private async Task<WorkerServiceStatus> GetOrCreateInitialStatusRecord()
     {
-        var entry = _dbContext.WorkerServiceStatuses.FirstOrDefault(x => x.ServiceName == config.ServiceName);
+        var entry = _dbContext.WorkerServiceStatuses.FirstOrDefault(x => x.ServiceName == globalServiceStatus.ServiceName);
         if (entry != null)
         {
             return entry;
@@ -150,7 +159,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, WorkerStatusConfiguratio
 
         entry = new WorkerServiceStatus
         {
-            ServiceName = config.ServiceName,
+            ServiceName = globalServiceStatus.ServiceName,
             CurrentStatus = "Started",
             DesiredStatus = string.Empty,
         };

@@ -17,8 +17,8 @@ using SmtpServer;
 using SmtpServer.Storage;
 using AliasVault.Logging;
 using AliasVault.SmtpService.Workers;
-using AliasVault.WorkerStatus;
 using AliasVault.WorkerStatus.Database;
+using AliasVault.WorkerStatus.ServiceExtensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -123,30 +123,12 @@ builder.Services.AddSingleton(
 );
 
 // -----------------------------------------------------------------------
-// Worker status service registration.
+// Register hosted services via Status library wrapper in order to monitor and control (start/stop) them via the database.
 // -----------------------------------------------------------------------
-var globalServiceStatus = new GlobalServiceStatus();
-builder.Services.AddSingleton(globalServiceStatus);
-
-builder.Services.AddSingleton<Func<IWorkerStatusDbContext>>(sp =>
-{
-    var factory = sp.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
-    return () => factory.CreateDbContext();
-});
-
-builder.Services.AddSingleton(sp => new WorkerStatusConfiguration
-{
-    ServiceName = Assembly.GetExecutingAssembly().GetName().Name!,
-    GlobalServiceStatus = sp.GetRequiredService<GlobalServiceStatus>(),
-});
-
-builder.Services.AddHostedService<StatusWorker>();
-
-// Register the names of the various worker services here so their status can be monitored.
-globalServiceStatus.RegisterWorker(nameof(SmtpServerWorker));
+builder.Services.AddStatusHostedService<SmtpServerWorker, AliasServerDbContext>(Assembly.GetExecutingAssembly().GetName().Name!);
 // -----------------------------------------------------------------------
-
-builder.Services.AddHostedService<SmtpServerWorker>();
+// vs:
+// builder.Services.AddHostedService<SmtpServerWorker>();
 
 
 var host = builder.Build();
