@@ -27,8 +27,9 @@ public static class LoggingConfiguration
     /// <param name="services">IServiceCollection.</param>
     /// <param name="configuration">IConfiguration.</param>
     /// <param name="applicationName">The application name to include in the log.</param>
+    /// <param name="logFolder">The folder to log to.</param>
     /// <returns>IServiceCollection instance.</returns>
-    public static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration configuration, string applicationName)
+    public static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration configuration, string applicationName, string logFolder = "logs/")
     {
         services.AddSerilog(new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
@@ -42,12 +43,12 @@ public static class LoggingConfiguration
 
             // Log everything to a file.
             .WriteTo.Logger(lc => lc
-                .WriteTo.File($"logs/{applicationName}-log-.txt", rollingInterval: RollingInterval.Day))
+                .WriteTo.File($"{logFolder}/{applicationName}-log-.txt", rollingInterval: RollingInterval.Day))
 
             // Log all errors and above to a separate file.
             .WriteTo.Logger(lc => lc
                 .Filter.ByIncludingOnly(evt => evt.Level >= LogEventLevel.Error)
-                .WriteTo.File($"logs/{applicationName}-error-.txt", rollingInterval: RollingInterval.Day))
+                .WriteTo.File($"{logFolder}/{applicationName}-error-.txt", rollingInterval: RollingInterval.Day))
 
             // Log all warning and above to database via EF core except for Microsoft.EntityFrameworkCore logs
             // as this would create a loop.

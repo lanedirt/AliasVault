@@ -33,7 +33,7 @@ jobs:
             # Test if the service on localhost:80 responds
             http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
             if [ "$http_code" -ne 200 ]; then
-              echo "Service did not respond with 200 OK"
+              echo "Service did not respond with 200 OK. Check if client app is configured correctly."
               exit 1
             else
               echo "Service responded with 200 OK"
@@ -43,7 +43,7 @@ jobs:
             # Test if the service on localhost:81 responds
             http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
             if [ "$http_code" -ne 200 ]; then
-                echo "Service did not respond with expected 200 OK. Check if all DB migrations are applied."
+                echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
                 exit 1
             else
                 echo "Service responded with $http_code"
@@ -56,4 +56,14 @@ jobs:
                 exit 1
             else
                 echo "SmtpService responded on port 2525"
+            fi
+      - name: Test if localhost:8080 (Admin) responds
+        run: |
+            # Test if the service on localhost:8080 responds
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
+            if [ "$http_code" -ne 200 ]; then
+                echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
+                exit 1
+            else
+                echo "Service responded with $http_code"
             fi
