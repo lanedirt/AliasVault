@@ -24,5 +24,8 @@ public class EmailLogTests : AdminPlaywrightTest
         // Navigate to emails page.
         await NavigateBrowser("emails");
         await WaitForUrlAsync("emails", "received mails");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("received mails"), "No email page content found.");
     }
 }

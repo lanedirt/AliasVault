@@ -181,7 +181,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContext();
+    var db = await container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContextAsync();
 
     await db.Database.MigrateAsync();
 }

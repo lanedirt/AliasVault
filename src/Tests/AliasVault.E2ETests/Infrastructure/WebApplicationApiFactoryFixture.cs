@@ -80,6 +80,7 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     public override ValueTask DisposeAsync()
     {
         _dbConnection.Dispose();
+        GC.SuppressFinalize(this);
         return base.DisposeAsync();
     }
 

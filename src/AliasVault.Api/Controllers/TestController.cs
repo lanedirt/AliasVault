@@ -45,6 +45,6 @@ public class TestController(UserManager<AliasVaultUser> userManager) : Authentic
     public IActionResult TestCallError()
     {
         // Throw an exception here to test error handling.
-        throw new Exception("Test error");
+        throw new ApplicationException("Test error");
     }
 }

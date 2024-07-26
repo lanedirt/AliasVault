@@ -74,6 +74,7 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     public override ValueTask DisposeAsync()
     {
         _dbConnection.Dispose();
+        GC.SuppressFinalize(this);
         return base.DisposeAsync();
     }
 

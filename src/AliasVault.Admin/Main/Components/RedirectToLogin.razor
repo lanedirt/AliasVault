@@ -4,6 +4,14 @@
     /// <inheritdoc />
     protected override void OnInitialized()
     {
-        NavigationManager.NavigateTo($"user/login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad: true);
+        var returnUrl = NavigationManager.Uri;
+        if (string.IsNullOrWhiteSpace(returnUrl) || returnUrl == "/")
+        {
+            NavigationManager.NavigateTo($"user/login", forceLoad: true);
+        }
+        else
+        {
+            NavigationManager.NavigateTo($"user/login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad: true);
+        }
     }
 }

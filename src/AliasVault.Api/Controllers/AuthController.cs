@@ -132,7 +132,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         // Check if the refresh token is valid.
         // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             return Unauthorized("Refresh token expired");
@@ -183,7 +183,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier).FirstOrDefault();
+        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             return Unauthorized("Invalid refresh token");

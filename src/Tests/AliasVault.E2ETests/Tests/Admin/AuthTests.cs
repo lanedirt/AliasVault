@@ -35,7 +35,10 @@ public class AuthTests : AdminPlaywrightTest
         await submitButton.ClickAsync();
 
         // Wait for current page to refresh and confirm message shows.
-        await WaitForUrlAsync("account/manage/change-password", "Error: incorrect password.");
+        await WaitForUrlAsync("account/manage/change-password", "Error");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Error: Incorrect password."), "No error shown after submitting change password field with wrong old password.");
     }
 
     /// <summary>
@@ -59,7 +62,10 @@ public class AuthTests : AdminPlaywrightTest
         await submitButton.ClickAsync();
 
         // Wait for current page to refresh and confirm message shows.
-        await WaitForUrlAsync("account/manage/change-password", "Your password has been changed.");
+        await WaitForUrlAsync("account/manage/change-password", "Your password");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Your password has been changed."), "No success message shown after successfully changing password.");
 
         // Set new password for next tests.
         TestUserPassword = "newnewnew";
@@ -84,5 +90,8 @@ public class AuthTests : AdminPlaywrightTest
 
         // Wait and check if we get redirected to /user/login.
         await WaitForUrlAsync("user/login**", "Sign in to");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Sign in to"), "No login page visible after logout.");
     }
 }

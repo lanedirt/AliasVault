@@ -15,7 +15,6 @@
 
 @code {
     private List<WorkerServiceStatus> serviceStatus = [];
-    private DateTime lastRefresh = DateTime.Now;
     private bool initInProgress;
     private bool firstInitPageDone;
 
@@ -24,7 +23,22 @@
 
     private string GetSmtpButtonClasses()
     {
-        return $"cursor-pointer {(smtpPending || !firstInitPageDone ? "bg-gray-600" : (smtpStatus ? "bg-green-600" : "bg-red-600"))}";
+        string buttonClass = "cursor-pointer ";
+
+        if (smtpPending || !firstInitPageDone)
+        {
+            buttonClass += "bg-gray-600";
+        }
+        else if (smtpStatus)
+        {
+            buttonClass += "bg-green-600";
+        }
+        else
+        {
+            buttonClass += "bg-red-600";
+        }
+
+        return buttonClass;
     }
 
     private async void SmtpClick()
@@ -49,18 +63,15 @@
         if (!smtpPending)
         {
             initInProgress = true;
-
-            //Console.WriteLine("Init services now: " + DateTime.Now);
             serviceStatus = await GetServiceStatuses();
             // Service status checks if the status is "Started" and was lastAlive
-            // (so actually reported itself) in the last 5 minutes..
-            var smtpEntry = serviceStatus.FirstOrDefault(x => x.ServiceName == "AliasVault.SmtpService");
+            // (so actually reported itself) in the last 5 minutes.
+            var smtpEntry = serviceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
             if (smtpEntry != null)
             {
                 smtpStatus = (DateTime.Now <= smtpEntry.Heartbeat.AddMinutes(5) && smtpEntry.CurrentStatus == "Started");
             }
 
-            lastRefresh = DateTime.Now;
             initInProgress = false;
             firstInitPageDone = true;
 
@@ -112,9 +123,15 @@
             await DbContext.SaveChangesAsync();
 
             // Wait for service to have stopped with ACK
-            // @TODO: add timeout method?
+            var timeout = DateTime.Now.AddSeconds(30);
             while (true)
             {
+                if (DateTime.Now > timeout)
+                {
+                    // Timeout
+                    return false;
+                }
+
                 var newdbContext = await DbContextFactory.CreateDbContextAsync();
                 var check = await newdbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
                 if (check.CurrentStatus == translateStatus)

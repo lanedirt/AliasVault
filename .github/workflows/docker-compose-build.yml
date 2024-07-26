@@ -60,7 +60,7 @@ jobs:
       - name: Test if localhost:8080 (Admin) responds
         run: |
             # Test if the service on localhost:8080 responds
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/user/login)
             if [ "$http_code" -ne 200 ]; then
                 echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
                 exit 1

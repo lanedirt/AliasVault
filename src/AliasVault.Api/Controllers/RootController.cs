@@ -32,7 +32,7 @@ public class RootController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         try
         {
-            var appliedMigrations = context.Database.GetAppliedMigrations();
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
             var allMigrations = context.Database.GetMigrations();
 
             if (allMigrations.Except(appliedMigrations).Any())
