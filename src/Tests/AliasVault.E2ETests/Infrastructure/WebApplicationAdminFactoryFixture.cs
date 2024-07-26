@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="WebApplicationApiFactoryFixture.cs" company="lanedirt">
+// <copyright file="WebApplicationAdminFactoryFixture.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -9,19 +9,19 @@ namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
 using AliasServerDb;
-using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 /// <summary>
-/// API web application factory fixture for integration tests.
+/// Admin web application factory fixture for integration tests.
 /// </summary>
 /// <typeparam name="TEntryPoint">The entry point.</typeparam>
-public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>
+public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFactory<TEntryPoint>
     where TEntryPoint : class
 {
     /// <summary>
@@ -37,12 +37,7 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <summary>
     /// Gets or sets the URL the web application host will listen on.
     /// </summary>
-    public string HostUrl { get; set; } = "https://localhost:5001";
-
-    /// <summary>
-    /// Gets the time provider instance for mutating the current time in tests.
-    /// </summary>
-    public TestTimeProvider TimeProvider { get; private set; } = new();
+    public string HostUrl { get; set; } = "https://localhost:5003";
 
     /// <summary>
     /// Returns the DbContext instance for the test. This can be used to seed the database with test data.
@@ -67,26 +62,14 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     {
         builder.UseUrls(HostUrl);
 
-        // Set the JWT key environment variable to debug value.
-        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
+        // Set static environment variables for the test.
+        // These are used in the Admin project to set the admin password hash and last password change date.
+        // An admin user will automatically be created with these values if the database is empty.
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
 
         builder.ConfigureServices((context, services) =>
         {
-            // Replace the ITimeProvider registration with a TestTimeProvider.
-            var timeProviderDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(ITimeProvider));
-
-            if (timeProviderDescriptor is null)
-            {
-                throw new InvalidOperationException(
-                    "No ITimeProvider registered.");
-            }
-
-            services.Remove(timeProviderDescriptor);
-
-            // Add TestTimeProvider
-            services.AddSingleton<ITimeProvider>(TimeProvider);
-
             // Remove the existing AliasServerDbContext registration.
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
@@ -99,6 +82,19 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
             }
 
             services.Remove(dbContextDescriptor);
+
+            // Remove the existing AliasServerDbContextFactory registration.
+            var dbContextFactoryDescriptor = services.SingleOrDefault(
+                d => d.ServiceType ==
+                     typeof(IDbContextFactory<AliasServerDbContext>));
+
+            if (dbContextFactoryDescriptor is null)
+            {
+                throw new InvalidOperationException(
+                    "No IDbContextFactory<AliasServerDbContext> registered.");
+            }
+
+            services.Remove(dbContextFactoryDescriptor);
 
             // Remove the existing DbConnection registration.
             var dbConnectionDescriptor = services.SingleOrDefault(
@@ -127,6 +123,16 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
                 var connection = container.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection);
             });
+
+            // Add the IDbContextFactory<AliasServerDbContext> as a scoped service
+            services.AddScoped<IDbContextFactory<AliasServerDbContext>, PooledDbContextFactory<AliasServerDbContext>>();
+
+            // Enable detailed errors for server-side Blazor.
+            services.AddServerSideBlazor()
+                .AddCircuitOptions(options =>
+                {
+                    options.DetailedErrors = true;
+                });
         });
     }
 

@@ -5,14 +5,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests;
+namespace AliasVault.E2ETests.Tests.Client;
 
 /// <summary>
 /// End-to-end tests for the database unlock functionality.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class UnlockTests : PlaywrightTest
+public class UnlockTests : ClientPlaywrightTest
 {
     /// <summary>
     /// Test that the unlock page is displayed after hard refresh which should
@@ -29,7 +29,7 @@ public class UnlockTests : PlaywrightTest
         await RefreshPageAndUnlockVault();
 
         // Check if we get redirected back to the page we were trying to access.
-        await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
+        await WaitForUrlAsync(startUrl, "Test webapi call 1.");
 
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database.");
@@ -50,13 +50,13 @@ public class UnlockTests : PlaywrightTest
         await Page.ReloadAsync();
 
         // Check if the unlock page is displayed.
-        await WaitForURLAsync("**/unlock", "unlock");
+        await WaitForUrlAsync("unlock", "unlock");
 
         // Hard refresh the page again.
         await Page.ReloadAsync();
 
         // Check if the unlock page is displayed.
-        await WaitForURLAsync("**/unlock", "unlock");
+        await WaitForUrlAsync("unlock", "unlock");
 
         // Check if by entering password the unlock page is replaced by the alias listing page.
         await InputHelper.FillInputFields(new Dictionary<string, string>
@@ -68,7 +68,7 @@ public class UnlockTests : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected back to the page we were trying to access.
-        await WaitForURLAsync("**/" + startUrl, "Test webapi call 1.");
+        await WaitForUrlAsync(startUrl, "Test webapi call 1.");
 
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database.");

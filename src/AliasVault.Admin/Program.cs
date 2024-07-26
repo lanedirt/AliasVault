@@ -23,12 +23,10 @@ builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.Environment
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
-var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH")
-                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
+var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
 config.AdminPasswordHash = adminPasswordHash;
 
-var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED")
-                   ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
+var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
 config.LastPasswordChanged = DateTime.ParseExact(lastPasswordChanged, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
 
 builder.Services.AddSingleton(config);
@@ -121,3 +119,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 await app.RunAsync();
+
+namespace AliasVault.Admin
+{
+    /// <summary>
+    /// Explicit program class definition. This is required in order to start the Admin project
+    /// in-memory from E2ETests project via WebApplicationFactory.
+    /// </summary>
+    public partial class Program
+    {
+    }
+}

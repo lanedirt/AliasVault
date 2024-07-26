@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests;
+namespace AliasVault.E2ETests.Tests.Client;
 
 using AliasServerDb;
 
@@ -14,12 +14,12 @@ using AliasServerDb;
 /// </summary>
 [TestFixture]
 [NonParallelizable]
-public class DbUpgradeTest : PlaywrightTest
+public class DbUpgradeTest : ClientPlaywrightTest
 {
     /// <summary>
     /// Gets or sets user email (override).
     /// </summary>
-    protected override string TestUserEmail { get; set; } = "testdbupgrade@example.com";
+    protected override string TestUserUsername { get; set; } = "testdbupgrade@example.com";
 
     /// <summary>
     /// Gets or sets user password (override).
@@ -64,12 +64,12 @@ public class DbUpgradeTest : PlaywrightTest
 
         // Wait for two things: either the homepage to show with credentials OR the
         // vault upgrade step to show.
-        await WaitForURLAsync("**/sync", "Vault needs to be upgraded");
+        await WaitForUrlAsync("sync", "Vault needs to be upgraded");
 
         var submitButton = Page.Locator("text=Start upgrade process").First;
         await submitButton.ClickAsync();
 
-        await WaitForURLAsync("**/", "Test credential 1");
+        await WaitForUrlAsync(string.Empty, "Test credential 1");
 
         // Check if the expected service names still appear on the index page and are still accessible.
         var pageContent = await Page.TextContentAsync("body");
@@ -85,7 +85,7 @@ public class DbUpgradeTest : PlaywrightTest
             await credentialCard.ClickAsync();
 
             // Wait for navigation to complete
-            await WaitForURLAsync("**/credentials/**");
+            await WaitForUrlAsync("credentials/**");
 
             // Check if the service name appears in the body of the new page
             var credentialPageContent = await Page.TextContentAsync("body");

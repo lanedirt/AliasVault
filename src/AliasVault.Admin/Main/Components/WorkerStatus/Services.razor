@@ -2,7 +2,7 @@
 @inherits MainBase
 
 <button @onclick="SmtpClick"
-        class="@GetSmtpButtonClasses() inline-flex items-center justify-center rounded-xl px-8 py-2 text-white">
+        class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white">
     <span>SmtpService</span>
     @if (smtpPending)
     {
@@ -54,8 +54,11 @@
             serviceStatus = await GetServiceStatuses();
             // Service status checks if the status is "Started" and was lastAlive
             // (so actually reported itself) in the last 5 minutes..
-            var smtpEntry = serviceStatus.Where(x => x.ServiceName == "AliasVault.SmtpService").First();
-            smtpStatus = (DateTime.Now <= smtpEntry.Heartbeat.AddMinutes(5) && smtpEntry.CurrentStatus == "Started");
+            var smtpEntry = serviceStatus.FirstOrDefault(x => x.ServiceName == "AliasVault.SmtpService");
+            if (smtpEntry != null)
+            {
+                smtpStatus = (DateTime.Now <= smtpEntry.Heartbeat.AddMinutes(5) && smtpEntry.CurrentStatus == "Started");
+            }
 
             lastRefresh = DateTime.Now;
             initInProgress = false;

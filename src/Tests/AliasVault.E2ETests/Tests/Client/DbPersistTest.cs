@@ -5,14 +5,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests;
+namespace AliasVault.E2ETests.Tests.Client;
 
 /// <summary>
 /// End-to-end tests for the credential management.
 /// </summary>
 [TestFixture]
 [NonParallelizable]
-public class DbPersistTest : PlaywrightTest
+public class DbPersistTest : ClientPlaywrightTest
 {
     /// <summary>
     /// Test if a created credential is still present after a hard page refresh which causes
@@ -37,7 +37,7 @@ public class DbPersistTest : PlaywrightTest
         await RefreshPageAndUnlockVault();
 
         // Wait for the credentials page to load again.
-        await WaitForURLAsync("**/credentials/**", serviceNameBefore);
+        await WaitForUrlAsync("credentials/**", serviceNameBefore);
 
         // Check if the service name is still present in the content.
         pageContent = await Page.TextContentAsync("body");

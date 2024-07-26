@@ -5,14 +5,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests;
+namespace AliasVault.E2ETests.Tests.Client;
 
 /// <summary>
 /// End-to-end tests for the credential management.
 /// </summary>
 [TestFixture]
 [Parallelizable(ParallelScope.Self)]
-public class CredentialTests : PlaywrightTest
+public class CredentialTests : ClientPlaywrightTest
 {
     private static readonly Random Random = new();
 
@@ -24,7 +24,7 @@ public class CredentialTests : PlaywrightTest
     public async Task CredentialListingTest()
     {
         await NavigateUsingBlazorRouter("credentials");
-        await WaitForURLAsync("**/credentials", "AliasVault");
+        await WaitForUrlAsync("credentials", "AliasVault");
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
@@ -70,7 +70,7 @@ public class CredentialTests : PlaywrightTest
         // Click the edit button.
         var editButton = Page.Locator("text=Edit credentials entry").First;
         await editButton.ClickAsync();
-        await WaitForURLAsync("**/edit", "Save Credentials");
+        await WaitForUrlAsync("edit", "Save Credentials");
 
         var serviceNameAfter = "Credential service after";
         await InputHelper.FillInputFields(
@@ -81,7 +81,7 @@ public class CredentialTests : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForURLAsync("**/credentials/**", "View credentials entry");
+        await WaitForUrlAsync("credentials/**", "View credentials entry");
 
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
