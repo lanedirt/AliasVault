@@ -109,8 +109,8 @@ generate_admin_password() {
 # Function to restart Docker containers
 restart_docker_containers() {
     printf "${CYAN}> Restarting Docker containers...${NC}\n"
-    docker-compose down
-    docker-compose up -d
+    docker compose down
+    docker compose up -d
     printf "${GREEN}> Docker containers restarted successfully.${NC}\n"
 }
 
@@ -195,11 +195,11 @@ set_smtp_tls_enabled() {
 build_and_run_docker_compose() {
     printf "${CYAN}> Building Docker Compose stack..."
     if [ "$VERBOSE" = true ]; then
-      docker-compose build
+      docker compose build
     else
       (
-        # Run docker-compose build and capture its output
-        docker-compose build > install_compose_build_output.log 2>&1 &
+        # Run docker compose build and capture its output
+        docker compose build > install_compose_build_output.log 2>&1 &
         BUILD_PID=$!
 
         # Print dots while the build is running
@@ -226,9 +226,9 @@ build_and_run_docker_compose() {
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-      docker-compose up -d
+      docker compose up -d
     else
-      docker-compose up -d > install_compose_up_output.log 2>&1
+      docker compose up -d > install_compose_up_output.log 2>&1
     fi
     UP_EXIT_CODE=$?
 
