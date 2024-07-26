@@ -18,6 +18,11 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     where T : IHostedService
 {
     /// <summary>
+    /// Lock object to prevent multiple tasks from starting the worker at the same time.
+    /// </summary>
+    private readonly object _taskLock = new();
+
+    /// <summary>
     /// A minimum delay that is used to wait before restarting the worker after a fault in the innerService.
     /// This delay is increased exponentially with a maximum delay of <see cref="_restartMaxDelayInMs"/>.
     /// </summary>
@@ -33,36 +38,33 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     /// </summary>
     private int _restartDelayInMs = _restartMinDelayInMs;
 
-    private readonly object _taskLock = new();
-    private Task? _workerTask;
-
     /// <summary>
     /// Default entry point called by the host.
     /// </summary>
-    /// <param name="serviceCancellationToken">Cancellation token.</param>
+    /// <param name="stoppingToken">Cancellation token.</param>
     /// <returns>Task.</returns>
-    protected override async Task ExecuteAsync(CancellationToken serviceCancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("StatusHostedService<{ServiceType}> ExecuteAsync called.", typeof(T).Name);
 
         // Register the service with the global service status so the StatusWorker will monitor it.
         globalServiceStatus.RegisterWorker(typeof(T).Name);
 
-        while (!serviceCancellationToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             // Add a second cancellationToken linked to the parent cancellation token.
             // When the parent gets canceled this gets canceled as well. However, this one can also
             // be canceled with a signal from the StatusWorker.
             var workerCancellationTokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(serviceCancellationToken);
+                CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
             // Start the inner while loop with the second cancellationToken.
             await ExecuteInnerAsync(workerCancellationTokenSource);
 
-            if (!serviceCancellationToken.IsCancellationRequested)
+            if (!stoppingToken.IsCancellationRequested)
             {
-                // If the worker was not stopped, wait for a second before attempting to restart it.
-                await Task.Delay(1000, serviceCancellationToken);
+                // If the parent service was not stopped, wait for a second before attempting to restart the worker.
+                await Task.Delay(1000, stoppingToken);
             }
         }
     }
@@ -73,7 +75,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     /// <param name="workerCancellationTokenSource">Cancellation token.</param>
     private async Task ExecuteInnerAsync(CancellationTokenSource workerCancellationTokenSource)
     {
-        _workerTask = null;
+        Task? workerTask = null;
 
         while (!workerCancellationTokenSource.IsCancellationRequested)
         {
@@ -81,10 +83,10 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             {
                 lock (_taskLock)
                 {
-                    if (_workerTask == null)
+                    if (workerTask == null)
                     {
                         globalServiceStatus.SetWorkerStatus(typeof(T).Name, true);
-                        _workerTask = Task.Run(() => WorkerLogic(workerCancellationTokenSource.Token), workerCancellationTokenSource.Token);
+                        workerTask = Task.Run(() => WorkerLogic(workerCancellationTokenSource.Token), workerCancellationTokenSource.Token);
                     }
                 }
             }
@@ -96,7 +98,6 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             }
             else if (globalServiceStatus.CurrentStatus == "Stopped")
             {
-                _workerTask = null;
                 break;
             }
         }

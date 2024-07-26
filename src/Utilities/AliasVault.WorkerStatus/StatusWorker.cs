@@ -8,6 +8,7 @@
 namespace AliasVault.WorkerStatus;
 
 using AliasVault.WorkerStatus.Database;
+using AliasVault.WorkerStatus.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -32,35 +33,40 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
             try
             {
                 var statusEntry = await GetServiceStatus();
-                switch (statusEntry.CurrentStatus)
+                switch (statusEntry.CurrentStatus.ToStatusEnum())
                 {
-                    case "Started":
+                    case Status.Started:
                         // Ensure that all workers are running, if not, revert to "Starting" CurrentStatus.
                         if (!globalServiceStatus.AreAllWorkersRunning())
                         {
-                            await SetServiceStatus(statusEntry, "Starting");
-                            logger.LogInformation("Not all workers are running (yet). Reverting to Starting.");
+                            await SetServiceStatus(statusEntry, Status.Starting.ToString());
+                            logger.LogInformation(
+                                "Status was set to Started but not all workers are running (yet). Reverting to Starting.");
                         }
 
                         break;
-                    case "Starting":
+                    case Status.Starting:
                         await WaitForAllWorkersToStart(stoppingToken);
-                        await SetServiceStatus(statusEntry, "Started");
+                        await SetServiceStatus(statusEntry, Status.Started.ToString());
                         logger.LogInformation("All workers started.");
                         break;
-                    case "Stopping":
+                    case Status.Stopping:
                         await WaitForAllWorkersToStop(stoppingToken);
-                        await SetServiceStatus(statusEntry, "Stopped");
+                        await SetServiceStatus(statusEntry, Status.Stopped.ToString());
                         logger.LogInformation("All workers stopped.");
                         break;
-                    case "Stopped":
+                    case Status.Stopped:
                         logger.LogInformation("Service is (soft) stopped.");
                         break;
                 }
             }
+            catch (TaskCanceledException)
+            {
+                // Ignore exception, this is expected when the service is stopped.
+            }
             catch (Exception e)
             {
-                logger.LogError(e, "Global main application exception");
+                logger.LogError(e, "StatusWorker exception");
             }
 
             await Task.Delay(5000, stoppingToken);
@@ -82,10 +88,10 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
 
         if (!string.IsNullOrEmpty(entry.DesiredStatus) && entry.CurrentStatus != entry.DesiredStatus)
         {
-            entry.CurrentStatus = entry.DesiredStatus switch
+            entry.CurrentStatus = entry.DesiredStatus.ToStatusEnum() switch
             {
-                "Started" => "Starting",
-                "Stopped" => "Stopping",
+                Status.Started => Status.Starting.ToString(),
+                Status.Stopped => Status.Stopping.ToString(),
                 _ => entry.CurrentStatus,
             };
         }
@@ -160,7 +166,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
         entry = new WorkerServiceStatus
         {
             ServiceName = globalServiceStatus.ServiceName,
-            CurrentStatus = "Started",
+            CurrentStatus = Status.Started.ToString(),
             DesiredStatus = string.Empty,
         };
         await _dbContext.WorkerServiceStatuses.AddAsync(entry);

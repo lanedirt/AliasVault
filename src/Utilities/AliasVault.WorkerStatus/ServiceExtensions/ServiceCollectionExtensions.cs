@@ -5,11 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using AliasVault.WorkerStatus.Database;
-using Microsoft.EntityFrameworkCore;
-
 namespace AliasVault.WorkerStatus.ServiceExtensions;
 
+using AliasVault.WorkerStatus.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;

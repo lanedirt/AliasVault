@@ -38,7 +38,7 @@ public class GlobalServiceStatus
     /// <summary>
     /// Gets or sets the ServiceName in order to identify the service and its workers in the database.
     /// </summary>
-    public string ServiceName { get; set; } = null!;
+    public string ServiceName { get; set; }
 
     /// <summary>
     /// Register a worker with the service.

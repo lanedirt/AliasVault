@@ -67,6 +67,8 @@ The script will output the URL where the app is available. You can now open the 
 
 #### Other useful commands:
 - To reset the admin password, run the install.sh script with the `--reset-admin-password` flag.
+- To uninstall AliasVault, make the uninstall script executable with `chmod +x uninstall.sh` first, then run the script: `./uninstall.sh`.
+This will remove all containers, images, and volumes related to AliasVault. It will keep all files and configuration intact however, so you can easily reinstall AliasVault later.
 
 ## Tech stack / credits
 The following technologies, frameworks and libraries are used in this project:
