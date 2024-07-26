@@ -13,7 +13,6 @@
     }
 </button>
 
-
 @code {
     private List<WorkerServiceStatus> serviceStatus = [];
     private DateTime lastRefresh = DateTime.Now;
@@ -22,7 +21,7 @@
 
     private bool smtpStatus;
     private bool smtpPending;
-                                                               å
+
     private string GetSmtpButtonClasses()
     {
         return $"cursor-pointer {(smtpPending || !firstInitPageDone ? "bg-gray-600" : (smtpStatus ? "bg-green-600" : "bg-red-600"))}";
