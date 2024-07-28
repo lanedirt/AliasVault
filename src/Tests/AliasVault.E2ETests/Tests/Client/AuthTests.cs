@@ -11,6 +11,7 @@ namespace AliasVault.E2ETests.Tests.Client;
 /// End-to-end tests for authentication.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
+[Category("ClientTests")]
 [TestFixture]
 public class AuthTests : ClientPlaywrightTest
 {

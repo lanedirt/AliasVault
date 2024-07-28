@@ -1,6 +1,5 @@
 ﻿@using AliasVault.WorkerStatus.Database
 @inherits MainBase
-@implements IDisposable
 
 <button @onclick="SmtpClick"
         class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white"
@@ -19,10 +18,10 @@
 @code {
     private List<WorkerServiceStatus> ServiceStatus = [];
     private bool InitInProgress;
-
     private bool SmtpStatus;
     private bool SmtpPending;
     private DateTime LastHeartbeat;
+    private readonly SemaphoreSlim InitLock = new(1, 1);
 
     /// <summary>
     /// The interval in milliseconds for refreshing the service status.
@@ -37,10 +36,10 @@
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
-            await InitPage();
-
             Timer = new Timer(async _ =>
             {
                 await InitPage();
@@ -132,27 +131,46 @@
             return;
         }
 
-        if (!SmtpPending)
+        try
         {
-            InitInProgress = true;
-            var dbContext = await DbContextFactory.CreateDbContextAsync();
-            ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
-            // Service status checks if the status is "Started" and was lastAlive
-            // (so actually reported itself) in the last 5 minutes.
-            var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
-            if (smtpEntry != null)
+            await InitLock.WaitAsync();
+
+            if (InitInProgress)
             {
-                LastHeartbeat = smtpEntry.Heartbeat;
-                SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
+                return;
             }
 
-            InitInProgress = false;
+            if (!SmtpPending)
+            {
+                InitInProgress = true;
 
-            await InvokeAsync(() => StateHasChanged());
+                try
+                {
+                    InitInProgress = true;
+                    var dbContext = await DbContextFactory.CreateDbContextAsync();
+                    ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
+                    // Service status checks if the status is "Started" and was lastAlive
+                    // (so actually reported itself) in the last 5 minutes.
+                    var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
+                    if (smtpEntry != null)
+                    {
+                        LastHeartbeat = smtpEntry.Heartbeat;
+                        SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
+                    }
+
+                    InitInProgress = false;
+
+                    await InvokeAsync(() => StateHasChanged());
+                }
+                finally
+                {
+                    InitInProgress = false;
+                }
+            }
         }
-        else
+        finally
         {
-            // Service status changing in progress, don't issue parallel requests..
+            InitLock.Release();
         }
     }
 
