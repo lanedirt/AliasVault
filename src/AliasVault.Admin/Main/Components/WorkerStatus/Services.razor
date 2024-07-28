@@ -1,10 +1,13 @@
 ﻿@using AliasVault.WorkerStatus.Database
 @inherits MainBase
+@implements IDisposable
 
 <button @onclick="SmtpClick"
-        class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white">
+        class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white"
+        disabled="@(!IsHeartbeatValid())"
+        title="@GetButtonTooltip()">
     <span>SmtpService</span>
-    @if (smtpPending)
+    @if (SmtpPending)
     {
     <svg class="animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -14,22 +17,62 @@
 </button>
 
 @code {
-    private List<WorkerServiceStatus> serviceStatus = [];
-    private bool initInProgress;
-    private bool firstInitPageDone;
+    private List<WorkerServiceStatus> ServiceStatus = [];
+    private bool InitInProgress;
 
-    private bool smtpStatus;
-    private bool smtpPending;
+    private bool SmtpStatus;
+    private bool SmtpPending;
+    private DateTime LastHeartbeat;
 
+    /// <summary>
+    /// The interval in milliseconds for refreshing the service status.
+    /// </summary>
+    private int AutoRefreshInterval = 5000;
+
+    /// <summary>
+    /// The timer for refreshing the service status.
+    /// </summary>
+    private Timer? Timer;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitPage();
+
+            Timer = new Timer(async _ =>
+            {
+                await InitPage();
+            }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(AutoRefreshInterval));
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            // Dispose of the timer if it exists.
+            Timer?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Gets the CSS classes for the SMTP button based on its current state.
+    /// </summary>
+    /// <returns>A string containing the CSS classes for the button.</returns>
     private string GetSmtpButtonClasses()
     {
         string buttonClass = "cursor-pointer ";
 
-        if (smtpPending || !firstInitPageDone)
+        if (!IsHeartbeatValid())
         {
             buttonClass += "bg-gray-600";
         }
-        else if (smtpStatus)
+        else if (SmtpStatus)
         {
             buttonClass += "bg-green-600";
         }
@@ -41,54 +84,74 @@
         return buttonClass;
     }
 
-    private async void SmtpClick()
+    /// <summary>
+    /// Gets the tooltip text for the SMTP button.
+    /// </summary>
+    /// <returns>A string containing the tooltip text.</returns>
+    private string GetButtonTooltip()
     {
-        smtpPending = true;
-        StateHasChanged();
-
-        smtpStatus = !smtpStatus;
-        await UpdateSmtpStatus(smtpStatus);
-
-        smtpPending = false;
-        StateHasChanged();
+        return IsHeartbeatValid() ? "" : "Heartbeat offline";
     }
 
-    private async Task InitPage()
+    /// <summary>
+    /// Checks if the heartbeat is valid (within the last 5 minutes).
+    /// </summary>
+    /// <returns>True if the heartbeat is valid, false otherwise.</returns>
+    private bool IsHeartbeatValid()
     {
-        if (initInProgress)
+        return DateTime.Now <= LastHeartbeat.AddMinutes(5);
+    }
+
+    /// <summary>
+    /// Handles the click event for the SMTP button.
+    /// </summary>
+    private async void SmtpClick()
+    {
+        if (!IsHeartbeatValid())
         {
             return;
         }
 
-        if (!smtpPending)
+        SmtpPending = true;
+        StateHasChanged();
+
+        SmtpStatus = !SmtpStatus;
+        await UpdateSmtpStatus(SmtpStatus);
+
+        SmtpPending = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Initializes the page by fetching service statuses and updating the SMTP status.
+    /// </summary>
+    private async Task InitPage()
+    {
+        if (InitInProgress)
         {
-            initInProgress = true;
-            serviceStatus = await GetServiceStatuses();
+            return;
+        }
+
+        if (!SmtpPending)
+        {
+            InitInProgress = true;
+            ServiceStatus = await GetServiceStatuses();
             // Service status checks if the status is "Started" and was lastAlive
             // (so actually reported itself) in the last 5 minutes.
-            var smtpEntry = serviceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
+            var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
             if (smtpEntry != null)
             {
-                smtpStatus = (DateTime.Now <= smtpEntry.Heartbeat.AddMinutes(5) && smtpEntry.CurrentStatus == "Started");
+                LastHeartbeat = smtpEntry.Heartbeat;
+                SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
             }
 
-            initInProgress = false;
-            firstInitPageDone = true;
+            InitInProgress = false;
 
             await InvokeAsync(() => StateHasChanged());
         }
         else
         {
             // Service status changing in progress, don't issue parallel requests..
-        }
-    }
-
-    /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await InitPage();
         }
     }
 
@@ -122,7 +185,7 @@
             entry.DesiredStatus = translateStatus;
             await DbContext.SaveChangesAsync();
 
-            // Wait for service to have stopped with ACK
+            // Wait for service to have updated its status.
             var timeout = DateTime.Now.AddSeconds(30);
             while (true)
             {
