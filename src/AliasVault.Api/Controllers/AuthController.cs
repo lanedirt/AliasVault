@@ -204,7 +204,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
-        var user = new AliasVaultUser { UserName = model.Email, Email = model.Email, Salt = model.Salt, Verifier = model.Verifier };
+        var user = new AliasVaultUser { UserName = model.Email, Email = model.Email, Salt = model.Salt, Verifier = model.Verifier, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
         var result = await userManager.CreateAsync(user);
 
         if (result.Succeeded)

@@ -11,6 +11,7 @@ namespace AliasVault.E2ETests.Tests.Admin;
 /// End-to-end tests for authentication.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
+[Category("AdminTests")]
 [TestFixture]
 public class AuthTests : AdminPlaywrightTest
 {

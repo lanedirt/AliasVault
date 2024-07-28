@@ -42,6 +42,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsInvokeService>();
 builder.Services.AddScoped<GlobalNotificationService>();
+builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<NavigationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
 
@@ -113,8 +114,7 @@ app.MapRazorComponents<App>()
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var db = container.GetRequiredService<AliasServerDbContext>();
-
+    var db = await container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContextAsync();
     await db.Database.MigrateAsync();
 
     await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);

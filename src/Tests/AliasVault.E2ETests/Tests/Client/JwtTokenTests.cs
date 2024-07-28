@@ -11,6 +11,7 @@ namespace AliasVault.E2ETests.Tests.Client;
 /// End-to-end tests for JWT token handling.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
+[Category("ClientTests")]
 [TestFixture]
 public class JwtTokenTests : ClientPlaywrightTest
 {

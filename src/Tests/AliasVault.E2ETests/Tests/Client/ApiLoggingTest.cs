@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 /// End-to-end tests for making sure errors and warnings in API are logged to database.
 /// </summary>
 [TestFixture]
+[Category("ClientTests")]
 [NonParallelizable]
 public class ApiLoggingTest : ClientPlaywrightTest
 {

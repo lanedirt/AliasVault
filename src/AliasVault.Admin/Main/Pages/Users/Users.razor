@@ -1,0 +1,142 @@
+﻿@page "/users"
+@using AliasVault.RazorComponents
+
+<LayoutPageTitle>Users</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Users</h1>
+            <RefreshButton OnRefresh="RefreshData" ButtonText="Refresh" />
+        </div>
+        <p>This page gives an overview of all registered users and the associated vaults.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <div class="px-4">
+        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+
+        <div class="mb-4">
+            <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th scope="col" class="px-4 py-3">ID</th>
+                <th scope="col" class="px-4 py-3">Registered</th>
+                <th scope="col" class="px-4 py-3">Username</th>
+                <th scope="col" class="px-4 py-3"># Vaults</th>
+                <th scope="col" class="px-4 py-3">Storage</th>
+                <th scope="col" class="px-4 py-3">Last vault update</th>
+                <th scope="col" class="px-4 py-3">Actions</th>
+            </tr>
+            </thead>
+            <tbody id="logTableBody">
+                @foreach (var user in UserList)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">@user.Id</td>
+                        <td class="px-4 py-3">@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">@user.UserName</td>
+                        <td class="px-4 py-3">@user.VaultCount</td>
+                        <td class="px-4 py-3">@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</td>
+                        <td class="px-4 py-3">@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="px-4 py-3">
+                            <a href="users/@user.Id" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-blue-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<UserViewModel> UserList { get; set; } = [];
+    private bool IsLoading { get; set; } = true;
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 50;
+    private int TotalRecords { get; set; }
+
+    private string _searchTerm = string.Empty;
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            if (_searchTerm != value)
+            {
+                _searchTerm = value;
+                _ = RefreshData();
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshData();
+        }
+    }
+
+    private void HandlePageChanged(int newPage)
+    {
+        CurrentPage = newPage;
+        _ = RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        IQueryable<AliasVaultUser> query = DbContext.AliasVaultUsers;
+
+        if (SearchTerm.Length > 0)
+        {
+            query = query.Where(x => EF.Functions.Like(x.UserName!.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.Email!.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+        }
+
+        TotalRecords = await query.CountAsync();
+
+        var users = await query
+            .OrderBy(x => x.CreatedAt)
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .Select(u => new
+            {
+                u.Id,
+                u.UserName,
+                u.CreatedAt,
+                Vaults = u.Vaults.Select(v => new
+                {
+                    v.FileSize,
+                    v.CreatedAt
+                })
+            })
+            .ToListAsync();
+
+        UserList = users.Select(user => new UserViewModel
+        {
+            Id = user.Id,
+            UserName = user.UserName?.ToLower() ?? "N/A",
+            CreatedAt = user.CreatedAt,
+            VaultCount = user.Vaults.Count(),
+            VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
+            LastVaultUpdate = user.Vaults.Max(x => x.CreatedAt),
+        }).ToList();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

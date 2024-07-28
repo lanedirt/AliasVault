@@ -1,0 +1,34 @@
+//-----------------------------------------------------------------------
+// <copyright file="FileHelper.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.Api.Helpers;
+
+/// <summary>
+/// File helper class.
+/// </summary>
+public static class FileHelper
+{
+    /// <summary>
+    /// Calculate the size of a base64 string in kilobytes.
+    /// </summary>
+    /// <param name="base64String">Base64 string as input.</param>
+    /// <returns>Length in kilobytes.</returns>
+    public static int Base64StringToKilobytes(string base64String)
+    {
+        // Remove padding characters
+        var base64Length = base64String.Length - base64String.Count(c => c == '=');
+
+        // Calculate the size of the decoded data in bytes
+        double decodedSizeBytes = (base64Length * 3) / 4.0;
+
+        // Convert bytes to kilobytes
+        var kilobytes = decodedSizeBytes / 1024;
+
+        // Return the size in kilobytes as int (rounded up)
+        return (int)Math.Ceiling(kilobytes);
+    }
+}

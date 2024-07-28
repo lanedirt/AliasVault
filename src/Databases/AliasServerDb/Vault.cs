@@ -44,6 +44,11 @@ public class Vault
     public string Version { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the vault filesize in kilobytes.
+    /// </summary>
+    public int FileSize { get; set; }
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

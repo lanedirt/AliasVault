@@ -11,6 +11,7 @@ namespace AliasVault.E2ETests.Tests.Client;
 /// End-to-end tests for the client database persistence.
 /// </summary>
 [TestFixture]
+[Category("ClientTests")]
 [NonParallelizable]
 public class DbPersistTest : ClientPlaywrightTest
 {

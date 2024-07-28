@@ -13,6 +13,7 @@ using AliasServerDb;
 /// End-to-end tests for upgrading client databases.
 /// </summary>
 [TestFixture]
+[Category("ClientTests")]
 [NonParallelizable]
 public class DbUpgradeTest : ClientPlaywrightTest
 {

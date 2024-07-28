@@ -2,9 +2,11 @@
 @inherits MainBase
 
 <button @onclick="SmtpClick"
-        class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white">
+        class="@GetSmtpButtonClasses() mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white"
+        disabled="@(!IsHeartbeatValid())"
+        title="@GetButtonTooltip()">
     <span>SmtpService</span>
-    @if (smtpPending)
+    @if (SmtpPending)
     {
     <svg class="animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -14,22 +16,62 @@
 </button>
 
 @code {
-    private List<WorkerServiceStatus> serviceStatus = [];
-    private bool initInProgress;
-    private bool firstInitPageDone;
+    private List<WorkerServiceStatus> ServiceStatus = [];
+    private bool InitInProgress;
+    private bool SmtpStatus;
+    private bool SmtpPending;
+    private DateTime LastHeartbeat;
+    private readonly SemaphoreSlim InitLock = new(1, 1);
 
-    private bool smtpStatus;
-    private bool smtpPending;
+    /// <summary>
+    /// The interval in milliseconds for refreshing the service status.
+    /// </summary>
+    private readonly int AutoRefreshInterval = 5000;
 
+    /// <summary>
+    /// The timer for refreshing the service status.
+    /// </summary>
+    private Timer? Timer;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            Timer = new Timer(async _ =>
+            {
+                await InitPage();
+            }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(AutoRefreshInterval));
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            // Dispose of the timer if it exists.
+            Timer?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Gets the CSS classes for the SMTP button based on its current state.
+    /// </summary>
+    /// <returns>A string containing the CSS classes for the button.</returns>
     private string GetSmtpButtonClasses()
     {
         string buttonClass = "cursor-pointer ";
 
-        if (smtpPending || !firstInitPageDone)
+        if (!IsHeartbeatValid())
         {
             buttonClass += "bg-gray-600";
         }
-        else if (smtpStatus)
+        else if (SmtpStatus)
         {
             buttonClass += "bg-green-600";
         }
@@ -41,63 +83,95 @@
         return buttonClass;
     }
 
-    private async void SmtpClick()
+    /// <summary>
+    /// Gets the tooltip text for the SMTP button.
+    /// </summary>
+    /// <returns>A string containing the tooltip text.</returns>
+    private string GetButtonTooltip()
     {
-        smtpPending = true;
-        StateHasChanged();
-
-        smtpStatus = !smtpStatus;
-        await UpdateSmtpStatus(smtpStatus);
-
-        smtpPending = false;
-        StateHasChanged();
+        return IsHeartbeatValid() ? "" : "Heartbeat offline";
     }
 
-    private async Task InitPage()
+    /// <summary>
+    /// Checks if the heartbeat is valid (within the last 5 minutes).
+    /// </summary>
+    /// <returns>True if the heartbeat is valid, false otherwise.</returns>
+    private bool IsHeartbeatValid()
     {
-        if (initInProgress)
+        return DateTime.Now <= LastHeartbeat.AddMinutes(5);
+    }
+
+    /// <summary>
+    /// Handles the click event for the SMTP button.
+    /// </summary>
+    private async void SmtpClick()
+    {
+        if (!IsHeartbeatValid())
         {
             return;
         }
 
-        if (!smtpPending)
-        {
-            initInProgress = true;
-            serviceStatus = await GetServiceStatuses();
-            // Service status checks if the status is "Started" and was lastAlive
-            // (so actually reported itself) in the last 5 minutes.
-            var smtpEntry = serviceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
-            if (smtpEntry != null)
-            {
-                smtpStatus = (DateTime.Now <= smtpEntry.Heartbeat.AddMinutes(5) && smtpEntry.CurrentStatus == "Started");
-            }
+        SmtpPending = true;
+        StateHasChanged();
 
-            initInProgress = false;
-            firstInitPageDone = true;
+        SmtpStatus = !SmtpStatus;
+        await UpdateSmtpStatus(SmtpStatus);
 
-            await InvokeAsync(() => StateHasChanged());
-        }
-        else
-        {
-            // Service status changing in progress, don't issue parallel requests..
-        }
-    }
-
-    /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await InitPage();
-        }
+        SmtpPending = false;
+        StateHasChanged();
     }
 
     /// <summary>
-    /// Gets the service statuses.
+    /// Initializes the page by fetching service statuses and updating the SMTP status.
     /// </summary>
-    public async Task<List<WorkerServiceStatus>> GetServiceStatuses()
+    private async Task InitPage()
     {
-        return await DbContext.WorkerServiceStatuses.ToListAsync();
+        if (InitInProgress)
+        {
+            return;
+        }
+
+        try
+        {
+            await InitLock.WaitAsync();
+
+            if (InitInProgress)
+            {
+                return;
+            }
+
+            if (!SmtpPending)
+            {
+                InitInProgress = true;
+
+                try
+                {
+                    InitInProgress = true;
+                    var dbContext = await DbContextFactory.CreateDbContextAsync();
+                    ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
+                    // Service status checks if the status is "Started" and was lastAlive
+                    // (so actually reported itself) in the last 5 minutes.
+                    var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
+                    if (smtpEntry != null)
+                    {
+                        LastHeartbeat = smtpEntry.Heartbeat;
+                        SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
+                    }
+
+                    InitInProgress = false;
+
+                    await InvokeAsync(() => StateHasChanged());
+                }
+                finally
+                {
+                    InitInProgress = false;
+                }
+            }
+        }
+        finally
+        {
+            InitLock.Release();
+        }
     }
 
     /// <summary>
@@ -105,24 +179,16 @@
     /// </summary>
     public async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
     {
-        string translateStatus = "";
-        switch (newStatus)
-        {
-            case true:
-                translateStatus = "Started";
-                break;
-            case false:
-                translateStatus = "Stopped";
-                break;
-        }
-
-        var entry = await DbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
+        // Refresh the DbContext to ensure we get the latest data.
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
         if (entry != null)
         {
-            entry.DesiredStatus = translateStatus;
-            await DbContext.SaveChangesAsync();
+            string newDesiredStatus = newStatus ? "Started" : "Stopped";
+            entry.DesiredStatus = newDesiredStatus;
+            await dbContext.SaveChangesAsync();
 
-            // Wait for service to have stopped with ACK
+            // Wait for service to have updated its status.
             var timeout = DateTime.Now.AddSeconds(30);
             while (true)
             {
@@ -132,9 +198,9 @@
                     return false;
                 }
 
-                var newdbContext = await DbContextFactory.CreateDbContextAsync();
-                var check = await newdbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
-                if (check.CurrentStatus == translateStatus)
+                dbContext = await DbContextFactory.CreateDbContextAsync();
+                var check = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
+                if (check.CurrentStatus == newDesiredStatus)
                 {
                     // Done
                     return true;
