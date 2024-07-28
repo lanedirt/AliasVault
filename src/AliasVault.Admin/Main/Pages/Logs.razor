@@ -23,8 +23,21 @@ else
     <div class="px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
-        <div class="mb-4">
-            <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="mb-4 flex space-x-4">
+            <div class="flex w-full">
+                <div class="w-2/3 pr-2">
+                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="w-1/3 pl-2">
+                    <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Services</option>
+                        @foreach (var service in ServiceNames)
+                        {
+                        <option value="@service">@service</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
         <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -45,26 +58,14 @@ else
                         <td class="px-4 py-3">@log.Application</td>
 
                         @{
-                            string bgColor;
-
-                            switch (log.Level)
+                            string bgColor = log.Level switch
                             {
-                                case "Information":
-                                bgColor = "bg-blue-500";
-                                break;
-                                case "Error":
-                                bgColor = "bg-red-500";
-                                break;
-                                case "Warning":
-                                bgColor = "bg-yellow-500";
-                                break;
-                                case "Debug":
-                                bgColor = "bg-green-500";
-                                break;
-                                default:
-                                bgColor = "bg-gray-500";
-                                break;
-                            }
+                                "Information" => "bg-blue-500",
+                                "Error" => "bg-red-500",
+                                "Warning" => "bg-yellow-500",
+                                "Debug" => "bg-green-500",
+                                _ => "bg-gray-500"
+                            };
                         }
                         <td class="px-4 py-3">
                             <span class="px-2 py-1 rounded-full text-white @bgColor">
@@ -100,13 +101,27 @@ else
         }
     }
 
-    /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private string _selectedServiceName = string.Empty;
+    private string SelectedServiceName
     {
-        if (firstRender)
+        get => _selectedServiceName;
+        set
         {
-            await RefreshData();
+            if (_selectedServiceName != value)
+            {
+                _selectedServiceName = value;
+                _ = RefreshData();
+            }
         }
+    }
+
+    private List<string> ServiceNames { get; set; } = [];
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceNames = await DbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
+        await RefreshData();
     }
 
     private void HandlePageChanged(int newPage)
@@ -120,29 +135,26 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        if (SearchTerm.Length > 0)
-        {
-            var filteredQuery = DbContext.Logs
-                .Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                            EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                            EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+        var query = DbContext.Logs.AsQueryable();
 
-            TotalRecords = await filteredQuery.CountAsync();
-            LogList = await filteredQuery
-                .OrderByDescending(x => x.Id)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToListAsync();
-        }
-        else
+        if (!string.IsNullOrEmpty(SearchTerm))
         {
-            TotalRecords = await DbContext.Logs.CountAsync();
-            LogList = await DbContext.Logs
-                .OrderByDescending(x => x.Id)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToListAsync();
+            query = query.Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%"));
         }
+
+        if (!string.IsNullOrEmpty(SelectedServiceName))
+        {
+            query = query.Where(x => x.Application == SelectedServiceName);
+        }
+
+        TotalRecords = await query.CountAsync();
+        LogList = await query
+            .OrderByDescending(x => x.Id)
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToListAsync();
 
         IsLoading = false;
         StateHasChanged();
