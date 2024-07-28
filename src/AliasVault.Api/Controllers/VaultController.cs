@@ -8,6 +8,7 @@
 namespace AliasVault.Api.Controllers;
 
 using AliasServerDb;
+using AliasVault.Api.Helpers;
 using AliasVault.Api.Vault;
 using AliasVault.Api.Vault.RetentionRules;
 using AliasVault.Shared.Providers.Time;
@@ -87,11 +88,12 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
         }
 
         // Create new vault entry.
-        var newVault = new AliasServerDb.Vault
+        var newVault = new Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };

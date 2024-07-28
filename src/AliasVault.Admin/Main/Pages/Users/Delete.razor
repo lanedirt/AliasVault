@@ -1,0 +1,102 @@
+@page "/users/{id}/delete"
+@inherits MainBase
+
+<LayoutPageTitle>Delete user</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Delete user</h1>
+        </div>
+        <p>You can delete the user below.</p>
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <AlertMessageError Message="Note: removing this user is permanent and cannot be undone. All encrypted vault data will also be removed." />
+        <h3 class="mb-4 text-xl font-semibold dark:text-white">User</h3>
+        <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
+            <div>@Id</div>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
+            <div>@Obj?.UserName</div>
+        </div>
+        <button @onclick="DeleteConfirm" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-900">
+            Yes, I'm sure
+        </button>
+
+        <button @onclick="Cancel" class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 border border-gray-200 font-medium inline-flex items-center rounded-lg text-sm px-3 py-2.5 text-center dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700" data-drawer-hide="drawer-delete-product-default">
+            No, cancel
+        </button>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// The ID of the user to display.
+    /// </summary>
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    private bool IsLoading { get; set; } = true;
+    private AliasVaultUser? Obj { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { Url = "users/" + Id, DisplayName = "View user" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete user" });
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            // Load existing Obj.
+            Obj = await DbContext.AliasVaultUsers.FindAsync(Id);
+
+            // Hide loading spinner
+            IsLoading = false;
+
+            // Force re-render invoke so the charts can be rendered
+            StateHasChanged();
+        }
+    }
+
+    private async void DeleteConfirm()
+    {
+        if (Obj is null)
+        {
+            GlobalNotificationService.AddErrorMessage("Error deleting. User entry not found.", true);
+            return;
+        }
+
+        GlobalLoadingSpinner.Show();
+
+        DbContext.AliasVaultUsers.Remove(Obj);
+        await DbContext.SaveChangesAsync();
+
+        GlobalNotificationService.AddSuccessMessage("User successfully deleted.");
+        GlobalLoadingSpinner.Hide();
+
+        NavigationService.RedirectTo("/users");
+    }
+
+    private void Cancel()
+    {
+        NavigationService.RedirectTo("/users/" + Id);
+    }
+}

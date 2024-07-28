@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
 @inject NavigationManager NavigationManager
+@inject GlobalLoadingService GlobalLoadingService
 
+<FullScreenLoadingIndicator @ref="LoadingIndicator" />
 <TopMenu />
 <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
     <div id="main-content" class="relative w-full max-w-screen-2xl mx-auto h-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
@@ -19,20 +21,37 @@
 </div>
 
 @code {
+    private FullScreenLoadingIndicator LoadingIndicator = new();
+
     /// <inheritdoc />
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+        GlobalLoadingService.OnChange -= OnChange;
     }
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
+        GlobalLoadingService.OnChange += OnChange;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
+        StateHasChanged();
+    }
+
+    private void OnChange()
+    {
+        if (GlobalLoadingService.IsLoading)
+        {
+            LoadingIndicator.Show();
+        }
+        else
+        {
+            LoadingIndicator.Hide();
+        }
         StateHasChanged();
     }
 }

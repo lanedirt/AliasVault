@@ -175,6 +175,13 @@ public class AliasServerDbContext : WorkerStatusDbContext
             builder.HasIndex(e => e.TimeStamp);
             builder.HasIndex(e => e.Application);
         });
+
+        // Configure Vault - AliasVaultUser relationship
+        modelBuilder.Entity<Vault>()
+            .HasOne(l => l.User)
+            .WithMany(c => c.Vaults)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     /// <summary>

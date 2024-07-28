@@ -25,8 +25,4 @@
     <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
     <ProjectReference Include="..\..\Utilities\AliasVault.Logging\AliasVault.Logging.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="logs\" />
-  </ItemGroup>
 </Project>

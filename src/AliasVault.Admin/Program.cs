@@ -42,6 +42,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsInvokeService>();
 builder.Services.AddScoped<GlobalNotificationService>();
+builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<NavigationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
 

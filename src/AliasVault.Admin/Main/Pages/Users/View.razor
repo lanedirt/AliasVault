@@ -1,0 +1,133 @@
+﻿@page "/users/{Id}"
+
+<LayoutPageTitle>User</LayoutPageTitle>
+
+@if (IsLoading || User == null)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <div class="grid grid-cols-2 px-4 pt-6 md:grid-cols-3 lg:gap-4 dark:bg-gray-900">
+        <div class="mb-4 col-span-full xl:mb-2">
+            <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View user</h1>
+                <div class="flex">
+                <a href="/users/@Id/delete" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800">
+                    Delete user
+                </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-full">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center xl:block sm:space-x-4 xl:space-x-0 2xl:space-x-4">
+                    <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">@User.UserName</h3>
+
+                        <div class="mb-4">
+                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
+                            <div>@User.Id</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center">
+                    <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Vaults</h3>
+
+                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">ID</th>
+                                <th scope="col" class="px-4 py-3">Created</th>
+                                <th scope="col" class="px-4 py-3">Filesize</th>
+                                <th scope="col" class="px-4 py-3">DB version</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var entry in VaultList)
+                            {
+                                <tr class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
+                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
+                                    <td class="px-4 py-3">@entry.Version</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the user ID.
+    /// </summary>
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    private bool IsLoading { get; set; } = true;
+    private AliasVaultUser? User { get; set; } = new();
+
+    private List<Vault> VaultList { get; set; } = new();
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Users", Url = "/users" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "View user" });
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await LoadEntryAsync();
+        }
+    }
+
+    private async Task LoadEntryAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        // Load the aliases from the webapi via AliasService.
+        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+
+        if (User is null)
+        {
+            // Error loading user.
+            GlobalNotificationService.AddErrorMessage("This user does not exist (anymore). Please try again.");
+            NavigationService.RedirectTo("/users");
+            return;
+        }
+
+        // Load all vaults for this user (do not load the actual file content for performance reasons).
+        VaultList = await DbContext.Vaults.Where(x => x.UserId == User.Id).Select(x => new Vault
+        {
+            Id = x.Id,
+            Version = x.Version,
+            FileSize = x.FileSize,
+            CreatedAt = x.CreatedAt,
+        })
+        .OrderByDescending(x => x.CreatedAt)
+        .ToListAsync();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

@@ -27,7 +27,7 @@ public class MainBase : OwningComponentBase
     /// Gets or sets the NavigationService instance responsible for handling navigation, replaces the default NavigationManager.
     /// </summary>
     [Inject]
-    public NavigationService NavigationService { get; set; } = null!;
+    protected NavigationService NavigationService { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the UserService instance responsible for handling user data.
@@ -58,6 +58,12 @@ public class MainBase : OwningComponentBase
     /// </summary>
     [Inject]
     protected IDbContextFactory<AliasServerDbContext> DbContextFactory { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the GlobalLoadingService in order to manipulate the global loading spinner animation.
+    /// </summary>
+    [Inject]
+    protected GlobalLoadingService GlobalLoadingSpinner { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the injected JSRuntime instance.

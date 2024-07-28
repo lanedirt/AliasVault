@@ -16,9 +16,7 @@
 
 @if (IsLoading)
 {
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
+    <LoadingIndicator />
 }
 else
 {
@@ -38,7 +36,7 @@ else
                 <th scope="col" class="px-4 py-3">Message</th>
             </tr>
             </thead>
-            <tbody id="logTableBody">
+            <tbody>
                 @foreach (var log in LogList)
                 {
                     <tr class="bg-white border-b hover:bg-gray-50">
