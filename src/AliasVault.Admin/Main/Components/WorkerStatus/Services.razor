@@ -135,7 +135,8 @@
         if (!SmtpPending)
         {
             InitInProgress = true;
-            ServiceStatus = await GetServiceStatuses();
+            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
             // Service status checks if the status is "Started" and was lastAlive
             // (so actually reported itself) in the last 5 minutes.
             var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
@@ -156,34 +157,18 @@
     }
 
     /// <summary>
-    /// Gets the service statuses.
-    /// </summary>
-    public async Task<List<WorkerServiceStatus>> GetServiceStatuses()
-    {
-        return await DbContext.WorkerServiceStatuses.ToListAsync();
-    }
-
-    /// <summary>
     /// Update the service statuses.
     /// </summary>
     public async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
     {
-        string translateStatus = "";
-        switch (newStatus)
-        {
-            case true:
-                translateStatus = "Started";
-                break;
-            case false:
-                translateStatus = "Stopped";
-                break;
-        }
-
-        var entry = await DbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
+        // Refresh the DbContext to ensure we get the latest data.
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
         if (entry != null)
         {
-            entry.DesiredStatus = translateStatus;
-            await DbContext.SaveChangesAsync();
+            string newDesiredStatus = newStatus ? "Started" : "Stopped";
+            entry.DesiredStatus = newDesiredStatus;
+            await dbContext.SaveChangesAsync();
 
             // Wait for service to have updated its status.
             var timeout = DateTime.Now.AddSeconds(30);
@@ -195,9 +180,9 @@
                     return false;
                 }
 
-                var newdbContext = await DbContextFactory.CreateDbContextAsync();
-                var check = await newdbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
-                if (check.CurrentStatus == translateStatus)
+                dbContext = await DbContextFactory.CreateDbContextAsync();
+                var check = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
+                if (check.CurrentStatus == newDesiredStatus)
                 {
                     // Done
                     return true;
