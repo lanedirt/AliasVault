@@ -433,6 +433,9 @@ namespace AliasServerDb.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PublicKey")
                         .IsRequired()
                         .HasMaxLength(2000)

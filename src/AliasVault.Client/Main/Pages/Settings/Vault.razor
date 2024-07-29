@@ -40,8 +40,6 @@
     </div>
 </div>
 
-
-
 @if (IsImporting)
 {
     <p>Loading...</p>
@@ -78,7 +76,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             using (MemoryStream memoryStream = new MemoryStream(fileBytes))
             {
                 // Invoke JavaScript to initiate the download
-                await Js.InvokeVoidAsync("downloadFileFromStream", "aliasvault-client.sqlite", memoryStream.ToArray());
+                await JsInteropService.DownloadFileFromStream("aliasvault-client.sqlite", memoryStream.ToArray());
             }
         }
         catch (Exception ex)
@@ -99,9 +97,8 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             using (MemoryStream memoryStream = new MemoryStream(csvBytes))
             {
                 // Invoke JavaScript to initiate the download
-                await Js.InvokeVoidAsync("downloadFileFromStream", "aliasvault-client.csv", memoryStream.ToArray());
+                await JsInteropService.DownloadFileFromStream("aliasvault-client.csv", memoryStream.ToArray());
             }
-
         }
         catch (Exception ex)
         {

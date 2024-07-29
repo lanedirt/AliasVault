@@ -65,10 +65,10 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, new List<string>(), DateTime.MinValue, DateTime.MinValue));
+            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, string.Empty, new List<string>(), DateTime.MinValue, DateTime.MinValue));
         }
 
-        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, new List<string>(), vault.CreatedAt, vault.UpdatedAt));
+        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, string.Empty, new List<string>(), vault.CreatedAt, vault.UpdatedAt));
     }
 
     /// <summary>
@@ -122,6 +122,12 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
             await UpdateUserEmailClaims(context, user.Id, model.EmailAddressList);
         }
 
+        // Sync user public key if supplied.
+        if (!string.IsNullOrEmpty(model.EncryptionPublicKey))
+        {
+            await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
+        }
+
         return Ok();
     }
 
@@ -161,6 +167,63 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
         // as they may be re-used by the user in the future. We don't want
         // to allow other users to re-use emails used by other users.
         // Email claims are considered permanent.
+        await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Updates the user's public key based on the provided public key. If it already exists, do nothing.
+    /// </summary>
+    /// <param name="context">The database context.</param>
+    /// <param name="userId">The ID of the user.</param>
+    /// <param name="newPublicKey">The new public key to sync and set as default.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task UpdateUserPublicKey(AliasServerDbContext context, string userId, string newPublicKey)
+    {
+        // Get all existing user public keys.
+        var publicKeyExists = await context.UserEncryptionKeys
+            .AnyAsync(x => x.UserId == userId && x.IsPrimary && x.PublicKey == newPublicKey);
+
+        // If the public key already exists and is marked as primary (default), do nothing.
+        if (publicKeyExists)
+        {
+            return;
+        }
+
+        // Update all existing keys to not be primary.
+        var otherKeys = await context.UserEncryptionKeys
+            .Where(x => x.UserId == userId)
+            .ToListAsync();
+
+        foreach (var key in otherKeys)
+        {
+            key.IsPrimary = false;
+            key.UpdatedAt = timeProvider.UtcNow;
+        }
+
+        // Check if the new public key already exists but is not marked as primary.
+        var existingPublicKey = await context.UserEncryptionKeys
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.PublicKey == newPublicKey);
+
+        if (existingPublicKey is not null)
+        {
+            // Set the existing key to be primary.
+            existingPublicKey.IsPrimary = true;
+            existingPublicKey.UpdatedAt = timeProvider.UtcNow;
+            await context.SaveChangesAsync();
+            return;
+        }
+
+        // Public key is new, so create it.
+        var newPublicKeyEntry = new UserEncryptionKey
+        {
+            UserId = userId,
+            PublicKey = newPublicKey,
+            IsPrimary = true,
+            CreatedAt = timeProvider.UtcNow,
+            UpdatedAt = timeProvider.UtcNow,
+        };
+        context.UserEncryptionKeys.Add(newPublicKeyEntry);
+
         await context.SaveChangesAsync();
     }
 }

@@ -12,7 +12,12 @@ sed -i "s|http://localhost:5092|${API_URL}|g" /usr/share/nginx/html/appsettings.
 # Replace the default SMTP allowed domains with the actual allowed SMTP domains
 # Note: this is used so the client knows which email addresses should be registered with the AliasVault server
 # in order to be able to receive emails.
-sed -i "s|localmail.tld|${SMTP_ALLOWED_DOMAINS}|g" /usr/share/nginx/html/appsettings.json
+
+# Convert comma-separated list to JSON array
+json_array=$(echo $domains | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
+
+# Use sed to update the SmtpAllowedDomains field in appsettings.json
+sed -i.bak "s|\"SmtpAllowedDomains\": \[.*\]|\"SmtpAllowedDomains\": $json_array|" /usr/share/nginx/html/appsettings.json
 
 # Start the application
 nginx -g "daemon off;"

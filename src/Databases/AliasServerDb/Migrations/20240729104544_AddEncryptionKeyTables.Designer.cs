@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    [Migration("20240729090556_AddEncryptionKeyTables")]
+    [Migration("20240729104544_AddEncryptionKeyTables")]
     partial class AddEncryptionKeyTables
     {
         /// <inheritdoc />
@@ -435,6 +435,9 @@ namespace AliasServerDb.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PublicKey")
                         .IsRequired()

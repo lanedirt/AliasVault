@@ -39,6 +39,11 @@ public class UserEncryptionKey
     public string PublicKey { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets a value indicating whether this public key is the primary key to use by default.
+    /// </summary>
+    public bool IsPrimary { get; set; }
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

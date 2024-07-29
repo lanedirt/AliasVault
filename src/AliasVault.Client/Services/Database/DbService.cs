@@ -12,6 +12,7 @@ using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Client.Services.Auth;
 using AliasVault.Shared.Models.WebApi;
+using Cryptography;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -24,7 +25,7 @@ using Microsoft.JSInterop;
 public class DbService : IDisposable
 {
     private readonly AuthService _authService;
-    private readonly IJSRuntime _jsRuntime;
+    private readonly JsInteropService _jsInteropService;
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
     private readonly Config _config;
@@ -38,13 +39,13 @@ public class DbService : IDisposable
     /// Initializes a new instance of the <see cref="DbService"/> class.
     /// </summary>
     /// <param name="authService">AuthService.</param>
-    /// <param name="jsRuntime">IJSRuntime.</param>
+    /// <param name="jsInteropService">JsInteropService.</param>
     /// <param name="httpClient">HttpClient.</param>
     /// <param name="config">Config instance.</param>
-    public DbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient, Config config)
+    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config)
     {
         _authService = authService;
-        _jsRuntime = jsRuntime;
+        _jsInteropService = jsInteropService;
         _httpClient = httpClient;
         _config = config;
 
@@ -125,8 +126,8 @@ public class DbService : IDisposable
 
         string base64String = await ExportSqliteToBase64Async();
 
-        // Encrypt base64 string using IJSInterop.
-        string encryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.encrypt", base64String, _authService.GetEncryptionKeyAsBase64Async());
+        // SymmetricEncrypt base64 string using IJSInterop.
+        string encryptedBase64String = await _jsInteropService.SymmetricEncrypt(base64String, _authService.GetEncryptionKeyAsBase64Async());
 
         // Save to webapi.
         var success = await SaveToServerAsync(encryptedBase64String);
@@ -411,7 +412,7 @@ public class DbService : IDisposable
                 }
 
                 // Attempt to decrypt the database blob.
-                string decryptedBase64String = await _jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
+                string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
                 await ImportDbContextFromBase64Async(decryptedBase64String);
 
                 // Check if database is up to date with migrations.
@@ -449,13 +450,19 @@ public class DbService : IDisposable
         var emailAddresses = await _dbContext.Aliases
             .Where(a => a.Email != null)
             .Select(a => a.Email)
-            .Where(email => _config.SmtpAllowedDomains.Any(domain => EF.Functions.Like(email, $"%@{domain}")))
             .Distinct()
             .Select(email => email!)
             .ToListAsync();
 
+        // Filter the list of email addresses to only include those that are in the allowed domains.
+        emailAddresses = emailAddresses
+            .Where(email => _config.SmtpAllowedDomains.Any(domain => email.EndsWith(domain)))
+            .ToList();
+
+        var encryptionKey = await GetOrCreateEncryptionKeyAsync();
+
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
-        var vaultObject = new Vault(encryptedDatabase, databaseVersion, emailAddresses, DateTime.Now, DateTime.Now);
+        var vaultObject = new Vault(encryptedDatabase, databaseVersion, encryptionKey.PublicKey, emailAddresses, DateTime.Now, DateTime.Now);
 
         try
         {
@@ -466,5 +473,34 @@ public class DbService : IDisposable
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Get the default public/private encryption key, if it does not yet exist, create it.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    private async Task<EncryptionKey> GetOrCreateEncryptionKeyAsync()
+    {
+        var encryptionKey = await _dbContext.EncryptionKeys.FirstOrDefaultAsync(x => x.IsPrimary);
+        if (encryptionKey is not null)
+        {
+            return encryptionKey;
+        }
+
+        // Create a new encryption key via JSInterop, .NET WASM does not support crypto operations natively (yet).
+        var keyPair = await _jsInteropService.GenerateRsaKeyPair();
+
+        encryptionKey = new EncryptionKey
+        {
+            PublicKey = keyPair.PublicKey,
+            PrivateKey = keyPair.PrivateKey,
+            IsPrimary = true,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now,
+        };
+        await _dbContext.EncryptionKeys.AddAsync(encryptionKey);
+        await _dbContext.SaveChangesAsync();
+
+        return encryptionKey;
     }
 }
