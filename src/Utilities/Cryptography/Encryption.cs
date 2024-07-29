@@ -38,10 +38,13 @@ public static class Encryption
     /// <returns>The encrypted symmetric key as a base64-encoded string.</returns>
     public static string EncryptSymmetricKeyWithRsa(byte[] symmetricKey, string publicKey)
     {
-        using (var rsa = new RSACryptoServiceProvider())
+        using (var rsa = RSA.Create())
         {
             ImportPublicKey(rsa, publicKey);
-            byte[] encryptedKey = rsa.Encrypt(symmetricKey, true);
+            rsa.KeySize = 2048;
+            var rsaParams = RSAEncryptionPadding.OaepSHA256;
+
+            byte[] encryptedKey = rsa.Encrypt(symmetricKey, rsaParams);
             return Convert.ToBase64String(encryptedKey);
         }
     }
@@ -54,11 +57,14 @@ public static class Encryption
     /// <returns>The encrypted symmetric key as a base64-encoded string.</returns>
     public static byte[] DecryptSymmetricKeyWithRsa(string ciphertext, string privateKey)
     {
-        using (var rsa = new RSACryptoServiceProvider())
+        using (var rsa = RSA.Create())
         {
             ImportPrivateKey(rsa, privateKey);
+            rsa.KeySize = 2048;
+            var rsaParams = RSAEncryptionPadding.OaepSHA256;
+
             byte[] cipherBytes = Convert.FromBase64String(ciphertext);
-            return rsa.Decrypt(cipherBytes, true);
+            return rsa.Decrypt(cipherBytes, rsaParams);
         }
     }
 
@@ -178,7 +184,7 @@ public static class Encryption
     /// </summary>
     /// <param name="rsa">The RSA provider to import the key into.</param>
     /// <param name="jwk">The public key in JWK format.</param>
-    private static void ImportPublicKey(RSACryptoServiceProvider rsa, string jwk)
+    private static void ImportPublicKey(RSA rsa, string jwk)
     {
         var jwkObj = JsonSerializer.Deserialize<JsonElement>(jwk);
         var n = Base64UrlDecode(jwkObj.GetProperty("n").GetString()!);
@@ -198,7 +204,7 @@ public static class Encryption
     /// </summary>
     /// <param name="rsa">The RSA provider to import the key into.</param>
     /// <param name="jwk">The private key in JWK format.</param>
-    private static void ImportPrivateKey(RSACryptoServiceProvider rsa, string jwk)
+    private static void ImportPrivateKey(RSA rsa, string jwk)
     {
         var jwkObj = JsonSerializer.Deserialize<JsonElement>(jwk);
         var n = Base64UrlDecode(jwkObj.GetProperty("n").GetString()!);

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Models.FormValidation;
+namespace AliasVault.Client.Main.Models.FormValidation;
 
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;

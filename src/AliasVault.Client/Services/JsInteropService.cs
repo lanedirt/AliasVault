@@ -7,7 +7,7 @@
 
 namespace AliasVault.Client.Services;
 
-using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.JSInterop;
 
@@ -93,9 +93,21 @@ public class JsInteropService(IJSRuntime jsRuntime)
     /// <summary>
     /// Decrypts a ciphertext with a private key.
     /// </summary>
-    /// <param name="ciphertext">Ciphertext to decrypt.</param>
+    /// <param name="base64Ciphertext">Ciphertext to decrypt.</param>
     /// <param name="privateKey">Private key to use for decryption.</param>
     /// <returns>Decrypted string.</returns>
-    public async Task<string> DecryptWithPrivateKey(string ciphertext, string privateKey) =>
-        await jsRuntime.InvokeAsync<string>("rsaInterop.decryptWithPrivateKey", ciphertext, privateKey);
+    public async Task<byte[]> DecryptWithPrivateKey(string base64Ciphertext, string privateKey)
+    {
+        try
+        {
+            // Invoke the JavaScript function and get the result as a byte array
+            byte[] result = await jsRuntime.InvokeAsync<byte[]>("rsaInterop.decryptWithPrivateKey", base64Ciphertext, privateKey);
+            return result;
+        }
+        catch (JSException ex)
+        {
+            Console.Error.WriteLine($"JavaScript decryption error: {ex.Message}");
+            throw new CryptographicException("Decryption failed", ex);
+        }
+    }
 }

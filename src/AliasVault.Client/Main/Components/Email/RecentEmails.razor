@@ -1,6 +1,10 @@
-﻿@using AliasVault.Client.Main.Models.Spamok
+﻿@using AliasVault.Shared.Models.Spamok
 @inherits ComponentBase
 @inject IHttpClientFactory HttpClientFactory
+@inject HttpClient HttpClient
+@inject JsInteropService JsInteropService
+@inject DbService DbService
+@inject Config Config
 
 @if (EmailModalVisible)
 {
@@ -20,6 +24,10 @@
         @if (IsLoading)
         {
             <LoadingIndicator/>
+        }
+        else if (!string.IsNullOrEmpty(Error))
+        {
+            <AlertMessageError Message="@Error" />
         }
         else if (MailboxEmails.Count == 0)
         {
@@ -76,6 +84,7 @@
     private bool ShowComponent { get; set; } = false;
     private EmailApiModel Email { get; set; } = new();
     private bool EmailModalVisible { get; set; }
+    private string Error { get; set; } = string.Empty;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -83,10 +92,44 @@
         await base.OnInitializedAsync();
 
         // Check if email has a known SpamOK domain, if not, don't show this component.
-        if (EmailAddress.EndsWith("@landmail.nl"))
+        if (IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress))
         {
             ShowComponent = true;
         }
+    }
+
+    /// <summary>
+    /// Returns true if the email address is from a known SpamOK domain.
+    /// </summary>
+    protected bool IsSpamOkDomain(string email)
+    {
+        return email.EndsWith("@spamok.nl") ||
+               email.EndsWith("@spamok.de") ||
+               email.EndsWith("@spamok.es") ||
+               email.EndsWith("@spamok.fr") ||
+               email.EndsWith("@spamok.com") ||
+               email.EndsWith("@spamok.com.ua") ||
+               email.EndsWith("@landmail.nl") ||
+               email.EndsWith("@landmeel.nl") ||
+               email.EndsWith("@asdasd.nl") ||
+               email.EndsWith("@sdfsdf.nl") ||
+               email.EndsWith("@solarflarecorp.com");
+    }
+
+    /// <summary>
+    /// Returns true if the email address is from a known AliasVault domain.
+    /// </summary>
+    protected bool IsAliasVaultDomain(string email)
+    {
+        foreach (var domain in Config.SmtpAllowedDomains)
+        {
+            if (email.EndsWith(domain))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <inheritdoc />
@@ -112,19 +155,66 @@
             return;
         }
 
+        Error = string.Empty;
+
         IsLoading = true;
         StateHasChanged();
 
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
-        var client = HttpClientFactory.CreateClient("EmailClient");
-        MailboxApiModel? mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
+        MailboxApiModel? mailbox = new();
 
-        if (mailbox?.Mails != null)
+        if (IsSpamOkDomain(EmailAddress))
         {
-            // Show maximum of 10 recent emails.
-            MailboxEmails = mailbox.Mails.Take(10).ToList();
+            // We construct a new HttpClient to avoid using the default one, which is used for the API and sends
+            // the Authorization header. We don't want to send the Authorization header to the external email API.
+            var client = HttpClientFactory.CreateClient("EmailClient");
+            mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
+
+            if (mailbox?.Mails != null)
+            {
+                // Show maximum of 10 recent emails.
+                MailboxEmails = mailbox.Mails.Take(10).ToList();
+            }
+        }
+        else if (IsAliasVaultDomain(EmailAddress))
+        {
+            try
+            {
+                mailbox = await HttpClient.GetFromJsonAsync<MailboxApiModel>($"api/v1/EmailBox/{EmailAddress}");
+                if (mailbox?.Mails != null)
+                {
+                    // Show maximum of 10 recent emails.
+                    MailboxEmails = mailbox.Mails.Take(10).ToList();
+                }
+
+                // Loop through emails and decrypt the subject locally.
+                var context = await DbService.GetDbContextAsync();
+                var privateKeys = await context.EncryptionKeys.ToListAsync();
+                foreach (var mail in MailboxEmails)
+                {
+                    var privateKey = privateKeys.FirstOrDefault(x => x.PublicKey == mail.EncryptionKey);
+                    if (privateKey is not null)
+                    {
+                        try
+                        {
+                            var decryptedSymmetricKey = await JsInteropService.DecryptWithPrivateKey(mail.EncryptedSymmetricKey, privateKey.PrivateKey);
+                            mail.Subject = await JsInteropService.SymmetricDecrypt(mail.Subject, Convert.ToBase64String(decryptedSymmetricKey));
+                        }
+                        catch (Exception ex)
+                        {
+                            Error = ex.Message;
+                            Console.WriteLine(ex);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+                Console.WriteLine(ex);
+            }
         }
 
         IsLoading = false;
@@ -139,16 +229,59 @@
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
-        // Load email from API
-        var client = HttpClientFactory.CreateClient("EmailClient");
-        EmailApiModel? mail = await client.GetFromJsonAsync<EmailApiModel>($"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
 
-        if (mail != null)
+        if (IsSpamOkDomain(EmailAddress))
         {
-            Email = mail;
-            EmailModalVisible = true;
-            StateHasChanged();
+            var client = HttpClientFactory.CreateClient("EmailClient");
+            EmailApiModel? mail = await client.GetFromJsonAsync<EmailApiModel>($"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
+            if (mail != null)
+            {
+                Email = mail;
+                EmailModalVisible = true;
+                StateHasChanged();
+            }
         }
+        else if (IsAliasVaultDomain(EmailAddress))
+        {
+            EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"api/v1/Email/{emailId}");
+            if (mail != null)
+            {
+                // Decrypt the email content locally.
+                var context = await DbService.GetDbContextAsync();
+                var privateKey = await context.EncryptionKeys.FirstOrDefaultAsync(x => x.PublicKey == mail.EncryptionKey);
+                if (privateKey is not null)
+                {
+                    try
+                    {
+                        var decryptedSymmetricKey = await JsInteropService.DecryptWithPrivateKey(mail.EncryptedSymmetricKey, privateKey.PrivateKey);
+                        mail.Subject = await JsInteropService.SymmetricDecrypt(mail.Subject, Convert.ToBase64String(decryptedSymmetricKey));
+                        if (mail.MessageHtml is not null)
+                        {
+                            mail.MessageHtml = await JsInteropService.SymmetricDecrypt(mail.MessageHtml, Convert.ToBase64String(decryptedSymmetricKey));
+                        }
+
+                        if (mail.MessagePlain is not null)
+                        {
+                            mail.MessagePlain = await JsInteropService.SymmetricDecrypt(mail.MessagePlain, Convert.ToBase64String(decryptedSymmetricKey));
+                        }
+
+                        mail.FromDisplay = await JsInteropService.SymmetricDecrypt(mail.FromDisplay, Convert.ToBase64String(decryptedSymmetricKey));
+                        mail.FromLocal = await JsInteropService.SymmetricDecrypt(mail.FromLocal, Convert.ToBase64String(decryptedSymmetricKey));
+                        mail.FromDomain = await JsInteropService.SymmetricDecrypt(mail.FromDomain, Convert.ToBase64String(decryptedSymmetricKey));
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = ex.Message;
+                    }
+                }
+
+                Email = mail;
+                EmailModalVisible = true;
+                StateHasChanged();
+            }
+
+        }
+
     }
 
     /// <summary>

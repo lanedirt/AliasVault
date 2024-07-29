@@ -123,5 +123,5 @@ public class Email
     /// <summary>
     /// Gets or sets the collection of email attachments.
     /// </summary>
-    public virtual ICollection<EmailAttachment> Attachments { get; set; } = [];
+    public virtual List<EmailAttachment> Attachments { get; set; } = [];
 }

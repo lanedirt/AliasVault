@@ -118,29 +118,42 @@ window.rsaInterop = {
      * Decrypts a ciphertext string using an RSA private key.
      * @param {string} ciphertext - The base64-encoded ciphertext to decrypt.
      * @param {string} privateKey - The private key in JWK format.
-     * @returns {Promise<string>} A promise that resolves to the decrypted plaintext.
+     * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted data as a Uint8Array.
      */
-    decryptWithPrivateKey : async function(ciphertext, privateKey) {
-        const privateKeyObj = await window.crypto.subtle.importKey(
-            "jwk",
-            JSON.parse(privateKey),
-            {
-                name: "RSA-OAEP",
-                hash: "SHA-256",
-            },
-            false,
-            ["decrypt"]
-        );
+    decryptWithPrivateKey: async function(ciphertext, privateKey) {
+        try {
+            // Parse the private key
+            let parsedPrivateKey = JSON.parse(privateKey);
 
-        const cipherBuffer = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
-        const plaintextBuffer = await window.crypto.subtle.decrypt(
-            {
-                name: "RSA-OAEP"
-            },
-            privateKeyObj,
-            cipherBuffer
-        );
+            // Import the private key
+            let privateKeyObj = await window.crypto.subtle.importKey(
+                "jwk",
+                parsedPrivateKey,
+                {
+                    name: "RSA-OAEP",
+                    hash: "SHA-256",
+                },
+                true,
+                ["decrypt"]
+            );
 
-        return new TextDecoder().decode(plaintextBuffer);
+            // Decode the base64 ciphertext
+            let cipherBuffer = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+
+            // Decrypt the ciphertext
+            let plaintextBuffer = await window.crypto.subtle.decrypt(
+                {
+                    name: "RSA-OAEP",
+                    hash: "SHA-256",
+                },
+                privateKeyObj,
+                cipherBuffer
+            );
+
+            // Return the decrypted data as a Uint8Array
+            return new Uint8Array(plaintextBuffer);
+        } catch (error) {
+            throw new Error(`Failed to decrypt: ${error.message}`);
+        }
     }
 };

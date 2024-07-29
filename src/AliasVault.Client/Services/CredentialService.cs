@@ -14,7 +14,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
-using AliasVault.Client.Models;
 using AliasVault.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
@@ -279,7 +278,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
             try
             {
                 var apiReturn =
-                    await httpClient.GetFromJsonAsync<FaviconExtractModel>("api/v1/Favicon/Extract?url=" + url);
+                    await httpClient.GetFromJsonAsync<FaviconExtractModel>($"api/v1/Favicon/Extract?url={url}");
                 if (apiReturn != null && apiReturn.Image != null)
                 {
                     credentialObject.Service.Logo = apiReturn.Image;

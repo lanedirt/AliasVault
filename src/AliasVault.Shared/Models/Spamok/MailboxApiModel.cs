@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Main.Models.Spamok;
+namespace AliasVault.Shared.Models.Spamok;
 
 /// <summary>
 /// Represents a mailbox API model.

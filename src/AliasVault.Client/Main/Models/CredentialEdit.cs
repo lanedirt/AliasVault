@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
-using AliasVault.Client.Models.FormValidation;
+using AliasVault.Client.Main.Models.FormValidation;
 
 /// <summary>
 /// Credential edit model.

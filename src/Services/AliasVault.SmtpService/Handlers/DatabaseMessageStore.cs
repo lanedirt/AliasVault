@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using Cryptography;
+using SmtpServer.Mail;
 
 namespace AliasVault.SmtpService.Handlers;
 
@@ -63,13 +64,15 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
 
             stream.Position = 0;
             var message = await MimeMessage.LoadAsync(stream, cancellationToken);
+
             // Retrieve all addresses from the SMTP transaction which should contain all recipients for this mail instance.
             var allAddresses = transaction.To
                 .Distinct()
                 .ToList();
-            // Limit list to 15 addresses max. (to prevent mailbomb spam abuse)
+
+            // Limit list to 15 addresses maximum (to prevent mailbomb spam abuse).
             var toAddresses = allAddresses.Take(15).ToList();
-            // For every toAddress
+
             foreach (var toAddress in toAddresses)
             {
                 // Check if toAddress domain is allowed.
@@ -131,7 +134,8 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                     return SmtpResponse.NoValidRecipientsGiven;
                 }
 
-                var insertedId = await InsertEmailIntoDatabase(message, userPublicKey);
+                // Set the "to" for the email to the actual one we are looping through now.
+                var insertedId = await InsertEmailIntoDatabase(message, new MailAddress(toAddress.AsAddress()), userPublicKey);
                 logger.LogInformation("Email for {ToAddress} successfully saved into database with ID {insertedId}.",
                     toAddress.User + "@" + toAddress.Host, insertedId);
             }
@@ -149,12 +153,13 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// Insert email into database.
     /// </summary>
     /// <param name="message">MimeMessage to save into database.</param>
+    /// <param name="toAddress">The recipient for this mail.</param>
     /// <param name="userEncryptionKey">The public key of the user to encrypt the mail contents with.</param>
-    private async Task<int> InsertEmailIntoDatabase(MimeMessage message, UserEncryptionKey userEncryptionKey)
+    private async Task<int> InsertEmailIntoDatabase(MimeMessage message, MailAddress toAddress, UserEncryptionKey userEncryptionKey)
     {
         var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var newEmail = ConvertMimeMessageToEmail(message);
+        var newEmail = ConvertMimeMessageToEmail(message, toAddress);
         newEmail = EmailEncryption.EncryptEmail(newEmail, userEncryptionKey);
 
         // Insert the email into the database.
@@ -168,9 +173,10 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// Convert MimeMessage to Email database object.
     /// </summary>
     /// <param name="message">MimeMessage object.</param>
+    /// <param name="toAddress">The recipient for this mail.</param>
     /// <returns>Email object.</returns>
     /// <exception cref="EmailParseMissingToException"></exception>
-    private static Email ConvertMimeMessageToEmail(MimeMessage message)
+    private static Email ConvertMimeMessageToEmail(MimeMessage message, MailAddress toAddress)
     {
         string from = "";
 
@@ -195,57 +201,23 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
         catch
         {
-            // If the above fails, try to find the x-sender in the mail
-            try
-            {
-                MailAddress fromAddress = new MailAddress(message.Headers.First(x => x.Field == "x-sender").Value.ToString());
-                fromLocal = fromAddress.User;
-                fromDomain = fromAddress.Host;
-            }
-            catch
-            {
-                // If this fails as well, then simply use a blank value
-                fromLocal = "";
-                fromDomain = "";
-            }
-        }
-
-        MailAddress toAddress;
-        string to;
-
-        // Try to extract to address firstly from x-receiver address..
-        try
-        {
-            to = message.Headers.First(x => x.Field == "x-receiver").Value.ToString();
-            toAddress = new MailAddress(to);
-        }
-        catch
-        {
-            // If the above fails, try to find the "to" in the mail
-            try
-            {
-                to = message.To.FirstOrDefault()?.ToString() ?? "";
-                toAddress = new MailAddress(to);
-            }
-            catch
-            {
-                // If this fails as well, then simply let it throw an error to the caller.
-                throw new EmailParseMissingToException("Could not find x-receiver or to address in email.");
-            }
+            // If this fails, then simply use a blank value
+            fromLocal = "";
+            fromDomain = "";
         }
 
         // Create email object
         var email = new Email();
         email.From = from;
-        email.FromLocal = fromLocal;
-        email.FromDomain = fromDomain;
+        email.FromLocal = fromLocal.ToLower();
+        email.FromDomain = fromDomain.ToLower();
 
-        email.To = to;
         // Local part to lowercase, as mailboxes are always lowercase
+        email.To = toAddress.Address.ToLower();
         email.ToLocal = toAddress.User.ToLower();
-        email.ToDomain = toAddress.Host;
+        email.ToDomain = toAddress.Host.ToLower();
 
-        email.Subject = message.Subject ?? "";
+        email.Subject = message.Subject ?? string.Empty;
         email.MessageHtml = message.HtmlBody;
         email.MessagePlain = message.TextBody;
         email.MessageSource = message.ToString();

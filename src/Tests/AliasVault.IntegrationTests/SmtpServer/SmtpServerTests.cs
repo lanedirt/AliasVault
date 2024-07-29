@@ -124,7 +124,7 @@ public class SmtpServerTests
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
 
         // Test non-encrypted field.
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <claimed@example.tld>"));
+        Assert.That(processedEmail.To, Is.EqualTo("claimed@example.tld"));
 
         // Decrypt the email and then check all individual fields.
         processedEmail = EmailEncryption.DecryptEmail(processedEmail, PrivateKey);
@@ -159,7 +159,7 @@ public class SmtpServerTests
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
 
         // Test non-encrypted field.
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <claimed@example.tld>"));
+        Assert.That(processedEmail.To, Is.EqualTo("claimed@example.tld"));
 
         // Decrypt the email and then check all individual fields.
         processedEmail = EmailEncryption.DecryptEmail(processedEmail, PrivateKey);
@@ -192,7 +192,7 @@ public class SmtpServerTests
         var processedEmail = await _testHostBuilder.GetDbContext().Emails.FirstAsync();
 
         // Test non-encrypted field.
-        Assert.That(processedEmail.To, Is.EqualTo("\"Test Recipient\" <claimed@example.tld>"));
+        Assert.That(processedEmail.To, Is.EqualTo("claimed@example.tld"));
 
         // Decrypt the email and then check all individual fields.
         processedEmail = EmailEncryption.DecryptEmail(processedEmail, PrivateKey);

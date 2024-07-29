@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Main.Models.Spamok.Base;
+namespace AliasVault.Shared.Models.Spamok.Base;
 
 /// <summary>
 /// Represents a mailbox email API model base.
@@ -61,4 +61,15 @@ public abstract class EmailApiModelBase
     /// Gets or sets the number of seconds ago the email was received.
     /// </summary>
     public double SecondsAgo { get; set; }
+
+    /// <summary>
+    /// Gets or sets the encrypted symmetric key which was used to encrypt the email message.
+    /// This key is encrypted with the public key of the user.
+    /// </summary>
+    public string EncryptedSymmetricKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the public key of the user used to encrypt the symmetric key.
+    /// </summary>
+    public string EncryptionKey { get; set; } = string.Empty;
 }
