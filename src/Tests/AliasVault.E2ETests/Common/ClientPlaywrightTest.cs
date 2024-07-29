@@ -96,6 +96,7 @@ public class ClientPlaywrightTest : PlaywrightTest
                 var response = new
                 {
                     ApiUrl = ApiBaseUrl.TrimEnd('/'),
+                    SmtpAllowedDomains = new string[] { "example.tld" },
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
@@ -111,6 +112,7 @@ public class ClientPlaywrightTest : PlaywrightTest
                 var response = new
                 {
                     ApiUrl = ApiBaseUrl.TrimEnd('/'),
+                    SmtpAllowedDomains = new string[] { "example.tld" },
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
