@@ -418,6 +418,9 @@ namespace AliasServerDb.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Address")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("UserEmailClaims");

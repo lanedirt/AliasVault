@@ -2,6 +2,11 @@
 @inherits ComponentBase
 @inject IHttpClientFactory HttpClientFactory
 
+@if (EmailModalVisible)
+{
+    <EmailModal Email="@Email" OnClose="CloseEmailModal" />
+}
+
 @if (ShowComponent)
 {
     <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -42,10 +47,10 @@
                                 {
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-600">
                                         <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                            <a target="_blank" href="https://spamok.com/@mail.ToLocal/@mail.Id">@(mail.Subject.Substring(0, mail.Subject.Length > 30 ? 30 : mail.Subject.Length))...</a>
+                                            <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@(mail.Subject.Substring(0, mail.Subject.Length > 30 ? 30 : mail.Subject.Length))...</span>
                                         </td>
                                         <td class="p-4 text-sm font-normal text-gray-500 whitespace-nowrap dark:text-gray-400">
-                                            <a target="_blank" href="https://spamok.com/@mail.ToLocal/@mail.Id">@mail.DateSystem</a>
+                                            <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@mail.DateSystem</span>
                                         </td>
                                     </tr>
                                 }
@@ -64,11 +69,13 @@
     /// The email address to show recent emails for.
     /// </summary>
     [Parameter]
-    public string Email { get; set; } = string.Empty;
+    public string EmailAddress { get; set; } = string.Empty;
 
     private List<MailboxEmailApiModel> MailboxEmails { get; set; } = new();
     private bool IsLoading { get; set; } = true;
     private bool ShowComponent { get; set; } = false;
+    private EmailApiModel Email { get; set; } = new();
+    private bool EmailModalVisible { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -76,7 +83,7 @@
         await base.OnInitializedAsync();
 
         // Check if email has a known SpamOK domain, if not, don't show this component.
-        if (Email.EndsWith("@landmail.nl"))
+        if (EmailAddress.EndsWith("@landmail.nl"))
         {
             ShowComponent = true;
         }
@@ -109,17 +116,47 @@
         StateHasChanged();
 
         // Get email prefix, which is the part before the @ symbol.
-        string emailPrefix = Email.Split('@')[0];
+        string emailPrefix = EmailAddress.Split('@')[0];
 
         var client = HttpClientFactory.CreateClient("EmailClient");
         MailboxApiModel? mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
 
         if (mailbox?.Mails != null)
         {
-            MailboxEmails = mailbox.Mails;
+            // Show maximum of 10 recent emails.
+            MailboxEmails = mailbox.Mails.Take(10).ToList();
         }
 
         IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Open the email modal.
+    /// </summary>
+    private async Task OpenEmail(int emailId)
+    {
+        // Get email prefix, which is the part before the @ symbol.
+        string emailPrefix = EmailAddress.Split('@')[0];
+
+        // Load email from API
+        var client = HttpClientFactory.CreateClient("EmailClient");
+        EmailApiModel? mail = await client.GetFromJsonAsync<EmailApiModel>($"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
+
+        if (mail != null)
+        {
+            Email = mail;
+            EmailModalVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Close the email modal.
+    /// </summary>
+    private void CloseEmailModal()
+    {
+        EmailModalVisible = false;
         StateHasChanged();
     }
 }

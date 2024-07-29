@@ -81,6 +81,12 @@ namespace AliasServerDb.Migrations
                 column: "UserEncryptionKeyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserEmailClaims_Address",
+                table: "UserEmailClaims",
+                column: "Address",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserEmailClaims_UserId",
                 table: "UserEmailClaims",
                 column: "UserId");

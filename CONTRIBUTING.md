@@ -80,6 +80,7 @@ Here is an example file with the various options explained:
 ```
 {
     "ApiUrl": "http://localhost:5092",
+    "SmtpAllowedDomains": ["example.tld"],
     "UseDebugEncryptionKey": "true"
 }
 ```

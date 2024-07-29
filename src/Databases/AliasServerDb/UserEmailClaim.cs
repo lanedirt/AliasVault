@@ -4,14 +4,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasServerDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// UserEmailClaim object. This object is used to reserve an email address for a user.
 /// </summary>
+[Index(nameof(Address), IsUnique = true)]
 public class UserEmailClaim
 {
     /// <summary>

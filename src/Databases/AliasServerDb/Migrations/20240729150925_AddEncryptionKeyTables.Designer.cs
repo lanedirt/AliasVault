@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    [Migration("20240729142520_AddEncryptionKeyTables")]
+    [Migration("20240729150925_AddEncryptionKeyTables")]
     partial class AddEncryptionKeyTables
     {
         /// <inheritdoc />
@@ -420,6 +420,9 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Address")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
