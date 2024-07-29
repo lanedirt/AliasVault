@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using Cryptography;
+
 namespace AliasVault.SmtpService.Handlers;
 
 using System.Buffers;
@@ -40,71 +42,122 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <returns>SmtpResponse.</returns>
     public override async Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction, ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
     {
-        await using var stream = new MemoryStream();
-
-        var position = buffer.GetPosition(0);
-        while (buffer.TryGet(ref position, out var memory))
+        try
         {
-            stream.Write(memory.Span);
-        }
+            await using var stream = new MemoryStream();
 
-        // Max email filesize limit: 10MB. If the mail is larger in size, reject it.
-        // Because of base64 encoding which has approx 33% increase in binary size
-        // we multiply the limit by 1.4 to be safe.
-        var maxEmailSizeInMegabytes = 10;
-        if (stream.Length > ((maxEmailSizeInMegabytes * 1024 * 1024) * 1.4))
-        {
-            return SmtpResponse.SizeLimitExceeded;
-        }
-
-        stream.Position = 0;
-        var message = await MimeMessage.LoadAsync(stream, cancellationToken);
-        // Retrieve all addresses from the SMTP transaction which should contain all recipients for this mail instance.
-        var allAddresses =  transaction.To
-            .Distinct()
-            .ToList();
-        // Limit list to 15 addresses max. (to prevent mailbomb spam abuse)
-        var toAddresses = allAddresses.Take(15).ToList();
-        // For every toAddress
-        foreach (var toAddress in toAddresses)
-        {
-            if (toAddress == null)
+            var position = buffer.GetPosition(0);
+            while (buffer.TryGet(ref position, out var memory))
             {
-                // No toAddress, skip.
-                logger.LogWarning("Skip email, no toAddress available.");
-                return SmtpResponse.NoValidRecipientsGiven;
+                stream.Write(memory.Span);
             }
-            if (!config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
+
+            // Max email filesize limit: 10MB. If the mail is larger in size, reject it.
+            // Because of base64 encoding which has approx 33% increase in binary size
+            // we multiply the limit by 1.4 to be safe.
+            var maxEmailSizeInMegabytes = 10;
+            if (stream.Length > ((maxEmailSizeInMegabytes * 1024 * 1024) * 1.4))
             {
-                // ToAddress domain is not allowed.
-                if (toAddresses.Count > 1)
+                return SmtpResponse.SizeLimitExceeded;
+            }
+
+            stream.Position = 0;
+            var message = await MimeMessage.LoadAsync(stream, cancellationToken);
+            // Retrieve all addresses from the SMTP transaction which should contain all recipients for this mail instance.
+            var allAddresses = transaction.To
+                .Distinct()
+                .ToList();
+            // Limit list to 15 addresses max. (to prevent mailbomb spam abuse)
+            var toAddresses = allAddresses.Take(15).ToList();
+            // For every toAddress
+            foreach (var toAddress in toAddresses)
+            {
+                // Check if toAddress domain is allowed.
+                if (toAddress is null || !config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
                 {
-                    // If more recipients, silently skip this one.
-                    continue;
+                    // ToAddress domain is not allowed.
+                    if (toAddresses.Count > 1)
+                    {
+                        // If more recipients, silently skip this one.
+                        continue;
+                    }
+
+                    // If only one recipient, return error.
+                    logger.LogWarning(
+                        "Rejected email: email for {ToAddress} is not allowed. Domain not in allowed domain list.",
+                        toAddress?.User + "@" + toAddress?.Host);
+                    return SmtpResponse.NoValidRecipientsGiven;
                 }
 
-                // If only one recipient, return error.
-                logger.LogWarning("Rejected email: email for {ToAddress} is not allowed.", toAddress.User + "@" + toAddress.Host);
-                return SmtpResponse.NoValidRecipientsGiven;
+                // Check if the local part of the toAddress is a known alias (claimed by a user)
+                var dbContext = await dbContextFactory.CreateDbContextAsync();
+                var userEmailClaim = await dbContext.UserEmailClaims.FirstOrDefaultAsync(x =>
+                    x.AddressLocal == toAddress.User.ToLowerInvariant() &&
+                    x.AddressDomain == toAddress.Host.ToLowerInvariant());
+
+                if (userEmailClaim is null)
+                {
+                    // Email address has no user claim with corresponding encryption key so we cannot process it.
+                    if (toAddresses.Count > 1)
+                    {
+                        // If more recipients, silently skip this one.
+                        continue;
+                    }
+
+                    // If only one recipient, return error.
+                    logger.LogWarning(
+                        "Rejected email: email for {ToAddress} is not allowed. No user claim on this ToAddress.",
+                        toAddress.User + "@" + toAddress.Host);
+                    return SmtpResponse.NoValidRecipientsGiven;
+                }
+
+                // Retrieve user public encryption key from database
+                var userPublicKey = dbContext.UserEncryptionKeys.FirstOrDefault(x =>
+                    x.UserId == userEmailClaim.UserId && x.IsPrimary);
+
+                if (userPublicKey is null)
+                {
+                    // Email address has no user claim with corresponding encryption key so we cannot process it.
+                    if (toAddresses.Count > 1)
+                    {
+                        // If more recipients, silently skip this one.
+                        continue;
+                    }
+
+                    // If only one recipient, return error.
+                    logger.LogCritical(
+                        "Rejected email: email for {ToAddress} cannot be processed. No primary encryption key found for this user.",
+                        toAddress.User + "@" + toAddress.Host);
+                    return SmtpResponse.NoValidRecipientsGiven;
+                }
+
+                var insertedId = await InsertEmailIntoDatabase(message, userPublicKey);
+                logger.LogInformation("Email for {ToAddress} successfully saved into database with ID {insertedId}.",
+                    toAddress.User + "@" + toAddress.Host, insertedId);
             }
 
-            var insertedId = await InsertEmailIntoDatabase(message);
-            logger.LogInformation("Email for {ToAddress} successfully saved into database with ID {insertedId}.", toAddress.User + "@" + toAddress.Host, insertedId);
+            return SmtpResponse.Ok;
         }
-
-        return SmtpResponse.Ok;
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving email into database.");
+            return SmtpResponse.MailboxUnavailable;
+        }
     }
 
     /// <summary>
     /// Insert email into database.
     /// </summary>
     /// <param name="message">MimeMessage to save into database.</param>
-    private async Task<int> InsertEmailIntoDatabase(MimeMessage message)
+    /// <param name="userEncryptionKey">The public key of the user to encrypt the mail contents with.</param>
+    private async Task<int> InsertEmailIntoDatabase(MimeMessage message, UserEncryptionKey userEncryptionKey)
     {
         var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var newEmail = ConvertMimeMessageToEmail(message);
+        newEmail = EmailEncryption.EncryptEmail(newEmail, userEncryptionKey);
 
+        // Insert the email into the database.
         await dbContext.Emails.AddAsync(newEmail);
         await dbContext.SaveChangesAsync();
 

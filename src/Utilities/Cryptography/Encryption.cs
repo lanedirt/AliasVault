@@ -22,25 +22,44 @@ using Org.BouncyCastle.Security;
 public static class Encryption
 {
     /// <summary>
-    /// Derive a key used for encryption/decryption based on a user password and system salt.
+    /// Generates a random symmetric key for use with AES-256.
     /// </summary>
-    /// <param name="password">User password.</param>
-    /// <param name="salt">The salt to use for the Argon2id hash.</param>
-    /// <returns>SrpArgonEncryption key as byte array.</returns>
-    public static byte[] DeriveKeyFromPassword(string password, string salt = "AliasVault")
+    /// <returns>A 256-bit (32-byte) random key as a byte array.</returns>
+    public static byte[] GenerateRandomSymmetricKey()
     {
-        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-        byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
+        return RandomNumberGenerator.GetBytes(32); // 256 bits
+    }
 
-        var argon2 = new Argon2id(passwordBytes)
+    /// <summary>
+    /// Encrypts a symmetric key using an RSA public key.
+    /// </summary>
+    /// <param name="symmetricKey">The symmetric key to encrypt.</param>
+    /// <param name="publicKey">The RSA public key in JWK format.</param>
+    /// <returns>The encrypted symmetric key as a base64-encoded string.</returns>
+    public static string EncryptSymmetricKeyWithRsa(byte[] symmetricKey, string publicKey)
+    {
+        using (var rsa = new RSACryptoServiceProvider())
         {
-            Salt = saltBytes,
-            DegreeOfParallelism = 4,
-            MemorySize = 8192,
-            Iterations = 1,
-        };
+            ImportPublicKey(rsa, publicKey);
+            byte[] encryptedKey = rsa.Encrypt(symmetricKey, true);
+            return Convert.ToBase64String(encryptedKey);
+        }
+    }
 
-        return argon2.GetBytes(32); // Generate a 256-bit key
+    /// <summary>
+    /// Decrypts an encrypted symmetric key using an RSA private key.
+    /// </summary>
+    /// <param name="ciphertext">The encrypted symmetric key as ciphertext.</param>
+    /// <param name="privateKey">The RSA private key in JWK format.</param>
+    /// <returns>The encrypted symmetric key as a base64-encoded string.</returns>
+    public static byte[] DecryptSymmetricKeyWithRsa(string ciphertext, string privateKey)
+    {
+        using (var rsa = new RSACryptoServiceProvider())
+        {
+            ImportPrivateKey(rsa, privateKey);
+            byte[] cipherBytes = Convert.FromBase64String(ciphertext);
+            return rsa.Decrypt(cipherBytes, true);
+        }
     }
 
     /// <summary>

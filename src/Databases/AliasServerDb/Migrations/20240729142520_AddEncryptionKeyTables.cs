@@ -15,6 +15,13 @@ namespace AliasServerDb.Migrations
             // Delete all records from the Email table as adding PKI will break the existing data.
             migrationBuilder.Sql("DELETE FROM Emails");
 
+            migrationBuilder.AddColumn<string>(
+                name: "EncryptedSymmetricKey",
+                table: "Emails",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.AddColumn<Guid>(
                 name: "UserEncryptionKeyId",
                 table: "Emails",
@@ -22,14 +29,6 @@ namespace AliasServerDb.Migrations
                 maxLength: 255,
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
-
-            migrationBuilder.AddColumn<string>(
-                name: "PublicKey",
-                table: "AliasVaultUsers",
-                type: "TEXT",
-                maxLength: 2000,
-                nullable: false,
-                defaultValue: "");
 
             migrationBuilder.CreateTable(
                 name: "UserEmailClaims",
@@ -117,12 +116,12 @@ namespace AliasServerDb.Migrations
                 table: "Emails");
 
             migrationBuilder.DropColumn(
-                name: "UserEncryptionKeyId",
+                name: "EncryptedSymmetricKey",
                 table: "Emails");
 
             migrationBuilder.DropColumn(
-                name: "PublicKey",
-                table: "AliasVaultUsers");
+                name: "UserEncryptionKeyId",
+                table: "Emails");
         }
     }
 }

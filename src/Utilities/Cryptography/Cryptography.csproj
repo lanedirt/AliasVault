@@ -30,4 +30,8 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
+    </ItemGroup>
+
 </Project>

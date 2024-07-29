@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    [Migration("20240729104544_AddEncryptionKeyTables")]
+    [Migration("20240729142520_AddEncryptionKeyTables")]
     partial class AddEncryptionKeyTables
     {
         /// <inheritdoc />
@@ -158,11 +158,6 @@ namespace AliasServerDb.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PublicKey")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Salt")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -235,6 +230,10 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateSystem")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EncryptedSymmetricKey")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("From")

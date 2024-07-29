@@ -28,13 +28,6 @@ public class AliasVaultUser : IdentityUser
     public string Verifier { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the user public key to be used by server to encrypt information that server
-    /// receives for user such as emails.
-    /// </summary>
-    [StringLength(2000)]
-    public string PublicKey { get; set; } = null!;
-
-    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

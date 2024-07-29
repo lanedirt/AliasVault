@@ -19,8 +19,9 @@ public class SrpArgonEncryptionTests
     /// <summary>
     /// Test basic encryption and decryption using default encryption logic (Argon2id and AES-256).
     /// </summary>
+    /// <returns>Task.</returns>
     [Test]
-    public void TestBasicEncrypt()
+    public async Task TestBasicEncrypt()
     {
         string password = "your-password";
         string salt = "your-salt"; // Use a secure random salt in production
@@ -28,7 +29,7 @@ public class SrpArgonEncryptionTests
         string plaintext = "Hello, World!";
 
         // Derive a key from the password using Argon2id
-        byte[] key = Encryption.DeriveKeyFromPassword(password, salt);
+        byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
         Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
 
         // SymmetricEncrypt the plaintext
@@ -66,8 +67,9 @@ public class SrpArgonEncryptionTests
     /// <summary>
     /// Test basic encryption and decryption using default encryption logic (Argon2id and AES-256).
     /// </summary>
+    /// <returns>Task.</returns>
     [Test]
-    public void TestNotEqualsPassword()
+    public async Task TestNotEqualsPassword()
     {
         string password = "your-password";
         string salt = "your-salt"; // Use a secure random salt in production
@@ -75,13 +77,13 @@ public class SrpArgonEncryptionTests
         string plaintext = "Hello, World!";
 
         // Derive a key from the password using Argon2id
-        byte[] key = Encryption.DeriveKeyFromPassword(password, salt);
+        byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
 
         // SymmetricEncrypt the plaintext
         string encrypted = Encryption.SymmetricEncrypt(plaintext, key);
 
         // SymmetricDecrypt the ciphertext using a different key
-        byte[] key2 = Encryption.DeriveKeyFromPassword("your-password2", salt);
+        byte[] key2 = await Encryption.DeriveKeyFromPasswordAsync("your-password2", salt);
 
         Assert.Throws<InvalidCipherTextException>(() => Encryption.SymmetricDecrypt(encrypted, key2));
     }

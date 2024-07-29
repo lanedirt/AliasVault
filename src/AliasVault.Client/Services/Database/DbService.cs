@@ -121,6 +121,9 @@ public class DbService : IDisposable
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
 
+        // Get the public encryption key that server requires to encrypt data they receive for current user.
+        var encryptionKey = await GetOrCreateEncryptionKeyAsync();
+
         // Save the actual dbContext.
         await _dbContext.SaveChangesAsync();
 
@@ -130,7 +133,7 @@ public class DbService : IDisposable
         string encryptedBase64String = await _jsInteropService.SymmetricEncrypt(base64String, _authService.GetEncryptionKeyAsBase64Async());
 
         // Save to webapi.
-        var success = await SaveToServerAsync(encryptedBase64String);
+        var success = await SaveToServerAsync(encryptionKey.PublicKey, encryptedBase64String);
         if (success)
         {
             Console.WriteLine("Database successfully saved to server.");
@@ -441,9 +444,10 @@ public class DbService : IDisposable
     /// <summary>
     /// Save encrypted database blob to server.
     /// </summary>
+    /// <param name="publicEncryptionKey">RSA public key that server requires in order to encrypt data for user such as received emails.</param>
     /// <param name="encryptedDatabase">Encrypted database as string.</param>
     /// <returns>True if save action succeeded.</returns>
-    private async Task<bool> SaveToServerAsync(string encryptedDatabase)
+    private async Task<bool> SaveToServerAsync(string publicEncryptionKey, string encryptedDatabase)
     {
         // Send list of email addresses that are used in aliases by this vault so they can be
         // claimed on the server.
@@ -459,10 +463,8 @@ public class DbService : IDisposable
             .Where(email => _config.SmtpAllowedDomains.Any(domain => email.EndsWith(domain)))
             .ToList();
 
-        var encryptionKey = await GetOrCreateEncryptionKeyAsync();
-
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
-        var vaultObject = new Vault(encryptedDatabase, databaseVersion, encryptionKey.PublicKey, emailAddresses, DateTime.Now, DateTime.Now);
+        var vaultObject = new Vault(encryptedDatabase, databaseVersion, publicEncryptionKey, emailAddresses, DateTime.Now, DateTime.Now);
 
         try
         {
@@ -499,8 +501,6 @@ public class DbService : IDisposable
             UpdatedAt = DateTime.Now,
         };
         await _dbContext.EncryptionKeys.AddAsync(encryptionKey);
-        await _dbContext.SaveChangesAsync();
-
         return encryptionKey;
     }
 }
