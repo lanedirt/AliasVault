@@ -49,7 +49,7 @@ public class VersionedContentService
     /// </summary>
     /// <param name="serverPath">Path to the file on the server.</param>
     /// <returns>MD5 hash.</returns>
-    private string GetVersionHashFrom(string serverPath)
+    private static string GetVersionHashFrom(string serverPath)
     {
         using var md5 = MD5.Create();
         using var stream = File.OpenRead(serverPath);
