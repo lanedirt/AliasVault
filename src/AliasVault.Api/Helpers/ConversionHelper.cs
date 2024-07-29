@@ -8,12 +8,11 @@
 namespace AliasVault.Api.Helpers;
 
 using System.Text.RegularExpressions;
-using AliasServerDb;
 
 /// <summary>
 /// Class which contains various helper methods for data conversion.
 /// </summary>
-public class ConversionHelper
+public static class ConversionHelper
 {
     /// <summary>
     /// Extract only displayname from full "From" string. E.g. "John Doe" [johndoe@john.com] becomes "John Doe".
@@ -24,17 +23,19 @@ public class ConversionHelper
     {
         // Get the display name from the From field, which is everything before the first < and after the first >
         string fromDisplay = from;
-        if (from.Contains("<"))
+        if (!from.Contains('<'))
         {
-            // Remove everything after the last < until the last >
-            fromDisplay = from.Substring(0, from.LastIndexOf("<", StringComparison.Ordinal));
-
-            // Remove any double quotes
-            fromDisplay = fromDisplay.Replace("\"", string.Empty);
-
-            // Trim any whitespace
-            fromDisplay = fromDisplay.Trim();
+            return fromDisplay;
         }
+
+        // Remove everything after the last < until the last >
+        fromDisplay = from.Substring(0, from.LastIndexOf('<'));
+
+        // Remove any double quotes
+        fromDisplay = fromDisplay.Replace("\"", string.Empty);
+
+        // Trim any whitespace
+        fromDisplay = fromDisplay.Trim();
 
         return fromDisplay;
     }
@@ -51,7 +52,8 @@ public class ConversionHelper
             html,
             @"<a\s+(.*?)href=([""'])(.*?)\2(.*?)>",
             m => $"<a {m.Groups[1].Value}href={m.Groups[2].Value}{m.Groups[3].Value}{m.Groups[2].Value} {m.Groups[4].Value} target=\"_blank\">",
-            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            RegexOptions.IgnoreCase | RegexOptions.Singleline,
+            TimeSpan.FromSeconds(1));
 
         return html;
     }

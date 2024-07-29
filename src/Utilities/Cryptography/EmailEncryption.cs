@@ -12,7 +12,7 @@ using AliasServerDb;
 /// <summary>
 /// Helper class for encrypting and decrypting email contents.
 /// </summary>
-public class EmailEncryption
+public static class EmailEncryption
 {
     /// <summary>
     /// Encrypt the email contents with the user's public key.

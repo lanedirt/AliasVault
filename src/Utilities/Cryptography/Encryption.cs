@@ -146,40 +146,6 @@ public static class Encryption
     }
 
     /// <summary>
-    /// Encrypts a plaintext string using an RSA public key.
-    /// </summary>
-    /// <param name="plaintext">The plaintext to encrypt.</param>
-    /// <param name="publicKey">The public key in XML format.</param>
-    /// <returns>The encrypted data as a base64-encoded string.</returns>
-    public static string EncryptWithPublicKey(string plaintext, string publicKey)
-    {
-        using (var rsa = new RSACryptoServiceProvider())
-        {
-            ImportPublicKey(rsa, publicKey);
-            byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-            byte[] cipherBytes = rsa.Encrypt(plaintextBytes, true);
-            return Convert.ToBase64String(cipherBytes);
-        }
-    }
-
-    /// <summary>
-    /// Decrypts a ciphertext string using an RSA private key.
-    /// </summary>
-    /// <param name="ciphertext">The base64-encoded ciphertext to decrypt.</param>
-    /// <param name="privateKey">The private key in XML format.</param>
-    /// <returns>The decrypted plaintext.</returns>
-    public static string DecryptWithPrivateKey(string ciphertext, string privateKey)
-    {
-        using (var rsa = new RSACryptoServiceProvider())
-        {
-            ImportPrivateKey(rsa, privateKey);
-            byte[] cipherBytes = Convert.FromBase64String(ciphertext);
-            byte[] plaintextBytes = rsa.Decrypt(cipherBytes, true);
-            return Encoding.UTF8.GetString(plaintextBytes);
-        }
-    }
-
-    /// <summary>
     /// Imports a public key from JWK format into an RSA provider.
     /// </summary>
     /// <param name="rsa">The RSA provider to import the key into.</param>

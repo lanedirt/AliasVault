@@ -74,14 +74,14 @@ public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFa
         };
 
         // Add attachment metadata (without the filebytes)
-        var attachments = context.EmailAttachments.Where(x => x.EmailId == email.Id).Select(x => new AttachmentApiModel()
+        var attachments = await context.EmailAttachments.Where(x => x.EmailId == email.Id).Select(x => new AttachmentApiModel()
         {
             Id = x.Id,
             Email_Id = x.EmailId,
             Filename = x.Filename,
             MimeType = x.MimeType,
             Filesize = x.Filesize,
-        }).ToList();
+        }).ToListAsync();
 
         returnEmail.Attachments = attachments;
 

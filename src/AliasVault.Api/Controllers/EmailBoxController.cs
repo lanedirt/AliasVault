@@ -49,7 +49,7 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
         }
 
         // Retrieve emails from database.
-        List<MailboxEmailApiModel> emails = context.Emails.AsNoTracking().Select(x => new MailboxEmailApiModel()
+        List<MailboxEmailApiModel> emails = await context.Emails.AsNoTracking().Select(x => new MailboxEmailApiModel()
         {
             Id = x.Id,
             Subject = x.Subject,
@@ -64,7 +64,7 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             MessagePreview = x.MessagePreview ?? string.Empty,
             EncryptedSymmetricKey = x.EncryptedSymmetricKey,
             EncryptionKey = x.EncryptionKey.PublicKey,
-        }).OrderByDescending(x => x.DateSystem).Take(75).ToList();
+        }).OrderByDescending(x => x.DateSystem).Take(75).ToListAsync();
 
         MailboxApiModel returnValue = new MailboxApiModel();
         returnValue.Address = to;

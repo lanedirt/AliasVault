@@ -89,6 +89,8 @@ public class ClientPlaywrightTest : PlaywrightTest
         await SetupPlaywrightBrowserAndContext();
 
         // Intercept Blazor WASM app requests to override appsettings.json
+        string[] smtpAllowedDomains = ["example.tld"];
+
         await Context.RouteAsync(
             "**/appsettings.json",
             async route =>
@@ -96,7 +98,7 @@ public class ClientPlaywrightTest : PlaywrightTest
                 var response = new
                 {
                     ApiUrl = ApiBaseUrl.TrimEnd('/'),
-                    SmtpAllowedDomains = new string[] { "example.tld" },
+                    SmtpAllowedDomains = smtpAllowedDomains,
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
@@ -112,7 +114,7 @@ public class ClientPlaywrightTest : PlaywrightTest
                 var response = new
                 {
                     ApiUrl = ApiBaseUrl.TrimEnd('/'),
-                    SmtpAllowedDomains = new string[] { "example.tld" },
+                    SmtpAllowedDomains = smtpAllowedDomains,
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions

@@ -3,7 +3,7 @@
 <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
     <div class="relative p-8 bg-white w-full max-w-md flex-col flex rounded-lg shadow-xl">
         <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white"><a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email?.Subject</a></h2>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white"><a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a></h2>
             <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -11,8 +11,8 @@
             </button>
         </div>
         <div class="mt-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">From: @Email?.FromDisplay</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email?.DateSystem</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">From: @Email.FromDisplay</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email.DateSystem</p>
         </div>
         <div class="mt-4 text-gray-700 dark:text-gray-300">
             <div>

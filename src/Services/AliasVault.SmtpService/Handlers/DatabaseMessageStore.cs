@@ -93,7 +93,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 }
 
                 // Check if the local part of the toAddress is a known alias (claimed by a user)
-                var dbContext = await dbContextFactory.CreateDbContextAsync();
+                var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
                 var userEmailClaim = await dbContext.UserEmailClaims.FirstOrDefaultAsync(x =>
                     x.AddressLocal == toAddress.User.ToLowerInvariant() &&
                     x.AddressDomain == toAddress.Host.ToLowerInvariant());
@@ -115,7 +115,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 }
 
                 // Retrieve user public encryption key from database
-                var userPublicKey = dbContext.UserEncryptionKeys.FirstOrDefault(x =>
+                var userPublicKey = await dbContext.UserEncryptionKeys.FirstOrDefaultAsync(x =>
                     x.UserId == userEmailClaim.UserId && x.IsPrimary);
 
                 if (userPublicKey is null)

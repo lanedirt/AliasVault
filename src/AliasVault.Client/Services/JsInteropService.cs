@@ -106,7 +106,7 @@ public class JsInteropService(IJSRuntime jsRuntime)
         }
         catch (JSException ex)
         {
-            Console.Error.WriteLine($"JavaScript decryption error: {ex.Message}");
+            await Console.Error.WriteLineAsync($"JavaScript decryption error: {ex.Message}");
             throw new CryptographicException("Decryption failed", ex);
         }
     }

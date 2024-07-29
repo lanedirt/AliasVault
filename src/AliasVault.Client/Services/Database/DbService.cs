@@ -460,7 +460,7 @@ public class DbService : IDisposable
 
         // Filter the list of email addresses to only include those that are in the allowed domains.
         emailAddresses = emailAddresses
-            .Where(email => _config.SmtpAllowedDomains.Any(domain => email.EndsWith(domain)))
+            .Where(email => _config.SmtpAllowedDomains.Exists(domain => email.EndsWith(domain)))
             .ToList();
 
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
