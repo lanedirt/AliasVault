@@ -17,12 +17,14 @@ public class Vault
     /// </summary>
     /// <param name="blob">Blob.</param>
     /// <param name="version">Version of the vault data model (migration).</param>
+    /// <param name="emailAddressList">List of email addresses that are used in the vault and should be registered.</param>
     /// <param name="createdAt">CreatedAt.</param>
     /// <param name="updatedAt">UpdatedAt.</param>
-    public Vault(string blob, string version, DateTime createdAt, DateTime updatedAt)
+    public Vault(string blob, string version, List<string> emailAddressList, DateTime createdAt, DateTime updatedAt)
     {
         Blob = blob;
         Version = version;
+        EmailAddressList = emailAddressList;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
     }
@@ -36,6 +38,11 @@ public class Vault
     /// Gets or sets the vault version.
     /// </summary>
     public string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of email addresses that are used in the vault and should be registered on the server.
+    /// </summary>
+    public List<string> EmailAddressList { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time of creation.

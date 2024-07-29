@@ -101,6 +101,16 @@ public class AliasServerDbContext : WorkerStatusDbContext
     public DbSet<EmailAttachment> EmailAttachments { get; set; }
 
     /// <summary>
+    /// Gets or sets the UserEmailClaims DbSet.
+    /// </summary>
+    public DbSet<UserEmailClaim> UserEmailClaims { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UserEncryptionKeys DbSet.
+    /// </summary>
+    public DbSet<UserEncryptionKey> UserEncryptionKeys { get; set; }
+
+    /// <summary>
     /// Gets or sets the Logs DbSet.
     /// </summary>
     public DbSet<Log> Logs { get; set; }
@@ -180,6 +190,27 @@ public class AliasServerDbContext : WorkerStatusDbContext
         modelBuilder.Entity<Vault>()
             .HasOne(l => l.User)
             .WithMany(c => c.Vaults)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure UserEmailClaim - AliasVaultUser relationship
+        modelBuilder.Entity<UserEmailClaim>()
+            .HasOne(l => l.User)
+            .WithMany(c => c.EmailClaims)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Email - UserEncryptionKey relationship
+        modelBuilder.Entity<Email>()
+            .HasOne(l => l.EncryptionKey)
+            .WithMany(c => c.Emails)
+            .HasForeignKey(l => l.UserEncryptionKeyId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // Configure UserEncryptionKey - AliasVaultUser relationship
+        modelBuilder.Entity<UserEncryptionKey>()
+            .HasOne(l => l.User)
+            .WithMany(c => c.EncryptionKeys)
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }

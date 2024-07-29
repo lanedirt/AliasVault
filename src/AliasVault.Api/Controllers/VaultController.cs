@@ -65,10 +65,10 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, DateTime.MinValue, DateTime.MinValue));
+            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, new List<string>(), DateTime.MinValue, DateTime.MinValue));
         }
 
-        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, vault.CreatedAt, vault.UpdatedAt));
+        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, new List<string>(), vault.CreatedAt, vault.UpdatedAt));
     }
 
     /// <summary>
@@ -116,6 +116,51 @@ public class VaultController(IDbContextFactory<AliasServerDbContext> dbContextFa
         await context.Vaults.AddAsync(newVault);
         await context.SaveChangesAsync();
 
+        // Update user email claims if email addresses have been supplied.
+        if (model.EmailAddressList.Count > 0)
+        {
+            await UpdateUserEmailClaims(context, user.Id, model.EmailAddressList);
+        }
+
         return Ok();
+    }
+
+    /// <summary>
+    /// Updates the user's email claims based on the provided email address list.
+    /// </summary>
+    /// <param name="context">The database context.</param>
+    /// <param name="userId">The ID of the user.</param>
+    /// <param name="newEmailAddresses">The list of new email addresses to claim.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task UpdateUserEmailClaims(AliasServerDbContext context, string userId, List<string> newEmailAddresses)
+    {
+        // Get all existing user email claims.
+        var existingEmailClaims = await context.UserEmailClaims
+            .Where(x => x.UserId == userId)
+            .Select(x => x.Address)
+            .ToListAsync();
+
+        // Register new email addresses.
+        foreach (var email in newEmailAddresses)
+        {
+            if (!existingEmailClaims.Contains(email))
+            {
+                await context.UserEmailClaims.AddAsync(new UserEmailClaim
+                {
+                    UserId = userId,
+                    Address = email,
+                    AddressLocal = email.Split('@')[0],
+                    AddressDomain = email.Split('@')[1],
+                    CreatedAt = timeProvider.UtcNow,
+                    UpdatedAt = timeProvider.UtcNow,
+                });
+            }
+        }
+
+        // Do not delete email claims that are not in the new list
+        // as they may be re-used by the user in the future. We don't want
+        // to allow other users to re-use emails used by other users.
+        // Email claims are considered permanent.
+        await context.SaveChangesAsync();
     }
 }

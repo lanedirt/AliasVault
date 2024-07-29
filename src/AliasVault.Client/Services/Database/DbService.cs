@@ -27,6 +27,7 @@ public class DbService : IDisposable
     private readonly IJSRuntime _jsRuntime;
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
+    private readonly Config _config;
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
     private bool _isSuccessfullyInitialized;
@@ -39,11 +40,13 @@ public class DbService : IDisposable
     /// <param name="authService">AuthService.</param>
     /// <param name="jsRuntime">IJSRuntime.</param>
     /// <param name="httpClient">HttpClient.</param>
-    public DbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient)
+    /// <param name="config">Config instance.</param>
+    public DbService(AuthService authService, IJSRuntime jsRuntime, HttpClient httpClient, Config config)
     {
         _authService = authService;
         _jsRuntime = jsRuntime;
         _httpClient = httpClient;
+        _config = config;
 
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
@@ -441,8 +444,18 @@ public class DbService : IDisposable
     /// <returns>True if save action succeeded.</returns>
     private async Task<bool> SaveToServerAsync(string encryptedDatabase)
     {
+        // Send list of email addresses that are used in aliases by this vault so they can be
+        // claimed on the server.
+        var emailAddresses = await _dbContext.Aliases
+            .Where(a => a.Email != null)
+            .Select(a => a.Email)
+            .Where(email => _config.SmtpAllowedDomains.Any(domain => EF.Functions.Like(email, $"%@{domain}")))
+            .Distinct()
+            .Select(email => email!)
+            .ToListAsync();
+
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
-        var vaultObject = new Vault(encryptedDatabase, databaseVersion, DateTime.Now, DateTime.Now);
+        var vaultObject = new Vault(encryptedDatabase, databaseVersion, emailAddresses, DateTime.Now, DateTime.Now);
 
         try
         {
