@@ -65,6 +65,35 @@ else
                     </div>
                 </div>
             </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center">
+                    <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Email claims</h3>
+
+                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">ID</th>
+                                <th scope="col" class="px-4 py-3">Created</th>
+                                <th scope="col" class="px-4 py-3">Filesize</th>
+                                <th scope="col" class="px-4 py-3">DB version</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var entry in EmailClaimList)
+                            {
+                                <tr class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
+                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="px-4 py-3">@entry.Address</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 }
@@ -78,8 +107,8 @@ else
 
     private bool IsLoading { get; set; } = true;
     private AliasVaultUser? User { get; set; } = new();
-
     private List<Vault> VaultList { get; set; } = new();
+    private List<UserEmailClaim> EmailClaimList { get; set; } = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -124,8 +153,13 @@ else
             FileSize = x.FileSize,
             CreatedAt = x.CreatedAt,
         })
-        .OrderByDescending(x => x.CreatedAt)
+        .OrderBy(x => x.CreatedAt)
         .ToListAsync();
+
+        // Load all email claims for this user.
+        EmailClaimList = await DbContext.UserEmailClaims.Where(x => x.UserId == User.Id)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
 
         IsLoading = false;
         StateHasChanged();
