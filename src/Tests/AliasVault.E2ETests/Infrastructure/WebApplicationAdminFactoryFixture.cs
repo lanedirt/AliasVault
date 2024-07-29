@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Infrastructure;
 
 using System.Data.Common;
 using AliasServerDb;
+using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -103,6 +104,10 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
 
             services.Remove(dbConnectionDescriptor ?? throw new InvalidOperationException("No DbContextOptions<AliasServerDbContext> registered."));
 
+            // Remove the existing VersionedContentService registration.
+            var versionedContentServiceDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(VersionedContentService));
+
             // Add the DbConnection as a singleton
             services.AddSingleton(_dbConnection);
 
@@ -112,6 +117,9 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
                 var connection = container.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection).UseLazyLoadingProxies();
             });
+
+            // Add the VersionedContentService
+            services.AddSingleton(new VersionedContentService("../../../../../AliasVault.Admin/wwwroot"));
 
             // Enable detailed errors for server-side Blazor.
             services.AddServerSideBlazor()

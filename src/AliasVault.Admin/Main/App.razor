@@ -1,12 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@inject VersionedContentService VersionService
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
-    <link rel="stylesheet" href="css/tailwind.css"/>
-    <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="@VersionService.GetVersionedPath("css/tailwind.css")"/>
+    <link rel="stylesheet" href="@VersionService.GetVersionedPath("css/app.css")"/>
     <link rel="stylesheet" href="AliasVault.Admin.styles.css"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
     <HeadOutlet @rendermode="RenderModeForPage"/>
@@ -14,9 +16,9 @@
 
 <body class="bg-gray-50 dark:bg-gray-800">
 <Routes @rendermode="RenderModeForPage"/>
-<script src="lib/qrcode.min.js?v=dev"></script>
-<script src="js/dark-mode.js?v=dev"></script>
-<script src="js/utilities.js?v=dev"></script>
+<script src="@VersionService.GetVersionedPath("lib/qrcode.min.js")"></script>
+<script src="@VersionService.GetVersionedPath("js/dark-mode.js")"></script>
+<script src="@VersionService.GetVersionedPath("js/utilities.js")"></script>
 
 <script>
     window.initTopMenu = function() {
