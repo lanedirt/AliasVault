@@ -68,7 +68,7 @@ public class EmailDecryptionTest : ClientPlaywrightTest
         // Assert that the users public key was created on the server.
         var publicKey = await ApiDbContext.UserEncryptionKeys.Where(x => x.UserId == claim.UserId).FirstOrDefaultAsync();
         Assert.That(publicKey, Is.Not.Null, "Public key for user not found in database. Check if public key creation is working correctly.");
-        Assert.That(publicKey.PublicKey.Length, Is.GreaterThanOrEqualTo(100), "Public key exists but length does not match expected. Check if public key creation is working correctly.");
+        Assert.That(publicKey.PublicKey, Has.Length.GreaterThanOrEqualTo(100), "Public key exists but length does not match expected. Check if public key creation is working correctly.");
 
         // Email the SMTP server which will save the email in encrypted form in the database..
         var message = new MimeMessage();

@@ -62,13 +62,16 @@ public class RsaEncryptionTests
     [Test]
     public void GenerateRsaKeyPair_ShouldReturnValidKeyPair()
     {
-        Assert.That(PublicKey, Is.Not.Null);
-        Assert.That(PrivateKey, Is.Not.Null);
-        Assert.That(PublicKey, Is.Not.EqualTo(PrivateKey));
+        Assert.Multiple(() =>
+        {
+            Assert.That(PublicKey, Is.Not.Null);
+            Assert.That(PrivateKey, Is.Not.Null);
+            Assert.That(PublicKey, Is.Not.EqualTo(PrivateKey));
 
-        // Verify that the keys are in valid JSON format
-        Assert.That(() => JsonSerializer.Deserialize<Dictionary<string, object>>(PublicKey), Throws.Nothing);
-        Assert.That(() => JsonSerializer.Deserialize<Dictionary<string, object>>(PrivateKey), Throws.Nothing);
+            // Verify that the keys are in valid JSON format
+            Assert.That(() => JsonSerializer.Deserialize<Dictionary<string, object>>(PublicKey), Throws.Nothing);
+            Assert.That(() => JsonSerializer.Deserialize<Dictionary<string, object>>(PrivateKey), Throws.Nothing);
+        });
     }
 
     /// <summary>
@@ -78,7 +81,7 @@ public class RsaEncryptionTests
     public void GenerateRandomSymmetricKey_ReturnsCorrectLength()
     {
         var key = Encryption.GenerateRandomSymmetricKey();
-        Assert.That(key.Length, Is.EqualTo(32), "The generated key should be 32 bytes (256 bits) long.");
+        Assert.That(key, Has.Length.EqualTo(32), "The generated key should be 32 bytes (256 bits) long.");
     }
 
     /// <summary>

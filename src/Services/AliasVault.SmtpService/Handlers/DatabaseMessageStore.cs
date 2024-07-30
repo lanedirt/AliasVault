@@ -40,108 +40,42 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     {
         try
         {
-            await using var stream = new MemoryStream();
-
-            var position = buffer.GetPosition(0);
-            while (buffer.TryGet(ref position, out var memory))
-            {
-                stream.Write(memory.Span);
-            }
-
-            // Max email filesize limit: 10MB. If the mail is larger in size, reject it.
-            // Because of base64 encoding which has approx 33% increase in binary size
-            // we multiply the limit by 1.4 to be safe.
+            // Check email size limit
             var maxEmailSizeInMegabytes = 10;
-            if (stream.Length > ((maxEmailSizeInMegabytes * 1024 * 1024) * 1.4))
+            var maxEmailSizeInBytes = (long)((maxEmailSizeInMegabytes * 1024 * 1024) * 1.4);
+            if (buffer.Length > maxEmailSizeInBytes)
             {
                 return SmtpResponse.SizeLimitExceeded;
             }
 
-            stream.Position = 0;
-            var message = await MimeMessage.LoadAsync(stream, cancellationToken);
+            var message = await LoadMessageFromBuffer(buffer, cancellationToken);
 
             // Retrieve all addresses from the SMTP transaction which should contain all recipients for this mail instance.
             var allAddresses = transaction.To
                 .Distinct()
                 .ToList();
 
-            // Limit list to 15 addresses maximum (to prevent mailbomb spam abuse).
+            // Limit list to 15 addresses maximum to prevent mailbomb/spam abuse.
             var toAddresses = allAddresses.Take(15).ToList();
 
+            var toAddressesCount = toAddresses.Count;
+            var toAddressesFailCount = 0;
             foreach (var toAddress in toAddresses)
             {
-                // Check if toAddress domain is allowed.
-                if (toAddress is null || !config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
+                // Process the email for each recipient separately.
+                var process = await ProcessEmailForRecipient(message, toAddress);
+                if (!process)
                 {
-                    // ToAddress domain is not allowed.
-                    if (toAddresses.Count > 1)
-                    {
-                        // If more recipients, silently skip this one.
-                        continue;
-                    }
-
-                    // If only one recipient, return error.
-                    logger.LogWarning(
-                        "Rejected email: email for {ToAddress} is not allowed. Domain not in allowed domain list.",
-                        toAddress?.User + "@" + toAddress?.Host);
-                    return SmtpResponse.NoValidRecipientsGiven;
+                    toAddressesFailCount++;
                 }
 
-                // Check if the local part of the toAddress is a known alias (claimed by a user)
-                var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
-                var toAddressLocal = toAddress.User.ToLowerInvariant();
-                var toAddressDomain = toAddress.Host.ToLowerInvariant();
-                var userEmailClaim = await dbContext.UserEmailClaims
-                    .FirstOrDefaultAsync(
-                        x =>
-                            x.AddressLocal == toAddressLocal &&
-                            x.AddressDomain == toAddressDomain,
-                        CancellationToken.None);
-
-                if (userEmailClaim is null)
+                // If all recipients failed, return error to sender.
+                if (toAddressesFailCount == toAddressesCount)
                 {
-                    // Email address has no user claim with corresponding encryption key so we cannot process it.
-                    if (toAddresses.Count > 1)
-                    {
-                        // If more recipients, silently skip this one.
-                        continue;
-                    }
-
-                    // If only one recipient, return error.
-                    logger.LogWarning(
-                        "Rejected email: email for {ToAddress} is not allowed. No user claim on this ToAddress.",
-                        toAddress.User + "@" + toAddress.Host);
+                    // No valid recipients given.
+                    logger.LogWarning("No valid recipients in email, returning error to sender.");
                     return SmtpResponse.NoValidRecipientsGiven;
                 }
-
-                // Retrieve user public encryption key from database
-                var userPublicKey = await dbContext.UserEncryptionKeys.FirstOrDefaultAsync(
-                    x =>
-                    x.UserId == userEmailClaim.UserId && x.IsPrimary,
-                    CancellationToken.None);
-
-                if (userPublicKey is null)
-                {
-                    // Email address has no user claim with corresponding encryption key so we cannot process it.
-                    if (toAddresses.Count > 1)
-                    {
-                        // If more recipients, silently skip this one.
-                        continue;
-                    }
-
-                    // If only one recipient, return error.
-                    logger.LogCritical(
-                        "Rejected email: email for {ToAddress} cannot be processed. No primary encryption key found for this user.",
-                        toAddress.User + "@" + toAddress.Host);
-                    return SmtpResponse.NoValidRecipientsGiven;
-                }
-
-                // Set the "to" for the email to the actual one we are looping through now.
-                var insertedId = await InsertEmailIntoDatabase(message, new MailAddress(toAddress.AsAddress()), userPublicKey);
-                logger.LogInformation(
-                    "Email for {ToAddress} successfully saved into database with ID {insertedId}.",
-                    toAddress.User + "@" + toAddress.Host,
-                    insertedId);
             }
 
             return SmtpResponse.Ok;
@@ -151,6 +85,26 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             logger.LogError(ex, "Error saving email into database.");
             return SmtpResponse.MailboxUnavailable;
         }
+    }
+
+      /// <summary>
+    /// Load the email message from the buffer.
+    /// </summary>
+    /// <param name="buffer">Buffer which contains the email contents.</param>
+    /// <param name="cancellationToken">CancellationToken instance.</param>
+    /// <returns>MimeMessage.</returns>
+    private static async Task<MimeMessage> LoadMessageFromBuffer(ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
+    {
+        await using var stream = new MemoryStream();
+
+        var position = buffer.GetPosition(0);
+        while (buffer.TryGet(ref position, out var memory))
+        {
+            stream.Write(memory.Span);
+        }
+
+        stream.Position = 0;
+        return await MimeMessage.LoadAsync(stream, cancellationToken);
     }
 
     /// <summary>
@@ -326,6 +280,68 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
 
             return memory.ToArray();
         }
+    }
+
+    /// <summary>
+    /// Process email for recipient separately.
+    /// </summary>
+    /// <param name="message">MimeMessage.</param>
+    /// <param name="toAddress">ToAddress.</param>
+    /// <returns>True if success or silent skip, false if SmtpResponse.NoValidRecipientsGiven should be triggered.</returns>
+    private async Task<bool> ProcessEmailForRecipient(MimeMessage message, IMailbox toAddress)
+    {
+        // Check if toAddress domain is allowed.
+        if (!config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
+        {
+            // ToAddress domain is not allowed.
+            logger.LogWarning(
+                "Rejected email: email for {ToAddress} is not allowed. Domain not in allowed domain list.",
+                toAddress?.User + "@" + toAddress?.Host);
+            return false;
+        }
+
+        // Check if the local part of the toAddress is a known alias (claimed by a user)
+        var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        var toAddressLocal = toAddress.User.ToLowerInvariant();
+        var toAddressDomain = toAddress.Host.ToLowerInvariant();
+        var userEmailClaim = await dbContext.UserEmailClaims
+            .FirstOrDefaultAsync(
+                x =>
+                    x.AddressLocal == toAddressLocal &&
+                    x.AddressDomain == toAddressDomain,
+                CancellationToken.None);
+
+        if (userEmailClaim is null)
+        {
+            // Email address has no user claim with corresponding encryption key so we cannot process it.
+            logger.LogWarning(
+                "Rejected email: email for {ToAddress} is not allowed. No user claim on this ToAddress.",
+                toAddress.User + "@" + toAddress.Host);
+            return false;
+        }
+
+        // Retrieve user public encryption key from database
+        var userPublicKey = await dbContext.UserEncryptionKeys.FirstOrDefaultAsync(
+            x =>
+            x.UserId == userEmailClaim.UserId && x.IsPrimary,
+            CancellationToken.None);
+
+        if (userPublicKey is null)
+        {
+            // Email address has no user claim with corresponding encryption key so we cannot process it.
+            logger.LogCritical(
+                "Rejected email: email for {ToAddress} cannot be processed. No primary encryption key found for this user.",
+                toAddress.User + "@" + toAddress.Host);
+            return false;
+        }
+
+        // Set the "to" for the email to the actual one we are looping through now.
+        var insertedId = await InsertEmailIntoDatabase(message, new MailAddress(toAddress.AsAddress()), userPublicKey);
+        logger.LogInformation(
+            "Email for {ToAddress} successfully saved into database with ID {insertedId}.",
+            toAddress.User + "@" + toAddress.Host,
+            insertedId);
+        return true;
     }
 
     /// <summary>
