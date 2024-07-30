@@ -14,7 +14,7 @@ sed -i "s|http://localhost:5092|${API_URL}|g" /usr/share/nginx/html/appsettings.
 # in order to be able to receive emails.
 
 # Convert comma-separated list to JSON array
-json_array=$(echo $domains | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
+json_array=$(echo $SMTP_ALLOWED_DOMAINS | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
 
 # Use sed to update the SmtpAllowedDomains field in appsettings.json
 sed -i.bak "s|\"SmtpAllowedDomains\": \[.*\]|\"SmtpAllowedDomains\": $json_array|" /usr/share/nginx/html/appsettings.json

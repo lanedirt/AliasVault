@@ -16,7 +16,7 @@
     <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <div class="flex justify-between">
             <h3 class="mb-4 text-xl font-semibold dark:text-white">Email</h3>
-            <button @onclick="LoadRecentEmailsAsync" type="button" class="text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-blue-500">
+            <button id="recent-email-refresh" @onclick="LoadRecentEmailsAsync" type="button" class="text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-blue-500">
                 Refresh
             </button>
         </div>
@@ -137,7 +137,7 @@
     /// </summary>
     private bool IsAliasVaultDomain(string email)
     {
-        return Config.SmtpAllowedDomains.Any(x => email.EndsWith(x));
+        return Config.SmtpAllowedDomains.Exists(x => email.EndsWith(x));
     }
 
     private async Task LoadRecentEmailsAsync()

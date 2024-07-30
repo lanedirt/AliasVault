@@ -15,7 +15,8 @@ AliasVault is an open-source password and identity manager built with C# ASP.NET
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Virtual identities**: Generate virtual identities with virtual (working) email addresses that are assigned to one or more passwords.
+- **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each identity. Emails sent to these addresses are instantly visible in the AliasVault app.
+- **Virtual identities**: Generate virtual identities and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for attackers to link your accounts.
 - **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
 
 > Note: AliasVault is currently in development and not yet ready for production use. The project is still in the early stages and many features are not yet implemented. You are welcome to contribute to the project by submitting pull requests or opening issues.
@@ -41,7 +42,7 @@ $ git clone https://github.com/lanedirt/AliasVault.git
 ```
 
 ### 2. Run the install script.
-The script checks and creates a .env file with a JWT secret, generates an admin password, and manages Docker image building and container initiation. It ensures necessary configurations and services are ready for the application's operation.
+The script checks and creates a .env file with a JWT secret, generates an admin password and manages Docker image building and container initiation. It ensures necessary configurations and services are ready for the application's operation.
 
 ```bash
 # Go to the project directory
