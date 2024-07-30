@@ -21,5 +21,5 @@ public class Config
     /// Gets or sets the domains that the SMTP service is listening for.
     /// Domains not in this list will be rejected.
     /// </summary>
-    public List<String> AllowedToDomains { get; set; } = [];
+    public List<string> AllowedToDomains { get; set; } = [];
 }

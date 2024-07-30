@@ -1,5 +1,4 @@
-﻿@inherits MainBase
-@using AliasVault.Client.Main.Pages;
+﻿@inherits AliasVault.Client.Main.Pages.MainBase
 @implements IDisposable
 
 <header>
@@ -119,9 +118,9 @@
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            await Js.InvokeVoidAsync("window.initTopMenu");
+            await JsInteropService.InitTopMenu();
             DotNetObjectReference<TopMenu> objRef = DotNetObjectReference.Create(this);
-            await Js.InvokeVoidAsync("window.registerClickOutsideHandler", objRef);
+            await JsInteropService.RegisterClickOutsideHandler(objRef);
         }
     }
 

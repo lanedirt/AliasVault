@@ -7,6 +7,8 @@
 
 namespace AliasServerDb;
 
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
@@ -23,6 +25,25 @@ public class Email
     /// Gets or sets the ID of the email.
     /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets encryption key foreign key.
+    /// </summary>
+    [StringLength(255)]
+    public Guid UserEncryptionKeyId { get; set; }
+
+    /// <summary>
+    /// Gets or sets foreign key to the UserEncryptionKey object which contains the public key used for encrypting
+    /// the symmetric encryption key.
+    /// </summary>
+    [ForeignKey("UserEncryptionKeyId")]
+    public virtual UserEncryptionKey EncryptionKey { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the encrypted symmetric key which was used to encrypt the email message.
+    /// This key is encrypted with the public key of the user.
+    /// </summary>
+    public string EncryptedSymmetricKey { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the subject of the email.
@@ -102,5 +123,5 @@ public class Email
     /// <summary>
     /// Gets or sets the collection of email attachments.
     /// </summary>
-    public virtual ICollection<EmailAttachment> Attachments { get; set; } = [];
+    public virtual List<EmailAttachment> Attachments { get; set; } = [];
 }

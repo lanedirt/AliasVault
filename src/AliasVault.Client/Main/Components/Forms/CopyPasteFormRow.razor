@@ -1,5 +1,5 @@
 ﻿@inject ClipboardCopyService ClipboardCopyService
-@inject IJSRuntime JsRuntime
+@inject JsInteropService JsInteropService
 @implements IDisposable
 
 <label for="@_inputId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
@@ -37,7 +37,7 @@
 
     private async Task CopyToClipboard()
     {
-        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Value);
+        await JsInteropService.CopyToClipboard(Value);
         ClipboardCopyService.SetCopied(_inputId);
 
         // After 2 seconds, reset the copied state if it's still the same element

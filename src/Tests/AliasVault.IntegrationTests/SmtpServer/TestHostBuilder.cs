@@ -5,13 +5,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using AliasVault.SmtpService.Handlers;
-using AliasVault.SmtpService.Workers;
-
 namespace AliasVault.IntegrationTests.SmtpServer;
 
 using System.Data.Common;
 using AliasServerDb;
+using AliasVault.SmtpService.Handlers;
+using AliasVault.SmtpService.Workers;
 using SmtpService;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,8 +59,20 @@ public class TestHostBuilder
     public IHost Build()
     {
         // Create a persistent in-memory database for the duration of the test.
-        _dbConnection = new SqliteConnection("DataSource=:memory:");
-        _dbConnection.Open();
+        var dbConnection = new SqliteConnection("DataSource=:memory:");
+        dbConnection.Open();
+
+        return Build(dbConnection);
+    }
+
+     /// <summary>
+    /// Builds the SmtpService test host with a provided database connection.
+    /// </summary>
+    /// <returns></returns>
+    public IHost Build(DbConnection dbConnection)
+    {
+        // Create a persistent in-memory database for the duration of the test.
+        _dbConnection = dbConnection;
 
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
@@ -81,7 +92,7 @@ public class TestHostBuilder
                 });
 
                 services.AddTransient<IMessageStore, DatabaseMessageStore>();
-                services.AddSingleton<global::SmtpServer.SmtpServer>(
+                services.AddSingleton<SmtpServer>(
                     provider =>
                     {
                         var options = new SmtpServerOptionsBuilder()

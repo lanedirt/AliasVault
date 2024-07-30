@@ -49,10 +49,10 @@ public class MainBase : OwningComponentBase
     public GlobalLoadingService GlobalLoadingSpinner { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the IJSRuntime.
+    /// Gets or sets the JsInteropService.
     /// </summary>
     [Inject]
-    public IJSRuntime Js { get; set; } = null!;
+    public JsInteropService JsInteropService { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the DbService.

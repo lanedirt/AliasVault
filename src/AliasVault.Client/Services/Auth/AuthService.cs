@@ -98,7 +98,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     /// <summary>
     /// Get encryption key.
     /// </summary>
-    /// <returns>Encryption key as byte[].</returns>
+    /// <returns>SrpArgonEncryption key as byte[].</returns>
     public byte[] GetEncryptionKeyAsync()
     {
         return _encryptionKey;
@@ -107,7 +107,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     /// <summary>
     /// Get encryption key as base64 string.
     /// </summary>
-    /// <returns>Encryption key as base64 string.</returns>
+    /// <returns>SrpArgonEncryption key as base64 string.</returns>
     public string GetEncryptionKeyAsBase64Async()
     {
         if (environment.IsDevelopment() && configuration["UseDebugEncryptionKey"] == "true")
@@ -131,7 +131,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
         var encryptionKey = GetEncryptionKeyAsBase64Async();
         if (encryptionKey == string.Empty || encryptionKey == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
         {
-            // Encryption key is empty or base64 encoded empty string.
+            // SrpArgonEncryption key is empty or base64 encoded empty string.
             return false;
         }
 
@@ -141,7 +141,7 @@ public class AuthService(HttpClient httpClient, ILocalStorageService localStorag
     /// <summary>
     /// Stores the encryption key asynchronously in-memory.
     /// </summary>
-    /// <param name="newKey">Encryption key.</param>
+    /// <param name="newKey">SrpArgonEncryption key.</param>
     public void StoreEncryptionKey(byte[] newKey)
     {
         _encryptionKey = newKey;

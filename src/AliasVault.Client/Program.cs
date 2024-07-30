@@ -16,6 +16,20 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.HostEnvironment.Environment}.json", optional: true, reloadOnChange: true);
 
+var config = new Config();
+builder.Configuration.Bind(config);
+if (string.IsNullOrEmpty(config.ApiUrl))
+{
+    throw new KeyNotFoundException("ApiUrl is not set in the configuration.");
+}
+
+if (config.SmtpAllowedDomains == null || config.SmtpAllowedDomains.Count == 0)
+{
+    throw new KeyNotFoundException("SmtpAllowedDomains is not set in the configuration.");
+}
+
+builder.Services.AddSingleton(config);
+
 builder.Services.AddLogging(logging =>
 {
     if (builder.HostEnvironment.IsDevelopment())
@@ -53,6 +67,7 @@ builder.Services.AddScoped<CredentialService>();
 builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
+builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 
 builder.Services.AddAuthorizationCore();

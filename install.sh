@@ -135,6 +135,25 @@ create_env_file() {
   fi
 }
 
+# Function to check and populate the .env file with API_URL
+populate_api_url() {
+  printf "${CYAN}> Checking API_URL...${NC}\n"
+  if ! grep -q "^API_URL=" "$ENV_FILE" || [ -z "$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    DEFAULT_API_URL="http://localhost:81"
+    read -p "Enter the base URL where the API will be hosted (press Enter for default: $DEFAULT_API_URL): " USER_API_URL
+    API_URL=${USER_API_URL:-$DEFAULT_API_URL}
+    if grep -q "^API_URL=" "$ENV_FILE"; then
+      awk -v url="$API_URL" '/^API_URL=/ {$0="API_URL="url} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    else
+      echo "API_URL=${API_URL}" >> "$ENV_FILE"
+    fi
+    printf "${GREEN}> API_URL has been set to $API_URL in $ENV_FILE.${NC}\n"
+  else
+    API_URL=$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)
+    printf "${GREEN}> API_URL already exists in $ENV_FILE with value: $API_URL${NC}\n"
+  fi
+}
+
 # Function to check and populate the .env file with JWT_KEY
 populate_jwt_key() {
   printf "${CYAN}> Checking JWT_KEY...${NC}\n"
@@ -155,16 +174,30 @@ populate_jwt_key() {
 set_smtp_allowed_domains() {
   printf "${CYAN}> Setting SMTP_ALLOWED_DOMAINS...${NC}\n"
   if ! grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-    printf "Please enter the domains that should be allowed to send email, separated by commas: "
+    printf "Please enter the domains that should be allowed to receive email, separated by commas (press Enter to disable email support): "
     read -r smtp_allowed_domains
+
+    # Set default value if user input is empty
+    smtp_allowed_domains=${smtp_allowed_domains:-"DISABLED.TLD"}
+
     if grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE"; then
       awk -v domains="$smtp_allowed_domains" '/^SMTP_ALLOWED_DOMAINS=/ {$0="SMTP_ALLOWED_DOMAINS="domains} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     else
       echo "SMTP_ALLOWED_DOMAINS=${smtp_allowed_domains}" >> "$ENV_FILE"
     fi
-    printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set in $ENV_FILE.${NC}\n"
+
+    if [ "$smtp_allowed_domains" = "DISABLED.TLD" ]; then
+      printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set to 'DISABLED.TLD' in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
+    else
+      printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set to '${smtp_allowed_domains}' in $ENV_FILE.${NC}\n"
+    fi
   else
-    printf "${GREEN}> SMTP_ALLOWED_DOMAINS already exists and has a value in $ENV_FILE.${NC}\n"
+    smtp_allowed_domains=$(grep "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ "$smtp_allowed_domains" = "DISABLED.TLD" ]; then
+      printf "${GREEN}> SMTP_ALLOWED_DOMAINS already exists in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
+    else
+      printf "${GREEN}> SMTP_ALLOWED_DOMAINS already exists in $ENV_FILE with value: ${smtp_allowed_domains}${NC}\n"
+    fi
   fi
 }
 
@@ -281,6 +314,7 @@ main() {
         printf "${YELLOW}+++ Initializing .env file +++${NC}\n"
         printf "\n"
         create_env_file || exit $?
+        populate_api_url || exit $?
         populate_jwt_key || exit $?
         set_smtp_allowed_domains || exit $?
         set_smtp_tls_enabled || exit $?

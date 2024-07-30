@@ -7,6 +7,11 @@
 
 namespace AliasVault.SmtpService.Workers;
 
+/// <summary>
+/// A worker for the SMTP server.
+/// </summary>
+/// <param name="logger">ILogger instance.</param>
+/// <param name="smtpServer">SmtpServer instance.</param>
 public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, SmtpServer.SmtpServer smtpServer) : BackgroundService
 {
     /// <inheritdoc />

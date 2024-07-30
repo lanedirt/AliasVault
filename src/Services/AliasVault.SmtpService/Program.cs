@@ -9,15 +9,15 @@ using System.Data.Common;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
+using AliasVault.Logging;
 using AliasVault.SmtpService;
 using AliasVault.SmtpService.Handlers;
+using AliasVault.SmtpService.Workers;
+using AliasVault.WorkerStatus.ServiceExtensions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmtpServer;
 using SmtpServer.Storage;
-using AliasVault.Logging;
-using AliasVault.SmtpService.Workers;
-using AliasVault.WorkerStatus.ServiceExtensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -70,8 +70,7 @@ builder.Services.AddSingleton(
                         .Port(587, false)
                         .AllowUnsecureAuthentication()
                         .Certificate(CreateCertificate())
-                        .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
-                );
+                        .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls12));
         }
         else
         {
@@ -81,8 +80,7 @@ builder.Services.AddSingleton(
                         .Port(25, false))
                 .Endpoint(serverBuilder =>
                     serverBuilder
-                        .Port(587, false)
-                );
+                        .Port(587, false));
         }
 
         return new SmtpServer.SmtpServer(options.Build(), provider.GetRequiredService<IServiceProvider>());
@@ -117,14 +115,12 @@ builder.Services.AddSingleton(
 
             return cert;
         }
-    }
-);
+    });
 
 // -----------------------------------------------------------------------
 // Register hosted services via Status library wrapper in order to monitor and control (start/stop) them via the database.
 // -----------------------------------------------------------------------
 builder.Services.AddStatusHostedService<SmtpServerWorker, AliasServerDbContext>(Assembly.GetExecutingAssembly().GetName().Name!);
-// -----------------------------------------------------------------------
 
 var host = builder.Build();
 

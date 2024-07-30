@@ -41,4 +41,14 @@ public class AliasVaultUser : IdentityUser
     /// Gets or sets the collection of vaults.
     /// </summary>
     public virtual ICollection<Vault> Vaults { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the collection of EmailClaims.
+    /// </summary>
+    public virtual ICollection<UserEmailClaim> EmailClaims { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the collection of EncryptionKeys.
+    /// </summary>
+    public virtual ICollection<UserEncryptionKey> EncryptionKeys { get; set; } = [];
 }

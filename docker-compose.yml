@@ -7,8 +7,8 @@ services:
         ports:
             - "8080:8082"
         volumes:
-            - ./database:/database
-            - ./logs:/logs
+            - ./database:/database:rw
+            - ./logs:/logs:rw
         restart: always
         env_file:
             - .env
@@ -20,8 +20,8 @@ services:
         ports:
             - "80:8080"
         restart: always
-        environment:
-            - API_URL=http://localhost:81
+        env_file:
+            - .env
 
     api:
         image: aliasvault-api
@@ -31,8 +31,8 @@ services:
         ports:
             - "81:8081"
         volumes:
-            - ./database:/database
-            - ./logs:/logs
+            - ./database:/database:rw
+            - ./logs:/logs:rw
         env_file:
             - .env
         restart: always
@@ -46,8 +46,8 @@ services:
             - "25:25"
             - "587:587"
         volumes:
-            - ./database:/database
-            - ./logs:/logs
+            - ./database:/database:rw
+            - ./logs:/logs:rw
         env_file:
             - .env
         restart: always
