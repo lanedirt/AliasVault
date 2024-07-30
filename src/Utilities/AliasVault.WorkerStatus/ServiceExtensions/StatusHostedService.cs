@@ -7,6 +7,7 @@
 
 namespace AliasVault.WorkerStatus.ServiceExtensions;
 
+using AliasVault.WorkerStatus.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -79,7 +80,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
 
         while (!workerCancellationTokenSource.IsCancellationRequested)
         {
-            if (globalServiceStatus.CurrentStatus == "Started" || globalServiceStatus.CurrentStatus == "Starting")
+            if (globalServiceStatus.CurrentStatus.ToStatusEnum() == Status.Started || globalServiceStatus.CurrentStatus.ToStatusEnum() == Status.Starting)
             {
                 lock (_taskLock)
                 {
@@ -90,16 +91,19 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
                     }
                 }
             }
-            else if (globalServiceStatus.CurrentStatus == "Stopping")
+            else if (globalServiceStatus.CurrentStatus.ToStatusEnum() == Status.Stopping)
             {
                 // If the StatusWorker has given us the signal to stop, cancel the inner worker.
                 await workerCancellationTokenSource.CancelAsync();
                 globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
             }
-            else if (globalServiceStatus.CurrentStatus == "Stopped")
+            else if (globalServiceStatus.CurrentStatus.ToStatusEnum() == Status.Stopped)
             {
-                break;
+                // Do nothing, the worker is stopped.
             }
+
+            // Wait for a second before checking the status again.
+            await Task.Delay(1000);
         }
     }
 
