@@ -288,10 +288,10 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <param name="message">MimeMessage.</param>
     /// <param name="toAddress">ToAddress.</param>
     /// <returns>True if success or silent skip, false if SmtpResponse.NoValidRecipientsGiven should be triggered.</returns>
-    private async Task<bool> ProcessEmailForRecipient(MimeMessage message, IMailbox toAddress)
+    private async Task<bool> ProcessEmailForRecipient(MimeMessage message, IMailbox? toAddress)
     {
         // Check if toAddress domain is allowed.
-        if (!config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
+        if (toAddress is null || !config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
         {
             // ToAddress domain is not allowed.
             logger.LogWarning(
