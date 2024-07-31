@@ -147,7 +147,7 @@
     /// </summary>
     private bool IsSpamOkDomain(string email)
     {
-        return Config.PublicEmailDomains.Any(x => email.EndsWith(x));
+        return Config.PublicEmailDomains.Exists(x => email.EndsWith(x));
     }
 
     /// <summary>
@@ -290,7 +290,7 @@
                     case HttpStatusCode.Unauthorized:
                         throw new UnauthorizedAccessException(errorResponse?.Message);
                     default:
-                        throw new ApplicationException(errorResponse?.Message);
+                        throw new WebException(errorResponse?.Message);
                 }
             }
         }
