@@ -10,6 +10,7 @@ namespace AliasVault.Api.Controllers;
 using AliasServerDb;
 using AliasVault.Api.Helpers;
 using AliasVault.Shared.Models.Spamok;
+using AliasVault.Shared.Models.WebApi;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,30 +42,54 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
 
         // See if this user has a valid claim to the email address.
         var emailClaim = await context.UserEmailClaims
-            .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Address == to);
+            .FirstOrDefaultAsync(x => x.Address == to);
 
         if (emailClaim is null)
         {
-            return Unauthorized("User does not have a claim to this email address.");
+            return BadRequest(new ApiErrorResponse
+            {
+                Message = "No claim exists for this email address.",
+                Code = "CLAIM_DOES_NOT_EXIST",
+                Details = new { ProvidedEmail = to },
+                StatusCode = StatusCodes.Status400BadRequest,
+                Timestamp = DateTime.UtcNow,
+            });
+        }
+
+        if (emailClaim.UserId != user.Id)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                Message = "Claim does not match user.",
+                Code = "CLAIM_DOES_NOT_MATCH_USER",
+                Details = new { ProvidedEmail = to },
+                StatusCode = StatusCodes.Status400BadRequest,
+                Timestamp = DateTime.UtcNow,
+            });
         }
 
         // Retrieve emails from database.
-        List<MailboxEmailApiModel> emails = await context.Emails.AsNoTracking().Select(x => new MailboxEmailApiModel()
-        {
-            Id = x.Id,
-            Subject = x.Subject,
-            FromDisplay = ConversionHelper.ConvertFromToFromDisplay(x.From),
-            FromDomain = x.FromDomain,
-            FromLocal = x.FromLocal,
-            ToDomain = x.ToDomain,
-            ToLocal = x.ToLocal,
-            Date = x.Date,
-            DateSystem = x.DateSystem,
-            SecondsAgo = (int)DateTime.UtcNow.Subtract(x.DateSystem).TotalSeconds,
-            MessagePreview = x.MessagePreview ?? string.Empty,
-            EncryptedSymmetricKey = x.EncryptedSymmetricKey,
-            EncryptionKey = x.EncryptionKey.PublicKey,
-        }).OrderByDescending(x => x.DateSystem).Take(75).ToListAsync();
+        List<MailboxEmailApiModel> emails = await context.Emails.AsNoTracking()
+            .Where(x => x.To == to)
+            .Select(x => new MailboxEmailApiModel()
+            {
+                Id = x.Id,
+                Subject = x.Subject,
+                FromDisplay = ConversionHelper.ConvertFromToFromDisplay(x.From),
+                FromDomain = x.FromDomain,
+                FromLocal = x.FromLocal,
+                ToDomain = x.ToDomain,
+                ToLocal = x.ToLocal,
+                Date = x.Date,
+                DateSystem = x.DateSystem,
+                SecondsAgo = (int)DateTime.UtcNow.Subtract(x.DateSystem).TotalSeconds,
+                MessagePreview = x.MessagePreview ?? string.Empty,
+                EncryptedSymmetricKey = x.EncryptedSymmetricKey,
+                EncryptionKey = x.EncryptionKey.PublicKey,
+            })
+            .OrderByDescending(x => x.DateSystem)
+            .Take(50)
+            .ToListAsync();
 
         MailboxApiModel returnValue = new MailboxApiModel();
         returnValue.Address = to;

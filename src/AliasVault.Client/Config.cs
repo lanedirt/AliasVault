@@ -23,5 +23,22 @@ public class Config
     /// Email addresses that client vault users use will be registered at the server
     /// to get exclusive access to the email address.
     /// </summary>
-    public List<string> SmtpAllowedDomains { get; set; } = [];
+    public List<string> PrivateEmailDomains { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the public email domains that are allowed to be used by the client vault users.
+    /// </summary>
+    public List<string> PublicEmailDomains { get; set; } =
+    [
+        "spamok.com",
+        "solarflarecorp.com",
+        "spamok.nl",
+        "3060.nl",
+        "landmail.nl",
+        "asdasd.nl",
+        "spamok.de",
+        "spamok.com.ua",
+        "spamok.es",
+        "spamok.fr",
+    ];
 }

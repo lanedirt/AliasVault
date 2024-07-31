@@ -30,11 +30,11 @@ This README provides step-by-step instructions for manually setting up AliasVaul
    ```
     JWT_KEY=your_32_char_string_here
 
-3. **Set SMTP_ALLOWED_DOMAINS**
+3. **Set PRIVATE_EMAIL_DOMAINS**
 
-   Update the .env file and set the SMTP_ALLOWED_DOMAINS value the allowed domains that can be used for email addresses. Separate multiple domains with commas.
+   Update the .env file and set the PRIVATE_EMAIL_DOMAINS value the allowed domains that can be used for email addresses. Separate multiple domains with commas.
    ```
-   SMTP_ALLOWED_DOMAINS=yourdomain.com,anotherdomain.com
+   PRIVATE_EMAIL_DOMAINS=yourdomain.com,anotherdomain.com
    ```
    Replace `yourdomain.com,anotherdomain.com` with your actual allowed domains.
 

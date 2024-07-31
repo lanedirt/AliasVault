@@ -1,0 +1,173 @@
+﻿@inject Config Config
+@inject JsInteropService JsInteropService
+
+<label for="@Id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
+<div class="relative">
+    <div class="flex">
+        <input type="text" id="@Id" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-l-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@LocalPart" @oninput="OnLocalPartChanged">
+        @if (!IsCustomDomain)
+        {
+            <span class="inline-flex items-center p-2.5 text-sm text-gray-900 bg-gray-200 border border-l-0 border-gray-300 rounded-r-lg dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600 cursor-pointer" @onclick="TogglePopup">
+                <span class="text-gray-500">@@</span>@SelectedDomain
+            </span>
+        }
+    </div>
+</div>
+
+<div class="mt-2">
+    <button type="button" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200" @onclick="TogglePopup">
+        @(IsCustomDomain ? "Use domain chooser" : "Enter custom domain")
+    </button>
+</div>
+
+@if (_isPopupVisible)
+{
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 z-30 overflow-y-auto h-full w-full" @onclick="ClosePopup">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800" @onclick:stopPropagation>
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Select Email Domain</h3>
+                <div class="mt-2 px-7 py-3">
+                    @if (ShowPrivateDomains)
+                    {
+                        <div class="mb-4">
+                            <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">Private Email (AliasVault server)</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">E2E encrypted, fully private.</p>
+                            @foreach (var domain in PrivateDomains)
+                            {
+                                <button class="mt-2 px-4 py-2 bg-primary-300 text-gray-700 rounded hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2" @onclick="() => SelectDomain(domain)">
+                                    @domain
+                                </button>
+                            }
+                        </div>
+                    }
+                    <div class="@(ShowPrivateDomains ? "border-t border-gray-200 dark:border-gray-600 pt-4" : "")">
+                        <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">Public Temp Email Providers</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Anonymous but limited privacy. Accessible to anyone that knows the address.</p>
+                        @foreach (var domain in PublicDomains)
+                        {
+                            <button class="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2" @onclick="() => SelectDomain(domain)">
+                                @domain
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// The id for the input field.
+    /// </summary>
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The label for the input field.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Email Address";
+
+    /// <summary>
+    /// The value of the input field. This should be the full email address.
+    /// </summary>
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Callback that is triggered when the value changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private bool IsCustomDomain { get; set; } = false;
+    private string LocalPart { get; set; } = string.Empty;
+    private string SelectedDomain = string.Empty;
+    private bool _isPopupVisible = false;
+
+    private List<string> PrivateDomains => Config.PrivateEmailDomains;
+    private List<string> PublicDomains => Config.PublicEmailDomains;
+
+    private bool ShowPrivateDomains => PrivateDomains.Count > 0 && !(PrivateDomains.Count == 1 && PrivateDomains[0] == "DISABLED.TLD");
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        IsCustomDomain = !PublicDomains.Contains(SelectedDomain) && !PrivateDomains.Contains(SelectedDomain);
+    }
+
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SelectedDomain = Value.Contains('@') ? Value.Split('@')[1] : (ShowPrivateDomains ? PrivateDomains[0] : PublicDomains[0]);
+        IsCustomDomain = !PublicDomains.Contains(SelectedDomain) && !PrivateDomains.Contains(SelectedDomain);
+        if (IsCustomDomain)
+        {
+            LocalPart = Value;
+        }
+        else
+        {
+            LocalPart = Value.Contains('@') ? Value.Split('@')[0] : Value;
+        }
+    }
+
+    private string FullEmail
+    {
+        get => Value;
+        set
+        {
+            Value = value;
+            ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private async Task OnLocalPartChanged(ChangeEventArgs e)
+    {
+        string newLocalPart = e.Value?.ToString() ?? string.Empty;
+
+        // Check if new value contains '@' symbol, if so, switch to custom domain mode.
+        if (newLocalPart.Contains('@'))
+        {
+            IsCustomDomain = true;
+            Value = newLocalPart;
+            await ValueChanged.InvokeAsync(Value);
+            return;
+        }
+
+        Value = $"{newLocalPart}@{SelectedDomain}";
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private void TogglePopup()
+    {
+        _isPopupVisible = !_isPopupVisible;
+    }
+
+    private void ClosePopup()
+    {
+        _isPopupVisible = false;
+    }
+
+    private async Task SelectDomain(string domain)
+    {
+        Value = $"{LocalPart}@{domain}";
+        await ValueChanged.InvokeAsync(Value);
+        IsCustomDomain = false;
+        ClosePopup();
+    }
+
+    private void ToggleCustomDomain()
+    {
+        IsCustomDomain = !IsCustomDomain;
+        if (!IsCustomDomain && !Value.Contains('@'))
+        {
+            Value = $"{Value}@{(ShowPrivateDomains ? PrivateDomains[0] : PublicDomains[0])}";
+            ValueChanged.InvokeAsync(Value);
+        }
+    }
+}

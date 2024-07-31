@@ -67,6 +67,12 @@ public class MainBase : OwningComponentBase
     public AuthService AuthService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the Config instance with values from appsettings.json.
+    /// </summary>
+    [Inject]
+    public Config Config { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the LocalStorage.
     /// </summary>
     [Inject]
