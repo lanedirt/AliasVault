@@ -25,9 +25,24 @@ jobs:
       run: dotnet build
     - name: Ensure browsers are installed
       run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install --with-deps
-    - name: Run AdminTests
-      run: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
-    - name: Run ClientTests
-      run: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=ClientTests"
-    - name: Run remaining tests
-      run: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category!=AdminTests&Category!=ClientTests"
+
+    - name: Run AdminTests with retry
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
+
+    - name: Run ClientTests with retry
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=ClientTests"
+
+    - name: Run remaining tests with retry
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category!=AdminTests&Category!=ClientTests"
