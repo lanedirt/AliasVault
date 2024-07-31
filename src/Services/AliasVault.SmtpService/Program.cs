@@ -26,8 +26,8 @@ builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAs
 
 // Create global config object, get values from environment variables.
 Config config = new Config();
-var emailDomains = Environment.GetEnvironmentVariable("SMTP_ALLOWED_DOMAINS")
-                   ?? throw new KeyNotFoundException("SMTP_ALLOWED_DOMAINS environment variable is not set.");
+var emailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")
+                   ?? throw new KeyNotFoundException("PRIVATE_EMAIL_DOMAINS environment variable is not set.");
 config.AllowedToDomains = emailDomains.Split(',').ToList();
 
 var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")

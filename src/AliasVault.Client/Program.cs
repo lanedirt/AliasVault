@@ -23,9 +23,9 @@ if (string.IsNullOrEmpty(config.ApiUrl))
     throw new KeyNotFoundException("ApiUrl is not set in the configuration.");
 }
 
-if (config.SmtpAllowedDomains == null || config.SmtpAllowedDomains.Count == 0)
+if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
 {
-    throw new KeyNotFoundException("SmtpAllowedDomains is not set in the configuration.");
+    throw new KeyNotFoundException("PrivateEmailDomains is not set in the configuration.");
 }
 
 builder.Services.AddSingleton(config);

@@ -170,33 +170,33 @@ populate_jwt_key() {
   fi
 }
 
-# Function to ask the user for SMTP_ALLOWED_DOMAINS
-set_smtp_allowed_domains() {
-  printf "${CYAN}> Setting SMTP_ALLOWED_DOMAINS...${NC}\n"
-  if ! grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+# Function to ask the user for PRIVATE_EMAIL_DOMAINS
+set_private_email_domains() {
+  printf "${CYAN}> Setting PRIVATE_EMAIL_DOMAINS...${NC}\n"
+  if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
     printf "Please enter the domains that should be allowed to receive email, separated by commas (press Enter to disable email support): "
-    read -r smtp_allowed_domains
+    read -r private_email_domains
 
     # Set default value if user input is empty
-    smtp_allowed_domains=${smtp_allowed_domains:-"DISABLED.TLD"}
+    private_email_domains=${private_email_domains:-"DISABLED.TLD"}
 
-    if grep -q "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE"; then
-      awk -v domains="$smtp_allowed_domains" '/^SMTP_ALLOWED_DOMAINS=/ {$0="SMTP_ALLOWED_DOMAINS="domains} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    if grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE"; then
+      awk -v domains="$private_email_domains" '/^PRIVATE_EMAIL_DOMAINS=/ {$0="PRIVATE_EMAIL_DOMAINS="domains} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     else
-      echo "SMTP_ALLOWED_DOMAINS=${smtp_allowed_domains}" >> "$ENV_FILE"
+      echo "PRIVATE_EMAIL_DOMAINS=${private_email_domains}" >> "$ENV_FILE"
     fi
 
-    if [ "$smtp_allowed_domains" = "DISABLED.TLD" ]; then
-      printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set to 'DISABLED.TLD' in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
+    if [ "$private_email_domains" = "DISABLED.TLD" ]; then
+      printf "${GREEN}> PRIVATE_EMAIL_DOMAINS has been set to 'DISABLED.TLD' in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
     else
-      printf "${GREEN}> SMTP_ALLOWED_DOMAINS has been set to '${smtp_allowed_domains}' in $ENV_FILE.${NC}\n"
+      printf "${GREEN}> PRIVATE_EMAIL_DOMAINS has been set to '${private_email_domains}' in $ENV_FILE.${NC}\n"
     fi
   else
-    smtp_allowed_domains=$(grep "^SMTP_ALLOWED_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
-    if [ "$smtp_allowed_domains" = "DISABLED.TLD" ]; then
-      printf "${GREEN}> SMTP_ALLOWED_DOMAINS already exists in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
+    private_email_domains=$(grep "^private_email_domains=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ "$private_email_domains" = "DISABLED.TLD" ]; then
+      printf "${GREEN}> PRIVATE_EMAIL_DOMAINS already exists in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
     else
-      printf "${GREEN}> SMTP_ALLOWED_DOMAINS already exists in $ENV_FILE with value: ${smtp_allowed_domains}${NC}\n"
+      printf "${GREEN}> PRIVATE_EMAIL_DOMAINS already exists in $ENV_FILE with value: ${private_email_domains}${NC}\n"
     fi
   fi
 }
@@ -316,7 +316,7 @@ main() {
         create_env_file || exit $?
         populate_api_url || exit $?
         populate_jwt_key || exit $?
-        set_smtp_allowed_domains || exit $?
+        set_private_email_domains || exit $?
         set_smtp_tls_enabled || exit $?
         generate_admin_password || exit $?
         printf "\n${YELLOW}+++ Building Docker containers +++${NC}\n"
