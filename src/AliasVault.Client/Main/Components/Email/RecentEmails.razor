@@ -207,7 +207,6 @@
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
-
         if (IsSpamOkDomain(EmailAddress))
         {
             await ShowSpamOkEmailInModal(emailPrefix, emailId);
