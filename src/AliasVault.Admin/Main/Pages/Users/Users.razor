@@ -33,6 +33,7 @@ else
                 <th scope="col" class="px-4 py-3">Registered</th>
                 <th scope="col" class="px-4 py-3">Username</th>
                 <th scope="col" class="px-4 py-3"># Vaults</th>
+                <th scope="col" class="px-4 py-3"># Email claims</th>
                 <th scope="col" class="px-4 py-3">Storage</th>
                 <th scope="col" class="px-4 py-3">Last vault update</th>
                 <th scope="col" class="px-4 py-3">Actions</th>
@@ -46,6 +47,7 @@ else
                         <td class="px-4 py-3">@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                         <td class="px-4 py-3">@user.UserName</td>
                         <td class="px-4 py-3">@user.VaultCount</td>
+                        <td class="px-4 py-3">@user.EmailClaimCount</td>
                         <td class="px-4 py-3">@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</td>
                         <td class="px-4 py-3">@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</td>
                         <td class="px-4 py-3">
@@ -122,7 +124,11 @@ else
                 {
                     v.FileSize,
                     v.CreatedAt
-                })
+                }),
+                EmailClaims = u.EmailClaims.Select(ec => new
+                {
+                    ec.CreatedAt
+                }),
             })
             .ToListAsync();
 
@@ -132,6 +138,7 @@ else
             UserName = user.UserName?.ToLower() ?? "N/A",
             CreatedAt = user.CreatedAt,
             VaultCount = user.Vaults.Count(),
+            EmailClaimCount = user.EmailClaims.Count(),
             VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
             LastVaultUpdate = user.Vaults.Max(x => x.CreatedAt),
         }).ToList();

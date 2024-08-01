@@ -33,6 +33,11 @@ public class UserViewModel
     public int VaultCount { get; set; }
 
     /// <summary>
+    /// Gets or sets the email claim count.
+    /// </summary>
+    public int EmailClaimCount { get; set; }
+
+    /// <summary>
     /// Gets or sets the total vault storage that this user takes up in kilobytes.
     /// </summary>
     public int VaultStorageInKb { get; set; }
