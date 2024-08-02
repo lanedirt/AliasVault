@@ -62,6 +62,15 @@
     /// </summary>
     private string EmailBody = string.Empty;
 
+    /// <summary>
+    /// Close the modal.
+    /// </summary>
+    [JSInvokable]
+    public Task Close()
+    {
+        return OnClose.InvokeAsync(false);
+    }
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
@@ -87,14 +96,5 @@
                 EmailBody = "[This email has no body.]";
             }
         }
-    }
-
-    /// <summary>
-    /// Close the modal.
-    /// </summary>
-    [JSInvokable]
-    private Task Close()
-    {
-        return OnClose.InvokeAsync(false);
     }
 }

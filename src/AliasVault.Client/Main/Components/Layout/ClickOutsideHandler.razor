@@ -10,57 +10,69 @@
     [Parameter]
     public EventCallback<bool> OnClose { get; set; }
 
-    [Parameter] public string ContentId { get; set; } = "modal-content";
+    /// <summary>
+    /// The content id of the modal which is used to identity if a click is inside or outside the modal.
+    /// </summary>
+    [Parameter]
+    public string ContentId { get; set; } = "modal-content";
 
-    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
+    /// <summary>
+    /// The child content of the component.
+    /// </summary>
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = null!;
 
     private DotNetObjectReference<ClickOutsideHandler>? ObjRef { get; set; }
-    private IJSObjectReference module { get; set; } = null!;
-    private bool IsModuleLoaded { get;set; } = false;
+    private IJSObjectReference? Module { get; set; } = null!;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await LoadModuleAsync();
     }
 
-    private async Task LoadModuleAsync()
-    {
-        if (!IsModuleLoaded)
-        {
-            Console.WriteLine("Loading module clckoutside");
-
-            module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/clickOutsideHandler.js");
-            ObjRef = DotNetObjectReference.Create(this);
-            IsModuleLoaded = true;
-        }
-    }
-
+    /// <inheritdoc />
     protected override async Task OnParametersSetAsync()
     {
         await LoadModuleAsync();
 
-        if (IsModuleLoaded)
+        if (Module != null)
         {
-            await module.InvokeVoidAsync("registerClickOutsideHandler", ObjRef, ContentId, nameof(CloseHandler));
+            await Module.InvokeVoidAsync("registerClickOutsideHandler", ObjRef, ContentId, nameof(CloseHandler));
         }
     }
 
+    /// <summary>
+    /// Call close handler on parent component.
+    /// </summary>
     [JSInvokable]
     public async Task CloseHandler()
     {
-        Console.WriteLine("Click outisde handler invoked");
         await OnClose.InvokeAsync();
         StateHasChanged();
     }
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        if (module != null)
+        if (Module != null)
         {
-            await module.InvokeVoidAsync("unregisterClickOutsideHandler");
-            await module.DisposeAsync();
+            await Module.InvokeVoidAsync("unregisterClickOutsideHandler");
+            await Module.DisposeAsync();
         }
 
         ObjRef?.Dispose();
+    }
+
+    /// <summary>
+    /// Load the JavaScript module.
+    /// </summary>
+    private async Task LoadModuleAsync()
+    {
+        if (Module == null)
+        {
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/clickOutsideHandler.js");
+            ObjRef = DotNetObjectReference.Create(this);
+        }
     }
 }
