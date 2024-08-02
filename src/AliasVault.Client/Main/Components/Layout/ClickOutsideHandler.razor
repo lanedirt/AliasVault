@@ -1,0 +1,69 @@
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+@if (IsVisible)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
+    [Parameter] public string ContainerId { get; set; } = "modal-container";
+    [Parameter] public string ContentId { get; set; } = "modal-content";
+
+    private DotNetObjectReference<ClickOutsideHandler>? ObjRef { get; set; }
+    private IJSObjectReference module { get; set; } = null!;
+    private bool IsModuleLoaded { get;set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModuleAsync();
+    }
+
+    private async Task LoadModuleAsync()
+    {
+        if (!IsModuleLoaded)
+        {
+            module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/clickOutsideHandler.js");
+            ObjRef = DotNetObjectReference.Create(this);
+            IsVisible = true;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadModuleAsync();
+
+        if (IsModuleLoaded)
+        {
+            if (IsVisible)
+            {
+                await module.InvokeVoidAsync("registerClickOutsideHandler", ObjRef, ContentId, nameof(CloseHandler));
+            }
+            else
+            {
+                await module.InvokeVoidAsync("unregisterClickOutsideHandler");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task CloseHandler()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module != null)
+        {
+            await module.InvokeVoidAsync("unregisterClickOutsideHandler");
+            await module.DisposeAsync();
+        }
+
+        ObjRef?.Dispose();
+    }
+}

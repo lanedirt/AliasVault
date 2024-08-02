@@ -64,11 +64,20 @@ public class JsInteropService(IJSRuntime jsRuntime)
     /// </summary>
     /// <typeparam name="TComponent">Component type.</typeparam>
     /// <param name="objRef">DotNetObjectReference.</param>
+    /// <param name="elementIds">Element ids that are considered inside.</param>
+    /// <param name="methodName">Method to execute when clicked outside.</param>
     /// <returns>Task.</returns>
-    public async Task RegisterClickOutsideHandler<TComponent>(DotNetObjectReference<TComponent> objRef)
+    public async Task<IJSObjectReference> RegisterClickOutsideHandler<TComponent>(
+        DotNetObjectReference<TComponent> objRef,
+        string[] elementIds,
+        string methodName)
         where TComponent : class
     {
-        await jsRuntime.InvokeVoidAsync("window.registerClickOutsideHandler", objRef);
+        return await jsRuntime.InvokeAsync<IJSObjectReference>(
+            "window.registerClickOutsideHandler",
+            objRef,
+            elementIds,
+            methodName);
     }
 
     /// <summary>

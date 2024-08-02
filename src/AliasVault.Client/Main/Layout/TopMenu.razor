@@ -1,5 +1,4 @@
 ﻿@inherits AliasVault.Client.Main.Pages.MainBase
-@implements IDisposable
 
 <header>
     <nav class="fixed z-30 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4">
@@ -35,11 +34,11 @@
                     <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="user photo">
                 </button>
 
-                @if (isMenuOpen)
+                @if (IsMenuOpen)
                 {
                     <div class="absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="userMenuDropdown" data-popper-placement="bottom">
                         <div class="py-3 px-4">
-                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">@_username</span>
+                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">@Username</span>
                         </div>
                         <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="userMenuDropdownButton">
                             <li>
@@ -61,7 +60,7 @@
             </div>
         </div>
     </nav>
-    @if (isMobileMenuOpen)
+    @if (IsMobileMenuOpen)
     {
         <nav class="bg-white dark:bg-gray-900">
             <ul id="mobileMenu" class="flex-col mt-0 pt-16 w-full text-sm font-medium lg:hidden">
@@ -81,9 +80,9 @@
 </header>
 
 @code {
-    private bool isMenuOpen = false;
-    private bool isMobileMenuOpen = false;
-    private string _username { get; set; } = "";
+    private bool IsMenuOpen { get; set; } = false;
+    private bool IsMobileMenuOpen { get; set; } = false;
+    private string Username { get; set; } = "";
 
     /// <summary>
     /// Close the menu.
@@ -91,8 +90,8 @@
     [JSInvokable]
     public void CloseMenu()
     {
-        isMenuOpen = false;
-        isMobileMenuOpen = false;
+        IsMenuOpen = false;
+        IsMobileMenuOpen = false;
         StateHasChanged();
     }
 
@@ -108,7 +107,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _username = await GetUsernameAsync();
+        Username = await GetUsernameAsync();
         NavigationManager.LocationChanged += LocationChanged;
     }
 
@@ -119,25 +118,23 @@
         if (firstRender)
         {
             await JsInteropService.InitTopMenu();
-            DotNetObjectReference<TopMenu> objRef = DotNetObjectReference.Create(this);
-            await JsInteropService.RegisterClickOutsideHandler(objRef);
         }
     }
 
     private void LocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        isMenuOpen = false;
-        isMobileMenuOpen = false;
+        IsMenuOpen = false;
+        IsMobileMenuOpen = false;
         StateHasChanged();
     }
 
     private void ToggleMenu()
     {
-        isMenuOpen = !isMenuOpen;
+        IsMenuOpen = !IsMenuOpen;
     }
 
     private void ToggleMobileMenu()
     {
-        isMobileMenuOpen = !isMobileMenuOpen;
+        IsMobileMenuOpen = !IsMobileMenuOpen;
     }
 }
