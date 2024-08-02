@@ -118,6 +118,8 @@
         if (firstRender)
         {
             await JsInteropService.InitTopMenu();
+            DotNetObjectReference<TopMenu> objRef = DotNetObjectReference.Create(this);
+            await JsInteropService.TopMenuClickOutsideHandler(objRef);
         }
     }
 

@@ -14,26 +14,20 @@ window.initTopMenu = function() {
     initDarkModeSwitcher();
 };
 
-window.registerClickOutsideHandler = (dotNetHelper, elementIds, methodName) => {
-    const handleClickOrEscape = (event) => {
-        const shouldClose = elementIds.every(id => {
-            const element = document.getElementById(id);
-            return element && !element.contains(event.target);
-        });
-
-        if (shouldClose || (event.key === 'Escape')) {
-            dotNetHelper.invokeMethodAsync(methodName);
+window.topMenuClickOutsideHandler = (dotNetHelper) => {
+    document.addEventListener('click', (event) => {
+        const menu = document.getElementById('userMenuDropdown');
+        const menuButton = document.getElementById('userMenuDropdownButton');
+        if (menu && !menu.contains(event.target) && !menuButton.contains(event.target)) {
+            dotNetHelper.invokeMethodAsync('CloseMenu');
         }
-    };
 
-    document.addEventListener('click', handleClickOrEscape);
-    document.addEventListener('keydown', handleClickOrEscape);
-
-    // Return a function to remove the event listeners
-    return () => {
-        document.removeEventListener('click', handleClickOrEscape);
-        document.removeEventListener('keydown', handleClickOrEscape);
-    };
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuButton = document.getElementById('toggleMobileMenuButton');
+        if (mobileMenu && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+            dotNetHelper.invokeMethodAsync('CloseMenu');
+        }
+    });
 };
 
 window.clipboardCopy = {

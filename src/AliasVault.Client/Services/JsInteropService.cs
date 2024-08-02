@@ -60,25 +60,14 @@ public class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("window.initTopMenu");
 
     /// <summary>
-    ///  Registers a click outside handler.
+    /// Registers a click outside handler for the top menu.
     /// </summary>
     /// <typeparam name="TComponent">Component type.</typeparam>
     /// <param name="objRef">DotNetObjectReference.</param>
-    /// <param name="elementIds">Element ids that are considered inside.</param>
-    /// <param name="methodName">Method to execute when clicked outside.</param>
     /// <returns>Task.</returns>
-    public async Task<IJSObjectReference> RegisterClickOutsideHandler<TComponent>(
-        DotNetObjectReference<TComponent> objRef,
-        string[] elementIds,
-        string methodName)
-        where TComponent : class
-    {
-        return await jsRuntime.InvokeAsync<IJSObjectReference>(
-            "window.registerClickOutsideHandler",
-            objRef,
-            elementIds,
-            methodName);
-    }
+    public async Task TopMenuClickOutsideHandler<TComponent>(DotNetObjectReference<TComponent> objRef)
+        where TComponent : class =>
+        await jsRuntime.InvokeVoidAsync("window.topMenuClickOutsideHandler", objRef);
 
     /// <summary>
     /// Generates a new RSA key pair.

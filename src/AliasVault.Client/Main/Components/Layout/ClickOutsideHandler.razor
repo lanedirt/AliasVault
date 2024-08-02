@@ -1,17 +1,18 @@
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
-@if (IsVisible)
-{
-    @ChildContent
-}
+@ChildContent
 
 @code {
-    [Parameter] public bool IsVisible { get; set; }
-    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
-    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
-    [Parameter] public string ContainerId { get; set; } = "modal-container";
+    /// <summary>
+    /// Callback when clicked outside the child.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> OnClose { get; set; }
+
     [Parameter] public string ContentId { get; set; } = "modal-content";
+
+    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
 
     private DotNetObjectReference<ClickOutsideHandler>? ObjRef { get; set; }
     private IJSObjectReference module { get; set; } = null!;
@@ -26,9 +27,11 @@
     {
         if (!IsModuleLoaded)
         {
+            Console.WriteLine("Loading module clckoutside");
+
             module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/clickOutsideHandler.js");
             ObjRef = DotNetObjectReference.Create(this);
-            IsVisible = true;
+            IsModuleLoaded = true;
         }
     }
 
@@ -38,22 +41,16 @@
 
         if (IsModuleLoaded)
         {
-            if (IsVisible)
-            {
-                await module.InvokeVoidAsync("registerClickOutsideHandler", ObjRef, ContentId, nameof(CloseHandler));
-            }
-            else
-            {
-                await module.InvokeVoidAsync("unregisterClickOutsideHandler");
-            }
+            await module.InvokeVoidAsync("registerClickOutsideHandler", ObjRef, ContentId, nameof(CloseHandler));
         }
     }
 
     [JSInvokable]
     public async Task CloseHandler()
     {
-        IsVisible = false;
-        await IsVisibleChanged.InvokeAsync(IsVisible);
+        Console.WriteLine("Click outisde handler invoked");
+        await OnClose.InvokeAsync();
+        StateHasChanged();
     }
 
     public async ValueTask DisposeAsync()
