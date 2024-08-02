@@ -9,15 +9,15 @@ namespace AliasVault.IntegrationTests.SmtpServer;
 
 using System.Data.Common;
 using AliasServerDb;
+using AliasVault.SmtpService;
 using AliasVault.SmtpService.Handlers;
 using AliasVault.SmtpService.Workers;
-using SmtpService;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using global::SmtpServer;
 using global::SmtpServer.Storage;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 /// <summary>
 /// Builder class for creating a test host for the SmtpServiceWorker in order to run integration tests against it.
@@ -55,7 +55,7 @@ public class TestHostBuilder
     /// <summary>
     /// Builds the SmtpService test host.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>IHost.</returns>
     public IHost Build()
     {
         // Create a persistent in-memory database for the duration of the test.
@@ -68,7 +68,8 @@ public class TestHostBuilder
      /// <summary>
     /// Builds the SmtpService test host with a provided database connection.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="dbConnection">The database connection to use for the test.</param>
+    /// <returns>IHost.</returns>
     public IHost Build(DbConnection dbConnection)
     {
         // Create a persistent in-memory database for the duration of the test.
@@ -80,7 +81,7 @@ public class TestHostBuilder
                 services.AddSingleton(new Config
                 {
                     AllowedToDomains = new List<string> { "example.tld" },
-                    SmtpTlsEnabled = "false"
+                    SmtpTlsEnabled = "false",
                 });
 
                 services.AddSingleton(_dbConnection);
@@ -106,12 +107,10 @@ public class TestHostBuilder
                                     .Port(2525, false))
                             .Endpoint(serverBuilder =>
                                 serverBuilder
-                                    .Port(5870, false)
-                            );
+                                    .Port(5870, false));
 
                         return new SmtpServer(options.Build(), provider.GetRequiredService<IServiceProvider>());
-                    }
-                );
+                    });
 
                 services.AddHostedService<SmtpServerWorker>();
 

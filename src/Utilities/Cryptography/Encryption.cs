@@ -98,6 +98,18 @@ public static class Encryption
     /// <returns>The encrypted string (ciphertext).</returns>
     public static string SymmetricEncrypt(string plaintext, byte[] key)
     {
+        var encryptedBytes = SymmetricEncrypt(Encoding.UTF8.GetBytes(plaintext), key);
+        return Convert.ToBase64String(encryptedBytes);
+    }
+
+    /// <summary>
+    /// SymmetricEncrypt a byte array using AES-256 GCM.
+    /// </summary>
+    /// <param name="plainBytes">The plain byte array.</param>
+    /// <param name="key">Key to use for encryption (must be 32 bytes for AES-256).</param>
+    /// <returns>The encrypted string (ciphertext).</returns>
+    public static byte[] SymmetricEncrypt(byte[] plainBytes, byte[] key)
+    {
         byte[] iv = new byte[12];
         SecureRandom random = new();
         random.NextBytes(iv);
@@ -106,16 +118,15 @@ public static class Encryption
         AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
         gcm.Init(true, parameters);
 
-        byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-        byte[] ciphertextBytes = new byte[gcm.GetOutputSize(plaintextBytes.Length)];
-        int outputLength = gcm.ProcessBytes(plaintextBytes, 0, plaintextBytes.Length, ciphertextBytes, 0);
+        byte[] ciphertextBytes = new byte[gcm.GetOutputSize(plainBytes.Length)];
+        int outputLength = gcm.ProcessBytes(plainBytes, 0, plainBytes.Length, ciphertextBytes, 0);
         gcm.DoFinal(ciphertextBytes, outputLength);
 
         byte[] combined = new byte[iv.Length + ciphertextBytes.Length];
         Array.Copy(iv, 0, combined, 0, iv.Length);
         Array.Copy(ciphertextBytes, 0, combined, iv.Length, ciphertextBytes.Length);
 
-        return Convert.ToBase64String(combined);
+        return combined;
     }
 
     /// <summary>
@@ -126,13 +137,23 @@ public static class Encryption
     /// <returns>The original plaintext string.</returns>
     public static string SymmetricDecrypt(string ciphertext, byte[] key)
     {
-        byte[] fullCipher = Convert.FromBase64String(ciphertext);
+        var plainBytes = SymmetricDecrypt(Convert.FromBase64String(ciphertext), key);
+        return Encoding.UTF8.GetString(plainBytes).TrimEnd('\0');
+    }
 
+    /// <summary>
+    /// SymmetricDecrypt a cipher byte array using AES-256 GCM.
+    /// </summary>
+    /// <param name="encryptedBytes">The encrypted byte array (cipherBytes).</param>
+    /// <param name="key">The key used to originally encrypt the string.</param>
+    /// <returns>The original plaintext string.</returns>
+    public static byte[] SymmetricDecrypt(byte[] encryptedBytes, byte[] key)
+    {
         byte[] iv = new byte[12];
-        byte[] cipherBytes = new byte[fullCipher.Length - iv.Length];
+        byte[] cipherBytes = new byte[encryptedBytes.Length - iv.Length];
 
-        Array.Copy(fullCipher, 0, iv, 0, iv.Length);
-        Array.Copy(fullCipher, iv.Length, cipherBytes, 0, cipherBytes.Length);
+        Array.Copy(encryptedBytes, 0, iv, 0, iv.Length);
+        Array.Copy(encryptedBytes, iv.Length, cipherBytes, 0, cipherBytes.Length);
 
         GcmBlockCipher gcm = new(new AesEngine());
         AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
@@ -142,7 +163,7 @@ public static class Encryption
         int outputLength = gcm.ProcessBytes(cipherBytes, 0, cipherBytes.Length, plaintextBytes, 0);
         gcm.DoFinal(plaintextBytes, outputLength);
 
-        return Encoding.UTF8.GetString(plaintextBytes).TrimEnd('\0');
+        return plaintextBytes;
     }
 
     /// <summary>

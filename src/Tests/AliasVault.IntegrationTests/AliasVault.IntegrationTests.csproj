@@ -9,6 +9,16 @@
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net8.0\AliasVault.IntegrationTests.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net8.0\AliasVault.IntegrationTests.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="MailKit" Version="4.7.1.1" />
@@ -16,6 +26,10 @@
         <PackageReference Include="NUnit" Version="3.14.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
