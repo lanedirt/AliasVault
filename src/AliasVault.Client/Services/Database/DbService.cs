@@ -12,10 +12,8 @@ using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Client.Services.Auth;
 using AliasVault.Shared.Models.WebApi;
-using Cryptography;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
 
 /// <summary>
 /// Class to manage the in-memory AliasClientDb service. The reason for this service is to provide a way to interact

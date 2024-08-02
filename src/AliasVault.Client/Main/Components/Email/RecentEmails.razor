@@ -13,7 +13,7 @@
 
 @if (EmailModalVisible)
 {
-    <EmailModal Email="@Email" OnClose="CloseEmailModal" />
+    <EmailModal Email="@Email" IsSpamOk="@IsSpamOk" OnClose="CloseEmailModal" />
 }
 
 @if (ShowComponent)
@@ -95,14 +95,12 @@
     private bool EmailModalVisible { get; set; }
     private string Error { get; set; } = string.Empty;
     private Timer? RefreshTimer { get; set; }
+
     private bool IsRefreshing { get; set; } = true;
-
-    /// <summary>
-    /// Boolean for UI to indicate refreshing. This value is switched between false/true every 2 seconds.
-    /// </summary>
-    private bool RefreshTick { get; set; } = false;
-
     private bool IsLoading { get; set; } = true;
+
+    private bool IsSpamOk { get; set; } = false;
+
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -114,10 +112,18 @@
         {
             ShowComponent = true;
         }
+        IsSpamOk = IsSpamOkDomain(EmailAddress);
 
         RefreshTimer = new Timer(2000);
         RefreshTimer.Elapsed += async (sender, e) => await TimerRefresh();
         RefreshTimer.Start();
+    }
+
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        IsSpamOk = IsSpamOkDomain(EmailAddress);
     }
 
     /// <inheritdoc />

@@ -904,6 +904,10 @@ video {
   width: 0.75rem;
 }
 
+.w-3\/4 {
+  width: 75%;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -1131,6 +1135,10 @@ video {
 
 .overflow-y-auto {
   overflow-y: auto;
+}
+
+.overscroll-y-auto {
+  overscroll-behavior-y: auto;
 }
 
 .whitespace-nowrap {

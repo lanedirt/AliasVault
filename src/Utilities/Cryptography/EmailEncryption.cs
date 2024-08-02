@@ -47,6 +47,12 @@ public static class EmailEncryption
         email.FromLocal = Encryption.SymmetricEncrypt(email.FromLocal, symmetricKey);
         email.FromDomain = Encryption.SymmetricEncrypt(email.FromDomain, symmetricKey);
 
+        // Encrypt all attachments with the symmetric key.
+        foreach (var attachment in email.Attachments)
+        {
+            attachment.Bytes = Encryption.SymmetricEncrypt(attachment.Bytes, symmetricKey);
+        }
+
         // Encrypt the symmetric key with the user's public key.
         email.EncryptedSymmetricKey = Encryption.EncryptSymmetricKeyWithRsa(symmetricKey, userEncryptionKey.PublicKey);
         email.UserEncryptionKeyId = userEncryptionKey.Id;

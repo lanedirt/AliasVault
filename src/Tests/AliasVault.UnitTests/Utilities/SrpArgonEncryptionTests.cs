@@ -138,4 +138,33 @@ public class SrpArgonEncryptionTests
         // Ensure the keys match.
         Assert.That(clientSession.Key, Is.EqualTo(serverSession.Key));
     }
+
+    /// <summary>
+    /// Test byte array encryption and decryption overload methods.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task TestByteArrayEncryption()
+    {
+        string password = "your-password";
+        string salt = "your-salt";
+
+        // Derive a key from the password using Argon2id
+        byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
+
+        // Generate random byte array of 1000 bytes
+        byte[] plainBytes = new byte[1000];
+        new Random().NextBytes(plainBytes);
+
+        // SymmetricEncrypt the plainBytes
+        var cipherBytes = Encryption.SymmetricEncrypt(plainBytes, key);
+
+        Assert.That(cipherBytes, Is.Not.Null);
+        Assert.That(cipherBytes, Is.Not.Empty);
+        Assert.That(cipherBytes, Is.Not.EqualTo(plainBytes));
+
+        // SymmetricDecrypt the cipherBytes
+        var decrypted = Encryption.SymmetricDecrypt(cipherBytes, key);
+        Assert.That(decrypted, Is.EqualTo(plainBytes));
+    }
 }

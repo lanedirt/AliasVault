@@ -1,30 +1,42 @@
 ﻿@using AliasVault.Shared.Models.Spamok
+@inject JsInteropService JsInteropService
 
-<div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
-    <div class="relative p-8 bg-white w-full max-w-md flex-col flex rounded-lg shadow-xl">
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white"><a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a></h2>
-            <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="mt-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">From: @Email.FromDisplay</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email.DateSystem</p>
-        </div>
-        <div class="mt-4 text-gray-700 dark:text-gray-300">
-            <div>
-                <iframe class="w-full h-[700px]" srcdoc="@(EmailBody ?? "<div>This email has no HTML content.</div>")">
-                </iframe>
+<ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
+    <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
+        <div id="emailModal" class="relative p-8 bg-white w-3/4 flex-col flex rounded-lg shadow-xl">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    @if (IsSpamOk)
+                    {
+                        <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a>
+                    }
+                    else
+                    {
+                        <span>@Email?.Subject</span>
+                    }
+                </h2>
+                <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">From: @Email?.FromDisplay</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email?.DateSystem</p>
+            </div>
+            <div class="mt-4 text-gray-700 dark:text-gray-300">
+                <div>
+                    <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@(EmailBody ?? "<div>This email has no HTML content.</div>")">
+                    </iframe>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
             </div>
         </div>
-        <div class="mt-6 flex justify-end">
-            <button @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
-        </div>
     </div>
-</div>
+</ClickOutsideHandler>
 
 @code {
     /// <summary>
@@ -32,6 +44,12 @@
     /// </summary>
     [Parameter]
     public EmailApiModel? Email { get; set; }
+
+    /// <summary>
+    /// Boolean that indicates if the email is from SpamOK public API.
+    /// </summary>
+    [Parameter]
+    public bool IsSpamOk { get; set; }
 
     /// <summary>
     /// Callback when the modal is closed.
@@ -43,6 +61,15 @@
     /// The message body to display
     /// </summary>
     private string EmailBody = string.Empty;
+
+    /// <summary>
+    /// Close the modal.
+    /// </summary>
+    [JSInvokable]
+    public Task Close()
+    {
+        return OnClose.InvokeAsync(false);
+    }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -69,13 +96,5 @@
                 EmailBody = "[This email has no body.]";
             }
         }
-    }
-
-    /// <summary>
-    /// Close the modal.
-    /// </summary>
-    private Task Close()
-    {
-        return OnClose.InvokeAsync(false);
     }
 }

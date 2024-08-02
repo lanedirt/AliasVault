@@ -9,3 +9,37 @@ function downloadFileFromStream(fileName, contentStreamReference) {
     anchorElement.remove();
     URL.revokeObjectURL(url);
 }
+
+window.initTopMenu = function() {
+    initDarkModeSwitcher();
+};
+
+window.topMenuClickOutsideHandler = (dotNetHelper) => {
+    document.addEventListener('click', (event) => {
+        const menu = document.getElementById('userMenuDropdown');
+        const menuButton = document.getElementById('userMenuDropdownButton');
+        if (menu && !menu.contains(event.target) && !menuButton.contains(event.target)) {
+            dotNetHelper.invokeMethodAsync('CloseMenu');
+        }
+
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuButton = document.getElementById('toggleMobileMenuButton');
+        if (mobileMenu && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+            dotNetHelper.invokeMethodAsync('CloseMenu');
+        }
+    });
+};
+
+window.clipboardCopy = {
+    copyText: function (text) {
+        navigator.clipboard.writeText(text).then(function () { })
+            .catch(function (error) {
+                alert(error);
+            });
+    }
+};
+
+// Primarily used by E2E tests.
+window.blazorNavigate = (url) => {
+    Blazor.navigateTo(url);
+};
