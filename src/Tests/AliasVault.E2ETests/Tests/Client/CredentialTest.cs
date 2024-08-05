@@ -121,8 +121,12 @@ public class CredentialTest : ClientPlaywrightTest
         var firstName = await Page.InputValueAsync("#first-name");
         var lastName = await Page.InputValueAsync("#last-name");
 
-        Assert.That(username, Is.Not.Null.And.Not.Empty, "Username not generated.");
-        Assert.That(firstName, Is.Not.Null.And.Not.Empty, "First name not generated.");
-        Assert.That(lastName, Is.Not.Null.And.Not.Empty, "Last name not generated.");
+        Assert.Multiple(
+            () =>
+        {
+            Assert.That(username, Is.Not.Null.And.Not.Empty, "Username not generated.");
+            Assert.That(firstName, Is.Not.Null.And.Not.Empty, "First name not generated.");
+            Assert.That(lastName, Is.Not.Null.And.Not.Empty, "Last name not generated.");
+        });
     }
 }
