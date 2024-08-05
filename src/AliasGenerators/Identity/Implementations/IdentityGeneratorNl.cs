@@ -16,11 +16,11 @@ using AliasGenerators.Identity.Implementations.Base;
 public class IdentityGeneratorNl : IdentityGenerator
 {
     /// <inheritdoc cref="IdentityGenerator.FirstNamesListMale" />
-    protected override string FirstNamesListMale => "AliasGenerators.Identity.Implementations.Lists.nl.firstnames_male";
+    protected override string FirstNamesListMale => "AliasGenerators.Identity.Implementations.Dictionaries.nl.firstnames_male";
 
     /// <inheritdoc cref="IdentityGenerator.FirstNamesListFemale" />
-    protected override string FirstNamesListFemale => "AliasGenerators.Identity.Implementations.Lists.nl.firstnames_female";
+    protected override string FirstNamesListFemale => "AliasGenerators.Identity.Implementations.Dictionaries.nl.firstnames_female";
 
     /// <inheritdoc cref="IdentityGenerator.LastNamesList" />
-    protected override string LastNamesList => "AliasGenerators.Identity.Implementations.Lists.nl.lastnames";
+    protected override string LastNamesList => "AliasGenerators.Identity.Implementations.Dictionaries.nl.lastnames";
 }

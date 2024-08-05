@@ -24,7 +24,7 @@ public class IdentityGeneratorTest
     public async Task TestNlGenerator()
     {
         // Generate random NL identity.
-        var generator = new IdentityGeneratorNl();
+        var generator = IdentityGeneratorFactory.CreateIdentityGenerator("nl");
 
         // Generate 10 identities, check if they are all unique.
         var identities = new List<Identity>();
@@ -62,8 +62,8 @@ public class IdentityGeneratorTest
     [Test]
     public async Task TestEnGenerator()
     {
-        // Generate random NL identity.
-        var generator = new IdentityGeneratorEn();
+        // Generate random EN identity.
+        var generator = IdentityGeneratorFactory.CreateIdentityGenerator("en");
 
         // Generate 10 identities, check if they are all unique.
         var identities = new List<Identity>();

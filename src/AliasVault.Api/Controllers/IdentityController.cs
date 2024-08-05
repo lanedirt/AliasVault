@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 public class IdentityController(UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
-    /// Proxies the request to the identity generator to generate a random identity.
+    /// Proxies the request to the english identity generator to generate a random identity.
     /// </summary>
     /// <returns>Identity model.</returns>
     [HttpGet("Generate")]
@@ -33,7 +33,7 @@ public class IdentityController(UserManager<AliasVaultUser> userManager) : Authe
             return Unauthorized();
         }
 
-        var identityGenerator = new FigIdentityGenerator();
+        var identityGenerator = new IdentityGeneratorEn();
         return Ok(await identityGenerator.GenerateRandomIdentityAsync());
     }
 }

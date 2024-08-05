@@ -22,6 +22,9 @@ public class UsernameEmailGenerator
     /// </summary>
     private const int MaxLength = 20;
 
+    /// <summary>
+    /// Create a new random instance for generating random values.
+    /// </summary>
     private readonly Random _random = new();
 
     /// <summary>
@@ -60,7 +63,7 @@ public class UsernameEmailGenerator
     /// <returns>Valid email prefix as string.</returns>
     public string GenerateEmailPrefix(Models.Identity identity)
     {
-        List<string> parts = new List<string>();
+        var parts = new List<string>();
 
         // Use first initial + last name
         if (_random.Next(2) == 0)
@@ -86,7 +89,7 @@ public class UsernameEmailGenerator
         }
 
         // Join parts and sanitize
-        string emailPrefix = string.Join(GetRandomSymbol(), parts);
+        var emailPrefix = string.Join(GetRandomSymbol(), parts);
         emailPrefix = SanitizeEmailPrefix(emailPrefix);
 
         // Adjust length
@@ -103,15 +106,11 @@ public class UsernameEmailGenerator
     }
 
     /// <summary>
-    /// Get a random symbol from the list of symbols.
+    /// Sanitize the email prefix by removing invalid characters and ensuring it's a valid email prefix.
     /// </summary>
-    /// <returns>Random symbol.</returns>
-    private string GetRandomSymbol()
-    {
-        return _random.Next(3) == 0 ? _symbols[_random.Next(_symbols.Count)] : string.Empty;
-    }
-
-    private string SanitizeEmailPrefix(string input)
+    /// <param name="input">The input string to sanitize.</param>
+    /// <returns>The sanitized string.</returns>
+    private static string SanitizeEmailPrefix(string input)
     {
         // Remove any character that's not a letter, number, dot, underscore, or hyphen including special characters
         string sanitized = System.Text.RegularExpressions.Regex.Replace(input, @"[^a-zA-Z0-9._-]", string.Empty);
@@ -125,6 +124,20 @@ public class UsernameEmailGenerator
         return sanitized;
     }
 
+    /// <summary>
+    /// Get a random symbol from the list of symbols.
+    /// </summary>
+    /// <returns>Random symbol.</returns>
+    private string GetRandomSymbol()
+    {
+        return _random.Next(3) == 0 ? _symbols[_random.Next(_symbols.Count)] : string.Empty;
+    }
+
+    /// <summary>
+    /// Generate a random string of a given length.
+    /// </summary>
+    /// <param name="length">Length of string to generate.</param>
+    /// <returns>String with random characters.</returns>
     private string GenerateRandomString(int length)
     {
         const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
