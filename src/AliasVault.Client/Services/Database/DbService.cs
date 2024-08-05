@@ -188,6 +188,7 @@ public class DbService : IDisposable
         {
             await _dbContext.Database.MigrateAsync();
             _isSuccessfullyInitialized = true;
+            await _settingsService.InitializeAsync(this);
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
         catch (Exception ex)
@@ -432,10 +433,7 @@ public class DbService : IDisposable
                 }
 
                 _isSuccessfullyInitialized = true;
-
-                // Initialize child settings service if it's not already.
                 await _settingsService.InitializeAsync(this);
-
                 _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
                 return true;
             }
