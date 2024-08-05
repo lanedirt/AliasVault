@@ -191,6 +191,27 @@ public class ClientPlaywrightTest : PlaywrightTest
     }
 
     /// <summary>
+    /// Logout the current user and register a new account.
+    /// </summary>
+    /// <returns>Task.</returns>
+    protected async Task LogoutAndLoginAsNewUser()
+    {
+        // Logout.
+        await NavigateUsingBlazorRouter("user/logout");
+        await WaitForUrlAsync("user/logout", "AliasVault");
+
+        // Wait and check if we get redirected to /user/login.
+        await WaitForUrlAsync("user/login");
+
+        // Reset username and password so a new random account is created.
+        TestUserUsername = string.Empty;
+        TestUserPassword = string.Empty;
+
+        // Register a new account random account.
+        await Register();
+    }
+
+    /// <summary>
     /// Register a new random account.
     /// </summary>
     /// <returns>Async task.</returns>

@@ -88,7 +88,6 @@ public class EmailDecryptionTest : ClientPlaywrightTest
         Assert.That(emailReceived.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
 
         // Attempt to click on email refresh button to get new emails.
-        // Id =  recent-email-refresh
         await Page.Locator("id=recent-email-refresh").First.ClickAsync();
 
         // Wait for 1 sec
@@ -119,6 +118,47 @@ public class EmailDecryptionTest : ClientPlaywrightTest
         var claim = await ApiDbContext.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == email);
 
         Assert.That(claim, Is.Null, "Claim for unknown email address domain found in database. Check if claim creation domain check is working correctly.");
+    }
+
+    /// <summary>
+    /// Test that a user cannot claim an email address that is already claimed by another user.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task EmailDuplicateClaimTest()
+    {
+        // Create credential which should automatically create claim on server during database sync.
+        const string serviceName = "Test Service";
+        const string email = "testclaimduplicate@example.tld";
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName },
+            { "email", email },
+        });
+
+        // Assert that the claim was created on the server.
+        var claim = await ApiDbContext.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == email);
+
+        // Login as new user.
+        await LogoutAndLoginAsNewUser();
+
+        // Try to claim the same email address again.
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName },
+            { "email", email },
+        });
+
+        // Assert that still only one claim exists for the email address.
+        var claimCount = await ApiDbContext.UserEmailClaims.CountAsync(x => x.Address == email);
+        Assert.That(
+            claimCount,
+            Is.LessThanOrEqualTo(1),
+            "More than one claim for email address found in database while only one should exist. Check if claim creation domain check is working correctly.");
+
+        // Assert that error is displayed on the page.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("The current chosen email address is already in use"), "Error message not displayed on page when trying to claim email address already claimed by another user.");
     }
 
     /// <summary>
