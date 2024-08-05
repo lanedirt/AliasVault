@@ -84,12 +84,6 @@ public class UsernameEmailGenerator
             parts.Add(identity.BirthDate.Year.ToString().Substring(2));
         }
 
-        // Ensure at least one part
-        if (parts.Count == 0)
-        {
-            parts.Add(identity.FirstName.ToLower() + identity.LastName.ToLower());
-        }
-
         // Join parts and sanitize
         var emailPrefix = string.Join(GetRandomSymbol(), parts);
         emailPrefix = SanitizeEmailPrefix(emailPrefix);

@@ -40,7 +40,7 @@ public abstract class IdentityGenerator : IIdentityGenerator
     /// <summary>
     /// Initializes a new instance of the <see cref="IdentityGenerator"/> class.
     /// </summary>
-    public IdentityGenerator()
+    protected IdentityGenerator()
     {
         _firstNamesMale = LoadList(FirstNamesListMale);
         _firstNamesFemale = LoadList(FirstNamesListFemale);
