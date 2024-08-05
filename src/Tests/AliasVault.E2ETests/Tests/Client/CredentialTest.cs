@@ -86,4 +86,47 @@ public class CredentialTest : ClientPlaywrightTest
         Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
         Assert.That(pageContent, Does.Contain(serviceNameAfter), "Credential not updated correctly.");
     }
+
+    /// <summary>
+    /// Test if generating a new identity on the create new credential screen works.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task GenerateIdentityTest()
+    {
+        // Create a new alias with service name = "Test Service".
+        var serviceName = "Test Service";
+
+        await NavigateUsingBlazorRouter("add-credentials");
+        await WaitForUrlAsync("add-credentials", "Add credentials");
+
+        await InputHelper.FillInputFields(
+            fieldValues: new Dictionary<string, string>
+            {
+                { "service-name", serviceName },
+            });
+
+        // Wait for button with text "Generate Random Identity" to appear.
+        var generateButton = Page.Locator("text=Generate Random Identity");
+        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
+
+        // Press the button to generate a random identity.
+        await generateButton.First.ClickAsync();
+
+        // Wait for the identity fields to be filled.
+        await Task.Delay(1000);
+
+        // Verify that the identity fields are filled.
+        var username = await Page.InputValueAsync("#username");
+        var firstName = await Page.InputValueAsync("#first-name");
+        var lastName = await Page.InputValueAsync("#last-name");
+
+        Assert.Multiple(
+            () =>
+        {
+            Assert.That(username, Is.Not.Null.And.Not.Empty, "Username not generated.");
+            Assert.That(firstName, Is.Not.Null.And.Not.Empty, "First name not generated.");
+            Assert.That(lastName, Is.Not.Null.And.Not.Empty, "Last name not generated.");
+        });
+    }
 }
