@@ -7,6 +7,8 @@
 
 namespace AliasGenerators.Identity;
 
+using System.Text.RegularExpressions;
+
 /// <summary>
 /// Generates usernames and email prefixes based on an identity.
 /// </summary>
@@ -41,7 +43,7 @@ public class UsernameEmailGenerator
     {
         // Generate username based on email prefix but strip all non-alphanumeric characters
         string username = GenerateEmailPrefix(identity);
-        username = System.Text.RegularExpressions.Regex.Replace(username, @"[^a-zA-Z0-9]", string.Empty);
+        username = Regex.Replace(username, @"[^a-zA-Z0-9]", string.Empty, RegexOptions.NonBacktracking);
 
         // Adjust length
         if (username.Length < MinLength)
@@ -113,10 +115,10 @@ public class UsernameEmailGenerator
     private static string SanitizeEmailPrefix(string input)
     {
         // Remove any character that's not a letter, number, dot, underscore, or hyphen including special characters
-        string sanitized = System.Text.RegularExpressions.Regex.Replace(input, @"[^a-zA-Z0-9._-]", string.Empty);
+        string sanitized = Regex.Replace(input, @"[^a-zA-Z0-9._-]", string.Empty, RegexOptions.NonBacktracking);
 
         // Remove consecutive dots, underscores, or hyphens
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"[-_.]{2,}", m => m.Value[0].ToString());
+        sanitized = Regex.Replace(sanitized, @"[-_.]{2,}", m => m.Value[0].ToString(), RegexOptions.NonBacktracking);
 
         // Ensure it doesn't start or end with a dot, underscore, or hyphen
         sanitized = sanitized.Trim('.', '_', '-');
