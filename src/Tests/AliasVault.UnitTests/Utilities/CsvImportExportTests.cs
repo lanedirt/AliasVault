@@ -38,15 +38,7 @@ public class CsvImportExportTests
                 LastName = "Doe",
                 NickName = "JD",
                 BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                AddressStreet = "123 Main St",
-                AddressCity = "New York",
-                AddressState = "NY",
-                AddressZipCode = "12345",
-                AddressCountry = "USA",
-                Hobbies = "Reading, Writing",
                 Email = "johndoe",
-                PhoneMobile = "123-456-7890",
-                BankAccountIBAN = "US1234567890",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
             },
@@ -93,15 +85,7 @@ public class CsvImportExportTests
             Assert.That(importedCredential.Alias.LastName, Is.EqualTo(credential.Alias.LastName));
             Assert.That(importedCredential.Alias.NickName, Is.EqualTo(credential.Alias.NickName));
             Assert.That(importedCredential.Alias.BirthDate, Is.EqualTo(credential.Alias.BirthDate));
-            Assert.That(importedCredential.Alias.AddressStreet, Is.EqualTo(credential.Alias.AddressStreet));
-            Assert.That(importedCredential.Alias.AddressCity, Is.EqualTo(credential.Alias.AddressCity));
-            Assert.That(importedCredential.Alias.AddressState, Is.EqualTo(credential.Alias.AddressState));
-            Assert.That(importedCredential.Alias.AddressZipCode, Is.EqualTo(credential.Alias.AddressZipCode));
-            Assert.That(importedCredential.Alias.AddressCountry, Is.EqualTo(credential.Alias.AddressCountry));
-            Assert.That(importedCredential.Alias.Hobbies, Is.EqualTo(credential.Alias.Hobbies));
             Assert.That(importedCredential.Alias.Email, Is.EqualTo(credential.Alias.Email));
-            Assert.That(importedCredential.Alias.PhoneMobile, Is.EqualTo(credential.Alias.PhoneMobile));
-            Assert.That(importedCredential.Alias.BankAccountIBAN, Is.EqualTo(credential.Alias.BankAccountIBAN));
             Assert.That(importedCredential.Alias.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.CreatedAt.ToString("yyyy-MM-dd")));
             Assert.That(importedCredential.Alias.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(credential.Alias.UpdatedAt.ToString("yyyy-MM-dd")));
             Assert.That(importedCredential.ServiceId, Is.EqualTo(credential.ServiceId));

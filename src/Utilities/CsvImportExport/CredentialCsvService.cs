@@ -40,15 +40,7 @@ public static class CredentialCsvService
                 AliasLastName = credential.Alias?.LastName ?? string.Empty,
                 AliasNickName = credential.Alias?.NickName ?? string.Empty,
                 AliasBirthDate = credential.Alias?.BirthDate,
-                AliasAddressStreet = credential.Alias?.AddressStreet ?? string.Empty,
-                AliasAddressCity = credential.Alias?.AddressCity ?? string.Empty,
-                AliasAddressState = credential.Alias?.AddressState ?? string.Empty,
-                AliasAddressZipCode = credential.Alias?.AddressZipCode ?? string.Empty,
-                AliasAddressCountry = credential.Alias?.AddressCountry ?? string.Empty,
-                AliasHobbies = credential.Alias?.Hobbies ?? string.Empty,
                 AliasEmail = credential.Alias?.Email ?? string.Empty,
-                AliasPhoneMobile = credential.Alias?.PhoneMobile ?? string.Empty,
-                AliasBankAccountIBAN = credential.Alias?.BankAccountIBAN ?? string.Empty,
                 AliasCreatedAt = credential.Alias?.CreatedAt,
                 AliasUpdatedAt = credential.Alias?.UpdatedAt,
                 ServiceId = credential.ServiceId,
@@ -111,15 +103,7 @@ public static class CredentialCsvService
                     LastName = record.AliasLastName,
                     NickName = record.AliasNickName,
                     BirthDate = record.AliasBirthDate ?? DateTime.MinValue,
-                    AddressStreet = record.AliasAddressStreet,
-                    AddressCity = record.AliasAddressCity,
-                    AddressState = record.AliasAddressState,
-                    AddressZipCode = record.AliasAddressZipCode,
-                    AddressCountry = record.AliasAddressCountry,
-                    Hobbies = record.AliasHobbies,
                     Email = record.AliasEmail,
-                    PhoneMobile = record.AliasPhoneMobile,
-                    BankAccountIBAN = record.AliasBankAccountIBAN,
                     CreatedAt = record.AliasCreatedAt ?? DateTime.UtcNow,
                     UpdatedAt = record.AliasUpdatedAt ?? DateTime.UtcNow
                 },
@@ -164,15 +148,7 @@ public class CredentialCsvRecord
     public string AliasLastName { get; set; } = string.Empty;
     public string AliasNickName { get; set; } = string.Empty;
     public DateTime? AliasBirthDate { get; set; } = null;
-    public string AliasAddressStreet { get; set; } = string.Empty;
-    public string AliasAddressCity { get; set; } = string.Empty;
-    public string AliasAddressState { get; set; } = string.Empty;
-    public string AliasAddressZipCode { get; set; } = string.Empty;
-    public string AliasAddressCountry { get; set; } = string.Empty;
-    public string AliasHobbies { get; set; } = string.Empty;
     public string AliasEmail { get; set; } = string.Empty;
-    public string AliasPhoneMobile { get; set; } = string.Empty;
-    public string AliasBankAccountIBAN { get; set; } = string.Empty;
     public DateTime? AliasCreatedAt { get; set; } = null;
     public DateTime? AliasUpdatedAt { get; set; } = null;
     public Guid ServiceId { get; set; } = Guid.Empty;
