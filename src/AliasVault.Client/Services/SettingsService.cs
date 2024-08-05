@@ -184,11 +184,7 @@ public class SettingsService
     {
         string value = GetSetting(key);
 
-        try
-        {
-            return CastSetting<T>(value);
-        }
-        catch (InvalidOperationException ex)
+        if (string.IsNullOrEmpty(value))
         {
             // If no value is available in database but default value is set, return default value.
             if (defaultValue is not null)
@@ -197,6 +193,15 @@ public class SettingsService
             }
 
             // No value in database and no default value set, throw exception.
+            throw new InvalidOperationException($"Setting {key} is not set and no default value is provided");
+        }
+
+        try
+        {
+            return CastSetting<T>(value);
+        }
+        catch (InvalidOperationException ex)
+        {
             throw new InvalidOperationException($"Failed to cast setting {key} to type {typeof(T)}", ex);
         }
     }
