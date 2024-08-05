@@ -129,7 +129,7 @@ public class EmailDecryptionTest : ClientPlaywrightTest
     {
         // Create credential which should automatically create claim on server during database sync.
         const string serviceName = "Test Service";
-        const string email = "testclaim@example.tld";
+        const string email = "testclaimduplicate@example.tld";
         await CreateCredentialEntry(new Dictionary<string, string>
         {
             { "service-name", serviceName },
