@@ -68,7 +68,6 @@ builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<JsInteropService>();
-builder.Services.AddScoped<SettingsService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 
 builder.Services.AddAuthorizationCore();

@@ -11,30 +11,39 @@ using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Service class for accessing and mutating general settings stored in database.
 /// </summary>
-public class SettingsService(DbService dbService)
+/// <remarks>Note: this service does not use DI but instead is initialized by and can be accessed through the DbService.
+/// This is done because the SettingsService requires a DbContext during initialization and the context is not yet
+/// available during application boot because of encryption/decryption of remote database file. When accessing the
+/// settings through the DbService we can ensure proper data flow.</remarks>
+public class SettingsService
 {
+    private readonly Dictionary<string, string?> _settings = new();
+    private DbService? _dbService;
+    private bool _initialized;
+
     /// <summary>
     /// Gets the DefaultEmailDomain setting asynchronously.
     /// </summary>
     /// <returns>Default email domain as string.</returns>
-    public Task<string> GetDefaultEmailDomainAsync() => GetSettingAsync("DefaultEmailDomain");
+    public string DefaultEmailDomain => GetSetting("DefaultEmailDomain");
+
+    /// <summary>
+    /// Gets a value indicating whether email refresh should be done automatically on the credentials page.
+    /// </summary>
+    /// <returns>AutoEmailRefresh setting as string.</returns>
+    public bool AutoEmailRefresh => GetSetting<bool>("AutoEmailRefresh", true);
 
     /// <summary>
     /// Sets the DefaultEmailDomain setting asynchronously.
     /// </summary>
     /// <param name="value">The new DeafultEmailDomain setting.</param>
     /// <returns>Task.</returns>
-    public Task SetDefaultEmailDomainAsync(string value) => SetSettingAsync("DefaultEmailDomain", value);
-
-    /// <summary>
-    /// Gets the AutoEmailRefresh setting asynchronously as a string.
-    /// </summary>
-    /// <returns>AutoEmailRefresh setting as string.</returns>
-    public Task<bool> GetAutoEmailRefreshAsync() => GetSettingAsync<bool>("AutoEmailRefresh");
+    public Task SetDefaultEmailDomain(string value) => SetSettingAsync("DefaultEmailDomain", value);
 
     /// <summary>
     /// Sets the AutoEmailRefresh setting asynchronously as a string.
@@ -44,27 +53,67 @@ public class SettingsService(DbService dbService)
     public Task SetAutoEmailRefreshAsync(bool value) => SetSettingAsync<bool>("AutoEmailRefresh", value);
 
     /// <summary>
+    /// Initializes the settings service asynchronously.
+    /// </summary>
+    /// <param name="dbService">DbService instance.</param>
+    /// <returns>Task.</returns>
+    public async Task InitializeAsync(DbService dbService)
+    {
+        if (_initialized)
+        {
+            return;
+        }
+
+        // Store the DbService instance for later use.
+        _dbService = dbService;
+
+        var db = await _dbService.GetDbContextAsync();
+        var settings = await db.Settings.ToListAsync();
+        foreach (var setting in settings)
+        {
+            _settings[setting.Key] = setting.Value;
+        }
+
+        _initialized = true;
+    }
+
+    /// <summary>
     /// Get setting value from database.
     /// </summary>
     /// <param name="key">Key of setting to retrieve.</param>
     /// <returns>Setting as string value.</returns>
-    private async Task<string> GetSettingAsync(string key)
+    private string GetSetting(string key)
     {
-        var db = await dbService.GetDbContextAsync();
-        var setting = await db.Settings.FindAsync(key);
-        return setting?.Value ?? string.Empty;
+        var setting = _settings.GetValueOrDefault(key);
+        return setting ?? string.Empty;
     }
 
     /// <summary>
-    /// Gets a setting asynchronously and casts it to the specified type.
+    /// Gets a setting and casts it to the specified type.
     /// </summary>
     /// <typeparam name="T">The type to cast the setting to.</typeparam>
     /// <param name="key">The key of the setting.</param>
+    /// <param name="defaultValue">The default value to use if no setting is set in database.</param>
     /// <returns>The setting value cast to type T.</returns>
-    private async Task<T?> GetSettingAsync<T>(string key)
+    private T? GetSetting<T>(string key, T? defaultValue = default)
     {
-        string value = await GetSettingAsync(key);
-        return CastSetting<T>(value);
+        string value = GetSetting(key);
+
+        try
+        {
+            return CastSetting<T>(value);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // If no value is available in database but default value is set, return default value.
+            if (defaultValue is not null)
+            {
+                return defaultValue;
+            }
+
+            // No value in database and no default value set, throw exception.
+            throw new InvalidOperationException($"Failed to cast setting {key} to type {typeof(T)}", ex);
+        }
     }
 
     /// <summary>
@@ -88,7 +137,7 @@ public class SettingsService(DbService dbService)
     /// <returns>Task.</returns>
     private async Task SetSettingAsync(string key, string value)
     {
-        var db = await dbService.GetDbContextAsync();
+        var db = await _dbService!.GetDbContextAsync();
         var setting = await db.Settings.FindAsync(key);
         if (setting == null)
         {
@@ -108,7 +157,7 @@ public class SettingsService(DbService dbService)
             db.Settings.Update(setting);
         }
 
-        await dbService.SaveDatabaseAsync();
+        await _dbService.SaveDatabaseAsync();
     }
 
     /// <summary>
@@ -126,7 +175,7 @@ public class SettingsService(DbService dbService)
                 return default;
             }
 
-            throw new ArgumentException($"Cannot cast null or empty string to non-nullable type {typeof(T)}");
+            throw new InvalidOperationException($"Setting value is null or empty for non-nullable type {typeof(T)}");
         }
 
         if (typeof(T) == typeof(bool))

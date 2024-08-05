@@ -27,6 +27,7 @@ public class DbService : IDisposable
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
     private readonly Config _config;
+    private SettingsService _settingsService = new();
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
     private bool _isSuccessfullyInitialized;
@@ -53,6 +54,12 @@ public class DbService : IDisposable
         // Create an in-memory SQLite database connection which stays open for the lifetime of the service.
         (_sqlConnection, _dbContext) = InitializeEmptyDatabase();
     }
+
+    /// <summary>
+    /// Gets the settings service instance which can be used to interact with general settings stored in the database.
+    /// </summary>
+    /// <returns>SettingsService.</returns>
+    public SettingsService Settings => _settingsService;
 
     /// <summary>
     /// Gets database service state object which can be subscribed to.
@@ -416,7 +423,7 @@ public class DbService : IDisposable
                 string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
                 await ImportDbContextFromBase64Async(decryptedBase64String);
 
-                // Check if database is up to date with migrations.
+                // Check if database is up-to-date with migrations.
                 var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
                 if (pendingMigrations.Any())
                 {
@@ -425,6 +432,10 @@ public class DbService : IDisposable
                 }
 
                 _isSuccessfullyInitialized = true;
+
+                // Initialize child settings service if it's not already.
+                await _settingsService.InitializeAsync(this);
+
                 _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
                 return true;
             }
