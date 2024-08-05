@@ -54,63 +54,10 @@ public class Alias
     public DateTime BirthDate { get; set; }
 
     /// <summary>
-    /// Gets or sets the address street.
-    /// </summary>
-    [StringLength(255)]
-    [Column(TypeName = "VARCHAR")]
-    public string? AddressStreet { get; set; }
-
-    /// <summary>
-    /// Gets or sets the address city.
-    /// </summary>
-    [StringLength(255)]
-    [Column(TypeName = "VARCHAR")]
-    public string? AddressCity { get; set; }
-
-    /// <summary>
-    /// Gets or sets the address state.
-    /// </summary>
-    [StringLength(255)]
-    [Column(TypeName = "VARCHAR")]
-    public string? AddressState { get; set; }
-
-    /// <summary>
-    /// Gets or sets the address zip code.
-    /// </summary>
-    [StringLength(255)]
-    [Column(TypeName = "VARCHAR")]
-    public string? AddressZipCode { get; set; }
-
-    /// <summary>
-    /// Gets or sets the address country.
-    /// </summary>
-    [StringLength(255)]
-    [Column(TypeName = "VARCHAR")]
-    public string? AddressCountry { get; set; }
-
-    /// <summary>
-    /// Gets or sets the hobbies in CSV format, can contain multiple values separated by ";".
-    /// </summary>
-    [StringLength(255)]
-    public string? Hobbies { get; set; }
-
-    /// <summary>
     /// Gets or sets the generated email.
     /// </summary>
     [StringLength(255)]
     public string? Email { get; set; }
-
-    /// <summary>
-    /// Gets or sets the random generated mobile phone number.
-    /// </summary>
-    [StringLength(255)]
-    public string? PhoneMobile { get; set; }
-
-    /// <summary>
-    /// Gets or sets the generated IBAN bank account number.
-    /// </summary>
-    [StringLength(255)]
-    public string? BankAccountIBAN { get; set; }
 
     /// <summary>
     /// Gets or sets the created timestamp.

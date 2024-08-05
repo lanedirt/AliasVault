@@ -44,6 +44,21 @@
     </div>
 </div>
 
+<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Identity Settings</h3>
+
+    <div class="mb-4">
+        <label for="defaultEmailDomain" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Identity generation language</label>
+        <select @bind="DefaultIdentityLanguage" @bind:after="UpdateDefaultIdentityLanguage" id="defaultIdentityLanguage" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option value="en">English</option>
+            <option value="nl">Dutch</option>
+        </select>
+        <span class="block text-sm font-normal text-gray-500 truncate dark:text-gray-400">
+            Set the default language that will be used when generating new identities.
+        </span>
+    </div>
+</div>
+
 @code {
     private List<string> PrivateDomains => Config.PrivateEmailDomains;
     private List<string> PublicDomains => Config.PublicEmailDomains;
@@ -51,6 +66,7 @@
 
     private string DefaultEmailDomain { get; set; } = string.Empty;
     private bool AutoEmailRefresh { get; set; }
+    private string DefaultIdentityLanguage { get; set; } = string.Empty;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -60,6 +76,7 @@
 
         DefaultEmailDomain = DbService.Settings.DefaultEmailDomain;
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;
+        DefaultIdentityLanguage = DbService.Settings.DefaultIdentityLanguage;
     }
 
     /// <summary>
@@ -77,6 +94,15 @@
     private async Task UpdateAutoEmailRefresh()
     {
         await DbService.Settings.SetAutoEmailRefresh(AutoEmailRefresh);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Updates the auto email refresh setting.
+    /// </summary>
+    private async Task UpdateDefaultIdentityLanguage()
+    {
+        await DbService.Settings.SetDefaultIdentityLanguage(DefaultIdentityLanguage);
         StateHasChanged();
     }
 }

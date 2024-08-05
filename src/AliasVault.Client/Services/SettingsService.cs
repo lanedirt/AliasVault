@@ -27,7 +27,7 @@ public class SettingsService
     private bool _initialized;
 
     /// <summary>
-    /// Gets the DefaultEmailDomain setting asynchronously.
+    /// Gets the DefaultEmailDomain setting.
     /// </summary>
     /// <returns>Default email domain as string.</returns>
     public string DefaultEmailDomain => GetSetting("DefaultEmailDomain");
@@ -39,18 +39,31 @@ public class SettingsService
     public bool AutoEmailRefresh => GetSetting<bool>("AutoEmailRefresh", true);
 
     /// <summary>
-    /// Sets the DefaultEmailDomain setting asynchronously.
+    /// Gets the DefaultIdentityLanguage setting.
     /// </summary>
-    /// <param name="value">The new DeafultEmailDomain setting.</param>
+    /// <returns>Default identity language as two-letter code.</returns>
+    public string DefaultIdentityLanguage => GetSetting<string>("DefaultIdentityLanguage", "en")!;
+
+    /// <summary>
+    /// Sets the DefaultEmailDomain setting.
+    /// </summary>
+    /// <param name="value">The new DefaultEmailDomain setting.</param>
     /// <returns>Task.</returns>
     public Task SetDefaultEmailDomain(string value) => SetSettingAsync("DefaultEmailDomain", value);
 
     /// <summary>
-    /// Sets the AutoEmailRefresh setting asynchronously as a string.
+    /// Sets the AutoEmailRefresh setting as a string.
     /// </summary>
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
     public Task SetAutoEmailRefresh(bool value) => SetSettingAsync<bool>("AutoEmailRefresh", value);
+
+    /// <summary>
+    /// Sets the DefaultIdentityLanguage setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetDefaultIdentityLanguage(string value) => SetSettingAsync("DefaultIdentityLanguage", value);
 
     /// <summary>
     /// Initializes the settings service asynchronously.

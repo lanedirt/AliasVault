@@ -27,4 +27,15 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\en\firstnames_female" />
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\en\firstnames_male" />
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\en\lastnames" />
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\nl\firstnames_female" />
+      <None Remove="Identity\Implementations\Lists\nl\firstnames" />
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\nl\firstnames_male" />
+      <None Remove="Identity\Implementations\Lists\nl\lastnames" />
+      <EmbeddedResource Include="Identity\Implementations\Dictionaries\nl\lastnames" />
+    </ItemGroup>
+
 </Project>

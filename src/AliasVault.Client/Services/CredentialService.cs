@@ -64,15 +64,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
                 LastName = loginObject.Alias.LastName,
                 BirthDate = loginObject.Alias.BirthDate,
                 Gender = loginObject.Alias.Gender,
-                AddressStreet = loginObject.Alias.AddressStreet,
-                AddressCity = loginObject.Alias.AddressCity,
-                AddressState = loginObject.Alias.AddressState,
-                AddressZipCode = loginObject.Alias.AddressZipCode,
-                AddressCountry = loginObject.Alias.AddressCountry,
-                Hobbies = loginObject.Alias.Hobbies,
                 Email = loginObject.Alias.Email,
-                PhoneMobile = loginObject.Alias.PhoneMobile,
-                BankAccountIBAN = loginObject.Alias.BankAccountIBAN,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             },
@@ -137,15 +129,7 @@ public class CredentialService(HttpClient httpClient, DbService dbService)
         login.Alias.LastName = loginObject.Alias.LastName;
         login.Alias.BirthDate = loginObject.Alias.BirthDate;
         login.Alias.Gender = loginObject.Alias.Gender;
-        login.Alias.AddressStreet = loginObject.Alias.AddressStreet;
-        login.Alias.AddressCity = loginObject.Alias.AddressCity;
-        login.Alias.AddressState = loginObject.Alias.AddressState;
-        login.Alias.AddressZipCode = loginObject.Alias.AddressZipCode;
-        login.Alias.AddressCountry = loginObject.Alias.AddressCountry;
-        login.Alias.Hobbies = loginObject.Alias.Hobbies;
         login.Alias.Email = loginObject.Alias.Email;
-        login.Alias.PhoneMobile = loginObject.Alias.PhoneMobile;
-        login.Alias.BankAccountIBAN = loginObject.Alias.BankAccountIBAN;
 
         login.Passwords = loginObject.Passwords;
 
