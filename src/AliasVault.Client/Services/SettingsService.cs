@@ -50,7 +50,7 @@ public class SettingsService
     /// </summary>
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
-    public Task SetAutoEmailRefreshAsync(bool value) => SetSettingAsync<bool>("AutoEmailRefresh", value);
+    public Task SetAutoEmailRefresh(bool value) => SetSettingAsync<bool>("AutoEmailRefresh", value);
 
     /// <summary>
     /// Initializes the settings service asynchronously.
@@ -156,6 +156,10 @@ public class SettingsService
             setting.UpdatedAt = DateTime.UtcNow;
             db.Settings.Update(setting);
         }
+
+        // Also update the setting in the local dictionary so the new value
+        // is returned by subsequent local reads.
+        _settings[key] = value;
 
         await _dbService.SaveDatabaseAsync();
     }

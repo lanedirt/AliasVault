@@ -467,22 +467,10 @@ public class DbService : IDisposable
             .Select(email => email!)
             .ToListAsync();
 
-        Console.WriteLine("Before filtering email addresses:");
-        foreach (var email in emailAddresses)
-        {
-            Console.WriteLine(email);
-        }
-
         // Filter the list of email addresses to only include those that are in the allowed domains.
         emailAddresses = emailAddresses
             .Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain)))
             .ToList();
-
-        Console.WriteLine("After filtering email addresses:");
-        foreach (var email in emailAddresses)
-        {
-            Console.WriteLine(email);
-        }
 
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
         var vaultObject = new Vault(encryptedDatabase, databaseVersion, publicEncryptionKey, emailAddresses, DateTime.Now, DateTime.Now);
