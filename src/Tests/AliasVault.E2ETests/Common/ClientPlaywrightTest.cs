@@ -89,7 +89,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         await SetupPlaywrightBrowserAndContext();
 
         // Intercept Blazor WASM app requests to override appsettings.json
-        string[] privateEmailDomains = ["example.tld"];
+        string[] privateEmailDomains = ["example.tld", "example2.tld"];
 
         await Context.RouteAsync(
             "**/appsettings.json",

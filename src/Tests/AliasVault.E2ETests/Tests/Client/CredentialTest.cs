@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CredentialTests.cs" company="lanedirt">
+// <copyright file="CredentialTest.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -13,10 +13,8 @@ namespace AliasVault.E2ETests.Tests.Client;
 [TestFixture]
 [Category("ClientTests")]
 [Parallelizable(ParallelScope.Self)]
-public class CredentialTests : ClientPlaywrightTest
+public class CredentialTest : ClientPlaywrightTest
 {
-    private static readonly Random Random = new();
-
     /// <summary>
     /// Test if the credential listing index page works.
     /// </summary>
