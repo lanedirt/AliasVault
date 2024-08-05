@@ -74,6 +74,11 @@ public class AliasClientDbContext : DbContext
     public DbSet<EncryptionKey> EncryptionKeys { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the Settings DbSet.
+    /// </summary>
+    public DbSet<Setting> Settings { get; set; } = null!;
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>
