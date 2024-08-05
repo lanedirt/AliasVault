@@ -31,7 +31,7 @@ public class GeneralSettingsTest : ClientPlaywrightTest
 
         // Set the default email domain to "example2.tld".
         var defaultEmailDomainField = Page.Locator("select[id='defaultEmailDomain']");
-        await defaultEmailDomainField.SelectOptionAsync(new[] { "example2.tld" });
+        await defaultEmailDomainField.SelectOptionAsync("example2.tld");
 
         // Go to new credential create page and assert that the default email domain is visible on the page.
         await NavigateUsingBlazorRouter("add-credentials");

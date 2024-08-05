@@ -27,7 +27,7 @@ public class DbService : IDisposable
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
     private readonly Config _config;
-    private SettingsService _settingsService = new();
+    private readonly SettingsService _settingsService = new();
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
     private bool _isSuccessfullyInitialized;

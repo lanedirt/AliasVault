@@ -78,6 +78,78 @@ public class SettingsService
     }
 
     /// <summary>
+    /// Casts a setting value from the database string type to the specified requested type.
+    /// </summary>
+    /// <param name="value">Value (string) to cast.</param>
+    /// <typeparam name="T">Type to cast it to.</typeparam>
+    /// <returns>The value casted to the requested type.</returns>
+    private static T? CastSetting<T>(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            if (default(T) is null)
+            {
+                return default;
+            }
+
+            throw new InvalidOperationException($"Setting value is null or empty for non-nullable type {typeof(T)}");
+        }
+
+        if (typeof(T) == typeof(bool))
+        {
+            return (T)(object)(bool.TryParse(value, out bool result) && result);
+        }
+
+        if (typeof(T) == typeof(int))
+        {
+            return (T)(object)int.Parse(value);
+        }
+
+        if (typeof(T) == typeof(double))
+        {
+            return (T)(object)double.Parse(value);
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)value;
+        }
+
+        // For complex types, attempt JSON deserialization
+        try
+        {
+            var result = JsonSerializer.Deserialize<T>(value);
+            if (result is null && default(T) is not null)
+            {
+                throw new InvalidOperationException($"Deserialization resulted in null for non-nullable type {typeof(T)}");
+            }
+
+            return result;
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Failed to deserialize value to type {typeof(T)}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Converts a value of any type to a string.
+    /// </summary>
+    /// <param name="value">The value to convert.</param>
+    /// <typeparam name="T">The type of the existing value.</typeparam>
+    /// <returns>Value converted to string.</returns>
+    private static string ConvertToString<T>(T value)
+    {
+        if (value is bool || value is int || value is double || value is string)
+        {
+            return value.ToString() ?? string.Empty;
+        }
+
+        // For complex types, use JSON serialization
+        return JsonSerializer.Serialize(value);
+    }
+
+    /// <summary>
     /// Get setting value from database.
     /// </summary>
     /// <param name="key">Key of setting to retrieve.</param>
@@ -162,77 +234,5 @@ public class SettingsService
         _settings[key] = value;
 
         await _dbService.SaveDatabaseAsync();
-    }
-
-    /// <summary>
-    /// Casts a setting value from the database string type to the specified requested type.
-    /// </summary>
-    /// <param name="value">Value (string) to cast.</param>
-    /// <typeparam name="T">Type to cast it to.</typeparam>
-    /// <returns>The value casted to the requested type.</returns>
-    private T? CastSetting<T>(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            if (default(T) is null)
-            {
-                return default;
-            }
-
-            throw new InvalidOperationException($"Setting value is null or empty for non-nullable type {typeof(T)}");
-        }
-
-        if (typeof(T) == typeof(bool))
-        {
-            return (T)(object)(bool.TryParse(value, out bool result) && result);
-        }
-
-        if (typeof(T) == typeof(int))
-        {
-            return (T)(object)int.Parse(value);
-        }
-
-        if (typeof(T) == typeof(double))
-        {
-            return (T)(object)double.Parse(value);
-        }
-
-        if (typeof(T) == typeof(string))
-        {
-            return (T)(object)value;
-        }
-
-        // For complex types, attempt JSON deserialization
-        try
-        {
-            var result = JsonSerializer.Deserialize<T>(value);
-            if (result is null && default(T) is not null)
-            {
-                throw new InvalidOperationException($"Deserialization resulted in null for non-nullable type {typeof(T)}");
-            }
-
-            return result;
-        }
-        catch (JsonException ex)
-        {
-            throw new InvalidOperationException($"Failed to deserialize value to type {typeof(T)}", ex);
-        }
-    }
-
-    /// <summary>
-    /// Converts a value of any type to a string.
-    /// </summary>
-    /// <param name="value">The value to convert.</param>
-    /// <typeparam name="T">The type of the existing value.</typeparam>
-    /// <returns>Value converted to string.</returns>
-    private string ConvertToString<T>(T value)
-    {
-        if (value is bool || value is int || value is double || value is string)
-        {
-            return value.ToString() ?? string.Empty;
-        }
-
-        // For complex types, use JSON serialization
-        return JsonSerializer.Serialize(value);
     }
 }
