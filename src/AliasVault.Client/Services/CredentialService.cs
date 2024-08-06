@@ -21,8 +21,34 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 /// <summary>
 /// Service class for alias operations.
 /// </summary>
-public class CredentialService(HttpClient httpClient, DbService dbService)
+public class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
+    /// <summary>
+    /// Gets the default email domain based on settings and available domains.
+    /// </summary>
+    /// <returns>Default email domain.</returns>
+    public string GetDefaultEmailDomain()
+    {
+        var defaultDomain = dbService.Settings.DefaultEmailDomain;
+
+        // Function to check if a domain is valid
+        bool IsValidDomain(string domain) =>
+            !string.IsNullOrEmpty(domain) &&
+            domain != "DISABLED.TLD" &&
+            (config.PublicEmailDomains.Contains(domain) || config.PrivateEmailDomains.Contains(domain));
+
+        // Get the first valid domain from private or public domains
+        string GetFirstValidDomain() =>
+            config.PrivateEmailDomains.Find(IsValidDomain) ??
+            config.PublicEmailDomains.FirstOrDefault() ??
+            "example.com";
+
+        // Use the default domain if it's valid, otherwise get the first valid domain
+        string domainToUse = IsValidDomain(defaultDomain) ? defaultDomain : GetFirstValidDomain();
+
+        return domainToUse;
+    }
+
     /// <summary>
     /// Generate random identity by calling the IdentityGenerator API.
     /// </summary>

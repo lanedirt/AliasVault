@@ -2,15 +2,18 @@
 let currentHandler = null;
 let currentDotNetHelper = null;
 
-export function registerClickOutsideHandler(dotNetHelper, contentId, methodName) {
+export function registerClickOutsideHandler(dotNetHelper, contentIds, methodName) {
     unregisterClickOutsideHandler();
 
     currentDotNetHelper = dotNetHelper;
-    currentHandler = (event) => {
-        const content = document.getElementById(contentId);
-        if (!content) return;
+    const idArray = Array.isArray(contentIds) ? contentIds : contentIds.split(',').map(id => id.trim());
 
-        const isOutside = !content.contains(event.target);
+    currentHandler = (event) => {
+        const isOutside = idArray.every(id => {
+            const content = document.getElementById(id);
+            return !content || !content.contains(event.target);
+        });
+
         const isEscapeKey = event.type === 'keydown' && event.key === 'Escape';
 
         if (isOutside || isEscapeKey) {

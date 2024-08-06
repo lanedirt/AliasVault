@@ -1,0 +1,269 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using AliasGenerators.Identity.Implementations
+@using AliasGenerators.Identity.Models
+@using AliasGenerators.Password
+@using AliasGenerators.Password.Implementations
+@inherits AliasVault.Client.Main.Pages.MainBase
+@inject IJSRuntime JSRuntime
+@inject CredentialService CredentialService
+@implements IDisposable
+
+<button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
+    + New identity
+</button>
+
+@if (IsPopupVisible)
+{
+    <ClickOutsideHandler OnClose="ClosePopup" ContentId="quickIdentityPopup,quickIdentityButton">
+        <div id="quickIdentityPopup" class="absolute z-50 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-300"
+             style="@PopupStyle">
+            <h3 class="text-lg font-semibold mb-4">Create New Identity</h3>
+            <EditForm Model="Model" OnValidSubmit="CreateIdentity">
+                <DataAnnotationsValidator />
+                <div class="mb-4">
+                    <EditFormRow Id="serviceName" Label="Service Name" @bind-Value="Model.ServiceName"></EditFormRow>
+                    <ValidationMessage For="() => Model.ServiceName"/>
+                </div>
+                <div class="mb-4">
+                    <EditFormRow Id="serviceUrl" Label="Service URL" OnFocus="OnFocusUrlInput" @bind-Value="Model.ServiceUrl"></EditFormRow>
+                    <ValidationMessage For="() => Model.ServiceUrl"/>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Create
+                    </button>
+                </div>
+                <div class="pt-2">
+                    <a href="#" @onclick="OpenAdvancedMode" @onclick:preventDefault class="text-sm text-blue-500 hover:text-blue-700">
+                        Create via advanced mode
+                    </a>
+                </div>
+            </EditForm>
+        </div>
+    </ClickOutsideHandler>
+}
+
+@code {
+    private const string DefaultServiceUrl = "https://";
+    private bool IsPopupVisible = false;
+    private bool IsCreating = false;
+    private CreateModel Model = new();
+    private string PopupStyle { get; set; } = "";
+    private ElementReference buttonRef;
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        KeyboardShortcutService.UnregisterShortcutAsync("gc").ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await KeyboardShortcutService.RegisterShortcutAsync("gc", ShowPopup);
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                window.getWindowWidth = function() {
+                    return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+                };
+                window.getElementRect = function(element) {
+                    if (element) {
+                        const rect = {
+                            left: element.offsetLeft,
+                            top: element.offsetTop,
+                            right: element.offsetLeft + element.offsetWidth,
+                            bottom: element.offsetTop + element.offsetHeight,
+                            width: element.offsetWidth,
+                            height: element.offsetHeight
+                        };
+                        let parent = element.offsetParent;
+                        while (parent) {
+                            rect.left += parent.offsetLeft;
+                            rect.top += parent.offsetTop;
+                            parent = parent.offsetParent;
+                        }
+                        rect.right = rect.left + rect.width;
+                        rect.bottom = rect.top + rect.height;
+                        return rect;
+                    }
+                    return null;
+                };
+            ");
+        }
+    }
+
+    private void OnFocusUrlInput(FocusEventArgs e)
+    {
+        if (Model.ServiceUrl != DefaultServiceUrl)
+        {
+            return;
+        }
+
+        // Use a small delay to ensure the focus is set after the browser's default behavior
+        Task.Delay(1).ContinueWith(_ =>
+        {
+            JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('serviceUrl').setSelectionRange({DefaultServiceUrl.Length}, {DefaultServiceUrl.Length})");
+        });
+    }
+
+    private async Task TogglePopup()
+    {
+        // Use the ToggleStatus to determine if the popup should be shown or hidden
+        // instead of just toggling the visibility. Because the popup might be hidden
+        // by clicking outside of it, and we don't want to show it again when the button
+        // is clicked.
+        IsPopupVisible = !IsPopupVisible;
+        if (IsPopupVisible)
+        {
+            await ShowPopup();
+        }
+    }
+
+    private async Task ShowPopup()
+    {
+        IsPopupVisible = true;
+
+        // Clear the input fields
+        Model = new();
+        Model.ServiceUrl = DefaultServiceUrl;
+
+        await UpdatePopupStyle();
+        await Task.Delay(100); // Give time for the DOM to update
+        await JSRuntime.InvokeVoidAsync("focusElement", "serviceName");
+    }
+
+    private void ClosePopup()
+    {
+        IsPopupVisible = false;
+    }
+
+    private async Task UpdatePopupStyle()
+    {
+        var windowWidth = await JSRuntime.InvokeAsync<int>("getWindowWidth");
+        var buttonRect = await JSRuntime.InvokeAsync<BoundingClientRect>("getElementRect", buttonRef);
+
+        var popupWidth = Math.Min(400, windowWidth - 20); // 20px for some padding
+        var leftPosition = Math.Max(0, Math.Min(buttonRect.Left, windowWidth - popupWidth - 10));
+
+        PopupStyle = $"width: {popupWidth}px; left: {leftPosition}px; top: {buttonRect.Bottom}px;";
+        StateHasChanged();
+    }
+
+    private async Task CreateIdentity()
+    {
+        if (IsCreating)
+        {
+            return;
+        }
+
+        IsCreating = true;
+        GlobalLoadingSpinner.Show();
+        StateHasChanged();
+
+        // Create new Obj
+        var credential = new Credential();
+        credential.Alias = new Alias();
+        credential.Alias.Email = "@" + CredentialService.GetDefaultEmailDomain();
+        credential.Service = new Service();
+        credential.Service.Name = Model.ServiceName;
+
+        if (Model.ServiceUrl != DefaultServiceUrl)
+        {
+            credential.Service.Url = Model.ServiceUrl;
+        }
+
+        credential.Passwords = new List<Password> { new() };
+        await GenerateRandomIdentity(credential);
+
+        var id = await CredentialService.InsertEntryAsync(credential);
+        if (id == Guid.Empty)
+        {
+            // Error saving.
+            IsCreating = false;
+            GlobalLoadingSpinner.Hide();
+            GlobalNotificationService.AddErrorMessage("Error saving credentials. Please try again.", true);
+            return;
+        }
+
+        // No error, add success message.
+        GlobalNotificationService.AddSuccessMessage("Credentials created successfully.");
+
+        NavigationManager.NavigateTo("/credentials/" + id);
+
+        IsCreating = false;
+        GlobalLoadingSpinner.Hide();
+        StateHasChanged();
+        ClosePopup();
+    }
+
+    private async Task GenerateRandomIdentity(Credential credential)
+    {
+        // Generate a random identity using the IIdentityGenerator implementation.
+        var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(DbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
+
+        // Generate random values for the Identity properties
+        credential.Username = identity.NickName;
+        credential.Alias.FirstName = identity.FirstName;
+        credential.Alias.LastName = identity.LastName;
+        credential.Alias.NickName = identity.NickName;
+        credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
+        credential.Alias.BirthDate = identity.BirthDate;
+
+        // Set the email
+        var emailDomain = CredentialService.GetDefaultEmailDomain();
+        credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
+
+        // Generate password
+        GenerateRandomPassword(credential);
+    }
+
+    private void GenerateRandomPassword(Credential credential)
+    {
+        // Generate a random password using a IPasswordGenerator implementation.
+        IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
+        credential.Passwords.First().Value = passwordGenerator.GenerateRandomPassword();
+    }
+
+    private void OpenAdvancedMode()
+    {
+        // Implement the logic to open the advanced mode
+        Console.WriteLine("Opening advanced mode");
+        NavigationManager.NavigateTo("/add-credentials");
+        ClosePopup();
+    }
+
+    private class BoundingClientRect
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Right { get; set; }
+        public double Bottom { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
+
+    /// <summary>
+    /// Local model for the form with support for validation.
+    /// </summary>
+    private class CreateModel
+    {
+        /// <summary>
+        /// The service name.
+        /// </summary>
+        [Required]
+        [Display(Name = "Service Name")]
+        public string ServiceName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The service URL.
+        /// </summary>
+        [Display(Name = "Service URL")]
+        public string ServiceUrl { get; set; } = string.Empty;
+    }
+}

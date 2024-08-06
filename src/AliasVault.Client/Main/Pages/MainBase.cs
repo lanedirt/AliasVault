@@ -61,6 +61,12 @@ public class MainBase : OwningComponentBase
     public DbService DbService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the KeyboardShortcutService.
+    /// </summary>
+    [Inject]
+    public KeyboardShortcutService KeyboardShortcutService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the AuthService.
     /// </summary>
     [Inject]
