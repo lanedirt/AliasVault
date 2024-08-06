@@ -82,7 +82,10 @@ public class KeyboardShortcutService : IAsyncDisposable
         });
     }
 
-    private class CallbackWrapper
+    /// <summary>
+    /// Wrapper class for callback functions that are invoked from JavaScript.
+    /// </summary>
+    private sealed class CallbackWrapper
     {
         private readonly Dictionary<string, Func<Task>> _callbacks = new Dictionary<string, Func<Task>>();
 

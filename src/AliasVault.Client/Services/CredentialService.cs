@@ -14,6 +14,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
+using AliasGenerators.Password;
+using AliasGenerators.Password.Implementations;
 using AliasVault.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
@@ -47,6 +49,17 @@ public class CredentialService(HttpClient httpClient, DbService dbService, Confi
         string domainToUse = IsValidDomain(defaultDomain) ? defaultDomain : GetFirstValidDomain();
 
         return domainToUse;
+    }
+
+    /// <summary>
+    /// Generates a random password for a credential.
+    /// </summary>
+    /// <returns>Random password.</returns>
+    public string GenerateRandomPassword()
+    {
+        // Generate a random password using a IPasswordGenerator implementation.
+        IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
+        return passwordGenerator.GenerateRandomPassword();
     }
 
     /// <summary>

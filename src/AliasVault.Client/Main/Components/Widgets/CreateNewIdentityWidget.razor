@@ -1,14 +1,12 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using AliasGenerators.Identity.Implementations
 @using AliasGenerators.Identity.Models
-@using AliasGenerators.Password
-@using AliasGenerators.Password.Implementations
 @inherits AliasVault.Client.Main.Pages.MainBase
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @implements IDisposable
 
-<button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
+<button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 ms-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
     + New identity
 </button>
 
@@ -105,7 +103,7 @@
             return;
         }
 
-        // Use a small delay to ensure the focus is set after the browser's default behavior
+        // Use a small delay to ensure the focus is set after the browser's default behavior.
         Task.Delay(1).ContinueWith(_ =>
         {
             JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('serviceUrl').setSelectionRange({DefaultServiceUrl.Length}, {DefaultServiceUrl.Length})");
@@ -114,10 +112,6 @@
 
     private async Task TogglePopup()
     {
-        // Use the ToggleStatus to determine if the popup should be shown or hidden
-        // instead of just toggling the visibility. Because the popup might be hidden
-        // by clicking outside of it, and we don't want to show it again when the button
-        // is clicked.
         IsPopupVisible = !IsPopupVisible;
         if (IsPopupVisible)
         {
@@ -166,7 +160,6 @@
         GlobalLoadingSpinner.Show();
         StateHasChanged();
 
-        // Create new Obj
         var credential = new Credential();
         credential.Alias = new Alias();
         credential.Alias.Email = "@" + CredentialService.GetDefaultEmailDomain();
@@ -220,25 +213,19 @@
         credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
 
         // Generate password
-        GenerateRandomPassword(credential);
-    }
-
-    private void GenerateRandomPassword(Credential credential)
-    {
-        // Generate a random password using a IPasswordGenerator implementation.
-        IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
-        credential.Passwords.First().Value = passwordGenerator.GenerateRandomPassword();
+        credential.Passwords.First().Value = CredentialService.GenerateRandomPassword();
     }
 
     private void OpenAdvancedMode()
     {
-        // Implement the logic to open the advanced mode
-        Console.WriteLine("Opening advanced mode");
         NavigationManager.NavigateTo("/add-credentials");
         ClosePopup();
     }
 
-    private class BoundingClientRect
+    /// <summary>
+    /// Bounding client rectangle returned from JavaScript.
+    /// </summary>
+    private sealed class BoundingClientRect
     {
         public double Left { get; set; }
         public double Top { get; set; }
@@ -251,7 +238,7 @@
     /// <summary>
     /// Local model for the form with support for validation.
     /// </summary>
-    private class CreateModel
+    private sealed class CreateModel
     {
         /// <summary>
         /// The service name.

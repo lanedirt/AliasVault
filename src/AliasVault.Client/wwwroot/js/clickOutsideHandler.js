@@ -1,4 +1,3 @@
-// clickOutsideHandler.js
 let currentHandler = null;
 let currentDotNetHelper = null;
 
@@ -11,7 +10,7 @@ export function registerClickOutsideHandler(dotNetHelper, contentIds, methodName
     currentHandler = (event) => {
         const isOutside = idArray.every(id => {
             const content = document.getElementById(id);
-            return !content || !content.contains(event.target);
+            return !content?.contains(event.target);
         });
 
         const isEscapeKey = event.type === 'keydown' && event.key === 'Escape';
