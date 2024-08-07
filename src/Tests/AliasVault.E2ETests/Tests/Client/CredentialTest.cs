@@ -113,7 +113,7 @@ public class CredentialTest : ClientPlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "View credentials entry");
+        await WaitForUrlAsync("credentials/**", "Delete credentials entry");
 
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
