@@ -1,24 +1,37 @@
 ﻿@inject GlobalNotificationService GlobalNotificationService
+@inject NavigationManager NavigationManager
 @implements IDisposable
 
-@foreach (var message in Messages)
+@if (Messages.Count == 0)
 {
-    if (message.Key == "success")
-    {
-        <AlertMessageSuccess Message="@message.Value" />
-    }
+    return;
 }
-@foreach (var message in Messages)
-{
-    if (message.Key == "error")
+
+<div class="messages-container grid px-4 pt-6 lg:gap-4 dark:bg-gray-900">
+    @foreach (var message in Messages)
     {
-        <AlertMessageError Message="@message.Value" />
+        if (message.Key == "success")
+        {
+            <AlertMessageSuccess Message="@message.Value" />
+        }
     }
-}
+    @foreach (var message in Messages)
+    {
+        if (message.Key == "error")
+        {
+            <AlertMessageError Message="@message.Value" />
+        }
+    }
+</div>
+
+<style>
+    .messages-container > :last-child {
+        margin-bottom: 0 !important;
+    }
+</style>
 
 @code {
     private List<KeyValuePair<string, string>> Messages { get; set; } = new();
-    private bool _onChangeSubscribed = false;
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -27,22 +40,26 @@
 
         if (firstRender)
         {
-            // We subscribe to the OnChange event of the PortalMessageService to update the UI when a new message is added
             RefreshAddMessages();
             GlobalNotificationService.OnChange += RefreshAddMessages;
-            _onChangeSubscribed = true;
+            NavigationManager.LocationChanged += HandleLocationChanged;
         }
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        // We unsubscribe from the OnChange event of the PortalMessageService when the component is disposed
-        if (_onChangeSubscribed)
-        {
-            GlobalNotificationService.OnChange -= RefreshAddMessages;
-            _onChangeSubscribed = false;
-        }
+        GlobalNotificationService.OnChange -= RefreshAddMessages;
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+    }
+
+    /// <summary>
+    /// Refreshes the messages on navigation to another page.
+    /// </summary>
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        RefreshAddMessages();
+        InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
