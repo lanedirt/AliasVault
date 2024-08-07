@@ -23,7 +23,7 @@ public class GeneralSettingsTest : ClientPlaywrightTest
     public async Task MutateDefaultEmailDomainTest()
     {
         await NavigateUsingBlazorRouter("settings/general");
-        await WaitForUrlAsync("settings/general", "General settings");
+        await WaitForUrlAsync("settings/general", "Configure general");
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");

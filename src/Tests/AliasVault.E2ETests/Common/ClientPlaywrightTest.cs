@@ -183,11 +183,11 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Login credentials");
+        await WaitForUrlAsync("credentials/**", "View credentials entry");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Login credentials"), "Credential not created.");
+        Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
     }
 
     /// <summary>

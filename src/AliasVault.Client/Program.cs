@@ -43,6 +43,7 @@ builder.Services.AddLogging(logging =>
 
     logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
+    logging.AddFilter("System.Net.Http.HttpClient", LogLevel.Error);
 });
 
 builder.RootComponents.Add<App>("#app");

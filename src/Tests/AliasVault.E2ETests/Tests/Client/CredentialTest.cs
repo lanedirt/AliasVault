@@ -82,6 +82,7 @@ public class CredentialTest : ClientPlaywrightTest
         await submitButton.ClickAsync();
         await WaitForUrlAsync("credentials/**", "View credentials entry");
 
+        await Task.Delay(5000);
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
         Assert.That(pageContent, Does.Contain(serviceNameAfter), "Credential not updated correctly.");

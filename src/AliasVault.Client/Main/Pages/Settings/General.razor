@@ -72,7 +72,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Vault settings" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "General settings" });
 
         DefaultEmailDomain = DbService.Settings.DefaultEmailDomain;
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;

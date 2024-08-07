@@ -160,7 +160,13 @@ public abstract class PlaywrightTest
         await Page.WaitForURLAsync("**/" + relativeUrl, new PageWaitForURLOptions() { Timeout = TestDefaults.DefaultTimeout });
 
         // Wait for actual content to load (web API calls, etc.)
-        await Page.WaitForSelectorAsync("text=" + waitForText, new PageWaitForSelectorOptions() { Timeout = TestDefaults.DefaultTimeout });
+        await Page.GetByText(waitForText, new PageGetByTextOptions { Exact = false })
+            .First
+            .WaitForAsync(new LocatorWaitForOptions
+            {
+                Timeout = TestDefaults.DefaultTimeout,
+                State = WaitForSelectorState.Attached,
+            });
     }
 
     /// <summary>
