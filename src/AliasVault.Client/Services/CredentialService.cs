@@ -28,6 +28,17 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 public class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
     /// <summary>
+    /// Generates a random password for a credential.
+    /// </summary>
+    /// <returns>Random password.</returns>
+    public static string GenerateRandomPassword()
+    {
+        // Generate a random password using a IPasswordGenerator implementation.
+        var passwordGenerator = new SpamOkPasswordGenerator();
+        return passwordGenerator.GenerateRandomPassword();
+    }
+
+    /// <summary>
     /// Generates a random identity for a credential.
     /// </summary>
     /// <param name="credential">The credential object to update.</param>
@@ -79,17 +90,6 @@ public class CredentialService(HttpClient httpClient, DbService dbService, Confi
         string domainToUse = IsValidDomain(defaultDomain) ? defaultDomain : GetFirstValidDomain();
 
         return domainToUse;
-    }
-
-    /// <summary>
-    /// Generates a random password for a credential.
-    /// </summary>
-    /// <returns>Random password.</returns>
-    public string GenerateRandomPassword()
-    {
-        // Generate a random password using a IPasswordGenerator implementation.
-        IPasswordGenerator passwordGenerator = new SpamOkPasswordGenerator();
-        return passwordGenerator.GenerateRandomPassword();
     }
 
     /// <summary>

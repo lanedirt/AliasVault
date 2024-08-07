@@ -17,7 +17,6 @@ using Microsoft.JSInterop;
 /// </summary>
 public class KeyboardShortcutService : IAsyncDisposable
 {
-    private readonly IJSRuntime _jsRuntime;
     private readonly DotNetObjectReference<CallbackWrapper> _dotNetHelper;
     private readonly NavigationManager _navigationManager;
     private readonly Lazy<Task<IJSObjectReference>> moduleTask;
@@ -29,7 +28,6 @@ public class KeyboardShortcutService : IAsyncDisposable
     /// <param name="navigationManager">NavigationManager instance.</param>
     public KeyboardShortcutService(IJSRuntime jsRuntime, NavigationManager navigationManager)
     {
-        _jsRuntime = jsRuntime;
         _dotNetHelper = DotNetObjectReference.Create(new CallbackWrapper());
         _navigationManager = navigationManager;
 
