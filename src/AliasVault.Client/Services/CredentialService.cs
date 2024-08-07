@@ -14,6 +14,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
+using AliasGenerators.Identity.Implementations;
+using AliasGenerators.Identity.Models;
 using AliasGenerators.Password;
 using AliasGenerators.Password.Implementations;
 using AliasVault.Shared.Models;
@@ -25,6 +27,34 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 /// </summary>
 public class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
+    /// <summary>
+    /// Generates a random identity for a credential.
+    /// </summary>
+    /// <param name="credential">The credential object to update.</param>
+    /// <returns>Task.</returns>
+    public async Task<Credential> GenerateRandomIdentity(Credential credential)
+    {
+        // Generate a random identity using the IIdentityGenerator implementation.
+        var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(dbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
+
+        // Generate random values for the Identity properties
+        credential.Username = identity.NickName;
+        credential.Alias.FirstName = identity.FirstName;
+        credential.Alias.LastName = identity.LastName;
+        credential.Alias.NickName = identity.NickName;
+        credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
+        credential.Alias.BirthDate = identity.BirthDate;
+
+        // Set the email
+        var emailDomain = GetDefaultEmailDomain();
+        credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
+
+        // Generate password
+        credential.Passwords.First().Value = GenerateRandomPassword();
+
+        return credential;
+    }
+
     /// <summary>
     /// Gets the default email domain based on settings and available domains.
     /// </summary>

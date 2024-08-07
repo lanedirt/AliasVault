@@ -20,6 +20,7 @@ public class KeyboardShortcutService : IAsyncDisposable
     private readonly IJSRuntime _jsRuntime;
     private readonly DotNetObjectReference<CallbackWrapper> _dotNetHelper;
     private readonly NavigationManager _navigationManager;
+    private readonly Lazy<Task<IJSObjectReference>> moduleTask;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="KeyboardShortcutService"/> class.
@@ -31,6 +32,9 @@ public class KeyboardShortcutService : IAsyncDisposable
         _jsRuntime = jsRuntime;
         _dotNetHelper = DotNetObjectReference.Create(new CallbackWrapper());
         _navigationManager = navigationManager;
+
+        moduleTask = new Lazy<Task<IJSObjectReference>>(() => jsRuntime.InvokeAsync<IJSObjectReference>(
+            "import", "./js/modules/keyboardShortcuts.js").AsTask());
 
         _ = RegisterStaticShortcuts();
     }
@@ -44,7 +48,8 @@ public class KeyboardShortcutService : IAsyncDisposable
     public async Task RegisterShortcutAsync(string keys, Func<Task> callback)
     {
         _dotNetHelper.Value.RegisterCallback(keys, callback);
-        await _jsRuntime.InvokeVoidAsync("keyboardShortcuts.registerShortcut", keys, _dotNetHelper);
+        var module = await moduleTask.Value;
+        await module.InvokeVoidAsync("registerShortcut", keys, _dotNetHelper);
     }
 
     /// <summary>
@@ -55,7 +60,8 @@ public class KeyboardShortcutService : IAsyncDisposable
     public async Task UnregisterShortcutAsync(string keys)
     {
         _dotNetHelper.Value.UnregisterCallback(keys);
-        await _jsRuntime.InvokeVoidAsync("keyboardShortcuts.unregisterShortcut", keys);
+        var module = await moduleTask.Value;
+        await module!.InvokeVoidAsync("unregisterShortcut", keys);
     }
 
     /// <summary>
@@ -64,7 +70,10 @@ public class KeyboardShortcutService : IAsyncDisposable
     /// <returns>ValueTask.</returns>
     public async ValueTask DisposeAsync()
     {
-        await _jsRuntime.InvokeVoidAsync("keyboardShortcuts.unregisterAllShortcuts");
+        var module = await moduleTask.Value;
+        await module.InvokeVoidAsync("unregisterAllShortcuts");
+        await module.DisposeAsync();
+
         _dotNetHelper.Dispose();
         GC.SuppressFinalize(this);
     }

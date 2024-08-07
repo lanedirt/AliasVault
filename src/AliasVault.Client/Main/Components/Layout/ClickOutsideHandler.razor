@@ -55,7 +55,7 @@
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        if (Module != null)
+        if (Module is not null)
         {
             await Module.InvokeVoidAsync("unregisterClickOutsideHandler");
             await Module.DisposeAsync();
@@ -69,9 +69,9 @@
     /// </summary>
     private async Task LoadModuleAsync()
     {
-        if (Module == null)
+        if (Module is null)
         {
-            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/clickOutsideHandler.js");
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/modules/clickOutsideHandler.js");
             ObjRef = DotNetObjectReference.Create(this);
         }
     }

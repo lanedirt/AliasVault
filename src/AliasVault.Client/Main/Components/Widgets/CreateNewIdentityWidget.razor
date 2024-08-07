@@ -1,10 +1,8 @@
 ﻿@using System.ComponentModel.DataAnnotations
-@using AliasGenerators.Identity.Implementations
-@using AliasGenerators.Identity.Models
 @inherits AliasVault.Client.Main.Pages.MainBase
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
-@implements IDisposable
+@implements IAsyncDisposable
 
 <button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 ms-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
     + New identity
@@ -48,17 +46,16 @@
     private CreateModel Model = new();
     private string PopupStyle { get; set; } = "";
     private ElementReference buttonRef;
+    private IJSObjectReference? Module;
 
     /// <inheritdoc />
-    public void Dispose()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        KeyboardShortcutService.UnregisterShortcutAsync("gc").ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
-    {
-        await KeyboardShortcutService.RegisterShortcutAsync("gc", ShowPopup);
+        await KeyboardShortcutService.UnregisterShortcutAsync("gc");
+        if (Module is not null)
+        {
+            await Module.DisposeAsync();
+        }
     }
 
     /// <inheritdoc />
@@ -66,36 +63,14 @@
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("eval", @"
-                window.getWindowWidth = function() {
-                    return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-                };
-                window.getElementRect = function(element) {
-                    if (element) {
-                        const rect = {
-                            left: element.offsetLeft,
-                            top: element.offsetTop,
-                            right: element.offsetLeft + element.offsetWidth,
-                            bottom: element.offsetTop + element.offsetHeight,
-                            width: element.offsetWidth,
-                            height: element.offsetHeight
-                        };
-                        let parent = element.offsetParent;
-                        while (parent) {
-                            rect.left += parent.offsetLeft;
-                            rect.top += parent.offsetTop;
-                            parent = parent.offsetParent;
-                        }
-                        rect.right = rect.left + rect.width;
-                        rect.bottom = rect.top + rect.height;
-                        return rect;
-                    }
-                    return null;
-                };
-            ");
+            await KeyboardShortcutService.RegisterShortcutAsync("gc", ShowPopup);
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/modules/newIdentityWidget.js");
         }
     }
 
+    /// <summary>
+    /// When the URL input is focused, place cursor at the end of the default URL to allow for easy typing.
+    /// </summary>
     private void OnFocusUrlInput(FocusEventArgs e)
     {
         if (Model.ServiceUrl != DefaultServiceUrl)
@@ -172,7 +147,7 @@
         }
 
         credential.Passwords = new List<Password> { new() };
-        await GenerateRandomIdentity(credential);
+        await CredentialService.GenerateRandomIdentity(credential);
 
         var id = await CredentialService.InsertEntryAsync(credential);
         if (id == Guid.Empty)
@@ -195,30 +170,9 @@
         ClosePopup();
     }
 
-    private async Task GenerateRandomIdentity(Credential credential)
-    {
-        // Generate a random identity using the IIdentityGenerator implementation.
-        var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(DbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
-
-        // Generate random values for the Identity properties
-        credential.Username = identity.NickName;
-        credential.Alias.FirstName = identity.FirstName;
-        credential.Alias.LastName = identity.LastName;
-        credential.Alias.NickName = identity.NickName;
-        credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
-        credential.Alias.BirthDate = identity.BirthDate;
-
-        // Set the email
-        var emailDomain = CredentialService.GetDefaultEmailDomain();
-        credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
-
-        // Generate password
-        credential.Passwords.First().Value = CredentialService.GenerateRandomPassword();
-    }
-
     private void OpenAdvancedMode()
     {
-        NavigationManager.NavigateTo("/add-credentials");
+        NavigationManager.NavigateTo("/credentials/create");
         ClosePopup();
     }
 

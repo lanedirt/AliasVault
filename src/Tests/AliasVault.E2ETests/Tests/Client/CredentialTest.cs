@@ -97,8 +97,8 @@ public class CredentialTest : ClientPlaywrightTest
         // Create a new alias with service name = "Test Service".
         var serviceName = "Test Service";
 
-        await NavigateUsingBlazorRouter("add-credentials");
-        await WaitForUrlAsync("add-credentials", "Add credentials");
+        await NavigateUsingBlazorRouter("credentials/create");
+        await WaitForUrlAsync("credentials/create", "Add credentials");
 
         await InputHelper.FillInputFields(
             fieldValues: new Dictionary<string, string>
