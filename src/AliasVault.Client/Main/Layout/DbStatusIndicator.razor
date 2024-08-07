@@ -1,16 +1,18 @@
 ﻿@implements IDisposable
 @inject DbService DbService
 
-@if (Loading)
-{
-    <div class="flex items-center justify-center">
-        <SmallLoadingIndicator Title="@LoadingIndicatorMessage" />
-    </div>
-}
-else
-{
-    <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="false" />
-}
+<div class="ms-2">
+    @if (Loading)
+    {
+        <div class="flex items-center justify-center">
+            <SmallLoadingIndicator Title="@LoadingIndicatorMessage" />
+        </div>
+    }
+    else
+    {
+        <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="false" />
+    }
+</div>
 
 <!--
 <p>Message: @DbService.GetState().CurrentState.Message</p>

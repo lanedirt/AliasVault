@@ -20,14 +20,14 @@ public class GlobalNotificationService
     public event Action? OnChange;
 
     /// <summary>
-    /// Gets or sets success messages that should be displayed to the user.
+    /// Gets success messages that should be displayed to the user.
     /// </summary>
-    protected List<string> SuccessMessages { get; set; } = [];
+    protected List<string> SuccessMessages { get; } = [];
 
     /// <summary>
-    /// Gets or sets error messages that should be displayed to the user.
+    /// Gets error messages that should be displayed to the user.
     /// </summary>
-    protected List<string> ErrorMessages { get; set; } = [];
+    protected List<string> ErrorMessages { get; } = [];
 
     /// <summary>
     /// Adds a success message to the list of messages that should be displayed to the user.

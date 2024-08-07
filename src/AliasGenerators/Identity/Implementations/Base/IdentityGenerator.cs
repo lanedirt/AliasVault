@@ -12,8 +12,8 @@ using AliasGenerators.Identity;
 using AliasGenerators.Identity.Models;
 
 /// <summary>
-/// Dutch identity generator which implements IIdentityGenerator and generates
-/// random dutch identities.
+/// Abstract identity generator which implements IIdentityGenerator and generates
+/// random identities for a certain language.
 /// </summary>
 public abstract class IdentityGenerator : IIdentityGenerator
 {

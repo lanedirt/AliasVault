@@ -23,7 +23,7 @@ public class GeneralSettingsTest : ClientPlaywrightTest
     public async Task MutateDefaultEmailDomainTest()
     {
         await NavigateUsingBlazorRouter("settings/general");
-        await WaitForUrlAsync("settings/general", "General settings");
+        await WaitForUrlAsync("settings/general", "Configure general");
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
@@ -34,8 +34,8 @@ public class GeneralSettingsTest : ClientPlaywrightTest
         await defaultEmailDomainField.SelectOptionAsync("example2.tld");
 
         // Go to new credential create page and assert that the default email domain is visible on the page.
-        await NavigateUsingBlazorRouter("add-credentials");
-        await WaitForUrlAsync("add-credentials", "Add credentials");
+        await NavigateUsingBlazorRouter("credentials/create");
+        await WaitForUrlAsync("credentials/create", "Add credentials");
 
         var defaultEmailDomainText = await Page.TextContentAsync("body");
         Assert.That(defaultEmailDomainText, Does.Contain("example2.tld"), "Default email domain not visible on add credentials page.");

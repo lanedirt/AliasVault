@@ -43,6 +43,7 @@ builder.Services.AddLogging(logging =>
 
     logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
+    logging.AddFilter("System.Net.Http.HttpClient", LogLevel.Error);
 });
 
 builder.RootComponents.Add<App>("#app");
@@ -67,6 +68,7 @@ builder.Services.AddScoped<CredentialService>();
 builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
+builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 

@@ -36,7 +36,7 @@ public class AuthTests : AdminPlaywrightTest
         await submitButton.ClickAsync();
 
         // Wait for current page to refresh and confirm message shows.
-        await WaitForUrlAsync("account/manage/change-password", "Error");
+        await WaitForUrlAsync("account/manage/change-password", "Incorrect");
 
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Error: Incorrect password."), "No error shown after submitting change password field with wrong old password.");

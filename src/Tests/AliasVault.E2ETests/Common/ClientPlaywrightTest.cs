@@ -170,8 +170,8 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null)
     {
-        await NavigateUsingBlazorRouter("add-credentials");
-        await WaitForUrlAsync("add-credentials", "Add credentials");
+        await NavigateUsingBlazorRouter("credentials/create");
+        await WaitForUrlAsync("credentials/create", "Add credentials");
 
         // Check if a button with text "Generate Random Identity" appears
         var generateButton = Page.Locator("text=Generate Random Identity");
@@ -183,11 +183,11 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Login credentials");
+        await WaitForUrlAsync("credentials/**", "View credentials entry");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Login credentials"), "Credential not created.");
+        Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
     }
 
     /// <summary>

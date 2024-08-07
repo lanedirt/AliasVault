@@ -6,7 +6,7 @@
     }
     else
     {
-        <input type="text" id="@Id" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
+        <input type="text" id="@Id" @onfocus="OnFocusEvent" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
     }
 </div>
 
@@ -39,11 +39,25 @@
     /// Callback that is triggered when the value changes.
     /// </summary>
     [Parameter]
+    public EventCallback<FocusEventArgs> OnFocus { get; set; }
+
+    /// <summary>
+    /// Callback that is triggered when the value changes.
+    /// </summary>
+    [Parameter]
     public EventCallback<string?> ValueChanged { get; set; }
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {
         Value = e.Value?.ToString() ?? string.Empty;
         await ValueChanged.InvokeAsync(Value);
+    }
+
+    private async Task OnFocusEvent(FocusEventArgs e)
+    {
+        if (OnFocus.HasDelegate)
+        {
+            await OnFocus.InvokeAsync(e);
+        }
     }
 }

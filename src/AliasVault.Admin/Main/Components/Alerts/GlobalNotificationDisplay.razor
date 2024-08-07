@@ -26,7 +26,7 @@
 
         if (firstRender)
         {
-            // We subscribe to the OnChange event of the PortalMessageService to update the UI when a new message is added
+            // We subscribe to the OnChange event of the GlobalNotificationService to update the UI when a new message is added
             RefreshAddMessages();
             GlobalNotificationService.OnChange += RefreshAddMessages;
             _onChangeSubscribed = true;

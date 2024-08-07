@@ -50,6 +50,39 @@ public class CredentialTest : ClientPlaywrightTest
     }
 
     /// <summary>
+    /// Test if creating a new credential entry works with quick create widget.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task CreateCredentialWidgetTest()
+    {
+        // Navigate to homepage
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForUrlAsync("credentials", "Credentials");
+
+        // Create a new alias with service name = "Test Service".
+        var serviceName = "Test Service Widget";
+
+        var widgetButton = Page.Locator("button[id='quickIdentityButton']");
+        Assert.That(widgetButton, Is.Not.Null, "Create new identity widget button not found.");
+        await widgetButton.ClickAsync();
+
+        await InputHelper.FillInputFields(new Dictionary<string, string>
+        {
+            { "serviceName", serviceName },
+        });
+
+        var submitButton = Page.Locator("button[id='quickIdentitySubmit']");
+        await submitButton.ClickAsync();
+
+        await WaitForUrlAsync("credentials/**", "View credentials entry");
+
+        // Check that the service name is present in the content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(serviceName), "Created credential service name does not appear on alias page.");
+    }
+
+    /// <summary>
     /// Test if editing a created credential entry works.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -97,8 +130,8 @@ public class CredentialTest : ClientPlaywrightTest
         // Create a new alias with service name = "Test Service".
         var serviceName = "Test Service";
 
-        await NavigateUsingBlazorRouter("add-credentials");
-        await WaitForUrlAsync("add-credentials", "Add credentials");
+        await NavigateUsingBlazorRouter("credentials/create");
+        await WaitForUrlAsync("credentials/create", "Add credentials");
 
         await InputHelper.FillInputFields(
             fieldValues: new Dictionary<string, string>
