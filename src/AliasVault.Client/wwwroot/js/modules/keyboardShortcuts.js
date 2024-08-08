@@ -12,7 +12,7 @@ export function handleKeyPress(event) {
     const currentTime = new Date().getTime();
     const key = event.key.toLowerCase();
 
-    if (currentTime - this.lastKeyPressTime > 500) {
+    if (currentTime - lastKeyPressTime > 1000) {
         lastKeyPressed = '';
     }
 
