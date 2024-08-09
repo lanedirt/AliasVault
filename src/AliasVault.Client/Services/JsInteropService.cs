@@ -45,6 +45,22 @@ public class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("downloadFileFromStream", filename, blob);
 
     /// <summary>
+    /// Focus an element by its ID.
+    /// </summary>
+    /// <param name="elementId">The element ID to focus.</param>
+    /// <returns>Task.</returns>
+    public async Task FocusElementById(string elementId) =>
+        await jsRuntime.InvokeVoidAsync("focusElement", elementId);
+
+    /// <summary>
+    /// Blur (defocus) an element by its ID.
+    /// </summary>
+    /// <param name="elementId">The element ID to focus.</param>
+    /// <returns>Task.</returns>
+    public async Task BlurElementById(string elementId) =>
+        await jsRuntime.InvokeVoidAsync("blurElement", elementId);
+
+    /// <summary>
     /// Copy a string to the browsers clipboard.
     /// </summary>
     /// <param name="value">Value to copy to clipboard.</param>

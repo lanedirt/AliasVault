@@ -47,6 +47,13 @@ window.focusElement = (elementId) => {
     }
 };
 
+window.blurElement = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.blur();
+    }
+};
+
 function initDarkModeSwitcher() {
     const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
     const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');

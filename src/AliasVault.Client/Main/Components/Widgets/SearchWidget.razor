@@ -1,0 +1,178 @@
+@inject DbService DbService
+@inject NavigationManager NavigationManager
+@inject KeyboardShortcutService KeyboardShortcutService
+@inject JsInteropService JsInteropService
+@implements IAsyncDisposable
+
+<div class="relative" id="searchWidgetContainer">
+    <input
+        id="searchWidget"
+        type="text"
+        placeholder="Type here to search"
+        autocomplete="off"
+        class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
+        @bind-value="SearchTerm"
+        @oninput="SearchTermChanged"
+        @onfocus="OnFocus"
+        @onblur="OnBlur"
+        @onkeydown="HandleKeyDown"/>
+
+    @if (ShowHelpText)
+    {
+        <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
+            @if (string.IsNullOrEmpty(SearchTerm))
+            {
+                <p>Type a term to search for, this can be the service name, description or email address.</p>
+            }
+            else if (SearchTerm.Length == 1)
+            {
+                <p>Please type more chars</p>
+            }
+            else
+            {
+                <p>Searching for "@SearchTerm"</p>
+            }
+        </div>
+    }
+
+    @if (ShowResults)
+    {
+        @if (SearchResults.Any())
+        {
+            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                @for (int i = 0; i < SearchResults.Count; i++)
+                {
+                    var result = SearchResults[i];
+                    <div
+                        class="search-result @(i == SelectedIndex ? "bg-gray-100 dark:bg-gray-700" : "") px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                        @onclick="() => SelectResult(result)">
+                        @result.Service.Name <span class="text-gray-500">(@result.Alias.Email)</span>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                    No results found
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private string SearchTerm { get; set; } = string.Empty;
+    private List<Credential> SearchResults { get; set; } = new();
+    private bool ShowResults => SearchTerm.Length >= 2;
+    private bool ShowHelpText { get; set; }
+    private int SelectedIndex { get; set; } = -1;
+
+    /// <inheritdoc />
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        await KeyboardShortcutService.UnregisterShortcutAsync("gs");
+        await KeyboardShortcutService.UnregisterShortcutAsync("gc");
+        NavigationManager.LocationChanged -= ResetSearchField;
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await KeyboardShortcutService.RegisterShortcutAsync("gs", FocusSearchField);
+            await KeyboardShortcutService.RegisterShortcutAsync("gf", FocusSearchField);
+            NavigationManager.LocationChanged += ResetSearchField;
+        }
+    }
+
+    private void OnFocus()
+    {
+        ShowHelpText = true;
+    }
+
+    private void OnBlur()
+    {
+        ShowHelpText = false;
+    }
+
+    private async Task SearchTermChanged(ChangeEventArgs e)
+    {
+        Console.WriteLine("Search term changed");
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+        await PerformSearch();
+    }
+
+    private async Task PerformSearch()
+    {
+        var context = await DbService.GetDbContextAsync();
+        if (SearchTerm.Length >= 2)
+        {
+            var searchTerms = SearchTerm.Trim().ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            var query = context.Credentials
+                .Include(x => x.Service)
+                .Include(x => x.Alias)
+                .AsQueryable();
+
+            foreach (var term in searchTerms)
+            {
+                query = query.Where(x =>
+                    (x.Service.Name != null && EF.Functions.Like(x.Service.Name.ToLower(), $"%{term}%")) ||
+                    (x.Alias.Email != null && EF.Functions.Like(x.Alias.Email.ToLower(), $"%{term}%"))
+                );
+            }
+
+            SearchResults = await query.Take(10).ToListAsync();
+
+            // Select first entry by default so when pressing enter, the first result is immediately selected.
+            SelectedIndex = 0;
+        }
+        else
+        {
+            SearchResults.Clear();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                SelectedIndex = Math.Min(SelectedIndex + 1, SearchResults.Count - 1);
+                break;
+            case "ArrowUp":
+                SelectedIndex = Math.Max(SelectedIndex - 1, -1);
+                break;
+            case "Enter":
+                if (SelectedIndex >= 0 && SelectedIndex < SearchResults.Count)
+                {
+                    await SelectResult(SearchResults[SelectedIndex]);
+                }
+
+                break;
+        }
+    }
+
+    private async Task SelectResult(Credential credential)
+    {
+        await JsInteropService.BlurElementById("searchWidget");
+        NavigationManager.NavigateTo($"/credentials/{credential.Id}");
+    }
+
+    private void ResetSearchField(object? sender, LocationChangedEventArgs e)
+    {
+        SearchTerm = string.Empty;
+        SearchResults.Clear();
+        StateHasChanged();
+    }
+
+    private async Task FocusSearchField()
+    {
+        await JsInteropService.FocusElementById("searchWidget");
+    }
+}
