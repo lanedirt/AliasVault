@@ -104,7 +104,7 @@
 
         await UpdatePopupStyle();
         await Task.Delay(100); // Give time for the DOM to update
-        await JSRuntime.InvokeVoidAsync("focusElement", "serviceName");
+        await JsInteropService.FocusElementById("serviceName");
     }
 
     private void ClosePopup()

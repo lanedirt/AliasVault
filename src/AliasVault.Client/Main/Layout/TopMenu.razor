@@ -15,9 +15,18 @@
                         <NavLink href="/credentials" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
                             Credentials
                         </NavLink>
+                        <NavLink href="/emails" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                            Emails
+                        </NavLink>
                     </ul>
                 </div>
             </div>
+
+            <!-- New search box -->
+            <div class="flex-grow mx-4">
+                <SearchWidget />
+            </div>
+
             <div class="flex justify-end items-center lg:order-2">
                 <CreateNewIdentityWidget />
 
