@@ -119,10 +119,10 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         // Try to extract favicon from service URL
         await ExtractFaviconAsync(loginObject);
 
-        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith("@"))
+        // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
+        // So we remove it.
+        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
-            // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
-            // So we remove it.
             loginObject.Alias.Email = null;
         }
 
@@ -195,10 +195,9 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             throw new InvalidOperationException("Login object not found.");
         }
 
-        // Sanitize email address.
         // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
         // So we remove it.
-        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith("@"))
+        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
             loginObject.Alias.Email = null;
         }

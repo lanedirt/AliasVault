@@ -285,6 +285,25 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Disposes the service.
+    /// </summary>
+    /// <param name="disposing">True if disposing.</param>
+    public void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _sqlConnection.Dispose();
+        }
+
+        _disposed = true;
+    }
+
+    /// <summary>
     /// Get a list of private email addresses that are used in aliases by this vault.
     /// </summary>
     /// <returns>List of email addresses.</returns>
@@ -305,25 +324,6 @@ public sealed class DbService : IDisposable
             .ToList();
 
         return emailAddresses;
-    }
-
-    /// <summary>
-    /// Disposes the service.
-    /// </summary>
-    /// <param name="disposing">True if disposing.</param>
-    public void Dispose(bool disposing)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        if (disposing)
-        {
-            _sqlConnection.Dispose();
-        }
-
-        _disposed = true;
     }
 
     /// <summary>
