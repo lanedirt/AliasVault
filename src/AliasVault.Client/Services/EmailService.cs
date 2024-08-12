@@ -102,7 +102,7 @@ public class EmailService(DbService dbService, JsInteropService jsInteropService
     /// </summary>
     private async Task EnsureEncryptionKeys()
     {
-        if (!_encryptionKeys.Any())
+        if (_encryptionKeys.Count == 0)
         {
             var context = await dbService.GetDbContextAsync();
             _encryptionKeys = await context.EncryptionKeys.ToListAsync();

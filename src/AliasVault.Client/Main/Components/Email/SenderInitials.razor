@@ -63,7 +63,7 @@
     /// </summary>
     private void GenerateSenderInitials()
     {
-        string senderName = Regex.Replace(SenderName, "[^a-zA-Z ]", "");
+        string senderName = Regex.Replace(SenderName, "[^a-zA-Z ]", "", RegexOptions.NonBacktracking);
 
         SenderNameLetters = string.Concat(senderName
             .Split(' ')
