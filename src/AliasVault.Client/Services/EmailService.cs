@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// Email service that contains utility methods for handling email functionality such as client-side decryption.
 /// </summary>
-public class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService)
+public sealed class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService)
 {
     private List<EncryptionKey> _encryptionKeys = [];
 

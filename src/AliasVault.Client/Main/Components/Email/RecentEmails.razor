@@ -91,7 +91,7 @@
     /// The email address to show recent emails for.
     /// </summary>
     [Parameter]
-    public string EmailAddress { get; set; } = string.Empty;
+    public string? EmailAddress { get; set; } = string.Empty;
 
     private List<MailboxEmailApiModel> MailboxEmails { get; set; } = new();
     private bool ShowComponent { get; set; } = false;
@@ -110,6 +110,11 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        if (EmailAddress is null)
+        {
+            return;
+        }
 
         // Check if email has a known SpamOK domain, if not, don't show this component.
         if (IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress))
@@ -131,6 +136,12 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+
+        if (EmailAddress is null)
+        {
+            return;
+        }
+
         IsSpamOk = IsSpamOkDomain(EmailAddress);
     }
 
@@ -192,7 +203,7 @@
 
     private async Task LoadRecentEmailsAsync()
     {
-        if (!ShowComponent)
+        if (!ShowComponent || EmailAddress is null)
         {
             return;
         }
@@ -218,6 +229,11 @@
     /// </summary>
     private async Task OpenEmail(int emailId)
     {
+        if (EmailAddress is null)
+        {
+            return;
+        }
+
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 

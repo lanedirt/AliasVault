@@ -15,7 +15,7 @@ using Microsoft.JSInterop;
 /// <summary>
 /// Service class for alias operations.
 /// </summary>
-public class KeyboardShortcutService : IAsyncDisposable
+public sealed class KeyboardShortcutService : IAsyncDisposable
 {
     private readonly DotNetObjectReference<CallbackWrapper> _dotNetHelper;
     private readonly NavigationManager _navigationManager;
@@ -85,6 +85,13 @@ public class KeyboardShortcutService : IAsyncDisposable
         await RegisterShortcutAsync("gh", () =>
         {
             _navigationManager.NavigateTo("/");
+            return Task.CompletedTask;
+        });
+
+        // Global shortcut: Go to email page
+        await RegisterShortcutAsync("ge", () =>
+        {
+            _navigationManager.NavigateTo("/emails");
             return Task.CompletedTask;
         });
     }

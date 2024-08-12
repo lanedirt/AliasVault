@@ -15,7 +15,7 @@ using Microsoft.JSInterop;
 /// JavaScript interop service for calling JavaScript functions from C#.
 /// </summary>
 /// <param name="jsRuntime">IJSRuntime.</param>
-public class JsInteropService(IJSRuntime jsRuntime)
+public sealed class JsInteropService(IJSRuntime jsRuntime)
 {
     /// <summary>
     /// Symmetrically encrypts a string using the provided encryption key.

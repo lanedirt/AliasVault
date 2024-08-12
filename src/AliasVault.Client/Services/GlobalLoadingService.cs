@@ -10,7 +10,7 @@ namespace AliasVault.Client.Services;
 /// <summary>
 /// Global loading service that can be used to show or hide a global layout loading spinner.
 /// </summary>
-public class GlobalLoadingService
+public sealed class GlobalLoadingService
 {
     private bool _isLoading;
 

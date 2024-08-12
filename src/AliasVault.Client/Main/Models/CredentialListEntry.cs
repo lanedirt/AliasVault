@@ -10,7 +10,7 @@ namespace AliasVault.Client.Main.Models;
 /// <summary>
 /// Alias list entry model. This model is used to represent an alias in a list with simplified properties.
 /// </summary>
-public class CredentialListEntry
+public sealed class CredentialListEntry
 {
     /// <summary>
     /// Gets or sets the alias id.

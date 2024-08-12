@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 /// with a AliasClientDb database instance that is only persisted in memory due to the encryption requirements of the
 /// database itself. The database should not be persisted to disk when in un-encrypted form.
 /// </summary>
-public class DbService : IDisposable
+public sealed class DbService : IDisposable
 {
     private readonly AuthService _authService;
     private readonly JsInteropService _jsInteropService;
@@ -285,6 +285,25 @@ public class DbService : IDisposable
     }
 
     /// <summary>
+    /// Disposes the service.
+    /// </summary>
+    /// <param name="disposing">True if disposing.</param>
+    public void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _sqlConnection.Dispose();
+        }
+
+        _disposed = true;
+    }
+
+    /// <summary>
     /// Get a list of private email addresses that are used in aliases by this vault.
     /// </summary>
     /// <returns>List of email addresses.</returns>
@@ -305,25 +324,6 @@ public class DbService : IDisposable
             .ToList();
 
         return emailAddresses;
-    }
-
-    /// <summary>
-    /// Disposes the service.
-    /// </summary>
-    /// <param name="disposing">True if disposing.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        if (disposing)
-        {
-            _sqlConnection.Dispose();
-        }
-
-        _disposed = true;
     }
 
     /// <summary>

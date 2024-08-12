@@ -10,7 +10,7 @@ namespace AliasVault.Client.Services.Database;
 /// <summary>
 /// Class to manage the state of the AliasClientDbService that others can subscribe to events for.
 /// </summary>
-public class DbServiceState
+public sealed class DbServiceState
 {
     private DatabaseState _currentState = new();
 
@@ -114,7 +114,7 @@ public class DbServiceState
     /// OnStateChanged event handler.
     /// </summary>
     /// <param name="newState">The new state.</param>
-    protected virtual void OnStateChanged(DatabaseState newState)
+    private void OnStateChanged(DatabaseState newState)
     {
         StateChanged?.Invoke(this, newState);
     }

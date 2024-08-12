@@ -12,7 +12,7 @@ namespace AliasVault.Client.Services;
 /// are stored in this object which is scoped to the current session. This allows the messages to be cached until
 /// they actually have been displayed. So they can survive redirects and page reloads.
 /// </summary>
-public class GlobalNotificationService
+public sealed class GlobalNotificationService
 {
     /// <summary>
     /// Allow other components to subscribe to changes in the event object.
@@ -22,12 +22,12 @@ public class GlobalNotificationService
     /// <summary>
     /// Gets success messages that should be displayed to the user.
     /// </summary>
-    protected List<string> SuccessMessages { get; } = [];
+    private List<string> SuccessMessages { get; } = [];
 
     /// <summary>
     /// Gets error messages that should be displayed to the user.
     /// </summary>
-    protected List<string> ErrorMessages { get; } = [];
+    private List<string> ErrorMessages { get; } = [];
 
     /// <summary>
     /// Adds a success message to the list of messages that should be displayed to the user.

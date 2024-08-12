@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using AliasClientDb;
 using AliasGenerators.Identity.Implementations;
 using AliasGenerators.Identity.Models;
-using AliasGenerators.Password;
 using AliasGenerators.Password.Implementations;
 using AliasVault.Shared.Models;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +24,7 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 /// <summary>
 /// Service class for alias operations.
 /// </summary>
-public class CredentialService(HttpClient httpClient, DbService dbService, Config config)
+public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
     /// <summary>
     /// Generates a random password for a credential.
@@ -120,6 +119,13 @@ public class CredentialService(HttpClient httpClient, DbService dbService, Confi
         // Try to extract favicon from service URL
         await ExtractFaviconAsync(loginObject);
 
+        // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
+        // So we remove it.
+        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
+        {
+            loginObject.Alias.Email = null;
+        }
+
         var login = new Credential
         {
             CreatedAt = DateTime.UtcNow,
@@ -187,6 +193,13 @@ public class CredentialService(HttpClient httpClient, DbService dbService, Confi
         if (login is null)
         {
             throw new InvalidOperationException("Login object not found.");
+        }
+
+        // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
+        // So we remove it.
+        if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
+        {
+            loginObject.Alias.Email = null;
         }
 
         login.UpdatedAt = DateTime.UtcNow;

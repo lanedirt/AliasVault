@@ -82,7 +82,7 @@
     /// The value of the input field. This should be the full email address.
     /// </summary>
     [Parameter]
-    public string Value { get; set; } = string.Empty;
+    public string? Value { get; set; } = string.Empty;
 
     /// <summary>
     /// Callback that is triggered when the value changes.
@@ -112,6 +112,11 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+
+        if (Value is null)
+        {
+            return;
+        }
 
         if (Value.Contains('@'))
         {
@@ -176,6 +181,11 @@
 
     private void ToggleCustomDomain()
     {
+        if (Value is null)
+        {
+            return;
+        }
+
         IsCustomDomain = !IsCustomDomain;
         if (!IsCustomDomain && !Value.Contains('@'))
         {

@@ -17,14 +17,11 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 /// This service is responsible for handling authentication-related operations such as refreshing tokens,
 /// storing tokens, and revoking tokens.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="AuthService"/> class.
-/// </remarks>
 /// <param name="httpClient">The HTTP client.</param>
 /// <param name="localStorage">The local storage service.</param>
 /// <param name="environment">IWebAssemblyHostEnvironment instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
-public class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, IConfiguration configuration)
+public sealed class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, IConfiguration configuration)
 {
     private const string AccessTokenKey = "token";
     private const string RefreshTokenKey = "refreshToken";
