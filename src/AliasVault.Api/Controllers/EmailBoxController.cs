@@ -11,6 +11,7 @@ using AliasServerDb;
 using AliasVault.Api.Helpers;
 using AliasVault.Shared.Models.Spamok;
 using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.WebApi.Email;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ using Microsoft.EntityFrameworkCore;
 public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
-    /// Get the newest version of the vault for the current user.
+    /// Returns a list of emails for the provided email address.
     /// </summary>
     /// <param name="to">The full email address including @ sign.</param>
     /// <returns>List of aliases in JSON format.</returns>
@@ -95,6 +96,74 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
         returnValue.Address = to;
         returnValue.Subscribed = false;
         returnValue.Mails = emails;
+
+        return Ok(returnValue);
+    }
+
+    /// <summary>
+    /// Returns a list of emails for the provided email address.
+    /// </summary>
+    /// <param name="model">The request model extracted from POST body.</param>
+    /// <returns>List of aliases in JSON format.</returns>
+    [HttpPost(template: "bulk", Name = "GetEmailBoxBulk")]
+    public async Task<IActionResult> GetEmailBoxBulk([FromBody] MailboxBulkRequest model)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var user = await GetCurrentUserAsync();
+        if (user is null)
+        {
+            return Unauthorized("Not authenticated.");
+        }
+
+        // Sanitize input.
+        model.Addresses = model.Addresses.Select(x => x.Trim().ToLower()).ToList();
+        model.PageSize = Math.Min(model.PageSize, 50);
+
+        // Load all email addresses that the user has a claim to where the address is in the list.
+        var emailClaims = await context.UserEmailClaims
+            .Where(claim => claim.UserId == user.Id && model.Addresses.Contains(claim.Address))
+            .ToListAsync();
+
+        var query = context.Emails
+            .AsNoTracking()
+            .Include(x => x.EncryptionKey)
+            .Where(email => context.UserEmailClaims
+                .Any(claim => claim.UserId == user.Id
+                              && claim.Address == email.To
+                              && model.Addresses.Contains(claim.Address)));
+
+        var totalRecords = await query.CountAsync();
+
+        List<MailboxEmailApiModel> emails = await query.Select(x => new MailboxEmailApiModel
+            {
+                Id = x.Id,
+                Subject = x.Subject,
+                FromDisplay = ConversionHelper.ConvertFromToFromDisplay(x.From),
+                FromDomain = x.FromDomain,
+                FromLocal = x.FromLocal,
+                ToDomain = x.ToDomain,
+                ToLocal = x.ToLocal,
+                Date = x.Date,
+                DateSystem = x.DateSystem,
+                SecondsAgo = (int)DateTime.UtcNow.Subtract(x.DateSystem).TotalSeconds,
+                MessagePreview = x.MessagePreview ?? string.Empty,
+                EncryptedSymmetricKey = x.EncryptedSymmetricKey,
+                EncryptionKey = x.EncryptionKey.PublicKey,
+            })
+            .OrderByDescending(x => x.DateSystem)
+            .Skip((model.Page - 1) * model.PageSize)
+            .Take(model.PageSize)
+            .ToListAsync();
+
+        MailboxBulkResponse returnValue = new()
+        {
+            Addresses = emailClaims.Select(x => x.Address).ToList(),
+            Mails = emails,
+            PageSize = model.PageSize,
+            CurrentPage = model.Page,
+            TotalRecords = totalRecords,
+        };
 
         return Ok(returnValue);
     }

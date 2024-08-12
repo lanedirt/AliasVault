@@ -3,6 +3,7 @@ module.exports = {
     content: [
         './**/*.html',
         './**/*.razor',
+        '../Utilities/AliasVault.RazorComponents/**/*.razor',
     ],
     safelist: [
         'w-64',

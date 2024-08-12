@@ -151,33 +151,36 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // Register new email addresses.
         foreach (var email in newEmailAddresses)
         {
+            // Sanitize email address.
+            var sanitizedEmail = email.Trim().ToLower();
+
             // If email address is invalid according to the EmailAddressAttribute, skip it.
-            if (!new EmailAddressAttribute().IsValid(email))
+            if (!new EmailAddressAttribute().IsValid(sanitizedEmail))
             {
                 continue;
             }
 
             // Check if the email address is already claimed (by another user).
             var existingClaim = await context.UserEmailClaims
-                .FirstOrDefaultAsync(x => x.Address == email);
+                .FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
 
             if (existingClaim != null && existingClaim.UserId != userId)
             {
                 // Email address is already claimed by another user. Log the error and continue.
-                logger.LogWarning("{User} tried to claim email address: {Email} but it is already claimed by another user.", userId, email);
+                logger.LogWarning("{User} tried to claim email address: {Email} but it is already claimed by another user.", userId, sanitizedEmail);
                 continue;
             }
 
-            if (!existingEmailClaims.Contains(email))
+            if (!existingEmailClaims.Contains(sanitizedEmail))
             {
                 try
                 {
                     await context.UserEmailClaims.AddAsync(new UserEmailClaim
                     {
                         UserId = userId,
-                        Address = email,
-                        AddressLocal = email.Split('@')[0],
-                        AddressDomain = email.Split('@')[1],
+                        Address = sanitizedEmail,
+                        AddressLocal = sanitizedEmail.Split('@')[0],
+                        AddressDomain = sanitizedEmail.Split('@')[1],
                         CreatedAt = timeProvider.UtcNow,
                         UpdatedAt = timeProvider.UtcNow,
                     });
@@ -185,7 +188,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
                 catch (DbUpdateException ex)
                 {
                     // Error while adding email claim. Log the error and continue.
-                    logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", email, userId);
+                    logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", sanitizedEmail, userId);
                 }
             }
         }

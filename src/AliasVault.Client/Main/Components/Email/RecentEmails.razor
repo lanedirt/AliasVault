@@ -8,6 +8,7 @@
 @inject JsInteropService JsInteropService
 @inject DbService DbService
 @inject Config Config
+@inject EmailService EmailService
 @using System.Timers
 @implements IDisposable
 
@@ -292,7 +293,7 @@
                                     break;
                                 case "CLAIM_DOES_NOT_EXIST":
                                     Error = "An error occurred while trying to load the emails. Please try to edit and " +
-                                            "save the credential entry to synchronize the database, then again.";
+                                            "save the credential entry to synchronize the database, then try again.";
                                     break;
                                 default:
                                     throw new ArgumentException(errorResponse.Message);
@@ -325,24 +326,7 @@
             MailboxEmails = mailbox.Mails.Take(10).ToList();
         }
 
-        // Loop through emails and decrypt the subject locally.
-        var context = await DbService.GetDbContextAsync();
-        var privateKeys = await context.EncryptionKeys.ToListAsync();
-        foreach (var mail in MailboxEmails)
-        {
-            var privateKey = privateKeys.First(x => x.PublicKey == mail.EncryptionKey);
-
-            try
-            {
-                var decryptedSymmetricKey = await JsInteropService.DecryptWithPrivateKey(mail.EncryptedSymmetricKey, privateKey.PrivateKey);
-                mail.Subject = await JsInteropService.SymmetricDecrypt(mail.Subject, Convert.ToBase64String(decryptedSymmetricKey));
-            }
-            catch (Exception ex)
-            {
-                Error = ex.Message;
-                Console.WriteLine(ex);
-            }
-        }
+        MailboxEmails = await EmailService.DecryptEmailList(MailboxEmails);
     }
 
     /// <summary>
@@ -358,28 +342,7 @@
             var privateKey = await context.EncryptionKeys.FirstOrDefaultAsync(x => x.PublicKey == mail.EncryptionKey);
             if (privateKey is not null)
             {
-                try
-                {
-                    var decryptedSymmetricKey = await JsInteropService.DecryptWithPrivateKey(mail.EncryptedSymmetricKey, privateKey.PrivateKey);
-                    mail.Subject = await JsInteropService.SymmetricDecrypt(mail.Subject, Convert.ToBase64String(decryptedSymmetricKey));
-                    if (mail.MessageHtml is not null)
-                    {
-                        mail.MessageHtml = await JsInteropService.SymmetricDecrypt(mail.MessageHtml, Convert.ToBase64String(decryptedSymmetricKey));
-                    }
-
-                    if (mail.MessagePlain is not null)
-                    {
-                        mail.MessagePlain = await JsInteropService.SymmetricDecrypt(mail.MessagePlain, Convert.ToBase64String(decryptedSymmetricKey));
-                    }
-
-                    mail.FromDisplay = await JsInteropService.SymmetricDecrypt(mail.FromDisplay, Convert.ToBase64String(decryptedSymmetricKey));
-                    mail.FromLocal = await JsInteropService.SymmetricDecrypt(mail.FromLocal, Convert.ToBase64String(decryptedSymmetricKey));
-                    mail.FromDomain = await JsInteropService.SymmetricDecrypt(mail.FromDomain, Convert.ToBase64String(decryptedSymmetricKey));
-                }
-                catch (Exception ex)
-                {
-                    Error = ex.Message;
-                }
+                mail = await EmailService.DecryptEmail(mail);
             }
 
             Email = mail;

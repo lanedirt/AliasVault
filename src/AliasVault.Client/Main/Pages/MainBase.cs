@@ -61,6 +61,12 @@ public class MainBase : OwningComponentBase
     public DbService DbService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the EmailService.
+    /// </summary>
+    [Inject]
+    public EmailService EmailService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the KeyboardShortcutService.
     /// </summary>
     [Inject]
