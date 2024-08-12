@@ -50,6 +50,7 @@ public class EmailDecryptionTest : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
+    [Order(1)]
     public async Task EmailEncryptionDecryptionTest()
     {
         // Create credential which should automatically create claim on server during database sync.
@@ -89,13 +90,19 @@ public class EmailDecryptionTest : ClientPlaywrightTest
 
         // Attempt to click on email refresh button to get new emails.
         await Page.Locator("id=recent-email-refresh").First.ClickAsync();
-
-        // Wait for 1 sec
-        await Task.Delay(1000);
+        await WaitForUrlAsync("credentials/**", "Subject");
 
         // Check if the email is visible on the page now.
         var emailContent = await Page.TextContentAsync("body");
-        Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the page. Check email decryption logic.");
+        Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the credential page. Check email decryption logic.");
+
+        // Navigate to the email index page and ensure that the decrypted email is also readable there.
+        await NavigateUsingBlazorRouter("emails");
+        await WaitForUrlAsync("emails", "Inbox");
+
+        // Check if the email is visible on the page now.
+        emailContent = await Page.TextContentAsync("body");
+        Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
     }
 
     /// <summary>
@@ -103,6 +110,7 @@ public class EmailDecryptionTest : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
+    [Order(2)]
     public async Task EmailUnknownDomainNoClaimTest()
     {
         // Create credential which should automatically create claim on server during database sync.
@@ -125,6 +133,7 @@ public class EmailDecryptionTest : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
+    [Order(3)]
     public async Task EmailDuplicateClaimTest()
     {
         // Create credential which should automatically create claim on server during database sync.

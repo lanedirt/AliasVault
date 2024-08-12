@@ -70,6 +70,7 @@ builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 
 builder.Services.AddAuthorizationCore();

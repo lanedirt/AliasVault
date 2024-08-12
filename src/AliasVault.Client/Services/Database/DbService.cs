@@ -285,6 +285,29 @@ public class DbService : IDisposable
     }
 
     /// <summary>
+    /// Get a list of private email addresses that are used in aliases by this vault.
+    /// </summary>
+    /// <returns>List of email addresses.</returns>
+    public async Task<List<string>> GetEmailClaimListAsync()
+    {
+        // Send list of email addresses that are used in aliases by this vault so they can be
+        // claimed on the server.
+        var emailAddresses = await _dbContext.Aliases
+            .Where(a => a.Email != null)
+            .Select(a => a.Email)
+            .Distinct()
+            .Select(email => email!)
+            .ToListAsync();
+
+        // Filter the list of email addresses to only include those that are in the allowed domains.
+        emailAddresses = emailAddresses
+            .Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain)))
+            .ToList();
+
+        return emailAddresses;
+    }
+
+    /// <summary>
     /// Disposes the service.
     /// </summary>
     /// <param name="disposing">True if disposing.</param>
