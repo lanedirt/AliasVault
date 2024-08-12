@@ -39,7 +39,7 @@ public class Credential
     /// <summary>
     /// Gets or sets the username field.
     /// </summary>
-    public string Username { get; set; } = null!;
+    public string? Username { get; set; }
 
     /// <summary>
     /// Gets or sets the password objects.

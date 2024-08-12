@@ -17,7 +17,7 @@ using System.Globalization;
 /// Initializes a new instance of the <see cref="StringDateFormatAttribute"/> class.
 /// </remarks>
 /// <param name="format">The date format to validate.</param>
-public class StringDateFormatAttribute(string format) : ValidationAttribute
+public sealed class StringDateFormatAttribute(string format) : ValidationAttribute
 {
     /// <summary>
     /// Check if the date string is in the correct format.

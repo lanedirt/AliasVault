@@ -648,6 +648,10 @@ video {
   grid-column: 1 / -1;
 }
 
+.col-span-12 {
+  grid-column: span 12 / span 12;
+}
+
 .mx-4 {
   margin-left: 1rem;
   margin-right: 1rem;

@@ -10,7 +10,7 @@ namespace AliasVault.Client.Services;
 /// <summary>
 /// Service to manage the clipboard copy operations across the application.
 /// </summary>
-public class ClipboardCopyService
+public sealed class ClipboardCopyService
 {
     private string _currentCopiedId = string.Empty;
 

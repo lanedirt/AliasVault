@@ -44,7 +44,7 @@ else
                 @foreach (var email in EmailList)
                 {
                     <li class="hover:bg-gray-50 transition duration-150 ease-in-out">
-                        <div @onclick="() => ShowAliasVaultEmailInModal(email.Id)" class="block p-4 flex justify-start items-start">
+                        <div @onclick="() => ShowAliasVaultEmailInModal(email.Id)" class="p-4 flex justify-start items-start">
                             <div class="mr-4 flex-shrink-0">
                                 <SenderInitials SenderName="@email.FromName" SenderEmail="@email.FromEmail" />
                             </div>
@@ -188,9 +188,10 @@ else
         var credentialLookup = await context.Credentials
             .Include(x => x.Service)
             .Include(x => x.Alias)
+            .GroupBy(x => x.Alias.Email!.ToLower())
             .ToDictionaryAsync(
-                x => x.Alias.Email?.ToLower() ?? string.Empty,
-                x => new { x.Id, ServiceName = x.Service.Name ?? "Unknown" }
+                g => g.Key,
+                g => new { Id = g.First().Id, ServiceName = g.First().Service.Name ?? "Unknown" }
             );
 
         // Convert the email list to view models and add credential info in a single pass

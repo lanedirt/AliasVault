@@ -9,6 +9,7 @@ namespace AliasVault.Client.Main.Models;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
 using AliasVault.Client.Main.Models.FormValidation;
@@ -16,7 +17,7 @@ using AliasVault.Client.Main.Models.FormValidation;
 /// <summary>
 /// Credential edit model.
 /// </summary>
-public class CredentialEdit
+public sealed class CredentialEdit
 {
     /// <summary>
     /// Gets or sets the Id of the login.
@@ -37,6 +38,7 @@ public class CredentialEdit
     /// Gets or sets the name of the service.
     /// </summary>
     [Required]
+    [Display(Name = "Service Name")]
     public string ServiceName { get; set; } = null!;
 
     /// <summary>

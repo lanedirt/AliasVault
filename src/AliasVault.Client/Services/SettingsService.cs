@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 /// This is done because the SettingsService requires a DbContext during initialization and the context is not yet
 /// available during application boot because of encryption/decryption of remote database file. When accessing the
 /// settings through the DbService we can ensure proper data flow.</remarks>
-public class SettingsService
+public sealed class SettingsService
 {
     private readonly Dictionary<string, string?> _settings = new();
     private DbService? _dbService;

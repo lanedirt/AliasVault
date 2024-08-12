@@ -139,18 +139,25 @@ public class CredentialTest : ClientPlaywrightTest
                 { "service-name", serviceName },
             });
 
-        // Wait for button with text "Generate Random Identity" to appear.
-        var generateButton = Page.Locator("text=Generate Random Identity");
-        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
+        // 1. First try to generate new username with no identity fields set yet.
+        var newUsernameButton = Page.Locator("text=New Username").First;
+        Assert.That(newUsernameButton, Is.Not.Null, "Generate button not found.");
+        await newUsernameButton.ClickAsync();
+        await Task.Delay(100);
 
-        // Press the button to generate a random identity.
+        var username = await Page.InputValueAsync("#username");
+        Assert.That(username, Is.Not.Null.And.Not.Empty, "Username not generated before alias is generated.");
+
+        // 2. Then generate a new identity.
+        var generateButton = Page.Locator("text=Generate Random Alias");
+        Assert.That(generateButton, Is.Not.Null, "Generate button not found.");
         await generateButton.First.ClickAsync();
 
         // Wait for the identity fields to be filled.
-        await Task.Delay(1000);
+        await Task.Delay(100);
 
         // Verify that the identity fields are filled.
-        var username = await Page.InputValueAsync("#username");
+        username = await Page.InputValueAsync("#username");
         var firstName = await Page.InputValueAsync("#first-name");
         var lastName = await Page.InputValueAsync("#last-name");
 
@@ -161,5 +168,13 @@ public class CredentialTest : ClientPlaywrightTest
             Assert.That(firstName, Is.Not.Null.And.Not.Empty, "First name not generated.");
             Assert.That(lastName, Is.Not.Null.And.Not.Empty, "Last name not generated.");
         });
+
+        // 3. Regenerate the username field again.
+        newUsernameButton = Page.Locator("text=New Username").First;
+        await newUsernameButton.ClickAsync();
+
+        await Task.Delay(100);
+        username = await Page.InputValueAsync("#username");
+        Assert.That(username, Is.Not.Null.And.Not.Empty, "Username not generated after alias is generated.");
     }
 }

@@ -10,7 +10,7 @@ namespace AliasVault.Client.Main.Models;
 /// <summary>
 /// Represents a breadcrumb item for the breadcrumb component.
 /// </summary>
-public class BreadcrumbItem
+public sealed class BreadcrumbItem
 {
     /// <summary>
     /// Gets or sets the display name for the breadcrumb item.
