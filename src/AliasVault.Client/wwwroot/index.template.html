@@ -34,11 +34,23 @@
 
 <body class="bg-gray-50 dark:bg-gray-800">
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="fixed inset-0 flex items-center justify-center">
+            <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+                <div class="text-center">
+                    <svg class="mx-auto animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">AliasVault is loading</h2>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Downloading the AliasVault app to your browser for secure end-to-end encryption.</p>
+                    <div class="loading-progress-text text-sm font-medium text-gray-700 mt-4"></div>
+                    <div class="mt-6 text-center">
+                        <p id="security-quote" class="text-sm text-primary-600 italic"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="blazor-error-ui">
@@ -47,6 +59,26 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script>
+        const securityQuotes = [
+            "Your identity is your most valuable asset. Protect it like one.",
+            "In the digital world, a strong password is your first line of defense.",
+            "Security is not a product, but a process.",
+            "The weakest link in the security chain is the human element.",
+            "Security is always excessive until it's not enough.",
+            "The only system which is truly secure is one which is switched off and unplugged.",
+            "In a world where you can be anything, be secure.",
+            "Trust, but verify - especially online.",
+            "Your data is only as secure as your weakest password.",
+            "Privacy is not an option, and it shouldn't be the price we accept for just getting on the Internet.",
+            "Arguing that you don't care about the right to privacy because you have nothing to hide is no different than saying you don't care about free speech because you have nothing to say.",
+            "The most secure password is the one you can't remember.",
+        ];
+
+        const quoteElement = document.getElementById('security-quote');
+        const randomIndex = Math.floor(Math.random() * securityQuotes.length);
+        quoteElement.textContent = `"${securityQuotes[randomIndex]}"`;
+    </script>
     <script src="js/crypto.js?v=@CacheBuster"></script>
     <script src="js/utilities.js?v=@CacheBuster"></script>
     <script src="_framework/blazor.webassembly.js?v=@CacheBuster"></script>

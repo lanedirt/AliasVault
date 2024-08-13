@@ -36,9 +36,9 @@ else
     <div class="overflow-x-auto px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged"/>
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="p-4 bg-gray-100 border-b">
-                <h2 class="text-xl font-semibold text-gray-800">Inbox</h2>
+        <div class="bg-white shadow rounded-lg overflow-hidden mt-6">
+            <div class="px-4 py-2 bg-gray-100 border-b">
+                <h2 class="font-semibold text-gray-800">Inbox</h2>
             </div>
             <ul class="divide-y divide-gray-200">
                 @foreach (var email in EmailList)
@@ -59,10 +59,7 @@ else
                                         </div>
                                     </div>
                                     <div class="flex justify-end">
-                                        <button @onclick:stopPropagation="true" @onclick="() => NavigateToCredential(email.CredentialId)"
-                                                class="mr-4 bg-gray-400 p-1 text-white text-sm font-medium rounded-md hover:bg-primary-700 transition duration-150 ease-in-out flex items-center justify-center">
-                                            <span class="truncate max-w-full px-1">@email.CredentialName</span>
-                                        </button>
+                                        <div @onclick="() => NavigateToCredential(email.CredentialId)" class="text-sm text-gray-700 cursor-pointer mr-4 hover:underline">@email.CredentialName</div>
                                         <div class="text-sm text-gray-500">@email.Date.ToString("yyyy-MM-dd")</div>
                                     </div>
                                 </div>
