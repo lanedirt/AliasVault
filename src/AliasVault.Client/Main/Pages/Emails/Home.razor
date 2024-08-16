@@ -206,6 +206,7 @@ else
         var credentialLookup = await context.Credentials
             .Include(x => x.Service)
             .Include(x => x.Alias)
+            .Where(x => x.Alias.Email != null)
             .GroupBy(x => x.Alias.Email!.ToLower())
             .ToDictionaryAsync(
                 g => g.Key,
