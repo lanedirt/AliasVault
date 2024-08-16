@@ -1,0 +1,66 @@
+﻿@page "/welcome"
+@inherits MainBase
+
+<div class="container pt-10 px-4 mx-auto lg:px-0">
+    <h1 class="mb-3 text-3xl font-bold text-gray-900 sm:text-4xl sm:leading-none sm:tracking-tight dark:text-white">Welcome to AliasVault</h1>
+    <p class="mb-6 text-lg font-normal text-gray-500 sm:text-xl dark:text-gray-400">It looks like you are new here. The instructions on this page will help to get you started.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Getting Started</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">How do I use AliasVault?</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Create a random identity with an associated email address. To get started, simply click the "+ New Identity" button in the top right corner.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">What is the purpose of AliasVault?</h3>
+                    <p class="text-gray-600 dark:text-gray-400">AliasVault keeps you safe online by providing unique passwords and email addresses for every service you use. This prevents your actual email from being used to link your accounts on different websites together.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Is my data secure?</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Yes, AliasVault uses a zero-knowledge architecture. This means that your data is end-to-end encrypted on your device before being stored on the server. No one can see your login information, identities and even emails but you. Not even us.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Get Started Now</h2>
+            <div class="mb-4">
+                <p class="text-gray-600 dark:text-gray-400">
+                    Go ahead and create a new login by clicking "+ New Identity" in the top right. Or explore these options:
+                    </p>
+            </div>
+            <div class="space-y-4">
+                <button @onclick="CreateIdentity" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Create First Identity (Advanced)
+                </button>
+                <button @onclick="ShowSettings" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Choose Default Language for New Identities
+                </button>
+                <button class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300 cursor-not-allowed opacity-75">
+                    Import Passwords from Existing Manager (coming soon)
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    private void CreateIdentity()
+    {
+        NavigationManager.NavigateTo("credentials/create");
+    }
+
+    private void ShowSettings()
+    {
+        NavigationManager.NavigateTo("settings/general");
+    }
+}
