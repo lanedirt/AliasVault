@@ -48,12 +48,6 @@
 </div>
 
 @code {
-    /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-    }
-
     private void CreateIdentity()
     {
         NavigationManager.NavigateTo("credentials/create");
