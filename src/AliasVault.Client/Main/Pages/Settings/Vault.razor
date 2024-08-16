@@ -120,7 +120,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             var bytesRead = await file.OpenReadStream().ReadAsync(buffer);
             if (bytesRead != file.Size)
             {
-                throw new Exception("Error reading file");
+                throw new FileLoadException("Error reading file");
             }
 
             var fileContent = System.Text.Encoding.UTF8.GetString(buffer);
