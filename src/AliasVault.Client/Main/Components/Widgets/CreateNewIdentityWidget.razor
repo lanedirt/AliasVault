@@ -40,7 +40,6 @@
 }
 
 @code {
-    private const string DefaultServiceUrl = "https://";
     private bool IsPopupVisible = false;
     private bool IsCreating = false;
     private CreateModel Model = new();
@@ -73,7 +72,7 @@
     /// </summary>
     private void OnFocusUrlInput(FocusEventArgs e)
     {
-        if (Model.ServiceUrl != DefaultServiceUrl)
+        if (Model.ServiceUrl != CredentialService.DefaultServiceUrl)
         {
             return;
         }
@@ -81,7 +80,7 @@
         // Use a small delay to ensure the focus is set after the browser's default behavior.
         Task.Delay(1).ContinueWith(_ =>
         {
-            JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('serviceUrl').setSelectionRange({DefaultServiceUrl.Length}, {DefaultServiceUrl.Length})");
+            JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('serviceUrl').setSelectionRange({CredentialService.DefaultServiceUrl.Length}, {CredentialService.DefaultServiceUrl.Length})");
         });
     }
 
@@ -100,7 +99,7 @@
 
         // Clear the input fields
         Model = new();
-        Model.ServiceUrl = DefaultServiceUrl;
+        Model.ServiceUrl = CredentialService.DefaultServiceUrl;
 
         await UpdatePopupStyle();
         await Task.Delay(100); // Give time for the DOM to update
@@ -141,7 +140,7 @@
         credential.Service = new Service();
         credential.Service.Name = Model.ServiceName;
 
-        if (Model.ServiceUrl != DefaultServiceUrl)
+        if (Model.ServiceUrl != CredentialService.DefaultServiceUrl)
         {
             credential.Service.Url = Model.ServiceUrl;
         }
