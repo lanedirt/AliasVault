@@ -108,6 +108,8 @@ else
 
         if (emailClaimList.Count == 0)
         {
+            IsLoading = false;
+            StateHasChanged();
             return;
         }
 
