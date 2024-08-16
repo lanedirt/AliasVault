@@ -79,11 +79,11 @@
         {
             if (PrivateDomains.Count > 0)
             {
-                DefaultEmailDomain = PrivateDomains.First();
+                DefaultEmailDomain = PrivateDomains[0];
             }
             else if (PublicDomains.Count > 0)
             {
-                DefaultEmailDomain = PublicDomains.First();
+                DefaultEmailDomain = PublicDomains[0];
             }
         }
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;
