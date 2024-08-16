@@ -325,6 +325,20 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             .FirstAsync();
 
         context.Credentials.Remove(login);
+
+        // Also remove associated alias and service. Later when
+        // aliases and services are shared between credentials, this
+        // should be removed.
+        var alias = await context.Aliases
+            .Where(x => x.Id == login.Alias.Id)
+            .FirstAsync();
+        context.Aliases.Remove(alias);
+
+        var service = await context.Services
+            .Where(x => x.Id == login.Service.Id)
+            .FirstAsync();
+        context.Services.Remove(service);
+
         await context.SaveChangesAsync();
         await dbService.SaveDatabaseAsync();
     }
