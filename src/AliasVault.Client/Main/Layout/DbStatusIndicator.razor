@@ -14,14 +14,8 @@
     }
 </div>
 
-<!--
-<p>Message: @DbService.GetState().CurrentState.Message</p>
-<p>Last Updated: @DbService.GetState().CurrentState.LastUpdated</p>
--->
-
 @code {
     private bool Loading { get; set; } = false;
-    private string Message { get; set; } = "";
     private string LoadingIndicatorMessage { get; set; } = "";
     private bool DatabaseLoading { get; set; } = false;
 
@@ -29,21 +23,36 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
+
+        UpdateLoadingIndicatorMessage();
     }
 
     private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
     {
         await InvokeAsync(StateHasChanged);
+
+        UpdateLoadingIndicatorMessage();
+
         if (newState.Status == DbServiceState.DatabaseStatus.SavingToServer)
         {
             // Show loading indicator for at least 0.5 seconds even if the save operation is faster.
-            Message = "Saving...";
             await ShowLoadingIndicatorAsync();
         }
+    }
 
-        LoadingIndicatorMessage = Message + " - " + newState.LastUpdated;
+    private void UpdateLoadingIndicatorMessage()
+    {
+        var currentState = DbService.GetState().CurrentState;
+
+        var message = currentState.Status.ToString();
+        if (currentState.Message != string.Empty)
+        {
+            message = currentState.Message;
+        }
+
+        LoadingIndicatorMessage = "Vault status: " + message + " - " + currentState.LastUpdated;
+        StateHasChanged();
     }
 
     private async Task ShowLoadingIndicatorAsync()

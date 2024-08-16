@@ -31,6 +31,14 @@
 {
     <LoadingIndicator/>
 }
+else if (NoEmailClaims)
+{
+    <div class="p-4 mx-4 mt-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="px-4 py-2 text-gray-400 rounded">
+            <p class="text-gray-500 dark:text-gray-400">You are not using any private email addresses (yet). Create a new identity and use a private email address supported by AliasVault. All emails received by these private email addresses will show up here.</p>
+        </div>
+    </div>
+}
 else
 {
     <div class="overflow-x-auto px-4">
@@ -41,32 +49,40 @@ else
                 <h2 class="font-semibold text-gray-800">Inbox</h2>
             </div>
             <ul class="divide-y divide-gray-200">
-                @foreach (var email in EmailList)
+                @if (EmailList.Count == 0)
                 {
-                    <li class="hover:bg-gray-50 transition duration-150 ease-in-out">
-                        <div @onclick="() => ShowAliasVaultEmailInModal(email.Id)" class="p-4 flex justify-start items-start">
-                            <div class="mr-4 flex-shrink-0">
-                                <SenderInitials SenderName="@email.FromName" SenderEmail="@email.FromEmail" />
-                            </div>
-                            <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-2 mr-4">
-                                    <div>
-                                        <div class="text-gray-800 mb-2">
-                                            @email.Subject
+                    <li class="p-4 text-center text-gray-500">
+                        No emails have been received yet.
+                    </li>
+                }
+                else
+                {
+                    @foreach (var email in EmailList)
+                    {
+                        <li class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                            <div @onclick="() => ShowAliasVaultEmailInModal(email.Id)" class="p-4 flex justify-start items-start">
+                                <div class="mr-4 flex-shrink-0">
+                                    <SenderInitials SenderName="@email.FromName" SenderEmail="@email.FromEmail" />
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex items-center justify-between mb-2 mr-4">
+                                        <div>
+                                            <div class="text-gray-800 mb-2">
+                                                @email.Subject
+                                            </div>
+                                            <div class="text-sm text-gray-400 line-clamp-2">
+                                                @email.MessagePreview
+                                            </div>
                                         </div>
-                                        <div class="text-sm text-gray-400 line-clamp-2">
-                                            @email.MessagePreview
+                                        <div class="flex justify-end">
+                                            <div @onclick="() => NavigateToCredential(email.CredentialId)" class="text-sm text-gray-700 cursor-pointer mr-4 hover:underline">@email.CredentialName</div>
+                                            <div class="text-sm text-gray-500">@email.Date.ToString("yyyy-MM-dd")</div>
                                         </div>
-                                    </div>
-                                    <div class="flex justify-end">
-                                        <div @onclick="() => NavigateToCredential(email.CredentialId)" class="text-sm text-gray-700 cursor-pointer mr-4 hover:underline">@email.CredentialName</div>
-                                        <div class="text-sm text-gray-500">@email.Date.ToString("yyyy-MM-dd")</div>
                                     </div>
                                 </div>
-
                             </div>
-                        </div>
-                    </li>
+                        </li>
+                    }
                 }
             </ul>
         </div>
@@ -80,6 +96,7 @@ else
     private int PageSize { get; set; } = 50;
     private int TotalRecords { get; set; }
     private bool EmailModalVisible { get; set; }
+    private bool NoEmailClaims { get; set; }
     private EmailApiModel EmailModalEmail { get; set; } = new();
 
     /// <inheritdoc />
@@ -102,12 +119,16 @@ else
     private async Task RefreshData()
     {
         IsLoading = true;
+        NoEmailClaims = false;
         StateHasChanged();
 
         var emailClaimList = await DbService.GetEmailClaimListAsync();
 
         if (emailClaimList.Count == 0)
         {
+            IsLoading = false;
+            NoEmailClaims = true;
+            StateHasChanged();
             return;
         }
 
@@ -185,6 +206,7 @@ else
         var credentialLookup = await context.Credentials
             .Include(x => x.Service)
             .Include(x => x.Alias)
+            .Where(x => x.Alias.Email != null)
             .GroupBy(x => x.Alias.Email!.ToLower())
             .ToDictionaryAsync(
                 g => g.Key,

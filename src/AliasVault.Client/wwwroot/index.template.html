@@ -33,7 +33,7 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-800">
-    <div id="app">
+    <div id="loading-screen">
         <div class="fixed inset-0 flex items-center justify-center">
             <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
                 <div class="text-center">
@@ -42,7 +42,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">AliasVault is loading</h2>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Downloading the AliasVault app to your browser for secure end-to-end encryption.</p>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Initializing secure environment. AliasVault prioritizes your privacy, which may take a few seconds.</p>
                     <div class="loading-progress-text text-sm font-medium text-gray-700 mt-4"></div>
                     <div class="mt-6 text-center">
                         <p id="security-quote" class="text-sm text-primary-600 italic"></p>
@@ -50,7 +50,9 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div id="app">
     </div>
 
     <div id="blazor-error-ui">
@@ -66,18 +68,39 @@
             "Security is not a product, but a process.",
             "The weakest link in the security chain is the human element.",
             "Security is always excessive until it's not enough.",
-            "The only system which is truly secure is one which is switched off and unplugged.",
-            "In a world where you can be anything, be secure.",
             "Trust, but verify - especially online.",
             "Your data is only as secure as your weakest password.",
-            "Privacy is not an option, and it shouldn't be the price we accept for just getting on the Internet.",
-            "Arguing that you don't care about the right to privacy because you have nothing to hide is no different than saying you don't care about free speech because you have nothing to say.",
             "The most secure password is the one you can't remember.",
         ];
 
         const quoteElement = document.getElementById('security-quote');
         const randomIndex = Math.floor(Math.random() * securityQuotes.length);
         quoteElement.textContent = `"${securityQuotes[randomIndex]}"`;
+
+        window.addEventListener('load', function() {
+            const startTime = new Date().getTime();
+            const minDisplayTime = 1000;
+
+            function hideLoadingScreen() {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('app').style.removeProperty('visibility');
+            }
+
+            function checkElapsedTime() {
+                const currentTime = new Date().getTime();
+                const elapsedTime = currentTime - startTime;
+
+                if (elapsedTime >= minDisplayTime) {
+                    hideLoadingScreen();
+                } else {
+                    setTimeout(hideLoadingScreen, minDisplayTime - elapsedTime);
+                }
+            }
+
+            document.getElementById('app').style.visibility = 'hidden';
+            document.getElementById('loading-screen').style.display = 'flex';
+            checkElapsedTime();
+        });
     </script>
     <script src="js/crypto.js?v=@CacheBuster"></script>
     <script src="js/utilities.js?v=@CacheBuster"></script>

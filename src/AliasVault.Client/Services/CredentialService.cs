@@ -27,6 +27,12 @@ using Identity = AliasGenerators.Identity.Models.Identity;
 public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
     /// <summary>
+    /// The default service URL used as placeholder in forms. When this value is set, the URL field is considered empty
+    /// and a null value is stored in the database.
+    /// </summary>
+    public const string DefaultServiceUrl = "https://";
+
+    /// <summary>
     /// Generates a random password for a credential.
     /// </summary>
     /// <returns>Random password.</returns>
@@ -124,6 +130,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
             loginObject.Alias.Email = null;
+        }
+
+        // If the URL equals the placeholder, we set it to null.
+        if (loginObject.Service.Url == "https://")
+        {
+            loginObject.Service.Url = null;
         }
 
         var login = new Credential
@@ -325,6 +337,20 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             .FirstAsync();
 
         context.Credentials.Remove(login);
+
+        // Also remove associated alias and service. Later when
+        // aliases and services are shared between credentials, this
+        // should be removed.
+        var alias = await context.Aliases
+            .Where(x => x.Id == login.Alias.Id)
+            .FirstAsync();
+        context.Aliases.Remove(alias);
+
+        var service = await context.Services
+            .Where(x => x.Id == login.Service.Id)
+            .FirstAsync();
+        context.Services.Remove(service);
+
         await context.SaveChangesAsync();
         await dbService.SaveDatabaseAsync();
     }

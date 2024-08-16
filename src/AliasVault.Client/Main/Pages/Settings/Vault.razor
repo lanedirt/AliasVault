@@ -14,7 +14,7 @@
     </div>
 </div>
 
-<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+<div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
     <div class="mb-4">
         <div>
@@ -30,7 +30,7 @@
     </div>
 </div>
 
-<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+<div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Import vault</h3>
     <div class="mb-4">
         <div>
@@ -117,9 +117,13 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
         {
             var file = e.File;
             var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
-            var fileContent = System.Text.Encoding.UTF8.GetString(buffer);
+            var bytesRead = await file.OpenReadStream().ReadAsync(buffer);
+            if (bytesRead != file.Size)
+            {
+                throw new FileLoadException("Error reading file");
+            }
 
+            var fileContent = System.Text.Encoding.UTF8.GetString(buffer);
             var importedCredentials = CsvImportExport.CredentialCsvService.ImportCredentialsFromCsv(fileContent);
 
             // Loop through the imported credentials and actually add them to the database
@@ -131,7 +135,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             // Save the database.
             await DbService.SaveDatabaseAsync();
 
-            ImportSuccessMessage = $"Succesfully imported {importedCredentials.Count} credentials.";
+            ImportSuccessMessage = $"Successfully imported {importedCredentials.Count} credentials.";
         }
         catch (Exception ex)
         {

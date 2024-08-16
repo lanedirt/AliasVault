@@ -92,10 +92,10 @@ public class AuthTests : ClientPlaywrightTest
         // Check if we get redirected when clicking on the login button.
         var loginButton = Page.Locator("button[type='submit']");
         await loginButton.ClickAsync();
-        await WaitForUrlAsync(AppBaseUrl, "Find all of your credentials below");
+        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Find all of your credentials below"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain("Welcome to AliasVault"), "No index content after logging in.");
     }
 }

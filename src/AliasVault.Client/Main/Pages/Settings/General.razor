@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+<div class="p-4 mb-4  mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Email Settings</h3>
 
     <div class="mb-4">
@@ -44,7 +44,7 @@
     </div>
 </div>
 
-<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+<div class="p-4  mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Alias Settings</h3>
 
     <div class="mb-4">
@@ -75,6 +75,17 @@
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "General settings" });
 
         DefaultEmailDomain = DbService.Settings.DefaultEmailDomain;
+        if (DefaultEmailDomain == string.Empty)
+        {
+            if (PrivateDomains.Count > 0)
+            {
+                DefaultEmailDomain = PrivateDomains[0];
+            }
+            else if (PublicDomains.Count > 0)
+            {
+                DefaultEmailDomain = PublicDomains[0];
+            }
+        }
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;
         DefaultIdentityLanguage = DbService.Settings.DefaultIdentityLanguage;
     }

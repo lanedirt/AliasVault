@@ -245,6 +245,6 @@ public class ClientPlaywrightTest : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
-        await WaitForUrlAsync(AppBaseUrl, "Find all of your credentials below");
+        await WaitForUrlAsync(AppBaseUrl, "Getting Started");
     }
 }
