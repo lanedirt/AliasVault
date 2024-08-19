@@ -15,9 +15,9 @@
 <EditForm Model="LoginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
-        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="LoginModel.Email" placeholder="name@company.com" />
-        <ValidationMessage For="() => LoginModel.Email"/>
+        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
+        <InputTextField id="email" @bind-Value="LoginModel.Username" placeholder="name / name@company.com" />
+        <ValidationMessage For="() => LoginModel.Username"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
@@ -64,7 +64,7 @@
 
         try
         {
-            var errors = await ProcessLoginAsync(LoginModel.Email, LoginModel.Password);
+            var errors = await ProcessLoginAsync(LoginModel.Username, LoginModel.Password);
             foreach (var error in errors)
             {
                 ServerValidationErrors.AddError(error);

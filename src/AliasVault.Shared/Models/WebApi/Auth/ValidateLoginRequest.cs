@@ -15,29 +15,29 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidateLoginRequest"/> class.
         /// </summary>
-        /// <param name="email">Email.</param>
+        /// <param name="username">Username.</param>
         /// <param name="clientPublicEphemeral">Client public ephemeral.</param>
         /// <param name="clientSessionProof">Client session proof.</param>
-        public ValidateLoginRequest(string email, string clientPublicEphemeral, string clientSessionProof)
+        public ValidateLoginRequest(string username, string clientPublicEphemeral, string clientSessionProof)
         {
-            Email = email;
+            Username = username.ToLowerInvariant().Trim();
             ClientPublicEphemeral = clientPublicEphemeral;
             ClientSessionProof = clientSessionProof;
         }
 
         /// <summary>
-        /// Gets or sets the email.
+        /// Gets the username.
         /// </summary>
-        public string Email { get; set; }
+        public string Username { get; }
 
         /// <summary>
-        /// Gets or sets the client's public ephemeral value.
+        /// Gets the client's public ephemeral value.
         /// </summary>
-        public string ClientPublicEphemeral { get; set; }
+        public string ClientPublicEphemeral { get; }
 
         /// <summary>
-        /// Gets or sets the client's session proof.
+        /// Gets the client's session proof.
         /// </summary>
-        public string ClientSessionProof { get; set; }
+        public string ClientSessionProof { get; }
     }
 }

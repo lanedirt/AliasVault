@@ -97,13 +97,16 @@ public class LoginBase : OwningComponentBase
     /// <summary>
     /// Gets the username from the authentication state asynchronously.
     /// </summary>
-    /// <param name="email">Email address.</param>
+    /// <param name="username">Username.</param>
     /// <param name="password">Password.</param>
     /// <returns>List of errors if something went wrong.</returns>
-    protected async Task<List<string>> ProcessLoginAsync(string email, string password)
+    protected async Task<List<string>> ProcessLoginAsync(string username, string password)
     {
+        // Sanitize username
+        username = username.ToLowerInvariant().Trim();
+
         // Send request to server with email to get server ephemeral public key.
-        var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(email));
+        var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(username));
         var responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
@@ -125,16 +128,16 @@ public class LoginBase : OwningComponentBase
         var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
         var clientEphemeral = Srp.GenerateEphemeralClient();
-        var privateKey = Srp.DerivePrivateKey(loginResponse.Salt, email, passwordHashString);
+        var privateKey = Srp.DerivePrivateKey(loginResponse.Salt, username, passwordHashString);
         var clientSession = Srp.DeriveSessionClient(
             privateKey,
             clientEphemeral.Secret,
             loginResponse.ServerEphemeral,
             loginResponse.Salt,
-            email);
+            username);
 
         // 4. Client sends proof of session key to server.
-        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(email, clientEphemeral.Public, clientSession.Proof));
+        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, clientEphemeral.Public, clientSession.Proof));
         responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
