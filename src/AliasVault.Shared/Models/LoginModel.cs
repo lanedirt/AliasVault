@@ -15,11 +15,10 @@ using System.ComponentModel.DataAnnotations;
 public class LoginModel
 {
     /// <summary>
-    /// Gets or sets the email.
+    /// Gets or sets the username.
     /// </summary>
     [Required]
-    [EmailAddress]
-    public string Email { get; set; } = null!;
+    public string Username { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password.

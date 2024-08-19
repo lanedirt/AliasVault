@@ -22,9 +22,9 @@
 <EditForm Model="RegisterModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
-        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-        <InputTextField id="email" @bind-Value="RegisterModel.Email" placeholder="name@company.com" />
-        <ValidationMessage For="() => RegisterModel.Email"/>
+        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
+        <InputTextField id="email" @bind-Value="RegisterModel.Username" placeholder="name / name@company.com" />
+        <ValidationMessage For="() => RegisterModel.Username"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
@@ -71,7 +71,7 @@
             byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt);
             var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
-            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, RegisterModel.Email, passwordHashString);
+            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, RegisterModel.Username, passwordHashString);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
             var responseContent = await result.Content.ReadAsStringAsync();
 

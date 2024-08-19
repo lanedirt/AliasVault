@@ -15,14 +15,14 @@ public class LoginRequest
     /// <summary>
     /// Initializes a new instance of the <see cref="LoginRequest"/> class.
     /// </summary>
-    /// <param name="email">Email.</param>
-    public LoginRequest(string email)
+    /// <param name="username">Username.</param>
+    public LoginRequest(string username)
     {
-        Email = email;
+        Username = username.ToLowerInvariant().Trim();
     }
 
     /// <summary>
-    /// Gets or sets the email address.
+    /// Gets the username.
     /// </summary>
-    public string Email { get; set; }
+    public string Username { get; }
 }

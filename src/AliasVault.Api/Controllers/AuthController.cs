@@ -39,9 +39,9 @@ using Microsoft.IdentityModel.Tokens;
 public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
 {
     /// <summary>
-    /// Error message for invalid email or password.
+    /// Error message for invalid username or password.
     /// </summary>
-    public static readonly string[] InvalidEmailOrPasswordError = ["Invalid email or password. Please try again."];
+    public static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -51,17 +51,17 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        var user = await userManager.FindByEmailAsync(model.Email);
+        var user = await userManager.FindByNameAsync(model.Username);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
         // Server creates ephemeral and sends to client
         var ephemeral = Cryptography.Srp.GenerateEphemeralServer(user.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
-        cache.Set(model.Email, ephemeral.Secret, TimeSpan.FromMinutes(5));
+        cache.Set(model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
         return Ok(new LoginResponse(user.Salt, ephemeral.Public));
     }
@@ -74,15 +74,15 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("validate")]
     public async Task<IActionResult> Validate([FromBody] ValidateLoginRequest model)
     {
-        var user = await userManager.FindByEmailAsync(model.Email);
+        var user = await userManager.FindByNameAsync(model.Username);
         if (user == null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
-        if (!cache.TryGetValue(model.Email, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        if (!cache.TryGetValue(model.Username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
         try
@@ -91,7 +91,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
                 serverSecretEphemeral.ToString() ?? string.Empty,
                 model.ClientPublicEphemeral,
                 user.Salt,
-                model.Email,
+                model.Username,
                 user.Verifier,
                 model.ClientSessionProof);
 
@@ -103,7 +103,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
         catch
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidEmailOrPasswordError, 400));
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
     }
 
@@ -120,13 +120,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var principal = GetPrincipalFromExpiredToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized("User not found (email-1)");
+            return Unauthorized("User not found (name-1)");
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized("User not found (email-2)");
+            return Unauthorized("User not found (name-2)");
         }
 
         // Check if the refresh token is valid.
@@ -172,13 +172,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var principal = GetPrincipalFromExpiredToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized("User not found (email-1)");
+            return Unauthorized("User not found (name-1)");
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized("User not found (email-2)");
+            return Unauthorized("User not found (name-2)");
         }
 
         // Check if the refresh token is valid.
@@ -204,7 +204,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
-        var user = new AliasVaultUser { UserName = model.Email, Email = model.Email, Salt = model.Salt, Verifier = model.Verifier, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var user = new AliasVaultUser { UserName = model.Username, Salt = model.Salt, Verifier = model.Verifier, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
         var result = await userManager.CreateAsync(user);
 
         if (result.Succeeded)
@@ -310,7 +310,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         {
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 

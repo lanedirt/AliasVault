@@ -105,8 +105,7 @@ else
 
         if (SearchTerm.Length > 0)
         {
-            query = query.Where(x => EF.Functions.Like(x.UserName!.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.Email!.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+            query = query.Where(x => EF.Functions.Like(x.UserName!.ToLower(), "%" + SearchTerm.ToLower() + "%"));
         }
 
         TotalRecords = await query.CountAsync();
@@ -140,7 +139,7 @@ else
             VaultCount = user.Vaults.Count(),
             EmailClaimCount = user.EmailClaims.Count(),
             VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
-            LastVaultUpdate = user.Vaults.Max(x => x.CreatedAt),
+            LastVaultUpdate = user.Vaults.Any() ? user.Vaults.Max(x => x.CreatedAt) : user.CreatedAt,
         }).ToList();
 
         IsLoading = false;
