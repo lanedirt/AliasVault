@@ -26,41 +26,34 @@ A live demo of the app is available at [main.aliasvault.net](https://main.aliasv
 
 <img width="700" alt="Screenshot 2024-07-12 at 14 58 29" src="https://github.com/user-attachments/assets/57103f67-dff0-4124-9b33-62137aab5578">
 
-## Installation on your own machine
-To install AliasVault on your own machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
+## Installation
+To install AliasVault on your local machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
 
 ### Requirements:
 - Access to a terminal
 - Docker
 - Git
 
-### 1. Clone this repository.
+### 1. Clone and run install script
+AliasVault comes with a install script that prepares the .env file, builds the Docker image, and starts the AliasVault containers.
 
 ```bash
 # Clone this Git repository to "AliasVault" directory
 $ git clone https://github.com/lanedirt/AliasVault.git
-```
 
-### 2. Run the install script.
-The script prepares the .env file, builds the Docker image, and starts the AliasVault containers.
-
-```bash
 # Go to the project directory
 $ cd AliasVault
 
-# Make install script executable
-$ chmod +x install.sh
-
-# Run the install script
-$ ./install.sh
+# Make install script executable and run it.
+$ chmod +x install.sh && ./install.sh
 ```
 
 Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/setup/1-manually-setup-docker.md) for more information.
 
-### 3. AliasVault is ready to use.
-The script will output the URL where the app is available. You can now open the app in your browser and create an account.
+### 2. Ready to use
+The install script executed in step #1 will output the URL where the app is available. By default this is http://localhost:80 for the client and http://localhost:8080 for the admin.
 
-> Note: the container binds to port 80 for client and port 8080 for admin by default. If you have another service running on these ports, you can change the AliasVault ports in the `docker-compose.yml` file.
+> Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file.
 
 #### Note for first time build:
 - When running the init script for the first time, it may take a few minutes for Docker to download all dependencies. Subsequent builds will be faster.
