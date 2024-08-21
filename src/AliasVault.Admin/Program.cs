@@ -8,7 +8,6 @@
 using System.Data.Common;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
 using AliasVault.Admin;
 using AliasVault.Admin.Auth.Providers;
@@ -17,9 +16,7 @@ using AliasVault.Admin.Services;
 using AliasVault.Logging;
 using Cryptography;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -96,30 +93,7 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// Generate or load the certificate
-X509Certificate2 cert;
-string certPath = "../../certificates/AliasVault.DataProtection.pfx";
-string certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS") ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS environment variable is not set.");
-if (certPassword == "Development")
-{
-    // For development use local certificate so it doesn't interfere with Docker setup which uses a unique generated password.
-    certPath = Path.Combine(AppContext.BaseDirectory, "AliasVault.DataProtection.Development.pfx");
-}
-
-if (!File.Exists(certPath))
-{
-    cert = CertificateGenerator.GeneratePfx("AliasVault.DataProtection", certPassword);
-    CertificateGenerator.SaveCertificateToFile(cert, certPassword, certPath);
-}
-else
-{
-    cert = new X509Certificate2(certPath, certPassword);
-}
-
-builder.Services.AddDataProtection()
-    .ProtectKeysWithCertificate(cert)
-    .PersistKeysToDbContext<AliasServerDbContext>()
-    .SetApplicationName("AliasVault.Admin");
+builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
