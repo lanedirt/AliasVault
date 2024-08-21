@@ -4,7 +4,6 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();

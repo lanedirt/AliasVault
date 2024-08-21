@@ -119,6 +119,11 @@ generate_jwt_key() {
   dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | head -c 32
 }
 
+# Function to generate a new 60-character DATA_PROTECTION_CERT_PASS
+generate_data_protection_cert_pass() {
+  dd if=/dev/urandom bs=1 count=60 2>/dev/null | base64 | head -c 60
+}
+
 # Function to create .env file from .env.example if it doesn't exist
 create_env_file() {
   printf "${CYAN}> Creating .env file...${NC}\n"
@@ -167,6 +172,22 @@ populate_jwt_key() {
     printf "${GREEN}> JWT_KEY has been generated and added to $ENV_FILE.${NC}\n"
   else
     printf "${GREEN}> JWT_KEY already exists and has a value in $ENV_FILE.${NC}\n"
+  fi
+}
+
+# Function to check and populate the .env file with DATA_PROTECTION_CERT_PASS
+populate_data_protection_cert_pass() {
+  printf "${CYAN}> Checking DATA_PROTECTION_CERT_PASS...${NC}\n"
+  if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    DATA_PROTECTION_CERT_PASS=$(generate_data_protection_cert_pass)
+    if grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE"; then
+      awk -v key="DATA_PROTECTION_CERT_PASS" '/^DATA_PROTECTION_CERT_PASS=/ {$0="DATA_PROTECTION_CERT_PASS="key} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    else
+      echo "DATA_PROTECTION_CERT_PASS=${DATA_PROTECTION_CERT_PASS}" >> "$ENV_FILE"
+    fi
+    printf "${GREEN}> DATA_PROTECTION_KEY has been generated and added to $ENV_FILE.${NC}\n"
+  else
+    printf "${GREEN}> DATA_PROTECTION_KEY already exists and has a value in $ENV_FILE.${NC}\n"
   fi
 }
 
@@ -316,6 +337,7 @@ main() {
         create_env_file || exit $?
         populate_api_url || exit $?
         populate_jwt_key || exit $?
+        populate_data_protection_cert_pass || exit $?
         set_private_email_domains || exit $?
         set_smtp_tls_enabled || exit $?
         generate_admin_password || exit $?

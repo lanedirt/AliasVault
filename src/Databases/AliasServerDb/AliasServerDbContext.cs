@@ -8,6 +8,7 @@
 namespace AliasServerDb;
 
 using AliasVault.WorkerStatus.Database;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 /// we have two separate user objects, one for the admin panel and one for the vault. We manually
 /// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public class AliasServerDbContext : WorkerStatusDbContext
+public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
@@ -34,6 +35,11 @@ public class AliasServerDbContext : WorkerStatusDbContext
         : base(options)
     {
     }
+
+    /// <summary>
+    /// Gets or sets the DataProtectionKeys DbSet.
+    /// </summary>
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
     /// <summary>
     /// Gets or sets the AliasVaultUser DbSet.

@@ -13,6 +13,7 @@ using AliasVault.Api.Jwt;
 using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
+using Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -50,12 +51,8 @@ builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) 
     options.UseSqlite(connection).UseLazyLoadingProxies();
 });
 
-builder.Services.AddDataProtection();
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-{
-    options.TokenLifespan = TimeSpan.FromDays(30);
-    options.Name = "AliasVault";
-});
+builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
+
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;
@@ -165,10 +162,6 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-else
-{
-    app.UseHttpsRedirection();
 }
 
 app.UseCors("CorsPolicy");

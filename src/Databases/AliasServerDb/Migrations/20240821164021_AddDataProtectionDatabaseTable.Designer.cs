@@ -3,6 +3,7 @@ using System;
 using AliasServerDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    partial class AliasServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240821164021_AddDataProtectionDatabaseTable")]
+    partial class AddDataProtectionDatabaseTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -369,10 +372,6 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Properties")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SourceContext")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

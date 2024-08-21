@@ -14,9 +14,9 @@ using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
 using AliasVault.Logging;
+using Cryptography;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -93,6 +93,14 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromDays(30);
+    options.Name = "AliasVault.Admin";
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,7 +110,6 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseHttpsRedirection();
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
