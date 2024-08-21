@@ -38,6 +38,9 @@ public class DatabaseSink(IFormatProvider formatProvider, Func<IDbContextFactory
             LogEvent = (logEvent.Level >= LogEventLevel.Error) ? JsonConvert.SerializeObject(logEvent) : string.Empty,
             MessageTemplate = logEvent.MessageTemplate.Text,
             Application = applicationName,
+            SourceContext = logEvent.Properties.ContainsKey("SourceContext")
+                ? logEvent.Properties["SourceContext"].ToString().Trim('"')
+                : string.Empty,
         };
 
         try

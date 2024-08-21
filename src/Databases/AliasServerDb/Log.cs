@@ -30,6 +30,12 @@ public class Log
     public string Application { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the source context that triggered this log message.
+    /// </summary>
+    [Column(TypeName = "nvarchar(255)")]
+    public string SourceContext { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the log message.
     /// </summary>
     public string Message { get; set; } = null!;

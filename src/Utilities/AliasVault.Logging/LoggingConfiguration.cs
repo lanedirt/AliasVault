@@ -39,16 +39,22 @@ public static class LoggingConfiguration
 
             // Log to console.
             .WriteTo.Logger(lc => lc
-                .WriteTo.Console())
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}"))
 
             // Log everything to a file.
             .WriteTo.Logger(lc => lc
-                .WriteTo.File($"{logFolder}/{applicationName}-log-.txt", rollingInterval: RollingInterval.Day))
+                .WriteTo.File(
+                    path: $"{logFolder}/{applicationName}-log-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}"))
 
             // Log all errors and above to a separate file.
             .WriteTo.Logger(lc => lc
                 .Filter.ByIncludingOnly(evt => evt.Level >= LogEventLevel.Error)
-                .WriteTo.File($"{logFolder}/{applicationName}-error-.txt", rollingInterval: RollingInterval.Day))
+                .WriteTo.File(
+                    path: $"{logFolder}/{applicationName}-error-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}"))
 
             // Log all warning and above to database via EF core except for Microsoft.EntityFrameworkCore logs
             // as this would create a loop.

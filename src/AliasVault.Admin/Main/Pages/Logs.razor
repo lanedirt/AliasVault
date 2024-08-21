@@ -72,7 +72,13 @@ else
                                 @log.Level
                             </span>
                         </td>
-                        <td class="px-4 py-3 line-clamp-1" title="@log.Exception">@log.Message</td>
+                        <td class="px-4 py-3" title="@log.Exception">
+                            @if (log.SourceContext.Length > 0)
+                            {
+                                <span>@log.SourceContext: </span>
+                            }
+                            @log.Message
+                        </td>
                     </tr>
                 }
             </tbody>
