@@ -89,6 +89,7 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
         // An admin user will automatically be created with these values if the database is empty.
         Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
         Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
 
         builder.ConfigureServices((context, services) =>
         {

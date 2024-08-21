@@ -89,8 +89,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     {
         builder.UseUrls(HostUrl);
 
-        // Set the JWT key environment variable to debug value.
+        // Set required environment variables to debug values.
         Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
 
         builder.ConfigureServices((context, services) =>
         {
