@@ -7,13 +7,16 @@
 
 using System.Data.Common;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Jwt;
 using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
+using Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -50,12 +53,31 @@ builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) 
     options.UseSqlite(connection).UseLazyLoadingProxies();
 });
 
-builder.Services.AddDataProtection();
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+// Generate or load the DataProtection certificate.
+X509Certificate2 cert;
+string certPath = "../../certificates/AliasVault.DataProtection.pfx";
+string certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS") ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS environment variable is not set.");
+if (certPassword == "Development")
 {
-    options.TokenLifespan = TimeSpan.FromDays(30);
-    options.Name = "AliasVault";
-});
+    // For development use local certificate so it doesn't interfere with Docker setup which uses a unique generated password.
+    certPath = Path.Combine(AppContext.BaseDirectory, "AliasVault.DataProtection.Development.pfx");
+}
+
+if (!File.Exists(certPath))
+{
+    cert = CertificateGenerator.GeneratePfx("AliasVault.DataProtection", certPassword);
+    CertificateGenerator.SaveCertificateToFile(cert, certPassword, certPath);
+}
+else
+{
+    cert = new X509Certificate2(certPath, certPassword);
+}
+
+builder.Services.AddDataProtection()
+    .ProtectKeysWithCertificate(cert)
+    .PersistKeysToDbContext<AliasServerDbContext>()
+    .SetApplicationName("AliasVault.Api");
+
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;

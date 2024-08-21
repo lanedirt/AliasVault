@@ -17,7 +17,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 
 /// <summary>
-/// SrpArgonEncryption class.
+/// RSA/AES and Argon2id encryption methods.
 /// </summary>
 public static class Encryption
 {
