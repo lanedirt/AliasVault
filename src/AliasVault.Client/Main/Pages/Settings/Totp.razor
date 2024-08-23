@@ -15,7 +15,7 @@
         <p class="text-sm text-gray-600 text-center">
             Scan this QR code with your authenticator app or enter the following secret manually:
         </p>
-        <p class="text-lg font-mono text-center bg-gray-100 p-2 rounded">@Secret</p>
+        <div class="text-lg font-mono text-center bg-gray-100 p-2 rounded" id="authenticator-secret">@Secret</div>
 
         <EditForm Model="@VerifyModel" OnValidSubmit="@VerifySetup" class="space-y-4">
             <div>
@@ -70,7 +70,7 @@
             // You might want to navigate the user or show a success message
             GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully enabled. On your " +
                                                         "next login you will need to enter your 2FA code.");
-            NavigationManager.NavigateTo("/credentials");
+            NavigationManager.NavigateTo("/settings/general");
         }
         else
         {
