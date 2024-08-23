@@ -17,7 +17,7 @@ public class FaviconExtractorTests
     /// </summary>
     /// <returns>Task.</returns>
     [Test]
-    public async Task ExtractFaviconSpamOK()
+    public async Task ExtractFaviconSpamOk()
     {
         var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://spamok.com");
         Assert.That(faviconBytes, Is.Not.Null);

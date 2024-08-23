@@ -14,7 +14,7 @@ using OtpNet;
 /// </summary>
 public class TotpGenerator
 {
-     /// <summary>
+    /// <summary>
     /// Generates a Time-based One-Time Password (TOTP) for the given secret key.
     /// </summary>
     /// <param name="secretKey">The secret key in Base32 encoding.</param>
