@@ -32,6 +32,26 @@ else
                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
                             <div>@User.Id</div>
                         </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">2FA Status:</span>
+                            <StatusPill Enabled="@User.TwoFactorEnabled" />
+                            <span>Authenticator key(s) active: @TwoFactorKeysCount</span>
+                            @if (User.TwoFactorEnabled)
+                            {
+                                <button @onclick="DisableTwoFactor" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+                                    Disable 2FA
+                                </button>
+                            }
+                            else
+                            {
+                                if (TwoFactorKeysCount > 0)
+                                {
+                                    <button @onclick="EnableTwoFactor" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+                                        Enable 2FA
+                                    </button>
+                                }
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,6 +126,7 @@ else
 
     private bool IsLoading { get; set; } = true;
     private AliasVaultUser? User { get; set; } = new();
+    private int TwoFactorKeysCount { get; set; }
     private List<Vault> VaultList { get; set; } = new();
     private List<UserEmailClaim> EmailClaimList { get; set; } = new();
 
@@ -136,6 +157,9 @@ else
         // Load the aliases from the webapi via AliasService.
         User = await DbContext.AliasVaultUsers.FindAsync(Id);
 
+        // Get count of user authenticator tokens.
+        TwoFactorKeysCount = await DbContext.UserTokens.CountAsync(x => x.UserId == User!.Id && x.Name == "AuthenticatorKey");
+
         if (User is null)
         {
             // Error loading user.
@@ -162,5 +186,29 @@ else
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    private async Task DisableTwoFactor()
+    {
+        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+
+        if (User != null)
+        {
+            User.TwoFactorEnabled = false;
+            await DbContext.SaveChangesAsync();
+            await LoadEntryAsync();
+        }
+    }
+
+    private async Task EnableTwoFactor()
+    {
+        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+
+        if (User != null)
+        {
+            User.TwoFactorEnabled = true;
+            await DbContext.SaveChangesAsync();
+            await LoadEntryAsync();
+        }
     }
 }

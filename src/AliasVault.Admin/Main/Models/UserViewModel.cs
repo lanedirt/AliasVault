@@ -28,6 +28,11 @@ public class UserViewModel
     public string UserName { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the user has two-factor authentication enabled.
+    /// </summary>
+    public bool TwoFactorEnabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the vault count.
     /// </summary>
     public int VaultCount { get; set; }
