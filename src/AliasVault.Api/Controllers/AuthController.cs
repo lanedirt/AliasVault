@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using AliasServerDb;
 using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
@@ -32,16 +33,22 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
-/// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing..</param>
+/// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
+/// <param name="urlEncoder">UrlEncoder instance.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
+public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, UrlEncoder urlEncoder) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid username or password.
     /// </summary>
-    public static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
+    private static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
+
+    /// <summary>
+    /// Error message for invalid 2-factor authentication code.
+    /// </summary>
+    private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -95,11 +102,65 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
                 user.Verifier,
                 model.ClientSessionProof);
 
-            // If above does not throw an exception., then the client's proof is valid, and we can issue the JWT token.
-            var tokenModel = await GenerateNewTokensForUser(user);
+            // If above does not throw an exception., then the client's proof is valid. Next check if 2FA is required.
+            // If 2FA is required, return that status and no token yet.
+            if (user.TwoFactorEnabled)
+            {
+                return Ok(new ValidateLoginResponse(true, string.Empty, null));
+            }
 
-            // Return server proof for optional client check and token.
-            return Ok(new ValidateLoginResponse(serverSession.Proof, tokenModel));
+            // If 2FA is not required, return the token immediately.
+            var tokenModel = await GenerateNewTokensForUser(user);
+            return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+        }
+        catch
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+    }
+
+    /// <summary>
+    /// Validate login including two factor authentication code check.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequest2Fa model.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("validate-2fa")]
+    public async Task<IActionResult> Validate2Fa([FromBody] ValidateLoginRequest2Fa model)
+    {
+        var user = await userManager.FindByNameAsync(model.Username);
+        if (user == null)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
+        if (!cache.TryGetValue(model.Username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
+        try
+        {
+            var serverSession = Cryptography.Srp.DeriveSessionServer(
+                serverSecretEphemeral.ToString() ?? string.Empty,
+                model.ClientPublicEphemeral,
+                user.Salt,
+                model.Username,
+                user.Verifier,
+                model.ClientSessionProof);
+
+            // If above does not throw an exception., then the client's proof is valid. Next check 2-factor code.
+
+            // Verify 2-factor code.
+            var result = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
+
+            if (!result)
+            {
+                return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
+            }
+
+            // Generate and return the JWT token.
+            var tokenModel = await GenerateNewTokensForUser(user);
+            return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
         }
         catch
         {
@@ -157,6 +218,59 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         var token = GenerateJwtToken(user);
         return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
+    }
+
+    /// <summary>
+    /// Enable two-factor authentication for a user.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [HttpPost("enable-2fa")]
+    public async Task<IActionResult> EnableTwoFactor()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var authenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
+        if (string.IsNullOrEmpty(authenticatorKey))
+        {
+            await userManager.ResetAuthenticatorKeyAsync(user);
+            authenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
+        }
+
+        var encodedKey = urlEncoder.Encode(authenticatorKey!);
+        var qrCodeUrl = $"otpauth://totp/{urlEncoder.Encode("AliasVault WASM")}:{urlEncoder.Encode(user.UserName!)}?secret={encodedKey}&issuer={urlEncoder.Encode("AliasVault WASM")}";
+
+        return Ok(new { Secret = authenticatorKey, QrCodeUrl = qrCodeUrl });
+    }
+
+    /// <summary>
+    /// Verify two-factor authentication setup.
+    /// </summary>
+    /// <param name="code">Code to verify if 2fa successfully works.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("verify-2fa")]
+    public async Task<IActionResult> VerifyTwoFactorSetup([FromBody] string code)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var isValid = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, code);
+
+        if (isValid)
+        {
+            await userManager.SetTwoFactorEnabledAsync(user, true);
+            return Ok();
+        }
+        else
+        {
+            return BadRequest("Invalid code.");
+        }
     }
 
     /// <summary>
