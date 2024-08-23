@@ -25,6 +25,16 @@ public class GlobalNotificationService
     protected List<string> SuccessMessages { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets info messages that should be displayed to the user.
+    /// </summary>
+    protected List<string> InfoMessages { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets warning messages that should be displayed to the user.
+    /// </summary>
+    protected List<string> WarningMessages { get; set; } = [];
+
+    /// <summary>
     /// Gets or sets error messages that should be displayed to the user.
     /// </summary>
     protected List<string> ErrorMessages { get; set; } = [];
@@ -39,6 +49,42 @@ public class GlobalNotificationService
     public void AddSuccessMessage(string message, bool notifyStateChanged = false)
     {
         SuccessMessages.Add(message);
+
+        // Notify subscribers that a message has been added.
+        if (notifyStateChanged)
+        {
+            NotifyStateChanged();
+        }
+    }
+
+    /// <summary>
+    /// Adds an info message to the list of messages that should be displayed to the user.
+    /// </summary>
+    /// <param name="message">The message to add.</param>
+    /// <param name="notifyStateChanged">Whether to notify state change to subscribers. Defaults to false.
+    /// Set this to true if you want to show the added message instantly instead of waiting for the notification
+    /// display to rerender (e.g. after navigation).</param>
+    public void AddInfoMessage(string message, bool notifyStateChanged = false)
+    {
+        InfoMessages.Add(message);
+
+        // Notify subscribers that a message has been added.
+        if (notifyStateChanged)
+        {
+            NotifyStateChanged();
+        }
+    }
+
+    /// <summary>
+    /// Adds a warning message to the list of messages that should be displayed to the user.
+    /// </summary>
+    /// <param name="message">The message to add.</param>
+    /// <param name="notifyStateChanged">Whether to notify state change to subscribers. Defaults to false.
+    /// Set this to true if you want to show the added message instantly instead of waiting for the notification
+    /// display to rerender (e.g. after navigation).</param>
+    public void AddWarningMessage(string message, bool notifyStateChanged = false)
+    {
+        WarningMessages.Add(message);
 
         // Notify subscribers that a message has been added.
         if (notifyStateChanged)
@@ -78,6 +124,16 @@ public class GlobalNotificationService
             messages.Add(new KeyValuePair<string, string>("success", message));
         }
 
+        foreach (var message in InfoMessages)
+        {
+            messages.Add(new KeyValuePair<string, string>("info", message));
+        }
+
+        foreach (var message in WarningMessages)
+        {
+            messages.Add(new KeyValuePair<string, string>("warning", message));
+        }
+
         foreach (var message in ErrorMessages)
         {
             messages.Add(new KeyValuePair<string, string>("error", message));
@@ -85,6 +141,7 @@ public class GlobalNotificationService
 
         // Clear messages
         SuccessMessages.Clear();
+        InfoMessages.Clear();
         ErrorMessages.Clear();
 
         return messages;
@@ -96,6 +153,8 @@ public class GlobalNotificationService
     public void ClearMessages()
     {
         SuccessMessages.Clear();
+        InfoMessages.Clear();
+        WarningMessages.Clear();
         ErrorMessages.Clear();
     }
 

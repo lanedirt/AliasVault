@@ -48,7 +48,7 @@
         Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userId);
 
         // Reload current page.
-        NavigationService.RedirectTo(NavigationService.Uri, forceLoad: true);
+        NavigationService.RedirectTo("account/manage/2fa");
     }
 
 }

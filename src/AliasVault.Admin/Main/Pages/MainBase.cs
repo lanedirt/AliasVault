@@ -92,6 +92,12 @@ public class MainBase : OwningComponentBase
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+
+        // Check if 2FA is enabled. If not, show a persistent notification.
+        if (!UserService.User().TwoFactorEnabled)
+        {
+            GlobalNotificationService.AddWarningMessage("Two-factor authentication is not enabled. Please enable it in Account Settings for better security.");
+        }
     }
 
     /// <summary>
