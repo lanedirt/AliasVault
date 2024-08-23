@@ -185,9 +185,9 @@ populate_data_protection_cert_pass() {
     else
       echo "DATA_PROTECTION_CERT_PASS=${DATA_PROTECTION_CERT_PASS}" >> "$ENV_FILE"
     fi
-    printf "${GREEN}> DATA_PROTECTION_KEY has been generated and added to $ENV_FILE.${NC}\n"
+    printf "${GREEN}> DATA_PROTECTION_CERT_PASS has been generated and added to $ENV_FILE.${NC}\n"
   else
-    printf "${GREEN}> DATA_PROTECTION_KEY already exists and has a value in $ENV_FILE.${NC}\n"
+    printf "${GREEN}> DATA_PROTECTION_CERT_PASS already exists and has a value in $ENV_FILE.${NC}\n"
   fi
 }
 
