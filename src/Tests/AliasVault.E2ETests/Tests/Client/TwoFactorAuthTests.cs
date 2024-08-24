@@ -23,8 +23,8 @@ public class TwoFactorAuthTests : ClientPlaywrightTest
     public async Task Setup2FactorAuthAndLogin()
     {
         // Setup two factor auth.
-        await NavigateUsingBlazorRouter("settings/totp");
-        await WaitForUrlAsync("settings/totp", "Set Up Two-Factor Authentication");
+        await NavigateUsingBlazorRouter("settings/security");
+        await WaitForUrlAsync("settings/security", "Two-factor Authentication");
 
         // Press the enable button with text "Enable Two-Factor Authentication"
         var enableButton = Page.Locator("button:has-text('Enable Two-Factor Authentication')");
@@ -96,7 +96,5 @@ public class TwoFactorAuthTests : ClientPlaywrightTest
 
         // Check if we get redirected to the index page.
         await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
-
-        await Task.Delay(5000);
     }
 }

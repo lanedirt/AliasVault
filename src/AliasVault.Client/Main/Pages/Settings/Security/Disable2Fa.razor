@@ -1,0 +1,87 @@
+﻿@page "/settings/security/disable-2fa"
+@inherits MainBase
+@inject HttpClient Http
+
+<LayoutPageTitle>Disable two-factor authentication</LayoutPageTitle>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+
+    <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+        <div class="mb-4 col-span-full xl:mb-2">
+            <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Disable two-factor authentication</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Disabling two-factor authentication means you will be able to login with only your password.</p>
+        </div>
+    </div>
+
+    <div class="p-4 mb-4  mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <AlertMessageError Message="Please note: after disabling two-factor authentication any configured authenticator app(s) will stop working. When you want to re-enable two-factor authentication you will have to configure the authenticator app(s) again." />
+        <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently enabled. Disable it in order to be able to access your vault with your password only.</div>
+        <button @onclick="DisableTwoFactor"
+                class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+            Disable Two-Factor Authentication
+        </button>
+    </div>
+}
+
+@code {
+    private bool IsLoading { get; set; } = true;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Security settings", Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Disable two-factor authentication" });
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        // Check on server if 2FA is enabled
+        if (firstRender)
+        {
+            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/Auth/status-2fa");
+            if (response is not null)
+            {
+                if (!response.TwoFactorEnabled)
+                {
+                    GlobalNotificationService.AddErrorMessage("Two-factor authentication is not enabled.");
+                    NavigationManager.NavigateTo("/settings/security");
+                    return;
+                }
+            }
+
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DisableTwoFactor()
+    {
+        var response = await Http.PostAsync("api/v1/Auth/disable-2fa", null);
+        if (response.IsSuccessStatusCode)
+        {
+            GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully disabled.");
+            NavigationManager.NavigateTo("/settings/security");
+            return;
+        }
+
+        // Handle error
+        GlobalNotificationService.AddErrorMessage("Failed to disable two-factor authentication.", true);
+        StateHasChanged();
+    }
+
+    private class TwoFactorEnabledResult
+    {
+        public bool TwoFactorEnabled { get; set; }
+    }
+}

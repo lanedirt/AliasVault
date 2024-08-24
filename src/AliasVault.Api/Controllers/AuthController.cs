@@ -221,6 +221,23 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
+    /// Get two-factor authentication enabled status for a user.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [HttpGet("status-2fa")]
+    public async Task<IActionResult> StatusTwoFactor()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var twoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+        return Ok(new { TwoFactorEnabled = twoFactorEnabled });
+    }
+
+    /// <summary>
     /// Enable two-factor authentication for a user.
     /// </summary>
     /// <returns>Task.</returns>
@@ -244,6 +261,32 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var qrCodeUrl = $"otpauth://totp/{urlEncoder.Encode("AliasVault WASM")}:{urlEncoder.Encode(user.UserName!)}?secret={encodedKey}&issuer={urlEncoder.Encode("AliasVault WASM")}";
 
         return Ok(new { Secret = authenticatorKey, QrCodeUrl = qrCodeUrl });
+    }
+
+    /// <summary>
+    /// Disable two-factor authentication for a user.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [HttpPost("disable-2fa")]
+    public async Task<IActionResult> DisableTwoFactor()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Disable 2FA and remove any existing authenticator key(s).
+        await userManager.SetTwoFactorEnabledAsync(user, false);
+        context.UserTokens.RemoveRange(
+            context.UserTokens.Where(
+                x => x.UserId == user.Id &&
+                     x.Name == "AuthenticatorKey").ToList());
+
+        await context.SaveChangesAsync();
+        return Ok();
     }
 
     /// <summary>
