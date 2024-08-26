@@ -49,7 +49,7 @@ else
         // Check on server if 2FA is enabled
         if (firstRender)
         {
-            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/Auth/status-2fa");
+            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/TwoFactorAuth/status");
             if (response is not null)
             {
                 if (!response.TwoFactorEnabled)
@@ -67,7 +67,7 @@ else
 
     private async Task DisableTwoFactor()
     {
-        var response = await Http.PostAsync("api/v1/Auth/disable-2fa", null);
+        var response = await Http.PostAsync("api/v1/TwoFactorAuth/disable", null);
         if (response.IsSuccessStatusCode)
         {
             GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully disabled.");

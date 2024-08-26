@@ -60,7 +60,7 @@ else
         // Check on server if 2FA is enabled
         if (firstRender)
         {
-            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/Auth/status-2fa");
+            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/TwoFactorAuth/status");
             if (response is not null)
             {
                 TwoFactorEnabled = response.TwoFactorEnabled;
