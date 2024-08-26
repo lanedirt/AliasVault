@@ -176,6 +176,14 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     }
 
     /// <summary>
+    /// Removes the encryption key from memory, called during logout.
+    /// </summary>
+    public void RemoveEncryptionKey()
+    {
+        _encryptionKey = new byte[32];
+    }
+
+    /// <summary>
     /// Revokes the access and refresh tokens on the server asynchronously.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

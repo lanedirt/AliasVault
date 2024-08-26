@@ -88,10 +88,6 @@ public sealed class DbService : IDisposable
         {
             _retryCount = 0;
         }
-        else
-        {
-            Console.WriteLine("Failed to load database from server.");
-        }
     }
 
     /// <summary>

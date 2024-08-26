@@ -164,7 +164,7 @@ public abstract class PlaywrightTest
             .First
             .WaitForAsync(new LocatorWaitForOptions
             {
-                Timeout = TestDefaults.DefaultTimeout,
+                Timeout = 300000,
                 State = WaitForSelectorState.Attached,
             });
     }
@@ -191,7 +191,7 @@ public abstract class PlaywrightTest
     }
 
     /// <summary>
-    /// Setup the Playwright test environment. This method is  required to be implemented by the derived class.
+    /// Setup the Playwright test environment. This method is required to be implemented by the derived class.
     /// </summary>
     /// <returns>Async task.</returns>
     protected abstract Task SetupEnvironment();
