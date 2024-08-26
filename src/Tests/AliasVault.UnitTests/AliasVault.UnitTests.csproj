@@ -55,6 +55,7 @@
         <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.csproj" />
         <ProjectReference Include="..\..\Utilities\CsvImportExport\CsvImportExport.csproj" />
         <ProjectReference Include="..\..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
+        <ProjectReference Include="..\..\Utilities\TotpGenerator\TotpGenerator.csproj" />
     </ItemGroup>
 
 </Project>

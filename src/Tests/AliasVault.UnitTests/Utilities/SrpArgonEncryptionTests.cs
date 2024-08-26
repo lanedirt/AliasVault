@@ -131,6 +131,7 @@ public class SrpArgonEncryptionTests
         var serverSession = Srp.DeriveSessionServer(serverEphemeral.Secret, clientEphemeral.Public, salt, email, verifier, clientSession.Proof);
 
         // --> send serverSession.Proof to client.
+        Assert.That(serverSession, Is.Not.Null, "Server session is null, likely indicating that the provided password is incorrect.");
 
         // 5. Client verifies the proof.
         Srp.VerifySession(clientEphemeral.Public, clientSession, serverSession.Proof);

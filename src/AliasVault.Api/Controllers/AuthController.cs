@@ -12,7 +12,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AliasServerDb;
-using AliasVault.Shared.Models;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Providers.Time;
@@ -23,6 +22,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
+using SecureRemotePassword;
 
 /// <summary>
 /// Auth controller for handling authentication.
@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Tokens;
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
-/// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing..</param>
+/// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
@@ -41,7 +41,17 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// <summary>
     /// Error message for invalid username or password.
     /// </summary>
-    public static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
+    private static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
+
+    /// <summary>
+    /// Error message for invalid 2-factor authentication code.
+    /// </summary>
+    private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
+
+    /// <summary>
+    /// Error message for invalid 2-factor authentication recovery code.
+    /// </summary>
+    private static readonly string[] InvalidRecoveryCode = ["Invalid recovery code."];
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -74,37 +84,83 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("validate")]
     public async Task<IActionResult> Validate([FromBody] ValidateLoginRequest model)
     {
-        var user = await userManager.FindByNameAsync(model.Username);
-        if (user == null)
+        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
+        if (result is null)
         {
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
-        if (!cache.TryGetValue(model.Username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        var (user, serverSession) = result.Value;
+
+        // If 2FA is required, return that status and no JWT token yet.
+        if (user.TwoFactorEnabled)
+        {
+            return Ok(new ValidateLoginResponse(true, string.Empty, null));
+        }
+
+        // If 2FA is not required, return the JWT token immediately.
+        var tokenModel = await GenerateNewTokensForUser(user);
+        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+    }
+
+    /// <summary>
+    /// Validate login including two-factor authentication code check.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequest2Fa model.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("validate-2fa")]
+    public async Task<IActionResult> Validate2Fa([FromBody] ValidateLoginRequest2Fa model)
+    {
+        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
+        if (result is null)
         {
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
-        try
+        var (user, serverSession) = result.Value;
+
+        // Verify 2-factor code.
+        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
+        if (!verifyResult)
         {
-            var serverSession = Cryptography.Srp.DeriveSessionServer(
-                serverSecretEphemeral.ToString() ?? string.Empty,
-                model.ClientPublicEphemeral,
-                user.Salt,
-                model.Username,
-                user.Verifier,
-                model.ClientSessionProof);
-
-            // If above does not throw an exception., then the client's proof is valid, and we can issue the JWT token.
-            var tokenModel = await GenerateNewTokensForUser(user);
-
-            // Return server proof for optional client check and token.
-            return Ok(new ValidateLoginResponse(serverSession.Proof, tokenModel));
+            return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
         }
-        catch
+
+        // Generate and return the JWT token.
+        var tokenModel = await GenerateNewTokensForUser(user);
+        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+    }
+
+    /// <summary>
+    /// Validate login including two-factor authentication recovery code check.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequestRecoveryCode model.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("validate-recovery-code")]
+    public async Task<IActionResult> ValidateRecoveryCode([FromBody] ValidateLoginRequestRecoveryCode model)
+    {
+        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
+        if (result is null)
         {
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
+
+        var (user, serverSession) = result.Value;
+
+        // Sanitize recovery code.
+        var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty).ToUpper();
+
+        // Attempt to redeem the recovery code
+        var redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user, recoveryCode);
+
+        if (!redeemResult.Succeeded)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
+        }
+
+        // Generate and return the JWT token.
+        var tokenModel = await GenerateNewTokensForUser(user);
+        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
     }
 
     /// <summary>
@@ -117,7 +173,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var principal = GetPrincipalFromExpiredToken(tokenModel.Token);
+        var principal = GetPrincipalFromToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
             return Unauthorized("User not found (name-1)");
@@ -130,7 +186,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Check if the refresh token is valid.
-        // Remove any existing refresh tokens for this user and device.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
         var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
@@ -169,7 +224,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var principal = GetPrincipalFromExpiredToken(model.Token);
+        var principal = GetPrincipalFromToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
             return Unauthorized("User not found (name-1)");
@@ -241,6 +296,20 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
+    /// Generate a refresh token for a user. This token is used to request a new access token when the current
+    /// access token expires. The refresh token is long-lived by design.
+    /// </summary>
+    /// <returns>Random string to be used as refresh token.</returns>
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    /// <summary>
     /// Get the JWT key from the environment variables.
     /// </summary>
     /// <returns>JWT key as string.</returns>
@@ -257,12 +326,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
-    /// Get the principal from an expired token. This is used to validate the token and extract the user.
+    /// Get the principal from a token. This is used to validate the token and extract the user.
     /// </summary>
-    /// <param name="token">The expired token as string.</param>
+    /// <param name="token">The token as string.</param>
     /// <returns>Claims principal.</returns>
     /// <exception cref="SecurityTokenException">Thrown if provided token is invalid.</exception>
-    private static ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    private static ClaimsPrincipal GetPrincipalFromToken(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -270,6 +339,8 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
+
+            // We don't validate the token lifetime here, as we only use it for refresh tokens.
             ValidateLifetime = false,
         };
 
@@ -284,17 +355,39 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
-    /// Generate a refresh token for a user. This token is used to request a new access token when the current
-    /// access token expires. The refresh token is long-lived by design.
+    /// Helper method that validates the SRP session based on provided username, ephemeral and proof.
     /// </summary>
-    /// <returns>Random string to be used as refresh token.</returns>
-    private static string GenerateRefreshToken()
+    /// <param name="username">The username.</param>
+    /// <param name="clientEphemeral">The client ephemeral value.</param>
+    /// <param name="clientSessionProof">The client session proof.</param>
+    /// <returns>Tuple.</returns>
+    private async Task<(AliasVaultUser User, SrpSession ServerSession)?> ValidateSrpSession(string username, string clientEphemeral, string clientSessionProof)
     {
-        var randomNumber = new byte[32];
-        using var rng = RandomNumberGenerator.Create();
+        var user = await userManager.FindByNameAsync(username);
+        if (user == null)
+        {
+            return null;
+        }
 
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        if (!cache.TryGetValue(username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        {
+            return null;
+        }
+
+        var serverSession = Cryptography.Srp.DeriveSessionServer(
+            serverSecretEphemeral.ToString() ?? string.Empty,
+            clientEphemeral,
+            user.Salt,
+            username,
+            user.Verifier,
+            clientSessionProof);
+
+        if (serverSession is null)
+        {
+            return null;
+        }
+
+        return (user, serverSession);
     }
 
     /// <summary>

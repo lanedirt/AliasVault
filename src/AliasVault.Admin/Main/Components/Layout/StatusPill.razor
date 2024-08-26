@@ -1,0 +1,19 @@
+﻿@inherits ComponentBase
+
+<span class="@PillClass px-2 py-1 text-xs font-medium rounded-full">
+    @StatusText
+</span>
+
+@code {
+    /// <summary>
+    /// Set to true to show the pill as enabled.
+    /// </summary>
+    [Parameter]
+    public bool Enabled { get; set; }
+
+    private string PillClass => Enabled
+        ? "bg-green-100 text-green-800"
+        : "bg-red-100 text-red-800";
+
+    private string StatusText => Enabled ? "Enabled" : "Disabled";
+}

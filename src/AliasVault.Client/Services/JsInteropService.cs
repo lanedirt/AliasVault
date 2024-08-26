@@ -124,4 +124,22 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             throw new CryptographicException("Decryption failed", ex);
         }
     }
+
+    /// <summary>
+    /// Generates a QR code.
+    /// </summary>
+    /// <param name="elementId">Element ID that contains data-url attribute which to generate QR code for.</param>
+    /// <returns>Task.</returns>
+    public async Task GenerateQrCode(string elementId)
+    {
+        try
+        {
+            // Invoke the JavaScript function and get the result as a byte array
+            await jsRuntime.InvokeVoidAsync("generateQrCode", "authenticator-uri");
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error: {ex.Message}");
+        }
+    }
 }

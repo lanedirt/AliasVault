@@ -99,16 +99,24 @@ public static class Srp
     /// <param name="verifier">Verifier.</param>
     /// <param name="clientSessionProof">Client session proof.</param>
     /// <returns>SrpSession.</returns>
-    public static SrpSession DeriveSessionServer(string serverEphemeralSecret, string clientEphemeralPublic, string salt, string username, string verifier, string clientSessionProof)
+    public static SrpSession? DeriveSessionServer(string serverEphemeralSecret, string clientEphemeralPublic, string salt, string username, string verifier, string clientSessionProof)
     {
-        var server = new SrpServer();
-        return server.DeriveSession(
-            serverEphemeralSecret,
-            clientEphemeralPublic,
-            salt,
-            username,
-            verifier,
-            clientSessionProof);
+        try
+        {
+            var server = new SrpServer();
+            return server.DeriveSession(
+                serverEphemeralSecret,
+                clientEphemeralPublic,
+                salt,
+                username,
+                verifier,
+                clientSessionProof);
+        }
+        catch (System.Security.SecurityException)
+        {
+            // Incorrect password provided, return null.
+            return null;
+        }
     }
 
     /// <summary>

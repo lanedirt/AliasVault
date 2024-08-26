@@ -17,7 +17,7 @@ using AliasClientDb;
 using AliasGenerators.Identity.Implementations;
 using AliasGenerators.Identity.Models;
 using AliasGenerators.Password.Implementations;
-using AliasVault.Shared.Models;
+using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
 using Identity = AliasGenerators.Identity.Models.Identity;
 

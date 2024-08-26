@@ -1,0 +1,33 @@
+﻿<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Recovery codes</h3>
+    <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        The recovery codes below are used to access your account in case you lose access to your authenticator device.
+        Make a photo or write them down and store them in a secure location. Do not share them with anyone.
+    </div>
+    <div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4">
+        <p class="font-semibold">
+            Store these recovery codes in a safe place.
+        </p>
+        <p>
+            If you lose your device and don't have the recovery codes you will lose access to your account. These
+            codes are only shown once!
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1" id="recovery-codes">
+        @foreach (var recoveryCode in RecoveryCodes)
+        {
+            <div>
+                <code class="block p-2">@recoveryCode</code>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The recovery codes to show.
+    /// </summary>
+    [Parameter]
+    public string[] RecoveryCodes { get; set; } = [];
+}

@@ -35,6 +35,7 @@ else
                 <th scope="col" class="px-4 py-3"># Vaults</th>
                 <th scope="col" class="px-4 py-3"># Email claims</th>
                 <th scope="col" class="px-4 py-3">Storage</th>
+                <th scope="col" class="px-4 py-3">2FA</th>
                 <th scope="col" class="px-4 py-3">Last vault update</th>
                 <th scope="col" class="px-4 py-3">Actions</th>
             </tr>
@@ -49,6 +50,7 @@ else
                         <td class="px-4 py-3">@user.VaultCount</td>
                         <td class="px-4 py-3">@user.EmailClaimCount</td>
                         <td class="px-4 py-3">@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</td>
+                        <td class="px-4 py-3"><StatusPill Enabled="user.TwoFactorEnabled" /></td>
                         <td class="px-4 py-3">@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</td>
                         <td class="px-4 py-3">
                             <a href="users/@user.Id" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-blue-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">View</a>
@@ -119,6 +121,7 @@ else
                 u.Id,
                 u.UserName,
                 u.CreatedAt,
+                u.TwoFactorEnabled,
                 Vaults = u.Vaults.Select(v => new
                 {
                     v.FileSize,
@@ -135,6 +138,7 @@ else
         {
             Id = user.Id,
             UserName = user.UserName?.ToLower() ?? "N/A",
+            TwoFactorEnabled = user.TwoFactorEnabled,
             CreatedAt = user.CreatedAt,
             VaultCount = user.Vaults.Count(),
             EmailClaimCount = user.EmailClaims.Count(),

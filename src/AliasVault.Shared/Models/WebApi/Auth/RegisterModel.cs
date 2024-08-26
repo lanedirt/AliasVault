@@ -7,37 +7,37 @@
 
 namespace AliasVault.Shared.Models.WebApi.Auth;
 
+using System.ComponentModel.DataAnnotations;
+using AliasVault.Shared.Models.Validation;
+
 /// <summary>
-/// This class represents the model for registering a new user
-/// using SRP (Secure Remote Password) protocol.
+/// Register model.
 /// </summary>
 public class RegisterModel
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterModel"/> class.
+    /// Gets or sets the username.
     /// </summary>
-    /// <param name="email">Email.</param>
-    /// <param name="salt">Salt.</param>
-    /// <param name="verifier">Verifier.</param>
-    public RegisterModel(string email, string salt, string verifier)
-    {
-        Email = email;
-        Salt = salt;
-        Verifier = verifier;
-    }
+    [Required]
+    public string Username { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the email.
+    /// Gets or sets the password.
     /// </summary>
-    public string Email { get; set; }
+    [Required]
+    [MinLength(8, ErrorMessage = "Password must be at least 8 characters long.")]
+    public string Password { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the salt.
+    /// Gets or sets the password confirmation.
     /// </summary>
-    public string Salt { get; set; }
+    [Required]
+    [Compare("Password", ErrorMessage = "Passwords do not match.")]
+    public string PasswordConfirm { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the verifier.
+    /// Gets or sets a value indicating whether the terms and conditions are accepted or not.
     /// </summary>
-    public string Verifier { get; set; }
+    [MustBeTrue(ErrorMessage = "You must accept the terms and conditions.")]
+    public bool AcceptTerms { get; set; } = false;
 }

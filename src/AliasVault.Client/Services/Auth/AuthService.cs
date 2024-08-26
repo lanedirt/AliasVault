@@ -9,7 +9,7 @@ namespace AliasVault.Client.Services.Auth;
 
 using System.Net.Http.Json;
 using System.Text.Json;
-using AliasVault.Shared.Models;
+using AliasVault.Shared.Models.WebApi.Auth;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -173,6 +173,14 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         // Remove the tokens from local storage.
         await localStorage.RemoveItemAsync(AccessTokenKey);
         await localStorage.RemoveItemAsync(RefreshTokenKey);
+    }
+
+    /// <summary>
+    /// Removes the encryption key from memory, called during logout.
+    /// </summary>
+    public void RemoveEncryptionKey()
+    {
+        _encryptionKey = new byte[32];
     }
 
     /// <summary>

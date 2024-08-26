@@ -16,6 +16,20 @@
     }
     @foreach (var message in Messages)
     {
+        if (message.Key == "info")
+        {
+            <AlertMessageInfo Message="@message.Value" />
+        }
+    }
+    @foreach (var message in Messages)
+    {
+        if (message.Key == "warning")
+        {
+            <AlertMessageWarning Message="@message.Value" />
+        }
+    }
+    @foreach (var message in Messages)
+    {
         if (message.Key == "error")
         {
             <AlertMessageError Message="@message.Value" />

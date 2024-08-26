@@ -13,7 +13,9 @@
     {
         await base.OnInitializedAsync();
         await AuthService.RemoveTokensAsync();
+        AuthService.RemoveEncryptionKey();
         await AuthStateProvider.GetAuthenticationStateAsync();
+
         // Initialize a new empty database to clear all data.
         DbService.InitializeEmptyDatabase();
         GlobalNotificationService.ClearMessages();
