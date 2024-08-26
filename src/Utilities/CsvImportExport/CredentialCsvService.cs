@@ -19,7 +19,11 @@ public static class CredentialCsvService
 {
     private const string CsvVersionIdentifier = "1.0.0";
 
-    /// <param name="filePath">The file path of the CSV file.</param>
+    /// <summary>
+    /// Export list of credentials to CSV file.
+    /// </summary>
+    /// <param name="credentials">List of credentials to export.</param>
+    /// <returns>CSV file as byte array.</returns>
     public static byte[] ExportCredentialsToCsv(List<Credential> credentials)
     {
         var records = new List<CredentialCsvRecord>();
@@ -30,7 +34,7 @@ public static class CredentialCsvService
             {
                 Version = CsvVersionIdentifier,
                 Id = credential.Id,
-                Username = credential.Username,
+                Username = credential.Username ?? string.Empty,
                 Notes = credential.Notes ?? string.Empty,
                 CreatedAt = credential.CreatedAt,
                 UpdatedAt = credential.UpdatedAt,

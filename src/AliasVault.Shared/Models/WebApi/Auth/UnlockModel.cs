@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models;
+namespace AliasVault.Shared.Models.WebApi.Auth;
 
 using System.ComponentModel.DataAnnotations;
 

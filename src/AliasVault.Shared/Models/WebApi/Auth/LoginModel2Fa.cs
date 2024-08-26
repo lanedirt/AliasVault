@@ -5,12 +5,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models;
+namespace AliasVault.Shared.Models.WebApi.Auth;
 
 using System.ComponentModel.DataAnnotations;
 
 /// <summary>
-/// Login model for two factor authentication step.
+/// Login model for two factor authentication step using an authenticator code.
 /// </summary>
 public class LoginModel2Fa
 {

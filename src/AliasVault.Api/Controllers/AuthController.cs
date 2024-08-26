@@ -51,6 +51,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
 
     /// <summary>
+    /// Error message for invalid 2-factor authentication recovery code.
+    /// </summary>
+    private static readonly string[] InvalidRecoveryCode = ["Invalid recovery code."];
+
+    /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>
@@ -169,6 +174,58 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
+    /// Validate login including two factor authentication recovery code check.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequestRecoveryCode model.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("validate-recovery-code")]
+    public async Task<IActionResult> ValidateRecoveryCode([FromBody] ValidateLoginRequestRecoveryCode model)
+    {
+        var user = await userManager.FindByNameAsync(model.Username);
+        if (user == null)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
+        if (!cache.TryGetValue(model.Username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
+        try
+        {
+            var serverSession = Cryptography.Srp.DeriveSessionServer(
+                serverSecretEphemeral.ToString() ?? string.Empty,
+                model.ClientPublicEphemeral,
+                user.Salt,
+                model.Username,
+                user.Verifier,
+                model.ClientSessionProof);
+
+            // If above does not throw an exception., then the client's proof is valid. Next check 2-factor code.
+
+            // Sanitize recovery code.
+            var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty).ToUpper();
+
+            // Attempt to redeem the recovery code
+            var result = await userManager.RedeemTwoFactorRecoveryCodeAsync(user, recoveryCode);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
+            }
+
+            // Generate and return the JWT token.
+            var tokenModel = await GenerateNewTokensForUser(user);
+            return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+        }
+        catch
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+    }
+
+    /// <summary>
     /// Refresh endpoint used to refresh an expired access token using a valid refresh token.
     /// </summary>
     /// <param name="tokenModel">Token model.</param>
@@ -258,7 +315,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         var encodedKey = urlEncoder.Encode(authenticatorKey!);
-        var qrCodeUrl = $"otpauth://totp/{urlEncoder.Encode("AliasVault WASM")}:{urlEncoder.Encode(user.UserName!)}?secret={encodedKey}&issuer={urlEncoder.Encode("AliasVault WASM")}";
+        var qrCodeUrl = $"otpauth://totp/{urlEncoder.Encode("AliasVault")}:{urlEncoder.Encode(user.UserName!)}?secret={encodedKey}&issuer={urlEncoder.Encode("AliasVault")}";
 
         return Ok(new { Secret = authenticatorKey, QrCodeUrl = qrCodeUrl });
     }
@@ -278,12 +335,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // Disable 2FA and remove any existing authenticator key(s).
+        // Disable 2FA and remove any existing authenticator key(s) and recovery codes.
         await userManager.SetTwoFactorEnabledAsync(user, false);
         context.UserTokens.RemoveRange(
             context.UserTokens.Where(
                 x => x.UserId == user.Id &&
-                     x.Name == "AuthenticatorKey").ToList());
+                     (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes")).ToList());
 
         await context.SaveChangesAsync();
         return Ok();
@@ -308,12 +365,14 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         if (isValid)
         {
             await userManager.SetTwoFactorEnabledAsync(user, true);
-            return Ok();
+
+            // Generate new recovery codes.
+            var recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+
+            return Ok(new { RecoveryCodes = recoveryCodes });
         }
-        else
-        {
-            return BadRequest("Invalid code.");
-        }
+
+        return BadRequest("Invalid code.");
     }
 
     /// <summary>

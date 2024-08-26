@@ -1,23 +1,28 @@
 ﻿@page "/settings/security/enable-2fa"
+@using AliasVault.Client.Main.Pages.Settings.Security.Components
 @inherits MainBase
 @inject HttpClient Http
 
 <LayoutPageTitle>Enable two-factor authentication</LayoutPageTitle>
 
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Enable two-factor authentication</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Enable two-factor authentication to increase the security of your vaults.</p>
+    </div>
+</div>
+
 @if (IsLoading)
 {
     <LoadingIndicator />
 }
+else if (RecoveryCodes is not null)
+{
+    <ShowRecoveryCodes RecoveryCodes="RecoveryCodes.ToArray()"/>
+}
 else
 {
-    <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-        <div class="mb-4 col-span-full xl:mb-2">
-            <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Enable two-factor authentication</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Enable two-factor authentication to increase the security of your vaults.</p>
-        </div>
-    </div>
-
     <div class="p-4 mb-4  mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <div class="space-y-6">
             <div id="authenticator-uri" data-url="@QrCodeUrl" class="flex justify-center">
@@ -49,6 +54,7 @@ else
     private string Secret { get; set; } = string.Empty;
     private VerificationModel VerifyModel = new();
     private bool IsLoading { get; set; } = true;
+    private List<string>? RecoveryCodes { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -76,7 +82,11 @@ else
                 if (result != null)
                 {
                     QrCodeUrl = result.QrCodeUrl;
-                    Secret = result.Secret;
+
+                    // Make secret more readable by adding spaces every 4 characters
+                    Secret = string.Join(" ", Enumerable.Range(0, result.Secret.Length / 4)
+                        .Select(i => result.Secret.Substring(i * 4, 4))).ToLower();
+
                     IsLoading = false;
                     StateHasChanged();
                     JsInteropService.GenerateQrCode("authenticator-uri");
@@ -93,21 +103,34 @@ else
         var response = await Http.PostAsJsonAsync("api/v1/Auth/verify-2fa", VerifyModel.Code);
         if (response.IsSuccessStatusCode)
         {
-            GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully enabled. On your " +
-                                                        "next login you will need to enter your 2FA code.");
-            NavigationManager.NavigateTo("/settings/security");
+            var result = await response.Content.ReadFromJsonAsync<TotpVerifyResult>();
+
+            if (result != null)
+            {
+                GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully enabled. On your " +
+                                                            "next login you will need to enter your 2FA code.", true);
+
+                // Show recovery codes.
+                RecoveryCodes = result.RecoveryCodes;
+                IsLoading = false;
+                StateHasChanged();
+                return;
+            }
         }
-        else
-        {
-            GlobalNotificationService.AddErrorMessage("Failed to enable two-factor authentication.", true);
-            StateHasChanged();
-        }
+
+        GlobalNotificationService.AddErrorMessage("Failed to enable two-factor authentication.", true);
+        StateHasChanged();
     }
 
     private class TotpSetupResult
     {
         public string Secret { get; set; } = string.Empty;
         public string QrCodeUrl { get; set; } = string.Empty;
+    }
+
+    private class TotpVerifyResult
+    {
+        public List<string> RecoveryCodes { get; set; } = new();
     }
 
     private class VerificationModel

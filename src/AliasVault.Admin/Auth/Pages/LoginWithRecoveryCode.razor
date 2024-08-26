@@ -9,8 +9,8 @@
 <ServerValidationErrors @ref="ServerValidationErrors" />
 
 <p class="text-gray-700 dark:text-gray-300 mb-6">
-    You have requested to log in with a recovery code. This login will not be remembered until you provide
-    an authenticator app code at log in or disable 2FA and log in again.
+    You have requested to log in with a recovery code. A recovery code is a one-time code that can be used to log in to your account.
+    Note that if you don't manually disable 2FA after login, you will be asked for an authenticator code again at the next login.
 </p>
 <div class="w-full max-w-md">
     <EditForm Model="Input" FormName="login-with-recovery-code" OnValidSubmit="OnValidSubmitAsync" method="post" class="space-y-6">

@@ -1206,6 +1206,10 @@ video {
   border-left-width: 0px;
 }
 
+.border-l-4 {
+  border-left-width: 4px;
+}
+
 .border-t {
   border-top-width: 1px;
 }
@@ -1243,6 +1247,11 @@ video {
 .border-primary-300 {
   --tw-border-opacity: 1;
   border-color: rgb(248 185 99 / var(--tw-border-opacity));
+}
+
+.border-primary-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(244 149 65 / var(--tw-border-opacity));
 }
 
 .border-primary-600 {
@@ -1330,9 +1339,19 @@ video {
   background-color: rgb(253 222 133 / var(--tw-bg-opacity));
 }
 
+.bg-primary-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(251 203 116 / var(--tw-bg-opacity));
+}
+
 .bg-primary-300 {
   --tw-bg-opacity: 1;
   background-color: rgb(248 185 99 / var(--tw-bg-opacity));
+}
+
+.bg-primary-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 149 65 / var(--tw-bg-opacity));
 }
 
 .bg-primary-600 {
@@ -1368,11 +1387,6 @@ video {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.bg-primary-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(244 149 65 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {
@@ -1872,6 +1886,11 @@ video {
   background-color: rgb(246 167 82 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-primary-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(214 131 56 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-primary-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(184 112 47 / var(--tw-bg-opacity));
@@ -1895,11 +1914,6 @@ video {
 .hover\:bg-red-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(153 27 27 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-primary-600:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(214 131 56 / var(--tw-bg-opacity));
 }
 
 .hover\:from-primary-600:hover {
