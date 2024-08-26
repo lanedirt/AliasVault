@@ -12,7 +12,7 @@ using OtpNet;
 /// <summary>
 /// Helper class to generate time based one-time passwords.
 /// </summary>
-public class TotpGenerator
+public static class TotpGenerator
 {
     /// <summary>
     /// Generates a Time-based One-Time Password (TOTP) for the given secret key.

@@ -129,7 +129,8 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// Generates a QR code.
     /// </summary>
     /// <param name="elementId">Element ID that contains data-url attribute which to generate QR code for.</param>
-    public async void GenerateQrCode(string elementId)
+    /// <returns>Task.</returns>
+    public async Task GenerateQrCode(string elementId)
     {
         try
         {

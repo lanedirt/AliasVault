@@ -81,8 +81,8 @@ else
         NavigationManager.NavigateTo("settings/security/disable-2fa");
     }
 
-    private class TwoFactorEnabledResult
+    private sealed class TwoFactorEnabledResult
     {
-        public bool TwoFactorEnabled { get; set; }
+        public required bool TwoFactorEnabled { get; init; } = false;
     }
 }

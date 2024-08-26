@@ -148,6 +148,9 @@ else
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Handle the basic login request with username and password.
+    /// </summary>
     private async Task HandleLogin()
     {
         LoadingIndicator.Show();
@@ -180,118 +183,8 @@ else
         }
     }
 
-    private async Task HandleRecoveryCode()
-    {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
-
-        try
-        {
-            // Sanitize username
-            var username = LoginModel.Username.ToLowerInvariant().Trim();
-
-            // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, ClientEphemeral.Public, ClientSession.Proof, LoginModelRecoveryCode.RecoveryCode));
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                foreach (var error in ParseResponse(responseContent))
-                {
-                    ServerValidationErrors.AddError(error);
-                    return;
-                }
-            }
-
-            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
-            if (validateLoginResponse == null)
-            {
-                ServerValidationErrors.AddError("An error occurred while processing the login request.");
-                return;
-            }
-
-            var errors = await ProcessLoginVerify(validateLoginResponse);
-            foreach (var error in errors)
-            {
-                ServerValidationErrors.AddError(error);
-            }
-        }
-#if DEBUG
-        catch (Exception ex)
-        {
-            // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
-        }
-#else
-        catch
-        {
-            // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
-        }
-#endif
-        finally
-        {
-            LoadingIndicator.Hide();
-        }
-    }
-
-    private async Task Handle2Fa()
-    {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
-
-        try
-        {
-            // Sanitize username
-            var username = LoginModel.Username.ToLowerInvariant().Trim();
-
-            // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode));
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                foreach (var error in ParseResponse(responseContent))
-                {
-                    ServerValidationErrors.AddError(error);
-                    return;
-                }
-            }
-
-            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
-            if (validateLoginResponse == null)
-            {
-                ServerValidationErrors.AddError("An error occurred while processing the login request.");
-                return;
-            }
-
-            var errors = await ProcessLoginVerify(validateLoginResponse);
-            foreach (var error in errors)
-            {
-                ServerValidationErrors.AddError(error);
-            }
-        }
-#if DEBUG
-        catch (Exception ex)
-        {
-            // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
-        }
-#else
-        catch
-        {
-            // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
-        }
-#endif
-        finally
-        {
-            LoadingIndicator.Hide();
-        }
-    }
-
     /// <summary>
-    /// Gets the username from the authentication state asynchronously.
+    /// Process the login request using username and password.
     /// </summary>
     /// <returns>List of errors if something went wrong.</returns>
     protected async Task<List<string>> ProcessLoginAsync()
@@ -356,9 +249,129 @@ else
             return [];
         }
 
+        // If no 2FA is required, verify the login.
         return await ProcessLoginVerify(validateLoginResponse);
     }
 
+    /// <summary>
+    /// Confirm 2-factor authentication protected login with recovery code.
+    /// </summary>
+    private async Task HandleRecoveryCode()
+    {
+        LoadingIndicator.Show();
+        ServerValidationErrors.Clear();
+
+        try
+        {
+            // Sanitize username
+            var username = LoginModel.Username.ToLowerInvariant().Trim();
+
+            // Validate 2-factor auth code auth and login
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, ClientEphemeral.Public, ClientSession.Proof, LoginModelRecoveryCode.RecoveryCode));
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                foreach (var error in ParseResponse(responseContent))
+                {
+                    ServerValidationErrors.AddError(error);
+                }
+                return;
+            }
+
+            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
+            if (validateLoginResponse == null)
+            {
+                ServerValidationErrors.AddError("An error occurred while processing the login request.");
+                return;
+            }
+
+            var errors = await ProcessLoginVerify(validateLoginResponse);
+            foreach (var error in errors)
+            {
+                ServerValidationErrors.AddError(error);
+            }
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            // If in debug mode show the actual exception.
+            ServerValidationErrors.AddError(ex.ToString());
+        }
+#else
+        catch
+        {
+            // If in release mode show a generic error.
+            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+        }
+#endif
+        finally
+        {
+            LoadingIndicator.Hide();
+        }
+    }
+
+    /// <summary>
+    /// Confirm 2-factor authentication protected login with authenticator code.
+    /// </summary>
+    private async Task Handle2Fa()
+    {
+        LoadingIndicator.Show();
+        ServerValidationErrors.Clear();
+
+        try
+        {
+            // Sanitize username
+            var username = LoginModel.Username.ToLowerInvariant().Trim();
+
+            // Validate 2-factor auth code auth and login
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode));
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                foreach (var error in ParseResponse(responseContent))
+                {
+                    ServerValidationErrors.AddError(error);
+                }
+                return;
+            }
+
+            var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
+            if (validateLoginResponse == null)
+            {
+                ServerValidationErrors.AddError("An error occurred while processing the login request.");
+                return;
+            }
+
+            var errors = await ProcessLoginVerify(validateLoginResponse);
+            foreach (var error in errors)
+            {
+                ServerValidationErrors.AddError(error);
+            }
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            // If in debug mode show the actual exception.
+            ServerValidationErrors.AddError(ex.ToString());
+        }
+#else
+        catch
+        {
+            // If in release mode show a generic error.
+            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+        }
+#endif
+        finally
+        {
+            LoadingIndicator.Hide();
+        }
+    }
+
+    /// <summary>
+    /// Verify the login response and store the tokens.
+    /// </summary>
     private async Task<List<string>> ProcessLoginVerify(ValidateLoginResponse validateLoginResponse)
     {
         Console.WriteLine("ProcessLoginVerify called...");

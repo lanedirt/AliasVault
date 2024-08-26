@@ -86,9 +86,9 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
         // Disable 2FA and remove any existing authenticator key(s) and recovery codes.
         await userManager.SetTwoFactorEnabledAsync(user, false);
         context.UserTokens.RemoveRange(
-            context.UserTokens.Where(
+            await context.UserTokens.Where(
                 x => x.UserId == user.Id &&
-                     (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes")).ToList());
+                     (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes")).ToListAsync());
 
         await context.SaveChangesAsync();
         return Ok();

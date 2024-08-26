@@ -10,7 +10,6 @@
 }
 else
 {
-
     <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
         <div class="mb-4 col-span-full xl:mb-2">
             <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
@@ -50,14 +49,11 @@ else
         if (firstRender)
         {
             var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/TwoFactorAuth/status");
-            if (response is not null)
+            if (response is not null && !response.TwoFactorEnabled)
             {
-                if (!response.TwoFactorEnabled)
-                {
-                    GlobalNotificationService.AddErrorMessage("Two-factor authentication is not enabled.");
-                    NavigationManager.NavigateTo("/settings/security");
-                    return;
-                }
+                GlobalNotificationService.AddErrorMessage("Two-factor authentication is not enabled.");
+                NavigationManager.NavigateTo("/settings/security");
+                return;
             }
 
             IsLoading = false;
@@ -80,8 +76,8 @@ else
         StateHasChanged();
     }
 
-    private class TwoFactorEnabledResult
+    private sealed class TwoFactorEnabledResult
     {
-        public bool TwoFactorEnabled { get; set; }
+        public required bool TwoFactorEnabled { get; init; } = false;
     }
 }

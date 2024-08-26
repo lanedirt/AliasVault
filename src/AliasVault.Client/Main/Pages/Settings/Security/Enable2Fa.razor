@@ -52,9 +52,9 @@ else
 @code {
     private string QrCodeUrl { get; set; } = string.Empty;
     private string Secret { get; set; } = string.Empty;
-    private VerificationModel VerifyModel = new();
     private bool IsLoading { get; set; } = true;
     private List<string>? RecoveryCodes { get; set; }
+    private readonly VerificationModel VerifyModel = new();
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -77,7 +77,7 @@ else
             var response = await Http.PostAsync("api/v1/TwoFactorAuth/enable", null);
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<TotpSetupResult>();
+                var result = await response.Content.ReadFromJsonAsync<TwoFactorSetupResult>();
 
                 if (result != null)
                 {
@@ -89,7 +89,7 @@ else
 
                     IsLoading = false;
                     StateHasChanged();
-                    JsInteropService.GenerateQrCode("authenticator-uri");
+                    await JsInteropService.GenerateQrCode("authenticator-uri");
                 }
             }
 
@@ -103,7 +103,7 @@ else
         var response = await Http.PostAsJsonAsync("api/v1/TwoFactorAuth/verify", VerifyModel.Code);
         if (response.IsSuccessStatusCode)
         {
-            var result = await response.Content.ReadFromJsonAsync<TotpVerifyResult>();
+            var result = await response.Content.ReadFromJsonAsync<TwoFactorVerifyResult>();
 
             if (result != null)
             {
@@ -122,18 +122,18 @@ else
         StateHasChanged();
     }
 
-    private class TotpSetupResult
+    private sealed class TwoFactorSetupResult
     {
-        public string Secret { get; set; } = string.Empty;
-        public string QrCodeUrl { get; set; } = string.Empty;
+        public required string Secret { get; init; } = string.Empty;
+        public required string QrCodeUrl { get; init; } = string.Empty;
     }
 
-    private class TotpVerifyResult
+    private sealed class TwoFactorVerifyResult
     {
-        public List<string> RecoveryCodes { get; set; } = new();
+        public required List<string> RecoveryCodes { get; init; } = [];
     }
 
-    private class VerificationModel
+    private sealed class VerificationModel
     {
         public string Code { get; set; } = string.Empty;
     }
