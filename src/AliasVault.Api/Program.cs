@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Jwt;
+using AliasVault.AuthLogging;
 using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
@@ -28,6 +29,8 @@ builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAs
 
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthLoggingService>();
 
 builder.Services.AddLogging(logging =>
 {

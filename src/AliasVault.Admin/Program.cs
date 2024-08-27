@@ -13,6 +13,7 @@ using AliasVault.Admin;
 using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
+using AliasVault.AuthLogging;
 using AliasVault.Logging;
 using Cryptography;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -46,6 +47,8 @@ builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<NavigationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 
 builder.Services.AddAuthentication(options =>

@@ -48,23 +48,24 @@
         ServerValidationErrors.Clear();
 
         var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
-
         var result = await SignInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
-
         var userId = await UserManager.GetUserIdAsync(user);
 
         if (result.Succeeded)
         {
+            await AuthLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TwoFactorAuthentication);
             Logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", userId);
             NavigationService.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut)
         {
+            await AuthLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
             Logger.LogWarning("User account locked out.");
             NavigationService.RedirectTo("user/lockout");
         }
         else
         {
+            await AuthLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidRecoveryCode);
             Logger.LogWarning("Invalid recovery code entered for user with ID '{UserId}' ", userId);
             ServerValidationErrors.AddError("Error: Invalid recovery code entered.");
         }

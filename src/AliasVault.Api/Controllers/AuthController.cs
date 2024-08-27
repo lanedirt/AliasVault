@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AliasServerDb;
+using AliasVault.AuthLogging;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Providers.Time;
@@ -33,10 +34,11 @@ using SecureRemotePassword;
 /// <param name="configuration">IConfiguration instance.</param>
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
 /// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
+/// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider) : ControllerBase
+public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid username or password.
@@ -64,6 +66,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var user = await userManager.FindByNameAsync(model.Username);
         if (user == null)
         {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidUsername);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
@@ -87,9 +90,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
         if (result is null)
         {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
+        await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.Login);
         var (user, serverSession) = result.Value;
 
         // If 2FA is required, return that status and no JWT token yet.
@@ -114,6 +119,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
         if (result is null)
         {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
@@ -123,8 +129,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
         if (!verifyResult)
         {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidTwoFactorCode);
             return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
         }
+
+        await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
         // Generate and return the JWT token.
         var tokenModel = await GenerateNewTokensForUser(user);
@@ -155,8 +164,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         if (!redeemResult.Succeeded)
         {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidRecoveryCode);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
         }
+
+        await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
         // Generate and return the JWT token.
         var tokenModel = await GenerateNewTokensForUser(user);
@@ -190,6 +202,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
         {
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
             return Unauthorized("Refresh token expired");
         }
 
@@ -210,6 +223,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         });
         await context.SaveChangesAsync();
 
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TokenRefresh);
         var token = GenerateJwtToken(user);
         return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
     }
@@ -241,6 +255,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Logout, AuthFailureReason.InvalidRefreshToken);
             return Unauthorized("Invalid refresh token");
         }
 
@@ -248,6 +263,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         context.AliasVaultUserRefreshTokens.Remove(existingToken);
         await context.SaveChangesAsync();
 
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.Logout);
         return Ok("Refresh token revoked successfully");
     }
 
@@ -259,6 +275,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
+        // Validate username, disallow "admin" as a username.
+        if (model.Username.ToLower() == "admin")
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(["Username 'admin' is not allowed."], 400));
+        }
+
         var user = new AliasVaultUser { UserName = model.Username, Salt = model.Salt, Verifier = model.Verifier, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
         var result = await userManager.CreateAsync(user);
 

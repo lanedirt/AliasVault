@@ -96,9 +96,8 @@ else
         }
 
         await UserManager.SetTwoFactorEnabledAsync(UserService.User(), true);
-        var userId = await UserManager.GetUserIdAsync(UserService.User());
-        Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
-
+        await AuthLoggingService.LogAuthEventSuccessAsync(UserService.User().UserName!, AuthEventType.TwoFactorAuthEnable);
+        Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", UserService.User().Id);
         GlobalNotificationService.AddSuccessMessage("Your authenticator app has been verified.");
 
         if (await UserManager.CountRecoveryCodesAsync(UserService.User()) == 0)

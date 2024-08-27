@@ -10,6 +10,7 @@ namespace AliasVault.Admin.Auth.Pages;
 using AliasServerDb;
 using AliasVault.Admin.Main.Components.Alerts;
 using AliasVault.Admin.Services;
+using AliasVault.AuthLogging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +51,12 @@ public class AuthBase : OwningComponentBase
     /// </summary>
     [Inject]
     protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the auth logging service.
+    /// </summary>
+    [Inject]
+    protected AuthLoggingService AuthLoggingService { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets object which holds server validation errors to show in the UI.

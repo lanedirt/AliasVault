@@ -9,6 +9,7 @@ namespace AliasVault.Api.Controllers;
 
 using System.Text.Encodings.Web;
 using AliasServerDb;
+using AliasVault.AuthLogging;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +21,11 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="urlEncoder">UrlEncoder instance.</param>
+/// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, UrlEncoder urlEncoder) : ControllerBase
+public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, UrlEncoder urlEncoder, AuthLoggingService authLoggingService) : ControllerBase
 {
     /// <summary>
     /// Get two-factor authentication enabled status for a user.
@@ -69,32 +71,6 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
     }
 
     /// <summary>
-    /// Disable two-factor authentication for a user.
-    /// </summary>
-    /// <returns>Task.</returns>
-    [HttpPost("disable")]
-    public async Task<IActionResult> Disable()
-    {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        // Disable 2FA and remove any existing authenticator key(s) and recovery codes.
-        await userManager.SetTwoFactorEnabledAsync(user, false);
-        context.UserTokens.RemoveRange(
-            await context.UserTokens.Where(
-                x => x.UserId == user.Id &&
-                     (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes")).ToListAsync());
-
-        await context.SaveChangesAsync();
-        return Ok();
-    }
-
-    /// <summary>
     /// Verify two-factor authentication setup.
     /// </summary>
     /// <param name="code">Code to verify if 2fa successfully works.</param>
@@ -117,9 +93,39 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
             // Generate new recovery codes.
             var recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
 
+            await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TwoFactorAuthEnable);
+
             return Ok(new { RecoveryCodes = recoveryCodes });
         }
 
         return BadRequest("Invalid code.");
+    }
+
+    /// <summary>
+    /// Disable two-factor authentication for a user.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [HttpPost("disable")]
+    public async Task<IActionResult> Disable()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        // Disable 2FA and remove any existing authenticator key(s) and recovery codes.
+        await userManager.SetTwoFactorEnabledAsync(user, false);
+        context.UserTokens.RemoveRange(
+            await context.UserTokens.Where(
+                x => x.UserId == user.Id &&
+                     (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes")).ToListAsync());
+
+        await context.SaveChangesAsync();
+
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TwoFactorAuthDisable);
+        return Ok();
     }
 }

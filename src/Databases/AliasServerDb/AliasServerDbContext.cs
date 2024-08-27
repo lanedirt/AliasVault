@@ -122,6 +122,11 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public DbSet<Log> Logs { get; set; }
 
     /// <summary>
+    /// Gets or sets the AuthLogs DbSet.
+    /// </summary>
+    public DbSet<AuthLog> AuthLogs { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>

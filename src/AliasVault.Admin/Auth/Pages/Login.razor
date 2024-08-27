@@ -60,25 +60,37 @@
     {
         ServerValidationErrors.Clear();
 
+        var user = await UserManager.FindByNameAsync(Input.UserName);
+        if (user == null)
+        {
+            await AuthLoggingService.LogAuthEventFailAsync(Input.UserName, AuthEventType.Login, AuthFailureReason.InvalidUsername);
+            ServerValidationErrors.AddError("Error: Invalid login attempt.");
+            return;
+        }
+
         var result = await SignInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
+            await AuthLoggingService.LogAuthEventSuccessAsync(Input.UserName, AuthEventType.Login);
             Logger.LogInformation("User logged in.");
             NavigationService.RedirectTo(ReturnUrl ?? "/");
         }
         else if (result.RequiresTwoFactor)
         {
+            await AuthLoggingService.LogAuthEventSuccessAsync(Input.UserName, AuthEventType.Login);
             NavigationService.RedirectTo(
                 "user/loginWith2fa",
                 new Dictionary<string, object?> { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
         else if (result.IsLockedOut)
         {
+            await AuthLoggingService.LogAuthEventFailAsync(Input.UserName, AuthEventType.Login, AuthFailureReason.AccountLocked);
             Logger.LogWarning("User account locked out.");
             NavigationService.RedirectTo("user/lockout");
         }
         else
         {
+            await AuthLoggingService.LogAuthEventFailAsync(Input.UserName, AuthEventType.Login, AuthFailureReason.InvalidPassword);
             ServerValidationErrors.AddError("Error: Invalid login attempt.");
         }
     }
