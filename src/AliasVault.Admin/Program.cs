@@ -90,6 +90,8 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = false;
+        options.Lockout.MaxFailedAccessAttempts = 10;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     })
     .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()

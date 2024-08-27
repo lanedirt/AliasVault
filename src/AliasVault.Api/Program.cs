@@ -65,6 +65,8 @@ builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
         options.Password.RequiredLength = 8;
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
+        options.Lockout.MaxFailedAccessAttempts = 10;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         options.Tokens.ProviderMap.Add("AliasVault", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<AliasVaultUser>)));
     })
     .AddEntityFrameworkStores<AliasServerDbContext>()
