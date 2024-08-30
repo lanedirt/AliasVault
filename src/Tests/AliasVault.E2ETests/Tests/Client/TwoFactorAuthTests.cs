@@ -26,7 +26,7 @@ public class TwoFactorAuthTests : ClientPlaywrightTest
 
         // Setup two-factor auth.
         await NavigateUsingBlazorRouter("settings/security");
-        await WaitForUrlAsync("settings/security", "Two-factor Authentication");
+        await WaitForUrlAsync("settings/security", "Two-factor authentication");
 
         // Press the enable button with text "Enable Two-Factor Authentication"
         var enableButton = Page.Locator("button:has-text('Enable Two-Factor Authentication')");
@@ -195,7 +195,7 @@ public class TwoFactorAuthTests : ClientPlaywrightTest
     {
         // Ensure that two factor auth is not enabled (in case the test is run after the previous test).
         await NavigateUsingBlazorRouter("settings/security");
-        await WaitForUrlAsync("settings/security", "Two-factor Authentication");
+        await WaitForUrlAsync("settings/security", "Two factor authentication is currently");
 
         // Check if two factor auth is enabled.
         var enableButton = Page.Locator("button:has-text('Enable Two-Factor Authentication')");
