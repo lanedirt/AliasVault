@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers;
+namespace AliasVault.Api.Controllers.Abstracts;
 
 using System.Security.Claims;
 using AliasServerDb;
@@ -20,8 +20,14 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [Authorize]
-public class AuthenticatedRequestController(UserManager<AliasVaultUser> userManager) : ControllerBase
+public abstract class AuthenticatedRequestController(UserManager<AliasVaultUser> userManager) : ControllerBase
 {
+    /// <summary>
+    /// Get the userManager instance.
+    /// </summary>
+    /// <returns>UserManager instance.</returns>
+    protected UserManager<AliasVaultUser> GetUserManager() => userManager;
+
     /// <summary>
     /// Get the current authenticated user.
     /// </summary>

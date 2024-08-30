@@ -5,10 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers;
+namespace AliasVault.Api.Controllers.Security;
 
 using System.Text.Encodings.Web;
 using AliasServerDb;
+using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.AuthLogging;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
@@ -19,13 +20,13 @@ using Microsoft.EntityFrameworkCore;
 /// Auth controller for handling authentication.
 /// </summary>
 /// <param name="dbContextFactory">AliasServerDbContext instance.</param>
-/// <param name="userManager">UserManager instance.</param>
 /// <param name="urlEncoder">UrlEncoder instance.</param>
 /// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
+/// <param name="userManager">UserManager instance.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, UrlEncoder urlEncoder, AuthLoggingService authLoggingService) : ControllerBase
+public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UrlEncoder urlEncoder, AuthLoggingService authLoggingService, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Get two-factor authentication enabled status for a user.
@@ -34,13 +35,13 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
     [HttpGet("status")]
     public async Task<IActionResult> Status()
     {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
+        var user = await GetCurrentUserAsync();
+        if (user is null)
         {
-            return NotFound();
+            return Unauthorized("Not authenticated.");
         }
 
-        var twoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+        var twoFactorEnabled = await GetUserManager().GetTwoFactorEnabledAsync(user);
         return Ok(new { TwoFactorEnabled = twoFactorEnabled });
     }
 
@@ -51,17 +52,17 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
     [HttpPost("enable")]
     public async Task<IActionResult> Enable()
     {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
+        var user = await GetCurrentUserAsync();
+        if (user is null)
         {
-            return NotFound();
+            return Unauthorized("Not authenticated.");
         }
 
-        var authenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
+        var authenticatorKey = await GetUserManager().GetAuthenticatorKeyAsync(user);
         if (string.IsNullOrEmpty(authenticatorKey))
         {
-            await userManager.ResetAuthenticatorKeyAsync(user);
-            authenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
+            await GetUserManager().ResetAuthenticatorKeyAsync(user);
+            authenticatorKey = await GetUserManager().GetAuthenticatorKeyAsync(user);
         }
 
         var encodedKey = urlEncoder.Encode(authenticatorKey!);
@@ -78,20 +79,20 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
     [HttpPost("verify")]
     public async Task<IActionResult> Verify([FromBody] string code)
     {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
+        var user = await GetCurrentUserAsync();
+        if (user is null)
         {
-            return NotFound();
+            return Unauthorized("Not authenticated.");
         }
 
-        var isValid = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, code);
+        var isValid = await GetUserManager().VerifyTwoFactorTokenAsync(user, GetUserManager().Options.Tokens.AuthenticatorTokenProvider, code);
 
         if (isValid)
         {
-            await userManager.SetTwoFactorEnabledAsync(user, true);
+            await GetUserManager().SetTwoFactorEnabledAsync(user, true);
 
             // Generate new recovery codes.
-            var recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            var recoveryCodes = await GetUserManager().GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
 
             await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TwoFactorAuthEnable);
 
@@ -108,16 +109,16 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
     [HttpPost("disable")]
     public async Task<IActionResult> Disable()
     {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
+        var user = await GetCurrentUserAsync();
+        if (user is null)
         {
-            return NotFound();
+            return Unauthorized("Not authenticated.");
         }
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         // Disable 2FA and remove any existing authenticator key(s) and recovery codes.
-        await userManager.SetTwoFactorEnabledAsync(user, false);
+        await GetUserManager().SetTwoFactorEnabledAsync(user, false);
         context.UserTokens.RemoveRange(
             await context.UserTokens.Where(
                 x => x.UserId == user.Id &&

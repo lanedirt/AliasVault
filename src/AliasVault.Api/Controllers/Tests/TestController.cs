@@ -11,9 +11,10 @@
  * attack surfaces we don't include this file in the production build.
  */
 
-namespace AliasVault.Api.Controllers;
+namespace AliasVault.Api.Controllers.Tests;
 
 using AliasServerDb;
+using AliasVault.Api.Controllers.Abstracts;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

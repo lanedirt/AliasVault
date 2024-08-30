@@ -98,21 +98,6 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     }
 
     /// <summary>
-    /// Generate random identity by calling the IdentityGenerator API.
-    /// </summary>
-    /// <returns>Identity object.</returns>
-    public async Task<Identity> GenerateRandomIdentityAsync()
-    {
-        var identity = await httpClient.GetFromJsonAsync<Identity>("api/v1/Identity/Generate");
-        if (identity is null)
-        {
-            throw new InvalidOperationException("Failed to generate random identity.");
-        }
-
-        return identity;
-    }
-
-    /// <summary>
     /// Insert new entry into database.
     /// </summary>
     /// <param name="loginObject">Login object to insert.</param>
