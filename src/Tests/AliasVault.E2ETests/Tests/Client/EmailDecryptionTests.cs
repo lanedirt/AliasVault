@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EmailDecryptionTest.cs" company="lanedirt">
+// <copyright file="EmailDecryptionTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -20,7 +20,7 @@ using MimeKit;
 [TestFixture]
 [Category("ClientTests")]
 [NonParallelizable]
-public class EmailDecryptionTest : ClientPlaywrightTest
+public class EmailDecryptionTests : ClientPlaywrightTest
 {
     /// <summary>
     /// The test host instance.

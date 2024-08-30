@@ -10,6 +10,7 @@ namespace AliasVault.Admin.Main.Pages;
 using AliasServerDb;
 using AliasVault.Admin.Main.Models;
 using AliasVault.Admin.Services;
+using AliasVault.AuthLogging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,12 @@ public class MainBase : OwningComponentBase
     /// </summary>
     [Inject]
     protected GlobalLoadingService GlobalLoadingSpinner { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the auth logging service.
+    /// </summary>
+    [Inject]
+    protected AuthLoggingService AuthLoggingService { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the injected JSRuntime instance.

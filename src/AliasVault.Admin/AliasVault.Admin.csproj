@@ -43,6 +43,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
+      <ProjectReference Include="..\Utilities\AliasVault.AuthLogging\AliasVault.AuthLogging.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.Logging\AliasVault.Logging.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />

@@ -5,9 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Api.Controllers;
+namespace AliasVault.Api.Controllers.Email;
 
 using AliasServerDb;
+using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.Api.Helpers;
 using AliasVault.Shared.Models.Spamok;
 using AliasVault.Shared.Models.WebApi;

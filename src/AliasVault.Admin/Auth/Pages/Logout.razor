@@ -1,4 +1,6 @@
 @page "/user/logout"
+@using AliasVault.Shared.Models.Enums
+@inject UserService UserService
 @inject GlobalNotificationService GlobalNotificationService
 
 @code {
@@ -10,10 +12,12 @@
         // the server session is already started.
         try
         {
+            var username = UserService.User().UserName;
             try
             {
                 await SignInManager.SignOutAsync();
                 GlobalNotificationService.ClearMessages();
+                await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
 
                 // Redirect to the home page with hard refresh.
                 NavigationService.RedirectTo("/", true);
@@ -23,6 +27,7 @@
                 // Hard refresh current page if sign out fails. When an interactive server session is already started
                 // the sign out will fail because it tries to mutate cookies which is only possible when the server
                 // session is not started yet.
+                await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
                 NavigationService.RedirectTo(NavigationService.Uri, true);
             }
         }

@@ -9,10 +9,12 @@ using System.Data.Common;
 using System.Globalization;
 using System.Reflection;
 using AliasServerDb;
+using AliasServerDb.Configuration;
 using AliasVault.Admin;
 using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
+using AliasVault.AuthLogging;
 using AliasVault.Logging;
 using Cryptography;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -46,6 +48,8 @@ builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<NavigationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 
 builder.Services.AddAuthentication(options =>
@@ -60,22 +64,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/user/login";
 });
 
-// We use dbContextFactory to create a new instance of the DbContext for every place that needs it
-// as otherwise concurrency issues may occur if we use a single instance of the DbContext across the application.
-builder.Services.AddSingleton<DbConnection>(container =>
-{
-    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
-    connection.Open();
-
-    return connection;
-});
-
-builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
-{
-    var connection = container.GetRequiredService<DbConnection>();
-    options.UseSqlite(connection).UseLazyLoadingProxies();
-});
-
+builder.Services.AddAliasVaultSqliteConfiguration();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddIdentityCore<AdminUser>(options =>
     {
@@ -87,6 +76,8 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
         options.Password.RequiredUniqueChars = 0;
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = false;
+        options.Lockout.MaxFailedAccessAttempts = 10;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
     })
     .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()

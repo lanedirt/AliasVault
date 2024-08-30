@@ -9,6 +9,7 @@ using System.Data.Common;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
+using AliasServerDb.Configuration;
 using AliasVault.Logging;
 using AliasVault.SmtpService;
 using AliasVault.SmtpService.Handlers;
@@ -35,20 +36,7 @@ var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")
 config.SmtpTlsEnabled = tlsEnabled;
 builder.Services.AddSingleton(config);
 
-builder.Services.AddSingleton<DbConnection>(container =>
-{
-    var connection = new SqliteConnection(builder.Configuration.GetConnectionString("AliasServerDbContext"));
-    connection.Open();
-
-    return connection;
-});
-
-builder.Services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
-{
-    var connection = container.GetRequiredService<DbConnection>();
-    options.UseSqlite(connection);
-});
-
+builder.Services.AddAliasVaultSqliteConfiguration();
 builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();
 builder.Services.AddSingleton(
     provider =>

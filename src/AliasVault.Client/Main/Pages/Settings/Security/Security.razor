@@ -1,48 +1,28 @@
 ﻿@page "/settings/security"
+@using AliasVault.Client.Main.Pages.Settings.Security.Components
 @inherits MainBase
-@inject HttpClient Http
 
 <LayoutPageTitle>Security settings</LayoutPageTitle>
 
-@if (IsLoading)
-{
-    <LoadingIndicator />
-}
-else
-{
-    <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-        <div class="mb-4 col-span-full xl:mb-2">
-            <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+        <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Security settings</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Configure security settings.</p>
+            <RefreshButton OnRefresh="LoadData" ButtonText="Refresh" />
         </div>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Configure security settings.</p>
     </div>
+</div>
 
-    <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Two-factor authentication</h3>
-
-        @if (TwoFactorEnabled)
-        {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently enabled.</div>
-            <button @onclick="DisableTwoFactor"
-                    class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Disable Two-Factor Authentication
-            </button>
-        }
-        else
-        {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently disabled. In order to improve your account security we advise you to enable it.</div>
-            <button @onclick="EnableTwoFactor"
-                    class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Enable Two-Factor Authentication
-            </button>
-        }
-    </div>
-}
+<TwoFactorAuthenticationSection @ref="TwoFactorSection" OnStatusChanged="LoadData" />
+<ActiveSessionsSection @ref="SessionsSection" OnSessionsChanged="LoadData" />
+<RecentAuthLogsSection @ref="RecentAuthLogsSection" OnSessionsChanged="LoadData" />
 
 @code {
-    private bool TwoFactorEnabled { get; set; }
-    private bool IsLoading { get; set; } = true;
+    private TwoFactorAuthenticationSection? TwoFactorSection;
+    private ActiveSessionsSection? SessionsSection;
+    private RecentAuthLogsSection? RecentAuthLogsSection;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -57,32 +37,22 @@ else
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        // Check on server if 2FA is enabled
         if (firstRender)
         {
-            var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("api/v1/TwoFactorAuth/status");
-            if (response is not null)
-            {
-                TwoFactorEnabled = response.TwoFactorEnabled;
-            }
-
-            IsLoading = false;
-            StateHasChanged();
+            await LoadData();
         }
     }
 
-    private void EnableTwoFactor()
+    /// <summary>
+    /// Loads data for both the Two-Factor Authentication and Active Sessions sections concurrently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task LoadData()
     {
-        NavigationManager.NavigateTo("settings/security/enable-2fa");
-    }
-
-    private void DisableTwoFactor()
-    {
-        NavigationManager.NavigateTo("settings/security/disable-2fa");
-    }
-
-    private sealed class TwoFactorEnabledResult
-    {
-        public required bool TwoFactorEnabled { get; init; } = false;
+        // Currently with SQLite, we have to load the data sequentially as otherwise we get database locks.
+        // When switched over to PostgreSQL, we can load the data concurrently.
+        await TwoFactorSection!.LoadData();
+        await SessionsSection!.LoadData();
+        await RecentAuthLogsSection!.LoadData();
     }
 }

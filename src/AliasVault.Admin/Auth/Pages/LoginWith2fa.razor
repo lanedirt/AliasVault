@@ -1,4 +1,5 @@
 ﻿@page "/user/loginWith2fa"
+@using AliasVault.Shared.Models.Enums
 
 <LayoutPageTitle>Two-factor authentication</LayoutPageTitle>
 
@@ -39,11 +40,14 @@
 @code {
     private AdminUser user = default!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
 
-    [SupplyParameterFromQuery] private bool RememberMe { get; set; }
+    [SupplyParameterFromQuery]
+    private bool RememberMe { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -68,16 +72,19 @@
 
         if (result.Succeeded)
         {
+            await AuthLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TwoFactorAuthentication);
             Logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", userId);
             NavigationService.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut)
         {
+            await AuthLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
             Logger.LogWarning("User with ID '{UserId}' account locked out.", userId);
             NavigationService.RedirectTo("user/lockout");
         }
         else
         {
+            await AuthLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidTwoFactorCode);
             Logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", userId);
             ServerValidationErrors.AddError("Error: Invalid authenticator code.");
         }

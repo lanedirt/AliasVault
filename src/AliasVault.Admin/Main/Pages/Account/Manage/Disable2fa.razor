@@ -1,5 +1,6 @@
 ﻿@page "/account/manage/disable-2fa"
 
+@using AliasVault.Shared.Models.Enums
 @using Microsoft.AspNetCore.Identity
 
 @inject UserManager<AdminUser> UserManager
@@ -41,11 +42,12 @@
         var disable2FaResult = await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
         if (!disable2FaResult.Succeeded)
         {
+            await AuthLoggingService.LogAuthEventFailAsync(UserService.User().UserName!, AuthEventType.TwoFactorAuthDisable, AuthFailureReason.Unknown);
             throw new InvalidOperationException("Unexpected error occurred disabling 2FA.");
         }
 
-        var userId = await UserManager.GetUserIdAsync(UserService.User());
-        Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userId);
+        await AuthLoggingService.LogAuthEventSuccessAsync(UserService.User().UserName!, AuthEventType.TwoFactorAuthDisable);
+        Logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", UserService.User().Id);
 
         // Reload current page.
         NavigationService.RedirectTo("account/manage/2fa");

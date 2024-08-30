@@ -11,9 +11,10 @@
  * attack surfaces we don't include this file in the production build.
  */
 
-namespace AliasVault.Api.Controllers;
+namespace AliasVault.Api.Controllers.Tests;
 
 using AliasServerDb;
+using AliasVault.Api.Controllers.Abstracts;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -45,6 +46,6 @@ public class TestController(UserManager<AliasVaultUser> userManager) : Authentic
     public IActionResult TestCallError()
     {
         // Throw an exception here to test error handling.
-        throw new ApplicationException("Test error");
+        throw new ArgumentException("Test error");
     }
 }

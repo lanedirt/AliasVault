@@ -9,6 +9,7 @@ namespace AliasVault.Api.Controllers;
 
 using System.ComponentModel.DataAnnotations;
 using AliasServerDb;
+using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.Api.Helpers;
 using AliasVault.Api.Vault;
 using AliasVault.Api.Vault.RetentionRules;

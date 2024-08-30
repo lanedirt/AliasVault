@@ -1,4 +1,5 @@
 ﻿@page "/users/{Id}"
+@inherits MainBase
 
 <LayoutPageTitle>User</LayoutPageTitle>
 
@@ -15,9 +16,10 @@ else
             <div class="flex items-center justify-between">
                 <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">View user</h1>
                 <div class="flex">
-                <a href="/users/@Id/delete" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800">
-                    Delete user
-                </a>
+                    <a href="/users/@Id/delete" class="mr-2 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800">
+                        Delete user
+                    </a>
+                    <RefreshButton OnRefresh="LoadEntryAsync" ButtonText="Refresh" />
                 </div>
             </div>
         </div>
@@ -55,6 +57,38 @@ else
                                 }
                             }
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center">
+                    <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">UserRefreshTokens (Logged in devices)</h3>
+
+                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">ID</th>
+                                <th scope="col" class="px-4 py-3">Device</th>
+                                <th scope="col" class="px-4 py-3">Created</th>
+                                <th scope="col" class="px-4 py-3">Expires</th>
+                                <th scope="col" class="px-4 py-3"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var entry in RefreshTokenList)
+                            {
+                                <tr class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
+                                    <td class="px-4 py-3">@entry.DeviceIdentifier</td>
+                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="px-4 py-3">@entry.ExpireDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="px-4 py-3"><button @onclick="() => RevokeRefreshToken(entry)" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Revoke</button></td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -130,6 +164,7 @@ else
     private bool IsLoading { get; set; } = true;
     private AliasVaultUser? User { get; set; } = new();
     private int TwoFactorKeysCount { get; set; }
+    private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = new();
     private List<Vault> VaultList { get; set; } = new();
     private List<UserEmailClaim> EmailClaimList { get; set; } = new();
 
@@ -171,6 +206,17 @@ else
             return;
         }
 
+        // Load all refresh tokens for this user to show which devices are logged in.
+        RefreshTokenList = await DbContext.AliasVaultUserRefreshTokens.Where(x => x.UserId == User.Id).Select(x => new AliasVaultUserRefreshToken()
+        {
+            Id = x.Id,
+            DeviceIdentifier = x.DeviceIdentifier,
+            ExpireDate = x.ExpireDate,
+            CreatedAt = x.CreatedAt,
+        })
+        .OrderBy(x => x.CreatedAt)
+        .ToListAsync();
+
         // Load all vaults for this user (do not load the actual file content for performance reasons).
         VaultList = await DbContext.Vaults.Where(x => x.UserId == User.Id).Select(x => new Vault
         {
@@ -189,6 +235,21 @@ else
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// This method will revoke a refresh token for the user which will log out the device.
+    /// </summary>
+    private async Task RevokeRefreshToken(AliasVaultUserRefreshToken entry)
+    {
+        var token = await DbContext.AliasVaultUserRefreshTokens.FindAsync(entry.Id);
+
+        if (token != null)
+        {
+            DbContext.AliasVaultUserRefreshTokens.Remove(token);
+            await DbContext.SaveChangesAsync();
+            await LoadEntryAsync();
+        }
     }
 
     /// <summary>

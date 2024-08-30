@@ -217,6 +217,81 @@ namespace AliasServerDb.Migrations
                     b.ToTable("AliasVaultUserRefreshTokens");
                 });
 
+            modelBuilder.Entity("AliasServerDb.AuthLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AdditionalInfo")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Browser")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeviceType")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("FailureReason")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSuspiciousActivity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OperatingSystem")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RequestPath")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "EventType" }, "IX_EventType");
+
+                    b.HasIndex(new[] { "IpAddress" }, "IX_IpAddress");
+
+                    b.HasIndex(new[] { "Timestamp" }, "IX_Timestamp");
+
+                    b.HasIndex(new[] { "Username", "IsSuccess", "Timestamp" }, "IX_Username_IsSuccess_Timestamp")
+                        .IsDescending(false, false, true);
+
+                    b.HasIndex(new[] { "Username", "Timestamp" }, "IX_Username_Timestamp")
+                        .IsDescending(false, true);
+
+                    b.ToTable("AuthLogs");
+                });
+
             modelBuilder.Entity("AliasServerDb.Email", b =>
                 {
                     b.Property<int>("Id")

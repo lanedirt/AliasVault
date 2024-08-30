@@ -85,50 +85,6 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     }
 
     /// <inheritdoc />
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseUrls(HostUrl);
-
-        // Set required environment variables to debug values.
-        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
-        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
-
-        builder.ConfigureServices((context, services) =>
-        {
-            // Remove the existing DbContextFactory registration
-            var timeProviderDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(ITimeProvider));
-
-            services.Remove(timeProviderDescriptor ?? throw new InvalidOperationException("No ITimeProvider registered."));
-
-            // Remove the existing DbContextFactory registration
-            var dbContextFactoryDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>));
-
-            services.Remove(dbContextFactoryDescriptor ?? throw new InvalidOperationException("No IDbContextFactory<AliasServerDbContext> registered."));
-
-            // Remove the existing DbConnection registration.
-            var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbConnection));
-
-            services.Remove(dbConnectionDescriptor ?? throw new InvalidOperationException("No DbContextOptions<AliasServerDbContext> registered."));
-
-            // Add the DbConnection as a singleton
-            services.AddSingleton(_dbConnection);
-
-            // Add the DbContextFactory
-            services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection).UseLazyLoadingProxies();
-            });
-
-            // Add TestTimeProvider
-            services.AddSingleton<ITimeProvider>(TimeProvider);
-        });
-    }
-
-    /// <inheritdoc />
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var dummyHost = builder.Build();
@@ -146,5 +102,73 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
         Thread.Sleep(100);
 
         return dummyHost;
+    }
+
+    /// <inheritdoc />
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseUrls(HostUrl);
+
+        SetEnvironmentVariables();
+
+        builder.ConfigureServices((context, services) =>
+        {
+            // Remove existing registrations
+            RemoveExistingRegistrations(services);
+
+            // Add new registrations
+            AddNewRegistrations(services);
+        });
+    }
+
+    /// <summary>
+    /// Sets the required environment variables for testing.
+    /// </summary>
+    private static void SetEnvironmentVariables()
+    {
+        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
+    }
+
+    /// <summary>
+    /// Removes existing service registrations.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
+    private static void RemoveExistingRegistrations(IServiceCollection services)
+    {
+        var descriptorsToRemove = new[]
+        {
+            services.SingleOrDefault(d => d.ServiceType == typeof(ITimeProvider)),
+            services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>)),
+            services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AliasServerDbContext>)),
+        };
+
+        foreach (var descriptor in descriptorsToRemove)
+        {
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds new service registrations.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
+    private void AddNewRegistrations(IServiceCollection services)
+    {
+        // Add the DbConnection as a singleton
+        services.AddSingleton(_dbConnection);
+
+        // Add the DbContextFactory
+        services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
+        {
+            var connection = container.GetRequiredService<DbConnection>();
+            options.UseSqlite(connection).UseLazyLoadingProxies();
+        });
+
+        // Add TestTimeProvider
+        services.AddSingleton<ITimeProvider>(TimeProvider);
     }
 }

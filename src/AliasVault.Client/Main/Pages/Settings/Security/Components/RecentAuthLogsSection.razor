@@ -1,0 +1,86 @@
+﻿@using AliasVault.Shared.Models.Enums
+@using AliasVault.Shared.Models.WebApi.Security
+@inject HttpClient Http
+@inject GlobalNotificationService GlobalNotificationService
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Recent Auth Logs</h3>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Below you can find an overview of recent login attempts to your account.</p>
+
+    @if (IsLoading)
+    {
+        <LoadingIndicator />
+    }
+    else
+    {
+    @if (!AuthLogs.Any())
+    {
+        <p class="text-sm text-gray-600 dark:text-gray-400">No authentication logs found.</p>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Timestamp</th>
+                        <th scope="col" class="px-6 py-3">Event Type</th>
+                        <th scope="col" class="px-6 py-3">Username</th>
+                        <th scope="col" class="px-6 py-3">IP Address</th>
+                        <th scope="col" class="px-6 py-3">Device</th>
+                        <th scope="col" class="px-6 py-3">Success</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var authLog in AuthLogs)
+                    {
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4">@authLog.Timestamp.ToLocalTime().ToString("g")</td>
+                            <td class="px-6 py-4">@authLog.EventType</td>
+                            <td class="px-6 py-4">@authLog.Username</td>
+                            <td class="px-6 py-4">@authLog.IpAddress</td>
+                            <td class="px-6 py-4">@authLog.UserAgent</td>
+                            <td class="px-4 py-4"><StatusPill Enabled="authLog.IsSuccess" TextTrue="Success" TextFalse="Failed" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    }
+</div>
+
+@code {
+
+    /// <summary>
+    /// Gets or sets the list of active sessions (refresh tokens) for the current user.
+    /// </summary>
+    [Parameter]
+    public List<AuthLogModel> AuthLogs { get; set; } = [];
+
+    /// <summary>
+    /// Event callback that is invoked when the list of active sessions changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnSessionsChanged { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+
+    /// <summary>
+    /// Loads the active sessions data from the server.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task LoadData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        var authlogResponse = await Http.GetFromJsonAsync<List<AuthLogModel>>("api/v1/Security/authlogs");
+        if (authlogResponse is not null)
+        {
+            AuthLogs = authlogResponse;
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}

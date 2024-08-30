@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.WorkerStatus", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TotpGenerator", "src\Utilities\TotpGenerator\TotpGenerator.csproj", "{E8D9C551-67D2-4651-8EDF-4262DF7375CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.AuthLogging", "src\Utilities\AliasVault.AuthLogging\AliasVault.AuthLogging.csproj", "{DA175274-0FF7-4436-9266-742F96C2D1ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +141,10 @@ Global
 		{E8D9C551-67D2-4651-8EDF-4262DF7375CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8D9C551-67D2-4651-8EDF-4262DF7375CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8D9C551-67D2-4651-8EDF-4262DF7375CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA175274-0FF7-4436-9266-742F96C2D1ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA175274-0FF7-4436-9266-742F96C2D1ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA175274-0FF7-4436-9266-742F96C2D1ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA175274-0FF7-4436-9266-742F96C2D1ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -160,6 +166,7 @@ Global
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{E8D9C551-67D2-4651-8EDF-4262DF7375CE} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
+		{DA175274-0FF7-4436-9266-742F96C2D1ED} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}
