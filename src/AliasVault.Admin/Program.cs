@@ -77,7 +77,7 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = false;
         options.Lockout.MaxFailedAccessAttempts = 10;
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
     })
     .AddRoles<AdminRole>()
     .AddEntityFrameworkStores<AliasServerDbContext>()

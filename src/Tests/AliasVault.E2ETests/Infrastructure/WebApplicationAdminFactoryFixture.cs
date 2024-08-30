@@ -80,58 +80,6 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     }
 
     /// <inheritdoc />
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseUrls(HostUrl);
-
-        // Set static environment variables for the test.
-        // These are used in the Admin project to set the admin password hash and last password change date.
-        // An admin user will automatically be created with these values if the database is empty.
-        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
-        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
-        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
-
-        builder.ConfigureServices((context, services) =>
-        {
-            // Remove the existing DbContextFactory registration
-            var dbContextFactoryDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>));
-
-            services.Remove(dbContextFactoryDescriptor ?? throw new InvalidOperationException("No IDbContextFactory<AliasServerDbContext> registered."));
-
-            // Remove the existing DbConnection registration.
-            var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbConnection));
-
-            services.Remove(dbConnectionDescriptor ?? throw new InvalidOperationException("No DbContextOptions<AliasServerDbContext> registered."));
-
-            // Remove the existing VersionedContentService registration.
-            var versionedContentServiceDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(VersionedContentService));
-
-            // Add the DbConnection as a singleton
-            services.AddSingleton(_dbConnection);
-
-            // Add the DbContextFactory
-            services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection).UseLazyLoadingProxies();
-            });
-
-            // Add the VersionedContentService
-            services.AddSingleton(new VersionedContentService("../../../../../AliasVault.Admin/wwwroot"));
-
-            // Enable detailed errors for server-side Blazor.
-            services.AddServerSideBlazor()
-                .AddCircuitOptions(options =>
-                {
-                    options.DetailedErrors = true;
-                });
-        });
-    }
-
-    /// <inheritdoc />
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var dummyHost = builder.Build();
@@ -149,5 +97,75 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
         Thread.Sleep(100);
 
         return dummyHost;
+    }
+
+    /// <inheritdoc />
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseUrls(HostUrl);
+
+        SetEnvironmentVariables();
+
+        builder.ConfigureServices(services =>
+        {
+            RemoveExistingRegistrations(services);
+            AddNewRegistrations(services);
+        });
+    }
+
+    /// <summary>
+    /// Sets the required environment variables for testing.
+    /// </summary>
+    private static void SetEnvironmentVariables()
+    {
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
+    }
+
+    /// <summary>
+    /// Removes existing service registrations.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
+    private static void RemoveExistingRegistrations(IServiceCollection services)
+    {
+        var descriptorsToRemove = new[]
+        {
+            services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>)),
+            services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AliasServerDbContext>)),
+            services.SingleOrDefault(d => d.ServiceType == typeof(VersionedContentService)),
+        };
+
+        foreach (var descriptor in descriptorsToRemove)
+        {
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds new service registrations.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
+    private void AddNewRegistrations(IServiceCollection services)
+    {
+        // Add the DbConnection as a singleton
+        services.AddSingleton(_dbConnection);
+
+        // Add the DbContextFactory
+        services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
+        {
+            var connection = container.GetRequiredService<DbConnection>();
+            options.UseSqlite(connection).UseLazyLoadingProxies();
+        });
+
+        // Add the VersionedContentService
+        services.AddSingleton(new VersionedContentService("../../../../../AliasVault.Admin/wwwroot"));
+
+        // Configure ServerSideBlazor with detailed errors
+        services.AddServerSideBlazor()
+            .AddCircuitOptions(options => options.DetailedErrors = true);
     }
 }
