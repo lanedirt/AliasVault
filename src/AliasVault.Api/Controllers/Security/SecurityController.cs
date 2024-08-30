@@ -9,7 +9,7 @@ namespace AliasVault.Api.Controllers.Security;
 
 using AliasServerDb;
 using AliasVault.Api.Controllers.Abstracts;
-using AliasVault.AuthLogging;
+using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi.Security;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
@@ -82,5 +82,40 @@ public class SecurityController(IDbContextFactory<AliasServerDbContext> dbContex
         await context.SaveChangesAsync();
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns the last 50 authentication logs for the current user.
+    /// </summary>
+    /// <returns>Task with a list of the last 50 authentication logs.</returns>
+    [HttpGet("authlogs")]
+    public async Task<IActionResult> GetUserAuthLogs()
+    {
+        var user = await GetCurrentUserAsync();
+        if (user is null)
+        {
+            return Unauthorized("Not authenticated.");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var authLogs = await context.AuthLogs
+            .Where(x => x.Username == user.UserName)
+            .Where(x => x.EventType != AuthEventType.TokenRefresh)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(50)
+            .Select(x => new AuthLogModel
+            {
+                Id = x.Id,
+                Timestamp = x.Timestamp,
+                EventType = x.EventType,
+                Username = x.Username,
+                IpAddress = x.IpAddress ?? string.Empty,
+                UserAgent = x.UserAgent ?? string.Empty,
+                IsSuccess = x.IsSuccess,
+            })
+            .ToListAsync();
+
+        return Ok(authLogs);
     }
 }

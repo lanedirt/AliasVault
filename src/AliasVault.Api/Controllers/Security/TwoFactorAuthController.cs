@@ -11,6 +11,7 @@ using System.Text.Encodings.Web;
 using AliasServerDb;
 using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.AuthLogging;
+using AliasVault.Shared.Models.Enums;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

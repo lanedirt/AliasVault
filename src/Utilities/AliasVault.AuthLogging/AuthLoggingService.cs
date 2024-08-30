@@ -8,6 +8,7 @@
 namespace AliasVault.AuthLogging;
 
 using AliasServerDb;
+using AliasVault.Shared.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

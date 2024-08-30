@@ -17,10 +17,12 @@
 
 <TwoFactorAuthenticationSection @ref="TwoFactorSection" OnStatusChanged="LoadData" />
 <ActiveSessionsSection @ref="SessionsSection" OnSessionsChanged="LoadData" />
+<RecentAuthLogsSection @ref="RecentAuthLogsSection" OnSessionsChanged="LoadData" />
 
 @code {
     private TwoFactorAuthenticationSection? TwoFactorSection;
     private ActiveSessionsSection? SessionsSection;
+    private RecentAuthLogsSection? RecentAuthLogsSection;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -51,5 +53,6 @@
         // When switched over to PostgreSQL, we can load the data concurrently.
         await TwoFactorSection!.LoadData();
         await SessionsSection!.LoadData();
+        await RecentAuthLogsSection!.LoadData();
     }
 }

@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AliasServerDb;
 using AliasVault.AuthLogging;
+using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Providers.Time;
