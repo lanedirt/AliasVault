@@ -48,7 +48,7 @@ public class SecurityController(IDbContextFactory<AliasServerDbContext> dbContex
                 ExpireDate = x.ExpireDate,
                 CreatedAt = x.CreatedAt,
             })
-            .OrderBy(x => x.CreatedAt)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
         return Ok(refreshTokenList);
