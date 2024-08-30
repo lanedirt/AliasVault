@@ -47,9 +47,9 @@
     /// <returns>A task representing the asynchronous operation.</returns>
     private async Task LoadData()
     {
-        await Task.WhenAll(
-            TwoFactorSection!.LoadData(),
-            SessionsSection!.LoadData()
-        );
+        // Currently with SQLite, we have to load the data sequentially as otherwise we get database locks.
+        // When switched over to PostgreSQL, we can load the data concurrently.
+        await TwoFactorSection!.LoadData();
+        await SessionsSection!.LoadData();
     }
 }
