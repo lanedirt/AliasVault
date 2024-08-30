@@ -51,7 +51,7 @@ public static class DatabaseConfiguration
         return services;
     }
 
-    private static DbConnection CreateAndConfigureSqliteConnection(string connectionString)
+    private static SqliteConnection CreateAndConfigureSqliteConnection(string connectionString)
     {
         var connection = new SqliteConnection(connectionString);
         connection.Open();

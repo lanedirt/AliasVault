@@ -108,6 +108,8 @@ public class AuthTests : ClientPlaywrightTest
 
         // Wait for account lockout message.
         await WaitForUrlAsync("user/login**", "locked out");
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("locked out"), "No account lockout message.");
     }
 
     /// <summary>

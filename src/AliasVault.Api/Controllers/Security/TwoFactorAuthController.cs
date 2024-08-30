@@ -39,7 +39,7 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
         var user = await GetCurrentUserAsync();
         if (user is null)
         {
-            return Unauthorized("Not authenticated.");
+            return Unauthorized();
         }
 
         var twoFactorEnabled = await GetUserManager().GetTwoFactorEnabledAsync(user);
@@ -56,7 +56,7 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
         var user = await GetCurrentUserAsync();
         if (user is null)
         {
-            return Unauthorized("Not authenticated.");
+            return Unauthorized();
         }
 
         var authenticatorKey = await GetUserManager().GetAuthenticatorKeyAsync(user);
@@ -83,7 +83,7 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
         var user = await GetCurrentUserAsync();
         if (user is null)
         {
-            return Unauthorized("Not authenticated.");
+            return Unauthorized();
         }
 
         var isValid = await GetUserManager().VerifyTwoFactorTokenAsync(user, GetUserManager().Options.Tokens.AuthenticatorTokenProvider, code);
@@ -113,7 +113,7 @@ public class TwoFactorAuthController(IDbContextFactory<AliasServerDbContext> dbC
         var user = await GetCurrentUserAsync();
         if (user is null)
         {
-            return Unauthorized("Not authenticated.");
+            return Unauthorized();
         }
 
         await using var context = await dbContextFactory.CreateDbContextAsync();

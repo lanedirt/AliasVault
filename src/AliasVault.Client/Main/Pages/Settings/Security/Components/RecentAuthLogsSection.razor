@@ -83,30 +83,4 @@
         IsLoading = false;
         StateHasChanged();
     }
-
-    /// <summary>
-    /// Revokes a specific session (refresh token) for the current user.
-    /// </summary>
-    /// <param name="id">The unique identifier of the session to revoke.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RevokeSession(Guid id)
-    {
-        try
-        {
-            var response = await Http.DeleteAsync($"api/v1/Security/sessions/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                GlobalNotificationService.AddSuccessMessage("Session revoked successfully.", true);
-                await OnSessionsChanged.InvokeAsync();
-            }
-            else
-            {
-                GlobalNotificationService.AddErrorMessage("Failed to revoke session.", true);
-            }
-        }
-        catch (Exception ex)
-        {
-            GlobalNotificationService.AddErrorMessage($"Failed to revoke session: {ex.Message}.", true);
-        }
-    }
 }

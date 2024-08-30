@@ -303,7 +303,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     public async Task<IActionResult> Register([FromBody] SrpSignup model)
     {
         // Validate username, disallow "admin" as a username.
-        if (model.Username.ToLower() == "admin")
+        if (string.Equals(model.Username, "admin", StringComparison.OrdinalIgnoreCase))
         {
             return BadRequest(ServerValidationErrorResponse.Create(["Username 'admin' is not allowed."], 400));
         }
