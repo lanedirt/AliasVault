@@ -8,6 +8,7 @@
 namespace AliasServerDb;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,6 +86,7 @@ public class AuthLog
     /// Gets or sets the type of authentication event (e.g., Login, Logout, FailedLogin).
     /// </summary>
     [Required]
+    [Column(TypeName = "nvarchar(50)")]
     public AuthEventType EventType { get; set; }
 
     /// <summary>

@@ -240,7 +240,7 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EventType")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("FailureReason")
                         .HasColumnType("INTEGER");

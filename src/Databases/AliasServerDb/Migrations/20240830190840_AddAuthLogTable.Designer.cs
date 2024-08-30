@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    [Migration("20240827205612_AddAuthLogTable")]
+    [Migration("20240830190840_AddAuthLogTable")]
     partial class AddAuthLogTable
     {
         /// <inheritdoc />
@@ -243,7 +243,7 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EventType")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("FailureReason")
                         .HasColumnType("INTEGER");

@@ -19,7 +19,7 @@ namespace AliasServerDb.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Username = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    EventType = table.Column<int>(type: "INTEGER", nullable: false),
+                    EventType = table.Column<int>(type: "nvarchar(50)", nullable: false),
                     IsSuccess = table.Column<bool>(type: "INTEGER", nullable: false),
                     FailureReason = table.Column<int>(type: "INTEGER", nullable: true),
                     IpAddress = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),

@@ -57,6 +57,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] InvalidRecoveryCode = ["Invalid recovery code."];
 
     /// <summary>
+    /// Error message for invalid 2-factor authentication recovery code.
+    /// </summary>
+    private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes.."];
+
+    /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>
@@ -69,6 +74,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidUsername);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
+        // Check if the account is locked out
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
+            return BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400));
         }
 
         // Server creates ephemeral and sends to client
@@ -88,25 +100,28 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("validate")]
     public async Task<IActionResult> Validate([FromBody] ValidateLoginRequest model)
     {
-        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
-        if (result is null)
+        var (user, serverSession, error) = await ValidateUserAndPassword(model);
+        if (error is not null)
         {
-            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            // Error occured during validation, return the error.
+            return error;
         }
 
         await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.Login);
-        var (user, serverSession) = result.Value;
 
         // If 2FA is required, return that status and no JWT token yet.
-        if (user.TwoFactorEnabled)
+        if (user!.TwoFactorEnabled)
         {
             return Ok(new ValidateLoginResponse(true, string.Empty, null));
         }
 
-        // If 2FA is not required, return the JWT token immediately.
+        // If 2FA is not required, then it means the user is successfully authenticated at this point.
+
+        // Reset failed login attempts.
+        await userManager.ResetAccessFailedCountAsync(user!);
+
         var tokenModel = await GenerateNewTokensForUser(user);
-        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+        return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
     }
 
     /// <summary>
@@ -117,28 +132,33 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("validate-2fa")]
     public async Task<IActionResult> Validate2Fa([FromBody] ValidateLoginRequest2Fa model)
     {
-        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
-        if (result is null)
+        var (user, serverSession, error) = await ValidateUserAndPassword(model);
+        if (error is not null)
         {
-            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            // Error occured during validation, return the error.
+            return error;
         }
 
-        var (user, serverSession) = result.Value;
-
         // Verify 2-factor code.
-        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
+        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user!, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
         if (!verifyResult)
         {
+            // Increment failed login attempts in order to lock out the account when the limit is reached.
+            await userManager.AccessFailedAsync(user!);
+
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidTwoFactorCode);
             return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
         }
 
+        // Validation of 2-FA token is successful, user is authenticated.
         await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
+        // Reset failed login attempts.
+        await userManager.ResetAccessFailedCountAsync(user!);
+
         // Generate and return the JWT token.
-        var tokenModel = await GenerateNewTokensForUser(user);
-        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+        var tokenModel = await GenerateNewTokensForUser(user!);
+        return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
     }
 
     /// <summary>
@@ -149,31 +169,37 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("validate-recovery-code")]
     public async Task<IActionResult> ValidateRecoveryCode([FromBody] ValidateLoginRequestRecoveryCode model)
     {
-        var result = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
-        if (result is null)
+        var (user, serverSession, error) = await ValidateUserAndPassword(model);
+        if (error is not null)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            // Error occured during validation, return the error.
+            return error;
         }
-
-        var (user, serverSession) = result.Value;
 
         // Sanitize recovery code.
         var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty).ToUpper();
 
         // Attempt to redeem the recovery code
-        var redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user, recoveryCode);
+        var redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user!, recoveryCode);
 
         if (!redeemResult.Succeeded)
         {
+            // Increment failed login attempts in order to lock out the account when the limit is reached.
+            await userManager.AccessFailedAsync(user!);
+
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidRecoveryCode);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
         }
 
+        // Recovery code is valid, user is authenticated.
         await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
+        // Reset failed login attempts.
+        await userManager.ResetAccessFailedCountAsync(user!);
+
         // Generate and return the JWT token.
-        var tokenModel = await GenerateNewTokensForUser(user);
-        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
+        var tokenModel = await GenerateNewTokensForUser(user!);
+        return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
     }
 
     /// <summary>
@@ -378,13 +404,49 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
+    /// Validates the user and SRP session (password). If the user is not found or the password is invalid an
+    /// action result is returned with the appropriate error message. If everything is valid nothing is returned.
+    /// </summary>
+    /// <param name="model">ValidateLoginRequest model.</param>
+    /// <returns>User and SrpSession object if validation succeeded, IActionResult as error on error.</returns>
+    private async Task<(AliasVaultUser? User, SrpSession? ServerSession, IActionResult? Error)> ValidateUserAndPassword(ValidateLoginRequest model)
+    {
+        var user = await userManager.FindByNameAsync(model.Username);
+        if (user == null)
+        {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidUsername);
+            return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
+        }
+
+        // Check if the account is locked out
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
+            return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400)));
+        }
+
+        // Validate the SRP session (actual password check).
+        var serverSession = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
+        if (serverSession is null)
+        {
+            // Increment failed login attempts in order to lock out the account when the limit is reached.
+            await userManager.AccessFailedAsync(user);
+
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
+            return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
+        }
+
+        return (user, serverSession, null);
+    }
+
+    /// <summary>
     /// Helper method that validates the SRP session based on provided username, ephemeral and proof.
     /// </summary>
     /// <param name="username">The username.</param>
     /// <param name="clientEphemeral">The client ephemeral value.</param>
     /// <param name="clientSessionProof">The client session proof.</param>
     /// <returns>Tuple.</returns>
-    private async Task<(AliasVaultUser User, SrpSession ServerSession)?> ValidateSrpSession(string username, string clientEphemeral, string clientSessionProof)
+    private async Task<SrpSession?> ValidateSrpSession(string username, string clientEphemeral, string clientSessionProof)
     {
         var user = await userManager.FindByNameAsync(username);
         if (user == null)
@@ -410,7 +472,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return null;
         }
 
-        return (user, serverSession);
+        return serverSession;
     }
 
     /// <summary>

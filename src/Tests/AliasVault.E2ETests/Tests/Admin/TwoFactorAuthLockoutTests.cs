@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="TwoFactorLockoutTests.cs" company="lanedirt">
+// <copyright file="TwoFactorAuthLockoutTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -13,7 +13,7 @@ namespace AliasVault.E2ETests.Tests.Admin;
 [Parallelizable(ParallelScope.Self)]
 [Category("AdminTests")]
 [TestFixture]
-public class TwoFactorLockoutTests : AdminPlaywrightTest
+public class TwoFactorAuthLockoutTests : AdminPlaywrightTest
 {
     /// <summary>
     /// Test if entering a wrong two-factor auth code too many times locks the account.

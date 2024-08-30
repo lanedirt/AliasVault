@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ApiLoggingTest.cs" company="lanedirt">
+// <copyright file="ApiLoggingTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 [TestFixture]
 [Category("ClientTests")]
 [NonParallelizable]
-public class ApiLoggingTest : ClientPlaywrightTest
+public class ApiLoggingTests : ClientPlaywrightTest
 {
     /// <summary>
     /// Test if an error in the API is logged to the database.
