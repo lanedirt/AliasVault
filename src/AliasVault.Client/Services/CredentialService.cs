@@ -160,7 +160,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             login.Attachments.Add(attachment);
         }
 
-        await context.Credentials.AddAsync(login);
+        context.Credentials.Add(login);
 
         // Add password.
         login.Passwords.Add(loginObject.Passwords.First());

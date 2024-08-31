@@ -1,5 +1,8 @@
 ﻿@using AliasVault.Shared.Models.Spamok
 @inject JsInteropService JsInteropService
+@inject GlobalNotificationService GlobalNotificationService
+@inject IHttpClientFactory HttpClientFactory
+@inject HttpClient HttpClient
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
     <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
@@ -32,7 +35,8 @@
                     </iframe>
                 </div>
             </div>
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex justify-end space-x-4">
+                <button @onclick="DeleteEmail" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
                 <button @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
             </div>
         </div>
@@ -59,6 +63,12 @@
     public EventCallback<bool> OnClose { get; set; }
 
     /// <summary>
+    /// Callback when an email is deleted.
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> OnEmailDeleted { get; set; }
+
+    /// <summary>
     /// The message body to display
     /// </summary>
     private string EmailBody = string.Empty;
@@ -70,6 +80,91 @@
     public Task Close()
     {
         return OnClose.InvokeAsync(false);
+    }
+
+    /// <summary>
+    /// Delete the current email.
+    /// </summary>
+    private async Task DeleteEmail()
+    {
+        if (Email == null)
+        {
+            return;
+        }
+
+        if (IsSpamOk)
+        {
+            //await JsInteropService.Confirm("Are you sure you want to delete this email?", DeleteEmailAliasVault);
+            await DeleteEmailSpamOk();
+        }
+        else
+        {
+            //await JsInteropService.Confirm("Are you sure you want to delete this email?", DeleteEmailAliasVault);
+            await DeleteEmailAliasVault();
+        }
+    }
+
+    /// <summary>
+    /// Delete the current email in SpamOk.
+    /// </summary>
+    private async Task DeleteEmailSpamOk()
+    {
+        if (Email == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("EmailClient");
+            var response = await client.DeleteAsync($"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
+                await OnEmailDeleted.InvokeAsync(Email.Id);
+                await Close();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+        }
+    }
+
+    /// <summary>
+    /// Delete the current email in AliasVault.
+    /// </summary>
+    private async Task DeleteEmailAliasVault()
+    {
+        if (Email == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var response = await HttpClient.DeleteAsync($"api/v1/Email/{Email.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
+                await OnEmailDeleted.InvokeAsync(Email.Id);
+                await Close();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+        }
     }
 
     /// <inheritdoc />

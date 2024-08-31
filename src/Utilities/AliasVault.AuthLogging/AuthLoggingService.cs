@@ -48,7 +48,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             IsSuspiciousActivity = false,
         };
 
-        await dbContext.AuthLogs.AddAsync(authAttempt);
+        dbContext.AuthLogs.Add(authAttempt);
         await dbContext.SaveChangesAsync();
     }
 
@@ -82,7 +82,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             IsSuspiciousActivity = false,
         };
 
-        await dbContext.AuthLogs.AddAsync(authAttempt);
+        dbContext.AuthLogs.Add(authAttempt);
         await dbContext.SaveChangesAsync();
     }
 

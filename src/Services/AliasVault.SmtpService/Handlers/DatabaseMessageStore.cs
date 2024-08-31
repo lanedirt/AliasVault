@@ -357,7 +357,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         newEmail = EmailEncryption.EncryptEmail(newEmail, userEncryptionKey);
 
         // Insert the email into the database.
-        await dbContext.Emails.AddAsync(newEmail);
+        dbContext.Emails.Add(newEmail);
         await dbContext.SaveChangesAsync();
 
         return newEmail.Id;
