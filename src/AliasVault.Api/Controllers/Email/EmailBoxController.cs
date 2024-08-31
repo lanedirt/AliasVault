@@ -77,7 +77,6 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             {
                 Id = x.Id,
                 Subject = x.Subject,
-                FromDisplay = ConversionHelper.ConvertFromToFromDisplay(x.From),
                 FromDomain = x.FromDomain,
                 FromLocal = x.FromLocal,
                 ToDomain = x.ToDomain,
@@ -140,7 +139,7 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             {
                 Id = x.Id,
                 Subject = x.Subject,
-                FromDisplay = ConversionHelper.ConvertFromToFromDisplay(x.From),
+                FromDisplay = x.From,
                 FromDomain = x.FromDomain,
                 FromLocal = x.FromLocal,
                 ToDomain = x.ToDomain,

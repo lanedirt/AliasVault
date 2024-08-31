@@ -1,4 +1,5 @@
 ﻿@using AliasVault.Shared.Models.Spamok
+@using AliasVault.Shared.Utilities
 @inject JsInteropService JsInteropService
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
@@ -28,7 +29,7 @@
             </div>
             <div class="mt-4 text-gray-700 dark:text-gray-300">
                 <div>
-                    <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@(EmailBody ?? "<div>This email has no HTML content.</div>")">
+                    <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@EmailBody">
                     </iframe>
                 </div>
             </div>
@@ -83,17 +84,17 @@
             // Check if there is HTML content, if not, then set default viewtype to plain
             if (Email.MessageHtml is not null && !string.IsNullOrWhiteSpace(Email.MessageHtml))
             {
-                // No HTML is available
-                EmailBody = Email.MessageHtml;
+                // HTML is available
+                EmailBody = ConversionUtility.ConvertAnchorTagsToOpenInNewTab(Email.MessageHtml);
             }
             else if (Email.MessagePlain is not null)
             {
-                // HTML is available
+                // No HTML but plain text is available
                 EmailBody = Email.MessagePlain;
             }
             else
             {
-                // No HTML is available
+                // No HTML and no plain text available
                 EmailBody = "[This email has no body.]";
             }
         }

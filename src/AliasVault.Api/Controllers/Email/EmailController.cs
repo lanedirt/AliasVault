@@ -60,7 +60,6 @@ public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFa
         {
             Id = email.Id,
             Subject = email.Subject,
-            FromDisplay = ConversionHelper.ConvertFromToFromDisplay(email.From),
             FromDomain = email.FromDomain,
             FromLocal = email.FromLocal,
             ToDomain = email.ToDomain,
@@ -85,12 +84,6 @@ public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFa
         }).ToListAsync();
 
         returnEmail.Attachments = attachments;
-
-        // Enrich HTML by changing all anchor tags to open in new tab
-        if (returnEmail.MessageHtml != null && !string.IsNullOrEmpty(email.MessageHtml))
-        {
-            returnEmail.MessageHtml = ConversionHelper.ConvertAnchorTagsToOpenInNewTab(email.MessageHtml);
-        }
 
         return Ok(returnEmail);
     }

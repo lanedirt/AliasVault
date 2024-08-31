@@ -77,8 +77,21 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         message.To.Add(new MailboxAddress("Test Recipient", email));
         const string textSubject = "Encrypted Email Subject";
         const string textBody = "This is a test email plain.";
+        const string htmlBody = @"
+        <html>
+        <body>
+            <h1>Test Email</h1>
+            <p>This is a test email with HTML content.</p>
+            <p>Sample anchor tag: <a href=""https://example.com"">Example Link</a></p>
+        </body>
+        </html>";
         message.Subject = textSubject;
-        message.Body = new BodyBuilder { TextBody = textBody }.ToMessageBody();
+        var bodyBuilder = new BodyBuilder
+        {
+            TextBody = textBody,
+            HtmlBody = htmlBody,
+        };
+        message.Body = bodyBuilder.ToMessageBody();
         await SendMessageToSmtpServer(message);
 
         // Assert that email was received by the server.
@@ -103,6 +116,14 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         // Check if the email is visible on the page now.
         emailContent = await Page.TextContentAsync("body");
         Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
+
+        // Attempt to click on the email subject to open the modal.
+        await Page.Locator("text=" + textSubject).First.ClickAsync();
+        await WaitForUrlAsync("emails**", "Delete");
+
+        // Assert that the anchor tag in the email iframe has target="_blank" attribute.
+        var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
+        Assert.That(anchorTag, Does.Contain("target=\"_blank\""), "Anchor tag in email iframe does not have target=\"_blank\" attribute. Check email decryption logic.");
     }
 
     /// <summary>
