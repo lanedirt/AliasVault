@@ -84,7 +84,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
     /// <returns>New current status.</returns>
     private async Task<WorkerServiceStatus> GetServiceStatus()
     {
-        var entry = await GetOrCreateInitialStatusRecord();
+        var entry = GetOrCreateInitialStatusRecord();
 
         if (!string.IsNullOrEmpty(entry.DesiredStatus) && entry.CurrentStatus != entry.DesiredStatus)
         {
@@ -155,7 +155,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
     /// <summary>
     /// Retrieves status record or creates an initial status record if it does not exist.
     /// </summary>
-    private async Task<WorkerServiceStatus> GetOrCreateInitialStatusRecord()
+    private WorkerServiceStatus GetOrCreateInitialStatusRecord()
     {
         var entry = _dbContext.WorkerServiceStatuses.FirstOrDefault(x => x.ServiceName == globalServiceStatus.ServiceName);
         if (entry != null)
@@ -169,7 +169,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
             CurrentStatus = Status.Started.ToString(),
             DesiredStatus = string.Empty,
         };
-        await _dbContext.WorkerServiceStatuses.AddAsync(entry);
+        _dbContext.WorkerServiceStatuses.Add(entry);
 
         return entry;
     }

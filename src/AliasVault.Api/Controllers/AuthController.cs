@@ -240,7 +240,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var newRefreshToken = GenerateRefreshToken();
 
         // Add new refresh token.
-        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
+        context.AliasVaultUserRefreshTokens.Add(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
@@ -526,7 +526,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         context.AliasVaultUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
-        await context.AliasVaultUserRefreshTokens.AddAsync(new AliasVaultUserRefreshToken
+        context.AliasVaultUserRefreshTokens.Add(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,

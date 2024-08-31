@@ -14,7 +14,7 @@
 
 @if (EmailModalVisible)
 {
-    <EmailModal Email="@Email" IsSpamOk="@IsSpamOk" OnClose="CloseEmailModal" />
+    <EmailModal Email="@Email" IsSpamOk="@IsSpamOk" OnClose="CloseEmailModal" OnEmailDeleted="ManualRefresh" />
 }
 
 @if (ShowComponent)

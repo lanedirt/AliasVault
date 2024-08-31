@@ -116,7 +116,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         context.Vaults.RemoveRange(vaultsToDelete);
 
         // Add the new vault and commit to database.
-        await context.Vaults.AddAsync(newVault);
+        context.Vaults.Add(newVault);
         await context.SaveChangesAsync();
 
         // Update user email claims if email addresses have been supplied.
@@ -176,7 +176,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             {
                 try
                 {
-                    await context.UserEmailClaims.AddAsync(new UserEmailClaim
+                    context.UserEmailClaims.Add(new UserEmailClaim
                     {
                         UserId = userId,
                         Address = sanitizedEmail,

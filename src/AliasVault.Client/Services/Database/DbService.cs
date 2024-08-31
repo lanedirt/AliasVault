@@ -526,7 +526,7 @@ public sealed class DbService : IDisposable
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now,
         };
-        await _dbContext.EncryptionKeys.AddAsync(encryptionKey);
+        _dbContext.EncryptionKeys.Add(encryptionKey);
         return encryptionKey;
     }
 }
