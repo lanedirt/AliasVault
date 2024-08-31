@@ -46,12 +46,13 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if received email encrypted by server can be successfully decrypted by client.
+    /// Test if received email encrypted by server can be successfully decrypted by client
+    /// and then be deleted by client.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(1)]
-    public async Task EmailEncryptionDecryptionTest()
+    public async Task EmailEncryptionDecryptionDeleteTest()
     {
         // Create credential which should automatically create claim on server during database sync.
         const string serviceName = "Test Service";
@@ -103,6 +104,20 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         // Check if the email is visible on the page now.
         emailContent = await Page.TextContentAsync("body");
         Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
+
+        // Attempt to click on the email subject to open the modal.
+        await Page.Locator("text=" + textSubject).First.ClickAsync();
+        await WaitForUrlAsync("emails**", "Delete");
+
+        // Click the delete button to delete the email.
+        await Page.Locator("id=delete-email").First.ClickAsync();
+
+        // Wait for the email delete confirm message to show up.
+        await WaitForUrlAsync("emails**", "Email deleted successfully");
+
+        // Assert that the email is no longer visible on the page.
+        var body = await Page.TextContentAsync("body");
+        Assert.That(body, Does.Not.Contain(textSubject), "Email not deleted from page after deletion. Check email deletion logic.");
     }
 
     /// <summary>
