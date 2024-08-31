@@ -51,4 +51,9 @@ public enum AuthEventType
     /// Represents disabling two-factor authentication in settings.
     /// </summary>
     TwoFactorAuthDisable = 23,
+
+    /// <summary>
+    /// Represents a user registration event.
+    /// </summary>
+    Register = 30,
 }

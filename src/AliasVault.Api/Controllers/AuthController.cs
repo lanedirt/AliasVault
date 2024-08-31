@@ -313,6 +313,8 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         if (result.Succeeded)
         {
+            await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.Register);
+
             // When a user is registered, they are automatically signed in.
             await signInManager.SignInAsync(user, isPersistent: false);
 

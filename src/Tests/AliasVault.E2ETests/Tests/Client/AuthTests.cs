@@ -7,6 +7,9 @@
 
 namespace AliasVault.E2ETests.Tests.Client;
 
+using AliasVault.Shared.Models.Enums;
+using Microsoft.EntityFrameworkCore;
+
 /// <summary>
 /// End-to-end tests for authentication.
 /// </summary>
@@ -16,11 +19,25 @@ namespace AliasVault.E2ETests.Tests.Client;
 public class AuthTests : ClientPlaywrightTest
 {
     /// <summary>
-    /// Test if logging out and logging in works.
+    /// Test if initial registration has created an auth log entry.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(1)]
+    public async Task RegistrationAuthLog()
+    {
+        // Check if the registration executed by the test setup method has
+        // lead to the creation of an auth log entry in the database.
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
+        Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after registration.");
+    }
+
+    /// <summary>
+    /// Test if logging out and logging in works.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(2)]
     public async Task LogoutAndLoginTest()
     {
         // Logout.
@@ -31,6 +48,10 @@ public class AuthTests : ClientPlaywrightTest
         await WaitForUrlAsync("user/login");
 
         await Login();
+
+        // Check if login has created an auth log entry.
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
+        Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
     }
 
     /// <summary>
@@ -38,7 +59,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(2)]
+    [Order(3)]
     public async Task RegisterFormWarningTest()
     {
         // Logout.
@@ -78,7 +99,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(3)]
+    [Order(4)]
     public async Task PasswordAuthLockoutTest()
     {
         // Logout.
@@ -105,6 +126,10 @@ public class AuthTests : ClientPlaywrightTest
 
             await WaitForUrlAsync("user/login**", "Invalid username or password.");
         }
+
+        // Check if the correct amount of auth failure log entries were created.
+        var authLogEntryFailureCount = await ApiDbContext.AuthLogs.CountAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login && !x.IsSuccess);
+        Assert.That(authLogEntryFailureCount, Is.EqualTo(10), "10 failed login attempts did not result in 10 failed auth log records.");
 
         // Wait for account lockout message.
         await WaitForUrlAsync("user/login**", "locked out");
