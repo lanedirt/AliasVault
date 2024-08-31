@@ -77,30 +77,32 @@
         const randomIndex = Math.floor(Math.random() * securityQuotes.length);
         quoteElement.textContent = `"${securityQuotes[randomIndex]}"`;
 
-        window.addEventListener('load', function() {
+        function manageLoadingScreen() {
             const startTime = new Date().getTime();
             const minDisplayTime = 1000;
+            const checkInterval = 500;
 
-            function hideLoadingScreen() {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('app').style.removeProperty('visibility');
-            }
+            const appElement = document.getElementById('app');
+            const loadingScreen = document.getElementById('loading-screen');
 
-            function checkElapsedTime() {
-                const currentTime = new Date().getTime();
-                const elapsedTime = currentTime - startTime;
+            appElement.style.visibility = 'hidden';
+            loadingScreen.style.display = 'flex';
 
-                if (elapsedTime >= minDisplayTime) {
-                    hideLoadingScreen();
-                } else {
-                    setTimeout(hideLoadingScreen, minDisplayTime - elapsedTime);
+            const checkContentAndTime = () => {
+                const elapsedTime = new Date().getTime() - startTime;
+                const hasContent = appElement.innerHTML.trim() !== '';
+
+                if ((elapsedTime >= minDisplayTime && hasContent)) {
+                    loadingScreen.style.display = 'none';
+                    appElement.style.removeProperty('visibility');
+                    clearInterval(intervalId);
                 }
-            }
+            };
 
-            document.getElementById('app').style.visibility = 'hidden';
-            document.getElementById('loading-screen').style.display = 'flex';
-            checkElapsedTime();
-        });
+            const intervalId = setInterval(checkContentAndTime, checkInterval);
+        }
+
+        window.addEventListener('load', manageLoadingScreen);
     </script>
     <script src="lib/qrcode.min.js?v=@CacheBuster"></script>
     <script src="js/crypto.js?v=@CacheBuster"></script>
