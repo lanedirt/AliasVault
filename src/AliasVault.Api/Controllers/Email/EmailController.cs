@@ -19,10 +19,11 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// Email controller for retrieving emails from the database.
 /// </summary>
+/// <param name="logger">ILogger instance.</param>
 /// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class EmailController(ILogger<VaultController> logger, IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Get the newest version of the vault for the current user.
@@ -34,31 +35,15 @@ public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFa
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var user = await GetCurrentUserAsync();
-        if (user is null)
+        var (email, errorResult) = await AuthenticateAndRetrieveEmailAsync(id, context);
+        if (errorResult != null)
         {
-            return Unauthorized("Not authenticated.");
-        }
-
-        // Retrieve email from database.
-        var email = await context.Emails.Include(x => x.EncryptionKey).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        if (email is null)
-        {
-            return NotFound("Email not found.");
-        }
-
-        // See if this user has a valid claim to the email address.
-        var emailClaim = await context.UserEmailClaims
-            .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Address == email.To);
-
-        if (emailClaim is null)
-        {
-            return Unauthorized("User does not have a claim to this email address.");
+            return errorResult;
         }
 
         var returnEmail = new EmailApiModel
         {
-            Id = email.Id,
+            Id = email!.Id,
             Subject = email.Subject,
             FromDomain = email.FromDomain,
             FromLocal = email.FromLocal,
@@ -86,5 +71,76 @@ public class EmailController(IDbContextFactory<AliasServerDbContext> dbContextFa
         returnEmail.Attachments = attachments;
 
         return Ok(returnEmail);
+    }
+
+    /// <summary>
+    /// Deletes an email for the current user.
+    /// </summary>
+    /// <param name="id">The email ID to delete.</param>
+    /// <returns>A response indicating the success or failure of the deletion.</returns>
+    [HttpDelete(template: "{id}", Name = "DeleteEmail")]
+    public async Task<IActionResult> DeleteEmail(int id)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var (email, errorResult) = await AuthenticateAndRetrieveEmailAsync(id, context);
+        if (errorResult != null)
+        {
+            return errorResult;
+        }
+
+        // Delete associated attachments
+        context.EmailAttachments.RemoveRange(email!.Attachments);
+
+        // Delete the email
+        context.Emails.Remove(email);
+
+        try
+        {
+            await context.SaveChangesAsync();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            logger.LogError(ex, "An error occurred while deleting email with ID {id}.", id);
+            return StatusCode(500, $"An error occurred while deleting the email: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Authenticates the user and retrieves the requested email.
+    /// </summary>
+    /// <param name="id">The email ID to retrieve.</param>
+    /// <param name="context">The database context.</param>
+    /// <returns>A tuple containing the authenticated user, the email, and an IActionResult if there's an error.</returns>
+    private async Task<(Email? Email, IActionResult? ErrorResult)> AuthenticateAndRetrieveEmailAsync(int id, AliasServerDbContext context)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user is null)
+        {
+            return (null, Unauthorized("Not authenticated."));
+        }
+
+        // Retrieve email from database.
+        var email = await context.Emails
+            .Include(x => x.Attachments)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (email is null)
+        {
+            return (null, NotFound("Email not found."));
+        }
+
+        // See if this user has a valid claim to the email address.
+        var emailClaim = await context.UserEmailClaims
+            .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Address == email.To);
+
+        if (emailClaim is null)
+        {
+            return (null, Unauthorized("User does not have a claim to this email address."));
+        }
+
+        return (email, null);
     }
 }

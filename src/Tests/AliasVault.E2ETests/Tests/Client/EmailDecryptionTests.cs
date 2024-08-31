@@ -46,12 +46,13 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if received email encrypted by server can be successfully decrypted by client.
+    /// Test if received email encrypted by server can be successfully decrypted by client
+    /// and then be deleted by client.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(1)]
-    public async Task EmailEncryptionDecryptionTest()
+    public async Task EmailEncryptionDecryptionDeleteTest()
     {
         // Create credential which should automatically create claim on server during database sync.
         const string serviceName = "Test Service";
@@ -124,6 +125,16 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         // Assert that the anchor tag in the email iframe has target="_blank" attribute.
         var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
         Assert.That(anchorTag, Does.Contain("target=\"_blank\""), "Anchor tag in email iframe does not have target=\"_blank\" attribute. Check email decryption logic.");
+
+        // Click the delete button to delete the email.
+        await Page.Locator("id=delete-email").First.ClickAsync();
+
+        // Wait for the email delete confirm message to show up.
+        await WaitForUrlAsync("emails**", "Email deleted successfully");
+
+        // Assert that the email is no longer visible on the page.
+        var body = await Page.TextContentAsync("body");
+        Assert.That(body, Does.Not.Contain(textSubject), "Email not deleted from page after deletion. Check email deletion logic.");
     }
 
     /// <summary>

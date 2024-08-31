@@ -13,7 +13,7 @@
 
 @if (EmailModalVisible)
 {
-    <EmailModal Email="EmailModalEmail" IsSpamOk="false" OnClose="CloseEmailModal" />
+    <EmailModal Email="EmailModalEmail" IsSpamOk="false" OnClose="CloseEmailModal" OnEmailDeleted="RefreshData" />
 }
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
@@ -44,7 +44,7 @@ else
     <div class="overflow-x-auto px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged"/>
 
-        <div class="bg-white shadow rounded-lg overflow-hidden mt-6">
+        <div class="bg-white border rounded-lg overflow-hidden mt-6">
             <div class="px-4 py-2 bg-gray-100 border-b">
                 <h2 class="font-semibold text-gray-800">Inbox</h2>
             </div>
