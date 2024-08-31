@@ -48,9 +48,4 @@
       <ProjectReference Include="..\Utilities\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Main\Components\Refresh\RefreshButton.razor" />
-    </ItemGroup>
-
 </Project>
