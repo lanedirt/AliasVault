@@ -94,12 +94,10 @@
 
         if (IsSpamOk)
         {
-            //await JsInteropService.Confirm("Are you sure you want to delete this email?", DeleteEmailAliasVault);
             await DeleteEmailSpamOk();
         }
         else
         {
-            //await JsInteropService.Confirm("Are you sure you want to delete this email?", DeleteEmailAliasVault);
             await DeleteEmailAliasVault();
         }
     }
