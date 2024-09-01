@@ -15,13 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
     - name: Install dependencies
       run: dotnet workload install wasm-tools
+
     - name: Build
       run: dotnet build
+      
     - name: Run integration tests
       run: dotnet test src/Tests/AliasVault.IntegrationTests --no-build --verbosity normal

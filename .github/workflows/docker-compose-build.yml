@@ -9,61 +9,80 @@ on:
 jobs:
   test-docker:
     runs-on: ubuntu-latest
+
     services:
       docker:
         image: docker:26.0.0
         options: --privileged
+
     steps:
       - uses: actions/checkout@v2
       - name: Set permissions and run install.sh
         run: |
           chmod +x install.sh
           ./install.sh
+
       - name: Set up Docker Compose
         run: |
             # Change the exposed host port of the SmtpService from 25 to 2525 because port 25 is not allowed in GitHub Actions
             sed -i 's/25\:25/2525\:25/g' docker-compose.yml
             docker compose -f docker-compose.yml up -d
+
       - name: Wait for services to be up
         run: |
             # Wait for a few seconds
-            sleep 5
-      - name: Test if localhost:80 (WASM app) responds
-        run: |
-            # Test if the service on localhost:80 responds
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
-            if [ "$http_code" -ne 200 ]; then
-              echo "Service did not respond with 200 OK. Check if client app is configured correctly."
-              exit 1
-            else
-              echo "Service responded with 200 OK"
-            fi
-      - name: Test if localhost:81 (WebApi) responds
-        run: |
-            # Test if the service on localhost:81 responds
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
-            if [ "$http_code" -ne 200 ]; then
-                echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
-                exit 1
-            else
-                echo "Service responded with $http_code"
-            fi
-      - name: Test if localhost:2525 (SmtpService) responds
-        run: |
-            # Test if the service on localhost:2525 responds
-            if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
-                echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
-                exit 1
-            else
-                echo "SmtpService responded on port 2525"
-            fi
-      - name: Test if localhost:8080 (Admin) responds
-        run: |
-            # Test if the service on localhost:8080 responds
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/user/login)
-            if [ "$http_code" -ne 200 ]; then
-                echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
-                exit 1
-            else
-                echo "Service responded with $http_code"
-            fi
+            sleep 10
+      -   name: Test if localhost:80 (WASM app) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with 200 OK. Check if client app is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with 200 OK"
+                  fi
+
+      -   name: Test if localhost:81 (WebApi) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with $http_code"
+                  fi
+
+      -   name: Test if localhost:2525 (SmtpService) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+                    echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
+                    exit 1
+                  else
+                    echo "SmtpService responded on port 2525"
+                  fi
+
+      -   name: Test if localhost:8080 (Admin) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/user/login)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with $http_code"
+                  fi
