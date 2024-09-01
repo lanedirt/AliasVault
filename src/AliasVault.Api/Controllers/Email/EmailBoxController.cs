@@ -77,6 +77,7 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             {
                 Id = x.Id,
                 Subject = x.Subject,
+                FromDisplay = x.From,
                 FromDomain = x.FromDomain,
                 FromLocal = x.FromLocal,
                 ToDomain = x.ToDomain,
