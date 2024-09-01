@@ -23,8 +23,15 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <param name="plaintext">Plain text to encrypt.</param>
     /// <param name="encryptionKey">Encryption key to use.</param>
     /// <returns>Encrypted ciphertext.</returns>
-    public async Task<string> SymmetricEncrypt(string plaintext, string encryptionKey) =>
-        await jsRuntime.InvokeAsync<string>("cryptoInterop.encrypt", plaintext, encryptionKey);
+    public async Task<string> SymmetricEncrypt(string plaintext, string encryptionKey)
+    {
+        if (string.IsNullOrEmpty(plaintext))
+        {
+            return plaintext;
+        }
+
+        return await jsRuntime.InvokeAsync<string>("cryptoInterop.encrypt", plaintext, encryptionKey);
+    }
 
     /// <summary>
     /// Symmetrically decrypts a string using the provided encryption key.
@@ -32,8 +39,15 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <param name="ciphertext">Cipher text to decrypt.</param>
     /// <param name="encryptionKey">Encryption key to use.</param>
     /// <returns>Encrypted ciphertext.</returns>
-    public async Task<string> SymmetricDecrypt(string ciphertext, string encryptionKey) =>
-        await jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", ciphertext, encryptionKey);
+    public async Task<string> SymmetricDecrypt(string ciphertext, string encryptionKey)
+    {
+        if (string.IsNullOrEmpty(ciphertext))
+        {
+            return ciphertext;
+        }
+
+        return await jsRuntime.InvokeAsync<string>("cryptoInterop.decrypt", ciphertext, encryptionKey);
+    }
 
     /// <summary>
     /// Downloads a file from a stream.
