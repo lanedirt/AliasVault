@@ -21,7 +21,7 @@ COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
 COPY ["src/Utilities/FaviconExtractor/FaviconExtractor.csproj", "src/Utilities/FaviconExtractor/"]
 RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj"
 
-# Copy the rest of the application code
+# Copy the application code
 COPY . .
 
 # Build the Client project
