@@ -22,7 +22,7 @@ public class CodeLockoutTests : TwoFactorAuthBase
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task TwoFactorAuthLockoutTest()
+    public async Task TwoFactorAuthCodeLockoutTest()
     {
         await DisableTwoFactorIfEnabled();
         await EnableTwoFactor();

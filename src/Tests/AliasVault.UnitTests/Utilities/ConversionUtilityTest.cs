@@ -13,7 +13,7 @@ using AliasVault.Shared.Utilities;
 /// <summary>
 /// Tests for the CsvImportExport class.
 /// </summary>
-public class ConversionUtilityTest
+public partial class ConversionUtilityTest
 {
     /// <summary>
     /// Tests the conversion of a simple anchor tag to open in a new tab.
@@ -90,14 +90,25 @@ public class ConversionUtilityTest
         string anchorHtml = "<a href=\"test.html\" target=\"_blank\">test anchor text</a>";
         string convertedAnchorTags = ConversionUtility.ConvertAnchorTagsToOpenInNewTab(anchorHtml);
 
-        // Check that only one target="_blank" appears.
-        int targetBlankCount = Regex.Matches(convertedAnchorTags, "target=\"_blank\"").Count;
-        Assert.That(targetBlankCount, Is.EqualTo(1), "There should be exactly one target=\"_blank\" attribute.");
+        int targetBlankCount = TargetBlankRegex().Matches(convertedAnchorTags).Count;
 
-        // Ensure other attributes are preserved
-        Assert.That(convertedAnchorTags, Does.Contain("href=\"test.html\""), "The href attribute should be preserved.");
+        Assert.Multiple(() =>
+        {
+            // Check that only one target="_blank" appears.
+            Assert.That(targetBlankCount, Is.EqualTo(1), "There should be exactly one target=\"_blank\" attribute.");
 
-        // Check that the anchor text is preserved
-        Assert.That(convertedAnchorTags, Does.Contain(">test anchor text</a>"), "The anchor text should be preserved.");
+            // Ensure other attributes are preserved
+            Assert.That(convertedAnchorTags, Does.Contain("href=\"test.html\""), "The href attribute should be preserved.");
+
+            // Check that the anchor text is preserved
+            Assert.That(convertedAnchorTags, Does.Contain(">test anchor text</a>"), "The anchor text should be preserved.");
+        });
     }
+
+    /// <summary>
+    /// Regex to match an anchor tag with an href attribute, generated at compile time.
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex("target=\"_blank\"")]
+    private static partial Regex TargetBlankRegex();
 }
