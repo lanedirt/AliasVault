@@ -5,7 +5,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Data.Common;
 using System.Globalization;
 using System.Reflection;
 using AliasServerDb;
@@ -16,10 +15,9 @@ using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
 using AliasVault.AuthLogging;
 using AliasVault.Logging;
-using Cryptography;
+using Cryptography.Server;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

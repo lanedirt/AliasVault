@@ -5,12 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography;
+namespace Cryptography.Server;
 
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Konscious.Security.Cryptography;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -66,28 +65,6 @@ public static class Encryption
             byte[] cipherBytes = Convert.FromBase64String(ciphertext);
             return rsa.Decrypt(cipherBytes, rsaParams);
         }
-    }
-
-    /// <summary>
-    /// Derive a key used for encryption/decryption based on a user password and system salt.
-    /// </summary>
-    /// <param name="password">User password.</param>
-    /// <param name="salt">The salt to use for the Argon2id hash.</param>
-    /// <returns>SrpArgonEncryption key as byte array.</returns>
-    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt)
-    {
-        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-        byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
-
-        var argon2 = new Argon2id(passwordBytes)
-        {
-            Salt = saltBytes,
-            DegreeOfParallelism = 4,
-            MemorySize = 8192,
-            Iterations = 1,
-        };
-
-        return await argon2.GetBytesAsync(32); // Generate a 256-bit key
     }
 
     /// <summary>

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography.Models;
+namespace Cryptography.Client.Models;
 
 /// <summary>
 /// Represents the data required for signing up with the Secure Remote Password (SRP) protocol.

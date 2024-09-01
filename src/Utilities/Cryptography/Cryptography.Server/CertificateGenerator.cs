@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography;
+namespace Cryptography.Server;
 
 using System;
 using System.IO;

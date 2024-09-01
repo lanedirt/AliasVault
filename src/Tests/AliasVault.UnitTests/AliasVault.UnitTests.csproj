@@ -52,7 +52,8 @@
         <ProjectReference Include="..\..\AliasVault.Api\AliasVault.Api.csproj" />
         <ProjectReference Include="..\..\Databases\AliasClientDb\AliasClientDb.csproj" />
         <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
-        <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.csproj" />
+        <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.Client\Cryptography.Client.csproj" />
+        <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.Server\Cryptography.Server.csproj" />
         <ProjectReference Include="..\..\Utilities\CsvImportExport\CsvImportExport.csproj" />
         <ProjectReference Include="..\..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
         <ProjectReference Include="..\..\Utilities\TotpGenerator\TotpGenerator.csproj" />

@@ -7,31 +7,28 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net8.0\CryptographyClient.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Debug\net8.0\Cryptography.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net8.0\CryptographyClient.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Release\net8.0\Cryptography.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="..\..\stylecop.json" Link="stylecop.json" />
+      <AdditionalFiles Include="..\..\..\stylecop.json">
+        <Link>stylecop.json</Link>
+      </AdditionalFiles>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
       <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
       <PackageReference Include="srp" Version="1.0.7" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
     </ItemGroup>
 
 </Project>

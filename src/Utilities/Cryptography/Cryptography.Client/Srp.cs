@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography;
+namespace Cryptography.Client;
 
-using Cryptography.Models;
+using Cryptography.Client.Models;
 using SecureRemotePassword;
 
 /// <summary>
