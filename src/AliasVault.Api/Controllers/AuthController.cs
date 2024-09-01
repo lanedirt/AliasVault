@@ -18,7 +18,8 @@ using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
-using Cryptography.Models;
+using Cryptography.Client;
+using Cryptography.Client.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -84,7 +85,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Server creates ephemeral and sends to client
-        var ephemeral = Cryptography.Srp.GenerateEphemeralServer(user.Verifier);
+        var ephemeral = Srp.GenerateEphemeralServer(user.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
         cache.Set(model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
@@ -461,7 +462,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return null;
         }
 
-        var serverSession = Cryptography.Srp.DeriveSessionServer(
+        var serverSession = Srp.DeriveSessionServer(
             serverSecretEphemeral.ToString() ?? string.Empty,
             clientEphemeral,
             user.Salt,

@@ -44,6 +44,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Services\AliasVault.SmtpService\AliasVault.SmtpService.csproj" />
+      <ProjectReference Include="..\..\Utilities\Cryptography\Cryptography.Server\Cryptography.Server.csproj" />
     </ItemGroup>
 
 </Project>

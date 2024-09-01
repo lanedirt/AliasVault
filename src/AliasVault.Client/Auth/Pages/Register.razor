@@ -9,7 +9,7 @@
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
 @using AliasVault.Client.Auth.Pages.Base
-@using Cryptography
+@using Cryptography.Client
 @using SecureRemotePassword
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -71,7 +71,7 @@
             byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt);
             var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
-            var srpSignup = Cryptography.Srp.SignupPrepareAsync(client, salt, RegisterModel.Username, passwordHashString);
+            var srpSignup = Srp.SignupPrepareAsync(client, salt, RegisterModel.Username, passwordHashString);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
             var responseContent = await result.Content.ReadAsStringAsync();
 

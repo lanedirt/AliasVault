@@ -11,7 +11,7 @@ using System.Buffers;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using AliasServerDb;
-using Cryptography;
+using Cryptography.Server;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using NUglify;

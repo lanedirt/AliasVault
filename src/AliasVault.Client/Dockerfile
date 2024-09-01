@@ -33,8 +33,9 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
-# Final stage: start nginx and serve static html files that were published in the previous stage
-FROM nginx:alpine AS final
+# Final stage
+FROM nginx:1.24.0 AS final
+
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
