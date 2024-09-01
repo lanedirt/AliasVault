@@ -22,7 +22,7 @@ public class RecoveryLockoutTests : TwoFactorAuthBase
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task TwoFactorAuthLockoutTest()
+    public async Task TwoFactorAuthRecoveryLockoutTest()
     {
         await DisableTwoFactorIfEnabled();
         await EnableTwoFactor();
