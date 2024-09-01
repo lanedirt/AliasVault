@@ -7,6 +7,7 @@
 
 using AliasVault.Client;
 using AliasVault.Client.Providers;
+using AliasVault.RazorComponents.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -72,6 +73,7 @@ builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
+builder.Services.AddScoped<ConfirmModalService>();
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
