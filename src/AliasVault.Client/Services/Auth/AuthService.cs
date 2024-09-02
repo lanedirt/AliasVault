@@ -21,10 +21,18 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 /// <param name="localStorage">The local storage service.</param>
 /// <param name="environment">IWebAssemblyHostEnvironment instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
-public sealed class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, IConfiguration configuration)
+/// <param name="jsInteropService">JSInteropService instance.</param>
+public sealed class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, IConfiguration configuration, JsInteropService jsInteropService)
 {
     private const string AccessTokenKey = "token";
     private const string RefreshTokenKey = "refreshToken";
+
+    /// <summary>
+    /// Test string that is stored in local storage in encrypted state. This is used to validate the encryption key
+    /// locally during future vault unlocks.
+    /// </summary>
+    private const string EncryptionTestString = "aliasvault-test-string";
+
     private byte[] _encryptionKey = new byte[32];
 
     /// <summary>
@@ -139,9 +147,48 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// Stores the encryption key asynchronously in-memory.
     /// </summary>
     /// <param name="newKey">SrpArgonEncryption key.</param>
-    public void StoreEncryptionKey(byte[] newKey)
+    /// <returns>Task.</returns>
+    public async Task StoreEncryptionKeyAsync(byte[] newKey)
     {
         _encryptionKey = newKey;
+
+        // When storing a new encryption key, encrypt a test string and save it to local storage.
+        // This test string can then be used to locally validate the password during future unlocks.
+        var encryptedTestString = await jsInteropService.SymmetricEncrypt(EncryptionTestString, GetEncryptionKeyAsBase64Async());
+
+        // Store the encrypted test string in local storage.
+        await localStorage.SetItemAsStringAsync("encryptionTestString", encryptedTestString);
+    }
+
+    /// <summary>
+    /// Validate the encryption locally by attempting to decrypt test string stored in local storage.
+    /// </summary>
+    /// <param name="encryptionKey">The encryption key to validate.</param>
+    /// <returns>True if encryption key is valid, false if not.</returns>
+    public async Task<bool> ValidateEncryptionKeyAsync(byte[] encryptionKey)
+    {
+        // Get the encrypted test string from local storage.
+        var encryptedTestString = await localStorage.GetItemAsStringAsync("encryptionTestString");
+        if (encryptedTestString == null)
+        {
+            return false;
+        }
+
+        var base64EncryptionKey = Convert.ToBase64String(encryptionKey);
+
+        // Decrypt the test string using the provided encryption key.
+        try
+        {
+            var decryptedTestString = await jsInteropService.SymmetricDecrypt(encryptedTestString, base64EncryptionKey);
+
+            // If the decrypted test string is not equal to the test string, the encryption key is invalid.
+            return decryptedTestString == EncryptionTestString;
+        }
+        catch
+        {
+            // Ignore errors, if decryption fails the encryption key is invalid.
+            return false;
+        }
     }
 
     /// <summary>

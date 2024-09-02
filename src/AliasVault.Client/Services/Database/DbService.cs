@@ -140,6 +140,7 @@ public sealed class DbService : IDisposable
 
         // Make sure a public/private RSA encryption key exists before saving the database.
         await GetOrCreateEncryptionKeyAsync();
+
         var encryptedBase64String = await GetEncryptedDatabaseBase64String();
 
         // Save to webapi.

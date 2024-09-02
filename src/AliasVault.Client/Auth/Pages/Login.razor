@@ -385,7 +385,7 @@ else
         await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token!.RefreshToken);
 
         // Store the encryption key in memory.
-        AuthService.StoreEncryptionKey(PasswordHash);
+        await AuthService.StoreEncryptionKeyAsync(PasswordHash);
 
         await AuthStateProvider.GetAuthenticationStateAsync();
         GlobalNotificationService.ClearMessages();
