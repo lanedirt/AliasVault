@@ -3,6 +3,7 @@
 @layout Auth.Layout.MainLayout
 @using System.Text.Json
 @using AliasVault.Client.Auth.Components
+@using AliasVault.Client.Utilities
 @using AliasVault.Shared.Models.WebApi.Auth
 @using Cryptography.Client
 
@@ -78,12 +79,12 @@
         try
         {
             // Send request to server with email to get user salt.
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(Email));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(Email));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
             {
-                var errors = ParseResponse(responseContent);
+                var errors = ApiResponseUtility.ParseErrorResponse(responseContent);
                 foreach (var error in errors)
                 {
                     ServerValidationErrors.AddError(error);
@@ -91,7 +92,7 @@
                 return;
             }
 
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
+            var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
                 ServerValidationErrors.AddError("An error occurred while processing the unlock request.");
@@ -100,8 +101,18 @@
             // 3. Client derives shared session key.
             byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(UnlockModel.Password, loginResponse!.Salt);
 
+            // Check if the password is correct locally by decrypting the test string.
+            var validPassword = await AuthService.ValidateEncryptionKeyAsync(passwordHash);
+
+            if (!validPassword)
+            {
+                ServerValidationErrors.AddError("The password is incorrect. Please try entering your password again, or logout and login again.");
+                return;
+            }
+
             // Store the encryption key in memory.
-            AuthService.StoreEncryptionKey(passwordHash);
+            await AuthService.StoreEncryptionKeyAsync(passwordHash);
+
 
             // Redirect to the page the user was trying to access before if set.
             var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");

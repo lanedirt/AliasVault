@@ -24,6 +24,9 @@ public class DbPersistTests : ClientPlaywrightTest
     [Test]
     public async Task DbPersistCredentialTest()
     {
+        // Advance time by 1 second manually to ensure the new vault is created in the future.
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
         var serviceNameBefore = "Credential service before";
         await CreateCredentialEntry(new Dictionary<string, string>
         {

@@ -5,6 +5,7 @@
 @using System.Text.Json
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
+@using AliasVault.Client.Utilities
 @using Cryptography.Client
 @using SecureRemotePassword
 
@@ -192,16 +193,16 @@ else
         // Sanitize username
         var username = LoginModel.Username.ToLowerInvariant().Trim();
 
-        // Send request to server with email to get server ephemeral public key.
-        var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginRequest(username));
+        // Send request to server with username to get server ephemeral public key.
+        var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(username));
         var responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
         {
-            return ParseResponse(responseContent);
+            return ApiResponseUtility.ParseErrorResponse(responseContent);
         }
 
-        var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
+        var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
         if (loginResponse == null)
         {
             return
@@ -229,7 +230,7 @@ else
 
         if (!result.IsSuccessStatusCode)
         {
-            return ParseResponse(responseContent);
+            return ApiResponseUtility.ParseErrorResponse(responseContent);
         }
 
         var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
@@ -272,7 +273,7 @@ else
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ParseResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
                 {
                     ServerValidationErrors.AddError(error);
                 }
@@ -330,7 +331,7 @@ else
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ParseResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
                 {
                     ServerValidationErrors.AddError(error);
                 }
@@ -384,7 +385,7 @@ else
         await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token!.RefreshToken);
 
         // Store the encryption key in memory.
-        AuthService.StoreEncryptionKey(PasswordHash);
+        await AuthService.StoreEncryptionKeyAsync(PasswordHash);
 
         await AuthStateProvider.GetAuthenticationStateAsync();
         GlobalNotificationService.ClearMessages();

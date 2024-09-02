@@ -28,8 +28,8 @@ builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAs
 
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthLoggingService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddLogging(logging =>
 {

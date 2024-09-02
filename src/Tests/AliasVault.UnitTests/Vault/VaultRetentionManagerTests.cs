@@ -30,15 +30,15 @@ public class VaultRetentionManagerTests
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
         testVaults =
         [
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0) },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0) },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0) }, // 2 days ago
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0) }, // 3 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0) }, // 4 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0) }, // 2 weeks ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0) }, // 3 weeks ago
-            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0) }, // 1 month ago
-            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0) }, // 2 months ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc" },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc" },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 2 days ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 3 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 4 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def" }, // 2 weeks ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def" }, // 3 weeks ago
+            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def" }, // 1 month ago
+            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi" }, // 2 months ago
         ];
     }
 
@@ -115,6 +115,28 @@ public class VaultRetentionManagerTests
             Assert.That(result, Has.Count.EqualTo(2));
             Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
             Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 28, 12, 0, 0)));
+        });
+    }
+
+    /// <summary>
+    /// Test the CredentialRetentionRule.
+    /// </summary>
+    [Test]
+    public void CredentialRetentionRuleTest()
+    {
+        // Keep the latest 2 unique credentials.
+        var rule = new CredentialRetentionRule { CredentialsToKeep = 2 };
+        var result = rule.ApplyRule(testVaults, now).ToList();
+
+        // Expecting two vaults to be kept:
+        // - the latest
+        // - the one from 2 weeks ago
+        // The oldest vault should be excluded as that is the 3rd unique credential.
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result[0].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 31, 12, 0, 0)));
+            Assert.That(result[1].UpdatedAt, Is.EqualTo(new DateTime(2023, 5, 18, 12, 0, 0)));
         });
     }
 

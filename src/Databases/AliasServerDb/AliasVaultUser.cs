@@ -7,7 +7,6 @@
 
 namespace AliasServerDb;
 
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 /// <summary>
@@ -16,21 +15,14 @@ using Microsoft.AspNetCore.Identity;
 public class AliasVaultUser : IdentityUser
 {
     /// <summary>
-    /// Gets or sets the salt used for SRP authentication.
-    /// </summary>
-    [StringLength(100)]
-    public string Salt { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the verifier used for SRP authentication.
-    /// </summary>
-    [StringLength(1000)]
-    public string Verifier { get; set; } = null!;
-
-    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timestamp when the user's password was last changed.
+    /// </summary>
+    public DateTime PasswordChangedAt { get; set; }
 
     /// <summary>
     /// Gets or sets updated timestamp.

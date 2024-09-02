@@ -1,25 +1,25 @@
 //-----------------------------------------------------------------------
-// <copyright file="LoginResponse.cs" company="lanedirt">
+// <copyright file="PasswordChangeInitiateResponse.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi.Auth;
+namespace AliasVault.Shared.Models.WebApi.PasswordChange;
 
 using System.Text.Json.Serialization;
 
 /// <summary>
 /// Represents a login response.
 /// </summary>
-public class LoginResponse
+public class PasswordChangeInitiateResponse
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="LoginResponse"/> class.
+    /// Initializes a new instance of the <see cref="PasswordChangeInitiateResponse"/> class.
     /// </summary>
     /// <param name="salt">Salt.</param>
     /// <param name="serverEphemeral">Server ephemeral.</param>
-    public LoginResponse(string salt, string serverEphemeral)
+    public PasswordChangeInitiateResponse(string salt, string serverEphemeral)
     {
         Salt = salt;
         ServerEphemeral = serverEphemeral;

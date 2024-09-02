@@ -191,6 +191,28 @@ public class ClientPlaywrightTest : PlaywrightTest
     }
 
     /// <summary>
+    /// Login (again) as current user.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    protected async Task Login()
+    {
+        await NavigateUsingBlazorRouter("/");
+
+        // Check that we are on the login page after navigating to the base URL.
+        // We are expecting to not be authenticated and thus to be redirected to the login page.
+        await WaitForUrlAsync("user/login");
+
+        // Try to log in with test credentials.
+        var emailField = Page.Locator("input[id='email']");
+        var passwordField = Page.Locator("input[id='password']");
+        await emailField.FillAsync(TestUserUsername);
+        await passwordField.FillAsync(TestUserPassword);
+
+        var loginButton = Page.Locator("button[type='submit']");
+        await loginButton.ClickAsync();
+    }
+
+    /// <summary>
     /// Logout the current user and register a new account.
     /// </summary>
     /// <returns>Task.</returns>

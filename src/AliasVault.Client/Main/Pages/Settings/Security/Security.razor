@@ -15,6 +15,7 @@
     </div>
 </div>
 
+<PasswordChangeSection OnStatusChanged="LoadData" />
 <TwoFactorAuthenticationSection @ref="TwoFactorSection" OnStatusChanged="LoadData" />
 <ActiveSessionsSection @ref="SessionsSection" OnSessionsChanged="LoadData" />
 <RecentAuthLogsSection @ref="RecentAuthLogsSection" OnSessionsChanged="LoadData" />

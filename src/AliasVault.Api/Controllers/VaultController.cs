@@ -13,11 +13,16 @@ using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.Api.Helpers;
 using AliasVault.Api.Vault;
 using AliasVault.Api.Vault.RetentionRules;
+using AliasVault.AuthLogging;
+using AliasVault.Shared.Models.Enums;
+using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.WebApi.PasswordChange;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 /// <summary>
 /// Vault controller for handling CRUD operations on the database for encrypted vault entities.
@@ -26,9 +31,16 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="timeProvider">ITimeProvider instance.</param>
+/// <param name="authLoggingService">AuthLoggingService instance.</param>
+/// <param name="cache">IMemoryCache instance.</param>
 [ApiVersion("1")]
-public class VaultController(ILogger<VaultController> logger, IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider) : AuthenticatedRequestController(userManager)
+public class VaultController(ILogger<VaultController> logger, IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache) : AuthenticatedRequestController(userManager)
 {
+    /// <summary>
+    /// Error message for providing an invalid current password (during password change).
+    /// </summary>
+    private static readonly string[] InvalidCurrentPassword = ["The current password provided is invalid. Please try again."];
+
     /// <summary>
     /// Default retention policy for vaults.
     /// </summary>
@@ -40,6 +52,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
             new VersionRetentionRule { VersionsToKeep = 3 },
+            new CredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
 
@@ -90,13 +103,18 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return Unauthorized();
         }
 
-        // Create new vault entry.
-        var newVault = new Vault
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
+
+        // Create new vault entry with salt and verifier of current vault.
+        var newVault = new AliasServerDb.Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
+            Salt = latestVault.Salt,
+            Verifier = latestVault.Verifier,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -131,7 +149,73 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
         }
 
-        return Ok();
+        return Ok(new { Message = "Database saved successfully." });
+    }
+
+    /// <summary>
+    /// Save a new vault to the database based on a new encryption password for the current user.
+    /// </summary>
+    /// <param name="model">Vault model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("change-password")]
+    public async Task<IActionResult> UpdateChangePassword([FromBody] VaultPasswordChangeRequest model)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Validate the SRP session (actual password check).  ,
+        var serverSession = AuthHelper.ValidateSrpSession(cache, user, model.CurrentClientPublicEphemeral, model.CurrentClientSessionProof);
+        if (serverSession is null)
+        {
+            // Increment failed login attempts in order to lock out the account when the limit is reached.
+            await GetUserManager().AccessFailedAsync(user);
+
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.PasswordChange, AuthFailureReason.InvalidPassword);
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
+        }
+
+        // Create new vault entry with salt and verifier of current vault.
+        var newVault = new AliasServerDb.Vault
+        {
+            UserId = user.Id,
+            VaultBlob = model.Blob,
+            Version = model.Version,
+            FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
+            Salt = model.NewPasswordSalt,
+            Verifier = model.NewPasswordVerifier,
+            CreatedAt = timeProvider.UtcNow,
+            UpdatedAt = timeProvider.UtcNow,
+        };
+
+        // Run the vault retention manager to keep the required vaults according
+        // to the applied retention policies and delete the rest.
+        // We only select the Id and UpdatedAt fields to reduce the amount of data transferred from the database.
+        var existingVaults = await context.Vaults
+            .Where(x => x.UserId == user.Id)
+            .OrderByDescending(v => v.UpdatedAt)
+            .Select(x => new AliasServerDb.Vault { Id = x.Id, UpdatedAt = x.UpdatedAt })
+            .ToListAsync();
+
+        var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, timeProvider.UtcNow, newVault);
+
+        // Delete vaults that are not needed anymore.
+        context.Vaults.RemoveRange(vaultsToDelete);
+
+        // Add the new vault and commit to database.
+        context.Vaults.Add(newVault);
+        await context.SaveChangesAsync();
+
+        // Update the password last changed at timestamp for user.
+        user.PasswordChangedAt = timeProvider.UtcNow;
+        await GetUserManager().UpdateAsync(user);
+
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
+        return Ok(new { Message = "Password changed successfully." });
     }
 
     /// <summary>

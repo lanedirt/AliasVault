@@ -74,7 +74,7 @@ public class LoginBase : OwningComponentBase
     /// </summary>
     /// <param name="responseContent">Response content.</param>
     /// <returns>List of errors if something went wrong.</returns>
-    public static List<string> ParseResponse(string responseContent)
+    public static List<string> ParseErrorResponse(string responseContent)
     {
         var returnErrors = new List<string>();
 

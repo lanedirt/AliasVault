@@ -3,6 +3,7 @@ using System;
 using AliasServerDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliasServerDb.Migrations
 {
     [DbContext(typeof(AliasServerDbContext))]
-    partial class AliasServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240902134755_MoveSrpColsToVaultTable")]
+    partial class MoveSrpColsToVaultTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,9 +149,6 @@ namespace AliasServerDb.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("PasswordChangedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
@@ -157,6 +157,11 @@ namespace AliasServerDb.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
@@ -168,6 +173,11 @@ namespace AliasServerDb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Verifier")
+                        .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

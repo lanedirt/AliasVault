@@ -41,11 +41,6 @@ public class DbUpgradeTests : ClientPlaywrightTest
             "Test credential 2",
         ];
 
-        // Update salt and verifier for the test user so the key derivation is deterministic.
-        var user = ApiDbContext.AliasVaultUsers.First();
-        user.Salt = "1a73a8ef3a1c6dd891674c415962d87246450f8ca5004ecca24be770a4d7b1f7";
-        user.Verifier = "ab284d4e6da07a2bc95fb4b9dcd0e192988cc45f51e4c51605e42d4fc1055f8398e579755f4772a045abdbded8ae47ae861faa9ff7cb98155103d7038b9713b12d80dff9134067f02564230ab2f5a550ae293b8b7049516a7dc3f918156cde7190bee7e9c84398b2b5b63aeea763cd776b3e9708fb1f66884340451187ca8aacfced19ea28bc94ae28eefa720aae7a3185b139cf6349c2d43e8147f1edadd249c7e125ce15e775c45694d9796ee3f9b8c5beacd37e777a2ea1e745c781b5c085b7e3826f6abe303a14f539cd8d9519661a91cc4e7d44111b8bc9aac1cf1a51ad76658502b436da746844348dfcfb2581c4e4c340058c116a06f975f57a689df4";
-
         // Insert static 1.0.0 vault into the database for the current user.
         ApiDbContext.Vaults.Add(
             new Vault
@@ -56,12 +51,18 @@ public class DbUpgradeTests : ClientPlaywrightTest
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 VaultBlob = await ResourceReaderUtility.ReadEmbeddedResourceAsync("AliasVault.E2ETests.TestData.AliasClientDb_encrypted_base64_1.0.0.txt"),
+                Salt = "1a73a8ef3a1c6dd891674c415962d87246450f8ca5004ecca24be770a4d7b1f7",
+                Verifier = "ab284d4e6da07a2bc95fb4b9dcd0e192988cc45f51e4c51605e42d4fc1055f8398e579755f4772a045abdbded8ae47ae861faa9ff7cb98155103d7038b9713b12d80dff9134067f02564230ab2f5a550ae293b8b7049516a7dc3f918156cde7190bee7e9c84398b2b5b63aeea763cd776b3e9708fb1f66884340451187ca8aacfced19ea28bc94ae28eefa720aae7a3185b139cf6349c2d43e8147f1edadd249c7e125ce15e775c45694d9796ee3f9b8c5beacd37e777a2ea1e745c781b5c085b7e3826f6abe303a14f539cd8d9519661a91cc4e7d44111b8bc9aac1cf1a51ad76658502b436da746844348dfcfb2581c4e4c340058c116a06f975f57a689df4",
             });
         await ApiDbContext.SaveChangesAsync();
 
-        // Refresh page so the database gets dropped then unlock the vault again which will
-        // refetch the newly inserted database from the server.
-        await RefreshPageAndUnlockVault();
+        // Logout.
+        await NavigateUsingBlazorRouter("user/logout");
+        await WaitForUrlAsync("user/logout", "AliasVault");
+
+        // Wait and check if we get redirected to /user/login.
+        await WaitForUrlAsync("user/login");
+        await Login();
 
         // Wait for two things: either the homepage to show with credentials OR the
         // vault upgrade step to show.
@@ -69,9 +70,6 @@ public class DbUpgradeTests : ClientPlaywrightTest
 
         var submitButton = Page.Locator("text=Start upgrade process").First;
         await submitButton.ClickAsync();
-
-        // Wait for welcome page to show up.
-        await WaitForUrlAsync(string.Empty, "Welcome to AliasVault");
 
         // Soft navigate to credentials.
         await NavigateUsingBlazorRouter("credentials");

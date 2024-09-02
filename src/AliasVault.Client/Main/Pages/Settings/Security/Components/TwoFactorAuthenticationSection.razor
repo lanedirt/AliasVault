@@ -13,18 +13,12 @@
         @if (TwoFactorEnabled)
         {
             <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently enabled.</div>
-            <button @onclick="DisableTwoFactor"
-                    class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Disable Two-Factor Authentication
-            </button>
+            <Button Color="danger" OnClick="DisableTwoFactor">Disable Two-Factor Authentication</Button>
         }
         else
         {
             <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently disabled. In order to improve your account security we advise you to enable it.</div>
-            <button @onclick="EnableTwoFactor"
-                    class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Enable Two-Factor Authentication
-            </button>
+            <Button Color="success" OnClick="EnableTwoFactor">Enable Two-Factor Authentication</Button>
         }
     }
 </div>
