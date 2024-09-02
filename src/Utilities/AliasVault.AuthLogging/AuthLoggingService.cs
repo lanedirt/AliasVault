@@ -38,7 +38,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             EventType = eventType,
             IsSuccess = true,
             FailureReason = null,
-            IpAddress = httpContext?.Connection.RemoteIpAddress?.ToString(),
+            IpAddress = GetIpFromContext(httpContext),
             UserAgent = httpContext?.Request.Headers.UserAgent,
             RequestPath = httpContext?.Request.Path,
             DeviceType = DetermineDeviceType(httpContext),
