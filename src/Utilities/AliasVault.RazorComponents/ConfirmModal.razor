@@ -10,7 +10,7 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900">@ModalService.Title</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500">
-                        @ModalService.Message
+                        @ConvertNewlinesToHtml(ModalService.Message)
                     </p>
                 </div>
                 <div class="items-center px-4 py-3">
@@ -35,5 +35,15 @@
     public void Dispose()
     {
         ModalService.OnChange -= StateHasChanged;
+    }
+
+    /// <summary>
+    /// Converts newline characters to HTML line breaks.
+    /// </summary>
+    /// <param name="text">The input text.</param>
+    /// <returns>The text with newlines replaced by <br /> tags.</returns>
+    private MarkupString ConvertNewlinesToHtml(string text)
+    {
+        return (MarkupString)text.Replace(Environment.NewLine, "<br />").Replace("\n", "<br />");
     }
 }
