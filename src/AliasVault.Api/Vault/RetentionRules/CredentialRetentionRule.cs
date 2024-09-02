@@ -1,0 +1,32 @@
+//-----------------------------------------------------------------------
+// <copyright file="CredentialRetentionRule.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.Api.Vault.RetentionRules;
+
+using AliasServerDb;
+
+/// <summary>
+/// Credential retention rule that keeps the latest X unique credentials and vaults associated with it.
+/// </summary>
+public class CredentialRetentionRule : IRetentionRule
+{
+    /// <summary>
+    /// Gets or sets amount of unique credentials to keep including the vault.
+    /// </summary>
+    public int CredentialsToKeep { get; set; }
+
+   /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
+    public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)
+    {
+        // For the specified amount of versions, take last vault per version.
+        return vaults
+            .GroupBy(x => new { x.Salt, x.Verifier })
+            .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(CredentialsToKeep);
+    }
+}

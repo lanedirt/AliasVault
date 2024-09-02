@@ -95,13 +95,16 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400));
         }
 
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
+
         // Server creates ephemeral and sends to client
-        var ephemeral = Srp.GenerateEphemeralServer(user.Verifier);
+        var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
         cache.Set(CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
-        return Ok(new LoginInitiateResponse(user.Salt, ephemeral.Public));
+        return Ok(new LoginInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
     }
 
     /// <summary>
@@ -320,7 +323,27 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return BadRequest(ServerValidationErrorResponse.Create(["Username 'admin' is not allowed."], 400));
         }
 
-        var user = new AliasVaultUser { UserName = model.Username, Salt = model.Salt, Verifier = model.Verifier, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var user = new AliasVaultUser
+        {
+            UserName = model.Username,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+
+            // TODO: delete salt and verifier from user table
+            Salt = string.Empty,
+            Verifier = string.Empty,
+        };
+
+        user.Vaults.Add(new AliasServerDb.Vault
+        {
+            VaultBlob = string.Empty,
+            Version = "0.0.0",
+            Salt = model.Salt,
+            Verifier = model.Verifier,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        });
+
         var result = await userManager.CreateAsync(user);
 
         if (result.Succeeded)
@@ -353,13 +376,16 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
         }
 
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
+
         // Server creates ephemeral and sends to client
-        var ephemeral = Srp.GenerateEphemeralServer(user.Verifier);
+        var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
         cache.Set(CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
-        return Ok(new PasswordChangeInitiateResponse(user.Salt, ephemeral.Public));
+        return Ok(new PasswordChangeInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
     }
 
     /// <summary>
@@ -495,21 +521,21 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
         }
 
-        // Check if the account is locked out
+        // Check if the account is locked out.
         if (await userManager.IsLockedOutAsync(user))
         {
-            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
             return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400)));
         }
 
         // Validate the SRP session (actual password check).
-        var serverSession = await ValidateSrpSession(model.Username, model.ClientPublicEphemeral, model.ClientSessionProof);
+        var serverSession = ValidateSrpSession(user, model.ClientPublicEphemeral, model.ClientSessionProof);
         if (serverSession is null)
         {
             // Increment failed login attempts in order to lock out the account when the limit is reached.
             await userManager.AccessFailedAsync(user);
 
-            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidPassword);
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Login, AuthFailureReason.InvalidPassword);
             return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
         }
 
@@ -519,29 +545,26 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// <summary>
     /// Helper method that validates the SRP session based on provided username, ephemeral and proof.
     /// </summary>
-    /// <param name="username">The username.</param>
+    /// <param name="user">The user object.</param>
     /// <param name="clientEphemeral">The client ephemeral value.</param>
     /// <param name="clientSessionProof">The client session proof.</param>
     /// <returns>Tuple.</returns>
-    private async Task<SrpSession?> ValidateSrpSession(string username, string clientEphemeral, string clientSessionProof)
+    private SrpSession? ValidateSrpSession(AliasVaultUser user, string clientEphemeral, string clientSessionProof)
     {
-        var user = await userManager.FindByNameAsync(username);
-        if (user == null)
+        if (!cache.TryGetValue(CachePrefixEphemeral + user.UserName, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
         {
             return null;
         }
 
-        if (!cache.TryGetValue(CachePrefixEphemeral + username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
-        {
-            return null;
-        }
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
 
         var serverSession = Srp.DeriveSessionServer(
             serverSecretEphemeral.ToString() ?? string.Empty,
             clientEphemeral,
-            user.Salt,
-            username,
-            user.Verifier,
+            latestVaultSaltAndVerifier.Salt,
+            user.UserName ?? string.Empty,
+            latestVaultSaltAndVerifier.Verifier,
             clientSessionProof);
 
         if (serverSession is null)
@@ -614,5 +637,17 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         await context.SaveChangesAsync();
 
         return new TokenModel { Token = token, RefreshToken = refreshToken };
+    }
+
+    /// <summary>
+    /// Get the user's latest vault which contains the current salt and verifier.
+    /// </summary>
+    /// <param name="user">User object.</param>
+    /// <returns>Tuple with salt and verifier.</returns>
+    private (string Salt, string Verifier) GetUserLatestVaultSaltAndVerifier(AliasVaultUser user)
+    {
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
+        return (latestVault.Salt, latestVault.Verifier);
     }
 }

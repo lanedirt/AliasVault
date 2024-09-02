@@ -40,6 +40,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
             new VersionRetentionRule { VersionsToKeep = 3 },
+            new CredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
 
@@ -90,13 +91,18 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return Unauthorized();
         }
 
-        // Create new vault entry.
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
+
+        // Create new vault entry with salt and verifier of current vault.
         var newVault = new Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
+            Salt = latestVault.Salt,
+            Verifier = latestVault.Verifier,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
