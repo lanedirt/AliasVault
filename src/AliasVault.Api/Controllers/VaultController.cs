@@ -149,7 +149,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
         }
 
-        return Ok();
+        return Ok(new { Message = "Database saved successfully." });
     }
 
     /// <summary>

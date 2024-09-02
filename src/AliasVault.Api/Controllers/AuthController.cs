@@ -317,8 +317,8 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var user = new AliasVaultUser
         {
             UserName = model.Username,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.UtcNow,
+            UpdatedAt = timeProvider.UtcNow,
             PasswordChangedAt = DateTime.UtcNow,
         };
 
@@ -328,8 +328,8 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             Version = "0.0.0",
             Salt = model.Salt,
             Verifier = model.Verifier,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.UtcNow,
+            UpdatedAt = timeProvider.UtcNow,
         });
 
         var result = await userManager.CreateAsync(user);
@@ -550,7 +550,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             DeviceIdentifier = deviceIdentifier,
             Value = refreshToken,
             ExpireDate = timeProvider.UtcNow.AddDays(30),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.UtcNow,
         });
         await context.SaveChangesAsync();
 

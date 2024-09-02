@@ -138,6 +138,8 @@ public sealed class DbService : IDisposable
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
 
+        // Make sure a public/private RSA encryption key exists before saving the database.
+        await GetOrCreateEncryptionKeyAsync();
         var encryptedBase64String = await GetEncryptedDatabaseBase64String();
 
         // Save to webapi.

@@ -62,8 +62,6 @@ public class SmtpServerTests
         {
             UserName = "testuser",
             Email = "testuser@example.tld",
-            Salt = "salt",
-            Verifier = "verifier",
         };
         dbContext.AliasVaultUsers.Add(user);
         await dbContext.SaveChangesAsync();
