@@ -84,27 +84,4 @@ public class AuthPasswordChangeTest : ClientPlaywrightTest
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created credential service name does not appear on login page after hard page reload. Check if the database is correctly persisted and then loaded from the server.");
     }
-
-    /// <summary>
-    /// Login (again).
-    /// </summary>
-    /// <returns>Async task.</returns>
-    private async Task Login()
-    {
-        await NavigateUsingBlazorRouter("/");
-
-        // Check that we are on the login page after navigating to the base URL.
-        // We are expecting to not be authenticated and thus to be redirected to the login page.
-        await WaitForUrlAsync("user/login");
-
-        // Try to login with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
-        await emailField.FillAsync(TestUserUsername);
-        await passwordField.FillAsync(TestUserPassword);
-
-        // Check if we get redirected when clicking on the login button.
-        var loginButton = Page.Locator("button[type='submit']");
-        await loginButton.ClickAsync();
-    }
 }

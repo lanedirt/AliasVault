@@ -49,6 +49,12 @@ public class AuthTests : ClientPlaywrightTest
 
         await Login();
 
+        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
+
+        // Check if the login was successful by verifying content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Welcome to AliasVault"), "No index content after logging in.");
+
         // Check if login has created an auth log entry.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
@@ -135,33 +141,5 @@ public class AuthTests : ClientPlaywrightTest
         await WaitForUrlAsync("user/login**", "locked out");
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("locked out"), "No account lockout message.");
-    }
-
-    /// <summary>
-    /// Test if logging in works.
-    /// </summary>
-    /// <returns>Async task.</returns>
-    private async Task Login()
-    {
-        await NavigateUsingBlazorRouter("/");
-
-        // Check that we are on the login page after navigating to the base URL.
-        // We are expecting to not be authenticated and thus to be redirected to the login page.
-        await WaitForUrlAsync("user/login");
-
-        // Try to login with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
-        await emailField.FillAsync(TestUserUsername);
-        await passwordField.FillAsync(TestUserPassword);
-
-        // Check if we get redirected when clicking on the login button.
-        var loginButton = Page.Locator("button[type='submit']");
-        await loginButton.ClickAsync();
-        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
-
-        // Check if the login was successful by verifying content.
-        var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Welcome to AliasVault"), "No index content after logging in.");
     }
 }

@@ -56,9 +56,13 @@ public class DbUpgradeTests : ClientPlaywrightTest
             });
         await ApiDbContext.SaveChangesAsync();
 
-        // Refresh page so the database gets dropped then unlock the vault again which will
-        // refetch the newly inserted database from the server.
-        await RefreshPageAndUnlockVault();
+        // Logout.
+        await NavigateUsingBlazorRouter("user/logout");
+        await WaitForUrlAsync("user/logout", "AliasVault");
+
+        // Wait and check if we get redirected to /user/login.
+        await WaitForUrlAsync("user/login");
+        await Login();
 
         // Wait for two things: either the homepage to show with credentials OR the
         // vault upgrade step to show.
@@ -66,9 +70,6 @@ public class DbUpgradeTests : ClientPlaywrightTest
 
         var submitButton = Page.Locator("text=Start upgrade process").First;
         await submitButton.ClickAsync();
-
-        // Wait for welcome page to show up.
-        await WaitForUrlAsync(string.Empty, "Welcome to AliasVault");
 
         // Soft navigate to credentials.
         await NavigateUsingBlazorRouter("credentials");
