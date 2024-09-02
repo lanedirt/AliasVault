@@ -319,10 +319,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             UserName = model.Username,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-
-            // TODO: delete salt and verifier from user table
-            Salt = string.Empty,
-            Verifier = string.Empty,
+            PasswordChangedAt = DateTime.UtcNow,
         };
 
         user.Vaults.Add(new AliasServerDb.Vault

@@ -210,6 +210,10 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         context.Vaults.Add(newVault);
         await context.SaveChangesAsync();
 
+        // Update the password last changed at timestamp for user.
+        user.PasswordChangedAt = timeProvider.UtcNow;
+        await GetUserManager().UpdateAsync(user);
+
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
         return Ok(new { Message = "Password changed successfully." });
     }
