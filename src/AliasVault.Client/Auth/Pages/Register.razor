@@ -9,6 +9,7 @@
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
 @using AliasVault.Client.Auth.Pages.Base
+@using AliasVault.Client.Utilities
 @using Cryptography.Client
 @using SecureRemotePassword
 
@@ -72,12 +73,14 @@
             var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
             var srpSignup = Srp.SignupPrepareAsync(client, salt, RegisterModel.Username, passwordHashString);
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", srpSignup);
+
+            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in LoginBase.ParseResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
                 {
                     ServerValidationErrors.AddError(error);
                 }

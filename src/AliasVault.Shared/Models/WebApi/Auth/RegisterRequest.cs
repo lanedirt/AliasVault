@@ -1,0 +1,42 @@
+//-----------------------------------------------------------------------
+// <copyright file="RegisterRequest.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.Shared.Models.WebApi.Auth;
+
+/// <summary>
+/// Register request model.
+/// </summary>
+public class RegisterRequest
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterRequest"/> class.
+    /// </summary>
+    /// <param name="username">The username.</param>
+    /// <param name="salt">The salt value.</param>
+    /// <param name="verifier">The verifier value.</param>
+    public RegisterRequest(string username, string salt, string verifier)
+    {
+        Username = username.ToLowerInvariant().Trim();
+        Salt = salt;
+        Verifier = verifier;
+    }
+
+    /// <summary>
+    /// Gets the username value.
+    /// </summary>
+    public string Username { get; }
+
+    /// <summary>
+    /// Gets the salt value.
+    /// </summary>
+    public string Salt { get; }
+
+    /// <summary>
+    /// Gets the verifier value.
+    /// </summary>
+    public string Verifier { get; }
+}

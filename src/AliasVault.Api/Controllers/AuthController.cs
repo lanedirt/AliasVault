@@ -16,10 +16,11 @@ using AliasVault.AuthLogging;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
+using AliasVault.Shared.Models.WebApi.PasswordChange;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Cryptography.Client;
-using Cryptography.Client.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
 
     /// <summary>
+    /// Error message for providing an invalid current password (during password change).
+    /// </summary>
+    private static readonly string[] InvalidCurrentPassword = ["The current password provided is invalid. Please try again."];
+
+    /// <summary>
     /// Error message for invalid 2-factor authentication code.
     /// </summary>
     private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
@@ -63,12 +69,17 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes.."];
 
     /// <summary>
+    /// Cache prefix for storing generated login ephemeral.
+    /// </summary>
+    private static readonly string CachePrefixEphemeral = "LoginEphemeral_";
+
+    /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest model)
+    public async Task<IActionResult> Login([FromBody] LoginInitiateRequest model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
         if (user == null)
@@ -88,9 +99,9 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         var ephemeral = Srp.GenerateEphemeralServer(user.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
-        cache.Set(model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
+        cache.Set(CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
-        return Ok(new LoginResponse(user.Salt, ephemeral.Public));
+        return Ok(new LoginInitiateResponse(user.Salt, ephemeral.Public));
     }
 
     /// <summary>
@@ -298,10 +309,10 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// <summary>
     /// Register endpoint used to register a new user.
     /// </summary>
-    /// <param name="model">Register model.</param>
+    /// <param name="model">Register request model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] SrpSignup model)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
         // Validate username, disallow "admin" as a username.
         if (string.Equals(model.Username, "admin", StringComparison.OrdinalIgnoreCase))
@@ -322,6 +333,69 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             // Return the token.
             var tokenModel = await GenerateNewTokensForUser(user);
             return Ok(tokenModel);
+        }
+
+        var errors = result.Errors.Select(e => e.Description).ToArray();
+        return BadRequest(ServerValidationErrorResponse.Create(errors, 400));
+    }
+
+    /// <summary>
+    /// Password change request is done by verifying the current password and then saving the new password via SRP.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [HttpGet("change-password/initiate")]
+    [Authorize]
+    public async Task<IActionResult> InitiatePasswordChange()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+        }
+
+        // Server creates ephemeral and sends to client
+        var ephemeral = Srp.GenerateEphemeralServer(user.Verifier);
+
+        // Store the server ephemeral in memory cache for Validate() endpoint to use.
+        cache.Set(CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
+
+        return Ok(new PasswordChangeInitiateResponse(user.Salt, ephemeral.Public));
+    }
+
+    /// <summary>
+    /// Password change request is done by verifying the current password and then saving the new password via SRP.
+    /// </summary>
+    /// <param name="model">The password change initiation request model.</param>
+    /// <returns>Task.</returns>
+    [HttpPost("change-password/process")]
+    [Authorize]
+    public async Task<IActionResult> ProcessPasswordChange([FromBody] PasswordChangeRequest model)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+        }
+
+        // Verify current password using SRP
+        var (_, _, error) = await ValidateUserAndPassword(new ValidateLoginRequest(user.UserName!, model.CurrentClientPublicEphemeral, model.CurrentClientSessionProof));
+
+        if (error != null)
+        {
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.PasswordChange, AuthFailureReason.InvalidPassword);
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
+        }
+
+        // Set new password using SRP.
+        user.Salt = model.NewPasswordSalt;
+        user.Verifier = model.NewPasswordVerifier;
+        user.UpdatedAt = DateTime.UtcNow;
+        var result = await userManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
+            return Ok(new { Message = "Password changed successfully." });
         }
 
         var errors = result.Errors.Select(e => e.Description).ToArray();
@@ -457,7 +531,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return null;
         }
 
-        if (!cache.TryGetValue(username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
+        if (!cache.TryGetValue(CachePrefixEphemeral + username, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
         {
             return null;
         }

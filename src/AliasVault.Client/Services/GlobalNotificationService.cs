@@ -97,6 +97,7 @@ public sealed class GlobalNotificationService
     {
         SuccessMessages.Clear();
         ErrorMessages.Clear();
+        NotifyStateChanged();
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();
