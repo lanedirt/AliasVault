@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AliasServerDb;
+using AliasVault.Api.Helpers;
 using AliasVault.AuthLogging;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
@@ -49,11 +50,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
 
     /// <summary>
-    /// Error message for providing an invalid current password (during password change).
-    /// </summary>
-    private static readonly string[] InvalidCurrentPassword = ["The current password provided is invalid. Please try again."];
-
-    /// <summary>
     /// Error message for invalid 2-factor authentication code.
     /// </summary>
     private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
@@ -67,11 +63,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// Error message for invalid 2-factor authentication recovery code.
     /// </summary>
     private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes.."];
-
-    /// <summary>
-    /// Cache prefix for storing generated login ephemeral.
-    /// </summary>
-    private static readonly string CachePrefixEphemeral = "LoginEphemeral_";
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -96,13 +87,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
+        var latestVaultSaltAndVerifier = AuthHelper.GetUserLatestVaultSaltAndVerifier(user);
 
         // Server creates ephemeral and sends to client
         var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
-        cache.Set(CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
+        cache.Set(AuthHelper.CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
         return Ok(new LoginInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
     }
@@ -365,6 +356,9 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// <summary>
     /// Password change request is done by verifying the current password and then saving the new password via SRP.
     /// </summary>
+    /// <remarks>The submit handler for the change password logic is in VaultController.UpdateChangePassword()
+    /// because changing the password of the AliasVault user also requires a new vault encrypted with that same
+    /// password in order for things to work properly.</remarks>
     /// <returns>Task.</returns>
     [HttpGet("change-password/initiate")]
     [Authorize]
@@ -377,55 +371,15 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
+        var latestVaultSaltAndVerifier = AuthHelper.GetUserLatestVaultSaltAndVerifier(user);
 
         // Server creates ephemeral and sends to client
         var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
 
-        // Store the server ephemeral in memory cache for Validate() endpoint to use.
-        cache.Set(CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
+        // Store the server ephemeral in memory cache for the Vault update (and set new password) endpoint to use.
+        cache.Set(AuthHelper.CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
         return Ok(new PasswordChangeInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
-    }
-
-    /// <summary>
-    /// Password change request is done by verifying the current password and then saving the new password via SRP.
-    /// </summary>
-    /// <param name="model">The password change initiation request model.</param>
-    /// <returns>Task.</returns>
-    [HttpPost("change-password/process")]
-    [Authorize]
-    public async Task<IActionResult> ProcessPasswordChange([FromBody] PasswordChangeRequest model)
-    {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
-        }
-
-        // Verify current password using SRP
-        var (_, _, error) = await ValidateUserAndPassword(new ValidateLoginRequest(user.UserName!, model.CurrentClientPublicEphemeral, model.CurrentClientSessionProof));
-
-        if (error != null)
-        {
-            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.PasswordChange, AuthFailureReason.InvalidPassword);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
-        }
-
-        // Set new password using SRP.
-        user.Salt = model.NewPasswordSalt;
-        user.Verifier = model.NewPasswordVerifier;
-        user.UpdatedAt = DateTime.UtcNow;
-        var result = await userManager.UpdateAsync(user);
-
-        if (result.Succeeded)
-        {
-            await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
-            return Ok(new { Message = "Password changed successfully." });
-        }
-
-        var errors = result.Errors.Select(e => e.Description).ToArray();
-        return BadRequest(ServerValidationErrorResponse.Create(errors, 400));
     }
 
     /// <summary>
@@ -529,7 +483,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Validate the SRP session (actual password check).
-        var serverSession = ValidateSrpSession(user, model.ClientPublicEphemeral, model.ClientSessionProof);
+        var serverSession = AuthHelper.ValidateSrpSession(cache, user, model.ClientPublicEphemeral, model.ClientSessionProof);
         if (serverSession is null)
         {
             // Increment failed login attempts in order to lock out the account when the limit is reached.
@@ -540,39 +494,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         return (user, serverSession, null);
-    }
-
-    /// <summary>
-    /// Helper method that validates the SRP session based on provided username, ephemeral and proof.
-    /// </summary>
-    /// <param name="user">The user object.</param>
-    /// <param name="clientEphemeral">The client ephemeral value.</param>
-    /// <param name="clientSessionProof">The client session proof.</param>
-    /// <returns>Tuple.</returns>
-    private SrpSession? ValidateSrpSession(AliasVaultUser user, string clientEphemeral, string clientSessionProof)
-    {
-        if (!cache.TryGetValue(CachePrefixEphemeral + user.UserName, out var serverSecretEphemeral) || serverSecretEphemeral is not string)
-        {
-            return null;
-        }
-
-        // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
-
-        var serverSession = Srp.DeriveSessionServer(
-            serverSecretEphemeral.ToString() ?? string.Empty,
-            clientEphemeral,
-            latestVaultSaltAndVerifier.Salt,
-            user.UserName ?? string.Empty,
-            latestVaultSaltAndVerifier.Verifier,
-            clientSessionProof);
-
-        if (serverSession is null)
-        {
-            return null;
-        }
-
-        return serverSession;
     }
 
     /// <summary>
@@ -637,17 +558,5 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         await context.SaveChangesAsync();
 
         return new TokenModel { Token = token, RefreshToken = refreshToken };
-    }
-
-    /// <summary>
-    /// Get the user's latest vault which contains the current salt and verifier.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <returns>Tuple with salt and verifier.</returns>
-    private (string Salt, string Verifier) GetUserLatestVaultSaltAndVerifier(AliasVaultUser user)
-    {
-        // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
-        return (latestVault.Salt, latestVault.Verifier);
     }
 }

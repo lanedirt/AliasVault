@@ -96,7 +96,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// Get encryption key.
     /// </summary>
     /// <returns>SrpArgonEncryption key as byte[].</returns>
-    public byte[] GetEncryptionKeyAsync()
+    public byte[] GetEncryptionKey()
     {
         return _encryptionKey;
     }
@@ -115,7 +115,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
             return "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB=";
         }
 
-        return Convert.ToBase64String(GetEncryptionKeyAsync());
+        return Convert.ToBase64String(GetEncryptionKey());
     }
 
     /// <summary>
