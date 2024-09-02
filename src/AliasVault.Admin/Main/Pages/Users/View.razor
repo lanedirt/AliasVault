@@ -343,7 +343,7 @@ else
     /// <param name="current">The current vault entry.</param>
     /// <param name="previous">The previous vault entry to compare against.</param>
     /// <returns>True if the password has changed, false otherwise.</returns>
-    private bool HasPasswordChanged(Vault current, Vault previous)
+    private static bool HasPasswordChanged(Vault current, Vault previous)
     {
         return current.Salt != previous.Salt || current.Verifier != previous.Verifier;
     }

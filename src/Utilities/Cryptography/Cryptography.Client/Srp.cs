@@ -17,22 +17,22 @@ using SecureRemotePassword;
 public static class Srp
 {
     /// <summary>
-    /// Prepare signup step.
+    /// Prepare password change step used for both registration and actual password change.
     /// </summary>
     /// <param name="client">SrpClient.</param>
     /// <param name="salt">Salt.</param>
     /// <param name="username">Username.</param>
     /// <param name="passwordHashString">Hashed password string.</param>
     /// <returns>SrpSignup model.</returns>
-    public static SrpSignup SignupPrepareAsync(SrpClient client, string salt, string username, string passwordHashString)
+    public static SrpPasswordChange PasswordChangeAsync(SrpClient client, string salt, string username, string passwordHashString)
     {
         // Derive a key from the password using Argon2id
 
-        // Signup: client generates a salt and verifier.
+        // Signup or password change: client generates a salt and verifier.
         var privateKey = DerivePrivateKey(salt, username, passwordHashString);
         var verifier = client.DeriveVerifier(privateKey);
 
-        return new SrpSignup(username, salt, privateKey, verifier);
+        return new SrpPasswordChange(username, salt, privateKey, verifier);
     }
 
     /// <summary>

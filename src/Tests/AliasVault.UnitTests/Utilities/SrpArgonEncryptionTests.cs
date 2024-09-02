@@ -105,7 +105,7 @@ public class SrpArgonEncryptionTests
 
         byte[] passwordHash = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync(password, salt);
         var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-        var srpSignup = Srp.SignupPrepareAsync(client, salt, email, passwordHashString);
+        var srpSignup = Srp.PasswordChangeAsync(client, salt, email, passwordHashString);
 
         var privateKey = srpSignup.PrivateKey;
         var verifier = srpSignup.Verifier;

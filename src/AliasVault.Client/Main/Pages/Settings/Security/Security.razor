@@ -15,14 +15,13 @@
     </div>
 </div>
 
-<PasswordChangeSection @ref="PasswordChangeSection" OnStatusChanged="LoadData" />
+<PasswordChangeSection OnStatusChanged="LoadData" />
 <TwoFactorAuthenticationSection @ref="TwoFactorSection" OnStatusChanged="LoadData" />
 <ActiveSessionsSection @ref="SessionsSection" OnSessionsChanged="LoadData" />
 <RecentAuthLogsSection @ref="RecentAuthLogsSection" OnSessionsChanged="LoadData" />
 
 @code {
     private TwoFactorAuthenticationSection? TwoFactorSection;
-    private PasswordChangeSection? PasswordChangeSection;
     private ActiveSessionsSection? SessionsSection;
     private RecentAuthLogsSection? RecentAuthLogsSection;
 

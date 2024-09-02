@@ -12,7 +12,7 @@ using AliasVault.Shared.Models.WebApi;
 /// <summary>
 /// Helper methods for parsing API responses.
 /// </summary>
-public class ApiResponseUtility
+public static class ApiResponseUtility
 {
     /// <summary>
     /// Parses the response content and displays the server validation errors.

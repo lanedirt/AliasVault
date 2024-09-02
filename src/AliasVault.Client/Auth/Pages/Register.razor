@@ -72,7 +72,7 @@
             byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt);
             var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
 
-            var srpSignup = Srp.SignupPrepareAsync(client, salt, RegisterModel.Username, passwordHashString);
+            var srpSignup = Srp.PasswordChangeAsync(client, salt, RegisterModel.Username, passwordHashString);
 
             var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);

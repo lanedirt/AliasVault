@@ -42,7 +42,7 @@
     /// </summary>
     /// <param name="text">The input text.</param>
     /// <returns>The text with newlines replaced by <br /> tags.</returns>
-    private MarkupString ConvertNewlinesToHtml(string text)
+    private static MarkupString ConvertNewlinesToHtml(string text)
     {
         return (MarkupString)text.Replace(Environment.NewLine, "<br />").Replace("\n", "<br />");
     }
