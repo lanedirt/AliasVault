@@ -60,7 +60,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the index page.
-        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
+        await WaitForUrlAsync("welcome**", "Getting Started");
     }
 
     /// <summary>
@@ -100,6 +100,6 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the index page.
-        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
+        await WaitForUrlAsync("welcome**", "Getting Started");
     }
 }

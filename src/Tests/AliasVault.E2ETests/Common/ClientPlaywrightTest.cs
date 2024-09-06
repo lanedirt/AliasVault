@@ -5,7 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-[assembly: LevelOfParallelism(4)]
+// Run tests in parallel with a maximum of 2 parallel tests.
+[assembly: LevelOfParallelism(2)]
 
 namespace AliasVault.E2ETests.Common;
 
@@ -198,15 +199,19 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task Login()
     {
-        await NavigateUsingBlazorRouter("/");
-
         // Check that we are on the login page after navigating to the base URL.
         // We are expecting to not be authenticated and thus to be redirected to the login page.
-        await WaitForUrlAsync("user/login");
+        await WaitForUrlAsync("user/login", "Your username");
+
+        // Wait for 100ms to ensure the page has loaded.
+        // Note: the default Playwright "waitfor" logic didn't work here and caused the form to be filled
+        // before it was actually fully rendered thus losing the input...
+        await Task.Delay(100);
 
         // Try to log in with test credentials.
         var emailField = Page.Locator("input[id='email']");
         var passwordField = Page.Locator("input[id='password']");
+
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
 
@@ -275,6 +280,6 @@ public class ClientPlaywrightTest : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
-        await WaitForUrlAsync(AppBaseUrl, "Getting Started");
+        await WaitForUrlAsync("welcome**", "Getting Started");
     }
 }
