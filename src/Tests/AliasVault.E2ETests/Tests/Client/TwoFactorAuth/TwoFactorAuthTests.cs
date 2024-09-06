@@ -37,9 +37,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         var message = await Page.TextContentAsync("div[role='alert']");
         Assert.That(message, Does.Contain("Two-factor authentication is now successfully enabled."), "No success message displayed.");
 
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/login", "AliasVault");
+        await Logout();
 
         // Attempt to login again with test credentials.
         var emailField = Page.Locator("input[id='email']");
@@ -75,9 +73,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         await DisableTwoFactorIfEnabled();
         var (_, recoveryCode) = await EnableTwoFactor();
 
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/login", "AliasVault");
+        await Logout();
 
         // Attempt to log in with test credentials.
         var emailField = Page.Locator("input[id='email']");

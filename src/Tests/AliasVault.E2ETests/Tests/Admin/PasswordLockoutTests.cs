@@ -22,11 +22,7 @@ public class PasswordLockoutTests : AdminPlaywrightTest
     [Test]
     public async Task AccountLockoutTestPassword()
     {
-        // Logout.
-        await NavigateBrowser("user/logout");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login**", "Sign in to");
+        await Logout();
 
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Login to your"), "No login page visible after logout.");

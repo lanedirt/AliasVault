@@ -56,12 +56,7 @@ public class DbUpgradeTests : ClientPlaywrightTest
             });
         await ApiDbContext.SaveChangesAsync();
 
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/logout", "AliasVault");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login");
+        await Logout();
         await Login();
 
         // Wait for two things: either the homepage to show with credentials OR the
