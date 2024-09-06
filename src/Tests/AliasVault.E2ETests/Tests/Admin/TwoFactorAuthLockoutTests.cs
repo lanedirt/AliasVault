@@ -52,10 +52,14 @@ public class TwoFactorAuthLockoutTests : AdminPlaywrightTest
         Assert.That(pageContent, Does.Contain("Sign in to"), "No login page visible after logout.");
 
         // Login with username and password.
-        await Page.Locator("input[id='username']").FillAsync(TestUserUsername);
-        await Page.Locator("input[id='password']").FillAsync(TestUserPassword);
+        // Enter login credentials.
+        await InputHelper.FillInputFields(new Dictionary<string, string>
+        {
+            { "username", TestUserUsername },
+            { "password", TestUserPassword },
+        });
 
-        submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Login to your account" });
+        submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Login" });
         await submitButton.ClickAsync();
 
         // Wait for 2FA page.

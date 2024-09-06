@@ -111,12 +111,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
 
         SetEnvironmentVariables();
 
-        builder.ConfigureServices((context, services) =>
+        builder.ConfigureServices(services =>
         {
-            // Remove existing registrations
             RemoveExistingRegistrations(services);
-
-            // Add new registrations
             AddNewRegistrations(services);
         });
     }
@@ -138,9 +135,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     {
         var descriptorsToRemove = new[]
         {
-            services.SingleOrDefault(d => d.ServiceType == typeof(ITimeProvider)),
             services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>)),
             services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AliasServerDbContext>)),
+            services.SingleOrDefault(d => d.ServiceType == typeof(ITimeProvider)),
         };
 
         foreach (var descriptor in descriptorsToRemove)
