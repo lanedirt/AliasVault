@@ -81,10 +81,28 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault(string.Empty, string.Empty, string.Empty, new List<string>(), DateTime.MinValue, DateTime.MinValue));
+            return Ok(new Shared.Models.WebApi.Vault
+            {
+                Blob = string.Empty,
+                Version = string.Empty,
+                EncryptionPublicKey = string.Empty,
+                CredentialsCount = 0,
+                EmailAddressList = new List<string>(),
+                CreatedAt = DateTime.MinValue,
+                UpdatedAt = DateTime.MinValue,
+            });
         }
 
-        return Ok(new Shared.Models.WebApi.Vault(vault.VaultBlob, vault.Version, string.Empty, new List<string>(), vault.CreatedAt, vault.UpdatedAt));
+        return Ok(new Shared.Models.WebApi.Vault
+        {
+            Blob = vault.VaultBlob,
+            Version = vault.Version,
+            EncryptionPublicKey = string.Empty,
+            CredentialsCount = 0,
+            EmailAddressList = new List<string>(),
+            CreatedAt = vault.CreatedAt,
+            UpdatedAt = vault.UpdatedAt,
+        });
     }
 
     /// <summary>
@@ -113,6 +131,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             VaultBlob = model.Blob,
             Version = model.Version,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
+            CredentialsCount = model.CredentialsCount,
+            EmailClaimsCount = model.EmailAddressList.Count,
             Salt = latestVault.Salt,
             Verifier = latestVault.Verifier,
             CreatedAt = timeProvider.UtcNow,
@@ -168,7 +188,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return Unauthorized();
         }
 
-        // Validate the SRP session (actual password check).  ,
+        // Validate the SRP session (actual password check).
         var serverSession = AuthHelper.ValidateSrpSession(cache, user, model.CurrentClientPublicEphemeral, model.CurrentClientSessionProof);
         if (serverSession is null)
         {
@@ -185,6 +205,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            CredentialsCount = model.CredentialsCount,
+            EmailClaimsCount = model.EmailAddressList.Count,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
             Salt = model.NewPasswordSalt,
             Verifier = model.NewPasswordVerifier,
