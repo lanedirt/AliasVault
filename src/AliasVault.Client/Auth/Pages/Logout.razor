@@ -7,10 +7,17 @@
 @inject GlobalNotificationService GlobalNotificationService
 @inject DbService DbService
 
+<div class="text-center">
+    <BoldLoadingIndicator />
+    <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Logging out...</h2>
+</div>
+
 @code {
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        await Task.Delay(500);
+
         await base.OnInitializedAsync();
         await AuthService.RemoveTokensAsync();
         AuthService.RemoveEncryptionKey();
