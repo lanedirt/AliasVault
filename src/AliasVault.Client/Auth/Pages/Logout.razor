@@ -1,15 +1,24 @@
 @page "/user/logout"
 @attribute [AllowAnonymous]
-@layout Auth.Layout.MainLayout
+@layout EmptyLayout
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
 @inject GlobalNotificationService GlobalNotificationService
 @inject DbService DbService
 
-<div class="text-center">
-    <BoldLoadingIndicator />
-    <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Logging out...</h2>
+<div class="fixed inset-0 overflow-y-auto h-full w-full flex flex-col items-center justify-center">
+    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+        <div class="text-center">
+            <div class="space-y-4">
+                <BoldLoadingIndicator />
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Logging out</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Securely unloading your data and logging you out. Please wait.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {

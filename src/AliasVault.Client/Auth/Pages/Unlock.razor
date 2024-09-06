@@ -33,7 +33,7 @@
     </button>
 
     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Logout</a>
+        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
     </div>
 </EditForm>
 
@@ -106,7 +106,7 @@
 
             if (!validPassword)
             {
-                ServerValidationErrors.AddError("The password is incorrect. Please try entering your password again, or logout and login again.");
+                ServerValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
                 return;
             }
 

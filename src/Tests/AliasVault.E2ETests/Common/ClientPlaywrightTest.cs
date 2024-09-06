@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+[assembly: LevelOfParallelism(4)]
+
 namespace AliasVault.E2ETests.Common;
 
 using AliasServerDb;
