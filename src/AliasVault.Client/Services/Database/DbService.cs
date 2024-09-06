@@ -259,6 +259,29 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Prepare a vault object for upload to the server.
+    /// </summary>
+    /// <param name="encryptedDatabase">Encrypted database as string.</param>
+    /// <returns>Vault object.</returns>
+    public async Task<Vault> PrepareVaultForUploadAsync(string encryptedDatabase)
+    {
+        var databaseVersion = await GetCurrentDatabaseVersionAsync();
+        var encryptionKey = await GetOrCreateEncryptionKeyAsync();
+        var credentialsCount = await _dbContext.Credentials.CountAsync();
+        var emailAddresses = await GetEmailClaimListAsync();
+        return new Vault
+        {
+            Blob = encryptedDatabase,
+            Version = databaseVersion,
+            EncryptionPublicKey = encryptionKey.PublicKey,
+            CredentialsCount = credentialsCount,
+            EmailAddressList = emailAddresses,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+    }
+
+    /// <summary>
     /// Clears the database connection and creates a new one so that the database is empty.
     /// </summary>
     /// <returns>SqliteConnection and AliasClientDbContext.</returns>
@@ -484,25 +507,7 @@ public sealed class DbService : IDisposable
     /// <returns>True if save action succeeded.</returns>
     private async Task<bool> SaveToServerAsync(string encryptedDatabase)
     {
-        // Get the public encryption key that server requires to encrypt data they receive for current user.
-        var encryptionKey = await GetOrCreateEncryptionKeyAsync();
-
-        // Send list of email addresses that are used in aliases by this vault so they can be
-        // claimed on the server.
-        var emailAddresses = await _dbContext.Aliases
-            .Where(a => a.Email != null)
-            .Select(a => a.Email)
-            .Distinct()
-            .Select(email => email!)
-            .ToListAsync();
-
-        // Filter the list of email addresses to only include those that are in the allowed domains.
-        emailAddresses = emailAddresses
-            .Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain)))
-            .ToList();
-
-        var databaseVersion = await GetCurrentDatabaseVersionAsync();
-        var vaultObject = new Vault(encryptedDatabase, databaseVersion, encryptionKey.PublicKey, emailAddresses, DateTime.Now, DateTime.Now);
+        var vaultObject = await PrepareVaultForUploadAsync(encryptedDatabase);
 
         try
         {

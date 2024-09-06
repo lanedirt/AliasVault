@@ -67,6 +67,18 @@ public class Vault
     public string Verifier { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the number of credentials stored in the vault. This anonymous data is used in case a vault back-up
+    /// needs to be restored to get a better idea of the vault size.
+    /// </summary>
+    public int CredentialsCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of email claims stored in the vault. This anonymous data is used in case a vault back-up
+    /// needs to be restored to get a better idea of the vault size.
+    /// </summary>
+    public int EmailClaimsCount { get; set; }
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

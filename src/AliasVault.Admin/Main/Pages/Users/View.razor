@@ -108,6 +108,8 @@ else
                                 <th scope="col" class="px-4 py-3">Updated</th>
                                 <th scope="col" class="px-4 py-3">Filesize</th>
                                 <th scope="col" class="px-4 py-3">DB version</th>
+                                <th scope="col" class="px-4 py-3">Credentials</th>
+                                <th scope="col" class="px-4 py-3">Email Claims</th>
                                 <th scope="col" class="px-4 py-3">Status</th>
                                 <th scope="col" class="px-4 py-3">Actions</th>
                             </tr>
@@ -124,6 +126,8 @@ else
                                     <td class="px-4 py-3">@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                                     <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
                                     <td class="px-4 py-3">@entry.Version</td>
+                                    <td class="px-4 py-3">@entry.CredentialsCount</td>
+                                    <td class="px-4 py-3">@entry.EmailClaimsCount</td>
                                     <td class="px-4 py-3">
                                         @if (entry == LatestVault)
                                         {
@@ -255,6 +259,8 @@ else
                 UpdatedAt = x.UpdatedAt,
                 Salt = x.Salt,
                 Verifier = x.Verifier,
+                CredentialsCount = x.CredentialsCount,
+                EmailClaimsCount = x.EmailClaimsCount,
             })
             .OrderBy(x => x.UpdatedAt)
             .ToListAsync();
