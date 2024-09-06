@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 // Run tests in parallel with a maximum of 2 parallel tests.
-[assembly: LevelOfParallelism(2)]
+[assembly: LevelOfParallelism(1)]
 
 namespace AliasVault.E2ETests.Common;
 
