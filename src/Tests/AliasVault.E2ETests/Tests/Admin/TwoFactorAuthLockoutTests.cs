@@ -45,10 +45,7 @@ public class TwoFactorAuthLockoutTests : AdminPlaywrightTest
         await WaitForUrlAsync("account/manage/enable-authenticator", "Put these codes in a safe place");
 
         // Logout.
-        await NavigateBrowser("user/logout");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login**", "Sign in to");
+        await Logout();
 
         // Try to login.
         var pageContent = await Page.TextContentAsync("body");

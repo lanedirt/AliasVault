@@ -69,12 +69,7 @@ public class AuthPasswordChangeTest : ClientPlaywrightTest
 
         // Test logging in again with new password.
         // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/logout", "AliasVault");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login");
-
+        await Logout();
         await Login();
 
         // Wait for the credentials page to load again.

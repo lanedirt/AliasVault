@@ -72,9 +72,7 @@ public class AuthTests : AdminPlaywrightTest
         TestUserPassword = "newnewnew";
 
         // Logout.
-        await NavigateBrowser("user/logout");
-        await WaitForUrlAsync("user/login**", "Sign in to");
-
+        await Logout();
         await LoginAsAdmin();
     }
 
@@ -86,12 +84,7 @@ public class AuthTests : AdminPlaywrightTest
     [Test]
     public async Task LogoutAndLoginTest()
     {
-        // Logout.
-        await NavigateBrowser("user/logout");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login**", "Sign in to");
-
+        await Logout();
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Sign in to"), "No login page visible after logout.");
     }

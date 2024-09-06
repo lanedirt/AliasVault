@@ -40,13 +40,7 @@ public class AuthTests : ClientPlaywrightTest
     [Order(2)]
     public async Task LogoutAndLoginTest()
     {
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/logout", "AliasVault");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login");
-
+        await Logout();
         await Login();
 
         await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
@@ -69,11 +63,7 @@ public class AuthTests : ClientPlaywrightTest
     public async Task RegisterFormWarningTest()
     {
         // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/logout", "AliasVault");
-
-        // Wait and check if we get redirected to /user/login.
-        await WaitForUrlAsync("user/login");
+        await Logout();
 
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
@@ -111,9 +101,7 @@ public class AuthTests : ClientPlaywrightTest
     [Order(4)]
     public async Task PasswordAuthLockoutTest()
     {
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/login", "AliasVault");
+        await Logout();
 
         // Fill in wrong password 11 times. After 11 times, the account should be locked.
         // Note: the actual lockout happens on the 10th wrong attempt, but the lockout message is only displayed

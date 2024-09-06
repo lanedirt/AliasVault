@@ -26,10 +26,7 @@ public class CodeLockoutTests : TwoFactorAuthBase
     {
         await DisableTwoFactorIfEnabled();
         await EnableTwoFactor();
-
-        // Logout.
-        await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/login", "AliasVault");
+        await Logout();
 
         // Attempt to log in with test credentials.
         var emailField = Page.Locator("input[id='email']");

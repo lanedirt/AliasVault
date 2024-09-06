@@ -77,6 +77,16 @@ public class AdminPlaywrightTest : PlaywrightTest
     }
 
     /// <summary>
+    /// Logout the current user.
+    /// </summary>
+    /// <returns>Task.</returns>
+    protected async Task Logout()
+    {
+        await NavigateUsingBlazorRouter("user/logout");
+        await WaitForUrlAsync("user/login**", "Sign in to");
+    }
+
+    /// <summary>
     /// Login to the Admin webapp as the default admin user.
     /// </summary>
     /// <returns>Async task.</returns>
