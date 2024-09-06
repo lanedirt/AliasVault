@@ -375,8 +375,6 @@ else
     /// </summary>
     private async Task<List<string>> ProcessLoginVerify(ValidateLoginResponse validateLoginResponse)
     {
-        Console.WriteLine("ProcessLoginVerify called...");
-
         // 5. Client verifies proof.
         Srp.VerifySession(ClientEphemeral.Public, ClientSession, validateLoginResponse.ServerSessionProof);
 

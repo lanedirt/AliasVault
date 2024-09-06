@@ -43,11 +43,12 @@ public class AuthTests : ClientPlaywrightTest
         await Logout();
         await Login();
 
-        await WaitForUrlAsync(AppBaseUrl, "Welcome to AliasVault");
+        // Wait for the index page to load which should show "Credentials" in the top menu.
+        await WaitForUrlAsync("**", "Credentials");
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Welcome to AliasVault"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain("Getting Started"), "No index content after logging in.");
 
         // Check if login has created an auth log entry.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
@@ -70,8 +71,9 @@ public class AuthTests : ClientPlaywrightTest
         await registerButton.ClickAsync();
         await WaitForUrlAsync("user/register", "Create a new AliasVault account");
 
-        // Wait for the form to be fully loaded
-        await Page.WaitForSelectorAsync("form");
+        // Wait for .1 seconds to ensure the page is fully loaded.
+        // Note: this is a workaround for a Playwright issue where the page is not fully loaded when the test continues.
+        await Task.Delay(100);
 
         // Register account with same test credentials as used in the initial registration bootstrap method.
         var emailField = Page.Locator("input[id='email']");

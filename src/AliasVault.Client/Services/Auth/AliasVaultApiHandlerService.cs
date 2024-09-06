@@ -54,15 +54,15 @@ public sealed class AliasVaultApiHandlerService(IServiceProvider serviceProvider
                 response = await base.SendAsync(request, cancellationToken);
                 return response;
             }
-            else
-            {
-                // Refreshing token failed. This might be caused by the expiration or revocation of the refresh token itself.
-                // Remove the token from local storage and redirect to the login page.
-                await authService.RemoveTokensAsync();
 
-                var navigationManager = serviceProvider.GetRequiredService<NavigationManager>();
-                navigationManager.NavigateTo("/user/login");
-            }
+            Console.WriteLine("Failed to refresh token, redirect to login.");
+
+            // Refreshing token failed. This might be caused by the expiration or revocation of the refresh token itself.
+            // Remove the token from local storage and redirect to the login page.
+            await authService.RemoveTokensAsync();
+
+            var navigationManager = serviceProvider.GetRequiredService<NavigationManager>();
+            navigationManager.NavigateTo("/user/login");
         }
 
         return response;

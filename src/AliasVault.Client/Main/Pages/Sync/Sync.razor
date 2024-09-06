@@ -108,7 +108,9 @@
     private async Task RedirectBackToReturnUrl()
     {
         var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
-        if (!string.IsNullOrEmpty(localStorageReturnUrl) && localStorageReturnUrl != "/sync")
+        var disallowedUrls = new[] { "/sync", "/unlock", "/user/logout" };
+
+        if (!string.IsNullOrEmpty(localStorageReturnUrl) && !disallowedUrls.Contains(localStorageReturnUrl))
         {
             await LocalStorage.RemoveItemAsync(ReturnUrlKey);
             NavigationManager.NavigateTo(localStorageReturnUrl);
