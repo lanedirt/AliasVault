@@ -5,6 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+// Run tests in parallel with a maximum of 2 parallel tests.
+[assembly: LevelOfParallelism(2)]
+
 namespace AliasVault.E2ETests.Common;
 
 using Microsoft.Extensions.Configuration;
