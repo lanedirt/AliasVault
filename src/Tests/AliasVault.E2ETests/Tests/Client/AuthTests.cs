@@ -78,7 +78,10 @@ public class AuthTests : ClientPlaywrightTest
         // Try to register a new account.
         var registerButton = Page.Locator("a[href='/user/register']");
         await registerButton.ClickAsync();
-        await WaitForUrlAsync("user/register");
+        await WaitForUrlAsync("user/register", "Create a new AliasVault account");
+
+        // Wait for the form to be fully loaded
+        await Page.WaitForSelectorAsync("form");
 
         // Register account with same test credentials as used in the initial registration bootstrap method.
         var emailField = Page.Locator("input[id='email']");
