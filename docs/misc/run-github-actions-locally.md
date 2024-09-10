@@ -54,12 +54,13 @@ This command tells `act` to use the `catthehacker/ubuntu:full-latest` Docker ima
 To run and debug the E2E tests for AliasVault using a more complete runner image, use the following command:
 
 ```bash
-act -W .github/workflows/dotnet-e2e-tests.yml -P ubuntu-latest=catthehacker/ubuntu:full-latest
+act -W .github/workflows/dotnet-e2e-tests.yml -P ubuntu-latest=catthehacker/ubuntu:full-latest --container-architecture linux/amd64
 ```
 
 This command does the following:
 - `-W .github/workflows/dotnet-e2e-tests.yml`: Specifies the workflow file to run
 - `-P ubuntu-latest=catthehacker/ubuntu:full-latest`: Uses a more complete Ubuntu image that better replicates the GitHub-hosted runner environment
+- `--container-architecture linux/amd64`: Specifies the architecture of the Docker container to use
 
 Running this command will execute the E2E tests locally, allowing you to debug and test your workflow without pushing changes to the repository.
 
