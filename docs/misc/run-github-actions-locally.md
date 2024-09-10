@@ -1,11 +1,10 @@
 # Run GitHub Actions Locally
 
-This guide will help you set up and run GitHub Actions locally on your Mac, which can be useful for debugging and testing your workflows without pushing changes to the repository.
+This guide will help you set up and run GitHub Actions locally on Linux, which can be useful for debugging and testing your workflows without pushing changes to the repository.
 
 ## Prerequisites
 
-- macOS
-- [Homebrew](https://brew.sh/) package manager
+- Linux (Ubuntu or RHEL-based distributions)
 - [Docker](https://www.docker.com/) installed and running
 
 ## Setup Instructions
@@ -15,7 +14,9 @@ This guide will help you set up and run GitHub Actions locally on your Mac, whic
 First, install the GitHub CLI using Homebrew:
 
 ```bash
-brew install gh
+sudo dnf install 'dnf-command(config-manager)'
+sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+sudo dnf install gh --repo gh-cli
 ```
 
 ### 2. Install Nektos/Act
@@ -54,13 +55,12 @@ This command tells `act` to use the `catthehacker/ubuntu:full-latest` Docker ima
 To run and debug the E2E tests for AliasVault using a more complete runner image, use the following command:
 
 ```bash
-act -W .github/workflows/dotnet-e2e-tests.yml -P ubuntu-latest=catthehacker/ubuntu:full-latest --container-architecture linux/amd64
+act -W .github/workflows/dotnet-e2e-tests.yml -P ubuntu-latest=catthehacker/ubuntu:full-latest
 ```
 
 This command does the following:
 - `-W .github/workflows/dotnet-e2e-tests.yml`: Specifies the workflow file to run
 - `-P ubuntu-latest=catthehacker/ubuntu:full-latest`: Uses a more complete Ubuntu image that better replicates the GitHub-hosted runner environment
-- `--container-architecture linux/amd64`: Specifies the architecture of the Docker container to use
 
 Running this command will execute the E2E tests locally, allowing you to debug and test your workflow without pushing changes to the repository.
 
