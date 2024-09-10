@@ -21,7 +21,6 @@
     private bool SmtpStatus;
     private bool SmtpPending;
     private DateTime LastHeartbeat;
-    private readonly SemaphoreSlim InitLock = new(1, 1);
 
     /// <summary>
     /// The interval in milliseconds for refreshing the service status.
@@ -29,9 +28,9 @@
     private readonly int AutoRefreshInterval = 5000;
 
     /// <summary>
-    /// The timer for refreshing the service status.
+    /// CancellationTokenSource for the timer.
     /// </summary>
-    private Timer? Timer;
+    private CancellationTokenSource? _timerCancellationTokenSource;
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -40,10 +39,20 @@
 
         if (firstRender)
         {
-            Timer = new Timer(async _ =>
-            {
-                await InitPage();
-            }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(AutoRefreshInterval));
+            _timerCancellationTokenSource = new CancellationTokenSource();
+            _ = RunPeriodicRefreshAsync(_timerCancellationTokenSource.Token);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the service status periodically while waiting for specified amount of ms in between.
+    /// </summary>
+    private async Task RunPeriodicRefreshAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await InitPage();
+            await Task.Delay(AutoRefreshInterval, cancellationToken);
         }
     }
 
@@ -54,8 +63,8 @@
 
         if (disposing)
         {
-            // Dispose of the timer if it exists.
-            Timer?.Dispose();
+            _timerCancellationTokenSource?.Cancel();
+            _timerCancellationTokenSource?.Dispose();
         }
     }
 
@@ -126,51 +135,29 @@
     /// </summary>
     private async Task InitPage()
     {
-        if (InitInProgress)
+        if (InitInProgress || SmtpPending)
         {
             return;
         }
 
         try
         {
-            await InitLock.WaitAsync();
+            InitInProgress = true;
+            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
 
-            if (InitInProgress)
+            var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
+            if (smtpEntry != null)
             {
-                return;
+                LastHeartbeat = smtpEntry.Heartbeat;
+                SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
             }
 
-            if (!SmtpPending)
-            {
-                InitInProgress = true;
-
-                try
-                {
-                    InitInProgress = true;
-                    var dbContext = await DbContextFactory.CreateDbContextAsync();
-                    ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
-                    // Service status checks if the status is "Started" and was lastAlive
-                    // (so actually reported itself) in the last 5 minutes.
-                    var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
-                    if (smtpEntry != null)
-                    {
-                        LastHeartbeat = smtpEntry.Heartbeat;
-                        SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
-                    }
-
-                    InitInProgress = false;
-
-                    await InvokeAsync(() => StateHasChanged());
-                }
-                finally
-                {
-                    InitInProgress = false;
-                }
-            }
+            await InvokeAsync(StateHasChanged);
         }
         finally
         {
-            InitLock.Release();
+            InitInProgress = false;
         }
     }
 

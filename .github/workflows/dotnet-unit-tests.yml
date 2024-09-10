@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 8.0.304
 
     - name: Install dependencies
       run: dotnet workload install wasm-tools
@@ -28,6 +28,6 @@ jobs:
 
     - name: Build
       run: dotnet build --no-restore
-      
+
     - name: Run unittests
       run: dotnet test src/Tests/AliasVault.UnitTests --no-build --verbosity normal
