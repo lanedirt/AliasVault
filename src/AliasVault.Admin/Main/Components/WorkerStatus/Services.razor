@@ -28,11 +28,6 @@
     private readonly int AutoRefreshInterval = 5000;
 
     /// <summary>
-    /// SemaphoreSlim to prevent concurrent execution of InitPage
-    /// </summary>
-    private SemaphoreSlim InitLock = new(1, 1);
-
-    /// <summary>
     /// CancellationTokenSource for the timer.
     /// </summary>
     private CancellationTokenSource? _timerCancellationTokenSource;
@@ -49,6 +44,9 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes the service status periodically while waiting for specified amount of ms in between.
+    /// </summary>
     private async Task RunPeriodicRefreshAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -67,7 +65,6 @@
         {
             _timerCancellationTokenSource?.Cancel();
             _timerCancellationTokenSource?.Dispose();
-            InitLock.Dispose();
         }
     }
 
@@ -138,33 +135,29 @@
     /// </summary>
     private async Task InitPage()
     {
-        if (await InitLock.WaitAsync(0))
+        if (InitInProgress || SmtpPending)
         {
-            try
+            return;
+        }
+
+        try
+        {
+            InitInProgress = true;
+            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
+
+            var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
+            if (smtpEntry != null)
             {
-                if (InitInProgress || SmtpPending)
-                {
-                    return;
-                }
-
-                InitInProgress = true;
-                var dbContext = await DbContextFactory.CreateDbContextAsync();
-                ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
-
-                var smtpEntry = ServiceStatus.Find(x => x.ServiceName == "AliasVault.SmtpService");
-                if (smtpEntry != null)
-                {
-                    LastHeartbeat = smtpEntry.Heartbeat;
-                    SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
-                }
-
-                await InvokeAsync(StateHasChanged);
+                LastHeartbeat = smtpEntry.Heartbeat;
+                SmtpStatus = IsHeartbeatValid() && smtpEntry.CurrentStatus == "Started";
             }
-            finally
-            {
-                InitInProgress = false;
-                InitLock.Release();
-            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        finally
+        {
+            InitInProgress = false;
         }
     }
 
