@@ -151,14 +151,10 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
     private void AddNewRegistrations(IServiceCollection services)
     {
-        // Add the DbConnection as a singleton
-        services.AddSingleton(_dbConnection);
-
         // Add the DbContextFactory
-        services.AddDbContextFactory<AliasServerDbContext>((container, options) =>
+        services.AddDbContextFactory<AliasServerDbContext>(options =>
         {
-            var connection = container.GetRequiredService<DbConnection>();
-            options.UseSqlite(connection).UseLazyLoadingProxies();
+            options.UseSqlite(_dbConnection).UseLazyLoadingProxies();
         });
 
         // Add the VersionedContentService
