@@ -142,34 +142,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             UpdatedAt = timeProvider.UtcNow,
         };
 
-        // Run the vault retention manager to keep the required vaults according
-        // to the applied retention policies and delete the rest.
-        // We only select the Id and UpdatedAt fields to reduce the amount of data transferred from the database.
-        var existingVaults = await context.Vaults
-            .Where(x => x.UserId == user.Id)
-            .OrderByDescending(v => v.UpdatedAt)
-            .Select(x => new AliasServerDb.Vault
-            {
-                Id = x.Id,
-                UserId = x.UserId,
-                VaultBlob = string.Empty,
-                Version = x.Version,
-                FileSize = x.FileSize,
-                CredentialsCount = x.CredentialsCount,
-                EmailClaimsCount = x.EmailClaimsCount,
-                Salt = x.Salt,
-                Verifier = x.Verifier,
-                EncryptionType = x.EncryptionType,
-                EncryptionSettings = x.EncryptionSettings,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt,
-            })
-            .ToListAsync();
-
-        var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, timeProvider.UtcNow, newVault);
-
-        // Delete vaults that are not needed anymore.
-        context.Vaults.RemoveRange(vaultsToDelete);
+        // Run the vault retention manager to clean up old vaults.
+        await ApplyVaultRetention(context, user.Id, newVault);
 
         // Add the new vault and commit to database.
         context.Vaults.Add(newVault);
@@ -234,11 +208,35 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             UpdatedAt = timeProvider.UtcNow,
         };
 
+        // Run the vault retention manager to clean up old vaults.
+        await ApplyVaultRetention(context, user.Id, newVault);
+
+        // Add the new vault and commit to database.
+        context.Vaults.Add(newVault);
+        await context.SaveChangesAsync();
+
+        // Update the password last changed at timestamp for user.
+        user.PasswordChangedAt = timeProvider.UtcNow;
+        await GetUserManager().UpdateAsync(user);
+
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
+        return Ok(new { Message = "Password changed successfully." });
+    }
+
+    /// <summary>
+    /// Apply vault retention policies to the user's vaults and delete the ones that are not covered
+    /// by the retention policies.
+    /// </summary>
+    /// <param name="context">Database context.</param>
+    /// <param name="userId">User ID.</param>
+    /// <param name="newVault">New vault object.</param>
+    private async Task ApplyVaultRetention(AliasServerDbContext context, string userId, AliasServerDb.Vault newVault)
+    {
         // Run the vault retention manager to keep the required vaults according
         // to the applied retention policies and delete the rest.
         // We only select the Id and UpdatedAt fields to reduce the amount of data transferred from the database.
         var existingVaults = await context.Vaults
-            .Where(x => x.UserId == user.Id)
+            .Where(x => x.UserId == userId)
             .OrderByDescending(v => v.UpdatedAt)
             .Select(x => new AliasServerDb.Vault
             {
@@ -262,17 +260,6 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
 
         // Delete vaults that are not needed anymore.
         context.Vaults.RemoveRange(vaultsToDelete);
-
-        // Add the new vault and commit to database.
-        context.Vaults.Add(newVault);
-        await context.SaveChangesAsync();
-
-        // Update the password last changed at timestamp for user.
-        user.PasswordChangedAt = timeProvider.UtcNow;
-        await GetUserManager().UpdateAsync(user);
-
-        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
-        return Ok(new { Message = "Password changed successfully." });
     }
 
     /// <summary>
