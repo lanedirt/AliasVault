@@ -25,7 +25,7 @@ public static class Defaults
     /// <summary>
     /// Gets the default memory size for Argon2id (in KB).
     /// </summary>
-    public static int Argon2IdMemorySize { get; } = 32768;
+    public static int Argon2IdMemorySize { get; } = 19456;
 
     /// <summary>
     /// Gets the default number of iterations for Argon2id.
