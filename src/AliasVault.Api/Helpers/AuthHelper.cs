@@ -38,14 +38,14 @@ public static class AuthHelper
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = GetUserLatestVaultSaltAndVerifier(user);
+        var latestVaultEncryptionSettings = GetUserLatestVaultEncryptionSettings(user);
 
         var serverSession = Srp.DeriveSessionServer(
             serverSecretEphemeral.ToString() ?? string.Empty,
             clientEphemeral,
-            latestVaultSaltAndVerifier.Salt,
+            latestVaultEncryptionSettings.Salt,
             user.UserName ?? string.Empty,
-            latestVaultSaltAndVerifier.Verifier,
+            latestVaultEncryptionSettings.Verifier,
             clientSessionProof);
 
         if (serverSession is null)
@@ -60,11 +60,11 @@ public static class AuthHelper
     /// Get the user's latest vault which contains the current salt and verifier.
     /// </summary>
     /// <param name="user">User object.</param>
-    /// <returns>Tuple with salt and verifier.</returns>
-    public static (string Salt, string Verifier) GetUserLatestVaultSaltAndVerifier(AliasVaultUser user)
+    /// <returns>Tuple with salt, verifier, encryption type and encryption settings.</returns>
+    public static (string Salt, string Verifier, string EncryptionType, string EncryptionSettings) GetUserLatestVaultEncryptionSettings(AliasVaultUser user)
     {
-        // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
-        return (latestVault.Salt, latestVault.Verifier);
+        // Retrieve latest vault of user which contains the encryption settings.
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
+        return (latestVault.Salt, latestVault.Verifier, latestVault.EncryptionType, latestVault.EncryptionSettings);
     }
 }

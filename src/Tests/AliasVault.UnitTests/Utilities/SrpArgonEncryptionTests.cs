@@ -23,13 +23,14 @@ public class SrpArgonEncryptionTests
     [Test]
     public async Task TestBasicEncrypt()
     {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         string password = "your-password";
         string salt = "your-salt"; // Use a secure random salt in production
 
         string plaintext = "Hello, World!";
 
         // Derive a key from the password using Argon2id
-        byte[] key = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync(password, salt);
+        byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
         Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
 
         // SymmetricEncrypt the plaintext
@@ -44,6 +45,10 @@ public class SrpArgonEncryptionTests
         string decrypted = Cryptography.Server.Encryption.SymmetricDecrypt(encrypted, key);
         Console.WriteLine($"Decrypted: {decrypted}");
         Assert.That(decrypted, Is.EqualTo(plaintext));
+
+        stopwatch.Stop();
+        var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+        Console.WriteLine($"Execution time: {elapsedMilliseconds} ms");
     }
 
     /// <summary>

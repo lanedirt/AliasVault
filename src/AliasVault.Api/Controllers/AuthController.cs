@@ -79,7 +79,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
         }
 
-        // Check if the account is locked out
+        // Check if the account is locked out.
         if (await userManager.IsLockedOutAsync(user))
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
@@ -87,15 +87,15 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = AuthHelper.GetUserLatestVaultSaltAndVerifier(user);
+        var latestVaultEncryptionSettings = AuthHelper.GetUserLatestVaultEncryptionSettings(user);
 
         // Server creates ephemeral and sends to client
-        var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
+        var ephemeral = Srp.GenerateEphemeralServer(latestVaultEncryptionSettings.Verifier);
 
         // Store the server ephemeral in memory cache for Validate() endpoint to use.
         cache.Set(AuthHelper.CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
-        return Ok(new LoginInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
+        return Ok(new LoginInitiateResponse(latestVaultEncryptionSettings.Salt, ephemeral.Public, latestVaultEncryptionSettings.EncryptionType, latestVaultEncryptionSettings.EncryptionSettings));
     }
 
     /// <summary>
@@ -328,6 +328,8 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             Version = "0.0.0",
             Salt = model.Salt,
             Verifier = model.Verifier,
+            EncryptionType = Defaults.EncryptionType,
+            EncryptionSettings = Defaults.EncryptionSettings,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         });
@@ -368,15 +370,15 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVaultSaltAndVerifier = AuthHelper.GetUserLatestVaultSaltAndVerifier(user);
+        var latestVaultEncryptionSettings = AuthHelper.GetUserLatestVaultEncryptionSettings(user);
 
         // Server creates ephemeral and sends to client
-        var ephemeral = Srp.GenerateEphemeralServer(latestVaultSaltAndVerifier.Verifier);
+        var ephemeral = Srp.GenerateEphemeralServer(latestVaultEncryptionSettings.Verifier);
 
         // Store the server ephemeral in memory cache for the Vault update (and set new password) endpoint to use.
         cache.Set(AuthHelper.CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
-        return Ok(new PasswordChangeInitiateResponse(latestVaultSaltAndVerifier.Salt, ephemeral.Public));
+        return Ok(new PasswordChangeInitiateResponse(latestVaultEncryptionSettings.Salt, ephemeral.Public, latestVaultEncryptionSettings.EncryptionType, latestVaultEncryptionSettings.EncryptionSettings));
     }
 
     /// <summary>

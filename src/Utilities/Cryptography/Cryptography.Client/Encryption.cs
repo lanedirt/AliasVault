@@ -8,6 +8,7 @@
 namespace Cryptography.Client;
 
 using System.Text;
+using System.Text.Json;
 using Konscious.Security.Cryptography;
 
 /// <summary>
@@ -20,20 +21,61 @@ public static class Encryption
     /// </summary>
     /// <param name="password">User password.</param>
     /// <param name="salt">The salt to use for the Argon2id hash.</param>
+    /// <param name="encryptionType">The encryption type to use. Defaults to <see cref="Defaults.EncryptionType"/>.</param>
+    /// <param name="encryptionSettings">The encryption settings to use. Defaults to settings as defined in <see cref="Defaults"/>.</param>
     /// <returns>SrpArgonEncryption key as byte array.</returns>
-    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt)
+    public static async Task<byte[]> DeriveKeyFromPasswordAsync(string password, string salt, string? encryptionType = null, string? encryptionSettings = null)
     {
+        if (encryptionType is null)
+        {
+            encryptionType = Defaults.EncryptionType;
+        }
+
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
         byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
 
-        var argon2 = new Argon2id(passwordBytes)
+        switch (encryptionType)
         {
-            Salt = saltBytes,
-            DegreeOfParallelism = 4,
-            MemorySize = 8192,
-            Iterations = 1,
-        };
+            case "Argon2Id":
+                var degreeOfParallelism = Defaults.Argon2IdDegreeOfParallelism;
+                var memorySize = Defaults.Argon2IdMemorySize;
+                var iterations = Defaults.Argon2IdIterations;
 
-        return await argon2.GetBytesAsync(32); // Generate a 256-bit key
+                if (encryptionSettings is not null)
+                {
+                    // Parse the encryption properties json string.
+                    var properties = JsonSerializer.Deserialize<Dictionary<string, int>>(encryptionSettings);
+                    if (properties is not null)
+                    {
+                        if (properties.TryGetValue("DegreeOfParallelism", out int doP))
+                        {
+                            degreeOfParallelism = doP;
+                        }
+
+                        if (properties.TryGetValue("MemorySize", out int memSize))
+                        {
+                            memorySize = memSize;
+                        }
+
+                        if (properties.TryGetValue("Iterations", out int iter))
+                        {
+                            iterations = iter;
+                        }
+                    }
+                }
+
+                var argon2 = new Argon2id(passwordBytes)
+                {
+                    Salt = saltBytes,
+                    DegreeOfParallelism = degreeOfParallelism,
+                    MemorySize = memorySize,
+                    Iterations = iterations,
+                };
+
+                return await argon2.GetBytesAsync(32); // Generate a 256-bit key
+
+            default:
+                throw new NotSupportedException($"Encryption type {Defaults.EncryptionType} is not supported.");
+        }
     }
 }
