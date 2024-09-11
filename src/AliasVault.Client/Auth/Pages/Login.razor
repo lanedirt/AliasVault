@@ -212,7 +212,7 @@ else
         }
 
         // 3. Client derives shared session key.
-        PasswordHash = await Encryption.DeriveKeyFromPasswordAsync(LoginModel.Password, loginResponse.Salt);
+        PasswordHash = await Encryption.DeriveKeyFromPasswordAsync(LoginModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
         var passwordHashString = BitConverter.ToString(PasswordHash).Replace("-", string.Empty);
 
         ClientEphemeral = Srp.GenerateEphemeralClient();

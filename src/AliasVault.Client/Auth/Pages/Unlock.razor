@@ -96,10 +96,11 @@
             if (loginResponse == null)
             {
                 ServerValidationErrors.AddError("An error occurred while processing the unlock request.");
+                return;
             }
 
             // 3. Client derives shared session key.
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(UnlockModel.Password, loginResponse!.Salt);
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(UnlockModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
 
             // Check if the password is correct locally by decrypting the test string.
             var validPassword = await AuthService.ValidateEncryptionKeyAsync(passwordHash);

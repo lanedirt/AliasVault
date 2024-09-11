@@ -35,13 +35,13 @@ public class Vault
     /// <summary>
     /// Gets or sets the encrypted vault blob.
     /// </summary>
-    public string VaultBlob { get; set; } = null!;
+    public required string VaultBlob { get; set; }
 
     /// <summary>
     /// Gets or sets the vault data model version.
     /// </summary>
     [StringLength(255)]
-    public string Version { get; set; } = null!;
+    public required string Version { get; set; }
 
     /// <summary>
     /// Gets or sets the vault filesize in kilobytes.
@@ -55,7 +55,7 @@ public class Vault
     /// backup restores.
     /// </summary>
     [StringLength(100)]
-    public string Salt { get; set; } = null!;
+    public required string Salt { get; set; }
 
     /// <summary>
     /// Gets or sets the verifier used for SRP authentication. Note: the login credentials are stored with the vault
@@ -64,7 +64,7 @@ public class Vault
     /// backup restores.
     /// </summary>
     [StringLength(1000)]
-    public string Verifier { get; set; } = null!;
+    public required string Verifier { get; set; }
 
     /// <summary>
     /// Gets or sets the number of credentials stored in the vault. This anonymous data is used in case a vault back-up
@@ -77,6 +77,16 @@ public class Vault
     /// needs to be restored to get a better idea of the vault size.
     /// </summary>
     public int EmailClaimsCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the encryption type.
+    /// </summary>
+    public required string EncryptionType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the encryption settings as a JSON string.
+    /// </summary>
+    public required string EncryptionSettings { get; set; }
 
     /// <summary>
     /// Gets or sets created timestamp.

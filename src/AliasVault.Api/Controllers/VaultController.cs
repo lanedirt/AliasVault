@@ -19,6 +19,7 @@ using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.PasswordChange;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
+using Cryptography.Client;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -121,8 +122,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return Unauthorized();
         }
 
-        // Retrieve latest vault of user which contains the current salt and verifier.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier }).First();
+        // Retrieve latest vault of user which contains the current encryption settings.
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
 
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
@@ -135,6 +136,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             EmailClaimsCount = model.EmailAddressList.Count,
             Salt = latestVault.Salt,
             Verifier = latestVault.Verifier,
+            EncryptionType = latestVault.EncryptionType,
+            EncryptionSettings = latestVault.EncryptionSettings,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -145,7 +148,22 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         var existingVaults = await context.Vaults
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(v => v.UpdatedAt)
-            .Select(x => new AliasServerDb.Vault { Id = x.Id, UpdatedAt = x.UpdatedAt })
+            .Select(x => new AliasServerDb.Vault
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                VaultBlob = string.Empty,
+                Version = x.Version,
+                FileSize = x.FileSize,
+                CredentialsCount = x.CredentialsCount,
+                EmailClaimsCount = x.EmailClaimsCount,
+                Salt = x.Salt,
+                Verifier = x.Verifier,
+                EncryptionType = x.EncryptionType,
+                EncryptionSettings = x.EncryptionSettings,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+            })
             .ToListAsync();
 
         var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, timeProvider.UtcNow, newVault);
@@ -210,6 +228,8 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
             Salt = model.NewPasswordSalt,
             Verifier = model.NewPasswordVerifier,
+            EncryptionType = Defaults.EncryptionType,
+            EncryptionSettings = Defaults.EncryptionSettings,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -220,7 +240,22 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         var existingVaults = await context.Vaults
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(v => v.UpdatedAt)
-            .Select(x => new AliasServerDb.Vault { Id = x.Id, UpdatedAt = x.UpdatedAt })
+            .Select(x => new AliasServerDb.Vault
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                VaultBlob = string.Empty,
+                Version = x.Version,
+                FileSize = x.FileSize,
+                CredentialsCount = x.CredentialsCount,
+                EmailClaimsCount = x.EmailClaimsCount,
+                Salt = x.Salt,
+                Verifier = x.Verifier,
+                EncryptionType = x.EncryptionType,
+                EncryptionSettings = x.EncryptionSettings,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+            })
             .ToListAsync();
 
         var vaultsToDelete = VaultRetentionManager.ApplyRetention(_retentionPolicy, existingVaults, timeProvider.UtcNow, newVault);

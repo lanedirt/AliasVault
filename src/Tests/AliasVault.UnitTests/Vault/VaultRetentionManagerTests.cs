@@ -30,15 +30,15 @@ public class VaultRetentionManagerTests
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
         testVaults =
         [
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc" },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc" },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 2 days ago
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 3 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc" }, // 4 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def" }, // 2 weeks ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def" }, // 3 weeks ago
-            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def" }, // 1 month ago
-            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi" }, // 2 months ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 days ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 3 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 4 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 weeks ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 3 weeks ago
+            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 1 month ago
+            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 months ago
         ];
     }
 
@@ -197,6 +197,12 @@ public class VaultRetentionManagerTests
         var now = DateTime.Now;
         var newVault = new Vault
         {
+            VaultBlob = string.Empty,
+            Version = string.Empty,
+            Salt = string.Empty,
+            Verifier = string.Empty,
+            EncryptionType = string.Empty,
+            EncryptionSettings = string.Empty,
             UpdatedAt = now,
         };
 
