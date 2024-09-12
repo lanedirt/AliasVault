@@ -30,6 +30,9 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="css/tailwind.css?v=@CacheBuster" rel="stylesheet">
     <link href="AliasVault.Client.styles.css?v=@CacheBuster" rel="stylesheet" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" sizes="500x500" href="img/icon-500.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="img/icon-192.png" />
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-800">
@@ -108,6 +111,11 @@
     <script src="js/utilities.js?v=@CacheBuster" async></script>
     <script src="_framework/blazor.webassembly.js?v=@CacheBuster" async></script>
     <script src="lib/qrcode.min.js?v=@CacheBuster" defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+    </script>
 </body>
 
 </html>
