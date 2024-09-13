@@ -12,16 +12,21 @@ function downloadFileFromStream(fileName, contentStreamReference) {
 
 window.topMenuClickOutsideHandler = (dotNetHelper) => {
     document.addEventListener('click', (event) => {
-        const menu = document.getElementById('userMenuDropdown');
-        const menuButton = document.getElementById('userMenuDropdownButton');
-        if (menu && !menu.contains(event.target) && !menuButton.contains(event.target)) {
-            dotNetHelper.invokeMethodAsync('CloseMenu');
+        const userMenu = document.getElementById('userMenuDropdown');
+        const userMenuButton = document.getElementById('userMenuDropdownButton');
+        const mobileMenu = document.getElementById('mobileMenuDropdown');
+        const mobileMenuButton = document.getElementById('toggleMobileMenuButton');
+
+        // Handle user menu
+        if (userMenu && !userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
+            dotNetHelper.invokeMethodAsync('CloseUserMenu');
         }
 
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuButton = document.getElementById('toggleMobileMenuButton');
-        if (mobileMenu && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
-            dotNetHelper.invokeMethodAsync('CloseMenu');
+        // Handle mobile menu
+        if (mobileMenu && !mobileMenu.contains(event.target)) {
+            if (!mobileMenuButton.contains(event.target)) {
+                dotNetHelper.invokeMethodAsync('CloseMobileMenu');
+            }
         }
     });
 };
@@ -152,5 +157,3 @@ function generateQrCode(id) {
 
     qrcode.makeCode(dataUrl);
 }
-
-
