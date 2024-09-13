@@ -37,7 +37,7 @@
                     <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="user photo">
                 </button>
 
-                <div class="absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsMenuOpen ? "block" : "hidden")" id="userMenuDropdown" data-popper-placement="bottom">
+                <div class="absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsUserMenuOpen ? "block" : "hidden")" id="userMenuDropdown" data-popper-placement="bottom">
                     <div class="py-3 px-4">
                         <span class="block text-sm font-semibold text-gray-900 dark:text-white">@Username</span>
                     </div>
@@ -68,44 +68,50 @@
                     </ul>
                 </div>
 
-                <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+               <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="ms-3 items-center p-2 text-gray-500 rounded-lg md:ml-2 lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
                     <span class="sr-only">Open menu</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
             </div>
         </div>
-    </nav>
-    @if (IsMobileMenuOpen)
-    {
-        <nav class="bg-white dark:bg-gray-900">
-            <ul id="mobileMenu" class="flex-col mt-0 pt-16 w-full text-sm font-medium lg:hidden">
-                <li class="block border-b dark:border-gray-700">
-                    <NavLink href="/" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+        <div class="w-full text-base list-none bg-white divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsMobileMenuOpen ? "block" : "hidden")" id="mobileMenuDropdown" data-popper-placement="bottom">
+            <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
+                <li>
+                    <NavLink href="/" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
                         Home
                     </NavLink>
                 </li>
-                <li class="block border-b dark:border-gray-700">
-                    <NavLink href="/credentials" class="block py-3 px-4 text-gray-900 lg:py-0 dark:text-white lg:hover:underline lg:px-0" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                <li>
+                    <NavLink href="/credentials" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
                         Credentials
                     </NavLink>
                 </li>
             </ul>
-        </nav>
-    }
+        </div>
+    </nav>
 </header>
 
 @code {
-    private bool IsMenuOpen { get; set; } = false;
+    private bool IsUserMenuOpen { get; set; } = false;
     private bool IsMobileMenuOpen { get; set; } = false;
-    private string Username { get; set; } = "";
+    private string Username { get; set; } = string.Empty;
 
     /// <summary>
     /// Close the menu.
     /// </summary>
     [JSInvokable]
-    public void CloseMenu()
+    public void CloseUserMenu()
     {
-        IsMenuOpen = false;
+        IsUserMenuOpen = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Close the menu.
+    /// </summary>
+    [JSInvokable]
+    public void CloseMobileMenu()
+    {
         IsMobileMenuOpen = false;
         StateHasChanged();
     }
@@ -140,18 +146,20 @@
 
     private void LocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        IsMenuOpen = false;
+        IsUserMenuOpen = false;
         IsMobileMenuOpen = false;
         StateHasChanged();
     }
 
     private void ToggleMenu()
     {
-        IsMenuOpen = !IsMenuOpen;
+        IsUserMenuOpen = !IsUserMenuOpen;
+        StateHasChanged();
     }
 
     private void ToggleMobileMenu()
     {
         IsMobileMenuOpen = !IsMobileMenuOpen;
+        StateHasChanged();
     }
 }
