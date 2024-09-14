@@ -107,9 +107,12 @@ else
     }
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await RefreshData();
+        if (firstRender)
+        {
+            await RefreshData();
+        }
     }
 
     private void HandlePageChanged(int newPage)

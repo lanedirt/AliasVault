@@ -127,11 +127,15 @@ else
     private List<string> ServiceNames { get; set; } = [];
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ServiceNames = await DbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
-        await RefreshData();
+        if (firstRender)
+        {
+            ServiceNames = await DbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
+            await RefreshData();
+        }
     }
+
 
     private void HandlePageChanged(int newPage)
     {
