@@ -5,7 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-// Run tests in parallel with a maximum of 2 parallel tests.
+// Run tests in parallel with a maximum of 1 parallel tests (= not parallel).
+// Increasing the level of parallelism can lead to concurrency issues especially
+// when running tests through GitHub Actions where the retry will take
+// longer to complete as opposed to running just one test at a time.
 [assembly: LevelOfParallelism(1)]
 
 namespace AliasVault.E2ETests.Common;

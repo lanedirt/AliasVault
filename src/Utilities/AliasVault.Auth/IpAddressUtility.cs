@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 /// <summary>
 /// Ip address utility class to extract IP address from HttpContext.
 /// </summary>
-public class IpAddressUtility
+public static class IpAddressUtility
 {
     /// <summary>
     /// Extract IP address from HttpContext.
