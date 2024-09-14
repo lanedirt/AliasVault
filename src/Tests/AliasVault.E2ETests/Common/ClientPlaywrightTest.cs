@@ -193,8 +193,9 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <summary>
     /// Login (again) as current user.
     /// </summary>
+    /// <param name="rememberMe">Whether the remember me option should be checked.</param>
     /// <returns>Async task.</returns>
-    protected async Task Login()
+    protected async Task Login(bool rememberMe = false)
     {
         // Check that we are on the login page after navigating to the base URL.
         // We are expecting to not be authenticated and thus to be redirected to the login page.
@@ -208,9 +209,19 @@ public class ClientPlaywrightTest : PlaywrightTest
         // Try to log in with test credentials.
         var emailField = Page.Locator("input[id='email']");
         var passwordField = Page.Locator("input[id='password']");
+        var rememberMeCheckbox = Page.Locator("input[id='remember']");
 
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
+
+        if (rememberMe)
+        {
+            await rememberMeCheckbox.CheckAsync();
+        }
+        else if (await rememberMeCheckbox.IsCheckedAsync())
+        {
+            await rememberMeCheckbox.UncheckAsync();
+        }
 
         var loginButton = Page.Locator("button[type='submit']");
         await loginButton.ClickAsync();

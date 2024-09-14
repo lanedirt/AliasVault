@@ -10,7 +10,7 @@ namespace AliasVault.Admin.Main.Pages;
 using AliasServerDb;
 using AliasVault.Admin.Main.Models;
 using AliasVault.Admin.Services;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using AliasVault.RazorComponents.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;

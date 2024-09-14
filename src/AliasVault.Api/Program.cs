@@ -10,7 +10,7 @@ using System.Text;
 using AliasServerDb;
 using AliasServerDb.Configuration;
 using AliasVault.Api.Jwt;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;

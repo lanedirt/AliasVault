@@ -16,11 +16,12 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// Initializes a new instance of the <see cref="ValidateLoginRequest2Fa"/> class.
         /// </summary>
         /// <param name="username">Username.</param>
+        /// <param name="rememberMe">Indicates if the user wants to be remembered which extends the refresh token lifetime.</param>
         /// <param name="clientPublicEphemeral">Client public ephemeral.</param>
         /// <param name="clientSessionProof">Client session proof.</param>
         /// <param name="code2Fa">2-factor authentication code.</param>
-        public ValidateLoginRequest2Fa(string username, string clientPublicEphemeral, string clientSessionProof, string code2Fa)
-            : base(username, clientPublicEphemeral, clientSessionProof)
+        public ValidateLoginRequest2Fa(string username, bool rememberMe, string clientPublicEphemeral, string clientSessionProof, string code2Fa)
+            : base(username, rememberMe, clientPublicEphemeral, clientSessionProof)
         {
             Code2Fa = code2Fa;
         }

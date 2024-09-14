@@ -96,7 +96,7 @@ else
 
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+                <InputCheckbox @bind-Value="LoginModel.RememberMe" id="remember" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
             </div>
             <div class="ml-3 text-sm">
                 <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
@@ -225,7 +225,7 @@ else
             username);
 
         // 4. Client sends proof of session key to server.
-        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, ClientEphemeral.Public, ClientSession.Proof));
+        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof));
         responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
@@ -268,7 +268,7 @@ else
             var username = LoginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, ClientEphemeral.Public, ClientSession.Proof, LoginModelRecoveryCode.RecoveryCode));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModelRecoveryCode.RecoveryCode));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -326,7 +326,7 @@ else
             var username = LoginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
