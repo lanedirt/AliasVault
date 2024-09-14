@@ -10,7 +10,7 @@ namespace AliasVault.Admin.Auth.Pages;
 using AliasServerDb;
 using AliasVault.Admin.Main.Components.Alerts;
 using AliasVault.Admin.Services;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;

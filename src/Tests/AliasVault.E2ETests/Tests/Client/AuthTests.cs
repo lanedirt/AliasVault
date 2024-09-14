@@ -30,6 +30,13 @@ public class AuthTests : ClientPlaywrightTest
         // lead to the creation of an auth log entry in the database.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after registration.");
+
+        // Check if the refresh token is stored in the database and its expiration date is set 7 days in the future
+        // after registration. The registration page does not have a "Remember me" checkbox, but it is assumed that
+        // the device is trusted so the refresh token will be valid for the extended duration: 7 days.
+        var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
+        Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddDays(7)), "Refresh token expiration date is not 7 days in the future while rememberMe checkbox was checked.");
     }
 
     /// <summary>
@@ -53,6 +60,40 @@ public class AuthTests : ClientPlaywrightTest
         // Check if login has created an auth log entry.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
+
+        // Check if the refresh token is stored in the database and its expiration date is set 4 hours in the future.
+        var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
+        Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(4)), "Refresh token expiration date is not 4 hours in the future.");
+    }
+
+    /// <summary>
+    /// Test if logging out and logging in works.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(3)]
+    public async Task LogoutAndLoginRememberMeTest()
+    {
+        await Logout();
+        await Login(rememberMe: true);
+
+        // Wait for the index page to load which should show "Credentials" in the top menu.
+        await WaitForUrlAsync("**", "Credentials");
+
+        // Check if the login was successful by verifying content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Getting Started"), "No index content after logging in.");
+
+        // Check if login has created an auth log entry.
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
+        Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
+
+        // Check if the refresh token is stored in the database and its expiration date is set 7 days in the future
+        // because the "Remember me" checkbox was checked.
+        var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
+        Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddDays(7)), "Refresh token expiration date is not 7 days in the future while rememberMe checkbox was checked.");
     }
 
     /// <summary>
@@ -60,7 +101,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(3)]
+    [Order(4)]
     public async Task RegisterFormWarningTest()
     {
         // Logout.
@@ -100,7 +141,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(4)]
+    [Order(5)]
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();

@@ -16,11 +16,12 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// Initializes a new instance of the <see cref="ValidateLoginRequestRecoveryCode"/> class.
         /// </summary>
         /// <param name="username">Username.</param>
+        /// <param name="rememberMe">Indicates if the user wants to be remembered which extends the refresh token lifetime.</param>
         /// <param name="clientPublicEphemeral">Client public ephemeral.</param>
         /// <param name="clientSessionProof">Client session proof.</param>
         /// <param name="recoveryCode">2-factor recovery code.</param>
-        public ValidateLoginRequestRecoveryCode(string username, string clientPublicEphemeral, string clientSessionProof, string recoveryCode)
-            : base(username, clientPublicEphemeral, clientSessionProof)
+        public ValidateLoginRequestRecoveryCode(string username, bool rememberMe, string clientPublicEphemeral, string clientSessionProof, string recoveryCode)
+            : base(username, rememberMe, clientPublicEphemeral, clientSessionProof)
         {
             RecoveryCode = recoveryCode;
         }

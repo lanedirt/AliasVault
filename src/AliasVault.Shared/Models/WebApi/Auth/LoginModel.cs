@@ -25,4 +25,9 @@ public class LoginModel
     /// </summary>
     [Required]
     public string Password { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the user wants to be remembered.
+    /// </summary>
+    public bool RememberMe { get; set; }
 }

@@ -16,11 +16,13 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// Initializes a new instance of the <see cref="ValidateLoginRequest"/> class.
         /// </summary>
         /// <param name="username">Username.</param>
+        /// <param name="rememberMe">Indicates if the user wants to be remembered which extends the refresh token lifetime.</param>
         /// <param name="clientPublicEphemeral">Client public ephemeral.</param>
         /// <param name="clientSessionProof">Client session proof.</param>
-        public ValidateLoginRequest(string username, string clientPublicEphemeral, string clientSessionProof)
+        public ValidateLoginRequest(string username, bool rememberMe, string clientPublicEphemeral, string clientSessionProof)
         {
             Username = username.ToLowerInvariant().Trim();
+            RememberMe = rememberMe;
             ClientPublicEphemeral = clientPublicEphemeral;
             ClientSessionProof = clientSessionProof;
         }
@@ -29,6 +31,11 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// Gets the username.
         /// </summary>
         public string Username { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the user wants to be remembered which extends the refresh token lifetime.
+        /// </summary>
+        public bool RememberMe { get; }
 
         /// <summary>
         /// Gets the client's public ephemeral value.

@@ -13,7 +13,7 @@ using Microsoft.Extensions.Caching.Memory;
 using SecureRemotePassword;
 
 /// <summary>
-/// AuthHelper class.
+/// AuthHelper class which contains helper methods for authentication.
 /// </summary>
 public static class AuthHelper
 {

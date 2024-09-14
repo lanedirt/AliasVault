@@ -13,7 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AliasServerDb;
 using AliasVault.Api.Helpers;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
@@ -63,6 +63,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// Error message for invalid 2-factor authentication recovery code.
     /// </summary>
     private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes.."];
+
+    /// <summary>
+    /// Semaphore to prevent concurrent access to the database when generating new tokens for a user.
+    /// </summary>
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
     /// <summary>
     /// Login endpoint used to process login attempt using credentials.
@@ -126,7 +131,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         // Reset failed login attempts.
         await userManager.ResetAccessFailedCountAsync(user!);
 
-        var tokenModel = await GenerateNewTokensForUser(user);
+        var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: model.RememberMe);
         return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
     }
 
@@ -145,12 +150,18 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return error;
         }
 
+        if (user == null || serverSession == null)
+        {
+            // Expected variables are not set, return generic error.
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
         // Verify 2-factor code.
-        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user!, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
+        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
         if (!verifyResult)
         {
             // Increment failed login attempts in order to lock out the account when the limit is reached.
-            await userManager.AccessFailedAsync(user!);
+            await userManager.AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidTwoFactorCode);
             return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
@@ -160,10 +171,10 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
         // Reset failed login attempts.
-        await userManager.ResetAccessFailedCountAsync(user!);
+        await userManager.ResetAccessFailedCountAsync(user);
 
         // Generate and return the JWT token.
-        var tokenModel = await GenerateNewTokensForUser(user!);
+        var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: model.RememberMe);
         return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
     }
 
@@ -182,16 +193,22 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return error;
         }
 
+        if (user == null || serverSession == null)
+        {
+            // Expected variables are not set, return generic error.
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+        }
+
         // Sanitize recovery code.
         var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty).ToUpper();
 
         // Attempt to redeem the recovery code
-        var redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user!, recoveryCode);
+        var redeemResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user, recoveryCode);
 
         if (!redeemResult.Succeeded)
         {
             // Increment failed login attempts in order to lock out the account when the limit is reached.
-            await userManager.AccessFailedAsync(user!);
+            await userManager.AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidRecoveryCode);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
@@ -201,11 +218,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         await authLoggingService.LogAuthEventSuccessAsync(model.Username, AuthEventType.TwoFactorAuthentication);
 
         // Reset failed login attempts.
-        await userManager.ResetAccessFailedCountAsync(user!);
+        await userManager.ResetAccessFailedCountAsync(user);
 
         // Generate and return the JWT token.
-        var tokenModel = await GenerateNewTokensForUser(user!);
-        return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
+        var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: model.RememberMe);
+        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
     }
 
     /// <summary>
@@ -231,34 +248,19 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Check if the refresh token is valid.
-        var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        if (existingToken == null || existingToken.Value != tokenModel.RefreshToken || existingToken.ExpireDate < timeProvider.UtcNow)
+        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.Value == tokenModel.RefreshToken);
+        if (existingToken == null || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
             return Unauthorized("Refresh token expired");
         }
 
-        // Remove the existing refresh token.
-        context.AliasVaultUserRefreshTokens.Remove(existingToken);
-
-        // Generate a new refresh token to replace the old one.
-        var newRefreshToken = GenerateRefreshToken();
-
-        // Add new refresh token.
-        context.AliasVaultUserRefreshTokens.Add(new AliasVaultUserRefreshToken
-        {
-            UserId = user.Id,
-            DeviceIdentifier = deviceIdentifier,
-            Value = newRefreshToken,
-            ExpireDate = timeProvider.UtcNow.AddDays(30),
-            CreatedAt = timeProvider.UtcNow,
-        });
+        // Generate new tokens for the user.
+        var token = await GenerateNewTokensForUser(user, existingToken);
         await context.SaveChangesAsync();
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TokenRefresh);
-        var token = GenerateJwtToken(user);
-        return Ok(new TokenModel() { Token = token, RefreshToken = newRefreshToken });
+        return Ok(new TokenModel() { Token = token.Token, RefreshToken = token.RefreshToken });
     }
 
     /// <summary>
@@ -344,7 +346,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             await signInManager.SignInAsync(user, isPersistent: false);
 
             // Return the token.
-            var tokenModel = await GenerateNewTokensForUser(user);
+            var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: true);
             return Ok(tokenModel);
         }
 
@@ -529,33 +531,117 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// to the database.
     /// </summary>
     /// <param name="user">The user to generate the tokens for.</param>
-    /// <returns>TokenModel which includes new access and refresh token.</returns>
-    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user)
+    /// <param name="extendedLifetime">If true, the refresh token will have an extended lifetime (remember me option).</param>
+    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, bool extendedLifetime = false)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var token = GenerateJwtToken(user);
+        var accessToken = GenerateJwtToken(user);
+
+        await _semaphore.WaitAsync();
+        try
+        {
+            // Determine the refresh token lifetime.
+            // - 4 hours by default.
+            // - 7 days if "remember me" was checked during login.
+            var refreshTokenLifetime = TimeSpan.FromHours(4);
+            if (extendedLifetime)
+            {
+                refreshTokenLifetime = TimeSpan.FromDays(7);
+            }
+
+            // Return new refresh token.
+            return await GenerateRefreshToken(user, refreshTokenLifetime);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Generates a new access and refresh token for a user and persists the refresh token
+    /// to the database.
+    /// </summary>
+    /// <param name="user">The user to generate the tokens for.</param>
+    /// <param name="existingToken">The existing token that is being replaced (optional).</param>
+    /// <returns>TokenModel which includes new access and refresh token.</returns>
+    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, AliasVaultUserRefreshToken existingToken)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        await _semaphore.WaitAsync();
+
+        try
+        {
+            // Token reuse window:
+            // Check if a new refresh token was already generated for the current token in the last 30 seconds.
+            // If yes, then return the already generated new token. This is to prevent client-side race conditions.
+            var existingTokenReuseWindow = timeProvider.UtcNow.AddSeconds(-30);
+            var existingTokenReuse = await context.AliasVaultUserRefreshTokens
+                .FirstOrDefaultAsync(t => t.UserId == user.Id &&
+                                            t.PreviousTokenValue == existingToken.Value &&
+                                            t.CreatedAt > existingTokenReuseWindow);
+
+            if (existingTokenReuse is not null)
+            {
+                // A new token was already generated for the current token in the last 30 seconds.
+                // Return the already generated new token.
+                var accessToken = GenerateJwtToken(user);
+                return new TokenModel { Token = accessToken, RefreshToken = existingTokenReuse.Value };
+            }
+
+            // Remove the existing refresh token.
+            var tokenToDelete = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.Id == existingToken.Id);
+            if (tokenToDelete is null)
+            {
+                await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
+                throw new InvalidOperationException("Refresh token does not exist (anymore).");
+            }
+
+            context.AliasVaultUserRefreshTokens.Remove(tokenToDelete);
+
+            // New refresh token lifetime is the same as the existing one.
+            var existingTokenLifetime = existingToken.ExpireDate - existingToken.CreatedAt;
+
+            // Return new refresh token.
+            return await GenerateRefreshToken(user, existingTokenLifetime, existingToken.Value);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Generates a new access and refresh token for a user and persists the refresh token
+    /// to the database.
+    /// </summary>
+    /// <param name="user">The user to generate the tokens for.</param>
+    /// <param name="newTokenLifetime">The lifetime of the new token.</param>
+    /// <param name="existingTokenValue">The existing token value that is being replaced (optional).</param>
+    /// <returns>TokenModel which includes new access and refresh token.</returns>
+    private async Task<TokenModel> GenerateRefreshToken(AliasVaultUser user, TimeSpan newTokenLifetime, string? existingTokenValue = null)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+         // Generate device identifier
+        var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
-
-        // Generate device identifier
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-
-        // Save refresh token to database.
-        // Remove any existing refresh tokens for this user and device.
-        var existingTokens = context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        context.AliasVaultUserRefreshTokens.RemoveRange(existingTokens);
 
         // Add new refresh token.
         context.AliasVaultUserRefreshTokens.Add(new AliasVaultUserRefreshToken
         {
             UserId = user.Id,
             DeviceIdentifier = deviceIdentifier,
+            IpAddress = IpAddressUtility.GetIpFromContext(HttpContext),
             Value = refreshToken,
-            ExpireDate = timeProvider.UtcNow.AddDays(30),
+            PreviousTokenValue = existingTokenValue,
+            ExpireDate = timeProvider.UtcNow.Add(newTokenLifetime),
             CreatedAt = timeProvider.UtcNow,
         });
-        await context.SaveChangesAsync();
 
-        return new TokenModel { Token = token, RefreshToken = refreshToken };
+        await context.SaveChangesAsync();
+        return new TokenModel { Token = accessToken, RefreshToken = refreshToken };
     }
 }

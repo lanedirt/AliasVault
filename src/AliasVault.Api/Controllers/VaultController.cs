@@ -13,7 +13,7 @@ using AliasVault.Api.Controllers.Abstracts;
 using AliasVault.Api.Helpers;
 using AliasVault.Api.Vault;
 using AliasVault.Api.Vault.RetentionRules;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.PasswordChange;

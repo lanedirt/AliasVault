@@ -13,7 +13,7 @@ using AliasVault.Admin;
 using AliasVault.Admin.Auth.Providers;
 using AliasVault.Admin.Main;
 using AliasVault.Admin.Services;
-using AliasVault.AuthLogging;
+using AliasVault.Auth;
 using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
 using Cryptography.Server;
