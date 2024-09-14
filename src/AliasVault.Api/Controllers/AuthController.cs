@@ -248,7 +248,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Check if the refresh token is valid.
-        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.Value == tokenModel.RefreshToken);
+        var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.Value == tokenModel.RefreshToken);
         if (existingToken == null || existingToken.ExpireDate < timeProvider.UtcNow)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
@@ -535,8 +535,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, bool extendedLifetime = false)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        var accessToken = GenerateJwtToken(user);
 
         await _semaphore.WaitAsync();
         try
