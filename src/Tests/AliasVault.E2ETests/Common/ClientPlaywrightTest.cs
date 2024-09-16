@@ -183,11 +183,42 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "View credentials entry");
+        await WaitForUrlAsync("credentials/**", "Credentials created successfully");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
+    }
+
+    /// <summary>
+    /// Update existing credential entry.
+    /// </summary>
+    /// <param name="credentialName">Name of the credential to update.</param>
+    /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
+    /// <returns>Async task.</returns>
+    protected async Task UpdateCredentialEntry(string credentialName, Dictionary<string, string>? formValues = null)
+    {
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForUrlAsync("credentials", "Find all of your credentials");
+        await Page.ClickAsync("text=" + credentialName);
+
+        // Wait for the credential details page to load.
+        await WaitForUrlAsync("credentials/**", "Edit credentials entry");
+        await Page.ClickAsync("text=Edit credentials entry");
+
+        // Wait for the edit credential page to load.
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+
+        // Fill all input fields with specified values and remaining empty fields with random data.
+        await InputHelper.FillInputFields(formValues);
+
+        var submitButton = Page.Locator("text=Save Credentials").First;
+        await submitButton.ClickAsync();
+        await WaitForUrlAsync("credentials/**", "Credentials updated successfully");
+
+        // Check if the credential was created
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Credentials updated successfully"), "Credential not updated successfully.");
     }
 
     /// <summary>
