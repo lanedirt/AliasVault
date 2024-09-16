@@ -9,11 +9,12 @@ namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// Password entity.
 /// </summary>
-public class Password
+public class Password : SyncableEntity
 {
     /// <summary>
     /// Gets or sets the password primary key.
@@ -26,16 +27,6 @@ public class Password
     /// </summary>
     [StringLength(255)]
     public string? Value { get; set; }
-
-    /// <summary>
-    /// Gets or sets the created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the credential foreign key.

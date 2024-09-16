@@ -4,15 +4,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// The alias entity.
 /// </summary>
-public class Alias
+public class Alias : SyncableEntity
 {
     /// <summary>
     /// Gets or sets the alias primary key.
@@ -58,16 +60,6 @@ public class Alias
     /// </summary>
     [StringLength(255)]
     public string? Email { get; set; }
-
-    /// <summary>
-    /// Gets or sets the created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the credential objects.

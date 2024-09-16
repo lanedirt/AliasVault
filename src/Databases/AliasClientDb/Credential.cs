@@ -4,15 +4,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// Login object.
 /// </summary>
-public class Credential
+public class Credential : SyncableEntity
 {
     /// <summary>
     /// Gets or sets Login ID.
@@ -50,16 +52,6 @@ public class Credential
     /// Gets or sets the attachment objects.
     /// </summary>
     public virtual ICollection<Attachment> Attachments { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the service ID foreign key.

@@ -4,14 +4,16 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// The service entity.
 /// </summary>
-public class Setting
+public class Setting : SyncableEntity
 {
     /// <summary>
     /// Gets or sets the setting key which is also the primary unique key.
@@ -25,14 +27,4 @@ public class Setting
     /// via serialization.
     /// </summary>
     public string? Value { get; set; }
-
-    /// <summary>
-    /// Gets or sets the created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 }
