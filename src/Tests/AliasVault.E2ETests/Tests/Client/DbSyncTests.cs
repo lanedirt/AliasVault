@@ -19,35 +19,87 @@ using Microsoft.EntityFrameworkCore;
 public class DbSyncTests : ClientPlaywrightTest
 {
     /// <summary>
-    /// Test if saving a new vault with the same revision number as an existing vault it results
-    /// in two vaults with the same revision number in the server database.
+    /// Test that client side merge works correctly when two or more conflicting vault versions have been detected.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(1)]
-    public async Task DbSyncDuplicateVersionNumberTest()
+    public async Task DbSyncClientMergeBasicTest()
     {
-        // Advance time by 1 second manually to ensure the new vault is created in the future.
+        var baselineVault = await CreateBaselineVault(async () =>
+        {
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline" } });
+        });
+
+        var client1Vault = await SimulateClient(baselineVault, async () =>
+        {
+            await NavigateUsingBlazorRouter("credentials");
+            await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestA" } });
+        });
+
+        await SimulateClient(baselineVault, async () =>
+        {
+            // Re-add client1 vault to simulate conflict when this second client updates the same vault.
+            client1Vault.Id = Guid.NewGuid();
+            ApiDbContext.Vaults.Add(client1Vault);
+            await ApiDbContext.SaveChangesAsync();
+
+            await NavigateUsingBlazorRouter("credentials");
+            await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestB" } });
+        });
+
+        // Assert that the two conflicting vaults have been merged and all service names are found.
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+        var pageContent = await Page.TextContentAsync("body");
+        var expectedServiceNames = new[] { "TestBaseline", "TestA", "TestB" };
+        foreach (var serviceName in expectedServiceNames)
+        {
+            Assert.That(pageContent, Does.Contain(serviceName), $"{serviceName} not found in vault after merge.");
+        }
+    }
+
+    /// <summary>
+    /// Create a baseline vault.
+    /// </summary>
+    /// <param name="clientActions">Optional client actions to execute after creating the baseline vault.</param>
+    /// <returns>The baseline vault.</returns>
+    private async Task<AliasServerDb.Vault> CreateBaselineVault(Func<Task> clientActions)
+    {
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+        await clientActions();
+
+        return await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
+    }
+
+    /// <summary>
+    /// Simulate a client by removing all vaults and adding the baseline vault back.
+    /// </summary>
+    /// <param name="baselineVault">The baseline vault to add back.</param>
+    /// <param name="clientActions">Optional client actions to execute after simulating the client.</param>
+    /// <returns>The baseline vault.</returns>
+    private async Task<AliasServerDb.Vault> SimulateClient(AliasServerDb.Vault baselineVault, Func<Task> clientActions)
+    {
         ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
 
-        // Create a new credential which will trigger a vault save to the server.
-        await CreateCredentialEntry();
-
-        // Assert that the vault is stored in the database with revision number 1.
-        var secondUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
-        Assert.That(secondUpdateVault.RevisionNumber, Is.EqualTo(1), "Vault revision number is not 1 after the first credential save.");
-
-        // Set the revision number of the vault to 2 (+1) to simulate a conflict where another client has
-        // saved a vault with the same revision number.
-        secondUpdateVault.RevisionNumber = 2;
+        // Remove all vaults and add the baseline vault back.
+        ApiDbContext.Vaults.RemoveRange(ApiDbContext.Vaults);
+        await ApiDbContext.SaveChangesAsync();
+        baselineVault.Id = Guid.NewGuid();
+        ApiDbContext.Vaults.Add(baselineVault);
         await ApiDbContext.SaveChangesAsync();
 
-        // Create a new credential. The client will provide revision number 1 as the previous one, which should result
-        // in the server giving this new vault revision number 2 as well. Thus resulting in a conflict.
-        await CreateCredentialEntry();
+        // Simulate new client.
+        await RefreshPageAndUnlockVault();
 
-        // Assert that there are now two vaults in the database with revision number 2.
-        var revisionNumber2VaultCount = await ApiDbContext.Vaults.CountAsync(x => x.RevisionNumber == 2);
-        Assert.That(revisionNumber2VaultCount, Is.EqualTo(2), "Two vaults with revision number 2 not found in the database. Check if the server correctly handles conflicts when two clients save a vault with the same revision number.");
+        // Execute custom client actions.
+        await clientActions();
+
+        return await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
     }
 }

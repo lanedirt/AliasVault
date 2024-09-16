@@ -50,7 +50,6 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     {
         Rules =
         [
-            new RevisionNumberConflictRetentionRule(),
             new DailyRetentionRule { DaysToKeep = 3 },
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
@@ -86,7 +85,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         {
             return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
             {
-                Status = VaultGetStatus.Ok,
+                Status = VaultStatus.Ok,
                 Vault = new Shared.Models.WebApi.Vault.Vault
                 {
                     Blob = string.Empty,
@@ -111,14 +110,14 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         {
             return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
             {
-                Status = VaultGetStatus.MergeRequired,
+                Status = VaultStatus.MergeRequired,
                 Vault = null,
             });
         }
 
         return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
         {
-            Status = VaultGetStatus.Ok,
+            Status = VaultStatus.Ok,
             Vault = new Shared.Models.WebApi.Vault.Vault
             {
                 Blob = vault.VaultBlob,
@@ -136,9 +135,10 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     /// <summary>
     /// Returns a list of vaults that should be merged by the client.
     /// </summary>
-    /// <returns>List of vaults to merge.</returns>
+    /// <param name="currentRevisionNumber">Current revision number of the local vault.</param>
+    /// <returns>List of vaults to merge that are newer than the provided current revision number.</returns>
     [HttpGet("merge")]
-    public async Task<IActionResult> GetVaultsToMerge()
+    public async Task<IActionResult> GetVaultsToMerge([FromQuery] long currentRevisionNumber)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -149,26 +149,14 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         }
 
         // Logic to retrieve vault for the user.
-        var vault = await context.Vaults
-            .Where(x => x.UserId == user.Id)
+        var vaultsToMerge = await context.Vaults
+            .Where(x => x.UserId == user.Id && x.RevisionNumber > currentRevisionNumber)
             .OrderByDescending(x => x.UpdatedAt)
-            .FirstOrDefaultAsync();
-
-        // If no vault is found on server, return an empty object.
-        if (vault == null)
-        {
-            return BadRequest("No vault(s) found for user.");
-        }
-
-        // Check if there are no other vaults with the same revision number.
-        // If there are, return a merge required status.
-        var otherVaults = await context.Vaults
-            .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
             .ToListAsync();
 
         return Ok(new Shared.Models.WebApi.Vault.VaultMergeResponse
         {
-            Vaults = otherVaults.Select(x => new Shared.Models.WebApi.Vault.Vault
+            Vaults = vaultsToMerge.Select(x => new Shared.Models.WebApi.Vault.Vault
             {
                 Blob = x.VaultBlob,
                 Version = x.Version,
@@ -199,13 +187,17 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
 
         // Calculate the new revision number for the vault.
-        // Note: it is possible multiple clients are updating the vault at the same time which would cause
-        // multiple vaults with the same revision number. This is expected and will trigger a vault
-        // synchronize/merge process on the client side.
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
+        // Check if the latest vault revision number is equal to or higher than the new revision number.
+        // If so, reject update and return a merge required status.
+        if (latestVault.RevisionNumber >= newRevisionNumber)
+        {
+            return Ok(new VaultUpdateResponse { Status = VaultStatus.MergeRequired, NewRevisionNumber = latestVault.RevisionNumber });
+        }
 
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
@@ -244,7 +236,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
         }
 
-        return Ok(new VaultUpdateResponse { NewRevisionNumber = newRevisionNumber });
+        return Ok(new VaultUpdateResponse { Status = VaultStatus.Ok, NewRevisionNumber = newRevisionNumber });
     }
 
     /// <summary>

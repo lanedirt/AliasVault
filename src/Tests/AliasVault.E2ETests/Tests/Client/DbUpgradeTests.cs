@@ -48,6 +48,7 @@ public class DbUpgradeTests : ClientPlaywrightTest
                 Id = Guid.NewGuid(),
                 UserId = ApiDbContext.AliasVaultUsers.First().Id,
                 Version = "1.0.0",
+                RevisionNumber = 0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 EncryptionType = "Argon2Id",

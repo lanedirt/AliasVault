@@ -17,7 +17,7 @@ public class VaultGetResponse
     /// <summary>
     /// Gets or sets the status of the vault get operation.
     /// </summary>
-    public VaultGetStatus Status { get; set; }
+    public VaultStatus Status { get; set; }
 
     /// <summary>
     /// Gets or sets the requested vault.

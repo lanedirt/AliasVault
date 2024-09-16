@@ -90,6 +90,8 @@
             await RedirectBackToReturnUrl();
         }
 
+        Console.WriteLine("Database state changed: " + CurrentDbState.Status);
+
         StateHasChanged();
     }
 

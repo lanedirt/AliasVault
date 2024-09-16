@@ -100,7 +100,7 @@ public sealed class DbService : IDisposable
     {
         try
         {
-            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>("api/v1/Vault/merge");
+            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>($"api/v1/Vault/merge?currentRevisionNumber={_vaultRevisionNumber}");
             if (vaultsToMerge == null || !vaultsToMerge.Vaults.Any())
             {
                 // No vaults to merge found, set error state.
@@ -110,7 +110,7 @@ public sealed class DbService : IDisposable
 
             var sqlConnections = new List<SqliteConnection>();
 
-            // Decrypt and instantiate each vault as a separate in-memory SQLite database
+            // Decrypt and instantiate each vault as a separate in-memory SQLite database.
             foreach (var vault in vaultsToMerge.Vaults)
             {
                 var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
@@ -120,54 +120,48 @@ public sealed class DbService : IDisposable
                 sqlConnections.Add(connection);
             }
 
-            // Use the first connection as the base
-            var baseConnection = sqlConnections[0];
-            sqlConnections.RemoveAt(0);
+            // Get all table names from the current base database.
+            var tables = await DbMergeUtility.GetTableNames(_sqlConnection);
 
-            // Get all table names from the base database
-            var tables = await DbMergeUtility.GetTableNames(baseConnection);
-
-            // Disable foreign key checks on the base connection
-            await using (var command = baseConnection.CreateCommand())
+            // Disable foreign key checks on the base connection.
+            await using (var command = _sqlConnection.CreateCommand())
             {
                 command.CommandText = "PRAGMA foreign_keys = OFF;";
                 await command.ExecuteNonQueryAsync();
             }
 
-            // Merge each database into the base
+            // Merge each database into the base.
             var i = 0;
             foreach (var connection in sqlConnections)
             {
                 i++;
                 foreach (var table in tables)
                 {
-                    await DbMergeUtility.MergeTable(baseConnection, connection, table);
+                    await DbMergeUtility.MergeTable(_sqlConnection, connection, table);
                 }
             }
 
-            // Re-enable foreign key checks and verify integrity
-            await using (var command = baseConnection.CreateCommand())
+            // Re-enable foreign key checks and verify integrity.
+            await using (var command = _sqlConnection.CreateCommand())
             {
                 command.CommandText = "PRAGMA foreign_keys = ON;";
                 await command.ExecuteNonQueryAsync();
 
-                // Verify foreign key integrity
+                // Verify foreign key integrity.
                 command.CommandText = "PRAGMA foreign_key_check;";
                 using var reader = await command.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
-                    // Foreign key violation detected
+                    // Foreign key violation detected.
                     _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "Foreign key violation detected after merge.");
                     return false;
                 }
             }
 
-            // Set the merged database as the current database
-            _sqlConnection.Close();
-            _sqlConnection = baseConnection;
+            // Update the dbcontext with the new merged database.
             _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
 
-            // Clean up other connections
+            // Clean up other connections.
             foreach (var connection in sqlConnections)
             {
                 connection.Close();
@@ -175,6 +169,10 @@ public sealed class DbService : IDisposable
             }
 
             await _dbContext.Database.MigrateAsync();
+
+            // Update the current vault revision number to the highest revision number in the merged database(s).
+            // This is important so the server knows that the local client has successfully merged the databases
+            // and should overwrite the existing database on the server with the new merged database.
             _vaultRevisionNumber = vaultsToMerge.Vaults.Max(v => v.CurrentRevisionNumber);
 
             _isSuccessfullyInitialized = true;
@@ -253,11 +251,6 @@ public sealed class DbService : IDisposable
             Console.WriteLine("Database successfully saved to server.");
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
-        else
-        {
-            Console.WriteLine("Failed to save database to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.OperationError);
-        }
     }
 
     /// <summary>
@@ -266,8 +259,6 @@ public sealed class DbService : IDisposable
     /// <returns>Base64 encoded string that represents SQLite database.</returns>
     public async Task<string> ExportSqliteToBase64Async()
     {
-        Console.WriteLine("Awaited database initialize...");
-
         var tempFileName = Path.GetRandomFileName();
 
         // Export SQLite memory database to a temp file.
@@ -568,7 +559,7 @@ public sealed class DbService : IDisposable
             var response = await _httpClient.GetFromJsonAsync<VaultGetResponse>("api/v1/Vault");
             if (response is not null)
             {
-                if (response.Status == VaultGetStatus.MergeRequired)
+                if (response.Status == VaultStatus.MergeRequired)
                 {
                     _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
                     return false;
@@ -635,7 +626,15 @@ public sealed class DbService : IDisposable
 
             if (vaultUpdateResponse != null)
             {
-                // Update the revision number
+                // If the server responds with a merge required status, we need to merge the local database
+                // with the one on the server before we can continue.
+                if (vaultUpdateResponse.Status == VaultStatus.MergeRequired)
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
+                    await MergeDatabasesAsync();
+                    return false;
+                }
+
                 _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
                 return true;
             }

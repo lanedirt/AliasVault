@@ -7,11 +7,18 @@
 
 namespace AliasVault.Shared.Models.WebApi.Vault;
 
+using AliasVault.Shared.Models.Enums;
+
 /// <summary>
 /// Vault update response model.
 /// </summary>
 public class VaultUpdateResponse
 {
+    /// <summary>
+    /// Gets or sets the status of the vault update operation.
+    /// </summary>
+    public required VaultStatus Status { get; set; }
+
     /// <summary>
     /// Gets or sets the current vault's revision number.
     /// The server will increment this number with each change to the vault and is used for managing concurrency
