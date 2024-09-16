@@ -47,55 +47,93 @@ public static class DbMergeUtility
         using var baseCommand = baseConnection.CreateCommand();
         using var sourceCommand = sourceConnection.CreateCommand();
 
-        // Check if the table has UpdatedAt and IsDeleted columns
         baseCommand.CommandText = $"PRAGMA table_info({tableName})";
         var columns = new List<string>();
+        bool hasId = false;
+        bool hasUpdatedAt = false;
+        bool hasIsDeleted = false;
+
         using (var reader = await baseCommand.ExecuteReaderAsync())
         {
             while (await reader.ReadAsync())
             {
-                columns.Add(reader.GetString(1));
+                string columnName = reader.GetString(1);
+                columns.Add(columnName);
+                if (columnName == "Id")
+                {
+                    hasId = true;
+                }
+                else if (columnName == "UpdatedAt")
+                {
+                    hasUpdatedAt = true;
+                }
+                else if (columnName == "IsDeleted")
+                {
+                    hasIsDeleted = true;
+                }
             }
         }
 
-        bool hasUpdatedAt = columns.Contains("UpdatedAt");
-        bool hasIsDeleted = columns.Contains("IsDeleted");
+        // Check if the table has Id, UpdatedAt and IsDeleted columns.
+        if (!hasId || !hasUpdatedAt || !hasIsDeleted)
+        {
+            return;
+        }
 
-        // Get all records from the source table
+        // Get all records from the source table.
         sourceCommand.CommandText = $"SELECT * FROM {tableName}";
         using var sourceReader = await sourceCommand.ExecuteReaderAsync();
 
+        Console.WriteLine($"Got records for {tableName}.");
+
         while (await sourceReader.ReadAsync())
         {
-            var id = sourceReader.GetValue(0); // Assuming the first column is always the ID
+            var id = sourceReader.GetValue(0);
             var updatedAt = hasUpdatedAt ? sourceReader.GetDateTime(columns.IndexOf("UpdatedAt")) : DateTime.MinValue;
             var isDeleted = hasIsDeleted && sourceReader.GetBoolean(columns.IndexOf("IsDeleted"));
 
-            // Check if the record exists in the base table
-            baseCommand.CommandText = $"SELECT * FROM {tableName} WHERE Id = @Id";
+            // Check if the record exists in the base table.
+            baseCommand.CommandText = $"SELECT UpdatedAt FROM {tableName} WHERE Id = @Id";
             baseCommand.Parameters.Clear();
             baseCommand.Parameters.AddWithValue("@Id", id);
 
-            using var baseReader = await baseCommand.ExecuteReaderAsync();
-            if (await baseReader.ReadAsync())
+            Console.WriteLine($"Checking if record exists in {tableName}.");
+
+            var existingRecord = await baseCommand.ExecuteScalarAsync();
+            if (existingRecord != null)
             {
-                // Record exists, compare UpdatedAt
+                Console.WriteLine($"Record exists in {tableName}.");
+
+                // Record exists, compare UpdatedAt if it exists.
                 if (hasUpdatedAt)
                 {
-                    var baseUpdatedAt = baseReader.GetDateTime(columns.IndexOf("UpdatedAt"));
+                    Console.WriteLine($"Comparing UpdatedAt in {tableName}.");
+                    Console.WriteLine($"UpdatedAt: {existingRecord}");
+                    var baseUpdatedAt = DateTime.Parse((string)existingRecord);
                     if (updatedAt > baseUpdatedAt)
                     {
-                        // Source record is newer, update the base record
+                        // Source record is newer, update the base record.
                         await UpdateRecord(baseConnection, tableName, sourceReader, columns);
                     }
+                    else
+                    {
+                        Console.WriteLine($"Base record is newer, skipping {tableName}.");
+                    }
+                }
+                else
+                {
+                    // If UpdatedAt doesn't exist, always update.
+                    await UpdateRecord(baseConnection, tableName, sourceReader, columns);
                 }
             }
             else
             {
-                // Record doesn't exist in base, add it
+                // Record doesn't exist in base, add it.
                 await InsertRecord(baseConnection, tableName, sourceReader, columns);
             }
         }
+
+        Console.WriteLine($"Merged {tableName}.");
     }
 
     /// <summary>

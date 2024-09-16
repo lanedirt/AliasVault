@@ -127,12 +127,38 @@ public sealed class DbService : IDisposable
             // Get all table names from the base database
             var tables = await DbMergeUtility.GetTableNames(baseConnection);
 
+            // Disable foreign key checks on the base connection
+            await using (var command = baseConnection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA foreign_keys = OFF;";
+                await command.ExecuteNonQueryAsync();
+            }
+
             // Merge each database into the base
+            var i = 0;
             foreach (var connection in sqlConnections)
             {
+                i++;
                 foreach (var table in tables)
                 {
                     await DbMergeUtility.MergeTable(baseConnection, connection, table);
+                }
+            }
+
+            // Re-enable foreign key checks and verify integrity
+            await using (var command = baseConnection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA foreign_keys = ON;";
+                await command.ExecuteNonQueryAsync();
+
+                // Verify foreign key integrity
+                command.CommandText = "PRAGMA foreign_key_check;";
+                using var reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    // Foreign key violation detected
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "Foreign key violation detected after merge.");
+                    return false;
                 }
             }
 
@@ -149,9 +175,14 @@ public sealed class DbService : IDisposable
             }
 
             await _dbContext.Database.MigrateAsync();
+            _vaultRevisionNumber = vaultsToMerge.Vaults.Max(v => v.CurrentRevisionNumber);
+
             _isSuccessfullyInitialized = true;
             await _settingsService.InitializeAsync(this);
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+
+            // Save the newly merged database to the server.
+            await SaveDatabaseAsync();
 
             return true;
         }
