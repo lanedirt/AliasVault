@@ -84,29 +84,52 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault.Vault
+            return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
             {
-                Blob = string.Empty,
-                Version = string.Empty,
-                CurrentRevisionNumber = 0,
-                EncryptionPublicKey = string.Empty,
-                CredentialsCount = 0,
-                EmailAddressList = new List<string>(),
-                CreatedAt = DateTime.MinValue,
-                UpdatedAt = DateTime.MinValue,
+                Status = VaultGetStatus.Ok,
+                Vault = new Shared.Models.WebApi.Vault.Vault
+                {
+                    Blob = string.Empty,
+                    Version = string.Empty,
+                    CurrentRevisionNumber = 0,
+                    EncryptionPublicKey = string.Empty,
+                    CredentialsCount = 0,
+                    EmailAddressList = new List<string>(),
+                    CreatedAt = DateTime.MinValue,
+                    UpdatedAt = DateTime.MinValue,
+                },
             });
         }
 
-        return Ok(new Shared.Models.WebApi.Vault.Vault
+        // Check if there are no other vaults with the same revision number.
+        // If there are, return a merge required status.
+        var otherVaults = await context.Vaults
+            .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
+            .ToListAsync();
+
+        if (otherVaults.Count > 1)
         {
-            Blob = vault.VaultBlob,
-            Version = vault.Version,
-            CurrentRevisionNumber = vault.RevisionNumber,
-            EncryptionPublicKey = string.Empty,
-            CredentialsCount = 0,
-            EmailAddressList = new List<string>(),
-            CreatedAt = vault.CreatedAt,
-            UpdatedAt = vault.UpdatedAt,
+            return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
+            {
+                Status = VaultGetStatus.MergeRequired,
+                Vault = null,
+            });
+        }
+
+        return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
+        {
+            Status = VaultGetStatus.Ok,
+            Vault = new Shared.Models.WebApi.Vault.Vault
+            {
+                Blob = vault.VaultBlob,
+                Version = vault.Version,
+                CurrentRevisionNumber = vault.RevisionNumber,
+                EncryptionPublicKey = string.Empty,
+                CredentialsCount = 0,
+                EmailAddressList = [],
+                CreatedAt = vault.CreatedAt,
+                UpdatedAt = vault.UpdatedAt,
+            },
         });
     }
 

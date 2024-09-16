@@ -11,6 +11,7 @@ using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Client.Services.Auth;
+using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi.Vault;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -462,9 +463,17 @@ public sealed class DbService : IDisposable
         // Load from webapi.
         try
         {
-            var vault = await _httpClient.GetFromJsonAsync<Vault>("api/v1/Vault");
-            if (vault is not null)
+            var response = await _httpClient.GetFromJsonAsync<VaultGetResponse>("api/v1/Vault");
+            if (response is not null)
             {
+                if (response.Status == VaultGetStatus.MergeRequired)
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
+                    return false;
+                }
+
+                var vault = response.Vault!;
+
                 // Check if vault blob is empty, if so, we don't need to do anything and the initial vault created
                 // on client is sufficient.
                 if (string.IsNullOrEmpty(vault.Blob))

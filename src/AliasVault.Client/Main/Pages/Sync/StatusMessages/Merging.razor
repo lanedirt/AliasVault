@@ -1,0 +1,57 @@
+﻿@inject DbService DbService
+@inject GlobalNotificationService GlobalNotificationService
+
+<div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+    <div class="text-center">
+        <div class="space-y-4">
+            <BoldLoadingIndicator />
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Merge required</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                A merge is required because another client has made changes to the vault since you last synced.
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Please wait while the merge is performed. This process may take a moment.
+            </p>
+
+            <div>
+                @if (ErrorMessage.Length > 0)
+                {
+                    <AlertMessageError Message="@ErrorMessage" />
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            // Start the database migration process
+            await MergeDatabase();
+        }
+    }
+
+    private async Task MergeDatabase()
+    {
+        // Simulate a delay.
+        await Task.Delay(1000);
+
+        // Migration failed
+        ErrorMessage = "Merge failed. Please try again or contact support.";
+
+        StateHasChanged();
+    }
+}

@@ -18,6 +18,10 @@
     {
         <PendingMigrations />
     }
+    else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.MergeRequired)
+    {
+        <Merging />
+    }
     else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Creating)
     {
         <Creating />
