@@ -89,8 +89,8 @@ public static class DbMergeUtility
         while (await sourceReader.ReadAsync())
         {
             var id = sourceReader.GetValue(0);
-            var updatedAt = hasUpdatedAt ? sourceReader.GetDateTime(columns.IndexOf("UpdatedAt")) : DateTime.MinValue;
-            var isDeleted = hasIsDeleted && sourceReader.GetBoolean(columns.IndexOf("IsDeleted"));
+            var updatedAt = sourceReader.GetDateTime(columns.IndexOf("UpdatedAt"));
+            var isDeleted = sourceReader.GetBoolean(columns.IndexOf("IsDeleted"));
 
             // Check if the record exists in the base table.
             baseCommand.CommandText = $"SELECT UpdatedAt FROM {tableName} WHERE Id = @Id";
@@ -149,6 +149,9 @@ public static class DbMergeUtility
         using var command = connection.CreateCommand();
         var updateColumns = string.Join(", ", columns.Select(c => $"{c} = @{c}"));
         command.CommandText = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
+
+        Console.WriteLine($"Updating record in {tableName}.");
+        Console.WriteLine($"Command: {command.CommandText}");
 
         for (int i = 0; i < columns.Count; i++)
         {

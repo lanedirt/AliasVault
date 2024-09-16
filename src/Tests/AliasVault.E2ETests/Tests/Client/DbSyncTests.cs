@@ -75,16 +75,16 @@ public class DbSyncTests : ClientPlaywrightTest
         var baselineVault = await CreateBaselineVault(async () =>
         {
             ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
-            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline1" }, { "username", "user1" }, { "email", "email1" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline1" }, { "username", "user1" }, { "email", "email1" }, { "first-name", "firstname1" } });
             ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
-            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline2" }, { "username", "user2" }, { "email", "email2" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline2" }, { "username", "user2" }, { "email", "email2" }, { "first-name", "firstname2" } });
             ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
-            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline3" }, { "username", "user3" }, { "email", "email3" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline3" }, { "username", "user3" }, { "email", "email3" }, { "first-name", "firstname3" } });
         });
 
         var client1Vault = await SimulateClient(baselineVault, async () =>
         {
-            await UpdateCredentialEntry("TestBaseline2", new Dictionary<string, string> { { "service-name", "TestBaseMutate2" }, { "username", "usermutate2" }, { "email", "emailmutate2" } });
+            await UpdateCredentialEntry("TestBaseline2", new Dictionary<string, string> { { "service-name", "TestBaseMutate2" }, { "username", "usermutate2" }, { "email", "emailmutate2" }, { "first-name", "firstnamemutate2" } });
         });
 
         await SimulateClient(baselineVault, async () =>
@@ -95,12 +95,17 @@ public class DbSyncTests : ClientPlaywrightTest
             await ApiDbContext.SaveChangesAsync();
 
             await UpdateCredentialEntry("TestBaseline3", new Dictionary<string, string> { { "service-name", "TestBaseMutate3" }, { "username", "usermutate3" }, { "email", "emailmutate3" } });
+
+            // TODO: investigate why the client1Vault changes are visible here while there does not
+            // seem to be an actual merge? Also, the Alias table is not updated with UpdatedAt so it should
+            // not trigger a merge anyway. Check why this test gives a false-positive...
+            await Task.Delay(50000);
         });
 
         // Assert that the two conflicting vaults have been merged and all mutated service names are found.
         Dictionary<string, List<string>> expectedStrings = new()
         {
-            { "TestBaseMutate2", new List<string> { "usermutate2", "emailmutate2@example.tld" } },
+            { "TestBaseMutate2", new List<string> { "usermutate2", "emailmutate2@example.tld", "firstnamemutate2" } },
             { "TestBaseMutate3", new List<string> { "usermutate3", "emailmutate3@example.tld" } },
         };
 
@@ -159,7 +164,6 @@ public class DbSyncTests : ClientPlaywrightTest
 
         // Execute custom client actions.
         await clientActions();
-
         return await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
     }
 }
