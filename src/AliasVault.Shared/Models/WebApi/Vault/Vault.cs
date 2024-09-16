@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi;
+namespace AliasVault.Shared.Models.WebApi.Vault;
 
 /// <summary>
 /// Vault model.
@@ -21,6 +21,13 @@ public class Vault
     /// Gets or sets the vault version.
     /// </summary>
     public required string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current vault's revision number.
+    /// The server will increment this number with each change to the vault and is used for managing concurrency
+    /// and merging if conflicts are detected.
+    /// </summary>
+    public required long CurrentRevisionNumber { get; set; }
 
     /// <summary>
     /// Gets or sets the public encryption key that server requires to encrypt user data such as received emails.

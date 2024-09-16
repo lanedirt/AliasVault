@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------
-// <copyright file="VaultRetentionManagerTests.cs" company="lanedirt">
+// <copyright file="GeneralRetentionTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Vault;
+namespace AliasVault.Tests.Vault.RetentionManager;
 
 using AliasServerDb;
 using AliasVault.Api.Vault;
@@ -16,7 +16,7 @@ using AliasVault.Api.Vault.RetentionRules;
 /// retention rules to keep backups of vaults when client uploads a new encrypted vault
 /// to the server.
 /// </summary>
-public class VaultRetentionManagerTests
+public class GeneralRetentionTests
 {
     private List<Vault> testVaults;
     private DateTime now;
@@ -119,13 +119,13 @@ public class VaultRetentionManagerTests
     }
 
     /// <summary>
-    /// Test the CredentialRetentionRule.
+    /// Test the LoginCredentialRetentionRule.
     /// </summary>
     [Test]
     public void CredentialRetentionRuleTest()
     {
         // Keep the latest 2 unique credentials.
-        var rule = new CredentialRetentionRule { CredentialsToKeep = 2 };
+        var rule = new LoginCredentialRetentionRule { CredentialsToKeep = 2 };
         var result = rule.ApplyRule(testVaults, now).ToList();
 
         // Expecting two vaults to be kept:

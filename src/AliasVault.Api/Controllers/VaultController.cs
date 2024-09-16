@@ -17,6 +17,7 @@ using AliasVault.Auth;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.PasswordChange;
+using AliasVault.Shared.Models.WebApi.Vault;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Cryptography.Client;
@@ -49,11 +50,12 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     {
         Rules =
         [
+            new RevisionNumberConflictRetentionRule(),
             new DailyRetentionRule { DaysToKeep = 3 },
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
             new VersionRetentionRule { VersionsToKeep = 3 },
-            new CredentialRetentionRule { CredentialsToKeep = 2 },
+            new LoginCredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
 
@@ -82,10 +84,11 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault
+            return Ok(new Shared.Models.WebApi.Vault.Vault
             {
                 Blob = string.Empty,
                 Version = string.Empty,
+                CurrentRevisionNumber = 0,
                 EncryptionPublicKey = string.Empty,
                 CredentialsCount = 0,
                 EmailAddressList = new List<string>(),
@@ -94,10 +97,11 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             });
         }
 
-        return Ok(new Shared.Models.WebApi.Vault
+        return Ok(new Shared.Models.WebApi.Vault.Vault
         {
             Blob = vault.VaultBlob,
             Version = vault.Version,
+            CurrentRevisionNumber = vault.RevisionNumber,
             EncryptionPublicKey = string.Empty,
             CredentialsCount = 0,
             EmailAddressList = new List<string>(),
@@ -112,7 +116,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     /// <param name="model">Vault model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("")]
-    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault model)
+    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -125,12 +129,19 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // Retrieve latest vault of user which contains the current encryption settings.
         var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
 
+        // Calculate the new revision number for the vault.
+        // Note: it is possible multiple clients are updating the vault at the same time which would cause
+        // multiple vaults with the same revision number. This is expected and will trigger a vault
+        // synchronize/merge process on the client side.
+        var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            RevisionNumber = newRevisionNumber,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
             CredentialsCount = model.CredentialsCount,
             EmailClaimsCount = model.EmailAddressList.Count,
@@ -161,7 +172,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
         }
 
-        return Ok(new { Message = "Database saved successfully." });
+        return Ok(new VaultUpdateResponse { NewRevisionNumber = newRevisionNumber });
     }
 
     /// <summary>

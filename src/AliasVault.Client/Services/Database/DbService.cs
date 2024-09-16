@@ -11,7 +11,7 @@ using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Client.Services.Auth;
-using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.WebApi.Vault;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +30,7 @@ public sealed class DbService : IDisposable
     private readonly SettingsService _settingsService = new();
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
+    private long _vaultRevisionNumber;
     private bool _isSuccessfullyInitialized;
     private int _retryCount;
     private bool _disposed;
@@ -273,6 +274,7 @@ public sealed class DbService : IDisposable
         {
             Blob = encryptedDatabase,
             Version = databaseVersion,
+            CurrentRevisionNumber = _vaultRevisionNumber,
             EncryptionPublicKey = encryptionKey.PublicKey,
             CredentialsCount = credentialsCount,
             EmailAddressList = emailAddresses,
@@ -484,6 +486,7 @@ public sealed class DbService : IDisposable
                     return false;
                 }
 
+                _vaultRevisionNumber = vault.CurrentRevisionNumber;
                 _isSuccessfullyInitialized = true;
                 await _settingsService.InitializeAsync(this);
                 _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
@@ -501,21 +504,37 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
-    /// Save encrypted database blob to server.
+    /// Saves encrypted database blob to server and updates the local revision number.
     /// </summary>
     /// <param name="encryptedDatabase">Encrypted database as string.</param>
-    /// <returns>True if save action succeeded.</returns>
+    /// <returns>True if save action succeeded and revision number was updated, false otherwise.</returns>
     private async Task<bool> SaveToServerAsync(string encryptedDatabase)
     {
         var vaultObject = await PrepareVaultForUploadAsync(encryptedDatabase);
 
         try
         {
-            await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
-            return true;
+            var response = await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
+
+            // Ensure the request was successful
+            response.EnsureSuccessStatusCode();
+
+            // Deserialize the response content
+            var vaultUpdateResponse = await response.Content.ReadFromJsonAsync<VaultUpdateResponse>();
+
+            if (vaultUpdateResponse != null)
+            {
+                // Update the revision number
+                _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
+                return true;
+            }
+
+            Console.WriteLine("Server response was empty or could not be deserialized.");
+            return false;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Unexpected Error: {ex.Message}");
             return false;
         }
     }

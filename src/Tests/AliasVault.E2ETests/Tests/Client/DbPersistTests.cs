@@ -7,6 +7,8 @@
 
 namespace AliasVault.E2ETests.Tests.Client;
 
+using Microsoft.EntityFrameworkCore;
+
 /// <summary>
 /// End-to-end tests for the client database persistence.
 /// </summary>
@@ -22,6 +24,7 @@ public class DbPersistTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
+    [Order(1)]
     public async Task DbPersistCredentialTest()
     {
         // Advance time by 1 second manually to ensure the new vault is created in the future.
@@ -46,5 +49,29 @@ public class DbPersistTests : ClientPlaywrightTest
         // Check if the service name is still present in the content.
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created credential service name does not appear on login page after hard page reload. Check if the database is correctly persisted and then loaded from the server.");
+    }
+
+    /// <summary>
+    /// Test if the vault revision number is incremented when a new version of the vault is saved to the server.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(2)]
+    public async Task VaultRevisionNumberIncrementTest()
+    {
+        // Assert that the vault revision number is 1 in the server database.
+        // Note: for this we expect the previous test to have run first and created a first credential.
+        var firstUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
+        Assert.That(firstUpdateVault.RevisionNumber, Is.EqualTo(1), "Vault revision number is not at 1 after creating the first credential in a new vault.");
+
+        // Advance time by 1 second manually to ensure the new vault is created in the future.
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
+        // Create a new credential which will trigger a vault save to the server.
+        await CreateCredentialEntry();
+
+        // Assert that the vault revision number is now 2 in the server database.
+        var secondUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
+        Assert.That(secondUpdateVault.RevisionNumber, Is.EqualTo(2), "Vault revision number is not 2 after the second credential save.");
     }
 }
