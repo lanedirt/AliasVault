@@ -103,11 +103,11 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
 
         // Check if there are no other vaults with the same revision number.
         // If there are, return a merge required status.
-        var otherVaults = await context.Vaults
+        var duplicateRevisionCount = await context.Vaults
             .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
-            .ToListAsync();
+            .CountAsync();
 
-        if (otherVaults.Count > 1)
+        if (duplicateRevisionCount > 1)
         {
             return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
             {
@@ -130,6 +130,55 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
                 CreatedAt = vault.CreatedAt,
                 UpdatedAt = vault.UpdatedAt,
             },
+        });
+    }
+
+    /// <summary>
+    /// Returns a list of vaults that should be merged by the client.
+    /// </summary>
+    /// <returns>List of vaults to merge.</returns>
+    [HttpGet("merge")]
+    public async Task<IActionResult> GetVaultsToMerge()
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Logic to retrieve vault for the user.
+        var vault = await context.Vaults
+            .Where(x => x.UserId == user.Id)
+            .OrderByDescending(x => x.UpdatedAt)
+            .FirstOrDefaultAsync();
+
+        // If no vault is found on server, return an empty object.
+        if (vault == null)
+        {
+            return BadRequest("No vault(s) found for user.");
+        }
+
+        // Check if there are no other vaults with the same revision number.
+        // If there are, return a merge required status.
+        var otherVaults = await context.Vaults
+            .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
+            .ToListAsync();
+
+        return Ok(new Shared.Models.WebApi.Vault.VaultMergeResponse
+        {
+            Vaults = otherVaults.Select(x => new Shared.Models.WebApi.Vault.Vault
+            {
+                Blob = x.VaultBlob,
+                Version = x.Version,
+                CurrentRevisionNumber = x.RevisionNumber,
+                EncryptionPublicKey = string.Empty,
+                CredentialsCount = 0,
+                EmailAddressList = [],
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+            }).ToList(),
         });
     }
 

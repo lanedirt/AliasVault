@@ -5,7 +5,7 @@
     <div class="text-center">
         <div class="space-y-4">
             <BoldLoadingIndicator />
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Merge required</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Merging required</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 A merge is required because another client has made changes to the vault since you last synced.
             </p>
@@ -46,11 +46,7 @@
 
     private async Task MergeDatabase()
     {
-        // Simulate a delay.
-        await Task.Delay(1000);
-
-        // Migration failed
-        ErrorMessage = "Merge failed. Please try again or contact support.";
+        await DbService.MergeDatabasesAsync();
 
         StateHasChanged();
     }

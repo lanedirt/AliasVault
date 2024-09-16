@@ -1,0 +1,11 @@
+﻿<div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+    <div class="text-center">
+        <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Vault merge error.</h2>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@Message Please try again (later) or contact support.</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+}

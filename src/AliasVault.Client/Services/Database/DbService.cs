@@ -93,6 +93,76 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Merges two or more databases into one.
+    /// </summary>
+    /// <returns>Bool which indicates if merging was successful.</returns>
+    public async Task<bool> MergeDatabasesAsync()
+    {
+        try
+        {
+            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>("api/v1/Vault/merge");
+            if (vaultsToMerge == null || !vaultsToMerge.Vaults.Any())
+            {
+                // No vaults to merge found, set error state.
+                _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "No vaults to merge found.");
+                return false;
+            }
+
+            var sqlConnections = new List<SqliteConnection>();
+
+            // Decrypt and instantiate each vault as a separate in-memory SQLite database
+            foreach (var vault in vaultsToMerge.Vaults)
+            {
+                var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
+                var connection = new SqliteConnection("Data Source=:memory:");
+                connection.Open();
+                await ImportDbContextFromBase64Async(decryptedBase64String, connection);
+                sqlConnections.Add(connection);
+            }
+
+            // Use the first connection as the base
+            var baseConnection = sqlConnections[0];
+            sqlConnections.RemoveAt(0);
+
+            // Get all table names from the base database
+            var tables = await DbMergeUtility.GetTableNames(baseConnection);
+
+            // Merge each database into the base
+            foreach (var connection in sqlConnections)
+            {
+                foreach (var table in tables)
+                {
+                    await DbMergeUtility.MergeTable(baseConnection, connection, table);
+                }
+            }
+
+            // Set the merged database as the current database
+            _sqlConnection.Close();
+            _sqlConnection = baseConnection;
+            _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
+
+            // Clean up other connections
+            foreach (var connection in sqlConnections)
+            {
+                connection.Close();
+                connection.Dispose();
+            }
+
+            await _dbContext.Database.MigrateAsync();
+            _isSuccessfullyInitialized = true;
+            await _settingsService.InitializeAsync(this);
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, $"Error merging databases: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Returns the AliasClientDbContext instance.
     /// </summary>
     /// <returns>AliasClientDbContext.</returns>
@@ -362,13 +432,14 @@ public sealed class DbService : IDisposable
     /// Loads a SQLite database from a base64 string which represents a .sqlite file.
     /// </summary>
     /// <param name="base64String">Base64 string representation of a .sqlite file.</param>
-    private async Task ImportDbContextFromBase64Async(string base64String)
+    /// <param name="connection">The connection to the database that should be used for the import.</param>
+    private async Task ImportDbContextFromBase64Async(string base64String, SqliteConnection connection)
     {
         var bytes = Convert.FromBase64String(base64String);
         var tempFileName = Path.GetRandomFileName();
         await File.WriteAllBytesAsync(tempFileName, bytes);
 
-        using (var command = _sqlConnection.CreateCommand())
+        using (var command = connection.CreateCommand())
         {
             // Disable foreign key constraints
             command.CommandText = "PRAGMA foreign_keys = OFF;";
@@ -485,7 +556,7 @@ public sealed class DbService : IDisposable
 
                 // Attempt to decrypt the database blob.
                 string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
-                await ImportDbContextFromBase64Async(decryptedBase64String);
+                await ImportDbContextFromBase64Async(decryptedBase64String, _sqlConnection);
 
                 // Check if database is up-to-date with migrations.
                 var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
