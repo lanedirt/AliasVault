@@ -328,6 +328,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         {
             VaultBlob = string.Empty,
             Version = "0.0.0",
+            RevisionNumber = 0,
             Salt = model.Salt,
             Verifier = model.Verifier,
             EncryptionType = Defaults.EncryptionType,

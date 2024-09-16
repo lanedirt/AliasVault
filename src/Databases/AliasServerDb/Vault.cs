@@ -51,7 +51,7 @@ public class Vault
     /// update a previous version of the vault simultaneously.
     /// </summary>
     [Required]
-    public long RevisionNumber { get; set; }
+    public required long RevisionNumber { get; set; }
 
     /// <summary>
     /// Gets or sets the vault filesize in kilobytes.

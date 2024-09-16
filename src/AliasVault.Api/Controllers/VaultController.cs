@@ -202,12 +202,19 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
         }
 
+        // Calculate the new revision number for the vault.
+        // Note: it is possible multiple clients are updating the vault at the same time which would cause
+        // multiple vaults with the same revision number. This is expected and will trigger a vault
+        // synchronize/merge process on the client side.
+        var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            RevisionNumber = newRevisionNumber,
             CredentialsCount = model.CredentialsCount,
             EmailClaimsCount = model.EmailAddressList.Count,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
@@ -255,6 +262,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
                 UserId = x.UserId,
                 VaultBlob = string.Empty,
                 Version = x.Version,
+                RevisionNumber = x.RevisionNumber,
                 FileSize = x.FileSize,
                 CredentialsCount = x.CredentialsCount,
                 EmailClaimsCount = x.EmailClaimsCount,
