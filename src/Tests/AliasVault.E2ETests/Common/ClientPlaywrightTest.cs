@@ -233,6 +233,7 @@ public class ClientPlaywrightTest : PlaywrightTest
     {
         // Check that we are on the login page after navigating to the base URL.
         // We are expecting to not be authenticated and thus to be redirected to the login page.
+        await Page.GotoAsync(AppBaseUrl);
         await WaitForUrlAsync("user/login", "Your username");
 
         // Wait for 100ms to ensure the page has loaded.

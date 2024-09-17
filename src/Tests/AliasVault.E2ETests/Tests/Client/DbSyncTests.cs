@@ -65,7 +65,7 @@ public class DbSyncTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test that client side merge works correctly when two or more conflicting vault versions have been detected.
+    /// Test that client side merge works correctly when two or more clients have updated the same vault.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
@@ -82,12 +82,14 @@ public class DbSyncTests : ClientPlaywrightTest
             await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline3" }, { "username", "user3" }, { "email", "email3" }, { "first-name", "firstname3" } });
         });
 
+        // Client 1 updates the vault first.
         var client1Vault = await SimulateClient(baselineVault, async () =>
         {
             await UpdateCredentialEntry("TestBaseline2", new Dictionary<string, string> { { "service-name", "TestBaseMutate2" }, { "username", "usermutate2" }, { "email", "emailmutate2" }, { "first-name", "firstnamemutate2" } });
         });
 
-        await SimulateClient(baselineVault, async () =>
+        // Then client 2 updates the same vault causing a conflict and requiring a client-side merge.
+        var client2Vault = await SimulateClient(baselineVault, async () =>
         {
             // Re-add client1 vault to simulate conflict when this second client updates the same vault.
             client1Vault.Id = Guid.NewGuid();
@@ -97,10 +99,21 @@ public class DbSyncTests : ClientPlaywrightTest
             await UpdateCredentialEntry("TestBaseline3", new Dictionary<string, string> { { "service-name", "TestBaseMutate3" }, { "username", "usermutate3" }, { "email", "emailmutate3" } });
         });
 
+        // Then another client updates the client 1 vault again, which should also cause a conflict with the client 2 vault update.
+        await SimulateClient(client1Vault, async () =>
+        {
+            // Re-add client2 vault to simulate conflict when this third client updates the same vault.
+            client2Vault.Id = Guid.NewGuid();
+            ApiDbContext.Vaults.Add(client2Vault);
+            await ApiDbContext.SaveChangesAsync();
+
+            await UpdateCredentialEntry("TestBaseMutate2", new Dictionary<string, string> { { "service-name", "TestBaseMutate23" }, { "first-name", "firstnamemutate23" } });
+        });
+
         // Assert that the two conflicting vaults have been merged and all mutated service names are found.
         Dictionary<string, List<string>> expectedStrings = new()
         {
-            { "TestBaseMutate2", new List<string> { "usermutate2", "emailmutate2@example.tld", "firstnamemutate2" } },
+            { "TestBaseMutate23", new List<string> { "usermutate2", "emailmutate2@example.tld", "firstnamemutate23" } },
             { "TestBaseMutate3", new List<string> { "usermutate3", "emailmutate3@example.tld" } },
         };
 
@@ -122,6 +135,70 @@ public class DbSyncTests : ClientPlaywrightTest
                 Assert.That(inputWithValue, Is.True, $"No input found with value '{property}' in {serviceName.Key} credential page after merge.");
             }
         }
+    }
+
+    /// <summary>
+    /// Test that merge between two vaults where one has changed the password results in an error.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(3)]
+    public async Task DbSyncClientMergePasswordChangeErrorTest()
+    {
+        var baselineVault = await CreateBaselineVault(async () =>
+        {
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline" } });
+        });
+
+        var client1Vault = await SimulateClient(baselineVault, async () =>
+        {
+            await NavigateUsingBlazorRouter("credentials");
+            await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestA" } });
+
+            // Attempt to change password.
+            await NavigateUsingBlazorRouter("settings/security/change-password");
+            await WaitForUrlAsync("settings/security/change-password", "Current Password");
+
+            // Fill in the form.
+            var currentPasswordField = Page.Locator("input[id='currentPassword']");
+            var newPasswordField = Page.Locator("input[id='newPassword']");
+            var confirmPasswordField = Page.Locator("input[id='newPasswordConfirm']");
+
+            var newPassword = TestUserPassword + "123";
+
+            await currentPasswordField.FillAsync(TestUserPassword);
+            await newPasswordField.FillAsync(newPassword);
+            await confirmPasswordField.FillAsync(newPassword);
+
+            // Advance time by 1 second manually to ensure the new vault (encrypted with new password) is created in the future.
+            ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
+            // Click the change password button.
+            var changePasswordButton = Page.Locator("button:has-text('Change Password')");
+            await changePasswordButton.ClickAsync();
+
+            // Wait for success message.
+            await WaitForUrlAsync("settings/security/change-password**", "Password changed successfully.");
+        });
+
+        await SimulateClient(baselineVault, async () =>
+        {
+            // Re-add client1 vault to simulate conflict when this second client updates the same vault.
+            client1Vault.Id = Guid.NewGuid();
+            ApiDbContext.Vaults.Add(client1Vault);
+            await ApiDbContext.SaveChangesAsync();
+
+            await NavigateUsingBlazorRouter("credentials");
+            await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestB" } });
+        });
+
+        // Assert that merge failed error message is shown.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("your changes could not be saved."), $"Merge failed error expected after another client changed the password but no error message found.");
     }
 
     /// <summary>
@@ -155,7 +232,9 @@ public class DbSyncTests : ClientPlaywrightTest
         await ApiDbContext.SaveChangesAsync();
 
         // Simulate new client.
-        await RefreshPageAndUnlockVault();
+        await Logout();
+        await Login();
+        await WaitForUrlAsync("credentials", "Find all of your credentials");
 
         // Execute custom client actions.
         await clientActions();

@@ -29,6 +29,7 @@ public sealed class DbService : IDisposable
     private readonly DbServiceState _state = new();
     private readonly Config _config;
     private readonly SettingsService _settingsService = new();
+    private readonly GlobalNotificationService _globalNotificationService;
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
     private long _vaultRevisionNumber;
@@ -43,12 +44,14 @@ public sealed class DbService : IDisposable
     /// <param name="jsInteropService">JsInteropService.</param>
     /// <param name="httpClient">HttpClient.</param>
     /// <param name="config">Config instance.</param>
-    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config)
+    /// <param name="globalNotificationService">Global notification service.</param>
+    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config, GlobalNotificationService globalNotificationService)
     {
         _authService = authService;
         _jsInteropService = jsInteropService;
         _httpClient = httpClient;
         _config = config;
+        _globalNotificationService = globalNotificationService;
 
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
@@ -110,10 +113,13 @@ public sealed class DbService : IDisposable
 
             var sqlConnections = new List<SqliteConnection>();
 
+            Console.WriteLine("Merging databases...");
+
             // Decrypt and instantiate each vault as a separate in-memory SQLite database.
             foreach (var vault in vaultsToMerge.Vaults)
             {
                 var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
+                Console.WriteLine($"Decrypted vault {vault.UpdatedAt}.");
                 var connection = new SqliteConnection("Data Source=:memory:");
                 connection.Open();
                 await ImportDbContextFromBase64Async(decryptedBase64String, connection);
@@ -137,6 +143,7 @@ public sealed class DbService : IDisposable
                 i++;
                 foreach (var table in tables)
                 {
+                    Console.WriteLine($"Merging table {table}.");
                     await DbMergeUtility.MergeTable(_sqlConnection, connection, table);
                 }
             }
@@ -179,6 +186,8 @@ public sealed class DbService : IDisposable
             await _settingsService.InitializeAsync(this);
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
 
+            Console.WriteLine("Databases merged successfully.");
+
             // Save the newly merged database to the server.
             await SaveDatabaseAsync();
 
@@ -186,6 +195,8 @@ public sealed class DbService : IDisposable
         }
         catch (Exception ex)
         {
+            _globalNotificationService.AddErrorMessage("Error: your changes could not be saved. Your vault has been changed elsewhere since you have last opened it and the automatic merge has failed. This might be caused by a password change. Please log out and log back in again to get the latest version of your vault.");
+            Console.WriteLine($"Error merging databases: {ex.Message}");
             _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, $"Error merging databases: {ex.Message}");
             return false;
         }
