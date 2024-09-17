@@ -64,6 +64,67 @@ else
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <div class="items-center">
                     <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Vaults</h3>
+
+                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">ID</th>
+                                <th scope="col" class="px-4 py-3">Created</th>
+                                <th scope="col" class="px-4 py-3">Updated</th>
+                                <th scope="col" class="px-4 py-3">Filesize</th>
+                                <th scope="col" class="px-4 py-3">DB version</th>
+                                <th scope="col" class="px-4 py-3">Revision</th>
+                                <th scope="col" class="px-4 py-3">Credentials</th>
+                                <th scope="col" class="px-4 py-3">Email Claims</th>
+                                <th scope="col" class="px-4 py-3">Status</th>
+                                <th scope="col" class="px-4 py-3">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @{
+                            Vault? previousEntry = null;
+                            }
+                            @foreach (var entry in VaultList.OrderBy(e => e.UpdatedAt))
+                            {
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
+                                <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-4 py-3">@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
+                                <td class="px-4 py-3">@entry.Version</td>
+                                <td class="px-4 py-3">@entry.RevisionNumber</td>
+                                <td class="px-4 py-3">@entry.CredentialsCount</td>
+                                <td class="px-4 py-3">@entry.EmailClaimsCount</td>
+                                <td class="px-4 py-3">
+                                    @if (entry == LatestVault)
+                                    {
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Current</span>
+                                    }
+                                    @if (previousEntry != null && HasPasswordChanged(entry, previousEntry))
+                                    {
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Password Changed</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if (entry != LatestVault)
+                                    {
+                                    <Button OnClick="() => MakeCurrentAsync(entry)">Make Current</Button>
+                                    }
+                                </td>
+                            </tr>
+
+                            previousEntry = entry;
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center">
+                    <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">UserRefreshTokens (Logged in devices)</h3>
 
                         <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
@@ -90,67 +151,6 @@ else
                                         <button @onclick="() => RevokeRefreshToken(entry)" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Revoke</button>
                                     </td>
                                 </tr>
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-                <div class="items-center">
-                    <div>
-                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Vaults</h3>
-
-                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-4 py-3">ID</th>
-                                <th scope="col" class="px-4 py-3">Created</th>
-                                <th scope="col" class="px-4 py-3">Updated</th>
-                                <th scope="col" class="px-4 py-3">Filesize</th>
-                                <th scope="col" class="px-4 py-3">DB version</th>
-                                <th scope="col" class="px-4 py-3">Revision</th>
-                                <th scope="col" class="px-4 py-3">Credentials</th>
-                                <th scope="col" class="px-4 py-3">Email Claims</th>
-                                <th scope="col" class="px-4 py-3">Status</th>
-                                <th scope="col" class="px-4 py-3">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @{
-                                Vault? previousEntry = null;
-                            }
-                            @foreach (var entry in VaultList.OrderBy(e => e.UpdatedAt))
-                            {
-                                <tr class="bg-white border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
-                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td class="px-4 py-3">@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
-                                    <td class="px-4 py-3">@entry.Version</td>
-                                    <td class="px-4 py-3">@entry.RevisionNumber</td>
-                                    <td class="px-4 py-3">@entry.CredentialsCount</td>
-                                    <td class="px-4 py-3">@entry.EmailClaimsCount</td>
-                                    <td class="px-4 py-3">
-                                        @if (entry == LatestVault)
-                                        {
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Current</span>
-                                        }
-                                        @if (previousEntry != null && HasPasswordChanged(entry, previousEntry))
-                                        {
-                                            <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Password Changed</span>
-                                        }
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        @if (entry != LatestVault)
-                                        {
-                                            <Button OnClick="() => MakeCurrentAsync(entry)">Make Current</Button>
-                                        }
-                                    </td>
-                                </tr>
-
-                                previousEntry = entry;
                             }
                             </tbody>
                         </table>

@@ -50,10 +50,11 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     {
         Rules =
         [
+            new RevisionRetentionRule { RevisionsToKeep = 10 },
             new DailyRetentionRule { DaysToKeep = 3 },
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
-            new VersionRetentionRule { VersionsToKeep = 3 },
+            new DbVersionRetentionRule { VersionsToKeep = 3 },
             new LoginCredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
