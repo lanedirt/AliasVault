@@ -104,7 +104,7 @@ public sealed class DbService : IDisposable
         try
         {
             var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>($"api/v1/Vault/merge?currentRevisionNumber={_vaultRevisionNumber}");
-            if (vaultsToMerge == null || !vaultsToMerge.Vaults.Any())
+            if (vaultsToMerge == null || vaultsToMerge.Vaults.Count == 0)
             {
                 // No vaults to merge found, set error state.
                 _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "No vaults to merge found.");
@@ -121,7 +121,7 @@ public sealed class DbService : IDisposable
                 var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
                 Console.WriteLine($"Decrypted vault {vault.UpdatedAt}.");
                 var connection = new SqliteConnection("Data Source=:memory:");
-                connection.Open();
+                await connection.OpenAsync();
                 await ImportDbContextFromBase64Async(decryptedBase64String, connection);
                 sqlConnections.Add(connection);
             }
@@ -171,8 +171,8 @@ public sealed class DbService : IDisposable
             // Clean up other connections.
             foreach (var connection in sqlConnections)
             {
-                connection.Close();
-                connection.Dispose();
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
 
             await _dbContext.Database.MigrateAsync();
@@ -470,7 +470,7 @@ public sealed class DbService : IDisposable
     /// </summary>
     /// <param name="base64String">Base64 string representation of a .sqlite file.</param>
     /// <param name="connection">The connection to the database that should be used for the import.</param>
-    private async Task ImportDbContextFromBase64Async(string base64String, SqliteConnection connection)
+    private static async Task ImportDbContextFromBase64Async(string base64String, SqliteConnection connection)
     {
         var bytes = Convert.FromBase64String(base64String);
         var tempFileName = Path.GetRandomFileName();

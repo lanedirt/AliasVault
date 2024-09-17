@@ -7,7 +7,7 @@
 
 namespace AliasVault.Client.Services.Database;
 
-using System.Data;
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 
 /// <summary>
@@ -49,33 +49,20 @@ public static class DbMergeUtility
 
         baseCommand.CommandText = $"PRAGMA table_info({tableName})";
         var columns = new List<string>();
-        bool hasId = false;
-        bool hasUpdatedAt = false;
-        bool hasIsDeleted = false;
 
+        // Get column names from the base table.
         using (var reader = await baseCommand.ExecuteReaderAsync())
         {
             while (await reader.ReadAsync())
             {
                 string columnName = reader.GetString(1);
                 columns.Add(columnName);
-                if (columnName == "Id")
-                {
-                    hasId = true;
-                }
-                else if (columnName == "UpdatedAt")
-                {
-                    hasUpdatedAt = true;
-                }
-                else if (columnName == "IsDeleted")
-                {
-                    hasIsDeleted = true;
-                }
             }
         }
 
-        // Check if the table has Id, UpdatedAt and IsDeleted columns.
-        if (!hasId || !hasUpdatedAt || !hasIsDeleted)
+        // Check if the table has Id, UpdatedAt and IsDeleted columns which are required in order to merge.
+        // If columns are missing, skip the table.
+        if (!columns.Contains("Id") || !columns.Contains("UpdatedAt") || !columns.Contains("IsDeleted"))
         {
             return;
         }
@@ -90,7 +77,6 @@ public static class DbMergeUtility
         {
             var id = sourceReader.GetValue(0);
             var updatedAt = sourceReader.GetDateTime(columns.IndexOf("UpdatedAt"));
-            var isDeleted = sourceReader.GetBoolean(columns.IndexOf("IsDeleted"));
 
             // Check if the record exists in the base table.
             baseCommand.CommandText = $"SELECT UpdatedAt FROM {tableName} WHERE Id = @Id";
@@ -105,25 +91,17 @@ public static class DbMergeUtility
                 Console.WriteLine($"Record exists in {tableName}.");
 
                 // Record exists, compare UpdatedAt if it exists.
-                if (hasUpdatedAt)
+                Console.WriteLine($"Comparing UpdatedAt in {tableName}.");
+                Console.WriteLine($"UpdatedAt: {existingRecord}");
+                var baseUpdatedAt = DateTime.Parse((string)existingRecord, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+                if (updatedAt > baseUpdatedAt)
                 {
-                    Console.WriteLine($"Comparing UpdatedAt in {tableName}.");
-                    Console.WriteLine($"UpdatedAt: {existingRecord}");
-                    var baseUpdatedAt = DateTime.Parse((string)existingRecord);
-                    if (updatedAt > baseUpdatedAt)
-                    {
-                        // Source record is newer, update the base record.
-                        await UpdateRecord(baseConnection, tableName, sourceReader, columns);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Base record is newer, skipping {tableName}.");
-                    }
+                    // Source record is newer, update the base record.
+                    await UpdateRecord(baseConnection, tableName, sourceReader, columns);
                 }
                 else
                 {
-                    // If UpdatedAt doesn't exist, always update.
-                    await UpdateRecord(baseConnection, tableName, sourceReader, columns);
+                    Console.WriteLine($"Base record is newer, skipping {tableName}.");
                 }
             }
             else

@@ -49,9 +49,18 @@
     /// Original attachments that were passed in. This is used to determine if a deleted attachment was part of the original set and
     /// can be hard deleted (did not exist in the original set) or should be soft deleted (was part of the original set).
     /// </summary>
-    private List<Attachment> _originalAttachments = [];
+    private List<Guid> _originalAttachmentsIds = [];
 
     private string statusMessage = string.Empty;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Keep track of the original attachments.
+        _originalAttachmentsIds = Attachments.Select(a => a.Id).ToList();
+    }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
@@ -91,7 +100,7 @@
         try
         {
             // Check if the attachment was part of the original set.
-            if (_originalAttachments.Contains(attachment))
+            if (_originalAttachmentsIds.Contains(attachment.Id))
             {
                 // If it was part of the original set, we soft delete it.
                 attachment.IsDeleted = true;
