@@ -29,5 +29,5 @@ public class LoginModel
     /// <summary>
     /// Gets or sets a value indicating whether the user wants to be remembered.
     /// </summary>
-    public bool RememberMe { get; set; }
+    public bool RememberMe { get; set; } = true;
 }
