@@ -30,15 +30,15 @@ public class GeneralRetentionTests
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
         testVaults =
         [
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 days ago
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 3 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 4 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 weeks ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 3 weeks ago
-            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 1 month ago
-            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 months ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 9 },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 8 },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 7 }, // 2 days ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 6 }, // 3 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 5 }, // 4 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 4 }, // 2 weeks ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 3 }, // 3 weeks ago
+            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 2 }, // 1 month ago
+            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 1 }, // 2 months ago
         ];
     }
 
@@ -102,12 +102,12 @@ public class GeneralRetentionTests
     }
 
     /// <summary>
-    /// Test the VersionRetentionRule.
+    /// Test the DbVersionRetentionRule.
     /// </summary>
     [Test]
     public void VersionRetentionRuleTest()
     {
-        var rule = new VersionRetentionRule { VersionsToKeep = 2 };
+        var rule = new DbVersionRetentionRule { VersionsToKeep = 2 };
         var result = rule.ApplyRule(testVaults, now).ToList();
 
         Assert.Multiple(() =>
@@ -141,6 +141,25 @@ public class GeneralRetentionTests
     }
 
     /// <summary>
+    /// Test the RevisionRetentionRule.
+    /// </summary>
+    [Test]
+    public void RevisionRetentionRuleTest()
+    {
+        // Keep the last 5 unique revisions.
+        var rule = new RevisionRetentionRule { RevisionsToKeep = 5 };
+        var result = rule.ApplyRule(testVaults, now).ToList();
+
+        // Expecting five vaults to be kept: the latest 5 unique revisions (5-9).
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(5));
+            Assert.That(result.Min(x => x.RevisionNumber), Is.EqualTo(5));
+            Assert.That(result.Max(x => x.RevisionNumber), Is.EqualTo(9));
+        });
+    }
+
+    /// <summary>
     /// Test the RetentionPolicy object.
     /// </summary>
     [Test]
@@ -150,10 +169,11 @@ public class GeneralRetentionTests
         {
             Rules = new List<IRetentionRule>
             {
+                new RevisionRetentionRule { RevisionsToKeep = 1 },
                 new DailyRetentionRule { DaysToKeep = 2 },
                 new WeeklyRetentionRule { WeeksToKeep = 2 },
                 new MonthlyRetentionRule { MonthsToKeep = 1 },
-                new VersionRetentionRule { VersionsToKeep = 3 },
+                new DbVersionRetentionRule { VersionsToKeep = 3 },
             },
         };
 

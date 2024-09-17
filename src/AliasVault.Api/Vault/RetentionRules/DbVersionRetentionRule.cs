@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="VersionRetentionRule.cs" company="lanedirt">
+// <copyright file="DbVersionRetentionRule.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,12 +10,12 @@ namespace AliasVault.Api.Vault.RetentionRules;
 using AliasServerDb;
 
 /// <summary>
-/// Version retention rule that keeps the latest X unique versions of the vault.
+/// Version retention rule that keeps the latest X unique db versions of the vault.
 /// </summary>
-public class VersionRetentionRule : IRetentionRule
+public class DbVersionRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of versions to keep the vault.
+    /// Gets or sets amount of db versions to keep the vault.
     /// </summary>
     public int VersionsToKeep { get; set; }
 
