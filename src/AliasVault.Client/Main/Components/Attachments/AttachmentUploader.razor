@@ -6,9 +6,9 @@
         <div class="grid gap-6">
             <div class="col-span-6 sm:col-span-3">
                 <InputFile OnChange="@HandleFileSelection" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" />
-                @if (!string.IsNullOrEmpty(statusMessage))
+                @if (!string.IsNullOrEmpty(StatusMessage))
                 {
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@statusMessage</p>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@StatusMessage</p>
                 }
                 @if (Attachments.Any())
                 {
@@ -45,11 +45,26 @@
     [Parameter]
     public EventCallback<List<Attachment>> AttachmentsChanged { get; set; }
 
-    private string statusMessage = string.Empty;
+    /// <summary>
+    /// Original attachments that were passed in. This is used to determine if a deleted attachment was part of the original set and
+    /// can be hard deleted (did not exist in the original set) or should be soft deleted (was part of the original set).
+    /// </summary>
+    private List<Guid> OriginalAttachmentsIds = [];
+
+    private string StatusMessage = string.Empty;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Keep track of the original attachments.
+        OriginalAttachmentsIds = Attachments.Select(a => a.Id).ToList();
+    }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
-        statusMessage = "Uploading...";
+        StatusMessage = "Uploading...";
         foreach (var file in e.GetMultipleFiles(int.MaxValue))
         {
             try
@@ -68,11 +83,11 @@
                 Attachments.Add(attachment);
                 await AttachmentsChanged.InvokeAsync(Attachments);
 
-                statusMessage = "File uploaded successfully.";
+                StatusMessage = "File uploaded successfully.";
             }
             catch (Exception ex)
             {
-                statusMessage = $"Error uploading file: {ex.Message}";
+                StatusMessage = $"Error uploading file: {ex.Message}";
                 Console.Error.WriteLine("Error uploading file: {0}", ex.Message);
             }
         }
@@ -84,14 +99,25 @@
     {
         try
         {
-            Attachments.Remove(attachment);
-            await AttachmentsChanged.InvokeAsync(Attachments);
+            // Check if the attachment was part of the original set.
+            if (OriginalAttachmentsIds.Contains(attachment.Id))
+            {
+                // If it was part of the original set, we soft delete it.
+                attachment.IsDeleted = true;
+                attachment.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // If it was not part of the original set, we hard delete it.
+                Attachments.Remove(attachment);
+            }
 
-            statusMessage = "Attachment deleted successfully.";
+            await AttachmentsChanged.InvokeAsync(Attachments);
+            StatusMessage = "Attachment deleted successfully.";
         }
         catch (Exception ex)
         {
-            statusMessage = $"Error deleting attachment: {ex.Message}";
+            StatusMessage = $"Error deleting attachment: {ex.Message}";
             Console.Error.WriteLine("Error deleting file: {0}", ex.Message);
         }
 

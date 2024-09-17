@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CredentialRetentionRule.cs" company="lanedirt">
+// <copyright file="LoginCredentialRetentionRule.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -10,12 +10,12 @@ namespace AliasVault.Api.Vault.RetentionRules;
 using AliasServerDb;
 
 /// <summary>
-/// Credential retention rule that keeps the latest X unique credentials and vaults associated with it.
+/// Credential retention rule that keeps the latest X unique login credentials and vaults associated with it.
 /// </summary>
-public class CredentialRetentionRule : IRetentionRule
+public class LoginCredentialRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of unique credentials to keep including the vault.
+    /// Gets or sets amount of unique login credentials to keep including the vault.
     /// </summary>
     public int CredentialsToKeep { get; set; }
 

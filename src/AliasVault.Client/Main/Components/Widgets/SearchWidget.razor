@@ -115,6 +115,7 @@
             var query = context.Credentials
                 .Include(x => x.Service)
                 .Include(x => x.Alias)
+                .Where(x => !x.IsDeleted)
                 .AsQueryable();
 
             foreach (var term in searchTerms)

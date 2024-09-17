@@ -39,7 +39,7 @@ public static class Encryption
             case "Argon2Id":
                 return await Argon2Id(passwordBytes, saltBytes, encryptionSettings);
             default:
-                throw new NotSupportedException($"Encryption type {Defaults.EncryptionType} is not supported.");
+                throw new NotSupportedException($"Encryption type {encryptionType} is not supported.");
         }
     }
 

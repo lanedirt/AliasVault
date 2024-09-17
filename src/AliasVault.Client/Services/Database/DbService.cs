@@ -11,7 +11,8 @@ using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
 using AliasVault.Client.Services.Auth;
-using AliasVault.Shared.Models.WebApi;
+using AliasVault.Shared.Models.Enums;
+using AliasVault.Shared.Models.WebApi.Vault;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,8 +29,10 @@ public sealed class DbService : IDisposable
     private readonly DbServiceState _state = new();
     private readonly Config _config;
     private readonly SettingsService _settingsService = new();
+    private readonly GlobalNotificationService _globalNotificationService;
     private SqliteConnection _sqlConnection;
     private AliasClientDbContext _dbContext;
+    private long _vaultRevisionNumber;
     private bool _isSuccessfullyInitialized;
     private int _retryCount;
     private bool _disposed;
@@ -41,12 +44,14 @@ public sealed class DbService : IDisposable
     /// <param name="jsInteropService">JsInteropService.</param>
     /// <param name="httpClient">HttpClient.</param>
     /// <param name="config">Config instance.</param>
-    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config)
+    /// <param name="globalNotificationService">Global notification service.</param>
+    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config, GlobalNotificationService globalNotificationService)
     {
         _authService = authService;
         _jsInteropService = jsInteropService;
         _httpClient = httpClient;
         _config = config;
+        _globalNotificationService = globalNotificationService;
 
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
@@ -87,6 +92,116 @@ public sealed class DbService : IDisposable
         if (loaded)
         {
             _retryCount = 0;
+        }
+    }
+
+    /// <summary>
+    /// Merges two or more databases into one.
+    /// </summary>
+    /// <returns>Bool which indicates if merging was successful.</returns>
+    public async Task<bool> MergeDatabasesAsync()
+    {
+        try
+        {
+            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>($"api/v1/Vault/merge?currentRevisionNumber={_vaultRevisionNumber}");
+            if (vaultsToMerge == null || vaultsToMerge.Vaults.Count == 0)
+            {
+                // No vaults to merge found, set error state.
+                _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "No vaults to merge found.");
+                return false;
+            }
+
+            var sqlConnections = new List<SqliteConnection>();
+
+            Console.WriteLine("Merging databases...");
+
+            // Decrypt and instantiate each vault as a separate in-memory SQLite database.
+            foreach (var vault in vaultsToMerge.Vaults)
+            {
+                var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
+                Console.WriteLine($"Decrypted vault {vault.UpdatedAt}.");
+                var connection = new SqliteConnection("Data Source=:memory:");
+                await connection.OpenAsync();
+                await ImportDbContextFromBase64Async(decryptedBase64String, connection);
+                sqlConnections.Add(connection);
+            }
+
+            // Get all table names from the current base database.
+            var tables = await DbMergeUtility.GetTableNames(_sqlConnection);
+
+            // Disable foreign key checks on the base connection.
+            await using (var command = _sqlConnection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA foreign_keys = OFF;";
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Merge each database into the base.
+            var i = 0;
+            foreach (var connection in sqlConnections)
+            {
+                i++;
+                foreach (var table in tables)
+                {
+                    Console.WriteLine($"Merging table {table}.");
+                    await DbMergeUtility.MergeTable(_sqlConnection, connection, table);
+                }
+            }
+
+            // Re-enable foreign key checks and verify integrity.
+            await using (var command = _sqlConnection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA foreign_keys = ON;";
+                await command.ExecuteNonQueryAsync();
+
+                // Verify foreign key integrity.
+                command.CommandText = "PRAGMA foreign_key_check;";
+                using var reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    // Foreign key violation detected.
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, "Foreign key violation detected after merge.");
+                    return false;
+                }
+            }
+
+            // Update the dbcontext with the new merged database.
+            _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
+
+            // Clean up other connections.
+            foreach (var connection in sqlConnections)
+            {
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
+            }
+
+            await _dbContext.Database.MigrateAsync();
+
+            // Update the current vault revision number to the highest revision number in the merged database(s).
+            // This is important so the server knows that the local client has successfully merged the databases
+            // and should overwrite the existing database on the server with the new merged database.
+            _vaultRevisionNumber = vaultsToMerge.Vaults.Max(v => v.CurrentRevisionNumber);
+
+            _isSuccessfullyInitialized = true;
+            await _settingsService.InitializeAsync(this);
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+
+            Console.WriteLine("Databases merged successfully.");
+
+            // Save the newly merged database to the server.
+            await SaveDatabaseAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _globalNotificationService.AddErrorMessage(
+                "Unable to save changes: Your vault has been updated elsewhere. " +
+                "The automatic merge was unsuccessful, possibly due to a password change or vault upgrade. " +
+                "Please log out and log back in to retrieve the latest version of your vault.");
+            Console.WriteLine($"Error merging databases: {ex.Message}");
+            _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, $"Error merging databases: {ex.Message}");
+            return false;
         }
     }
 
@@ -150,11 +265,6 @@ public sealed class DbService : IDisposable
             Console.WriteLine("Database successfully saved to server.");
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
-        else
-        {
-            Console.WriteLine("Failed to save database to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.OperationError);
-        }
     }
 
     /// <summary>
@@ -163,8 +273,6 @@ public sealed class DbService : IDisposable
     /// <returns>Base64 encoded string that represents SQLite database.</returns>
     public async Task<string> ExportSqliteToBase64Async()
     {
-        Console.WriteLine("Awaited database initialize...");
-
         var tempFileName = Path.GetRandomFileName();
 
         // Export SQLite memory database to a temp file.
@@ -267,12 +375,13 @@ public sealed class DbService : IDisposable
     {
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
         var encryptionKey = await GetOrCreateEncryptionKeyAsync();
-        var credentialsCount = await _dbContext.Credentials.CountAsync();
+        var credentialsCount = await _dbContext.Credentials.Where(x => !x.IsDeleted).CountAsync();
         var emailAddresses = await GetEmailClaimListAsync();
         return new Vault
         {
             Blob = encryptedDatabase,
             Version = databaseVersion,
+            CurrentRevisionNumber = _vaultRevisionNumber,
             EncryptionPublicKey = encryptionKey.PublicKey,
             CredentialsCount = credentialsCount,
             EmailAddressList = emailAddresses,
@@ -342,6 +451,7 @@ public sealed class DbService : IDisposable
         // claimed on the server.
         var emailAddresses = await _dbContext.Aliases
             .Where(a => a.Email != null)
+            .Where(a => !a.IsDeleted)
             .Select(a => a.Email)
             .Distinct()
             .Select(email => email!)
@@ -359,13 +469,14 @@ public sealed class DbService : IDisposable
     /// Loads a SQLite database from a base64 string which represents a .sqlite file.
     /// </summary>
     /// <param name="base64String">Base64 string representation of a .sqlite file.</param>
-    private async Task ImportDbContextFromBase64Async(string base64String)
+    /// <param name="connection">The connection to the database that should be used for the import.</param>
+    private static async Task ImportDbContextFromBase64Async(string base64String, SqliteConnection connection)
     {
         var bytes = Convert.FromBase64String(base64String);
         var tempFileName = Path.GetRandomFileName();
         await File.WriteAllBytesAsync(tempFileName, bytes);
 
-        using (var command = _sqlConnection.CreateCommand())
+        using (var command = connection.CreateCommand())
         {
             // Disable foreign key constraints
             command.CommandText = "PRAGMA foreign_keys = OFF;";
@@ -460,9 +571,18 @@ public sealed class DbService : IDisposable
         // Load from webapi.
         try
         {
-            var vault = await _httpClient.GetFromJsonAsync<Vault>("api/v1/Vault");
-            if (vault is not null)
+            var response = await _httpClient.GetFromJsonAsync<VaultGetResponse>("api/v1/Vault");
+            if (response is not null)
             {
+                if (response.Status == VaultStatus.MergeRequired)
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
+                    return false;
+                }
+
+                var vault = response.Vault!;
+                _vaultRevisionNumber = vault.CurrentRevisionNumber;
+
                 // Check if vault blob is empty, if so, we don't need to do anything and the initial vault created
                 // on client is sufficient.
                 if (string.IsNullOrEmpty(vault.Blob))
@@ -474,7 +594,7 @@ public sealed class DbService : IDisposable
 
                 // Attempt to decrypt the database blob.
                 string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
-                await ImportDbContextFromBase64Async(decryptedBase64String);
+                await ImportDbContextFromBase64Async(decryptedBase64String, _sqlConnection);
 
                 // Check if database is up-to-date with migrations.
                 var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
@@ -483,6 +603,9 @@ public sealed class DbService : IDisposable
                     _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
                     return false;
                 }
+
+                // Check if any soft-deleted records exist that are older than 7 days. If so, permanently delete them.
+                await VaultCleanupSoftDeletedRecords();
 
                 _isSuccessfullyInitialized = true;
                 await _settingsService.InitializeAsync(this);
@@ -501,21 +624,45 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
-    /// Save encrypted database blob to server.
+    /// Saves encrypted database blob to server and updates the local revision number.
     /// </summary>
     /// <param name="encryptedDatabase">Encrypted database as string.</param>
-    /// <returns>True if save action succeeded.</returns>
+    /// <returns>True if save action succeeded and revision number was updated, false otherwise.</returns>
     private async Task<bool> SaveToServerAsync(string encryptedDatabase)
     {
         var vaultObject = await PrepareVaultForUploadAsync(encryptedDatabase);
 
         try
         {
-            await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
-            return true;
+            var response = await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
+
+            // Ensure the request was successful
+            response.EnsureSuccessStatusCode();
+
+            // Deserialize the response content
+            var vaultUpdateResponse = await response.Content.ReadFromJsonAsync<VaultUpdateResponse>();
+
+            if (vaultUpdateResponse != null)
+            {
+                // If the server responds with a merge required status, we need to merge the local database
+                // with the one on the server before we can continue.
+                if (vaultUpdateResponse.Status == VaultStatus.MergeRequired)
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
+                    await MergeDatabasesAsync();
+                    return false;
+                }
+
+                _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
+                return true;
+            }
+
+            Console.WriteLine("Server response was empty or could not be deserialized.");
+            return false;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Unexpected Error: {ex.Message}");
             return false;
         }
     }
@@ -545,5 +692,47 @@ public sealed class DbService : IDisposable
         };
         _dbContext.EncryptionKeys.Add(encryptionKey);
         return encryptionKey;
+    }
+
+    /// <summary>
+    /// Check if any soft-deleted records exist that are older than 7 days. If so, permanently delete them.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task VaultCleanupSoftDeletedRecords()
+    {
+        var deleteCount = 0;
+
+        var cutoffDate = DateTime.UtcNow.AddDays(-7);
+        var softDeletedCredentials = await _dbContext.Credentials
+            .Where(c => c.IsDeleted && c.UpdatedAt <= cutoffDate)
+            .ToListAsync();
+
+        // Hard delete all soft-deleted credentials that are older than 7 days.
+        foreach (var credential in softDeletedCredentials)
+        {
+            var login = await _dbContext.Credentials
+                .Where(x => x.Id == credential.Id)
+                .FirstAsync();
+            _dbContext.Credentials.Remove(login);
+
+            deleteCount++;
+        }
+
+        // Attachments
+        var softDeletedAttachments = await _dbContext.Attachments
+            .Where(a => a.IsDeleted && a.UpdatedAt <= cutoffDate)
+            .ToListAsync();
+
+        foreach (var attachment in softDeletedAttachments)
+        {
+            _dbContext.Attachments.Remove(attachment);
+            deleteCount++;
+        }
+
+        if (deleteCount > 0)
+        {
+            // Save the database to the server to persist the cleanup.
+            await SaveDatabaseAsync();
+        }
     }
 }

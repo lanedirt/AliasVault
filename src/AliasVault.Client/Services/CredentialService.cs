@@ -209,8 +209,13 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         login.Alias.BirthDate = loginObject.Alias.BirthDate;
         login.Alias.Gender = loginObject.Alias.Gender;
         login.Alias.Email = loginObject.Alias.Email;
+        login.Alias.UpdatedAt = DateTime.UtcNow;
 
         login.Passwords = loginObject.Passwords;
+        if (login.Passwords.Count > 0)
+        {
+            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
+        }
 
         login.Service.Name = loginObject.Service.Name;
         login.Service.Url = loginObject.Service.Url;
@@ -261,6 +266,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         .Include(x => x.Attachments)
         .AsSplitQuery()
         .Where(x => x.Id == loginId)
+        .Where(x => !x.IsDeleted)
         .FirstOrDefaultAsync();
 
         return loginObject;
@@ -280,6 +286,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         .Include(x => x.Service)
         .Include(x => x.Attachments)
         .AsSplitQuery()
+        .Where(x => !x.IsDeleted)
         .ToListAsync();
 
         return loginObject;
@@ -298,6 +305,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             .Include(x => x.Alias)
             .Include(x => x.Service)
             .AsSplitQuery()
+            .Where(x => !x.IsDeleted)
             .Select(x => new CredentialListEntry
             {
                 Id = x.Id,
@@ -309,11 +317,13 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     }
 
     /// <summary>
-    /// Removes existing entry from database.
+    /// Soft deletes an existing entry from database. NOTE: all user actions should be handled via this soft deletion.
+    /// Permanently deleting entries is handled by periodic database cleanup job. The soft-delete mechanism
+    /// is required in order to synchronize the deletion of entries across multiple client vault versions.
     /// </summary>
     /// <param name="id">Id of alias to delete.</param>
     /// <returns>Task.</returns>
-    public async Task DeleteEntryAsync(Guid id)
+    public async Task SoftDeleteEntryAsync(Guid id)
     {
         var context = await dbService.GetDbContextAsync();
 
@@ -321,22 +331,22 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             .Where(x => x.Id == id)
             .FirstAsync();
 
-        context.Credentials.Remove(login);
+        login.IsDeleted = true;
+        login.UpdatedAt = DateTime.UtcNow;
 
-        // Also remove associated alias and service. Later when
-        // aliases and services are shared between credentials, this
-        // should be removed.
+        // Mark associated alias and service as deleted
         var alias = await context.Aliases
             .Where(x => x.Id == login.Alias.Id)
             .FirstAsync();
-        context.Aliases.Remove(alias);
+        alias.IsDeleted = true;
+        alias.UpdatedAt = DateTime.UtcNow;
 
         var service = await context.Services
             .Where(x => x.Id == login.Service.Id)
             .FirstAsync();
-        context.Services.Remove(service);
+        service.IsDeleted = true;
+        service.UpdatedAt = DateTime.UtcNow;
 
-        await context.SaveChangesAsync();
         await dbService.SaveDatabaseAsync();
     }
 

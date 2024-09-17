@@ -17,6 +17,7 @@ using AliasVault.Auth;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.PasswordChange;
+using AliasVault.Shared.Models.WebApi.Vault;
 using AliasVault.Shared.Providers.Time;
 using Asp.Versioning;
 using Cryptography.Client;
@@ -53,7 +54,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
             new VersionRetentionRule { VersionsToKeep = 3 },
-            new CredentialRetentionRule { CredentialsToKeep = 2 },
+            new LoginCredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
 
@@ -82,27 +83,90 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // as starting point.
         if (vault == null)
         {
-            return Ok(new Shared.Models.WebApi.Vault
+            return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
             {
-                Blob = string.Empty,
-                Version = string.Empty,
-                EncryptionPublicKey = string.Empty,
-                CredentialsCount = 0,
-                EmailAddressList = new List<string>(),
-                CreatedAt = DateTime.MinValue,
-                UpdatedAt = DateTime.MinValue,
+                Status = VaultStatus.Ok,
+                Vault = new Shared.Models.WebApi.Vault.Vault
+                {
+                    Blob = string.Empty,
+                    Version = string.Empty,
+                    CurrentRevisionNumber = 0,
+                    EncryptionPublicKey = string.Empty,
+                    CredentialsCount = 0,
+                    EmailAddressList = new List<string>(),
+                    CreatedAt = DateTime.MinValue,
+                    UpdatedAt = DateTime.MinValue,
+                },
             });
         }
 
-        return Ok(new Shared.Models.WebApi.Vault
+        // Check if there are no other vaults with the same revision number.
+        // If there are, return a merge required status.
+        var duplicateRevisionCount = await context.Vaults
+            .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
+            .CountAsync();
+
+        if (duplicateRevisionCount > 1)
         {
-            Blob = vault.VaultBlob,
-            Version = vault.Version,
-            EncryptionPublicKey = string.Empty,
-            CredentialsCount = 0,
-            EmailAddressList = new List<string>(),
-            CreatedAt = vault.CreatedAt,
-            UpdatedAt = vault.UpdatedAt,
+            return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
+            {
+                Status = VaultStatus.MergeRequired,
+                Vault = null,
+            });
+        }
+
+        return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
+        {
+            Status = VaultStatus.Ok,
+            Vault = new Shared.Models.WebApi.Vault.Vault
+            {
+                Blob = vault.VaultBlob,
+                Version = vault.Version,
+                CurrentRevisionNumber = vault.RevisionNumber,
+                EncryptionPublicKey = string.Empty,
+                CredentialsCount = 0,
+                EmailAddressList = [],
+                CreatedAt = vault.CreatedAt,
+                UpdatedAt = vault.UpdatedAt,
+            },
+        });
+    }
+
+    /// <summary>
+    /// Returns a list of vaults that should be merged by the client.
+    /// </summary>
+    /// <param name="currentRevisionNumber">Current revision number of the local vault.</param>
+    /// <returns>List of vaults to merge that are newer than the provided current revision number.</returns>
+    [HttpGet("merge")]
+    public async Task<IActionResult> GetVaultsToMerge([FromQuery] long currentRevisionNumber)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Logic to retrieve vault for the user.
+        var vaultsToMerge = await context.Vaults
+            .Where(x => x.UserId == user.Id && x.RevisionNumber > currentRevisionNumber)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync();
+
+        return Ok(new Shared.Models.WebApi.Vault.VaultMergeResponse
+        {
+            Vaults = vaultsToMerge.Select(x => new Shared.Models.WebApi.Vault.Vault
+            {
+                Blob = x.VaultBlob,
+                Version = x.Version,
+                CurrentRevisionNumber = x.RevisionNumber,
+                EncryptionPublicKey = string.Empty,
+                CredentialsCount = 0,
+                EmailAddressList = [],
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+            }).ToList(),
         });
     }
 
@@ -112,7 +176,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
     /// <param name="model">Vault model.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("")]
-    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault model)
+    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -123,7 +187,17 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
+        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
+
+        // Calculate the new revision number for the vault.
+        var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
+        // Check if the latest vault revision number is equal to or higher than the new revision number.
+        // If so, reject update and return a merge required status.
+        if (latestVault.RevisionNumber >= newRevisionNumber)
+        {
+            return Ok(new VaultUpdateResponse { Status = VaultStatus.MergeRequired, NewRevisionNumber = latestVault.RevisionNumber });
+        }
 
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
@@ -131,6 +205,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            RevisionNumber = newRevisionNumber,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
             CredentialsCount = model.CredentialsCount,
             EmailClaimsCount = model.EmailAddressList.Count,
@@ -161,7 +236,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             await UpdateUserPublicKey(context, user.Id, model.EncryptionPublicKey);
         }
 
-        return Ok(new { Message = "Database saved successfully." });
+        return Ok(new VaultUpdateResponse { Status = VaultStatus.Ok, NewRevisionNumber = newRevisionNumber });
     }
 
     /// <summary>
@@ -191,12 +266,19 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
         }
 
+        // Calculate the new revision number for the vault.
+        // Note: it is possible multiple clients are updating the vault at the same time which would cause
+        // multiple vaults with the same revision number. This is expected and will trigger a vault
+        // synchronize/merge process on the client side.
+        var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault
         {
             UserId = user.Id,
             VaultBlob = model.Blob,
             Version = model.Version,
+            RevisionNumber = newRevisionNumber,
             CredentialsCount = model.CredentialsCount,
             EmailClaimsCount = model.EmailAddressList.Count,
             FileSize = FileHelper.Base64StringToKilobytes(model.Blob),
@@ -244,6 +326,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
                 UserId = x.UserId,
                 VaultBlob = string.Empty,
                 Version = x.Version,
+                RevisionNumber = x.RevisionNumber,
                 FileSize = x.FileSize,
                 CredentialsCount = x.CredentialsCount,
                 EmailClaimsCount = x.EmailClaimsCount,

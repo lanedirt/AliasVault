@@ -44,6 +44,16 @@ public class Vault
     public required string Version { get; set; }
 
     /// <summary>
+    /// Gets or sets the revision number of the vault.
+    /// This number is incremented with each change to the vault and is used for
+    /// managing concurrency and merging during the synchronization process.
+    /// It helps in detecting conflicts and ensuring data consistency if multiple clients
+    /// update a previous version of the vault simultaneously.
+    /// </summary>
+    [Required]
+    public required long RevisionNumber { get; set; }
+
+    /// <summary>
     /// Gets or sets the vault filesize in kilobytes.
     /// </summary>
     public int FileSize { get; set; }

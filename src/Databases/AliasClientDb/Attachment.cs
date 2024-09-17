@@ -9,11 +9,12 @@ namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// Attachment entity.
 /// </summary>
-public class Attachment
+public class Attachment : SyncableEntity
 {
     /// <summary>
     /// Gets or sets the attachment primary key.
@@ -31,16 +32,6 @@ public class Attachment
     /// Gets or sets the file blob.
     /// </summary>
     public byte[] Blob { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the credential foreign key.

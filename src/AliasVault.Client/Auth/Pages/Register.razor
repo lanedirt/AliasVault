@@ -5,6 +5,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
+@inject IConfiguration Configuration
 @using System.Text.Json
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
@@ -68,12 +69,21 @@
             var client = new SrpClient();
             var salt = client.GenerateSalt();
 
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt);
-            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+            byte[] passwordHash;
+            string encryptionType = Defaults.EncryptionType;
+            string encryptionSettings = Defaults.EncryptionSettings;
+            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null) {
+                // If cryptography type and settings override are present in appsettings.json, use them instead of defaults
+                // declared in code. This is used in certain cases e.g. E2E tests to speed up the process.
+                encryptionType = Configuration["CryptographyOverrideType"]!;
+                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
+            }
 
+            passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt, encryptionType, encryptionSettings);
+            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
             var srpSignup = Srp.PasswordChangeAsync(client, salt, RegisterModel.Username, passwordHashString);
 
-            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier);
+            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
             var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
             var responseContent = await result.Content.ReadAsStringAsync();
 

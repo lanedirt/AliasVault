@@ -4,14 +4,16 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace AliasClientDb;
 
 using System.ComponentModel.DataAnnotations;
+using AliasClientDb.Abstracts;
 
 /// <summary>
 /// The service entity.
 /// </summary>
-public class Service
+public class Service : SyncableEntity
 {
     /// <summary>
     /// Gets or sets the service primary key.
@@ -35,16 +37,6 @@ public class Service
     /// Gets or sets image logo of the service.
     /// </summary>
     public byte[]? Logo { get; set; } = null;
-
-    /// <summary>
-    /// Gets or sets the created timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets the updated timestamp.
-    /// </summary>
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the credential objects.

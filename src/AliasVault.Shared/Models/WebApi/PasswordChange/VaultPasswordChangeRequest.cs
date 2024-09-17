@@ -7,6 +7,8 @@
 
 namespace AliasVault.Shared.Models.WebApi.PasswordChange;
 
+using AliasVault.Shared.Models.WebApi.Vault;
+
 /// <summary>
 /// Represents a request to change the users password including a new vault that is encrypted with the new password.
 /// </summary>

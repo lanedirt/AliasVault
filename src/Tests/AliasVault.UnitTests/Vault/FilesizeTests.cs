@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="VaultFilesizeTests.cs" company="lanedirt">
+// <copyright file="FilesizeTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -12,7 +12,7 @@ using AliasVault.Api.Helpers;
 /// <summary>
 /// Tests for the Vault FileSize calculation.
 /// </summary>
-public class VaultFilesizeTests
+public class FilesizeTests
 {
     /// <summary>
     /// Test the FileSize calculation for small strings.

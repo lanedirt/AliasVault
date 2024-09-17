@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------
-// <copyright file="VaultRetentionManagerTests.cs" company="lanedirt">
+// <copyright file="GeneralRetentionTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Vault;
+namespace AliasVault.Tests.Vault.RetentionManager;
 
 using AliasServerDb;
 using AliasVault.Api.Vault;
@@ -16,7 +16,7 @@ using AliasVault.Api.Vault.RetentionRules;
 /// retention rules to keep backups of vaults when client uploads a new encrypted vault
 /// to the server.
 /// </summary>
-public class VaultRetentionManagerTests
+public class GeneralRetentionTests
 {
     private List<Vault> testVaults;
     private DateTime now;
@@ -30,15 +30,15 @@ public class VaultRetentionManagerTests
         now = new DateTime(2023, 6, 1, 12, 0, 0); // Set a fixed "now" date for testing: June 1, 2023, 12:00 PM
         testVaults =
         [
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty },
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 days ago
-            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 3 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 4 days ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 weeks ago
-            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 3 weeks ago
-            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 1 month ago
-            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty }, // 2 months ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 31, 4, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 },
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 30, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 days ago
+            new Vault { Version = "1.1.0", UpdatedAt = new DateTime(2023, 5, 29, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 3 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 28, 12, 0, 0), Salt = "abc", Verifier = "abc", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 4 days ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 18, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 weeks ago
+            new Vault { Version = "1.0.3", UpdatedAt = new DateTime(2023, 5, 11, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 3 weeks ago
+            new Vault { Version = "1.0.2", UpdatedAt = new DateTime(2023, 5, 1, 12, 0, 0), Salt = "def", Verifier = "def", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 1 month ago
+            new Vault { Version = "1.0.1", UpdatedAt = new DateTime(2023, 4, 1, 12, 0, 0), Salt = "ghi", Verifier = "ghi", VaultBlob = string.Empty, EncryptionType = string.Empty, EncryptionSettings = string.Empty, RevisionNumber = 0 }, // 2 months ago
         ];
     }
 
@@ -119,13 +119,13 @@ public class VaultRetentionManagerTests
     }
 
     /// <summary>
-    /// Test the CredentialRetentionRule.
+    /// Test the LoginCredentialRetentionRule.
     /// </summary>
     [Test]
     public void CredentialRetentionRuleTest()
     {
         // Keep the latest 2 unique credentials.
-        var rule = new CredentialRetentionRule { CredentialsToKeep = 2 };
+        var rule = new LoginCredentialRetentionRule { CredentialsToKeep = 2 };
         var result = rule.ApplyRule(testVaults, now).ToList();
 
         // Expecting two vaults to be kept:
@@ -203,6 +203,7 @@ public class VaultRetentionManagerTests
             Verifier = string.Empty,
             EncryptionType = string.Empty,
             EncryptionSettings = string.Empty,
+            RevisionNumber = 0,
             UpdatedAt = now,
         };
 

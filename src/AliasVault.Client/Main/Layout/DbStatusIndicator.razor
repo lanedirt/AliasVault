@@ -1,23 +1,31 @@
 ﻿@implements IDisposable
 @inject DbService DbService
 
-<div class="ms-2">
-    @if (Loading)
-    {
-        <div class="flex items-center justify-center">
-            <SmallLoadingIndicator Title="@LoadingIndicatorMessage" />
-        </div>
-    }
-    else
-    {
-        <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="false" />
-    }
+<div class="ms-2 flex items-center">
+    <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="@Loading">
+        @if (!Loading)
+        {
+            <button class="absolute p-2 hover:bg-gray-200 rounded-2xl" @onclick="OnRefreshClick">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        }
+    </SmallLoadingIndicator>
 </div>
 
 @code {
     private bool Loading { get; set; } = false;
     private string LoadingIndicatorMessage { get; set; } = "";
     private bool DatabaseLoading { get; set; } = false;
+
+    /// <summary>
+    /// Dispose method.
+    /// </summary>
+    public void Dispose()
+    {
+        DbService.GetState().StateChanged -= OnDatabaseStateChanged;
+    }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -26,6 +34,14 @@
         DbService.GetState().StateChanged += OnDatabaseStateChanged;
 
         UpdateLoadingIndicatorMessage();
+    }
+
+    /// <summary>
+    /// Refresh the database.
+    /// </summary>
+    private async Task OnRefreshClick()
+    {
+        await DbService.InitializeDatabaseAsync();
     }
 
     private async void OnDatabaseStateChanged(object? sender, DbServiceState.DatabaseState newState)
@@ -62,13 +78,5 @@
         await Task.Delay(800);
         Loading = false;
         StateHasChanged();
-    }
-
-    /// <summary>
-    /// Dispose method.
-    /// </summary>
-    public void Dispose()
-    {
-        DbService.GetState().StateChanged -= OnDatabaseStateChanged;
     }
 }
