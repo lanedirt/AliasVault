@@ -159,7 +159,10 @@ public class ClientPlaywrightTest : PlaywrightTest
         var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Unlock" });
         await submitButton.ClickAsync();
 
-        // Wait for the original page to load again.
+        // Wait for the sync page to show
+        await WaitForUrlAsync("sync**");
+
+        // Then wait for the original page to load again.
         await WaitForUrlAsync(currentUrl);
     }
 

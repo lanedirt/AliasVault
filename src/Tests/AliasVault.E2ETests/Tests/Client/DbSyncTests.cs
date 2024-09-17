@@ -95,11 +95,6 @@ public class DbSyncTests : ClientPlaywrightTest
             await ApiDbContext.SaveChangesAsync();
 
             await UpdateCredentialEntry("TestBaseline3", new Dictionary<string, string> { { "service-name", "TestBaseMutate3" }, { "username", "usermutate3" }, { "email", "emailmutate3" } });
-
-            // TODO: investigate why the client1Vault changes are visible here while there does not
-            // seem to be an actual merge? Also, the Alias table is not updated with UpdatedAt so it should
-            // not trigger a merge anyway. Check why this test gives a false-positive...
-            await Task.Delay(50000);
         });
 
         // Assert that the two conflicting vaults have been merged and all mutated service names are found.
