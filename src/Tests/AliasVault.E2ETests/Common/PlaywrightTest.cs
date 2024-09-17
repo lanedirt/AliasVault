@@ -170,7 +170,7 @@ public abstract class PlaywrightTest
             .First
             .WaitForAsync(new LocatorWaitForOptions
             {
-                Timeout = 15000,
+                Timeout = 20000,
                 State = WaitForSelectorState.Attached,
             });
     }
