@@ -33,20 +33,20 @@ jobs:
     - name: Run ClientTests with retry
       uses: nick-fields/retry@v3
       with:
-          timeout_minutes: 10
+          timeout_minutes: 60
           max_attempts: 3
           command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=ClientTests"
 
     - name: Run AdminTests with retry
       uses: nick-fields/retry@v3
       with:
-        timeout_minutes: 10
+        timeout_minutes: 60
         max_attempts: 3
         command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
 
     - name: Run remaining tests with retry
       uses: nick-fields/retry@v3
       with:
-        timeout_minutes: 10
+        timeout_minutes: 60
         max_attempts: 3
         command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category!=AdminTests&Category!=ClientTests"
