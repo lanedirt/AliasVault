@@ -209,8 +209,13 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         login.Alias.BirthDate = loginObject.Alias.BirthDate;
         login.Alias.Gender = loginObject.Alias.Gender;
         login.Alias.Email = loginObject.Alias.Email;
+        login.Alias.UpdatedAt = DateTime.UtcNow;
 
         login.Passwords = loginObject.Passwords;
+        if (login.Passwords.Count > 0)
+        {
+            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
+        }
 
         login.Service.Name = loginObject.Service.Name;
         login.Service.Url = loginObject.Service.Url;
