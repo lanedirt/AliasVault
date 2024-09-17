@@ -18,11 +18,15 @@ public class RegisterRequest
     /// <param name="username">The username.</param>
     /// <param name="salt">The salt value.</param>
     /// <param name="verifier">The verifier value.</param>
-    public RegisterRequest(string username, string salt, string verifier)
+    /// <param name="encryptionType">The encryption type.</param>
+    /// <param name="encryptionSettings">The encryption settings.</param>
+    public RegisterRequest(string username, string salt, string verifier, string encryptionType, string encryptionSettings)
     {
         Username = username.ToLowerInvariant().Trim();
         Salt = salt;
         Verifier = verifier;
+        EncryptionType = encryptionType;
+        EncryptionSettings = encryptionSettings;
     }
 
     /// <summary>
@@ -39,4 +43,14 @@ public class RegisterRequest
     /// Gets the verifier value.
     /// </summary>
     public string Verifier { get; }
+
+    /// <summary>
+    /// Gets the encryption type.
+    /// </summary>
+    public string EncryptionType { get; }
+
+    /// <summary>
+    /// Gets the encryption settings.
+    /// </summary>
+    public string EncryptionSettings { get; }
 }

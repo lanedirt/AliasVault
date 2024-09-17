@@ -107,6 +107,7 @@ public class ClientPlaywrightTest : PlaywrightTest
                         Body = System.Text.Json.JsonSerializer.Serialize(response),
                     });
             });
+
         await Context.RouteAsync(
             "**/appsettings.Development.json",
             async route =>
@@ -115,6 +116,10 @@ public class ClientPlaywrightTest : PlaywrightTest
                 {
                     ApiUrl = ApiBaseUrl.TrimEnd('/'),
                     PrivateEmailDomains = privateEmailDomains,
+
+                    // Override encryption settings for faster testing.
+                    CryptographyOverrideType = "Argon2Id",
+                    CryptographyOverrideSettings = "{\"DegreeOfParallelism\":1,\"MemorySize\":1024,\"Iterations\":1}",
                 };
                 await route.FulfillAsync(
                     new RouteFulfillOptions

@@ -81,9 +81,20 @@ Here is an example file with the various options explained:
 {
     "ApiUrl": "http://localhost:5092",
     "PrivateEmailDomains": ["example.tld"],
-    "UseDebugEncryptionKey": "true"
+    "UseDebugEncryptionKey": "true",
+    "CryptographyOverrideType" : "Argon2Id",
+    "CryptographyOverrideSettings" : "{\"DegreeOfParallelism\":1,\"MemorySize\":1024,\"Iterations\":1}"
 }
 ```
 
 - UseDebugEncryptionKey
     - This setting will use a static encryption key so that if you login as a user you can refresh the page without needing to unlock the database again. This speeds up development when changing things in the WebApp WASM project. Note: the project needs to be run in "Development" mode for this setting to be used.
+
+- CryptographyOverrideType
+    - This setting allows overriding the default encryption type (Argon2id) with a different encryption type. This is useful for testing different encryption types without having to change code.
+
+- CryptographyOverrideSettings
+    - This setting allows overriding the default encryption settings (Argon2id) with different settings. This is useful for testing different encryption settings without having to change code. The default Argon2id settings
+    are defined in the project as `Utilities/Cryptography/Cryptography.Client/Defaults.cs`. These default settings
+    are focused on security but NOT performance. Normally for key derivation purposes the slower/heavier the algorithm
+    the better protection against attackers. For production builds this is what we want, however in case of automated testing or debugging extra performance can be gained by tweaking (lowering) these settings.
