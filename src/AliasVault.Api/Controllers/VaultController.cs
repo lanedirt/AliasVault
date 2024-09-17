@@ -76,7 +76,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         // Logic to retrieve vault for the user.
         var vault = await context.Vaults
             .Where(x => x.UserId == user.Id)
-            .OrderByDescending(x => x.UpdatedAt)
+            .OrderByDescending(x => x.RevisionNumber)
             .FirstOrDefaultAsync();
 
         // If no vault is found on server, return an empty object. This means the client will use an empty vault
@@ -187,7 +187,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
-        var latestVault = user.Vaults.OrderByDescending(x => x.UpdatedAt).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
+        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
 
         // Calculate the new revision number for the vault.
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
