@@ -195,7 +195,10 @@ public sealed class DbService : IDisposable
         }
         catch (Exception ex)
         {
-            _globalNotificationService.AddErrorMessage("Error: your changes could not be saved. Your vault has been changed elsewhere since you have last opened it and the automatic merge has failed. This might be caused by a password change. Please log out and log back in again to get the latest version of your vault.");
+            _globalNotificationService.AddErrorMessage(
+                "Unable to save changes: Your vault has been updated elsewhere. " +
+                "The automatic merge was unsuccessful, possibly due to a password change or vault upgrade. " +
+                "Please log out and log back in to retrieve the latest version of your vault.");
             Console.WriteLine($"Error merging databases: {ex.Message}");
             _state.UpdateState(DbServiceState.DatabaseStatus.MergeFailed, $"Error merging databases: {ex.Message}");
             return false;
@@ -372,7 +375,7 @@ public sealed class DbService : IDisposable
     {
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
         var encryptionKey = await GetOrCreateEncryptionKeyAsync();
-        var credentialsCount = await _dbContext.Credentials.CountAsync();
+        var credentialsCount = await _dbContext.Credentials.Where(x => !x.IsDeleted).CountAsync();
         var emailAddresses = await GetEmailClaimListAsync();
         return new Vault
         {
@@ -448,6 +451,7 @@ public sealed class DbService : IDisposable
         // claimed on the server.
         var emailAddresses = await _dbContext.Aliases
             .Where(a => a.Email != null)
+            .Where(a => !a.IsDeleted)
             .Select(a => a.Email)
             .Distinct()
             .Select(email => email!)
@@ -577,6 +581,7 @@ public sealed class DbService : IDisposable
                 }
 
                 var vault = response.Vault!;
+                _vaultRevisionNumber = vault.CurrentRevisionNumber;
 
                 // Check if vault blob is empty, if so, we don't need to do anything and the initial vault created
                 // on client is sufficient.
@@ -599,7 +604,9 @@ public sealed class DbService : IDisposable
                     return false;
                 }
 
-                _vaultRevisionNumber = vault.CurrentRevisionNumber;
+                // Check if any soft-deleted records exist that are older than 7 days. If so, permanently delete them.
+                await VaultCleanupSoftDeletedRecords();
+
                 _isSuccessfullyInitialized = true;
                 await _settingsService.InitializeAsync(this);
                 _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
@@ -685,5 +692,47 @@ public sealed class DbService : IDisposable
         };
         _dbContext.EncryptionKeys.Add(encryptionKey);
         return encryptionKey;
+    }
+
+    /// <summary>
+    /// Check if any soft-deleted records exist that are older than 7 days. If so, permanently delete them.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task VaultCleanupSoftDeletedRecords()
+    {
+        var deleteCount = 0;
+
+        var cutoffDate = DateTime.UtcNow.AddDays(-7);
+        var softDeletedCredentials = await _dbContext.Credentials
+            .Where(c => c.IsDeleted && c.UpdatedAt <= cutoffDate)
+            .ToListAsync();
+
+        // Hard delete all soft-deleted credentials that are older than 7 days.
+        foreach (var credential in softDeletedCredentials)
+        {
+            var login = await _dbContext.Credentials
+                .Where(x => x.Id == credential.Id)
+                .FirstAsync();
+            _dbContext.Credentials.Remove(login);
+
+            deleteCount++;
+        }
+
+        // Attachments
+        var softDeletedAttachments = await _dbContext.Attachments
+            .Where(a => a.IsDeleted && a.UpdatedAt <= cutoffDate)
+            .ToListAsync();
+
+        foreach (var attachment in softDeletedAttachments)
+        {
+            _dbContext.Attachments.Remove(attachment);
+            deleteCount++;
+        }
+
+        if (deleteCount > 0)
+        {
+            // Save the database to the server to persist the cleanup.
+            await SaveDatabaseAsync();
+        }
     }
 }

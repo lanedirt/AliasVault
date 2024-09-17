@@ -27,9 +27,6 @@ public class DbPersistTests : ClientPlaywrightTest
     [Order(1)]
     public async Task DbPersistCredentialTest()
     {
-        // Advance time by 1 second manually to ensure the new vault is created in the future.
-        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
-
         var serviceNameBefore = "Credential service before";
         await CreateCredentialEntry(new Dictionary<string, string>
         {
@@ -63,9 +60,6 @@ public class DbPersistTests : ClientPlaywrightTest
         // Note: for this we expect the previous test to have run first and created a first credential.
         var firstUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
         Assert.That(firstUpdateVault.RevisionNumber, Is.EqualTo(1), "Vault revision number is not at 1 after creating the first credential in a new vault.");
-
-        // Advance time by 1 second manually to ensure the new vault is created in the future.
-        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
 
         // Create a new credential which will trigger a vault save to the server.
         await CreateCredentialEntry();

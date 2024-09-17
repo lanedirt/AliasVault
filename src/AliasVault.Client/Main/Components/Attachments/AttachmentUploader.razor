@@ -45,6 +45,12 @@
     [Parameter]
     public EventCallback<List<Attachment>> AttachmentsChanged { get; set; }
 
+    /// <summary>
+    /// Original attachments that were passed in. This is used to determine if a deleted attachment was part of the original set and
+    /// can be hard deleted (did not exist in the original set) or should be soft deleted (was part of the original set).
+    /// </summary>
+    private List<Attachment> _originalAttachments = [];
+
     private string statusMessage = string.Empty;
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
@@ -84,9 +90,20 @@
     {
         try
         {
-            Attachments.Remove(attachment);
-            await AttachmentsChanged.InvokeAsync(Attachments);
+            // Check if the attachment was part of the original set.
+            if (_originalAttachments.Contains(attachment))
+            {
+                // If it was part of the original set, we soft delete it.
+                attachment.IsDeleted = true;
+                attachment.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // If it was not part of the original set, we hard delete it.
+                Attachments.Remove(attachment);
+            }
 
+            await AttachmentsChanged.InvokeAsync(Attachments);
             statusMessage = "Attachment deleted successfully.";
         }
         catch (Exception ex)

@@ -51,7 +51,7 @@ public class AliasClientDbContext : DbContext
     /// <summary>
     /// Gets or sets the Attachment DbSet.
     /// </summary>
-    public DbSet<Attachment> Attachment { get; set; } = null!;
+    public DbSet<Attachment> Attachments { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the Credential DbSet.

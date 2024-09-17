@@ -178,6 +178,10 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null)
     {
+        // Advance the time by 1 second to ensure the credential is created with a unique timestamp.
+        // This is required for certain tests that check for the latest credential and/or latest vault.
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
         await NavigateUsingBlazorRouter("credentials/create");
         await WaitForUrlAsync("credentials/create", "Add credentials");
 
@@ -206,6 +210,10 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <returns>Async task.</returns>
     protected async Task UpdateCredentialEntry(string credentialName, Dictionary<string, string>? formValues = null)
     {
+        // Advance the time by 1 second to ensure the credential is created with a unique timestamp.
+        // This is required for certain tests that check for the latest credential and/or latest vault.
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
         await NavigateUsingBlazorRouter("credentials");
         await WaitForUrlAsync("credentials", "Find all of your credentials");
         await Page.ClickAsync("text=" + credentialName);
@@ -227,6 +235,37 @@ public class ClientPlaywrightTest : PlaywrightTest
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Credentials updated successfully"), "Credential not updated successfully.");
+    }
+
+    /// <summary>
+    /// Update existing credential entry.
+    /// </summary>
+    /// <param name="credentialName">Name of the credential to update.</param>
+    /// <returns>Async task.</returns>
+    protected async Task DeleteCredentialEntry(string credentialName)
+    {
+        // Advance the time by 1 second to ensure the credential is created with a unique timestamp.
+        // This is required for certain tests that check for the latest credential and/or latest vault.
+        ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
+
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForUrlAsync("credentials", "Find all of your credentials");
+        await Page.ClickAsync("text=" + credentialName);
+
+        // Wait for the credential details page to load.
+        await WaitForUrlAsync("credentials/**", "Delete credentials entry");
+        await Page.ClickAsync("text=Delete credentials entry");
+
+        // Wait for the delete credential page to load.
+        await WaitForUrlAsync("credentials/**/delete", "You can delete a credentials entry below");
+
+        var submitButton = Page.Locator("text=Yes, I'm sure").First;
+        await submitButton.ClickAsync();
+        await WaitForUrlAsync("credentials", "Find all of your credentials");
+
+        // Assert that the credential with specified name is no longer found on the page.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Not.Contain(credentialName), "Credential not deleted successfully.");
     }
 
     /// <summary>

@@ -28,7 +28,8 @@ public class DbSyncTests : ClientPlaywrightTest
     {
         var baselineVault = await CreateBaselineVault(async () =>
         {
-            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline1" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline2" } });
         });
 
         var client1Vault = await SimulateClient(baselineVault, async () =>
@@ -37,6 +38,9 @@ public class DbSyncTests : ClientPlaywrightTest
             await WaitForUrlAsync("credentials", "Find all of your credentials");
 
             await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestA" } });
+
+            // Delete a credential to test the delete support during merge.
+            await DeleteCredentialEntry("TestBaseline1");
         });
 
         await SimulateClient(baselineVault, async () =>
@@ -57,11 +61,14 @@ public class DbSyncTests : ClientPlaywrightTest
         await WaitForUrlAsync("credentials", "Find all of your credentials");
 
         var pageContent = await Page.TextContentAsync("body");
-        var expectedServiceNames = new[] { "TestBaseline", "TestA", "TestB" };
+        var expectedServiceNames = new[] { "TestBaseline2", "TestA", "TestB" };
         foreach (var serviceName in expectedServiceNames)
         {
             Assert.That(pageContent, Does.Contain(serviceName), $"{serviceName} not found in vault after merge.");
         }
+
+        // Assert that the deleted credential is not found.
+        Assert.That(pageContent, Does.Not.Contain("TestBaseline1"), "Deleted credential found in vault after merge.");
     }
 
     /// <summary>
@@ -74,11 +81,8 @@ public class DbSyncTests : ClientPlaywrightTest
     {
         var baselineVault = await CreateBaselineVault(async () =>
         {
-            ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
             await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline1" }, { "username", "user1" }, { "email", "email1" }, { "first-name", "firstname1" } });
-            ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
             await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline2" }, { "username", "user2" }, { "email", "email2" }, { "first-name", "firstname2" } });
-            ApiTimeProvider.AdvanceBy(TimeSpan.FromSeconds(1));
             await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestBaseline3" }, { "username", "user3" }, { "email", "email3" }, { "first-name", "firstname3" } });
         });
 
@@ -198,7 +202,7 @@ public class DbSyncTests : ClientPlaywrightTest
 
         // Assert that merge failed error message is shown.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("your changes could not be saved."), $"Merge failed error expected after another client changed the password but no error message found.");
+        Assert.That(pageContent, Does.Contain("Unable to save changes"), $"Merge failed error expected after another client changed the password but no error message found.");
     }
 
     /// <summary>
