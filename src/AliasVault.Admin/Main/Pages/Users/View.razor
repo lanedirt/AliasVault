@@ -110,6 +110,7 @@ else
                                 <th scope="col" class="px-4 py-3">Updated</th>
                                 <th scope="col" class="px-4 py-3">Filesize</th>
                                 <th scope="col" class="px-4 py-3">DB version</th>
+                                <th scope="col" class="px-4 py-3">Revision</th>
                                 <th scope="col" class="px-4 py-3">Credentials</th>
                                 <th scope="col" class="px-4 py-3">Email Claims</th>
                                 <th scope="col" class="px-4 py-3">Status</th>
@@ -128,6 +129,7 @@ else
                                     <td class="px-4 py-3">@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                                     <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
                                     <td class="px-4 py-3">@entry.Version</td>
+                                    <td class="px-4 py-3">@entry.RevisionNumber</td>
                                     <td class="px-4 py-3">@entry.CredentialsCount</td>
                                     <td class="px-4 py-3">@entry.EmailClaimsCount</td>
                                     <td class="px-4 py-3">
@@ -364,7 +366,7 @@ else
     /// <summary>
     /// Gets the latest vault entry from the list.
     /// </summary>
-    private Vault? LatestVault => VaultList.MaxBy(v => v.UpdatedAt);
+    private Vault? LatestVault => VaultList.MaxBy(v => v.RevisionNumber);
 
     /// <summary>
     /// Handles the action of making a vault the current one.
@@ -383,14 +385,13 @@ Important notes:
 Do you want to proceed with the restoration?")) {
             // Load vault
             var currentVault = await DbContext.Vaults.FindAsync(vault.Id);
-
             if (currentVault == null)
             {
                 return;
             }
 
             // Update time to make this the current vault.
-            currentVault.UpdatedAt = DateTime.UtcNow;
+            currentVault.RevisionNumber = LatestVault!.RevisionNumber + 1;
 
             // Save it.
             await DbContext.SaveChangesAsync();
