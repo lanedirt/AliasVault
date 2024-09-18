@@ -19,6 +19,8 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
 {
     private readonly DotNetObjectReference<CallbackWrapper> _dotNetHelper;
     private readonly NavigationManager _navigationManager;
+    private readonly DbService _dbService;
+    private readonly AuthService _authService;
     private readonly Lazy<Task<IJSObjectReference>> moduleTask;
 
     /// <summary>
@@ -26,10 +28,14 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
     /// </summary>
     /// <param name="jsRuntime">IJSRuntime instance.</param>
     /// <param name="navigationManager">NavigationManager instance.</param>
-    public KeyboardShortcutService(IJSRuntime jsRuntime, NavigationManager navigationManager)
+    /// <param name="dbService">DbService instance.</param>
+    /// <param name="authService">AuthService instance.</param>
+    public KeyboardShortcutService(IJSRuntime jsRuntime, NavigationManager navigationManager, DbService dbService, AuthService authService)
     {
         _dotNetHelper = DotNetObjectReference.Create(new CallbackWrapper());
         _navigationManager = navigationManager;
+        _dbService = dbService;
+        _authService = authService;
 
         moduleTask = new Lazy<Task<IJSObjectReference>>(() => jsRuntime.InvokeAsync<IJSObjectReference>(
             "import", "./js/modules/keyboardShortcuts.js").AsTask());
@@ -92,6 +98,20 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
         await RegisterShortcutAsync("ge", () =>
         {
             _navigationManager.NavigateTo("/emails");
+            return Task.CompletedTask;
+        });
+
+        // Global shortcut: Lock vault.
+        await RegisterShortcutAsync("gl", () =>
+        {
+            // Remove encryption key.
+            _authService.RemoveEncryptionKey();
+
+            // Initialize empty database which removes unencrypted data.
+            _dbService.InitializeEmptyDatabase();
+
+            // Redirect to unlock page.
+            _navigationManager.NavigateTo("/unlock");
             return Task.CompletedTask;
         });
     }
