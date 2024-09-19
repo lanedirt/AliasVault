@@ -61,6 +61,8 @@ public sealed class AliasVaultApiHandlerService(IServiceProvider serviceProvider
             // Remove the token from local storage and redirect to the login page.
             await authService.RemoveTokensAsync();
 
+            var globalNotificationService = serviceProvider.GetRequiredService<GlobalNotificationService>();
+            globalNotificationService.AddErrorMessage("Your session has expired. Please log in again.");
             var navigationManager = serviceProvider.GetRequiredService<NavigationManager>();
             navigationManager.NavigateTo("/user/login");
         }

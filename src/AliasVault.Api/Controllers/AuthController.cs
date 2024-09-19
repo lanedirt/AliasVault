@@ -70,6 +70,17 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
     /// <summary>
+    /// Status endpoint called by client to check if user is still authenticated.
+    /// </summary>
+    /// <returns>Returns OK if valid authentication is provided, otherwise it will return 401 unauthorized.</returns>
+    [Authorize]
+    [HttpGet("status")]
+    public IActionResult Status()
+    {
+        return Ok();
+    }
+
+    /// <summary>
     /// Login endpoint used to process login attempt using credentials.
     /// </summary>
     /// <param name="model">Login model.</param>

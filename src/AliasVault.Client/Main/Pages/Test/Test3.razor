@@ -7,6 +7,7 @@
 @code {
     private int SoftDeletedCredentialCount { get; set; }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();

@@ -161,6 +161,17 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     }
 
     /// <summary>
+    /// Check if the encryption test string is stored in local storage which is used to validate
+    /// the encryption key locally during future vault unlocks. If its not stored the unlock
+    /// attempts will fail and user should login again instead.
+    /// </summary>
+    /// <returns>Task.</returns>
+    public async Task<bool> HasEncryptionKeyTestStringAsync()
+    {
+        return await localStorage.GetItemAsStringAsync("encryptionTestString") != null;
+    }
+
+    /// <summary>
     /// Validate the encryption locally by attempting to decrypt test string stored in local storage.
     /// </summary>
     /// <param name="encryptionKey">The encryption key to validate.</param>
