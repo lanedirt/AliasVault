@@ -29,61 +29,56 @@
 
             <div class="flex justify-end items-center lg:order-2">
                 <CreateNewIdentityWidget />
-
+                <DbLockButton />
                 <DbStatusIndicator />
-
-                <button @onclick="ToggleMenu" type="button" class="flex ms-3 text-sm bg-gray-800 rounded-full md:mr-0 flex-shrink-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="userMenuDropdownButton" aria-expanded="false" data-dropdown-toggle="userMenuDropdown">
-                    <span class="sr-only">Open user menu</span>
-                    <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="user photo">
-                </button>
-
-                <div class="absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsUserMenuOpen ? "block" : "hidden")" id="userMenuDropdown" data-popper-placement="bottom">
-                    <div class="py-3 px-4">
-                        <span class="block text-sm font-semibold text-gray-900 dark:text-white">@Username</span>
-                    </div>
-                    <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="userMenuDropdownButton">
-                        <li>
-                            <a href="/settings/general" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">General settings</a>
-                        </li>
-                        <li>
-                            <a href="/settings/security" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Security settings</a>
-                        </li>
-                        <li>
-                            <a href="/settings/vault" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Vault settings</a>
-                        </li>
-                    </ul>
-                    <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
-                        <li>
-                            <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="w-full text-start py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
-                                Toggle dark mode
-                                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                            </button>
-                        </li>
-                    </ul>
-                    <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
-                        <li>
-                            <a href="/user/logout" class="block py-2 px-4 font-bold text-sm text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-primary-200 dark:hover:text-white">Log out</a>
-                        </li>
-                    </ul>
-                </div>
-
-               <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="ms-3 items-center p-2 text-gray-500 rounded-lg md:ml-2 lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
+               <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center ms-1 p-2 text-gray-500 rounded-lg md:ml-2 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
                     <span class="sr-only">Open menu</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
             </div>
         </div>
-        <div class="w-full text-base list-none bg-white divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsMobileMenuOpen ? "block" : "hidden")" id="mobileMenuDropdown" data-popper-placement="bottom">
-            <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
+        <div class="absolute w-full md:w-64 top-12 right-0 z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 @(IsMobileMenuOpen ? "block" : "hidden")" id="mobileMenuDropdown" data-popper-placement="bottom">
+            <ul class="lg:hidden py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
                 <li>
-                    <NavLink href="/" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                        Home
+                    <NavLink href="/credentials" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.Prefix">
+                        Credentials
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink href="/credentials" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                        Credentials
+                    <NavLink href="/emails" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Emails
+                    </NavLink>
+                </li>
+            </ul>
+            <div class="py-3 px-4">
+                <span class="block text-sm font-semibold text-gray-900 dark:text-white">@Username</span>
+            </div>
+            <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
+                <li>
+                    <NavLink href="/settings/general" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        General settings
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink href="/settings/security" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Security settings
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink href="/settings/vault" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Vault settings
+                    </NavLink>
+                </li>
+                <li>
+                    <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="w-full text-start py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
+                        Toggle dark mode
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </li>
+                <li>
+                    <NavLink href="/user/logout" class="block py-2 px-4 font-bold text-sm text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-primary-200 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
+                        Log out
                     </NavLink>
                 </li>
             </ul>
@@ -151,7 +146,7 @@
         StateHasChanged();
     }
 
-    private void ToggleMenu()
+    private void ToggleUserMenu()
     {
         IsUserMenuOpen = !IsUserMenuOpen;
         StateHasChanged();
