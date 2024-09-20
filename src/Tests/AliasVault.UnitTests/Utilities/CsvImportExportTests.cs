@@ -8,10 +8,10 @@
 namespace AliasVault.Tests.Utilities;
 
 using AliasClientDb;
-using CsvImportExport;
+using AliasVault.CsvImportExport;
 
 /// <summary>
-/// Tests for the CsvImportExport class.
+/// Tests for the AliasVault.CsvImportExport class.
 /// </summary>
 public class CsvImportExportTests
 {

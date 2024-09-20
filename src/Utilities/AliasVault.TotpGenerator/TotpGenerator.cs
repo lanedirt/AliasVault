@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TotpGenerator;
+namespace AliasVault.TotpGenerator;
 
 using OtpNet;
 

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography.Client.Models;
+namespace AliasVault.Cryptography.Client.Models;
 
 /// <summary>
 /// Represents the data required for signing up or changing password with the Secure Remote Password (SRP) protocol.

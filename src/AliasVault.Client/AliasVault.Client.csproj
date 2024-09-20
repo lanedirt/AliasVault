@@ -78,9 +78,9 @@
       <ProjectReference Include="..\Generators\AliasVault.Generators.Password\AliasVault.Generators.Password.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
-      <ProjectReference Include="..\Utilities\Cryptography\Cryptography.Client\Cryptography.Client.csproj" />
-      <ProjectReference Include="..\Utilities\CsvImportExport\CsvImportExport.csproj" />
-      <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />
+      <ProjectReference Include="..\Utilities\Cryptography\AliasVault.Cryptography.Client\AliasVault.Cryptography.Client.csproj" />
+      <ProjectReference Include="..\Utilities\AliasVault.CsvImportExport\AliasVault.CsvImportExport.csproj" />
+      <ProjectReference Include="..\Utilities\AliasVault.FaviconExtractor\AliasVault.FaviconExtractor.csproj" />
       <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
       <ServiceWorker Include="wwwroot\service-worker.published.js">
         <PublishedContent>wwwroot/service-worker.published.js</PublishedContent>

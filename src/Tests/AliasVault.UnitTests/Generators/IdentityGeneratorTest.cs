@@ -12,7 +12,7 @@ using AliasVault.Generators.Identity.Implementations.Factories;
 using AliasVault.Generators.Identity.Models;
 
 /// <summary>
-/// Tests for the CsvImportExport class.
+/// Tests for the AliasVault.CsvImportExport class.
 /// </summary>
 public class IdentityGeneratorTest
 {

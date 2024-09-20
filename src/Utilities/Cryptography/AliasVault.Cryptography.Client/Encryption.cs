@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography.Client;
+namespace AliasVault.Cryptography.Client;
 
 using System.Text;
 using System.Text.Json;

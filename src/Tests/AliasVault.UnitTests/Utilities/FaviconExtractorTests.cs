@@ -8,7 +8,7 @@
 namespace AliasVault.Tests.Utilities;
 
 /// <summary>
-/// Tests for the FaviconExtractor class.
+/// Tests for the AliasVault.FaviconExtractor class.
 /// </summary>
 public class FaviconExtractorTests
 {

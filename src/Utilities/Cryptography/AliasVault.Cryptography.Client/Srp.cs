@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography.Client;
+namespace AliasVault.Cryptography.Client;
 
-using Cryptography.Client.Models;
+using AliasVault.Cryptography.Client.Models;
 using SecureRemotePassword;
 
 /// <summary>

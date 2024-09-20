@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FaviconExtractor", "src\Utilities\FaviconExtractor\FaviconExtractor.csproj", "{ED328644-A152-403D-86EB-81201AA07744}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.FaviconExtractor", "src\Utilities\AliasVault.FaviconExtractor\AliasVault.FaviconExtractor.csproj", "{ED328644-A152-403D-86EB-81201AA07744}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.UnitTests", "src\Tests\AliasVault.UnitTests\AliasVault.UnitTests.csproj", "{8E6A418A-B305-465D-857D-49953605C18E}"
 EndProject
@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.E2ETests.Client.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{607945F3-9896-4544-99EC-F3496CF4D36B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvImportExport", "src\Utilities\CsvImportExport\CsvImportExport.csproj", "{A9C9A606-C87E-4298-AB32-09B1884D7487}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.CsvImportExport", "src\Utilities\AliasVault.CsvImportExport\AliasVault.CsvImportExport.csproj", "{A9C9A606-C87E-4298-AB32-09B1884D7487}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A477241-B96C-4174-968D-D40CB77F1ECD}"
 EndProject
@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.IntegrationTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Admin", "src\AliasVault.Admin\AliasVault.Admin.csproj", "{F2CAE93E-94A7-4365-8E84-8D48CE8DD53F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitializationCLI", "src\Utilities\InitializationCLI\InitializationCLI.csproj", "{857BCD0E-753F-437A-AF75-B995B4D9A5FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.InstallCli", "src\Utilities\AliasVault.InstallCli\AliasVault.InstallCli.csproj", "{857BCD0E-753F-437A-AF75-B995B4D9A5FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Logging", "src\Utilities\AliasVault.Logging\AliasVault.Logging.csproj", "{FF0B0E64-1AE2-415C-A404-0EB78010821A}"
 EndProject
@@ -47,15 +47,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.RazorComponents"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.WorkerStatus", "src\Utilities\AliasVault.WorkerStatus\AliasVault.WorkerStatus.csproj", "{951C3DF8-DF22-4B2B-839F-FBA26DDD8ABD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TotpGenerator", "src\Utilities\TotpGenerator\TotpGenerator.csproj", "{E8D9C551-67D2-4651-8EDF-4262DF7375CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.TotpGenerator", "src\Utilities\AliasVault.TotpGenerator\AliasVault.TotpGenerator.csproj", "{E8D9C551-67D2-4651-8EDF-4262DF7375CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Auth", "src\Utilities\AliasVault.Auth\AliasVault.Auth.csproj", "{DA175274-0FF7-4436-9266-742F96C2D1ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cryptography", "Cryptography", "{BB7E701E-B1C6-453E-800A-E12CE256318D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography.Server", "src\Utilities\Cryptography\Cryptography.Server\Cryptography.Server.csproj", "{341EC443-0B6B-4E8C-AF46-D6156573CEA5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Cryptography.Server", "src\Utilities\Cryptography\AliasVault.Cryptography.Server\AliasVault.Cryptography.Server.csproj", "{341EC443-0B6B-4E8C-AF46-D6156573CEA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography.Client", "src\Utilities\Cryptography\Cryptography.Client\Cryptography.Client.csproj", "{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Cryptography.Client", "src\Utilities\Cryptography\AliasVault.Cryptography.Client\AliasVault.Cryptography.Client.csproj", "{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{03D55CA4-20B3-4FEA-9ADD-3C7B5B10E0FE}"
 EndProject

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Cryptography.Server;
+namespace AliasVault.Cryptography.Server;
 
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;

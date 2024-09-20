@@ -9,7 +9,7 @@ namespace AliasVault.IntegrationTests.SmtpServer;
 
 using System.Text;
 using AliasServerDb;
-using Cryptography.Server;
+using AliasVault.Cryptography.Server;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;

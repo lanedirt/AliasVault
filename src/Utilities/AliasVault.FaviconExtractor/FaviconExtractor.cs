@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FaviconExtractor;
+namespace AliasVault.FaviconExtractor;
 
 using System;
 using System.Net.Http;
