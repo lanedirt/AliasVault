@@ -9,10 +9,7 @@ WORKDIR /src
 
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.Admin/AliasVault.Admin.csproj", "src/AliasVault.Admin/"]
-COPY ["src/Databases/AliasServerDb/AliasServerDb.csproj", "src/Databases/AliasServerDb/"]
 RUN dotnet restore "src/AliasVault.Admin/AliasVault.Admin.csproj"
-
-# Copy the rest of the application code
 COPY . .
 
 # Build the WebApi project
