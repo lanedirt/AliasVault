@@ -74,10 +74,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasClientDb\AliasClientDb.csproj" />
-      <ProjectReference Include="..\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Generators\AliasVault.Generators.Identity\AliasVault.Generators.Identity.csproj" />
       <ProjectReference Include="..\Generators\AliasVault.Generators.Password\AliasVault.Generators.Password.csproj" />
-      <ProjectReference Include="..\Utilities\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
+      <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
+      <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\Cryptography.Client\Cryptography.Client.csproj" />
       <ProjectReference Include="..\Utilities\CsvImportExport\CsvImportExport.csproj" />
       <ProjectReference Include="..\Utilities\FaviconExtractor\FaviconExtractor.csproj" />

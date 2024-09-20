@@ -44,7 +44,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\AliasVault.Shared\AliasVault.Shared.csproj" />
+      <ProjectReference Include="..\..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\..\Utilities\AliasVault.WorkerStatus\AliasVault.WorkerStatus.csproj" />
     </ItemGroup>
 

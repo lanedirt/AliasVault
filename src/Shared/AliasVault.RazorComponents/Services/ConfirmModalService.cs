@@ -15,27 +15,27 @@ using System.Threading.Tasks;
 /// </summary>
 public class ConfirmModalService
 {
+    private TaskCompletionSource<bool> _modalTaskCompletionSource = default!;
+
     /// <summary>
     /// Event triggered when the modal state changes.
     /// </summary>
     public event Action OnChange = default!;
 
     /// <summary>
-    /// Gets or sets the title of the modal.
+    /// Gets the title of the modal.
     /// </summary>
     public string Title { get; private set; } = "Are you sure?";
 
     /// <summary>
-    /// Gets or sets the message of the modal.
+    /// Gets the message of the modal.
     /// </summary>
     public string Message { get; private set; } = "Are you sure you want to do this?";
 
     /// <summary>
-    /// Gets or sets a value indicating whether the modal is visible.
+    /// Gets a value indicating whether the modal is visible.
     /// </summary>
     public bool IsVisible { get; private set; }
-
-    private TaskCompletionSource<bool> _modalTaskCompletionSource = default!;
 
     /// <summary>
     /// Shows the confirmation modal and waits for user response.
