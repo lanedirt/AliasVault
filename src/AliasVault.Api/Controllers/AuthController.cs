@@ -36,7 +36,7 @@ using SecureRemotePassword;
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="signInManager">SignInManager instance.</param>
 /// <param name="configuration">IConfiguration instance.</param>
-/// <param name="cache">IMemoryCache instance for persisting SRP values during multi-step login process.</param>
+/// <param name="cache">IMemoryCache instance for persisting SRP values during multistep login process.</param>
 /// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
 /// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -67,7 +67,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// <summary>
     /// Semaphore to prevent concurrent access to the database when generating new tokens for a user.
     /// </summary>
-    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
     /// <summary>
     /// Status endpoint called by client to check if user is still authenticated.
@@ -140,7 +140,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         // If 2FA is not required, then it means the user is successfully authenticated at this point.
 
         // Reset failed login attempts.
-        await userManager.ResetAccessFailedCountAsync(user!);
+        await userManager.ResetAccessFailedCountAsync(user);
 
         var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: model.RememberMe);
         return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
@@ -186,7 +186,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         // Generate and return the JWT token.
         var tokenModel = await GenerateNewTokensForUser(user, extendedLifetime: model.RememberMe);
-        return Ok(new ValidateLoginResponse(false, serverSession!.Proof, tokenModel));
+        return Ok(new ValidateLoginResponse(false, serverSession.Proof, tokenModel));
     }
 
     /// <summary>
@@ -526,14 +526,14 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey()));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"] ?? string.Empty,
             audience: configuration["Jwt:Issuer"] ?? string.Empty,
             claims: claims,
             expires: timeProvider.UtcNow.AddMinutes(10),
-            signingCredentials: creds);
+            signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -548,7 +548,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await _semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
         try
         {
             // Determine the refresh token lifetime.
@@ -565,7 +565,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
         finally
         {
-            _semaphore.Release();
+            Semaphore.Release();
         }
     }
 
@@ -579,7 +579,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, AliasVaultUserRefreshToken existingToken)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        await _semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
 
         try
         {
@@ -618,7 +618,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
         finally
         {
-            _semaphore.Release();
+            Semaphore.Release();
         }
     }
 

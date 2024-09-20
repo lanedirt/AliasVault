@@ -8,7 +8,7 @@
 namespace AliasVault.Client.Services.Database;
 
 /// <summary>
-/// Class to manage the state of the AliasClientDbService that others can subscribe to events for.
+/// Class to manage the state of the DbService that others can subscribe to events for.
 /// </summary>
 public sealed class DbServiceState
 {
@@ -46,11 +46,6 @@ public sealed class DbServiceState
         MergeRequired,
 
         /// <summary>
-        /// Database is being merged.
-        /// </summary>
-        Merging,
-
-        /// <summary>
         /// Database merge failed.
         /// </summary>
         MergeFailed,
@@ -74,11 +69,6 @@ public sealed class DbServiceState
         /// Database is saving to server.
         /// </summary>
         SavingToServer,
-
-        /// <summary>
-        /// An error occurred during a database operation.
-        /// </summary>
-        OperationError,
     }
 
     /// <summary>
@@ -156,20 +146,12 @@ public sealed class DbServiceState
         public DateTime LastUpdated { get; set; } = DateTime.Now;
 
         /// <summary>
-        /// Returns true if the database state represents a initialized state.
+        /// Returns true if the database state represents an initialized state.
         /// </summary>
         /// <returns>Bool.</returns>
         public bool IsInitialized()
         {
-            if (Status == DatabaseStatus.Uninitialized ||
-                Status == DatabaseStatus.PendingMigrations ||
-                Status == DatabaseStatus.Loading ||
-                Status == DatabaseStatus.DecryptionFailed)
-            {
-                return false;
-            }
-
-            return true;
+            return Status is DatabaseStatus.Ready or DatabaseStatus.SavingToServer;
         }
     }
 }

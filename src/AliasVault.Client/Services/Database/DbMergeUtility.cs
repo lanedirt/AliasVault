@@ -24,9 +24,9 @@ public static class DbMergeUtility
     public static async Task<List<string>> GetTableNames(SqliteConnection connection)
     {
         var tables = new List<string>();
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';";
-        using var reader = await command.ExecuteReaderAsync();
+        await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             tables.Add(reader.GetString(0));
@@ -44,14 +44,14 @@ public static class DbMergeUtility
     /// <returns>Task.</returns>
     public static async Task MergeTable(SqliteConnection baseConnection, SqliteConnection sourceConnection, string tableName)
     {
-        using var baseCommand = baseConnection.CreateCommand();
-        using var sourceCommand = sourceConnection.CreateCommand();
+        await using var baseCommand = baseConnection.CreateCommand();
+        await using var sourceCommand = sourceConnection.CreateCommand();
 
         baseCommand.CommandText = $"PRAGMA table_info({tableName})";
         var columns = new List<string>();
 
         // Get column names from the base table.
-        using (var reader = await baseCommand.ExecuteReaderAsync())
+        await using (var reader = await baseCommand.ExecuteReaderAsync())
         {
             while (await reader.ReadAsync())
             {
@@ -69,7 +69,7 @@ public static class DbMergeUtility
 
         // Get all records from the source table.
         sourceCommand.CommandText = $"SELECT * FROM {tableName}";
-        using var sourceReader = await sourceCommand.ExecuteReaderAsync();
+        await using var sourceReader = await sourceCommand.ExecuteReaderAsync();
 
         Console.WriteLine($"Got records for {tableName}.");
 
@@ -115,21 +115,19 @@ public static class DbMergeUtility
     }
 
     /// <summary>
-    /// Updates a record in the specified table with data from the source reader.
+    /// Inserts a new record into the specified table with data from the source reader.
     /// </summary>
     /// <param name="connection">The SQLite connection to use.</param>
-    /// <param name="tableName">The name of the table to update.</param>
+    /// <param name="tableName">The name of the table to insert into.</param>
     /// <param name="sourceReader">The data reader containing the source record.</param>
     /// <param name="columns">The list of column names in the table.</param>
     /// <returns>Task.</returns>
-    public static async Task UpdateRecord(SqliteConnection connection, string tableName, SqliteDataReader sourceReader, List<string> columns)
+    private static async Task InsertRecord(SqliteConnection connection, string tableName, SqliteDataReader sourceReader, List<string> columns)
     {
-        using var command = connection.CreateCommand();
-        var updateColumns = string.Join(", ", columns.Select(c => $"{c} = @{c}"));
-        command.CommandText = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
-
-        Console.WriteLine($"Updating record in {tableName}.");
-        Console.WriteLine($"Command: {command.CommandText}");
+        await using var command = connection.CreateCommand();
+        var columnNames = string.Join(", ", columns);
+        var parameterNames = string.Join(", ", columns.Select(c => $"@{c}"));
+        command.CommandText = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterNames})";
 
         for (int i = 0; i < columns.Count; i++)
         {
@@ -140,19 +138,21 @@ public static class DbMergeUtility
     }
 
     /// <summary>
-    /// Inserts a new record into the specified table with data from the source reader.
+    /// Updates a record in the specified table with data from the source reader.
     /// </summary>
     /// <param name="connection">The SQLite connection to use.</param>
-    /// <param name="tableName">The name of the table to insert into.</param>
+    /// <param name="tableName">The name of the table to update.</param>
     /// <param name="sourceReader">The data reader containing the source record.</param>
     /// <param name="columns">The list of column names in the table.</param>
     /// <returns>Task.</returns>
-    public static async Task InsertRecord(SqliteConnection connection, string tableName, SqliteDataReader sourceReader, List<string> columns)
+    private static async Task UpdateRecord(SqliteConnection connection, string tableName, SqliteDataReader sourceReader, List<string> columns)
     {
-        using var command = connection.CreateCommand();
-        var columnNames = string.Join(", ", columns);
-        var parameterNames = string.Join(", ", columns.Select(c => $"@{c}"));
-        command.CommandText = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterNames})";
+        await using var command = connection.CreateCommand();
+        var updateColumns = string.Join(", ", columns.Select(c => $"{c} = @{c}"));
+        command.CommandText = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
+
+        Console.WriteLine($"Updating record in {tableName}.");
+        Console.WriteLine($"Command: {command.CommandText}");
 
         for (int i = 0; i < columns.Count; i++)
         {

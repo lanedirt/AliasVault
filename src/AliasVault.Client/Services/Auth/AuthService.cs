@@ -92,15 +92,6 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     }
 
     /// <summary>
-    /// Retrieves the stored refresh token asynchronously.
-    /// </summary>
-    /// <returns>The stored refresh token.</returns>
-    public async Task<string> GetRefreshTokenAsync()
-    {
-        return await localStorage.GetItemAsStringAsync(RefreshTokenKey) ?? string.Empty;
-    }
-
-    /// <summary>
     /// Get encryption key.
     /// </summary>
     /// <returns>SrpArgonEncryption key as byte[].</returns>
@@ -162,8 +153,8 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
 
     /// <summary>
     /// Check if the encryption test string is stored in local storage which is used to validate
-    /// the encryption key locally during future vault unlocks. If its not stored the unlock
-    /// attempts will fail and user should login again instead.
+    /// the encryption key locally during future vault unlocks. If it's not stored the unlock
+    /// attempts will fail and user should log in again instead.
     /// </summary>
     /// <returns>Task.</returns>
     public async Task<bool> HasEncryptionKeyTestStringAsync()
@@ -261,5 +252,14 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         // Add the X-Ignore-Failure header to the request so any failure does not trigger another refresh token request.
         request.Headers.Add("X-Ignore-Failure", "true");
         await httpClient.SendAsync(request);
+    }
+
+    /// <summary>
+    /// Retrieves the stored refresh token asynchronously.
+    /// </summary>
+    /// <returns>The stored refresh token.</returns>
+    private async Task<string> GetRefreshTokenAsync()
+    {
+        return await localStorage.GetItemAsStringAsync(RefreshTokenKey) ?? string.Empty;
     }
 }

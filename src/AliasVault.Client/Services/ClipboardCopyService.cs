@@ -17,7 +17,7 @@ public sealed class ClipboardCopyService
     /// <summary>
     /// Event to notify the application that an item has been copied.
     /// </summary>
-    public event Action<string> OnCopy = null!;
+    public event Action<string>? OnCopy;
 
     /// <summary>
     /// Keep track of the last copied item.

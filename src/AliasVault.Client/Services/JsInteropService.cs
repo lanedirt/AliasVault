@@ -75,7 +75,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("blurElement", elementId);
 
     /// <summary>
-    /// Copy a string to the browsers clipboard.
+    /// Copy a string to the browser's clipboard.
     /// </summary>
     /// <param name="value">Value to copy to clipboard.</param>
     /// <returns>Task.</returns>

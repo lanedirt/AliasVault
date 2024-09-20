@@ -138,35 +138,33 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
         catch
         {
-            // If this fails, then simply use a blank value
+            // If this fails, then simply use a blank value.
             fromLocal = string.Empty;
             fromDomain = string.Empty;
         }
 
-        // Create email object
-        var email = new Email();
-        email.From = from;
-        email.FromLocal = fromLocal.ToLower();
-        email.FromDomain = fromDomain.ToLower();
+        // Create email object.
+        var email = new Email
+        {
+            From = from,
+            FromLocal = fromLocal.ToLower(),
+            FromDomain = fromDomain.ToLower(),
+            To = toAddress.Address.ToLower(),
+            ToLocal = toAddress.User.ToLower(),
+            ToDomain = toAddress.Host.ToLower(),
+            Subject = message.Subject ?? string.Empty,
+            MessageHtml = message.HtmlBody,
+            MessagePlain = message.TextBody,
+            MessageSource = message.ToString(),
+            Date = message.Date.DateTime,
+            DateSystem = DateTime.UtcNow,
+            Visible = true,
+        };
 
-        // Local part to lowercase, as mailboxes are always lowercase
-        email.To = toAddress.Address.ToLower();
-        email.ToLocal = toAddress.User.ToLower();
-        email.ToDomain = toAddress.Host.ToLower();
-
-        email.Subject = message.Subject ?? string.Empty;
-        email.MessageHtml = message.HtmlBody;
-        email.MessagePlain = message.TextBody;
-        email.MessageSource = message.ToString();
-
-        // Extract message preview text based on body contents.
+        // Extract a preview of the email message body to be used in the email listing preview in the UI.
         email.MessagePreview = ExtractMessagePreview(email);
 
-        email.Date = message.Date.DateTime;
-        email.DateSystem = DateTime.UtcNow;
-        email.Visible = true;
-
-        // Parse attachments from email, and create separate attachment records in database for each attachment
+        // Parse attachments from email, and create separate attachment records in database for each attachment.
         foreach (var attachment in message.Attachments)
         {
             var emailAttachment = CreateEmailAttachment(attachment);
@@ -235,7 +233,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
         catch
         {
-            // Extracting useful words from email failed.. Skip the step, do nothing..
+            // Extracting useful words from email failed. Skip the step, do nothing.
         }
 
         return messagePreview;
@@ -267,19 +265,18 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <returns>Attachment byte array.</returns>
     private static byte[] GetAttachmentBytes(MimeEntity attachment)
     {
-        using (var memory = new MemoryStream())
-        {
-            if (attachment is MimePart mimePartAttachment)
-            {
-                mimePartAttachment.Content.DecodeTo(memory);
-            }
-            else
-            {
-                ((MessagePart)attachment).Message.WriteTo(memory);
-            }
+        using var memory = new MemoryStream();
 
-            return memory.ToArray();
+        if (attachment is MimePart mimePartAttachment)
+        {
+            mimePartAttachment.Content.DecodeTo(memory);
         }
+        else
+        {
+            ((MessagePart)attachment).Message.WriteTo(memory);
+        }
+
+        return memory.ToArray();
     }
 
     /// <summary>
@@ -313,7 +310,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
 
         if (userEmailClaim is null)
         {
-            // Email address has no user claim with corresponding encryption key so we cannot process it.
+            // Email address has no user claim with corresponding encryption key, so we cannot process it.
             logger.LogWarning(
                 "Rejected email: email for {ToAddress} is not allowed. No user claim on this ToAddress.",
                 toAddress.User + "@" + toAddress.Host);
@@ -328,7 +325,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
 
         if (userPublicKey is null)
         {
-            // Email address has no user claim with corresponding encryption key so we cannot process it.
+            // Email address has no user claim with corresponding encryption key, so we cannot process it.
             logger.LogCritical(
                 "Rejected email: email for {ToAddress} cannot be processed. No primary encryption key found for this user.",
                 toAddress.User + "@" + toAddress.Host);

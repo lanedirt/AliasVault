@@ -21,7 +21,7 @@ using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Service class for alias operations.
+/// Service class for credential operations.
 /// </summary>
 public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
@@ -366,12 +366,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         var url = credentialObject.Service.Url;
         if (url != null && !string.IsNullOrEmpty(url) && url.Contains("http"))
         {
-            // Request favicon from from service URL via WebApi
+            // Request favicon from service URL via WebApi
             try
             {
                 var apiReturn =
                     await httpClient.GetFromJsonAsync<FaviconExtractModel>($"api/v1/Favicon/Extract?url={url}");
-                if (apiReturn != null && apiReturn.Image != null)
+                if (apiReturn?.Image is not null)
                 {
                     credentialObject.Service.Logo = apiReturn.Image;
                 }

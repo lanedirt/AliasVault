@@ -102,7 +102,7 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
         if (httpContextAccessor.HttpContext != null)
         {
             // Load user from database. Use a new context everytime to ensure we get the latest data.
-            var userName = httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+            var userName = httpContextAccessor.HttpContext?.User.Identity?.Name ?? string.Empty;
 
             var user = await dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
             if (user != null)
@@ -229,12 +229,28 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
     }
 
     /// <summary>
+    /// Checks if supplied password is correct for the user.
+    /// </summary>
+    /// <param name="user">User object.</param>
+    /// <param name="password">The password to check.</param>
+    /// <returns>Boolean indicating whether supplied password is valid and matches what is stored in the database.</returns>
+    public async Task<bool> CheckPasswordAsync(AdminUser user, string password)
+    {
+        if (password.Length == 0)
+        {
+            return false;
+        }
+
+        return await userManager.CheckPasswordAsync(user, password);
+    }
+
+    /// <summary>
     /// Update user roles. This is a separate method because it is called from both CreateUserAsync and UpdateUserAsync.
     /// </summary>
     /// <param name="user">User object.</param>
     /// <param name="roles">New roles for the user.</param>
     /// <returns>List of errors if any.</returns>
-    public async Task<List<string>> UpdateUserRolesAsync(AdminUser user, List<string> roles)
+    private async Task<List<string>> UpdateUserRolesAsync(AdminUser user, List<string> roles)
     {
         List<string> errors = new();
 
@@ -252,22 +268,6 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
         await userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
         return errors;
-    }
-
-    /// <summary>
-    /// Checks if supplied password is correct for the user.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <param name="password">The password to check.</param>
-    /// <returns>Boolean indicating whether supplied password is valid and matches what is stored in the database..</returns>
-    public async Task<bool> CheckPasswordAsync(AdminUser user, string password)
-    {
-        if (password.Length == 0)
-        {
-            return false;
-        }
-
-        return await userManager.CheckPasswordAsync(user, password);
     }
 
     /// <summary>

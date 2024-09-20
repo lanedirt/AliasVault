@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Auth controller for handling authentication.
+/// Two-factor authentication controller for handling two-factor authentication related actions.
 /// </summary>
 /// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="urlEncoder">UrlEncoder instance.</param>

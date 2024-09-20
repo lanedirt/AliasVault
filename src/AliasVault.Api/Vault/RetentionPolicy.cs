@@ -15,7 +15,7 @@ using AliasVault.Api.Vault.RetentionRules;
 public class RetentionPolicy
 {
     /// <summary>
-    /// Gets or sets the rules that this policy consists of.
+    /// Gets the rules that this policy consists of.
     /// </summary>
-    public List<IRetentionRule> Rules { get; set; } = new();
+    public List<IRetentionRule> Rules { get; init; } = [];
 }

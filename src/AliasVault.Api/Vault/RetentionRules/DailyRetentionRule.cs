@@ -15,9 +15,9 @@ using AliasServerDb;
 public class DailyRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of days to keep vault.
+    /// Gets the amount of days to keep vault.
     /// </summary>
-    public int DaysToKeep { get; set; }
+    public int DaysToKeep { get; init; }
 
    /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)

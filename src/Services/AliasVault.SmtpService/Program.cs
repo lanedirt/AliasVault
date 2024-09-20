@@ -5,7 +5,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Data.Common;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
@@ -15,7 +14,6 @@ using AliasVault.SmtpService;
 using AliasVault.SmtpService.Handlers;
 using AliasVault.SmtpService.Workers;
 using AliasVault.WorkerStatus.ServiceExtensions;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmtpServer;
 using SmtpServer.Storage;
