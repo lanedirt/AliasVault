@@ -11,6 +11,11 @@
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net8.0\AliasVault.Generators.Identity.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
     <ItemGroup>
       <EmbeddedResource Include="Implementations\Dictionaries\en\firstnames_female" />
       <EmbeddedResource Include="Implementations\Dictionaries\en\firstnames_male" />
