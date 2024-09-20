@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasGenerators", "src\AliasGenerators\AliasGenerators.csproj", "{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FaviconExtractor", "src\Utilities\FaviconExtractor\FaviconExtractor.csproj", "{ED328644-A152-403D-86EB-81201AA07744}"
@@ -59,16 +57,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography.Server", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography.Client", "src\Utilities\Cryptography\Cryptography.Client\Cryptography.Client.csproj", "{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{EF3569C0-AF85-4B19-A12F-137A582949AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{03D55CA4-20B3-4FEA-9ADD-3C7B5B10E0FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Generators.Password", "src\Generators\AliasVault.Generators.Password\AliasVault.Generators.Password.csproj", "{47F47A1B-49E0-406A-81C8-31FF2E4C339B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Generators.Identity", "src\Generators\AliasVault.Generators.Identity\AliasVault.Generators.Identity.csproj", "{80E74FBC-4EC8-45FB-B210-473337C484B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78E84B4E-57D1-491A-8F4E-9879AE49DE0F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ED328644-A152-403D-86EB-81201AA07744}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED328644-A152-403D-86EB-81201AA07744}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED328644-A152-403D-86EB-81201AA07744}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -153,6 +155,14 @@ Global
 		{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47F47A1B-49E0-406A-81C8-31FF2E4C339B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47F47A1B-49E0-406A-81C8-31FF2E4C339B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47F47A1B-49E0-406A-81C8-31FF2E4C339B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47F47A1B-49E0-406A-81C8-31FF2E4C339B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +187,8 @@ Global
 		{BB7E701E-B1C6-453E-800A-E12CE256318D} = {01AB9389-2F89-4F8E-A688-BF4BF1FC42C8}
 		{341EC443-0B6B-4E8C-AF46-D6156573CEA5} = {BB7E701E-B1C6-453E-800A-E12CE256318D}
 		{542C7B7D-C2B4-4AE3-9B2C-C62FCF4DFF8E} = {BB7E701E-B1C6-453E-800A-E12CE256318D}
+		{47F47A1B-49E0-406A-81C8-31FF2E4C339B} = {03D55CA4-20B3-4FEA-9ADD-3C7B5B10E0FE}
+		{80E74FBC-4EC8-45FB-B210-473337C484B5} = {03D55CA4-20B3-4FEA-9ADD-3C7B5B10E0FE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}

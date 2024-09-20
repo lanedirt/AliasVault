@@ -1,20 +1,20 @@
 //-----------------------------------------------------------------------
-// <copyright file="IIdentityGenerator.cs" company="lanedirt">
+// <copyright file="IPasswordGenerator.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity;
+namespace AliasVault.Generators.Password;
 
 /// <summary>
-/// IdentityGenerator interface.
+/// Interface for password generators.
 /// </summary>
-public interface IIdentityGenerator
+public interface IPasswordGenerator
 {
     /// <summary>
-    /// Generates a random identity.
+    /// Generates a random password.
     /// </summary>
-    /// <returns>Identity model object which contains the random identity.</returns>
-    Task<Models.Identity> GenerateRandomIdentityAsync();
+    /// <returns>Random generated password as string.</returns>
+    string GenerateRandomPassword();
 }

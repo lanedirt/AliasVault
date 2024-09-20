@@ -14,12 +14,11 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
-using AliasGenerators.Identity.Implementations;
-using AliasGenerators.Identity.Models;
-using AliasGenerators.Password.Implementations;
+using AliasVault.Generators.Identity.Implementations.Factories;
+using AliasVault.Generators.Identity.Models;
+using AliasVault.Generators.Password.Implementations;
 using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
-using Identity = AliasGenerators.Identity.Models.Identity;
 
 /// <summary>
 /// Service class for alias operations.

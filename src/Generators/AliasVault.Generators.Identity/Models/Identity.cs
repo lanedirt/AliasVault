@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity.Models;
+namespace AliasVault.Generators.Identity.Models;
 
 /// <summary>
 /// Identity model.

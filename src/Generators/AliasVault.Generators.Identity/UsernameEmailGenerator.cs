@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity;
+namespace AliasVault.Generators.Identity;
 
 using System.Text.RegularExpressions;
 

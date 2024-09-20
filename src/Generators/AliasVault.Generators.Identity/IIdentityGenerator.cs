@@ -1,24 +1,20 @@
 //-----------------------------------------------------------------------
-// <copyright file="Gender.cs" company="lanedirt">
+// <copyright file="IIdentityGenerator.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity.Models;
+namespace AliasVault.Generators.Identity;
 
 /// <summary>
-/// Identity model.
+/// IdentityGenerator interface.
 /// </summary>
-public enum Gender
+public interface IIdentityGenerator
 {
     /// <summary>
-    /// Male gender.
+    /// Generates a random identity.
     /// </summary>
-    Male,
-
-    /// <summary>
-    /// Female gender.
-    /// </summary>
-    Female,
+    /// <returns>Identity model object which contains the random identity.</returns>
+    Task<Models.Identity> GenerateRandomIdentityAsync();
 }

@@ -5,9 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Password.Implementations;
-
-using AliasGenerators.Password;
+namespace AliasVault.Generators.Password.Implementations;
 
 /// <summary>
 /// Implementation of IPasswordGenerator which generates passwords using the SpamOK library.

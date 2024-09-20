@@ -5,11 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity.Implementations.Base;
+namespace AliasVault.Generators.Identity.Implementations.Base;
 
 using System.Reflection;
-using AliasGenerators.Identity;
-using AliasGenerators.Identity.Models;
+using AliasVault.Generators.Identity.Models;
 
 /// <summary>
 /// Abstract identity generator which implements IIdentityGenerator and generates
@@ -50,17 +49,17 @@ public abstract class IdentityGenerator : IIdentityGenerator
     /// <summary>
     /// Gets namespace path to the male first names list for the correct language.
     /// </summary>
-    protected virtual string FirstNamesListMale => "AliasGenerators.Identity.Implementations.Dictionaries.nl.firstnames_male";
+    protected virtual string FirstNamesListMale => "AliasVault.Generators.Identity.Implementations.Dictionaries.nl.firstnames_male";
 
     /// <summary>
     /// Gets namespace path to the female first names list for the correct language.
     /// </summary>
-    protected virtual string FirstNamesListFemale => "AliasGenerators.Identity.Implementations.Dictionaries.nl.firstnames_female";
+    protected virtual string FirstNamesListFemale => "AliasVault.Generators.Identity.Implementations.Dictionaries.nl.firstnames_female";
 
     /// <summary>
     /// Gets namespace path to the last names list for the correct language.
     /// </summary>
-    protected virtual string LastNamesList => "AliasGenerators.Identity.Implementations.Dictionaries.nl.lastnames";
+    protected virtual string LastNamesList => "AliasVault.Generators.Identity.Implementations.Dictionaries.nl.lastnames";
 
     /// <inheritdoc/>
     public async Task<Identity> GenerateRandomIdentityAsync()

@@ -1,19 +1,24 @@
 //-----------------------------------------------------------------------
-// <copyright file="IPasswordGenerator.cs" company="lanedirt">
+// <copyright file="Gender.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace AliasGenerators.Password;
+
+namespace AliasVault.Generators.Identity.Models;
 
 /// <summary>
-/// Interface for password generators.
+/// Identity model.
 /// </summary>
-public interface IPasswordGenerator
+public enum Gender
 {
     /// <summary>
-    /// Generates a random password.
+    /// Male gender.
     /// </summary>
-    /// <returns>Random generated password as string.</returns>
-    string GenerateRandomPassword();
+    Male,
+
+    /// <summary>
+    /// Female gender.
+    /// </summary>
+    Female,
 }

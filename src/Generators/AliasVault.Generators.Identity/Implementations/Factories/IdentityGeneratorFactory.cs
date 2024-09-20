@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasGenerators.Identity.Implementations;
+namespace AliasVault.Generators.Identity.Implementations.Factories;
 
-using AliasGenerators.Identity.Implementations.Base;
+using AliasVault.Generators.Identity.Implementations.Base;
 
 /// <summary>
 /// Identity generator factory which creates an identity generator based on the language code.

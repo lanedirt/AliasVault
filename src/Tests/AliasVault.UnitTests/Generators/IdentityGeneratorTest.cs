@@ -8,8 +8,8 @@
 namespace AliasVault.Tests.Generators;
 
 using System.Net.Mail;
-using AliasGenerators.Identity.Implementations;
-using AliasGenerators.Identity.Models;
+using AliasVault.Generators.Identity.Implementations.Factories;
+using AliasVault.Generators.Identity.Models;
 
 /// <summary>
 /// Tests for the CsvImportExport class.
