@@ -118,7 +118,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         }
 
         // If the URL equals the placeholder, we set it to null.
-        if (loginObject.Service.Url == "https://")
+        if (loginObject.Service.Url == DefaultServiceUrl)
         {
             loginObject.Service.Url = null;
         }
@@ -197,6 +197,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
             loginObject.Alias.Email = null;
+        }
+
+        // If the URL equals the placeholder, we set it to null.
+        if (loginObject.Service.Url == DefaultServiceUrl)
+        {
+            loginObject.Service.Url = null;
         }
 
         login.UpdatedAt = DateTime.UtcNow;
