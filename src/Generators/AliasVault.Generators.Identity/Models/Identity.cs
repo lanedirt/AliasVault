@@ -13,11 +13,6 @@ namespace AliasVault.Generators.Identity.Models;
 public class Identity
 {
     /// <summary>
-    /// Gets or sets the id.
-    /// </summary>
-    public string Id { get; set; } = null!;
-
-    /// <summary>
     /// Gets or sets the gender.
     /// </summary>
     public Gender Gender { get; set; }
@@ -25,17 +20,17 @@ public class Identity
     /// <summary>
     /// Gets or sets the first name.
     /// </summary>
-    public string FirstName { get; set; } = null!;
+    public string FirstName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the last name.
     /// </summary>
-    public string LastName { get; set; } = null!;
+    public string LastName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the nickname. This is also used as the username.
     /// </summary>
-    public string NickName { get; set; } = null!;
+    public string NickName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the birth date.
@@ -45,5 +40,5 @@ public class Identity
     /// <summary>
     /// Gets or sets the email address prefix.
     /// </summary>
-    public string EmailPrefix { get; set; } = null!;
+    public string EmailPrefix { get; set; } = string.Empty;
 }

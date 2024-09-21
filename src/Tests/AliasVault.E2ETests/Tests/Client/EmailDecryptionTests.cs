@@ -25,12 +25,12 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     /// <summary>
     /// The test host instance.
     /// </summary>
-    private IHost _testHost = null!;
+    private IHost _testHost;
 
     /// <summary>
     /// The test host builder instance.
     /// </summary>
-    private TestHostBuilder _testHostBuilder = null!;
+    private TestHostBuilder _testHostBuilder;
 
     /// <summary>
     /// Setup logic for every test.

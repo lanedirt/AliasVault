@@ -20,10 +20,11 @@
     /// The child content of the component.
     /// </summary>
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = null!;
+    public required RenderFragment ChildContent { get; set; }
 
     private DotNetObjectReference<ClickOutsideHandler>? ObjRef { get; set; }
-    private IJSObjectReference? Module { get; set; } = null!;
+
+    private IJSObjectReference? Module { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()

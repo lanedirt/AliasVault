@@ -12,30 +12,36 @@
     /// <summary>
     /// Gets or sets the ID of the input field.
     /// </summary>
-    [Parameter] public string Id { get; set; } = null!;
+    [Parameter]
+    public required string Id { get; set; }
 
     /// <summary>
     /// Gets or sets the value of the input field.
     /// </summary>
-    [Parameter] public string Value { get; set; } = null!;
+    [Parameter]
+    public required string Value { get; set; }
 
     /// <summary>
     /// Gets or sets the event callback that is triggered when the value changes.
     /// </summary>
-    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter]
+    public required EventCallback<string?> ValueChanged { get; set; }
 
     /// <summary>
     /// Gets or sets the expression that identifies the value property.
     /// </summary>
-    [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = null!;
+    [Parameter]
+    public required Expression<Func<string>> ValueExpression { get; set; }
 
     /// <summary>
     /// Gets or sets the placeholder text for the input field.
     /// </summary>
-    [Parameter] public string Placeholder { get; set; } = null!;
+    [Parameter]
+    public required string Placeholder { get; set; }
 
     /// <summary>
     /// Gets or sets additional attributes for the input field.
     /// </summary>
-    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object?>? AdditionalAttributes { get; set; } = new();
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object?>? AdditionalAttributes { get; set; } = new();
 }

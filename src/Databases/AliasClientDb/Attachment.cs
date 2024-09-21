@@ -26,7 +26,7 @@ public class Attachment : SyncableEntity
     /// Gets or sets the filename value.
     /// </summary>
     [StringLength(255)]
-    public string Filename { get; set; } = null!;
+    public string Filename { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the file blob.

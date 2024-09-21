@@ -46,37 +46,37 @@ public class AliasClientDbContext : DbContext
     /// <summary>
     /// Gets or sets the Alias DbSet.
     /// </summary>
-    public DbSet<Alias> Aliases { get; set; } = null!;
+    public DbSet<Alias> Aliases { get; set; }
 
     /// <summary>
     /// Gets or sets the Attachment DbSet.
     /// </summary>
-    public DbSet<Attachment> Attachments { get; set; } = null!;
+    public DbSet<Attachment> Attachments { get; set; }
 
     /// <summary>
     /// Gets or sets the Credential DbSet.
     /// </summary>
-    public DbSet<Credential> Credentials { get; set; } = null!;
+    public DbSet<Credential> Credentials { get; set; }
 
     /// <summary>
     /// Gets or sets the Password DbSet.
     /// </summary>
-    public DbSet<Password> Passwords { get; set; } = null!;
+    public DbSet<Password> Passwords { get; set; }
 
     /// <summary>
     /// Gets or sets the Service DbSet.
     /// </summary>
-    public DbSet<Service> Services { get; set; } = null!;
+    public DbSet<Service> Services { get; set; }
 
     /// <summary>
     /// Gets or sets the EncryptionKey DbSet.
     /// </summary>
-    public DbSet<EncryptionKey> EncryptionKeys { get; set; } = null!;
+    public DbSet<EncryptionKey> EncryptionKeys { get; set; }
 
     /// <summary>
     /// Gets or sets the Settings DbSet.
     /// </summary>
-    public DbSet<Setting> Settings { get; set; } = null!;
+    public DbSet<Setting> Settings { get; set; }
 
     /// <summary>
     /// The OnModelCreating method.
