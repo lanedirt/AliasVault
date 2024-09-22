@@ -41,9 +41,9 @@ public class AuthPasswordChangeTest : ClientPlaywrightTest
         await WaitForUrlAsync("settings/security/change-password", "Current Password");
 
         // Fill in the form.
-        var currentPasswordField = Page.Locator("input[id='currentPassword']");
-        var newPasswordField = Page.Locator("input[id='newPassword']");
-        var confirmPasswordField = Page.Locator("input[id='newPasswordConfirm']");
+        var currentPasswordField = await WaitForAndGetElement("input[id='currentPassword']");
+        var newPasswordField = await WaitForAndGetElement("input[id='newPassword']");
+        var confirmPasswordField = await WaitForAndGetElement("input[id='newPasswordConfirm']");
 
         var newPassword = TestUserPassword + "123";
 

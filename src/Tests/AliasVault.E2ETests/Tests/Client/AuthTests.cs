@@ -104,33 +104,8 @@ public class AuthTests : ClientPlaywrightTest
     [Order(4)]
     public async Task RegisterFormWarningTest()
     {
-        // Logout.
         await Logout();
-
-        // Try to register a new account.
-        var registerButton = Page.Locator("a[href='/user/register']");
-        await registerButton.ClickAsync();
-        await WaitForUrlAsync("user/register", "Create a new AliasVault account");
-
-        // Wait for .1 seconds to ensure the page is fully loaded.
-        // Note: this is a workaround for a Playwright issue where the page is not fully loaded when the test continues.
-        await Task.Delay(100);
-
-        // Register account with same test credentials as used in the initial registration bootstrap method.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
-        var password2Field = Page.Locator("input[id='password2']");
-        await emailField.FillAsync(TestUserUsername);
-        await passwordField.FillAsync(TestUserPassword);
-        await password2Field.FillAsync(TestUserPassword);
-
-        // Check the terms of service checkbox
-        var termsCheckbox = Page.Locator("input[id='terms']");
-        await termsCheckbox.CheckAsync();
-
-        // Check if we get a visible warning when trying to register.
-        var submitButton = Page.Locator("button[type='submit']");
-        await submitButton.ClickAsync();
+        await Register(checkForSuccess: false);
 
         var warning = await Page.TextContentAsync("div[role='alert']");
         Assert.That(warning, Does.Contain("is already taken."), "No visible warning when registering with existing email address.");
@@ -151,12 +126,12 @@ public class AuthTests : ClientPlaywrightTest
         // on the next attempt, so we need to try 11 times to see the lockout message.
         for (var i = 0; i < 11; i++)
         {
-            var emailField = Page.Locator("input[id='email']");
-            var passwordField = Page.Locator("input[id='password']");
+            var emailField = await WaitForAndGetElement("input[id='email']");
+            var passwordField = await WaitForAndGetElement("input[id='password']");
             await emailField.FillAsync(TestUserUsername);
             await passwordField.FillAsync("wrongpassword");
 
-            var loginButton = Page.Locator("button[type='submit']");
+            var loginButton = await WaitForAndGetElement("button[type='submit']");
             await loginButton.ClickAsync();
 
             if (i == 10)

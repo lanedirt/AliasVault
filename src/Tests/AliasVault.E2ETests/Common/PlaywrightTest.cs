@@ -29,12 +29,12 @@ public abstract class PlaywrightTest
     /// <summary>
     /// Gets or sets random unique account email that is used for the test.
     /// </summary>
-    protected virtual string TestUserUsername { get; set; } = string.Empty;
+    protected virtual string TestUserUsername { get; set; } = $"{Guid.NewGuid()}@test.com";
 
     /// <summary>
     /// Gets or sets random unique account password that is used for the test.
     /// </summary>
-    protected virtual string TestUserPassword { get; set; } = string.Empty;
+    protected virtual string TestUserPassword { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Gets or sets the Playwright browser instance.
@@ -194,6 +194,35 @@ public abstract class PlaywrightTest
         var playwright = await Playwright.CreateAsync();
         Browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = headless });
         Context = await Browser.NewContextAsync();
+    }
+
+    /// <summary>
+    /// Sets new random test user credentials that are used for signing up and logging in.
+    /// </summary>
+    protected void SetRandomTestUserCredentials()
+    {
+        TestUserUsername = $"{Guid.NewGuid()}@test.com";
+        TestUserPassword = Guid.NewGuid().ToString();
+    }
+
+    /// <summary>
+    /// Wait for the page to be fully loaded and the specified element to be visible and enabled.
+    /// </summary>
+    /// <param name="selector">The element to wait for and get.</param>
+    /// <returns>The requested element or a timeout if element was not found in time.</returns>
+    protected async Task<ILocator> WaitForAndGetElement(string selector)
+    {
+        var requestedElement = Page.Locator(selector);
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Wait for the requested element to be visible and enabled.
+        await requestedElement.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 10000,
+        });
+
+        return requestedElement;
     }
 
     /// <summary>

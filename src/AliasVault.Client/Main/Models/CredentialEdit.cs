@@ -9,7 +9,6 @@ namespace AliasVault.Client.Main.Models;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
 using AliasVault.Client.Main.Models.FormValidation;
