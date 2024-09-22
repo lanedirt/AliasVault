@@ -17,6 +17,8 @@ using HtmlAgilityPack;
 /// </summary>
 public static class FaviconExtractor
 {
+    private static readonly string[] _allowedSchemes = { "http", "https" };
+
     /// <summary>
     /// Extracts the favicon from a URL.
     /// </summary>
@@ -24,6 +26,14 @@ public static class FaviconExtractor
     /// <returns>Byte array for favicon image.</returns>
     public static async Task<byte[]?> GetFaviconAsync(string url)
     {
+        Uri uri = new Uri(url);
+
+        // Only allow HTTP and HTTPS schemes and default ports.
+        if (!_allowedSchemes.Contains(uri.Scheme) || !uri.IsDefaultPort)
+        {
+            return null;
+        }
+
         using HttpClient client = new(new HttpClientHandler
         {
             AllowAutoRedirect = true,
@@ -40,7 +50,7 @@ public static class FaviconExtractor
         client.DefaultRequestHeaders.Add("Connection", "keep-alive");
         client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
 
-        HttpResponseMessage response = await client.GetAsync(url);
+        HttpResponseMessage response = await client.GetAsync(uri);
         if (!response.IsSuccessStatusCode)
         {
             return null;

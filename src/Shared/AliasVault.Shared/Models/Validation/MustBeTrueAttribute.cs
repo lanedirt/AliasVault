@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 /// <summary>
 /// Validation attribute to ensure that a boolean property is true.
 /// </summary>
+[AttributeUsage(AttributeTargets.Property)]
 public class MustBeTrueAttribute : ValidationAttribute
 {
     /// <inheritdoc />

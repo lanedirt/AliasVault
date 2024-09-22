@@ -14,11 +14,13 @@ RUN dotnet restore "src/Utilities/InitializationCLI/InitializationCLI.csproj"
 COPY . .
 
 # Build the project
-RUN dotnet build "src/Utilities/InitializationCLI/InitializationCLI.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
+RUN dotnet build "src/Utilities/InitializationCLI/InitializationCLI.csproj"  \
+    -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "src/Utilities/InitializationCLI/InitializationCLI.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Utilities/InitializationCLI/InitializationCLI.csproj"  \
+    -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
