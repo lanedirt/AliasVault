@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client;
+namespace AliasVault.E2ETests.Tests.Client.Shard2;
 
 /// <summary>
 /// End-to-end tests for the client database persistence.

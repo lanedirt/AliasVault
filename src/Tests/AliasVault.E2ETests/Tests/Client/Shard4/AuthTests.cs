@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client;
+namespace AliasVault.E2ETests.Tests.Client.Shard4;
 
 using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [Category("ClientTests")]
+
 [TestFixture]
 public class AuthTests : ClientPlaywrightTest
 {

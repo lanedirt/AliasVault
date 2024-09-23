@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client.TwoFactorAuth.Abstracts;
+namespace AliasVault.E2ETests.Tests.Client.Shard3.Abstracts;
 
 /// <summary>
 /// Abstract base class for two factor auth test which contains common methods.

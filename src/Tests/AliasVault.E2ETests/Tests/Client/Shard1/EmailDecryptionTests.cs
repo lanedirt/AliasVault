@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client;
+namespace AliasVault.E2ETests.Tests.Client.Shard1;
 
 using AliasVault.IntegrationTests.SmtpServer;
 using MailKit.Net.Smtp;

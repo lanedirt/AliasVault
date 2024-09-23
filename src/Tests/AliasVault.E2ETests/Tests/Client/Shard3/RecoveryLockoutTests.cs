@@ -5,9 +5,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client.TwoFactorAuth;
+namespace AliasVault.E2ETests.Tests.Client.Shard3;
 
-using AliasVault.E2ETests.Tests.Client.TwoFactorAuth.Abstracts;
+using AliasVault.E2ETests.Tests.Client.Shard3.Abstracts;
 
 /// <summary>
 /// End-to-end tests for user two-factor authentication recovery code lockout behavior.
