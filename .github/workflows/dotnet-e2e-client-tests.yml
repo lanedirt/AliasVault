@@ -36,27 +36,4 @@ jobs:
               with:
                   timeout_minutes: 60
                   max_attempts: 3
-                  command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.ClientTests.Shard${{ matrix.shard }}."
-
-            - name: Upload Test Results
-              if: always()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: client-test-results-shard-${{ matrix.shard }}
-                  path: TestResults-Client-Shard-${{ matrix.shard }}.xml
-
-    publish-test-results:
-        name: "Publish Test Results"
-        needs: client-tests
-        runs-on: ubuntu-latest
-        if: always()
-        steps:
-            - name: Download Artifacts
-              uses: actions/download-artifact@v3
-              with:
-                  path: artifacts
-
-            - name: Publish Test Results
-              uses: EnricoMi/publish-unit-test-result-action@v2
-              with:
-                  nunit_files: "artifacts/**/*.xml"
+                  command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
