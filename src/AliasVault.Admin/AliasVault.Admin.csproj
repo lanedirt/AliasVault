@@ -43,9 +43,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
+      <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.Auth\AliasVault.Auth.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.Logging\AliasVault.Logging.csproj" />
-      <ProjectReference Include="..\Utilities\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
-      <ProjectReference Include="..\Utilities\Cryptography\Cryptography.Server\Cryptography.Server.csproj" />
+      <ProjectReference Include="..\Utilities\Cryptography\AliasVault.Cryptography.Server\AliasVault.Cryptography.Server.csproj" />
     </ItemGroup>
 </Project>

@@ -280,15 +280,10 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Page.GotoAsync(AppBaseUrl);
         await WaitForUrlAsync("user/login", "Your username");
 
-        // Wait for 100ms to ensure the page has loaded.
-        // Note: the default Playwright "waitfor" logic didn't work here and caused the form to be filled
-        // before it was actually fully rendered thus losing the input...
-        await Task.Delay(100);
-
         // Try to log in with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
-        var rememberMeCheckbox = Page.Locator("input[id='remember']");
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
+        var rememberMeCheckbox = await WaitForAndGetElement("input[id='remember']");
 
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
@@ -326,8 +321,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Logout();
 
         // Reset username and password so a new random account is created.
-        TestUserUsername = string.Empty;
-        TestUserPassword = string.Empty;
+        SetRandomTestUserCredentials();
 
         // Register a new account random account.
         await Register();
@@ -336,37 +330,39 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// <summary>
     /// Register a new random account.
     /// </summary>
+    /// <param name="checkForSuccess">Whether to check for successful registration. Default is true.</param>
+    /// <param name="username">Username to use for registration. If empty then it defaults to the TestUserUsername.</param>
+    /// <param name="password">Password to use for registration. If empty then it defaults to the TestUserPassword.</param>
     /// <returns>Async task.</returns>
-    private async Task Register()
+    protected async Task Register(bool checkForSuccess = true, string? username = null, string? password = null)
     {
-        // If email is not set by test explicitly, generate a random email.
-        TestUserUsername = TestUserUsername.Length > 0 ? TestUserUsername : $"{Guid.NewGuid()}@test.com";
-
-        // If password is not set by test explicitly, generate a random password.
-        TestUserPassword = TestUserPassword.Length > 0 ? TestUserPassword : Guid.NewGuid().ToString();
-
         // Try to register a new account.
-        var registerButton = Page.Locator("a[href='/user/register']");
+        var registerButton = await WaitForAndGetElement("a[href='/user/register']");
         await registerButton.ClickAsync();
         await WaitForUrlAsync("user/register");
 
         // Try to register an account with the generated test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
-        var password2Field = Page.Locator("input[id='password2']");
-        await emailField.FillAsync(TestUserUsername);
-        await passwordField.FillAsync(TestUserPassword);
-        await password2Field.FillAsync(TestUserPassword);
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
+        var password2Field = await WaitForAndGetElement("input[id='password2']");
+
+        // Use the provided username and password if available, otherwise use the default test credentials.
+        await emailField.FillAsync(username ?? TestUserUsername);
+        await passwordField.FillAsync(password ?? TestUserPassword);
+        await password2Field.FillAsync(password ?? TestUserPassword);
 
         // Check the terms of service checkbox
-        var termsCheckbox = Page.Locator("input[id='terms']");
+        var termsCheckbox = await WaitForAndGetElement("input[id='terms']");
         await termsCheckbox.CheckAsync();
 
         // Check if we get redirected when clicking on the register button.
-        var submitButton = Page.Locator("button[type='submit']");
+        var submitButton = await WaitForAndGetElement("button[type='submit']");
         await submitButton.ClickAsync();
 
         // Check if we get redirected to the root URL after registration which means we are logged in.
-        await WaitForUrlAsync("welcome**", "Getting Started");
+        if (checkForSuccess)
+        {
+            await WaitForUrlAsync("welcome**", "Getting Started");
+        }
     }
 }

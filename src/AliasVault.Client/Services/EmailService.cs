@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// Email service that contains utility methods for handling email functionality such as client-side decryption.
 /// </summary>
-public sealed class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService)
+public sealed class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService, ILogger<EmailService> logger)
 {
     private List<EncryptionKey> _encryptionKeys = [];
 
@@ -54,7 +54,7 @@ public sealed class EmailService(DbService dbService, JsInteropService jsInterop
             catch (Exception ex)
             {
                 globalNotificationService.AddErrorMessage(ex.Message, true);
-                Console.WriteLine(ex);
+                logger.LogError(ex, "Error decrypting email list.");
             }
         }
 
@@ -91,7 +91,7 @@ public sealed class EmailService(DbService dbService, JsInteropService jsInterop
         catch (Exception ex)
         {
             globalNotificationService.AddErrorMessage(ex.Message, true);
-            Console.WriteLine(ex);
+            logger.LogError(ex, "Error decrypting email.");
         }
 
         return email;

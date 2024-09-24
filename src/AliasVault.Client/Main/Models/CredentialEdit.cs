@@ -9,7 +9,6 @@ namespace AliasVault.Client.Main.Models;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
 using AliasVault.Client.Main.Models.FormValidation;
@@ -27,19 +26,19 @@ public sealed class CredentialEdit
     /// <summary>
     /// Gets or sets notes field (free text input).
     /// </summary>
-    public string Notes { get; set; } = null!;
+    public string Notes { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets username field.
     /// </summary>
-    public string Username { get; set; } = null!;
+    public string Username { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the name of the service.
     /// </summary>
     [Required]
     [Display(Name = "Service Name")]
-    public string ServiceName { get; set; } = null!;
+    public string ServiceName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the URL of the service.
@@ -49,7 +48,7 @@ public sealed class CredentialEdit
     /// <summary>
     /// Gets or sets the logo of the service.
     /// </summary>
-    public byte[]? ServiceLogo { get; set; } = null;
+    public byte[]? ServiceLogo { get; set; }
 
     /// <summary>
     /// Gets or sets the Alias Identity object.
@@ -60,7 +59,7 @@ public sealed class CredentialEdit
     /// Gets or sets the Alias BirthDate.
     /// </summary>
     [StringDateFormat("yyyy-MM-dd")]
-    public string AliasBirthDate { get; set; } = null!;
+    public string AliasBirthDate { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the Alias Password object.

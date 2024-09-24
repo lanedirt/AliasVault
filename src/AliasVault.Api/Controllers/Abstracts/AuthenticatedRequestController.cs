@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
-/// Base controller for requests that require authentication.
+/// Base controller that concrete controllers can extend from if all requests require authentication.
 /// </summary>
 /// <param name="userManager">UserManager instance.</param>
 [Route("api/v{version:apiVersion}/[controller]")]

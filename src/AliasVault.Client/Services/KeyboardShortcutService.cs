@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 /// <summary>
-/// Service class for alias operations.
+/// Service to manage and act on keyboard shortcuts across the application.
 /// </summary>
 public sealed class KeyboardShortcutService : IAsyncDisposable
 {
@@ -21,7 +21,7 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
     private readonly NavigationManager _navigationManager;
     private readonly DbService _dbService;
     private readonly AuthService _authService;
-    private readonly Lazy<Task<IJSObjectReference>> moduleTask;
+    private readonly Lazy<Task<IJSObjectReference>> _moduleTask;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="KeyboardShortcutService"/> class.
@@ -37,7 +37,7 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
         _dbService = dbService;
         _authService = authService;
 
-        moduleTask = new Lazy<Task<IJSObjectReference>>(() => jsRuntime.InvokeAsync<IJSObjectReference>(
+        _moduleTask = new Lazy<Task<IJSObjectReference>>(() => jsRuntime.InvokeAsync<IJSObjectReference>(
             "import", "./js/modules/keyboardShortcuts.js").AsTask());
 
         _ = RegisterStaticShortcuts();
@@ -52,7 +52,7 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
     public async Task RegisterShortcutAsync(string keys, Func<Task> callback)
     {
         _dotNetHelper.Value.RegisterCallback(keys, callback);
-        var module = await moduleTask.Value;
+        var module = await _moduleTask.Value;
         await module.InvokeVoidAsync("registerShortcut", keys, _dotNetHelper);
     }
 
@@ -64,8 +64,8 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
     public async Task UnregisterShortcutAsync(string keys)
     {
         _dotNetHelper.Value.UnregisterCallback(keys);
-        var module = await moduleTask.Value;
-        await module!.InvokeVoidAsync("unregisterShortcut", keys);
+        var module = await _moduleTask.Value;
+        await module.InvokeVoidAsync("unregisterShortcut", keys);
     }
 
     /// <summary>
@@ -74,12 +74,11 @@ public sealed class KeyboardShortcutService : IAsyncDisposable
     /// <returns>ValueTask.</returns>
     public async ValueTask DisposeAsync()
     {
-        var module = await moduleTask.Value;
+        var module = await _moduleTask.Value;
         await module.InvokeVoidAsync("unregisterAllShortcuts");
         await module.DisposeAsync();
 
         _dotNetHelper.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     /// <summary>

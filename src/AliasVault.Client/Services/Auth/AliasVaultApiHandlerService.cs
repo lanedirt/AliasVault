@@ -55,12 +55,15 @@ public sealed class AliasVaultApiHandlerService(IServiceProvider serviceProvider
                 return response;
             }
 
-            Console.WriteLine("Failed to refresh token, redirect to login.");
+            var logger = serviceProvider.GetRequiredService<ILogger<AliasVaultApiHandlerService>>();
+            logger.LogError("Failed to refresh token, redirect to login.");
 
             // Refreshing token failed. This might be caused by the expiration or revocation of the refresh token itself.
             // Remove the token from local storage and redirect to the login page.
             await authService.RemoveTokensAsync();
 
+            var globalNotificationService = serviceProvider.GetRequiredService<GlobalNotificationService>();
+            globalNotificationService.AddErrorMessage("Your session has expired. Please log in again.");
             var navigationManager = serviceProvider.GetRequiredService<NavigationManager>();
             navigationManager.NavigateTo("/user/login");
         }

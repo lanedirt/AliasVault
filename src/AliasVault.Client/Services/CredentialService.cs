@@ -14,15 +14,14 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
-using AliasGenerators.Identity.Implementations;
-using AliasGenerators.Identity.Models;
-using AliasGenerators.Password.Implementations;
+using AliasVault.Generators.Identity.Implementations.Factories;
+using AliasVault.Generators.Identity.Models;
+using AliasVault.Generators.Password.Implementations;
 using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
-using Identity = AliasGenerators.Identity.Models.Identity;
 
 /// <summary>
-/// Service class for alias operations.
+/// Service class for credential operations.
 /// </summary>
 public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config)
 {
@@ -118,7 +117,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         }
 
         // If the URL equals the placeholder, we set it to null.
-        if (loginObject.Service.Url == "https://")
+        if (loginObject.Service.Url == DefaultServiceUrl)
         {
             loginObject.Service.Url = null;
         }
@@ -197,6 +196,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
             loginObject.Alias.Email = null;
+        }
+
+        // If the URL equals the placeholder, we set it to null.
+        if (loginObject.Service.Url == DefaultServiceUrl)
+        {
+            loginObject.Service.Url = null;
         }
 
         login.UpdatedAt = DateTime.UtcNow;
@@ -361,12 +366,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         var url = credentialObject.Service.Url;
         if (url != null && !string.IsNullOrEmpty(url) && url.Contains("http"))
         {
-            // Request favicon from from service URL via WebApi
+            // Request favicon from service URL via WebApi
             try
             {
                 var apiReturn =
                     await httpClient.GetFromJsonAsync<FaviconExtractModel>($"api/v1/Favicon/Extract?url={url}");
-                if (apiReturn != null && apiReturn.Image != null)
+                if (apiReturn?.Image is not null)
                 {
                     credentialObject.Service.Logo = apiReturn.Image;
                 }

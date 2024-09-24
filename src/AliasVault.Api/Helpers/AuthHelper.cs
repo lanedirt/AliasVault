@@ -8,7 +8,7 @@
 namespace AliasVault.Api.Helpers;
 
 using AliasServerDb;
-using Cryptography.Client;
+using AliasVault.Cryptography.Client;
 using Microsoft.Extensions.Caching.Memory;
 using SecureRemotePassword;
 

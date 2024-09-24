@@ -8,6 +8,7 @@
 @using AliasVault.Shared.Models.WebApi.Email
 @inherits MainBase
 @inject HttpClient HttpClient
+@inject ILogger<Home> Logger
 
 <LayoutPageTitle>Emails</LayoutPageTitle>
 
@@ -181,7 +182,7 @@ else
         catch (Exception ex)
         {
            GlobalNotificationService.AddErrorMessage(ex.Message, true);
-           Console.WriteLine(ex);
+           Logger.LogError(ex, "An error occurred while refreshing data");
         }
 
         IsLoading = false;

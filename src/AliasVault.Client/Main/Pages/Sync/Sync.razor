@@ -6,6 +6,7 @@
 @inject DbService DbService
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
+@inject ILogger<Sync> Logger
 
 <LayoutPageTitle>Sync</LayoutPageTitle>
 
@@ -90,8 +91,7 @@
             await RedirectBackToReturnUrl();
         }
 
-        Console.WriteLine("Database state changed: " + CurrentDbState.Status);
-
+        Logger.LogDebug("Database state changed: {NewStatus}", CurrentDbState.Status);
         StateHasChanged();
     }
 

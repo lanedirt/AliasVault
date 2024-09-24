@@ -15,9 +15,9 @@ using AliasServerDb;
 public class WeeklyRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of weeks to keep vault.
+    /// Gets the amount of weeks to keep vault.
     /// </summary>
-    public int WeeksToKeep { get; set; }
+    public int WeeksToKeep { get; init; }
 
     /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)

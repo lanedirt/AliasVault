@@ -15,9 +15,9 @@ using AliasServerDb;
 public class DbVersionRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of db versions to keep the vault.
+    /// Gets the amount of db versions to keep the vault.
     /// </summary>
-    public int VersionsToKeep { get; set; }
+    public int VersionsToKeep { get; init; }
 
    /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)

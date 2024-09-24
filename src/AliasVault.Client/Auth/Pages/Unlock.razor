@@ -5,11 +5,11 @@
 @using AliasVault.Client.Auth.Components
 @using AliasVault.Client.Utilities
 @using AliasVault.Shared.Models.WebApi.Auth
-@using Cryptography.Client
+@using AliasVault.Cryptography.Client
 
 <div class="flex space-x-4">
     <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="Bonnie image">
-    <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Email</h2>
+    <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Username</h2>
 </div>
 
 <p class="text-base font-normal text-gray-500 dark:text-gray-400">
@@ -19,7 +19,7 @@
 <FullScreenLoadingIndicator @ref="LoadingIndicator" />
 <ServerValidationErrors @ref="ServerValidationErrors" />
 
-<EditForm Model="UnlockModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+<EditForm Model="UnlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
@@ -38,7 +38,7 @@
 </EditForm>
 
 @code {
-    private string? Email { get; set; }
+    private string? Username { get; set; }
     private readonly UnlockModel UnlockModel = new();
     private FullScreenLoadingIndicator LoadingIndicator = new();
     private ServerValidationErrors ServerValidationErrors = new();
@@ -46,40 +46,28 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        await AuthStateProvider.GetAuthenticationStateAsync();
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (authState.User.Identity?.IsAuthenticated == false) {
-            // Not authenticated (anymore), redirect to login page.
-            NavigationManager.NavigateTo("/user/login");
-        }
+        // Do not await this call, as it is only to check if the user is still authenticated
+        // and does not need to block the page from rendering.
+        _ = Http.GetAsync("api/v1/Auth/status");
 
-        var email = authState.User.Identity?.Name;
-        if (email is null)
-        {
-            // Clear all tokens and redirect to login page.
-            await AuthService.RemoveTokensAsync();
-            await AuthStateProvider.GetAuthenticationStateAsync();
-            GlobalNotificationService.ClearMessages();
-            NavigationManager.NavigateTo("/user/login");
-        }
-
-        Email = email;
+        await StatusCheck();
     }
 
-    private async Task HandleLogin()
+    /// <summary>
+    /// Execute the unlock form submission.
+    /// </summary>
+    private async Task UnlockSubmit()
     {
-        if (Email == null)
-        {
-            return;
-        }
-
         LoadingIndicator.Show();
         ServerValidationErrors.Clear();
 
         try
         {
+            await StatusCheck();
+            await Http.GetAsync("api/v1/Auth/status");
+
             // Send request to server with email to get user salt.
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(Email));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(Username!));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -141,6 +129,47 @@
         finally
         {
             LoadingIndicator.Hide();
+        }
+    }
+
+    /// <summary>
+    /// Make a request to the server to check if access token is still valid.
+    /// If not, then this call will automatically result in redirect to the login page.
+    /// </summary>
+    private async Task StatusCheck()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == false) {
+            // Not authenticated (anymore), redirect to login page.
+            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            NavigationManager.NavigateTo("/user/login");
+            return;
+        }
+
+        // Check if encryption key test string is available. If not
+        // user should login again.
+        if (!await AuthService.HasEncryptionKeyTestStringAsync())
+        {
+            // Clear all tokens and redirect to login page.
+            await AuthService.RemoveTokensAsync();
+            GlobalNotificationService.ClearMessages();
+            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            NavigationManager.NavigateTo("/user/login");
+            return;
+        }
+
+        // Check if username is set.
+        // If not, redirect to login page.
+        Username = authState.User.Identity?.Name;
+        if (Username is null)
+        {
+            // Clear all tokens and redirect to login page.
+            await AuthService.RemoveTokensAsync();
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            GlobalNotificationService.ClearMessages();
+            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            NavigationManager.NavigateTo("/user/login");
         }
     }
 }

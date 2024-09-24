@@ -9,7 +9,6 @@ namespace AliasVault.Api.Controllers.Email;
 
 using AliasServerDb;
 using AliasVault.Api.Controllers.Abstracts;
-using AliasVault.Api.Helpers;
 using AliasVault.Shared.Models.Spamok;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Email;
@@ -19,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Email controller for retrieving emails from the database.
+/// Email controller for retrieving emailboxes from the database.
 /// </summary>
 /// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
@@ -93,10 +92,12 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             .Take(50)
             .ToListAsync();
 
-        MailboxApiModel returnValue = new MailboxApiModel();
-        returnValue.Address = to;
-        returnValue.Subscribed = false;
-        returnValue.Mails = emails;
+        var returnValue = new MailboxApiModel
+        {
+            Address = to,
+            Subscribed = false,
+            Mails = emails,
+        };
 
         return Ok(returnValue);
     }

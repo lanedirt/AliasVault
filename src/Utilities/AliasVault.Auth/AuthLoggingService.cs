@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// User service for managing users.
+/// Auth logging service for logging authentication events such as user login attempts.
 /// </summary>
 /// <param name="serviceProvider">IServiceProvider instance.</param>
 /// <param name="httpContextAccessor">IHttpContextAccessor instance.</param>

@@ -14,7 +14,7 @@ using AliasServerDb;
 
 /// <summary>
 /// History manager for vaults that keeps track of vault history and applies retention rules to
-/// determine how many vaults to keep as backups and automatically deletes vaults that do no
+/// determine how many vaults to keep as backups and automatically deletes vaults that do not
 /// match the applied retention policies.
 /// </summary>
 public static class VaultRetentionManager
@@ -51,7 +51,7 @@ public static class VaultRetentionManager
         }
 
         // Always keep the most recent vault
-        if (existingVaults.Count > 0 && !vaultsToKeep.Contains(existingVaults[0]))
+        if (existingVaults.Count > 0)
         {
             vaultsToKeep.Add(existingVaults[0]);
         }

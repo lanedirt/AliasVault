@@ -15,9 +15,9 @@ using AliasServerDb;
 public class MonthlyRetentionRule : IRetentionRule
 {
     /// <summary>
-    /// Gets or sets amount of months to keep vault.
+    /// Gets the amount of months to keep vault.
     /// </summary>
-    public int MonthsToKeep { get; set; }
+    public int MonthsToKeep { get; init; }
 
     /// <inheritdoc cref="IRetentionRule.ApplyRule"/>
     public IEnumerable<Vault> ApplyRule(List<Vault> vaults, DateTime now)

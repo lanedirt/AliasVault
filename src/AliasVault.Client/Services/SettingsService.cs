@@ -36,7 +36,7 @@ public sealed class SettingsService
     /// Gets a value indicating whether email refresh should be done automatically on the credentials page.
     /// </summary>
     /// <returns>AutoEmailRefresh setting as string.</returns>
-    public bool AutoEmailRefresh => GetSetting<bool>("AutoEmailRefresh", true);
+    public bool AutoEmailRefresh => GetSetting("AutoEmailRefresh", true);
 
     /// <summary>
     /// Gets the DefaultIdentityLanguage setting.
@@ -56,7 +56,7 @@ public sealed class SettingsService
     /// </summary>
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
-    public Task SetAutoEmailRefresh(bool value) => SetSettingAsync<bool>("AutoEmailRefresh", value);
+    public Task SetAutoEmailRefresh(bool value) => SetSettingAsync("AutoEmailRefresh", value);
 
     /// <summary>
     /// Sets the DefaultIdentityLanguage setting.
@@ -95,7 +95,7 @@ public sealed class SettingsService
     /// </summary>
     /// <param name="value">Value (string) to cast.</param>
     /// <typeparam name="T">Type to cast it to.</typeparam>
-    /// <returns>The value casted to the requested type.</returns>
+    /// <returns>The value cast to the requested type.</returns>
     private static T? CastSetting<T>(string value)
     {
         if (string.IsNullOrEmpty(value))

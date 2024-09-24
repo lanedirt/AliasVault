@@ -100,7 +100,6 @@
 
     private async Task SearchTermChanged(ChangeEventArgs e)
     {
-        Console.WriteLine("Search term changed");
         SearchTerm = e.Value?.ToString() ?? string.Empty;
         await PerformSearch();
     }

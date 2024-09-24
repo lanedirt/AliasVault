@@ -1,6 +1,7 @@
 ﻿@page "/settings/vault"
 @inherits MainBase
 @inject CredentialService CredentialService
+@inject ILogger<Vault> Logger
 
 <LayoutPageTitle>Vault settings</LayoutPageTitle>
 
@@ -54,7 +55,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
 }
 
 @code {
-    private bool IsImporting = false;
+    private bool IsImporting;
     private string ImportErrorMessage = string.Empty;
     private string ImportSuccessMessage = string.Empty;
 
@@ -81,7 +82,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error downloading file: {ex.Message}");
+            Logger.LogError(ex, "Error downloading file");
         }
     }
 
@@ -102,7 +103,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error downloading file: {ex.Message}");
+            Logger.LogError(ex, "Error downloading file");
         }
     }
 

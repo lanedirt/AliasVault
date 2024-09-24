@@ -51,11 +51,11 @@ generate_admin_password() {
 
     if [ "$VERBOSE" = true ]; then
       printf "\n"
-      docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile .
+      docker build -t initcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
     else
     (
         # Run docker build and capture its output
-        docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile . > install_build_output.log 2>&1 &
+        docker build -t initcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
         BUILD_PID=$!
 
         printf "${CYAN}"

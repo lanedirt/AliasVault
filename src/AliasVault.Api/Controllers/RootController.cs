@@ -41,7 +41,7 @@ public class RootController(IDbContextFactory<AliasServerDbContext> dbContextFac
                 return StatusCode(500, "There are pending migrations. Please run 'dotnet ef database update' to apply them.");
             }
 
-            // Database is up to date
+            // Database is up-to-date
             return Ok("OK");
         }
         catch

@@ -10,6 +10,7 @@
 @inject Config Config
 @inject EmailService EmailService
 @using System.Timers
+@inject ILogger<RecentEmails> Logger
 @implements IDisposable
 
 @if (EmailModalVisible)
@@ -327,7 +328,7 @@
         catch (Exception ex)
         {
             Error = ex.Message;
-            Console.WriteLine(ex);
+            Logger.LogError(ex, "An error occurred while loading AliasVault emails.");
         }
     }
 

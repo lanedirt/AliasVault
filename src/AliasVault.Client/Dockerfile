@@ -1,8 +1,6 @@
-﻿# Use the official ASP.NET Core runtime image as the base image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-# Use the official .NET SDK image to build the app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -15,13 +13,7 @@ RUN dotnet workload install wasm-tools
 
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.Client/AliasVault.Client.csproj", "src/AliasVault.Client/"]
-COPY ["src/AliasVault.Shared/AliasVault.Shared.csproj", "src/AliasVault.Shared/"]
-COPY ["src/Databases/AliasServerDb/AliasServerDb.csproj", "src/Databases/AliasServerDb/"]
-COPY ["src/AliasGenerators/AliasGenerators.csproj", "src/AliasGenerators/"]
-COPY ["src/Utilities/FaviconExtractor/FaviconExtractor.csproj", "src/Utilities/FaviconExtractor/"]
 RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj"
-
-# Copy the application code
 COPY . .
 
 # Build the Client project

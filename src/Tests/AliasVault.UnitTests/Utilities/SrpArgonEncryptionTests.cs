@@ -7,7 +7,7 @@
 
 namespace AliasVault.Tests.Utilities;
 
-using Cryptography.Client;
+using AliasVault.Cryptography.Client;
 using Org.BouncyCastle.Crypto;
 using SecureRemotePassword;
 

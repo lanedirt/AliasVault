@@ -25,49 +25,49 @@ public class LoginBase : OwningComponentBase
     /// Gets or sets the NavigationManager.
     /// </summary>
     [Inject]
-    public NavigationManager NavigationManager { get; set; } = null!;
+    public required NavigationManager NavigationManager { get; set; }
 
     /// <summary>
     /// Gets or sets the HttpClient.
     /// </summary>
     [Inject]
-    public HttpClient Http { get; set; } = null!;
+    public required HttpClient Http { get; set; }
 
     /// <summary>
     /// Gets or sets the AuthenticationStateProvider.
     /// </summary>
     [Inject]
-    public AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    public required AuthenticationStateProvider AuthStateProvider { get; set; }
 
     /// <summary>
     /// Gets or sets the GlobalNotificationService.
     /// </summary>
     [Inject]
-    public GlobalNotificationService GlobalNotificationService { get; set; } = null!;
+    public required GlobalNotificationService GlobalNotificationService { get; set; }
 
     /// <summary>
     /// Gets or sets the IJSRuntime.
     /// </summary>
     [Inject]
-    public IJSRuntime Js { get; set; } = null!;
+    public required IJSRuntime Js { get; set; }
 
     /// <summary>
     /// Gets or sets the DbService.
     /// </summary>
     [Inject]
-    public DbService DbService { get; set; } = null!;
+    public required DbService DbService { get; set; }
 
     /// <summary>
     /// Gets or sets the AuthService.
     /// </summary>
     [Inject]
-    public AuthService AuthService { get; set; } = null!;
+    public required AuthService AuthService { get; set; }
 
     /// <summary>
     /// Gets or sets the LocalStorage.
     /// </summary>
     [Inject]
-    public ILocalStorageService LocalStorage { get; set; } = null!;
+    public required ILocalStorageService LocalStorage { get; set; }
 
     /// <summary>
     /// Parses the response content and displays the server validation errors.
