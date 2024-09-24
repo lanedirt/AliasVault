@@ -41,8 +41,9 @@ public static class DbMergeUtility
     /// <param name="baseConnection">The connection to the base database.</param>
     /// <param name="sourceConnection">The connection to the source database.</param>
     /// <param name="tableName">The name of the table to merge.</param>
+    /// <param name="logger">ILogger instance.</param>
     /// <returns>Task.</returns>
-    public static async Task MergeTable(SqliteConnection baseConnection, SqliteConnection sourceConnection, string tableName)
+    public static async Task MergeTable(SqliteConnection baseConnection, SqliteConnection sourceConnection, string tableName, ILogger<DbService> logger)
     {
         await using var baseCommand = baseConnection.CreateCommand();
         await using var sourceCommand = sourceConnection.CreateCommand();
@@ -71,8 +72,7 @@ public static class DbMergeUtility
         sourceCommand.CommandText = $"SELECT * FROM {tableName}";
         await using var sourceReader = await sourceCommand.ExecuteReaderAsync();
 
-        Console.WriteLine($"Got records for {tableName}.");
-
+        logger.LogDebug("Got records for {tableName}.", tableName);
         while (await sourceReader.ReadAsync())
         {
             var id = sourceReader.GetValue(0);
@@ -83,16 +83,16 @@ public static class DbMergeUtility
             baseCommand.Parameters.Clear();
             baseCommand.Parameters.AddWithValue("@Id", id);
 
-            Console.WriteLine($"Checking if record exists in {tableName}.");
+            logger.LogDebug("Checking if record exists in {tableName}.", tableName);
 
             var existingRecord = await baseCommand.ExecuteScalarAsync();
             if (existingRecord != null)
             {
-                Console.WriteLine($"Record exists in {tableName}.");
+                logger.LogDebug("Record exists in {tableName}.", tableName);
 
                 // Record exists, compare UpdatedAt if it exists.
-                Console.WriteLine($"Comparing UpdatedAt in {tableName}.");
-                Console.WriteLine($"UpdatedAt: {existingRecord}");
+                logger.LogDebug("Comparing UpdatedAt in {tableName}.", tableName);
+                logger.LogDebug("UpdatedAt: {existingRecord}", existingRecord);
                 var baseUpdatedAt = DateTime.Parse((string)existingRecord, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
                 if (updatedAt > baseUpdatedAt)
                 {
@@ -101,7 +101,8 @@ public static class DbMergeUtility
                 }
                 else
                 {
-                    Console.WriteLine($"Base record is newer, skipping {tableName}.");
+                    // Base record is newer, skip.
+                    logger.LogDebug("Base record is newer, skipping {tableName}.", tableName);
                 }
             }
             else
@@ -111,7 +112,7 @@ public static class DbMergeUtility
             }
         }
 
-        Console.WriteLine($"Merged {tableName}.");
+        logger.LogDebug("Finished merging {tableName}.", tableName);
     }
 
     /// <summary>
@@ -150,9 +151,6 @@ public static class DbMergeUtility
         await using var command = connection.CreateCommand();
         var updateColumns = string.Join(", ", columns.Select(c => $"{c} = @{c}"));
         command.CommandText = $"UPDATE {tableName} SET {updateColumns} WHERE Id = @Id";
-
-        Console.WriteLine($"Updating record in {tableName}.");
-        Console.WriteLine($"Command: {command.CommandText}");
 
         for (int i = 0; i < columns.Count; i++)
         {

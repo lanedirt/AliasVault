@@ -146,7 +146,7 @@ public sealed class DbService : IDisposable
                 foreach (var table in tables)
                 {
                     _logger.LogInformation("Merging table {Table}.", table);
-                    await DbMergeUtility.MergeTable(_sqlConnection, connection, table);
+                    await DbMergeUtility.MergeTable(_sqlConnection, connection, table, _logger);
                 }
             }
 
@@ -168,7 +168,7 @@ public sealed class DbService : IDisposable
             }
 
             // Update the db context with the new merged database.
-            _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogInformation(log));
+            _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogDebug("{Message}", log));
 
             // Clean up other connections.
             foreach (var connection in sqlConnections)
@@ -406,7 +406,7 @@ public sealed class DbService : IDisposable
         _sqlConnection = new SqliteConnection("Data Source=:memory:");
         _sqlConnection.Open();
 
-        _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogInformation(log));
+        _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogDebug("{Message}", log));
 
         // Reset the database state.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);

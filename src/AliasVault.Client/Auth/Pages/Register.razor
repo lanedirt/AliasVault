@@ -112,7 +112,9 @@
             else
             {
                 // Handle the case where the token is not present in the response
-                Console.WriteLine("Token not found in the response.");
+                ServerValidationErrors.AddError("An error occured during registration.");
+                StateHasChanged();
+                return;
             }
 
             NavigationManager.NavigateTo("/");

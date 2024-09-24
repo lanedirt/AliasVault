@@ -35,7 +35,7 @@ builder.Services.AddLogging(logging =>
 {
     if (builder.HostEnvironment.IsDevelopment())
     {
-        logging.SetMinimumLevel(LogLevel.Debug);
+        logging.SetMinimumLevel(LogLevel.Trace);
     }
     else
     {

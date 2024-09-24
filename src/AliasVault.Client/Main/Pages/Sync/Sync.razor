@@ -91,7 +91,7 @@
             await RedirectBackToReturnUrl();
         }
 
-        Logger.LogDebug("Database state changed: " + CurrentDbState.Status);
+        Logger.LogDebug("Database state changed: {NewStatus}", CurrentDbState.Status);
         StateHasChanged();
     }
 

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 /// <summary>
 /// Custom authentication state provider for the application.
 /// </summary>
-public class AuthStateProvider(AuthService authService) : AuthenticationStateProvider
+public class AuthStateProvider(AuthService authService, ILogger<AuthStateProvider> logger) : AuthenticationStateProvider
 {
     /// <summary>
     /// Parses the claims from the JWT token.
@@ -52,9 +52,9 @@ public class AuthStateProvider(AuthService authService) : AuthenticationStatePro
             {
                 identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("Invalid JWT token. Removing...");
+                logger.LogError(ex, "Invalid JWT token. Removing...");
                 await authService.RemoveTokensAsync();
                 identity = new ClaimsIdentity();
             }
