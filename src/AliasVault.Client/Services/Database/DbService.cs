@@ -29,6 +29,7 @@ public sealed class DbService : IDisposable
     private readonly DbServiceState _state = new();
     private readonly Config _config;
     private readonly SettingsService _settingsService = new();
+    private readonly ILogger<DbService> _logger;
     private readonly GlobalNotificationService _globalNotificationService;
     private SqliteConnection? _sqlConnection;
     private AliasClientDbContext _dbContext;
@@ -45,13 +46,15 @@ public sealed class DbService : IDisposable
     /// <param name="httpClient">HttpClient.</param>
     /// <param name="config">Config instance.</param>
     /// <param name="globalNotificationService">Global notification service.</param>
-    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config, GlobalNotificationService globalNotificationService)
+    /// <param name="logger">ILogger instance.</param>
+    public DbService(AuthService authService, JsInteropService jsInteropService, HttpClient httpClient, Config config, GlobalNotificationService globalNotificationService, ILogger<DbService> logger)
     {
         _authService = authService;
         _jsInteropService = jsInteropService;
         _httpClient = httpClient;
         _config = config;
         _globalNotificationService = globalNotificationService;
+        _logger = logger;
 
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
@@ -113,13 +116,14 @@ public sealed class DbService : IDisposable
 
             var sqlConnections = new List<SqliteConnection>();
 
-            Console.WriteLine("Merging databases...");
+            _logger.LogInformation("Merging databases...");
 
             // Decrypt and instantiate each vault as a separate in-memory SQLite database.
             foreach (var vault in vaultsToMerge.Vaults)
             {
                 var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
-                Console.WriteLine($"Decrypted vault {vault.UpdatedAt}.");
+
+                _logger.LogInformation("Decrypted vault {VaultUpdatedAt}.", vault.UpdatedAt);
                 var connection = new SqliteConnection("Data Source=:memory:");
                 await connection.OpenAsync();
                 await ImportDbContextFromBase64Async(decryptedBase64String, connection);
@@ -141,7 +145,7 @@ public sealed class DbService : IDisposable
             {
                 foreach (var table in tables)
                 {
-                    Console.WriteLine($"Merging table {table}.");
+                    _logger.LogInformation("Merging table {Table}.", table);
                     await DbMergeUtility.MergeTable(_sqlConnection, connection, table);
                 }
             }
@@ -164,7 +168,7 @@ public sealed class DbService : IDisposable
             }
 
             // Update the db context with the new merged database.
-            _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
+            _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogInformation(log));
 
             // Clean up other connections.
             foreach (var connection in sqlConnections)
@@ -183,8 +187,7 @@ public sealed class DbService : IDisposable
             _isSuccessfullyInitialized = true;
             await _settingsService.InitializeAsync(this);
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
-
-            Console.WriteLine("Databases merged successfully.");
+            _logger.LogInformation("Databases merged successfully.");
 
             // Save the newly merged database to the server.
             await SaveDatabaseAsync();
@@ -197,7 +200,7 @@ public sealed class DbService : IDisposable
                 "Unable to save changes: Your vault has been updated elsewhere. " +
                 "The automatic merge was unsuccessful, possibly due to a password change or vault upgrade. " +
                 "Please log out and log back in to retrieve the latest version of your vault.");
-            Console.WriteLine($"Error merging databases: {ex.Message}");
+            _logger.LogError(ex, "Error merging databases.");
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
             return false;
         }
@@ -260,7 +263,7 @@ public sealed class DbService : IDisposable
         var success = await SaveToServerAsync(encryptedBase64String);
         if (success)
         {
-            Console.WriteLine("Database successfully saved to server.");
+            _logger.LogInformation("Database successfully saved to server.");
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
     }
@@ -305,7 +308,7 @@ public sealed class DbService : IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex, "Error migrating database.");
             return false;
         }
 
@@ -403,7 +406,7 @@ public sealed class DbService : IDisposable
         _sqlConnection = new SqliteConnection("Data Source=:memory:");
         _sqlConnection.Open();
 
-        _dbContext = new AliasClientDbContext(_sqlConnection, log => Console.WriteLine(log));
+        _dbContext = new AliasClientDbContext(_sqlConnection, log => _logger.LogInformation(log));
 
         // Reset the database state.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
@@ -547,6 +550,7 @@ public sealed class DbService : IDisposable
     private async Task<bool> LoadDatabaseFromServerAsync()
     {
         _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+        _logger.LogInformation("Loading database from server...");
 
         // Load from webapi.
         try
@@ -595,7 +599,7 @@ public sealed class DbService : IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex, "Error loading database from server.");
             _state.UpdateState(DbServiceState.DatabaseStatus.DecryptionFailed);
             return false;
         }
@@ -637,12 +641,12 @@ public sealed class DbService : IDisposable
                 return true;
             }
 
-            Console.WriteLine("Server response was empty or could not be deserialized.");
+            _logger.LogError("Error during save: server response was empty or could not be deserialized.");
             return false;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Unexpected Error: {ex.Message}");
+            _logger.LogError(ex, "Error saving database to server.");
             return false;
         }
     }
