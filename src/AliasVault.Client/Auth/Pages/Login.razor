@@ -190,6 +190,8 @@ else
     /// <returns>List of errors if something went wrong.</returns>
     protected async Task<List<string>> ProcessLoginAsync()
     {
+        GlobalNotificationService.ClearMessages();
+
         // Sanitize username
         var username = LoginModel.Username.ToLowerInvariant().Trim();
 
