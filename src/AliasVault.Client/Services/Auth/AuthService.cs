@@ -167,18 +167,30 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// </summary>
     /// <param name="username">The username to associate with the credential.</param>
     /// <returns>Decrypted encryption key.</returns>
-    public async Task<string> GetWebAuthnEncryptedEncryptionKeyAsync(string username)
+    public async Task<byte[]> GetDecryptedWebAuthnEncryptionKeyAsync(string username)
     {
         var encryptedEncryptionKey = await localStorage.GetItemAsStringAsync("webAuthnEncryptedEncryptionKey");
-        if (string.IsNullOrEmpty(encryptedEncryptionKey))
+        var webauthnCredentialId = await localStorage.GetItemAsStringAsync("webAuthnCredentialId");
+        if (string.IsNullOrEmpty(encryptedEncryptionKey) || string.IsNullOrEmpty(webauthnCredentialId))
         {
-            throw new InvalidOperationException("WebAuthn encrypted encryption key is not set.");
+            throw new InvalidOperationException("WebAuthn encrypted encryption key is not set or WebAuthn credential ID is not set.");
         }
 
-        var webauthnCredentialDerivedKey = await jsInteropService.GetWebAuthnCredentialDerivedKey(username);
+        var webauthnCredentialDerivedKey = await jsInteropService.GetWebAuthnCredentialDerivedKey(username, webauthnCredentialId);
+        if (webauthnCredentialDerivedKey is null)
+        {
+            throw new InvalidOperationException("WebAuthn credential derived key is not set.");
+        }
+
+        Console.WriteLine($"webauthnCredentialDerivedKey: {webauthnCredentialDerivedKey}");
+        Console.WriteLine($"encryptedEncryptionKey: {encryptedEncryptionKey}");
 
         // Decrypt the encrypted encryption key with the WebAuthn derived key.
-        return await jsInteropService.SymmetricDecrypt(encryptedEncryptionKey, webauthnCredentialDerivedKey);
+        var decryptedString = await jsInteropService.SymmetricDecrypt(encryptedEncryptionKey, webauthnCredentialDerivedKey.Value.DerivedKey);
+
+        Console.WriteLine($"decryptedString: {decryptedString}");
+
+        return Convert.FromBase64String(decryptedString);
     }
 
     /// <summary>
@@ -187,19 +199,25 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// </summary>
     /// <param name="enabled">True if WebAuthn is enabled, otherwise false.</param>
     /// <param name="webauthCredentialDerivedKey">WebAuthn credential derived key.</param>
+    /// <param name="webauthCredentialId">WebAuthn credential ID.</param>
     /// <returns>Task.</returns>
-    public async Task SetWebAuthnEnabledAsync(bool enabled, string? webauthCredentialDerivedKey)
+    public async Task SetWebAuthnEnabledAsync(bool enabled, string? webauthCredentialDerivedKey, string? webauthCredentialId)
     {
         await localStorage.SetItemAsStringAsync("webAuthnEnabled", enabled.ToString().ToLower());
 
         Console.WriteLine($"Set webAuthnEnabled to {enabled}");
 
         // Encrypt the current encryption key with the webauthn derived key and store it in local storage.
-        if (enabled && !string.IsNullOrEmpty(webauthCredentialDerivedKey))
+        if (enabled && !string.IsNullOrEmpty(webauthCredentialDerivedKey) && !string.IsNullOrEmpty(webauthCredentialId))
         {
             Console.WriteLine("Encrypting encryption key with webauthn derived key");
-            var encryptedEncryptionKey = await jsInteropService.SymmetricEncrypt(Convert.ToBase64String(GetEncryptionKey()), webauthCredentialDerivedKey);
+            var encryptionKeyBase64 = Convert.ToBase64String(GetEncryptionKey());
+            Console.WriteLine($"encryptionKeyBase64: {encryptionKeyBase64}");
+            var encryptedEncryptionKey = await jsInteropService.SymmetricEncrypt(encryptionKeyBase64, webauthCredentialDerivedKey);
+            Console.WriteLine($"encryptedEncryptionKey: {encryptedEncryptionKey}");
+            Console.WriteLine($"webauthCredentialDerivedKey: {webauthCredentialDerivedKey}");
             await localStorage.SetItemAsStringAsync("webAuthnEncryptedEncryptionKey", encryptedEncryptionKey);
+            await localStorage.SetItemAsStringAsync("webAuthnCredentialId", webauthCredentialId);
         }
     }
 
@@ -291,7 +309,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     private async Task RevokeTokenAsync()
     {
         // Remove webauthn enabled flag.
-        await SetWebAuthnEnabledAsync(false, null);
+        await SetWebAuthnEnabledAsync(false, null, null);
 
         var tokenInput = new TokenModel
         {

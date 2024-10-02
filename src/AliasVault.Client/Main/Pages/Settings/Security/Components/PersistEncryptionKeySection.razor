@@ -55,12 +55,14 @@
     /// </summary>
     public async Task EnableWebAuthn()
     {
-        var webauthCredentialDerivedKey = await JsInteropService.GetWebAuthnCredentialDerivedKey(await GetUsernameAsync());
-        Console.WriteLine("WebAuthn initialized.");
-        Console.WriteLine(webauthCredentialDerivedKey);
+        var webauthCredentialDerivedKey = await JsInteropService.GetOrCreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
+
+        Console.WriteLine($"webauthCredentialDerivedKey: {webauthCredentialDerivedKey}");
+        Console.WriteLine($"webauthCredentialDerivedKey.CredentialId: {webauthCredentialDerivedKey.CredentialId}");
+        Console.WriteLine($"webauthCredentialDerivedKey.DerivedKey: {webauthCredentialDerivedKey.DerivedKey}");
 
         // Set local storage var to indicate that WebAuthn is enabled and we should try to use it to unlock the vault.
-        await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey);
+        await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.DerivedKey, webauthCredentialDerivedKey.CredentialId);
 
         await LoadData();
     }
@@ -71,7 +73,7 @@
     public async Task DisableWebAuthn()
     {
         // Set local storage var to indicate that WebAuthn is disabled and we should not try to use it to unlock the vault.
-        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty);
+        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty);
 
         await LoadData();
     }

@@ -158,21 +158,64 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     }
 
     /// <summary>
-    /// Get webauthn credential derived key.
+    /// Gets the WebAuthn credential derived key used to encrypt or decrypt the persisted vault encryption key.
     /// </summary>
-    /// <param name="username">Username.</param>
-    /// <returns>Task.</returns>
-    public async Task<string> GetWebAuthnCredentialDerivedKey(string username)
+    /// <param name="username">The username for the credential.</param>
+    /// <param name="credentialId">The credential ID to use.</param>
+    /// <returns>A tuple containing the credential ID and the derived key.</returns>
+    /// <exception cref="CryptographicException">Thrown when decryption fails due to a JavaScript error.</exception>
+    public async Task<(string CredentialId, string DerivedKey)?> GetWebAuthnCredentialDerivedKey(string username, string credentialId)
     {
         try
         {
-            // Invoke the JavaScript function and get the result as a string.
-            return await jsRuntime.InvokeAsync<string>("getWebAuthnCredentialAndDeriveKey", username);
+            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, false, credentialId);
+            return result != null
+                ? (result.CredentialId, result.DerivedKey)
+                : throw new CryptographicException("Failed to get WebAuthn credential");
         }
         catch (JSException ex)
         {
             await Console.Error.WriteLineAsync($"JavaScript error: {ex.Message}");
             throw new CryptographicException("Decryption failed", ex);
         }
+    }
+
+    /// <summary>
+    /// Gets or creates the WebAuthn credential derived key used to encrypt or decrypt the persisted vault encryption key.
+    /// </summary>
+    /// <param name="username">The username for the credential.</param>
+    /// <returns>A tuple containing the credential ID and the derived key.</returns>
+    /// <exception cref="CryptographicException">Thrown when decryption fails due to a JavaScript error.</exception>
+    public async Task<(string CredentialId, string DerivedKey)> GetOrCreateWebAuthnCredentialDerivedKey(string username)
+    {
+        try
+        {
+            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, true, null);
+            Console.WriteLine($"Result: {result}");
+            return result != null
+                ? (result.CredentialId, result.DerivedKey)
+                : throw new CryptographicException("Failed to get or create WebAuthn credential");
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error: {ex.Message}");
+            throw new CryptographicException("Decryption failed", ex);
+        }
+    }
+
+    /// <summary>
+    /// Represents the result of a WebAuthn credential operation.
+    /// </summary>
+    private class WebAuthnResult
+    {
+        /// <summary>
+        /// Gets or sets the credential ID as a base64 string.
+        /// </summary>
+        public string CredentialId { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the derived key as a base64 string.
+        /// </summary>
+        public string DerivedKey { get; set; } = null!;
     }
 }
