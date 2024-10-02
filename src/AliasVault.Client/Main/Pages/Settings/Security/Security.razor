@@ -17,11 +17,13 @@
 
 <PasswordChangeSection OnStatusChanged="LoadData" />
 <TwoFactorAuthenticationSection @ref="TwoFactorSection" OnStatusChanged="LoadData" />
+<PersistEncryptionKeySection @ref="WebAuthnSection" OnStatusChanged="LoadData" />
 <ActiveSessionsSection @ref="SessionsSection" OnSessionsChanged="LoadData" />
 <RecentAuthLogsSection @ref="RecentAuthLogsSection" OnSessionsChanged="LoadData" />
 
 @code {
     private TwoFactorAuthenticationSection? TwoFactorSection;
+    private PersistEncryptionKeySection? WebAuthnSection;
     private ActiveSessionsSection? SessionsSection;
     private RecentAuthLogsSection? RecentAuthLogsSection;
 
@@ -53,6 +55,7 @@
         // Currently with SQLite, we have to load the data sequentially as otherwise we get database locks.
         // When switched over to PostgreSQL, we can load the data concurrently.
         await TwoFactorSection!.LoadData();
+        await WebAuthnSection!.LoadData();
         await SessionsSection!.LoadData();
         await RecentAuthLogsSection!.LoadData();
     }

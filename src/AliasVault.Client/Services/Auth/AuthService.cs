@@ -11,6 +11,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AliasVault.Shared.Models.WebApi.Auth;
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 /// <summary>
@@ -152,6 +153,57 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     }
 
     /// <summary>
+    /// Check if WebAuthn is enabled.
+    /// </summary>
+    /// <returns>True if WebAuthn is enabled, otherwise false.</returns>
+    public async Task<bool> IsWebAuthnEnabledAsync()
+    {
+        await localStorage.GetItemAsStringAsync("webAuthnEnabled");
+        return await localStorage.GetItemAsStringAsync("webAuthnEnabled") == "true";
+    }
+
+    /// <summary>
+    /// Get the encryption key that is stored in local storage and decrypt it with the WebAuthn derived key.
+    /// </summary>
+    /// <param name="username">The username to associate with the credential.</param>
+    /// <returns>Decrypted encryption key.</returns>
+    public async Task<string> GetWebAuthnEncryptedEncryptionKeyAsync(string username)
+    {
+        var encryptedEncryptionKey = await localStorage.GetItemAsStringAsync("webAuthnEncryptedEncryptionKey");
+        if (string.IsNullOrEmpty(encryptedEncryptionKey))
+        {
+            throw new InvalidOperationException("WebAuthn encrypted encryption key is not set.");
+        }
+
+        var webauthnCredentialDerivedKey = await jsInteropService.GetWebAuthnCredentialDerivedKey(username);
+
+        // Decrypt the encrypted encryption key with the WebAuthn derived key.
+        return await jsInteropService.SymmetricDecrypt(encryptedEncryptionKey, webauthnCredentialDerivedKey);
+    }
+
+    /// <summary>
+    /// Set WebAuthn enabled. This will be used to determine if WebAuthn should be used for attempting to unlock the vault.
+    /// If set to false, the user will be prompted to enter the master password instead.
+    /// </summary>
+    /// <param name="enabled">True if WebAuthn is enabled, otherwise false.</param>
+    /// <param name="webauthCredentialDerivedKey">WebAuthn credential derived key.</param>
+    /// <returns>Task.</returns>
+    public async Task SetWebAuthnEnabledAsync(bool enabled, string? webauthCredentialDerivedKey)
+    {
+        await localStorage.SetItemAsStringAsync("webAuthnEnabled", enabled.ToString().ToLower());
+
+        Console.WriteLine($"Set webAuthnEnabled to {enabled}");
+
+        // Encrypt the current encryption key with the webauthn derived key and store it in local storage.
+        if (enabled && !string.IsNullOrEmpty(webauthCredentialDerivedKey))
+        {
+            Console.WriteLine("Encrypting encryption key with webauthn derived key");
+            var encryptedEncryptionKey = await jsInteropService.SymmetricEncrypt(Convert.ToBase64String(GetEncryptionKey()), webauthCredentialDerivedKey);
+            await localStorage.SetItemAsStringAsync("webAuthnEncryptedEncryptionKey", encryptedEncryptionKey);
+        }
+    }
+
+    /// <summary>
     /// Check if the encryption test string is stored in local storage which is used to validate
     /// the encryption key locally during future vault unlocks. If it's not stored the unlock
     /// attempts will fail and user should log in again instead.
@@ -238,6 +290,9 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private async Task RevokeTokenAsync()
     {
+        // Remove webauthn enabled flag.
+        await SetWebAuthnEnabledAsync(false, null);
+
         var tokenInput = new TokenModel
         {
             Token = await GetAccessTokenAsync(),

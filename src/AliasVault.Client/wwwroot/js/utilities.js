@@ -157,3 +157,82 @@ function generateQrCode(id) {
 
     qrcode.makeCode(dataUrl);
 }
+
+/**
+ * Gets a WebAuthn credential and derives an encryption key.
+ * @param {string} username - The username to associate with the credential.
+ * @returns {Promise<ArrayBuffer>} A promise that resolves to the derived encryption key as an ArrayBuffer.
+ */
+async function getWebAuthnCredentialAndDeriveKey(username) {
+    let credential;
+
+    // Step 1: Try to get an existing credential
+    try {
+        credential = await navigator.credentials.get({
+            publicKey: {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                rpId: window.location.hostname,
+                userVerification: "preferred",
+                timeout: 60000
+            }
+        });
+    } catch (error) {
+        console.log("No existing credential found, creating a new one.");
+    }
+
+    // If no existing credential, create a new one
+    if (!credential) {
+        credential = await navigator.credentials.create({
+            publicKey: {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                rp: {
+                    name: "AliasVault",
+                    id: window.location.hostname
+                },
+                user: {
+                    id: new TextEncoder().encode(username),
+                    name: username,
+                    displayName: username
+                },
+                pubKeyCredParams: [{alg: -7, type: "public-key"}],
+                authenticatorSelection: {
+                    authenticatorAttachment: "platform",
+                    userVerification: "preferred"
+                },
+                timeout: 60000
+            }
+        });
+    }
+
+    // Step 2: Extract the raw ID from the credential
+    const rawId = new Uint8Array(credential.rawId);
+
+    // Step 3: Derive an encryption key using PBKDF2
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        rawId,
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits", "deriveKey"]
+    );
+
+    const derivedKey = await crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+
+    // Step 4: Export the key as raw data
+    const exportedKey = await crypto.subtle.exportKey("raw", derivedKey);
+
+    // Step 5: Encode the key as base64
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(exportedKey)));
+}

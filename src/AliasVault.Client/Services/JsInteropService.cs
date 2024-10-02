@@ -156,4 +156,23 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             await Console.Error.WriteLineAsync($"JavaScript error: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Get webauthn credential derived key.
+    /// </summary>
+    /// <param name="username">Username.</param>
+    /// <returns>Task.</returns>
+    public async Task<string> GetWebAuthnCredentialDerivedKey(string username)
+    {
+        try
+        {
+            // Invoke the JavaScript function and get the result as a string.
+            return await jsRuntime.InvokeAsync<string>("getWebAuthnCredentialAndDeriveKey", username);
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error: {ex.Message}");
+            throw new CryptographicException("Decryption failed", ex);
+        }
+    }
 }
