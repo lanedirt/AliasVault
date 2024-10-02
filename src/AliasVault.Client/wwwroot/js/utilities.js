@@ -157,3 +157,101 @@ function generateQrCode(id) {
 
     qrcode.makeCode(dataUrl);
 }
+
+/**
+ * Gets or creates a WebAuthn credential and derives a key from it.
+ * @param {string} username - The username to associate with the credential.
+ * @param {boolean} createNewIfNotExists - Whether to create a new credential if one doesn't exist.
+ * @param {string} credentialIdToUse - The credentialId to use if one exists.
+ * * @returns {Promise<{credentialId: string, derivedKey: string} | null>} An object containing the credentialId and derived key, or null if unsuccessful. */
+async function getWebAuthnCredentialAndDeriveKey(username, createNewIfNotExists = false, credentialIdToUse = null) {
+    const rpId = window.location.hostname;
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId = new TextEncoder().encode(username);
+
+    let credentialId;
+
+    let allowCredentials = [];
+    if (credentialIdToUse) {
+        allowCredentials = [{
+            id: Uint8Array.from(atob(credentialIdToUse), c => c.charCodeAt(0)),
+            type: 'public-key'
+        }];
+    }
+
+    // TODO: make the create or get logic more readable.
+    if (!createNewIfNotExists) {
+        try {
+            // Try to get an existing credential
+            const credential = await navigator.credentials.get({
+                publicKey: {
+                    challenge,
+                    rpId,
+                    userVerification: "preferred",
+                    allowCredentials
+                }
+            });
+            credentialId = new Uint8Array(credential.rawId);
+        } catch (error) {
+            console.log("No existing credential found:", error);
+        }
+    }
+
+    if (createNewIfNotExists && !credentialId) {
+        // Create a new credential
+        try {
+            const newCredential = await navigator.credentials.create({
+                publicKey: {
+                    challenge,
+                    rp: {name: "AliasVault", id: rpId},
+                    user: {id: userId, name: username, displayName: username},
+                    pubKeyCredParams: [{alg: -7, type: "public-key"}],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        userVerification: "preferred",
+                        residentKey: "required"
+                    }
+                }
+            });
+            credentialId = new Uint8Array(newCredential.rawId);
+        } catch (createError) {
+            console.error("Error creating new credential:", createError);
+            return null;
+        }
+    }
+
+    if (!credentialId) {
+        console.error("No credentialId found.");
+        return null;
+    }
+
+    // Derive a key from the credentialId
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        credentialId,
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+    );
+
+    const derivedBits = await crypto.subtle.deriveBits(
+        {
+            name: "PBKDF2",
+            salt: userId,
+            iterations: 100000,
+            hash: "SHA-256"
+        },
+        keyMaterial,
+        256 // 256 bits
+    );
+
+    // Convert to base64
+    const derivedKey = btoa(String.fromCharCode.apply(null, new Uint8Array(derivedBits)));
+    const credentialIdBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(credentialId)));
+
+    console.log(`credentialId: ${credentialId}`);
+    console.log(`credentialIdBase64: ${credentialIdBase64}`);
+
+    return { CredentialId: credentialIdBase64, DerivedKey: derivedKey };
+
+}

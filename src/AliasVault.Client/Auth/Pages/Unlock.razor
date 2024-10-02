@@ -1,5 +1,6 @@
 @page "/unlock"
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@inject ILogger<Unlock> Logger
 @layout Auth.Layout.MainLayout
 @using System.Text.Json
 @using AliasVault.Client.Auth.Components
@@ -7,50 +8,73 @@
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Cryptography.Client
 
-<div class="flex space-x-4">
-    <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="Bonnie image">
-    <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Username</h2>
-</div>
+@if (IsLoading) {
+    <BoldLoadingIndicator />
 
-<p class="text-base font-normal text-gray-500 dark:text-gray-400">
-    Enter your master password in order to unlock your database.
-</p>
-
-<FullScreenLoadingIndicator @ref="LoadingIndicator" />
-<ServerValidationErrors @ref="ServerValidationErrors" />
-
-<EditForm Model="UnlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
-    <DataAnnotationsValidator/>
-    <div>
-        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="UnlockModel.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => UnlockModel.Password"/>
+}
+else if (IsWebAuthnLoading) {
+    <BoldLoadingIndicator />
+    <p class="text-center font-normal text-gray-500 dark:text-gray-400">
+        Logging in with WebAuthn...
+    </p>
+}
+else
+{
+    <div class="flex space-x-4">
+        <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="Bonnie image">
+        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Username</h2>
     </div>
 
-    <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-        <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
-        Unlock
-    </button>
+    <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+        Enter your master password in order to unlock your database.
+    </p>
 
-    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
-    </div>
-</EditForm>
+    <FullScreenLoadingIndicator @ref="LoadingIndicator"/>
+    <ServerValidationErrors @ref="ServerValidationErrors"/>
+
+    <EditForm Model="UnlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
+        <DataAnnotationsValidator/>
+        <div>
+            <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+            <InputTextField id="password" @bind-Value="UnlockModel.Password" type="password" placeholder="••••••••"/>
+            <ValidationMessage For="() => UnlockModel.Password"/>
+        </div>
+
+        <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+            <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+            Unlock
+        </button>
+
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
+        </div>
+    </EditForm>
+}
 
 @code {
     private string? Username { get; set; }
     private readonly UnlockModel UnlockModel = new();
     private FullScreenLoadingIndicator LoadingIndicator = new();
     private ServerValidationErrors ServerValidationErrors = new();
+    private bool IsLoading { get; set; } = true;
+    private bool IsWebAuthnLoading { get; set; } = true;
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Do not await this call, as it is only to check if the user is still authenticated
-        // and does not need to block the page from rendering.
-        _ = Http.GetAsync("api/v1/Auth/status");
+        if (firstRender)
+        {
+            // Do not await this call, as it is only to check if the user is still authenticated
+            // and does not need to block the page from rendering.
+            _ = Http.GetAsync("api/v1/Auth/status");
 
-        await StatusCheck();
+            await StatusCheck();
+            await UnlockWithWebAuthn();
+
+            IsLoading = false;
+            IsWebAuthnLoading = false;
+            StateHasChanged();
+        }
     }
 
     /// <summary>
@@ -170,6 +194,48 @@
             GlobalNotificationService.ClearMessages();
             GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
             NavigationManager.NavigateTo("/user/login");
+        }
+    }
+
+    /// <summary>
+    /// Unlock the vault with WebAuthn if enabled.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task UnlockWithWebAuthn()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        // Check if webauthn is enabled. If so, try to unlock the vault with it.
+        if (await AuthService.IsWebAuthnEnabledAsync())
+        {
+            IsLoading = false;
+            IsWebAuthnLoading = true;
+            StateHasChanged();
+
+            try
+            {
+                var decryptionKey = await AuthService.GetDecryptedWebAuthnEncryptionKeyAsync(authState.User.Identity!.Name!);
+                if (decryptionKey.Length == 0)
+                {
+                    Logger.LogWarning("No decryption key found for user {Username}. Falling back to password unlock.", authState.User.Identity!.Name!);
+                    return;
+                }
+
+                if (await AuthService.ValidateEncryptionKeyAsync(decryptionKey))
+                {
+                    await AuthService.StoreEncryptionKeyAsync(decryptionKey);
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    Logger.LogWarning("The decrypted encryption key does not match the persisted encryption key. Falling back to password unlock.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "An error occurred while trying to unlock the vault with WebAuthn.");
+            }
         }
     }
 }
