@@ -55,7 +55,7 @@
     /// </summary>
     public async Task EnableWebAuthn()
     {
-        var webauthCredentialDerivedKey = await JsInteropService.GetOrCreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
+        var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
 
         Console.WriteLine($"webauthCredentialDerivedKey: {webauthCredentialDerivedKey}");
         Console.WriteLine($"webauthCredentialDerivedKey.CredentialId: {webauthCredentialDerivedKey.CredentialId}");

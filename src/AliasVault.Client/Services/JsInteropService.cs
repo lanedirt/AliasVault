@@ -168,7 +168,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     {
         try
         {
-            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, false, credentialId);
+            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, credentialId);
             return result != null
                 ? (result.CredentialId, result.DerivedKey)
                 : throw new CryptographicException("Failed to get WebAuthn credential");
@@ -186,11 +186,11 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <param name="username">The username for the credential.</param>
     /// <returns>A tuple containing the credential ID and the derived key.</returns>
     /// <exception cref="CryptographicException">Thrown when decryption fails due to a JavaScript error.</exception>
-    public async Task<(string CredentialId, string DerivedKey)> GetOrCreateWebAuthnCredentialDerivedKey(string username)
+    public async Task<(string CredentialId, string DerivedKey)> CreateWebAuthnCredentialDerivedKey(string username)
     {
         try
         {
-            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, true, null);
+            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("createWebAuthnCredentialAndDeriveKey", username);
             Console.WriteLine($"Result: {result}");
             return result != null
                 ? (result.CredentialId, result.DerivedKey)
