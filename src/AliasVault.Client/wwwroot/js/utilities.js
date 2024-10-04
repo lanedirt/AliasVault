@@ -186,21 +186,21 @@ async function getWebAuthnCredentialAndDeriveKey(credentialIdToUse, salt) {
         });
 
         const extensionsResult = existingCredential.getClientExtensionResults();
-        if (!extensionsResult.prf) {
-            return { error: "PRF_NOT_SUPPORTED" };
+        if (!extensionsResult?.prf) {
+            return { Error: "PRF_NOT_SUPPORTED" };
         }
 
-        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
-            return { error: "PRF_DERIVATION_FAILED" };
+        if (!extensionsResult.prf?.results?.first) {
+            return { Error: "PRF_DERIVATION_FAILED" };
         }
 
         const derivedKey = extensionsResult.prf.results.first;
         return {
-            derivedKey: btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey)))
+            DerivedKey: btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey)))
         };
     } catch (error) {
         console.error("Error getting WebAuthn credential:", error);
-        return { error: "WEBAUTHN_GET_ERROR", message: error.message };
+        return { Error: "WEBAUTHN_GET_ERROR", Message: error.message };
     }
 }
 
@@ -257,10 +257,10 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
         let extensionsResult = newCredential.getClientExtensionResults();
 
         if (!extensionsResult.prf) {
-            return { error: "PRF_NOT_SUPPORTED" };
+            return { Error: "PRF_NOT_SUPPORTED" };
         }
 
-        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
+        if (!extensionsResult.prf?.results?.first) {
             alert("Your authenticator has been successfully registered. Please use your authenticator again to complete the process.")
 
             // Note: Some authenticators do not return the derived key in the create response. In this case,
@@ -288,8 +288,8 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
             extensionsResult = existingCredential.getClientExtensionResults();
         }
 
-        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
-            return { error: "PRF_DERIVATION_FAILED" };
+        if (!extensionsResult.prf?.results?.first) {
+            return { Error: "PRF_DERIVATION_FAILED" };
         }
 
         const derivedKey = extensionsResult.prf.results.first;
@@ -302,7 +302,7 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
         };
     } catch (createError) {
         console.error("Error creating new WebAuthn credential:", createError);
-        return { error: "WEBAUTHN_CREATE_ERROR", message: createError.message };
+        return { Error: "WEBAUTHN_CREATE_ERROR", Message: createError.message };
     }
 }
 

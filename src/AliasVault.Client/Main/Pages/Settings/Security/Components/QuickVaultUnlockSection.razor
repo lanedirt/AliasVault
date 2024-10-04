@@ -63,7 +63,7 @@
         {
             var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
             await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
-            GlobalNotificationService.AddSuccessMessage("WebAuthn is successfully enabled. The next time your vault is locked you can unlock it with your created passkey.", true);
+            GlobalNotificationService.AddSuccessMessage("Quick Vault Unlock is successfully enabled. The next time your vault is locked you can unlock it with your created passkey.", true);
         }
         catch (NotSupportedException)
         {
@@ -72,7 +72,7 @@
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage("An error occurred while trying to enable WebAuthn. Please try again (later).", true);
+            GlobalNotificationService.AddErrorMessage("An error occurred while trying to enable Quick Vault Unlock. Please try again (later).", true);
             Logger.LogInformation(ex, "An error occurred while trying to enable WebAuthn.");
             return;
         }
@@ -86,6 +86,7 @@
     public async Task DisableWebAuthn()
     {
         await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty, string.Empty);
+        GlobalNotificationService.AddSuccessMessage("Quick Vault Unlock is successfully disabled.", true);
         await LoadData();
     }
 }
