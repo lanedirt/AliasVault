@@ -1,4 +1,5 @@
 ﻿@inherits MainBase
+@inject ILogger<PersistEncryptionKeySection> Logger
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Encryption key persist</h3>
@@ -55,14 +56,24 @@
     /// </summary>
     public async Task EnableWebAuthn()
     {
-        var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
+        try
+        {
+            var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
 
-        Console.WriteLine($"webauthCredentialDerivedKey: {webauthCredentialDerivedKey}");
-        Console.WriteLine($"webauthCredentialDerivedKey.CredentialId: {webauthCredentialDerivedKey.CredentialId}");
-        Console.WriteLine($"webauthCredentialDerivedKey.DerivedKey: {webauthCredentialDerivedKey.DerivedKey}");
-
-        // Set local storage var to indicate that WebAuthn is enabled and we should try to use it to unlock the vault.
-        await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
+            // Set local storage var to indicate that WebAuthn is enabled, and we should try to use it to unlock the vault.
+            await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
+        }
+        catch (NotSupportedException)
+        {
+            GlobalNotificationService.AddErrorMessage("Your current browser does not support the WebAuthn PRF extension. Please try again with a different browser.", true);
+            return;
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage("An error occurred while trying to enable WebAuthn. Please try again (later).", true);
+            Logger.LogInformation(ex, "An error occurred while trying to enable WebAuthn.");
+            return;
+        }
 
         await LoadData();
     }

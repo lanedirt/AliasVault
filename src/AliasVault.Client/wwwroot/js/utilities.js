@@ -166,12 +166,11 @@ async function getWebAuthnCredentialAndDeriveKey(credentialIdToUse, salt) {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
 
     try {
-        // Try to get an existing credential
         const existingCredential = await navigator.credentials.get({
             publicKey: {
                 challenge,
                 rpId,
-                userVerification: "preferred",
+                userVerification: "discouraged",
                 allowCredentials: [{
                     id: Uint8Array.from(atob(credentialIdToUse), c => c.charCodeAt(0)),
                     type: 'public-key'
@@ -186,21 +185,22 @@ async function getWebAuthnCredentialAndDeriveKey(credentialIdToUse, salt) {
             }
         });
 
-        // Check if the authenticator supports the PRF extension
         const extensionsResult = existingCredential.getClientExtensionResults();
         if (!extensionsResult.prf) {
-            throw new Error("Authenticator does not support the PRF extension");
+            return { error: "PRF_NOT_SUPPORTED" };
         }
 
-        if (!extensionsResult.prf || !extensionsResult.prf.results || !extensionsResult.prf.results.first) {
-            throw new Error("Failed to derive key using PRF extension");
+        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
+            return { error: "PRF_DERIVATION_FAILED" };
         }
 
         const derivedKey = extensionsResult.prf.results.first;
-        return btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey)));
+        return {
+            derivedKey: btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey)))
+        };
     } catch (error) {
-        console.log("No existing WebAuthn credential found:", error);
-        return null;
+        console.error("Error getting WebAuthn credential:", error);
+        return { error: "WEBAUTHN_GET_ERROR", message: error.message };
     }
 }
 
@@ -214,8 +214,8 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const salt = crypto.getRandomValues(new Uint8Array(32));
 
-    // Create a new credential
     try {
+        // Create the credential
         const newCredential = await navigator.credentials.create({
             publicKey: {
                 challenge,
@@ -227,14 +227,22 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
                     name: username,
                     displayName: username
                 },
-                pubKeyCredParams: [{
-                    alg: -7,
-                    type: "public-key"
-                }],
+                pubKeyCredParams: [
+                    { alg: -7, type: "public-key" },   // ES256
+                    { alg: -257, type: "public-key" }, // RS256
+                    { alg: -37, type: "public-key" },  // PS256
+                    { alg: -8, type: "public-key" },   // EdDSA
+                    { alg: -35, type: "public-key" },  // ES384
+                    { alg: -36, type: "public-key" },  // ES512
+                    { alg: -259, type: "public-key" }, // RS384
+                    { alg: -258, type: "public-key" }, // RS512
+                    { alg: -38, type: "public-key" },  // PS384
+                    { alg: -39, type: "public-key" },  // PS512
+                ],
                 authenticatorSelection: {
-                    authenticatorAttachment: "platform",
-                    userVerification: "preferred",
-                    residentKey: "required"
+                    userVerification: "discouraged",
+                    residentKey: "discouraged",
+                    requireResidentKey: false,
                 },
                 extensions: {
                     prf: {
@@ -246,14 +254,42 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
             }
         });
 
-        // Check if the authenticator supports the PRF extension
-        const extensionsResult = newCredential.getClientExtensionResults();
-        if (!extensionsResult.prf || !extensionsResult.prf.enabled) {
-            throw new Error("Authenticator does not support the PRF extension");
+        let extensionsResult = newCredential.getClientExtensionResults();
+
+        if (!extensionsResult.prf) {
+            return { error: "PRF_NOT_SUPPORTED" };
         }
 
-        if (!extensionsResult.prf || !extensionsResult.prf.results || !extensionsResult.prf.results.first) {
-            throw new Error("Failed to derive key using PRF extension");
+        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
+            alert("Your authenticator has been successfully registered. Please use your authenticator again to complete the process.")
+
+            // Note: Some authenticators do not return the derived key in the create response. In this case,
+            // we need to read the credential to get the derived key. This is required for certain passkeys
+            // such as Yubikey.
+            const existingCredential = await navigator.credentials.get({
+                publicKey: {
+                    challenge,
+                    rpId,
+                    userVerification: "discouraged",
+                    allowCredentials: [{
+                        id: newCredential.rawId,
+                        type: 'public-key'
+                    }],
+                    extensions: {
+                        prf: {
+                            eval: {
+                                first: salt,
+                            },
+                        },
+                    },
+                }
+            });
+
+            extensionsResult = existingCredential.getClientExtensionResults();
+        }
+
+        if (!extensionsResult.prf.results || !extensionsResult.prf.results.first) {
+            return { error: "PRF_DERIVATION_FAILED" };
         }
 
         const derivedKey = extensionsResult.prf.results.first;
@@ -266,7 +302,7 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
         };
     } catch (createError) {
         console.error("Error creating new WebAuthn credential:", createError);
-        return null;
+        return { error: "WEBAUTHN_CREATE_ERROR", message: createError.message };
     }
 }
 

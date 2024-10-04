@@ -232,6 +232,10 @@ else
                     Logger.LogWarning("The decrypted encryption key does not match the persisted encryption key. Falling back to password unlock.");
                 }
             }
+            catch (NotSupportedException)
+            {
+                GlobalNotificationService.AddErrorMessage("Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.", true);
+            }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "An error occurred while trying to unlock the vault with WebAuthn.");

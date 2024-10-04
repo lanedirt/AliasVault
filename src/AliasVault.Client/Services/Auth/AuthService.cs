@@ -174,22 +174,13 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         var webauthnSalt = await localStorage.GetItemAsStringAsync("webAuthnSalt");
         if (string.IsNullOrEmpty(encryptedEncryptionKey) || string.IsNullOrEmpty(webauthnCredentialId) || string.IsNullOrEmpty(webauthnSalt))
         {
-            throw new InvalidOperationException("WebAuthn encrypted encryption key is not set or WebAuthn credential ID is not set.");
+            throw new NullReferenceException("WebAuthn encrypted encryption key is not set or WebAuthn credential ID is not set.");
         }
 
         var webauthnCredentialDerivedKey = await jsInteropService.GetWebAuthnCredentialDerivedKey(webauthnCredentialId, webauthnSalt);
-        if (webauthnCredentialDerivedKey is null)
-        {
-            throw new InvalidOperationException("WebAuthn credential derived key is not set.");
-        }
-
-        Console.WriteLine($"webauthnCredentialDerivedKey: {webauthnCredentialDerivedKey}");
-        Console.WriteLine($"encryptedEncryptionKey: {encryptedEncryptionKey}");
 
         // Decrypt the encrypted encryption key with the WebAuthn derived key.
         var decryptedString = await jsInteropService.SymmetricDecrypt(encryptedEncryptionKey, webauthnCredentialDerivedKey);
-
-        Console.WriteLine($"decryptedString: {decryptedString}");
 
         return Convert.FromBase64String(decryptedString);
     }
