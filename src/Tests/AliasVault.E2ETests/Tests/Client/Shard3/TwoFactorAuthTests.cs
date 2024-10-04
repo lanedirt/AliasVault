@@ -39,13 +39,19 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
 
         await Logout();
 
-        // Attempt to login again with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
+        // Attempt to log in again with test credentials.
+        await WaitForUrlAsync("user/login", "Your username");
+
+        // Wait for the page to fully load.
+        await Task.Delay(100);
+
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
+
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
 
-        var loginButton = Page.Locator("button[type='submit']");
+        var loginButton = await WaitForAndGetElement("button[type='submit']");
         await loginButton.ClickAsync();
 
         // Check if we get a 2FA code prompt by checking for text "Authenticator code".
@@ -53,7 +59,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         Assert.That(prompt, Does.Contain("Authenticator code"), "No 2FA code prompt displayed.");
 
         // Fill in the 2FA code and submit the form.
-        var totpField = Page.Locator("input[id='two-factor-code']");
+        var totpField = await WaitForAndGetElement("input[id='two-factor-code']");
         await totpField.FillAsync(totpCode);
 
         var submitButton = Page.Locator("button[type='submit']");
@@ -75,13 +81,18 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
 
         await Logout();
 
-        // Attempt to log in with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
+        // Attempt to log in again with test credentials.
+        await WaitForUrlAsync("user/login", "Your username");
+
+        // Wait for the page to fully load.
+        await Task.Delay(100);
+
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
 
-        var loginButton = Page.Locator("button[type='submit']");
+        var loginButton = await WaitForAndGetElement("button[type='submit']");
         await loginButton.ClickAsync();
 
         // Check if we get a 2FA code prompt by checking for text "Authenticator code".
