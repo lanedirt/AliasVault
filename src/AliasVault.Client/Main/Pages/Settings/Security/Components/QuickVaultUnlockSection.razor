@@ -1,8 +1,8 @@
 ﻿@inherits MainBase
-@inject ILogger<PersistEncryptionKeySection> Logger
+@inject ILogger<QuickVaultUnlockSection> Logger
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Encryption key persist</h3>
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Quick vault unlock</h3>
 
     @if (IsLoading)
     {
@@ -12,15 +12,18 @@
     {
         if (IsWebAuthnEnabled)
         {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">The encryption key is persisted through WebAuthn. This means that when you reload the AliasVault page or tab, you can login with your face, fingerprint or built-in browser security keys.
-                If you with to disable WebAuthn, you can do so with the button below.</div>
-            <Button Color="danger" OnClick="DisableWebAuthn">Disable WebAuthn</Button>
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">The vault decryption key is saved via a passkey. This means that when you reload the AliasVault page or tab, you can login with your face, fingerprint or built-in browser security keys.
+                If you with to disable the quick vault unlock, you can do so with the button below.</div>
+            <Button Color="danger" OnClick="DisableWebAuthn">Disable Quick Vault Unlock</Button>
         }
         else
         {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">By default the encryption key to unlock your vault is NOT persisted during the browser session. This means that when you reload the AliasVault page or tab, you will be prompted to enter your master password again.
-                Alternatively, you can choose to persist the encryption key in the browser's local storage via WebAuthn. This will allow you, after logging in for the first time, to subsequently unlock your vault with your face, fingerprint or built-in browser security keys.</div>
-            <Button Color="success" OnClick="EnableWebAuthn">Enable WebAuthn</Button>
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">By default when you reload the AliasVault page or tab, you will be prompted to enter your master password again.
+                Alternatively, you can choose to use a browser passkey (or hardware authenticator such as YubiKey) instead of your master password. This will allow you to unlock your vault with your face, fingerprint or built-in browser security keys. This only applies to the current device and browser.</div>
+
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Please note that this feature is experimental and may not work on all devices or browsers. Your browser must support WebAuthn and the PRF extension in order for this to work. If you experience any issues, you can disable this feature at any time.</div>
+
+            <Button Color="success" OnClick="EnableWebAuthn">Enable Quick Vault Unlock</Button>
         }
     }
 </div>
@@ -59,9 +62,8 @@
         try
         {
             var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
-
-            // Set local storage var to indicate that WebAuthn is enabled, and we should try to use it to unlock the vault.
             await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
+            GlobalNotificationService.AddSuccessMessage("WebAuthn is successfully enabled. The next time your vault is locked you can unlock it with your created passkey.", true);
         }
         catch (NotSupportedException)
         {
@@ -83,9 +85,7 @@
     /// </summary>
     public async Task DisableWebAuthn()
     {
-        // Set local storage var to indicate that WebAuthn is disabled and we should not try to use it to unlock the vault.
         await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty, string.Empty);
-
         await LoadData();
     }
 }
