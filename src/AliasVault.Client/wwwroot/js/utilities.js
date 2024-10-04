@@ -122,14 +122,12 @@ window.initTopMenu = function() {
  * @param id
  */
 function generateQrCode(id) {
-    console.log(`Generating QR code for element with id "${id}".`);
     // Find the element by id
     const element = document.getElementById(id);
 
     // Check if the element exists
     if (!element) {
-        console.log(`Element with id "${id}" not found. QR code generation aborted.`);
-        return; // Silently fail
+        return;
     }
 
     // Get the data-url attribute
@@ -137,8 +135,7 @@ function generateQrCode(id) {
 
     // Check if data-url exists
     if (!dataUrl) {
-        console.log(`No data-url attribute found on element with id "${id}". QR code generation aborted.`);
-        return; // Silently fail
+        return;
     }
 
     // Create a container for the QR code
@@ -160,98 +157,152 @@ function generateQrCode(id) {
 
 /**
  * Gets or creates a WebAuthn credential and derives a key from it.
- * @param {string} username - The username to associate with the credential.
- * @param {boolean} createNewIfNotExists - Whether to create a new credential if one doesn't exist.
  * @param {string} credentialIdToUse - The credentialId to use if one exists.
- * * @returns {Promise<{credentialId: string, derivedKey: string} | null>} An object containing the credentialId and derived key, or null if unsuccessful. */
-async function getWebAuthnCredentialAndDeriveKey(username, createNewIfNotExists = false, credentialIdToUse = null) {
+ * @param {string} salt - The salt to use when deriving the key.
+ * @returns {Promise<string>} The derived key as a base64 string.
+ */
+async function getWebAuthnCredentialAndDeriveKey(credentialIdToUse, salt) {
     const rpId = window.location.hostname;
     const challenge = crypto.getRandomValues(new Uint8Array(32));
-    const userId = new TextEncoder().encode(username);
 
-    let credentialId;
+    try {
+        const existingCredential = await navigator.credentials.get({
+            publicKey: {
+                challenge,
+                rpId,
+                userVerification: "discouraged",
+                allowCredentials: [{
+                    id: Uint8Array.from(atob(credentialIdToUse), c => c.charCodeAt(0)),
+                    type: 'public-key'
+                }],
+                extensions: {
+                    prf: {
+                        eval: {
+                            first: Uint8Array.from(atob(salt), c => c.charCodeAt(0)),
+                        },
+                    },
+                },
+            }
+        });
 
-    let allowCredentials = [];
-    if (credentialIdToUse) {
-        allowCredentials = [{
-            id: Uint8Array.from(atob(credentialIdToUse), c => c.charCodeAt(0)),
-            type: 'public-key'
-        }];
+        const extensionsResult = existingCredential.getClientExtensionResults();
+        if (!extensionsResult?.prf) {
+            return { Error: "PRF_NOT_SUPPORTED" };
+        }
+
+        if (!extensionsResult.prf?.results?.first) {
+            return { Error: "PRF_DERIVATION_FAILED" };
+        }
+
+        const derivedKey = extensionsResult.prf.results.first;
+        return {
+            DerivedKey: btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey)))
+        };
+    } catch (error) {
+        console.error("Error getting WebAuthn credential:", error);
+        return { Error: "WEBAUTHN_GET_ERROR", Message: error.message };
     }
+}
 
-    // TODO: make the create or get logic more readable.
-    if (!createNewIfNotExists) {
-        try {
-            // Try to get an existing credential
-            const credential = await navigator.credentials.get({
+/**
+ * Creates a WebAuthn credential and derives a key from it.
+ * @param {string} username - The username to associate with the credential.
+ * * @returns {Promise<{credentialId: string, salt: string, derivedKey: string} | null>} An object containing the credentialId, salt and derived key, or null if unsuccessful.
+ */
+async function createWebAuthnCredentialAndDeriveKey(username) {
+    const rpId = window.location.hostname;
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const salt = crypto.getRandomValues(new Uint8Array(32));
+
+    try {
+        // Create the credential
+        const newCredential = await navigator.credentials.create({
+            publicKey: {
+                challenge,
+                rp: {
+                    name: "AliasVault",
+                    id: rpId},
+                user: {
+                    id: crypto.getRandomValues(new Uint8Array(32)),
+                    name: username,
+                    displayName: username
+                },
+                pubKeyCredParams: [
+                    { alg: -7, type: "public-key" },   // ES256
+                    { alg: -257, type: "public-key" }, // RS256
+                    { alg: -37, type: "public-key" },  // PS256
+                    { alg: -8, type: "public-key" },   // EdDSA
+                    { alg: -35, type: "public-key" },  // ES384
+                    { alg: -36, type: "public-key" },  // ES512
+                    { alg: -259, type: "public-key" }, // RS384
+                    { alg: -258, type: "public-key" }, // RS512
+                    { alg: -38, type: "public-key" },  // PS384
+                    { alg: -39, type: "public-key" },  // PS512
+                ],
+                authenticatorSelection: {
+                    userVerification: "discouraged",
+                    residentKey: "discouraged",
+                    requireResidentKey: false,
+                },
+                extensions: {
+                    prf: {
+                        eval: {
+                            first: salt,
+                        },
+                    },
+                },
+            }
+        });
+
+        let extensionsResult = newCredential.getClientExtensionResults();
+
+        if (!extensionsResult.prf) {
+            return { Error: "PRF_NOT_SUPPORTED" };
+        }
+
+        if (!extensionsResult.prf?.results?.first) {
+            alert("Your authenticator has been successfully registered. Please use your authenticator again to complete the process.")
+
+            // Note: Some authenticators do not return the derived key in the create response. In this case,
+            // we need to read the credential to get the derived key. This is required for certain passkeys
+            // such as Yubikey.
+            const existingCredential = await navigator.credentials.get({
                 publicKey: {
                     challenge,
                     rpId,
-                    userVerification: "preferred",
-                    allowCredentials
+                    userVerification: "discouraged",
+                    allowCredentials: [{
+                        id: newCredential.rawId,
+                        type: 'public-key'
+                    }],
+                    extensions: {
+                        prf: {
+                            eval: {
+                                first: salt,
+                            },
+                        },
+                    },
                 }
             });
-            credentialId = new Uint8Array(credential.rawId);
-        } catch (error) {
-            console.log("No existing credential found:", error);
+
+            extensionsResult = existingCredential.getClientExtensionResults();
         }
-    }
 
-    if (createNewIfNotExists && !credentialId) {
-        // Create a new credential
-        try {
-            const newCredential = await navigator.credentials.create({
-                publicKey: {
-                    challenge,
-                    rp: {name: "AliasVault", id: rpId},
-                    user: {id: userId, name: username, displayName: username},
-                    pubKeyCredParams: [{alg: -7, type: "public-key"}],
-                    authenticatorSelection: {
-                        authenticatorAttachment: "platform",
-                        userVerification: "preferred",
-                        residentKey: "required"
-                    }
-                }
-            });
-            credentialId = new Uint8Array(newCredential.rawId);
-        } catch (createError) {
-            console.error("Error creating new credential:", createError);
-            return null;
+        if (!extensionsResult.prf?.results?.first) {
+            return { Error: "PRF_DERIVATION_FAILED" };
         }
+
+        const derivedKey = extensionsResult.prf.results.first;
+        const credentialId = new Uint8Array(newCredential.rawId);
+
+        return {
+            CredentialId: btoa(String.fromCharCode.apply(null, credentialId)),
+            Salt: btoa(String.fromCharCode.apply(null, salt)),
+            DerivedKey: btoa(String.fromCharCode.apply(null, new Uint8Array(derivedKey))),
+        };
+    } catch (createError) {
+        console.error("Error creating new WebAuthn credential:", createError);
+        return { Error: "WEBAUTHN_CREATE_ERROR", Message: createError.message };
     }
-
-    if (!credentialId) {
-        console.error("No credentialId found.");
-        return null;
-    }
-
-    // Derive a key from the credentialId
-    const keyMaterial = await crypto.subtle.importKey(
-        "raw",
-        credentialId,
-        { name: "PBKDF2" },
-        false,
-        ["deriveBits"]
-    );
-
-    const derivedBits = await crypto.subtle.deriveBits(
-        {
-            name: "PBKDF2",
-            salt: userId,
-            iterations: 100000,
-            hash: "SHA-256"
-        },
-        keyMaterial,
-        256 // 256 bits
-    );
-
-    // Convert to base64
-    const derivedKey = btoa(String.fromCharCode.apply(null, new Uint8Array(derivedBits)));
-    const credentialIdBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(credentialId)));
-
-    console.log(`credentialId: ${credentialId}`);
-    console.log(`credentialIdBase64: ${credentialIdBase64}`);
-
-    return { CredentialId: credentialIdBase64, DerivedKey: derivedKey };
-
 }
+

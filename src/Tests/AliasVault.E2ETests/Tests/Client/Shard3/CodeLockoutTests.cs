@@ -28,13 +28,18 @@ public class CodeLockoutTests : TwoFactorAuthBase
         await EnableTwoFactor();
         await Logout();
 
-        // Attempt to log in with test credentials.
-        var emailField = Page.Locator("input[id='email']");
-        var passwordField = Page.Locator("input[id='password']");
+        // Attempt to log in again with test credentials.
+        await WaitForUrlAsync("user/login", "Your username");
+
+        // Wait for the page to fully load.
+        await Task.Delay(100);
+
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
         await emailField.FillAsync(TestUserUsername);
         await passwordField.FillAsync(TestUserPassword);
 
-        var loginButton = Page.Locator("button[type='submit']");
+        var loginButton = await WaitForAndGetElement("button[type='submit']");
         await loginButton.ClickAsync();
 
         // Check if we get a 2FA code prompt by checking for text "Authenticator code".

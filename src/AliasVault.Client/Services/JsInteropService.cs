@@ -160,18 +160,30 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <summary>
     /// Gets the WebAuthn credential derived key used to encrypt or decrypt the persisted vault encryption key.
     /// </summary>
-    /// <param name="username">The username for the credential.</param>
     /// <param name="credentialId">The credential ID to use.</param>
-    /// <returns>A tuple containing the credential ID and the derived key.</returns>
-    /// <exception cref="CryptographicException">Thrown when decryption fails due to a JavaScript error.</exception>
-    public async Task<(string CredentialId, string DerivedKey)?> GetWebAuthnCredentialDerivedKey(string username, string credentialId)
+    /// <param name="salt">The salt to use.</param>
+    /// <returns>Derived key as base64 string.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the authenticator does not support the PRF extension.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the PRF key derivation fails.</exception>
+    /// <exception cref="CryptographicException">Thrown when there's an error getting the WebAuthn credential or when decryption fails.</exception>
+    public async Task<string> GetWebAuthnCredentialDerivedKey(string credentialId, string salt)
     {
         try
         {
-            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, false, credentialId);
-            return result != null
-                ? (result.CredentialId, result.DerivedKey)
-                : throw new CryptographicException("Failed to get WebAuthn credential");
+            var result = await jsRuntime.InvokeAsync<WebAuthnGetCredentialResult>("getWebAuthnCredentialAndDeriveKey", credentialId, salt);
+
+            if (result.Error is null)
+            {
+                return result.DerivedKey ?? throw new CryptographicException("Derived key is null");
+            }
+
+            throw result.Error switch
+            {
+                "PRF_NOT_SUPPORTED" => new NotSupportedException("Authenticator does not support the PRF extension."),
+                "PRF_DERIVATION_FAILED" => new InvalidOperationException("Failed to derive key using PRF extension."),
+                "WEBAUTHN_CREATE_ERROR" => new CryptographicException($"Failed to create WebAuthn credential: {result.Message}"),
+                _ => new CryptographicException($"Unknown error occurred: {result.Error ?? "No error specified"}"),
+            };
         }
         catch (JSException ex)
         {
@@ -184,17 +196,30 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// Gets or creates the WebAuthn credential derived key used to encrypt or decrypt the persisted vault encryption key.
     /// </summary>
     /// <param name="username">The username for the credential.</param>
-    /// <returns>A tuple containing the credential ID and the derived key.</returns>
+    /// <returns>A tuple containing the credential ID, salt and the derived key.</returns>
     /// <exception cref="CryptographicException">Thrown when decryption fails due to a JavaScript error.</exception>
-    public async Task<(string CredentialId, string DerivedKey)> GetOrCreateWebAuthnCredentialDerivedKey(string username)
+    /// <exception cref="NotSupportedException">Thrown when the authenticator does not support the PRF extension.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the PRF key derivation fails.</exception>
+    public async Task<(string CredentialId, string Salt, string DerivedKey)> CreateWebAuthnCredentialDerivedKey(string username)
     {
         try
         {
-            var result = await jsRuntime.InvokeAsync<WebAuthnResult>("getWebAuthnCredentialAndDeriveKey", username, true, null);
-            Console.WriteLine($"Result: {result}");
-            return result != null
-                ? (result.CredentialId, result.DerivedKey)
-                : throw new CryptographicException("Failed to get or create WebAuthn credential");
+            var result = await jsRuntime.InvokeAsync<WebAuthnCreateCredentialResult>("createWebAuthnCredentialAndDeriveKey", "AliasVault | " + username);
+
+            if (result.CredentialId is not null &&
+                result.Salt is not null &&
+                result.DerivedKey is not null)
+            {
+                return (result.CredentialId, result.Salt, result.DerivedKey);
+            }
+
+            throw result.Error switch
+            {
+                "PRF_NOT_SUPPORTED" => new NotSupportedException("Authenticator does not support the PRF extension."),
+                "PRF_DERIVATION_FAILED" => new InvalidOperationException("Failed to derive key using PRF extension."),
+                "WEBAUTHN_CREATE_ERROR" => new CryptographicException($"Failed to create WebAuthn credential: {result.Message}"),
+                _ => new CryptographicException($"Unknown error occurred: {result.Error ?? "No error specified"}"),
+            };
         }
         catch (JSException ex)
         {
@@ -204,18 +229,54 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     }
 
     /// <summary>
-    /// Represents the result of a WebAuthn credential operation.
+    /// Represents the result of a WebAuthn get credential operation.
     /// </summary>
-    private class WebAuthnResult
+    private sealed class WebAuthnGetCredentialResult
     {
         /// <summary>
-        /// Gets or sets the credential ID as a base64 string.
+        /// Gets the derived key.
         /// </summary>
-        public string CredentialId { get; set; } = null!;
+        public string? DerivedKey { get; }
 
         /// <summary>
-        /// Gets or sets the derived key as a base64 string.
+        /// Gets the optional error message.
         /// </summary>
-        public string DerivedKey { get; set; } = null!;
+        public string? Error { get; }
+
+        /// <summary>
+        /// Gets the optional additional error details.
+        /// </summary>
+        public string? Message { get; }
+    }
+
+    /// <summary>
+    /// Represents the result of a WebAuthn credential operation.
+    /// </summary>
+    private sealed class WebAuthnCreateCredentialResult
+    {
+        /// <summary>
+        /// Gets the credential ID as a base64 string.
+        /// </summary>
+        public string? CredentialId { get; }
+
+        /// <summary>
+        /// Gets the salt as a base64 string.
+        /// </summary>
+        public string? Salt { get; }
+
+        /// <summary>
+        /// Gets the derived key as a base64 string.
+        /// </summary>
+        public string? DerivedKey { get; }
+
+        /// <summary>
+        /// Gets the optional error message.
+        /// </summary>
+        public string? Error { get; }
+
+        /// <summary>
+        /// Gets the optional additional error details.
+        /// </summary>
+        public string? Message { get; }
     }
 }

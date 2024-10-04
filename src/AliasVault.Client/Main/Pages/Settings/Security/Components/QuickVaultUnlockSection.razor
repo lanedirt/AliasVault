@@ -1,0 +1,92 @@
+﻿@inherits MainBase
+@inject ILogger<QuickVaultUnlockSection> Logger
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Quick vault unlock</h3>
+
+    @if (IsLoading)
+    {
+        <LoadingIndicator />
+    }
+    else
+    {
+        if (IsWebAuthnEnabled)
+        {
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">The vault decryption key is saved via a passkey. This means that when you reload the AliasVault page or tab, you can login with your face, fingerprint or built-in browser security keys.
+                If you with to disable the quick vault unlock, you can do so with the button below.</div>
+            <Button Color="danger" OnClick="DisableWebAuthn">Disable Quick Vault Unlock</Button>
+        }
+        else
+        {
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">By default when you reload the AliasVault page or tab, you will be prompted to enter your master password again.
+                Alternatively, you can choose to use a browser passkey (or hardware authenticator such as YubiKey) instead of your master password. This will allow you to unlock your vault with your face, fingerprint or built-in browser security keys. This only applies to the current device and browser.</div>
+
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Please note that this feature is experimental and may not work on all devices or browsers. Your browser must support WebAuthn and the PRF extension in order for this to work. If you experience any issues, you can disable this feature at any time.</div>
+
+            <Button Color="success" OnClick="EnableWebAuthn">Enable Quick Vault Unlock</Button>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Event callback that is invoked when the Two-Factor Authentication status changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnStatusChanged { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+
+    private bool IsWebAuthnEnabled { get; set; }
+
+    /// <summary>
+    /// Loads the Two-Factor Authentication status from the server.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task LoadData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        IsWebAuthnEnabled = await AuthService.IsWebAuthnEnabledAsync();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Enables WebAuthn.
+    /// </summary>
+    public async Task EnableWebAuthn()
+    {
+        try
+        {
+            var webauthCredentialDerivedKey = await JsInteropService.CreateWebAuthnCredentialDerivedKey(await GetUsernameAsync());
+            await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
+            GlobalNotificationService.AddSuccessMessage("Quick Vault Unlock is successfully enabled. The next time your vault is locked you can unlock it with your created passkey.", true);
+        }
+        catch (NotSupportedException)
+        {
+            GlobalNotificationService.AddErrorMessage("Your current browser does not support the WebAuthn PRF extension. Please try again with a different browser.", true);
+            return;
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage("An error occurred while trying to enable Quick Vault Unlock. Please try again (later).", true);
+            Logger.LogInformation(ex, "An error occurred while trying to enable WebAuthn.");
+            return;
+        }
+
+        await LoadData();
+    }
+
+    /// <summary>
+    /// Disables WebAuthn.
+    /// </summary>
+    public async Task DisableWebAuthn()
+    {
+        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty, string.Empty);
+        GlobalNotificationService.AddSuccessMessage("Quick Vault Unlock is successfully disabled.", true);
+        await LoadData();
+    }
+}
