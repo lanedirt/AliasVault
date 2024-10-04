@@ -62,7 +62,7 @@
         Console.WriteLine($"webauthCredentialDerivedKey.DerivedKey: {webauthCredentialDerivedKey.DerivedKey}");
 
         // Set local storage var to indicate that WebAuthn is enabled and we should try to use it to unlock the vault.
-        await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.DerivedKey, webauthCredentialDerivedKey.CredentialId);
+        await AuthService.SetWebAuthnEnabledAsync(true, webauthCredentialDerivedKey.CredentialId, webauthCredentialDerivedKey.Salt, webauthCredentialDerivedKey.DerivedKey);
 
         await LoadData();
     }
@@ -73,7 +73,7 @@
     public async Task DisableWebAuthn()
     {
         // Set local storage var to indicate that WebAuthn is disabled and we should not try to use it to unlock the vault.
-        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty);
+        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty, string.Empty);
 
         await LoadData();
     }
