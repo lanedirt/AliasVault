@@ -168,7 +168,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Verify 2-factor code.
-        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa);
+        var verifyResult = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code2Fa.ToString());
         if (!verifyResult)
         {
             // Increment failed login attempts in order to lock out the account when the limit is reached.

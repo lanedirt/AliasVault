@@ -20,7 +20,7 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// <param name="clientPublicEphemeral">Client public ephemeral.</param>
         /// <param name="clientSessionProof">Client session proof.</param>
         /// <param name="code2Fa">2-factor authentication code.</param>
-        public ValidateLoginRequest2Fa(string username, bool rememberMe, string clientPublicEphemeral, string clientSessionProof, string code2Fa)
+        public ValidateLoginRequest2Fa(string username, bool rememberMe, string clientPublicEphemeral, string clientSessionProof, int code2Fa)
             : base(username, rememberMe, clientPublicEphemeral, clientSessionProof)
         {
             Code2Fa = code2Fa;
@@ -29,6 +29,6 @@ namespace AliasVault.Shared.Models.WebApi.Auth
         /// <summary>
         /// Gets the 2-factor authentication code.
         /// </summary>
-        public string Code2Fa { get; }
+        public int Code2Fa { get; }
     }
 }

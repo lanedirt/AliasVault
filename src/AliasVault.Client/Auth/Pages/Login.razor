@@ -21,10 +21,9 @@
     <div class="w-full">
         <EditForm Model="LoginModel2Fa" FormName="login-with-2fa" OnValidSubmit="Handle2Fa" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
-            <ValidationSummary class="text-red-600 dark:text-red-400" role="alert"/>
             <div>
                 <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Authenticator code</label>
-                <InputText @bind-Value="LoginModel2Fa.TwoFactorCode" id="two-factor-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
+                <InputNumber @bind-Value="LoginModel2Fa.TwoFactorCode" id="two-factor-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
                 <ValidationMessage For="() => LoginModel2Fa.TwoFactorCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
             </div>
             <div class="flex items-start">
@@ -58,7 +57,6 @@ else if (ShowLoginWithRecoveryCodeStep)
     <div class="w-full">
         <EditForm Model="LoginModelRecoveryCode" FormName="login-with-recovery-code" OnValidSubmit="HandleRecoveryCode" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
-            <ValidationSummary class="text-red-600 dark:text-red-400" role="alert"/>
             <div>
                 <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Recovery Code</label>
                 <InputText @bind-Value="LoginModelRecoveryCode.RecoveryCode" id="recovery-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
@@ -328,7 +326,7 @@ else
             var username = LoginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode ?? 0));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
