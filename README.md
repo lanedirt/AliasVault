@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>AliasVault</h1>
+<h1><img src="https://main.aliasvault.net/icon-trimmed.png" width="40" /> AliasVault</h1>
 
 <p align="center">
 <a href="https://main.aliasvault.net">Live demo 🚀</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🏠</a> • <a href="#installation">Installation 📦</a>
