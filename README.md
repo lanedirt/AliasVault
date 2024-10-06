@@ -2,6 +2,14 @@
 
 <h1>AliasVault</h1>
 
+<p align="center">
+<a href="https://main.aliasvault.net">Live demo 🚀</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🏠</a> • <a href="#installation">Installation 📦</a>
+</p>
+
+<h3 align="center">
+Open-source password and identity manager
+</h3>
+
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/OGameX/releases)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/docker-compose-build.yml?label=docker-compose%20build">](https://github.com/lanedirt/AliasVault/actions/workflows/docker-compose-build.yml)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
