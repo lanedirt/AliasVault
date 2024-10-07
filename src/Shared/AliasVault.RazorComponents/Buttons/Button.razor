@@ -52,17 +52,9 @@
     /// <returns>A string containing the CSS classes for the button.</returns>
     private string GetButtonClasses()
     {
-        var baseClasses = "flex center items-center px-3 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-4";
-        var colorClasses = Color switch
-        {
-            "primary" => "bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800",
-            "danger" => "bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800",
-            "success" => "bg-green-700 hover:bg-green-800 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800",
-            "secondary" => "bg-secondary-700 hover:bg-secondary-800 focus:ring-secondary-300 dark:bg-secondary-600 dark:hover:bg-secondary-700 dark:focus:ring-secondary-800",
-            _ => "bg-gray-700 hover:bg-gray-800 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-        };
-        var disabledClasses = IsDisabled ? "bg-gray-400 cursor-not-allowed" : "";
+        var colorClasses = ButtonStyles.GetColorClasses(Color);
+        var disabledClasses = IsDisabled ? ButtonStyles.DisabledClasses : "";
 
-        return $"{baseClasses} {colorClasses} {disabledClasses} {AdditionalClasses}".Trim();
+        return $"{ButtonStyles.BaseClasses} {colorClasses} {disabledClasses} {AdditionalClasses}".Trim();
     }
 }
