@@ -133,17 +133,20 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        foreach (var entity in modelBuilder.Model.GetEntityTypes())
-        {
-            foreach (var property in entity.GetProperties())
-            {
-                // NOTE: This is a workaround for SQLite. Add conditional check if SQLite is used.
-                // NOTE: SQL server doesn't need this override.
 
-                // SQLite does not support varchar(max) so we use TEXT.
-                if (property.ClrType == typeof(string) && property.GetMaxLength() == null)
+        // NOTE: This is a workaround for SQLite. Add conditional check if SQLite is used.
+        // NOTE: SQL server doesn't need this override.
+        if (Database.IsSqlite())
+        {
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entity.GetProperties())
                 {
-                    property.SetColumnType("TEXT");
+                    // SQLite does not support varchar(max) so we use TEXT.
+                    if (property.ClrType == typeof(string) && property.GetMaxLength() == null)
+                    {
+                        property.SetColumnType("TEXT");
+                    }
                 }
             }
         }
