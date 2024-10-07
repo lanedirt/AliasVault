@@ -747,6 +747,10 @@ video {
   margin-top: 2rem;
 }
 
+.ms-1 {
+  margin-inline-start: 0.25rem;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
