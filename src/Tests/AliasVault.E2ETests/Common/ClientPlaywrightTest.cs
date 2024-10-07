@@ -219,8 +219,8 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Page.ClickAsync("text=" + credentialName);
 
         // Wait for the credential details page to load.
-        await WaitForUrlAsync("credentials/**", "Edit credentials entry");
-        await Page.ClickAsync("text=Edit credentials entry");
+        await WaitForUrlAsync("credentials/**", "Edit");
+        await Page.ClickAsync("text=Edit");
 
         // Wait for the edit credential page to load.
         await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
