@@ -17,16 +17,14 @@
     <EmailModal Email="EmailModalEmail" IsSpamOk="false" OnClose="CloseEmailModal" OnEmailDeleted="RefreshData" />
 }
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Emails</h1>
-            <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
-        </div>
-        <p>Below you can find all recent emails sent to one of the email addresses used in your credentials.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Emails"
+    Description="You can view all emails received by your private email addresses below.">
+    <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
 
 @if (IsLoading)
 {
@@ -36,7 +34,7 @@ else if (NoEmailClaims)
 {
     <div class="p-4 mx-4 mt-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="px-4 py-2 text-gray-400 rounded">
-            <p class="text-gray-500 dark:text-gray-400">You are not using any private email addresses (yet). Create a new identity and use a private email address supported by AliasVault. All emails received by these private email addresses will show up here.</p>
+            <p class="text-gray-500 dark:text-gray-400">You are not using any private email addresses (yet). Create a new alias and use a private email address supported by AliasVault. All emails received by these private email addresses will show up here.</p>
         </div>
     </div>
 }

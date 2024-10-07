@@ -36,7 +36,7 @@ public class JwtTokenTests : ClientPlaywrightTest
         await WaitForUrlAsync("test/2", "Test 2 OK");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Test webapi call 2."), "No page content after refreshing access token.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 2"), "No page content after refreshing access token.");
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class JwtTokenTests : ClientPlaywrightTest
         await WaitForUrlAsync(startUrl, "Test 1 OK");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Test webapi call 1."), "No index content after unlocking database with a expired JWT token.");
+        Assert.That(pageContent, Does.Contain("Test webapi call 1"), "No index content after unlocking database with a expired JWT token.");
     }
 
     /// <summary>

@@ -253,8 +253,8 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Page.ClickAsync("text=" + credentialName);
 
         // Wait for the credential details page to load.
-        await WaitForUrlAsync("credentials/**", "Delete credentials entry");
-        await Page.ClickAsync("text=Delete credentials entry");
+        await WaitForUrlAsync("credentials/**", "Delete");
+        await Page.ClickAsync("text=Delete");
 
         // Wait for the delete credential page to load.
         await WaitForUrlAsync("credentials/**/delete", "You can delete a credentials entry below");

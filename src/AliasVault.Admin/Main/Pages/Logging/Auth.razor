@@ -1,22 +1,19 @@
 ﻿@page "/logging/auth"
+@using AliasVault.RazorComponents.Tables
 @using AliasVault.Shared.Models.Enums
 @inherits MainBase
 
 <LayoutPageTitle>Auth logs</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Auth logs</h1>
-            <div class="flex items-end space-x-2">
-                <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
-                <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
-            </div>
-        </div>
-        <p>This page gives an overview of recent auth attempts.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Auth logs"
+    Description="This page gives an overview of recent auth attempts.">
+    <CustomActions>
+        <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
 
 @if (IsLoading)
 {
@@ -43,6 +40,21 @@ else
                 </div>
             </div>
         </div>
+
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+            @foreach (var log in LogList)
+            {
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
+                    <td class="px-4 py-3">@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="px-4 py-3">@log.Username</td>
+                    <td class="px-4 py-3">@log.EventType</td>
+                    <td class="px-4 py-3"><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="Failed" /></td>
+                    <td class="px-4 py-3">@log.IpAddress</td>
+                </tr>
+            }
+        </SortableTable>
+
         <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -72,6 +84,15 @@ else
 }
 
 @code {
+    private readonly List<TableColumn> _tableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Time", PropertyName = "Timestamp" },
+        new TableColumn { Title = "Username", PropertyName = "Username" },
+        new TableColumn { Title = "Event", PropertyName = "EventType" },
+        new TableColumn { Title = "Success", PropertyName = "IsSuccess" },
+        new TableColumn { Title = "IP", PropertyName = "IpAddress" },
+    ];
+
     private List<AuthLog> LogList { get; set; } = [];
     private bool IsLoading { get; set; } = true;
     private int CurrentPage { get; set; } = 1;
@@ -104,6 +125,16 @@ else
                 _ = RefreshData();
             }
         }
+    }
+
+    private string SortColumn { get; set; } = "Id";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private async Task HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        await RefreshData();
     }
 
     /// <inheritdoc />
@@ -142,15 +173,59 @@ else
             }
         }
 
+        query = ApplySort(query);
+
         TotalRecords = await query.CountAsync();
         LogList = await query
-            .OrderByDescending(x => x.Timestamp)
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Apply sort to the query.
+    /// </summary>
+    private IQueryable<AuthLog> ApplySort(IQueryable<AuthLog> query)
+    {
+        // Apply sort.
+        switch (SortColumn)
+        {
+            case "Timestamp":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Timestamp)
+                    : query.OrderByDescending(x => x.Timestamp);
+                break;
+            case "Username":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Username)
+                    : query.OrderByDescending(x => x.Username);
+                break;
+            case "EventType":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.EventType)
+                    : query.OrderByDescending(x => x.EventType);
+                break;
+            case "IsSuccess":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.IsSuccess)
+                    : query.OrderByDescending(x => x.IsSuccess);
+                break;
+            case "IpAddress":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.IpAddress)
+                    : query.OrderByDescending(x => x.IpAddress);
+                break;
+            default:
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+        }
+
+        return query;
     }
 
     private async Task DeleteLogsWithConfirmation()

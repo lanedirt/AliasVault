@@ -1,24 +1,24 @@
 //-----------------------------------------------------------------------
-// <copyright file="BreadcrumbItem.cs" company="lanedirt">
+// <copyright file="SortDirection.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Admin.Main.Models;
+namespace AliasVault.RazorComponents.Tables;
 
 /// <summary>
-/// Breadcrumb item model.
+/// An enum that represents the direction of a sort.
 /// </summary>
-public class BreadcrumbItem
+public enum SortDirection
 {
     /// <summary>
-    /// Gets or sets the display name.
+    /// The sort is ascending.
     /// </summary>
-    public string? DisplayName { get; set; }
+    Ascending,
 
     /// <summary>
-    /// Gets or sets the URL.
+    /// The sort is descending.
     /// </summary>
-    public string? Url { get; set; }
+    Descending,
 }

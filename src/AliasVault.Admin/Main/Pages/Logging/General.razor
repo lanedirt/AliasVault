@@ -1,21 +1,18 @@
 ﻿@page "/logging/general"
+@using AliasVault.RazorComponents.Tables
 @inherits MainBase
 
 <LayoutPageTitle>System logs</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">General logs</h1>
-            <div class="flex items-end space-x-2">
-                <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
-                <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
-            </div>
-        </div>
-        <p>This page gives an overview of recent system logs.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="General logs"
+    Description="This page gives an overview of recent system logs.">
+    <CustomActions>
+        <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
 
 @if (IsLoading)
 {
@@ -36,60 +33,57 @@ else
                         <option value="">All Services</option>
                         @foreach (var service in ServiceNames)
                         {
-                        <option value="@service">@service</option>
+                            <option value="@service">@service</option>
                         }
                     </select>
                 </div>
             </div>
         </div>
-        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-                <th scope="col" class="px-4 py-3">ID</th>
-                <th scope="col" class="px-4 py-3">Time</th>
-                <th scope="col" class="px-4 py-3">Application</th>
-                <th scope="col" class="px-4 py-3">Level</th>
-                <th scope="col" class="px-4 py-3">Message</th>
-            </tr>
-            </thead>
-            <tbody>
-                @foreach (var log in LogList)
-                {
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
-                        <td class="px-4 py-3">@log.TimeStamp.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="px-4 py-3">@log.Application</td>
 
-                        @{
-                            string bgColor = log.Level switch
-                            {
-                                "Information" => "bg-blue-500",
-                                "Error" => "bg-red-500",
-                                "Warning" => "bg-yellow-500",
-                                "Debug" => "bg-green-500",
-                                _ => "bg-gray-500"
-                            };
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+            @foreach (var log in LogList)
+            {
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
+                    <td class="px-4 py-3">@log.TimeStamp.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="px-4 py-3">@log.Application</td>
+                    @{
+                        string bgColor = log.Level switch
+                        {
+                            "Information" => "bg-blue-500",
+                            "Error" => "bg-red-500",
+                            "Warning" => "bg-yellow-500",
+                            "Debug" => "bg-green-500",
+                            _ => "bg-gray-500"
+                        };
+                    }
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded-full text-white @bgColor">
+                            @log.Level
+                        </span>
+                    </td>
+                    <td class="px-4 py-3" title="@log.Exception">
+                        @if (log.SourceContext.Length > 0)
+                        {
+                            <span>@log.SourceContext: </span>
                         }
-                        <td class="px-4 py-3">
-                            <span class="px-2 py-1 rounded-full text-white @bgColor">
-                                @log.Level
-                            </span>
-                        </td>
-                        <td class="px-4 py-3" title="@log.Exception">
-                            @if (log.SourceContext.Length > 0)
-                            {
-                                <span>@log.SourceContext: </span>
-                            }
-                            @log.Message
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        @log.Message
+                    </td>
+                </tr>
+            }
+        </SortableTable>
     </div>
 }
 
 @code {
+    private readonly List<TableColumn> _tableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Time", PropertyName = "Timestamp" },
+        new TableColumn { Title = "Application", PropertyName = "Application" },
+        new TableColumn { Title = "Level", PropertyName = "Level" },
+        new TableColumn { Title = "Message", PropertyName = "Message" },
+    ];
+
     private List<Log> LogList { get; set; } = [];
     private bool IsLoading { get; set; } = true;
     private int CurrentPage { get; set; } = 1;
@@ -126,6 +120,16 @@ else
 
     private List<string> ServiceNames { get; set; } = [];
 
+    private string SortColumn { get; set; } = "Id";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private async Task HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        await RefreshData();
+    }
+
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -135,7 +139,6 @@ else
             await RefreshData();
         }
     }
-
 
     private void HandlePageChanged(int newPage)
     {
@@ -162,9 +165,38 @@ else
             query = query.Where(x => x.Application == SelectedServiceName);
         }
 
+        // Apply sort.
+        switch (SortColumn)
+        {
+            case "Application":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Application)
+                    : query.OrderByDescending(x => x.Application);
+                break;
+            case "Message":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Message)
+                    : query.OrderByDescending(x => x.Message);
+                break;
+            case "Level":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Level)
+                    : query.OrderByDescending(x => x.Level);
+                break;
+            case "Timestamp":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.TimeStamp)
+                    : query.OrderByDescending(x => x.TimeStamp);
+                break;
+            default:
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+        }
+
         TotalRecords = await query.CountAsync();
         LogList = await query
-            .OrderByDescending(x => x.Id)
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();

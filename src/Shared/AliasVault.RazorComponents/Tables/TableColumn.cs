@@ -1,0 +1,29 @@
+//-----------------------------------------------------------------------
+// <copyright file="TableColumn.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.RazorComponents.Tables;
+
+/// <summary>
+/// A class that represents a column in a table.
+/// </summary>
+public class TableColumn
+{
+    /// <summary>
+    /// Gets or sets the title of the column.
+    /// </summary>
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the property to bind to.
+    /// </summary>
+    public required string PropertyName { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the column is sortable.
+    /// </summary>
+    public bool Sortable { get; set; } = true;
+}

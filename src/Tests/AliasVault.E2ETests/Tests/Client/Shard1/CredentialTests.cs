@@ -100,7 +100,7 @@ public class CredentialTests : ClientPlaywrightTest
         Assert.That(pageContent, Does.Contain(serviceNameBefore), "Created credential service name does not appear on login page.");
 
         // Click the edit button.
-        var editButton = Page.Locator("text=Edit credentials entry").First;
+        var editButton = Page.Locator("text=Edit").First;
         await editButton.ClickAsync();
         await WaitForUrlAsync("edit", "Save Credentials");
 
@@ -113,7 +113,7 @@ public class CredentialTests : ClientPlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Delete credentials entry");
+        await WaitForUrlAsync("credentials/**", "Delete");
 
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");

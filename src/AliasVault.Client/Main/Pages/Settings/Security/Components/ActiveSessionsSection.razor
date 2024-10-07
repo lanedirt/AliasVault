@@ -36,8 +36,7 @@
                             <td class="px-6 py-4">@session.CreatedAt.ToLocalTime().ToString("g")</td>
                             <td class="px-6 py-4">@session.ExpireDate.ToLocalTime().ToString("g")</td>
                             <td class="px-6 py-4">
-                                <button @onclick="() => RevokeSession(session.Id)"
-                                        class="font-medium text-red-600 dark:text-red-500 hover:underline">Revoke (log out)</button>
+                                <Button Color="danger" OnClick="() => RevokeSession(session.Id)">Revoke</Button>
                             </td>
                         </tr>
                     }

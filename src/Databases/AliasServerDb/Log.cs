@@ -54,7 +54,7 @@ public class Log
     /// <summary>
     /// Gets or sets the timestamp of the log entry.
     /// </summary>
-    public DateTimeOffset TimeStamp { get; set; }
+    public DateTime TimeStamp { get; set; }
 
     /// <summary>
     /// Gets or sets the exception associated with the log entry.

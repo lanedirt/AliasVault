@@ -5,28 +5,20 @@
 
 <LayoutPageTitle>Vault settings</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Vault settings</h1>
-        </div>
-        <p>On this page you can configure your vault settings.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Vault settings"
+    Description="On this page you can configure your vault settings.">
+</PageHeader>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
     <div class="mb-4">
         <div>
-            <button @onclick="ExportVaultSqlite" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
-                Export vault to unencrypted SQLite file
-            </button>
+            <Button OnClick="ExportVaultSqlite">Export vault to unencrypted SQLite file</Button>
         </div>
         <div class="mt-6">
-            <button @onclick="ExportVaultCsv" type="button" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">
-                Export vault to unencrypted CSV file
-            </button>
+            <Button OnClick="ExportVaultCsv">Export vault to unencrypted CSV file</Button>
         </div>
     </div>
 </div>
@@ -70,13 +62,13 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
     {
         try
         {
-            // Decode the base64 string to a byte array
+            // Decode the base64 string to a byte array.
             byte[] fileBytes = Convert.FromBase64String(await DbService.ExportSqliteToBase64Async());
 
-            // Create a memory stream from the byte array
+            // Create a memory stream from the byte array.
             using (MemoryStream memoryStream = new MemoryStream(fileBytes))
             {
-                // Invoke JavaScript to initiate the download
+                // Invoke JavaScript to initiate the download.
                 await JsInteropService.DownloadFileFromStream("aliasvault-client.sqlite", memoryStream.ToArray());
             }
         }
@@ -94,10 +86,10 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
 
             var csvBytes = CsvImportExport.CredentialCsvService.ExportCredentialsToCsv(credentials);
 
-            // Create a memory stream from the byte array
+            // Create a memory stream from the byte array.
             using (MemoryStream memoryStream = new MemoryStream(csvBytes))
             {
-                // Invoke JavaScript to initiate the download
+                // Invoke JavaScript to initiate the download.
                 await JsInteropService.DownloadFileFromStream("aliasvault-client.csv", memoryStream.ToArray());
             }
         }
@@ -127,7 +119,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             var fileContent = System.Text.Encoding.UTF8.GetString(buffer);
             var importedCredentials = CsvImportExport.CredentialCsvService.ImportCredentialsFromCsv(fileContent);
 
-            // Loop through the imported credentials and actually add them to the database
+            // Loop through the imported credentials and actually add them to the database.
             foreach (var importedCredential in importedCredentials)
             {
                 await CredentialService.InsertEntryAsync(importedCredential, false);

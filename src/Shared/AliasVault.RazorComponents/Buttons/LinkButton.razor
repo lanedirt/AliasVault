@@ -1,0 +1,46 @@
+<a href="@Href" class="space-x-3 @GetButtonClasses()">
+    @Text @if (AdditionalText.Length > 0) { <span class="hidden md:inline ms-1">@AdditionalText</span> }
+</a>
+
+@code {
+    /// <summary>
+    /// Gets or sets the URL that the hyperlink points to.
+    /// </summary>
+    [Parameter]
+    public string Href { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the main text of the button.
+    /// </summary>
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the additional text that appears on larger screens.
+    /// </summary>
+    [Parameter]
+    public string AdditionalText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the color theme of the button.
+    /// </summary>
+    [Parameter]
+    public string Color { get; set; } = "primary";
+
+    /// <summary>
+    /// Gets or sets additional CSS classes to apply to the button.
+    /// </summary>
+    [Parameter]
+    public string AdditionalClasses { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the CSS classes for the link button based on the color and additional classes.
+    /// </summary>
+    /// <returns>A string containing the CSS classes for the link button.</returns>
+    private string GetButtonClasses()
+    {
+        var colorClasses = ButtonStyles.GetColorClasses(Color);
+
+        return $"{ButtonStyles.BaseClasses} {colorClasses} {AdditionalClasses}".Trim();
+    }
+}

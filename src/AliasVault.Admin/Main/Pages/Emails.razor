@@ -1,18 +1,17 @@
 ﻿@page "/emails"
+@using AliasVault.RazorComponents.Tables
 @inherits MainBase
 
 <LayoutPageTitle>Emails</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Emails</h1>
-            <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
-        </div>
-        <p>This page gives an overview of recently received mails by this AliasVault server.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Emails"
+    Description="This page gives an overview of recently received mails by this AliasVault server. Note that all email fields except 'To' are encrypted with the public key of the user and cannot be decrypted by the server.">
+    <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
 
 @if (IsLoading)
 {
@@ -23,58 +22,65 @@ else
     <div class="overflow-x-auto px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
-        <table class="w-full text-sm text-left text-gray-500 shadow rounded border mt-8">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-4 py-3">ID</th>
-                    <th scope="col" class="px-4 py-3">Time</th>
-                    <th scope="col" class="px-4 py-3">From</th>
-                    <th scope="col" class="px-4 py-3">To</th>
-                    <th scope="col" class="px-4 py-3">Subject</th>
-                    <th scope="col" class="px-4 py-3">Preview</th>
-                    <th scope="col" class="px-4 py-3">Attachments</th>
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+            @foreach (var email in EmailList)
+            {
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">
+                        @email.Id
+                    </td>
+                    <td class="px-4 py-3">
+                        @email.DateSystem.ToString("yyyy-MM-dd HH:mm")
+                    </td>
+                    <td class="px-4 py-3">
+                        @(email.FromLocal.Length > 15 ? email.FromLocal.Substring(0, 15) : email.FromLocal)@@@(email.FromDomain.Length > 15 ? email.FromDomain.Substring(0, 15) : email.FromDomain)
+                    </td>
+                    <td class="px-4 py-3">
+                        @email.ToLocal@@@email.ToDomain
+                    </td>
+                    <td class="px-4 py-3">
+                        @(email.Subject.Length > 30 ? email.Subject.Substring(0, 30) : email.Subject)
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="line-clamp-1">
+                            @(email.MessagePreview?.Length > 30 ? email.MessagePreview.Substring(0, 30) : email.MessagePreview)
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        @email.Attachments.Count
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var email in EmailList)
-                {
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">
-                            @email.Id
-                        </td>
-                        <td class="px-4 py-3">
-                            @email.DateSystem.ToString("yyyy-MM-dd HH:mm")
-                        </td>
-                        <td class="px-4 py-3">
-                            @(email.FromLocal.Length > 15 ? email.FromLocal.Substring(0, 15) : email.FromLocal)@@@(email.FromDomain.Length > 15 ? email.FromDomain.Substring(0, 15) : email.FromDomain)
-                        </td>
-                        <td class="px-4 py-3">
-                           @email.ToLocal@@@email.ToDomain
-                        </td>
-                        <td class="px-4 py-3">
-                            @(email.Subject.Length > 30 ? email.Subject.Substring(0, 30) : email.Subject)
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="line-clamp-1">
-                                @(email.MessagePreview?.Length > 30 ? email.MessagePreview.Substring(0, 30) : email.MessagePreview)
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            @email.Attachments.Count
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+            }
+        </SortableTable>
     </div>
 }
 
 @code {
+    private readonly List<TableColumn> _tableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Time", PropertyName = "DateSystem" },
+        new TableColumn { Title = "From", PropertyName = "From" },
+        new TableColumn { Title = "To", PropertyName = "To" },
+        new TableColumn { Title = "Subject", PropertyName = "Subject" },
+        new TableColumn { Title = "Preview", PropertyName = "MessagePreview" },
+        new TableColumn { Title = "Attachments", PropertyName = "Attachments" },
+    ];
+
     private List<Email> EmailList { get; set; } = [];
     private bool IsLoading { get; set; } = true;
     private int CurrentPage { get; set; } = 1;
     private int PageSize { get; set; } = 50;
     private int TotalRecords { get; set; }
+
+    private string SortColumn { get; set; } = "Id";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private async Task HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        await RefreshData();
+    }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -96,9 +102,53 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        TotalRecords = await DbContext.Emails.CountAsync();
-        EmailList = await DbContext.Emails
-            .OrderByDescending(x => x.DateSystem)
+        IQueryable<Email> query = DbContext.Emails;
+
+        // Apply sort
+        switch (SortColumn)
+        {
+            case "Id":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+            case "DateSystem":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.DateSystem)
+                    : query.OrderByDescending(x => x.DateSystem);
+                break;
+            case "From":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.FromLocal + "@" + x.FromDomain)
+                    : query.OrderByDescending(x => x.FromLocal + "@" + x.FromDomain);
+                break;
+            case "To":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.ToLocal + "@" + x.ToDomain)
+                    : query.OrderByDescending(x => x.ToLocal + "@" + x.ToDomain);
+                break;
+            case "Subject":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Subject)
+                    : query.OrderByDescending(x => x.Subject);
+                break;
+            case "MessagePreview":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.MessagePreview)
+                    : query.OrderByDescending(x => x.MessagePreview);
+                break;
+            case "Attachments":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Attachments.Count)
+                    : query.OrderByDescending(x => x.Attachments.Count);
+                break;
+            default:
+                query = query.OrderByDescending(x => x.DateSystem);
+                break;
+        }
+
+        TotalRecords = await query.CountAsync();
+        EmailList = await query
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
