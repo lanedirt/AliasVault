@@ -41,7 +41,7 @@ else
             </div>
         </div>
 
-        <SortableTable TItem="Log" Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var log in LogList)
             {
                 <tr class="bg-white border-b hover:bg-gray-50">
@@ -173,6 +173,23 @@ else
             }
         }
 
+        query = ApplySort(query);
+
+        TotalRecords = await query.CountAsync();
+        LogList = await query
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToListAsync();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Apply sort to the query.
+    /// </summary>
+    private IQueryable<AuthLog> ApplySort(IQueryable<AuthLog> query)
+    {
         // Apply sort.
         switch (SortColumn)
         {
@@ -208,14 +225,7 @@ else
                 break;
         }
 
-        TotalRecords = await query.CountAsync();
-        LogList = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToListAsync();
-
-        IsLoading = false;
-        StateHasChanged();
+        return query;
     }
 
     private async Task DeleteLogsWithConfirmation()

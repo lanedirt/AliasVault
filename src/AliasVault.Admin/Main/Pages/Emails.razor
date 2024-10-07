@@ -22,7 +22,7 @@ else
     <div class="overflow-x-auto px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
-        <SortableTable TItem="Log" Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var email in EmailList)
             {
                 <tr class="bg-white border-b hover:bg-gray-50">

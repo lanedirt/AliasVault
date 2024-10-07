@@ -26,7 +26,7 @@ else
             <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search users..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <SortableTable TItem="Log" Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var user in UserList)
             {
                 <tr class="bg-white border-b hover:bg-gray-50">
@@ -117,57 +117,9 @@ else
         }
 
         // Apply sort.
-        switch (SortColumn)
-        {
-            case "Id":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Id)
-                    : query.OrderByDescending(x => x.Id);
-                break;
-            case "CreatedAt":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.CreatedAt)
-                    : query.OrderByDescending(x => x.CreatedAt);
-                break;
-            case "UserName":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.UserName)
-                    : query.OrderByDescending(x => x.UserName);
-                break;
-            case "VaultCount":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Vaults.Count())
-                    : query.OrderByDescending(x => x.Vaults.Count());
-                break;
-            case "EmailClaimCount":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.EmailClaims.Count())
-                    : query.OrderByDescending(x => x.EmailClaims.Count());
-                break;
-            case "VaultStorageInKb":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Vaults.Sum(v => v.FileSize))
-                    : query.OrderByDescending(x => x.Vaults.Sum(v => v.FileSize));
-                break;
-            case "TwoFactorEnabled":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.TwoFactorEnabled)
-                    : query.OrderByDescending(x => x.TwoFactorEnabled);
-                break;
-            case "LastVaultUpdate":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Vaults.Max(v => v.CreatedAt))
-                    : query.OrderByDescending(x => x.Vaults.Max(v => v.CreatedAt));
-                break;
-            default:
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Id)
-                    : query.OrderByDescending(x => x.Id);
-                break;
-        }
+        query = ApplySort(query);
 
         TotalRecords = await query.CountAsync();
-
         var users = await query
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
@@ -204,4 +156,63 @@ else
         IsLoading = false;
         StateHasChanged();
     }
+
+    /// <summary>
+    /// Apply sort to the query.
+    /// </summary>
+    private IQueryable<AliasVaultUser> ApplySort(IQueryable<AliasVaultUser> query)
+    {
+        // Apply sort.
+        switch (SortColumn)
+        {
+            case "Id":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+            case "CreatedAt":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.CreatedAt)
+                    : query.OrderByDescending(x => x.CreatedAt);
+                break;
+            case "UserName":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.UserName)
+                    : query.OrderByDescending(x => x.UserName);
+                break;
+            case "VaultCount":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Vaults.Count)
+                    : query.OrderByDescending(x => x.Vaults.Count);
+                break;
+            case "EmailClaimCount":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.EmailClaims.Count)
+                    : query.OrderByDescending(x => x.EmailClaims.Count);
+                break;
+            case "VaultStorageInKb":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Vaults.Sum(v => v.FileSize))
+                    : query.OrderByDescending(x => x.Vaults.Sum(v => v.FileSize));
+                break;
+            case "TwoFactorEnabled":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.TwoFactorEnabled)
+                    : query.OrderByDescending(x => x.TwoFactorEnabled);
+                break;
+            case "LastVaultUpdate":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Vaults.Max(v => v.CreatedAt))
+                    : query.OrderByDescending(x => x.Vaults.Max(v => v.CreatedAt));
+                break;
+            default:
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+        }
+
+        return query;
+    }
+
 }

@@ -40,7 +40,7 @@ else
             </div>
         </div>
 
-        <SortableTable TItem="Log" Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var log in LogList)
             {
                 <tr class="bg-white border-b hover:bg-gray-50">
