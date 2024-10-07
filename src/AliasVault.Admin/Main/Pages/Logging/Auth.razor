@@ -4,19 +4,15 @@
 
 <LayoutPageTitle>Auth logs</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <H1>Auth logs</H1>
-            <div class="flex items-end space-x-2">
-                <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
-                <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
-            </div>
-        </div>
-        <p>This page gives an overview of recent auth attempts.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Auth logs"
+    Description="This page gives an overview of recent auth attempts.">
+    <CustomActions>
+        <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
 
 @if (IsLoading)
 {

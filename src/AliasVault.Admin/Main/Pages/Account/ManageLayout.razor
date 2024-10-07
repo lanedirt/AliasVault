@@ -2,14 +2,11 @@
 @using AliasVault.Admin.Main.Layout
 @layout MainLayout
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <div class="flex items-center justify-between">
-            <H1>Manage account</H1>
-        </div>
-        <p>Manage your profile here.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Manage account"
+    Description="Manage your profile here.">
+</PageHeader>
 
 <div class="container mx-auto px-4 py-8">
     <hr class="mb-6 border-t border-gray-300"/>
@@ -22,3 +19,19 @@
         </div>
     </div>
 </div>
+
+@code {
+    /// <summary>
+    /// Gets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
+    /// </summary>
+    private List<BreadcrumbItem> BreadcrumbItems { get; } = new();
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Add base breadcrumbs.
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = "/" });
+    }
+}

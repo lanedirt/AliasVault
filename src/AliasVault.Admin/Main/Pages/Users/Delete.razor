@@ -3,15 +3,11 @@
 
 <LayoutPageTitle>Delete user</LayoutPageTitle>
 
-<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
-    <div class="mb-4 col-span-full xl:mb-2">
-        <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
-            <H1>Delete user</H1>
-        </div>
-        <p>You can delete the user below.</p>
-    </div>
-</div>
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Delete user"
+    Description="You can delete the user below.">
+</PageHeader>
 
 @if (IsLoading)
 {
