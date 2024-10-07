@@ -101,12 +101,10 @@
                     loadingScreen.style.display = 'none';
                     appElement.style.removeProperty('visibility');
                     clearInterval(intervalId);
-                } else {
-                    if (elapsedTime % 1000 < checkInterval) {
-                        if (!('WebAssembly' in window)) {
-                            showError("AliasVault requires WebAssembly, which this browser does not support. Please use a modern browser that supports WebAssembly.");
-                            clearInterval(intervalId);
-                        }
+                } else if (elapsedTime % 1000 < checkInterval) {
+                    if (!('WebAssembly' in window)) {
+                        showError("AliasVault requires WebAssembly, which this browser does not support. Please use a modern browser that supports WebAssembly.");
+                        clearInterval(intervalId);
                     }
                 }
             };
