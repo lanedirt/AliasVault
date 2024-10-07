@@ -9,6 +9,7 @@ namespace AliasVault.Client.Main.Pages;
 
 using AliasVault.Client.Services;
 using AliasVault.Client.Services.Auth;
+using AliasVault.RazorComponents.Models;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

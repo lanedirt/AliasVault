@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Main.Models;
+namespace AliasVault.RazorComponents.Models;
 
 /// <summary>
 /// Represents a breadcrumb item for the breadcrumb component.
