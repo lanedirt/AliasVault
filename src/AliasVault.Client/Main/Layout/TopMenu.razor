@@ -5,7 +5,7 @@
     <nav class="fixed z-30 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4">
         <div class="flex justify-between items-center max-w-screen-2xl mx-auto">
             <div class="flex justify-start items-center">
-                <a href="/" class="flex md:mr-10">
+                <a href="/" class="flex mr-0 sm:mr-4 lg:mr-8">
                     <img src="/icon-trimmed.png" class="mr-3 h-8" alt="AliasVault Logo">
                     <span class="self-center hidden sm:flex text-2xl font-semibold whitespace-nowrap dark:text-white">AliasVault</span>
                 </a>
@@ -23,7 +23,7 @@
             </div>
 
             <!-- New search box -->
-            <div class="flex-grow mx-4">
+            <div class="flex-grow mr-4 ms-0 lg:ms-4">
                 <SearchWidget />
             </div>
 
@@ -31,7 +31,7 @@
                 <CreateNewIdentityWidget />
                 <DbLockButton />
                 <DbStatusIndicator />
-               <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center ms-1 p-2 text-gray-500 rounded-lg md:ml-2 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
+               <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
                     <span class="sr-only">Open menu</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
