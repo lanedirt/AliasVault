@@ -46,18 +46,12 @@
     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
         @if (!hasAuthenticator)
         {
-            <a href="account/manage/enable-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                Add authenticator app
-            </a>
+            <LinkButton Href="account/manage/enable-authenticator" Color="primary" Text="Add authenticator app" />
         }
         else
         {
-            <a href="account/manage/enable-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                Set up authenticator app
-            </a>
-            <a href="account/manage/reset-authenticator" class="inline-block px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm text-center focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                Reset authenticator app
-            </a>
+            <LinkButton Href="account/manage/enable-authenticator" Color="primary" Text="Add authenticator app" />
+            <LinkButton Href="account/manage/reset-authenticator" Color="primary" Text="Reset authenticator app" />
         }
     </div>
 </div>

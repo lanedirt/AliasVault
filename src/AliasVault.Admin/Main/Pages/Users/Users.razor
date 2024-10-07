@@ -51,7 +51,7 @@ else
                         <td class="px-4 py-3"><StatusPill Enabled="user.TwoFactorEnabled" /></td>
                         <td class="px-4 py-3">@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</td>
                         <td class="px-4 py-3">
-                            <a href="users/@user.Id" class="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-blue-300 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-800">View</a>
+                            <LinkButton Color="primary" Href="@($"users/{user.Id}")" Text="View" />
                         </td>
                     </tr>
                 }

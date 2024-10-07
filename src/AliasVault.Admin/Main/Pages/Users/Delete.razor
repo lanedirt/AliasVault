@@ -26,13 +26,10 @@ else
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
             <div>@Obj?.UserName</div>
         </div>
-        <button @onclick="DeleteConfirm" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-900">
-            Yes, I'm sure
-        </button>
-
-        <button @onclick="Cancel" class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 border border-gray-200 font-medium inline-flex items-center rounded-lg text-sm px-3 py-2.5 text-center dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700" data-drawer-hide="drawer-delete-product-default">
-            No, cancel
-        </button>
+        <div class="flex space-x-3">
+            <Button Color="danger" OnClick="DeleteConfirm">Yes, I'm sure</Button>
+            <Button Color="secondary" OnClick="Cancel">No, cancel</Button>
+        </div>
     </div>
 }
 

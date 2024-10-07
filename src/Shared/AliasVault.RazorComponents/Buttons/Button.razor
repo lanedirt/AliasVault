@@ -1,4 +1,5 @@
-<button @onclick="HandleClick"
+<button type="@Type"
+        @onclick="HandleClick"
         disabled="@IsDisabled"
         class="@GetButtonClasses()">
     @ChildContent
@@ -24,6 +25,12 @@
     public bool IsDisabled { get; set; }
 
     /// <summary>
+    /// Specifies the type of the button. Default is "button".
+    /// </summary>
+    [Parameter]
+    public string Type { get; set; } = "button";
+
+    /// <summary>
     /// The color theme of the button.
     /// </summary>
     [Parameter]
@@ -34,6 +41,12 @@
     /// </summary>
     [Parameter]
     public string AdditionalClasses { get; set; } = "";
+
+    /// <summary>
+    /// The display class of the button. Defaults to inline.
+    /// </summary>
+    [Parameter]
+    public string Display { get; set; } = "inline";
 
     /// <summary>
     /// Handles the button click event.
@@ -55,6 +68,6 @@
         var colorClasses = ButtonStyles.GetColorClasses(Color);
         var disabledClasses = IsDisabled ? ButtonStyles.DisabledClasses : "";
 
-        return $"{ButtonStyles.BaseClasses} {colorClasses} {disabledClasses} {AdditionalClasses}".Trim();
+        return $"{Display} {ButtonStyles.BaseClasses} {colorClasses} {disabledClasses} {AdditionalClasses}".Trim();
     }
 }
