@@ -4,7 +4,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #eee;
     opacity: 0.9;
 }
 
@@ -22,7 +21,6 @@
 
 .spinner>div {
     z-index: 999;
-    background-color: black;
     height: 100%;
     width: 6px;
     display: inline-block;
