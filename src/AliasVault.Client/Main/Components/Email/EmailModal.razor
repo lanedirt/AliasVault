@@ -9,7 +9,7 @@
     <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
         <div id="emailModal" class="relative p-8 bg-white w-3/4 flex-col flex rounded-lg shadow-xl">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 class="text-2xl font-bold text-gray-900">
                     @if (IsSpamOk)
                     {
                         <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a>

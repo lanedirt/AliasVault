@@ -11,9 +11,9 @@
 @if (IsPopupVisible)
 {
     <ClickOutsideHandler OnClose="ClosePopup" ContentId="quickIdentityPopup,quickIdentityButton">
-        <div id="quickIdentityPopup" class="absolute z-50 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-300"
+        <div id="quickIdentityPopup" class="absolute z-50 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-300 dark:bg-gray-800 dark:border-gray-400"
              style="@PopupStyle">
-            <h3 class="text-lg font-semibold mb-4">Create New Alias</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Create New Alias</h3>
             <EditForm Model="Model" OnValidSubmit="CreateIdentity">
                 <DataAnnotationsValidator />
                 <div class="mb-4">
