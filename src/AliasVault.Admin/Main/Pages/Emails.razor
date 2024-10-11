@@ -25,31 +25,19 @@ else
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var email in EmailList)
             {
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">
-                        @email.Id
-                    </td>
-                    <td class="px-4 py-3">
-                        @email.DateSystem.ToString("yyyy-MM-dd HH:mm")
-                    </td>
-                    <td class="px-4 py-3">
-                        @(email.FromLocal.Length > 15 ? email.FromLocal.Substring(0, 15) : email.FromLocal)@@@(email.FromDomain.Length > 15 ? email.FromDomain.Substring(0, 15) : email.FromDomain)
-                    </td>
-                    <td class="px-4 py-3">
-                        @email.ToLocal@@@email.ToDomain
-                    </td>
-                    <td class="px-4 py-3">
-                        @(email.Subject.Length > 30 ? email.Subject.Substring(0, 30) : email.Subject)
-                    </td>
-                    <td class="px-4 py-3">
+                <SortableTableRow>
+                    <SortableTableColumn IsPrimary="true">@email.Id</SortableTableColumn>
+                    <SortableTableColumn>@email.DateSystem.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>@(email.FromLocal.Length > 15 ? email.FromLocal.Substring(0, 15) : email.FromLocal)@@@(email.FromDomain.Length > 15 ? email.FromDomain.Substring(0, 15) : email.FromDomain)</SortableTableColumn>
+                    <SortableTableColumn>@email.ToLocal@@@email.ToDomain</SortableTableColumn>
+                    <SortableTableColumn>@(email.Subject.Length > 30 ? email.Subject.Substring(0, 30) : email.Subject)</SortableTableColumn>
+                    <SortableTableColumn>
                         <span class="line-clamp-1">
                             @(email.MessagePreview?.Length > 30 ? email.MessagePreview.Substring(0, 30) : email.MessagePreview)
                         </span>
-                    </td>
-                    <td class="px-4 py-3">
-                        @email.Attachments.Count
-                    </td>
-                </tr>
+                    </SortableTableColumn>
+                    <SortableTableColumn>@email.Attachments.Count</SortableTableColumn>
+                </SortableTableRow>
             }
         </SortableTable>
     </div>

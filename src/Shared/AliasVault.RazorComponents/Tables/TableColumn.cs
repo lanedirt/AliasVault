@@ -20,7 +20,7 @@ public class TableColumn
     /// <summary>
     /// Gets or sets the name of the property to bind to.
     /// </summary>
-    public required string PropertyName { get; set; }
+    public string? PropertyName { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the column is sortable.

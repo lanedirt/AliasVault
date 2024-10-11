@@ -26,10 +26,10 @@ else
         <div class="mb-4 flex space-x-4">
             <div class="flex w-full">
                 <div class="w-2/3 pr-2">
-                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                 </div>
                 <div class="w-1/3 pl-2">
-                    <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">All Services</option>
                         @foreach (var service in ServiceNames)
                         {
@@ -43,33 +43,33 @@ else
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var log in LogList)
             {
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
-                    <td class="px-4 py-3">@log.TimeStamp.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-3">@log.Application</td>
-                    @{
-                        string bgColor = log.Level switch
-                        {
-                            "Information" => "bg-blue-500",
-                            "Error" => "bg-red-500",
-                            "Warning" => "bg-yellow-500",
-                            "Debug" => "bg-green-500",
-                            _ => "bg-gray-500"
-                        };
-                    }
-                    <td class="px-4 py-3">
+                <SortableTableRow>
+                    <SortableTableColumn IsPrimary="true">@log.Id</SortableTableColumn>
+                    <SortableTableColumn>@log.TimeStamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>@log.Application</SortableTableColumn>
+                    <SortableTableColumn>
+                        @{
+                            string bgColor = log.Level switch
+                            {
+                                "Information" => "bg-blue-500",
+                                "Error" => "bg-red-500",
+                                "Warning" => "bg-yellow-500",
+                                "Debug" => "bg-green-500",
+                                _ => "bg-gray-500"
+                            };
+                        }
                         <span class="px-2 py-1 rounded-full text-white @bgColor">
                             @log.Level
                         </span>
-                    </td>
-                    <td class="px-4 py-3" title="@log.Exception">
+                    </SortableTableColumn>
+                    <SortableTableColumn Title="@log.Exception">
                         @if (log.SourceContext.Length > 0)
                         {
                             <span>@log.SourceContext: </span>
                         }
                         @log.Message
-                    </td>
-                </tr>
+                    </SortableTableColumn>
+                </SortableTableRow>
             }
         </SortableTable>
     </div>
