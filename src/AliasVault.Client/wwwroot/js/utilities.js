@@ -60,16 +60,11 @@ window.blurElement = (elementId) => {
 };
 
 function initializeDarkMode() {
-    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
     if (localStorage.getItem('color-theme') === 'dark' ||
         (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
-        themeToggleDarkIcon?.classList.remove('hidden');
     } else {
         document.documentElement.classList.remove('dark');
-        themeToggleLightIcon?.classList.remove('hidden');
     }
 }
 
@@ -80,6 +75,13 @@ function initDarkModeSwitcher() {
 
     if (!themeToggleBtn || !themeToggleDarkIcon || !themeToggleLightIcon) {
         return;
+    }
+
+    if (localStorage.getItem('color-theme') === 'dark' ||
+        (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleDarkIcon?.classList.remove('hidden');
+    } else {
+        themeToggleLightIcon?.classList.remove('hidden');
     }
 
     let event = new Event('dark-mode');
