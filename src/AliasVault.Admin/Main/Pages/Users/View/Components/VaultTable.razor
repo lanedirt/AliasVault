@@ -38,7 +38,7 @@
     /// Gets or sets the list of vaults to display.
     /// </summary>
     [Parameter]
-    public List<Vault> VaultList { get; set; } = new();
+    public List<Vault> VaultList { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the event callback to make a vault current.
@@ -74,27 +74,20 @@
         StateHasChanged();
     }
 
-    private IEnumerable<Vault> SortList(List<Vault> vaults, string sortColumn, SortDirection sortDirection)
+    private static IEnumerable<Vault> SortList(List<Vault> vaults, string sortColumn, SortDirection sortDirection)
     {
         return sortColumn switch
         {
-            "Id" => SortProperty(vaults, v => v.Id, sortDirection),
-            "CreatedAt" => SortProperty(vaults, v => v.CreatedAt, sortDirection),
-            "UpdatedAt" => SortProperty(vaults, v => v.UpdatedAt, sortDirection),
-            "FileSize" => SortProperty(vaults, v => v.FileSize, sortDirection),
-            "Version" => SortProperty(vaults, v => v.Version, sortDirection),
-            "RevisionNumber" => SortProperty(vaults, v => v.RevisionNumber, sortDirection),
-            "CredentialsCount" => SortProperty(vaults, v => v.CredentialsCount, sortDirection),
-            "EmailClaimsCount" => SortProperty(vaults, v => v.EmailClaimsCount, sortDirection),
+            "Id" => SortableTable.SortListByProperty(vaults, v => v.Id, sortDirection),
+            "CreatedAt" => SortableTable.SortListByProperty(vaults, v => v.CreatedAt, sortDirection),
+            "UpdatedAt" => SortableTable.SortListByProperty(vaults, v => v.UpdatedAt, sortDirection),
+            "FileSize" => SortableTable.SortListByProperty(vaults, v => v.FileSize, sortDirection),
+            "Version" => SortableTable.SortListByProperty(vaults, v => v.Version, sortDirection),
+            "RevisionNumber" => SortableTable.SortListByProperty(vaults, v => v.RevisionNumber, sortDirection),
+            "CredentialsCount" => SortableTable.SortListByProperty(vaults, v => v.CredentialsCount, sortDirection),
+            "EmailClaimsCount" => SortableTable.SortListByProperty(vaults, v => v.EmailClaimsCount, sortDirection),
             _ => vaults
         };
-    }
-
-    private IEnumerable<T> SortProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
-    {
-        return direction == SortDirection.Ascending
-            ? source.OrderBy(keySelector)
-            : source.OrderByDescending(keySelector);
     }
 
     private static bool HasPasswordChanged(Vault current, Vault previous)

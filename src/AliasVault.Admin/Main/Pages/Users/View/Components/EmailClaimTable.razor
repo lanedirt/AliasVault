@@ -16,7 +16,7 @@
     /// Gets or sets the list of email claims to display.
     /// </summary>
     [Parameter]
-    public List<UserEmailClaim> EmailClaimList { get; set; } = new();
+    public List<UserEmailClaim> EmailClaimList { get; set; } = [];
 
     private string SortColumn { get; set; } = "CreatedAt";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
@@ -36,21 +36,14 @@
         StateHasChanged();
     }
 
-    private IEnumerable<UserEmailClaim> SortList(List<UserEmailClaim> emailClaims, string sortColumn, SortDirection sortDirection)
+    private static IEnumerable<UserEmailClaim> SortList(List<UserEmailClaim> emailClaims, string sortColumn, SortDirection sortDirection)
     {
         return sortColumn switch
         {
-            "Id" => SortProperty(emailClaims, e => e.Id, sortDirection),
-            "CreatedAt" => SortProperty(emailClaims, e => e.CreatedAt, sortDirection),
-            "Address" => SortProperty(emailClaims, e => e.Address, sortDirection),
+            "Id" => SortableTable.SortListByProperty(emailClaims, e => e.Id, sortDirection),
+            "CreatedAt" => SortableTable.SortListByProperty(emailClaims, e => e.CreatedAt, sortDirection),
+            "Address" => SortableTable.SortListByProperty(emailClaims, e => e.Address, sortDirection),
             _ => emailClaims
         };
-    }
-
-    private IEnumerable<T> SortProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
-    {
-        return direction == SortDirection.Ascending
-            ? source.OrderBy(keySelector)
-            : source.OrderByDescending(keySelector);
     }
 }

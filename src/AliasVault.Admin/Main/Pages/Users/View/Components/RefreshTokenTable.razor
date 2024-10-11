@@ -21,7 +21,7 @@
     /// Gets or sets the list of refresh tokens to display.
     /// </summary>
     [Parameter]
-    public List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = new();
+    public List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the event callback to revoke a refresh token.
@@ -50,24 +50,17 @@
         StateHasChanged();
     }
 
-    private IEnumerable<AliasVaultUserRefreshToken> SortList(List<AliasVaultUserRefreshToken> refreshTokens, string sortColumn, SortDirection sortDirection)
+    private static IEnumerable<AliasVaultUserRefreshToken> SortList(List<AliasVaultUserRefreshToken> refreshTokens, string sortColumn, SortDirection sortDirection)
     {
         return sortColumn switch
         {
-            "Id" => SortProperty(refreshTokens, r => r.Id, sortDirection),
-            "DeviceIdentifier" => SortProperty(refreshTokens, r => r.DeviceIdentifier, sortDirection),
-            "IpAddress" => SortProperty(refreshTokens, r => r.IpAddress, sortDirection),
-            "CreatedAt" => SortProperty(refreshTokens, r => r.CreatedAt, sortDirection),
-            "ExpireDate" => SortProperty(refreshTokens, r => r.ExpireDate, sortDirection),
+            "Id" => SortableTable.SortListByProperty(refreshTokens, r => r.Id, sortDirection),
+            "DeviceIdentifier" => SortableTable.SortListByProperty(refreshTokens, r => r.DeviceIdentifier, sortDirection),
+            "IpAddress" => SortableTable.SortListByProperty(refreshTokens, r => r.IpAddress, sortDirection),
+            "CreatedAt" => SortableTable.SortListByProperty(refreshTokens, r => r.CreatedAt, sortDirection),
+            "ExpireDate" => SortableTable.SortListByProperty(refreshTokens, r => r.ExpireDate, sortDirection),
             _ => refreshTokens
         };
-    }
-
-    private IEnumerable<T> SortProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
-    {
-        return direction == SortDirection.Ascending
-            ? source.OrderBy(keySelector)
-            : source.OrderByDescending(keySelector);
     }
 
     private async Task RevokeRefreshToken(AliasVaultUserRefreshToken entry)

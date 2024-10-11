@@ -66,6 +66,16 @@
     /// </summary>
     [Parameter] public EventCallback<(string, SortDirection)> OnSortChanged { get; set; }
 
+    /// <summary>
+    /// Sorts the list of items by the specified column and direction.
+    /// </summary>
+    public static IEnumerable<T> SortListByProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
+    {
+        return direction == SortDirection.Ascending
+            ? source.OrderBy(keySelector)
+            : source.OrderByDescending(keySelector);
+    }
+
     private async Task OnSort(string columnName)
     {
         if (SortColumn == columnName)
