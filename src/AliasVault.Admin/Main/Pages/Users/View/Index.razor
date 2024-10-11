@@ -1,4 +1,5 @@
 ﻿@page "/users/{Id}"
+@using AliasVault.Admin.Main.Pages.Users.View.Components
 @inherits MainBase
 
 <LayoutPageTitle>User</LayoutPageTitle>
@@ -28,12 +29,12 @@ else
 
                         <div class="mb-4">
                             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
-                            <div>@User.Id</div>
+                            <div class="text-gray-700 dark:text-gray-300">@User.Id</div>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-sm font-medium text-gray-900 dark:text-white">2FA Status:</span>
                             <StatusPill Enabled="@User.TwoFactorEnabled"/>
-                            <span>Authenticator key(s) active: @TwoFactorKeysCount</span>
+                            <span class="text-gray-700 dark:text-gray-300">Authenticator key(s) active: @TwoFactorKeysCount</span>
                             @if (User.TwoFactorEnabled)
                             {
                                 <Button Color="danger" OnClick="DisableTwoFactor">Disable 2FA</Button>
@@ -56,58 +57,7 @@ else
                     <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Vaults</h3>
 
-                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3">ID</th>
-                                    <th scope="col" class="px-4 py-3">Created</th>
-                                    <th scope="col" class="px-4 py-3">Updated</th>
-                                    <th scope="col" class="px-4 py-3">Filesize</th>
-                                    <th scope="col" class="px-4 py-3">DB version</th>
-                                    <th scope="col" class="px-4 py-3">Revision</th>
-                                    <th scope="col" class="px-4 py-3">Credentials</th>
-                                    <th scope="col" class="px-4 py-3">Email Claims</th>
-                                    <th scope="col" class="px-4 py-3">Status</th>
-                                    <th scope="col" class="px-4 py-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    Vault? previousEntry = null;
-                                }
-                                @foreach (var entry in VaultList.OrderBy(e => e.UpdatedAt))
-                                {
-                                    <tr class="bg-white border-b hover:bg-gray-50">
-                                        <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
-                                        <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td class="px-4 py-3">@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td class="px-4 py-3">@Math.Round((double)entry.FileSize / 1024, 1) MB</td>
-                                        <td class="px-4 py-3">@entry.Version</td>
-                                        <td class="px-4 py-3">@entry.RevisionNumber</td>
-                                        <td class="px-4 py-3">@entry.CredentialsCount</td>
-                                        <td class="px-4 py-3">@entry.EmailClaimsCount</td>
-                                        <td class="px-4 py-3">
-                                            @if (entry == LatestVault)
-                                            {
-                                                <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Current</span>
-                                            }
-                                            @if (previousEntry != null && HasPasswordChanged(entry, previousEntry))
-                                            {
-                                                <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Password Changed</span>
-                                            }
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            @if (entry != LatestVault)
-                                            {
-                                                <Button OnClick="() => MakeCurrentAsync(entry)">Make Current</Button>
-                                            }
-                                        </td>
-                                    </tr>
-
-                                    previousEntry = entry;
-                                }
-                            </tbody>
-                        </table>
+                        <VaultTable VaultList="@VaultList" OnMakeCurrent="@MakeCurrentAsync" />
                     </div>
                 </div>
             </div>
@@ -117,33 +67,7 @@ else
                     <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">UserRefreshTokens (Logged in devices)</h3>
 
-                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-4 py-3">ID</th>
-                                <th scope="col" class="px-4 py-3">Device</th>
-                                <th scope="col" class="px-4 py-3">Ip</th>
-                                <th scope="col" class="px-4 py-3">Created</th>
-                                <th scope="col" class="px-4 py-3">Expires</th>
-                                <th scope="col" class="px-4 py-3"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach (var entry in RefreshTokenList)
-                            {
-                                <tr class="bg-white border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
-                                    <td class="px-4 py-3">@entry.DeviceIdentifier</td>
-                                    <td class="px-4 py-3">@entry.IpAddress</td>
-                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td class="px-4 py-3">@entry.ExpireDate.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td class="px-4 py-3">
-                                        <Button Color="danger" OnClick="() => RevokeRefreshToken(entry)">Revoke</Button>
-                                    </td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
+                        <RefreshTokenTable RefreshTokenList="@RefreshTokenList" OnRevokeToken="@RevokeRefreshToken" />
                     </div>
                 </div>
             </div>
@@ -153,25 +77,7 @@ else
                     <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Email claims</h3>
 
-                        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-4 py-3">ID</th>
-                                <th scope="col" class="px-4 py-3">Created</th>
-                                <th scope="col" class="px-4 py-3">Email</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach (var entry in EmailClaimList)
-                            {
-                                <tr class="bg-white border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-medium text-gray-900">@entry.Id</td>
-                                    <td class="px-4 py-3">@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td class="px-4 py-3">@entry.Address</td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
+                        <EmailClaimTable EmailClaimList="@EmailClaimList" />
                     </div>
                 </div>
             </div>
@@ -180,7 +86,6 @@ else
 }
 
 @code {
-
     /// <summary>
     /// Gets or sets the user ID.
     /// </summary>
@@ -190,9 +95,9 @@ else
     private bool IsLoading { get; set; } = true;
     private AliasVaultUser? User { get; set; } = new();
     private int TwoFactorKeysCount { get; set; }
-    private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = new();
-    private List<Vault> VaultList { get; set; } = new();
-    private List<UserEmailClaim> EmailClaimList { get; set; } = new();
+    private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
+    private List<Vault> VaultList { get; set; } = [];
+    private List<UserEmailClaim> EmailClaimList { get; set; } = [];
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -232,7 +137,7 @@ else
             return;
         }
 
-        // Load all refresh tokens for this user to show which devices are logged in.
+        // Load all active refresh tokens for this user to show which devices are logged in.
         RefreshTokenList = await DbContext.AliasVaultUserRefreshTokens.Where(x => x.UserId == User.Id).Select(x => new AliasVaultUserRefreshToken()
             {
                 Id = x.Id,
@@ -241,6 +146,7 @@ else
                 ExpireDate = x.ExpireDate,
                 CreatedAt = x.CreatedAt,
             })
+            .Where(x => x.ExpireDate > DateTime.UtcNow)
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 
@@ -343,22 +249,6 @@ else
     }
 
     /// <summary>
-    /// Determines if the password has changed between two vault entries.
-    /// </summary>
-    /// <param name="current">The current vault entry.</param>
-    /// <param name="previous">The previous vault entry to compare against.</param>
-    /// <returns>True if the password has changed, false otherwise.</returns>
-    private static bool HasPasswordChanged(Vault current, Vault previous)
-    {
-        return current.Salt != previous.Salt || current.Verifier != previous.Verifier;
-    }
-
-    /// <summary>
-    /// Gets the latest vault entry from the list.
-    /// </summary>
-    private Vault? LatestVault => VaultList.MaxBy(v => v.RevisionNumber);
-
-    /// <summary>
     /// Handles the action of making a vault the current one.
     /// </summary>
     /// <param name="vault">The vault to make current.</param>
@@ -366,11 +256,11 @@ else
     {
         if (await ConfirmModalService.ShowConfirmation(
                 title: "Confirm Vault Restoration",
-                message: $@"Are you sure you want to restore this earlier vault and make it the active one?
+                message: @"Are you sure you want to restore this specific vault and make it the active one?
 
 Important notes:
-• The next time the user logs in, they will load this previous vault version.
-• If the user has changed their password recently, it will be reverted to the one stored in this vault.
+• The next time the user logs in, they will load this vault version.
+• If the user has changed their password recently, their password will be reverted to the one associated with this vault.
 
 Do you want to proceed with the restoration?")) {
             // Load vault
@@ -381,7 +271,7 @@ Do you want to proceed with the restoration?")) {
             }
 
             // Update time to make this the current vault.
-            currentVault.RevisionNumber = LatestVault!.RevisionNumber + 1;
+            currentVault.RevisionNumber = VaultList.MaxBy(x => x.RevisionNumber)!.RevisionNumber + 1;
 
             // Save it.
             await DbContext.SaveChangesAsync();

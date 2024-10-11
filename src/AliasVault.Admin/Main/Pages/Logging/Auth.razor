@@ -27,10 +27,10 @@ else
         <div class="mb-4 flex space-x-4">
             <div class="flex w-full">
                 <div class="w-2/3 pr-2">
-                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                 </div>
                 <div class="w-1/3 pl-2">
-                    <select @bind="SelectedEventType" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select @bind="SelectedEventType" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">All event types</option>
                         @foreach (var eventType in Enum.GetValues<AuthEventType>())
                         {
@@ -44,42 +44,16 @@ else
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var log in LogList)
             {
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
-                    <td class="px-4 py-3">@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-3">@log.Username</td>
-                    <td class="px-4 py-3">@log.EventType</td>
-                    <td class="px-4 py-3"><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="Failed" /></td>
-                    <td class="px-4 py-3">@log.IpAddress</td>
-                </tr>
+                <SortableTableRow>
+                    <SortableTableColumn IsPrimary="true">@log.Id</SortableTableColumn>
+                    <SortableTableColumn>@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>@log.Username</SortableTableColumn>
+                    <SortableTableColumn>@log.EventType</SortableTableColumn>
+                    <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="Failed" /></SortableTableColumn>
+                    <SortableTableColumn>@log.IpAddress</SortableTableColumn>
+                </SortableTableRow>
             }
         </SortableTable>
-
-        <table class="w-full text-sm text-left text-gray-500 shadow rounded border">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-                <th scope="col" class="px-4 py-3">ID</th>
-                <th scope="col" class="px-4 py-3">Time</th>
-                <th scope="col" class="px-4 py-3">Username</th>
-                <th scope="col" class="px-4 py-3">Event</th>
-                <th scope="col" class="px-4 py-3">Success</th>
-                <th scope="col" class="px-4 py-3">IP</th>
-            </tr>
-            </thead>
-            <tbody>
-                @foreach (var log in LogList)
-                {
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">@log.Id</td>
-                        <td class="px-4 py-3">@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="px-4 py-3">@log.Username</td>
-                        <td class="px-4 py-3">@log.EventType</td>
-                        <td class="px-4 py-3"><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="Failed" /></td>
-                        <td class="px-4 py-3">@log.IpAddress</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
     </div>
 }
 

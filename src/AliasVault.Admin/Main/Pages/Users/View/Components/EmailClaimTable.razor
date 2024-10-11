@@ -1,0 +1,56 @@
+﻿@using AliasVault.RazorComponents.Tables
+
+<SortableTable Columns="@_emailClaimTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+    @foreach (var entry in SortedEmailClaimList)
+    {
+        <SortableTableRow>
+            <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
+            <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+            <SortableTableColumn>@entry.Address</SortableTableColumn>
+        </SortableTableRow>
+    }
+</SortableTable>
+
+@code {
+    /// <summary>
+    /// Gets or sets the list of email claims to display.
+    /// </summary>
+    [Parameter]
+    public List<UserEmailClaim> EmailClaimList { get; set; } = new();
+
+    private string SortColumn { get; set; } = "CreatedAt";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private readonly List<TableColumn> _emailClaimTableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Created", PropertyName = "CreatedAt" },
+        new TableColumn { Title = "Email", PropertyName = "Address" },
+    ];
+
+    private IEnumerable<UserEmailClaim> SortedEmailClaimList => SortList(EmailClaimList, SortColumn, SortDirection);
+
+    private void HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        StateHasChanged();
+    }
+
+    private IEnumerable<UserEmailClaim> SortList(List<UserEmailClaim> emailClaims, string sortColumn, SortDirection sortDirection)
+    {
+        return sortColumn switch
+        {
+            "Id" => SortProperty(emailClaims, e => e.Id, sortDirection),
+            "CreatedAt" => SortProperty(emailClaims, e => e.CreatedAt, sortDirection),
+            "Address" => SortProperty(emailClaims, e => e.Address, sortDirection),
+            _ => emailClaims
+        };
+    }
+
+    private IEnumerable<T> SortProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
+    {
+        return direction == SortDirection.Ascending
+            ? source.OrderBy(keySelector)
+            : source.OrderByDescending(keySelector);
+    }
+}

@@ -23,25 +23,25 @@ else
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
         <div class="mb-4">
-            <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search users..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search users..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
         </div>
 
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var user in UserList)
             {
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">@user.Id</td>
-                    <td class="px-4 py-3">@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-3">@user.UserName</td>
-                    <td class="px-4 py-3">@user.VaultCount</td>
-                    <td class="px-4 py-3">@user.EmailClaimCount</td>
-                    <td class="px-4 py-3">@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</td>
-                    <td class="px-4 py-3"><StatusPill Enabled="user.TwoFactorEnabled" /></td>
-                    <td class="px-4 py-3">@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-3">
+                <SortableTableRow>
+                    <SortableTableColumn IsPrimary="true">@user.Id</SortableTableColumn>
+                    <SortableTableColumn>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>@user.UserName</SortableTableColumn>
+                    <SortableTableColumn>@user.VaultCount</SortableTableColumn>
+                    <SortableTableColumn>@user.EmailClaimCount</SortableTableColumn>
+                    <SortableTableColumn>@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</SortableTableColumn>
+                    <SortableTableColumn><StatusPill Enabled="user.TwoFactorEnabled" /></SortableTableColumn>
+                    <SortableTableColumn>@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>
                         <LinkButton Color="primary" Href="@($"users/{user.Id}")" Text="View" />
-                    </td>
-                </tr>
+                    </SortableTableColumn>
+                </SortableTableRow>
             }
         </SortableTable>
     </div>
@@ -57,6 +57,7 @@ else
         new TableColumn { Title = "Storage", PropertyName = "VaultStorageInKb" },
         new TableColumn { Title = "2FA", PropertyName = "TwoFactorEnabled" },
         new TableColumn { Title = "LastVaultUpdate", PropertyName = "LastVaultUpdate" },
+        new TableColumn { Title = "Actions", Sortable = false},
     ];
 
     private List<UserViewModel> UserList { get; set; } = [];

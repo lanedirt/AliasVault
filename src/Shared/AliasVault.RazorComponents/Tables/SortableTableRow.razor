@@ -1,0 +1,11 @@
+﻿<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+    @ChildContent
+</tr>
+
+@code {
+    /// <summary>
+    /// Gets or sets the child content of the table.
+    /// </summary>
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = null!;
+}

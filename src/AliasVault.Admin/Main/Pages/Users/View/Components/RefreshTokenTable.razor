@@ -1,0 +1,77 @@
+﻿@using AliasVault.RazorComponents.Tables
+
+<SortableTable Columns="@_refreshTokenTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+    @foreach (var entry in SortedRefreshTokenList)
+    {
+        <SortableTableRow>
+            <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
+            <SortableTableColumn>@entry.DeviceIdentifier</SortableTableColumn>
+            <SortableTableColumn>@entry.IpAddress</SortableTableColumn>
+            <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+            <SortableTableColumn>@entry.ExpireDate.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+            <SortableTableColumn>
+                <Button Color="danger" OnClick="() => RevokeRefreshToken(entry)">Revoke</Button>
+            </SortableTableColumn>
+        </SortableTableRow>
+    }
+</SortableTable>
+
+@code {
+    /// <summary>
+    /// Gets or sets the list of refresh tokens to display.
+    /// </summary>
+    [Parameter]
+    public List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the event callback to revoke a refresh token.
+    /// </summary>
+    [Parameter]
+    public EventCallback<AliasVaultUserRefreshToken> OnRevokeToken { get; set; }
+
+    private string SortColumn { get; set; } = "CreatedAt";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private readonly List<TableColumn> _refreshTokenTableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Device", PropertyName = "DeviceIdentifier" },
+        new TableColumn { Title = "Ip", PropertyName = "IpAddress" },
+        new TableColumn { Title = "Created", PropertyName = "CreatedAt" },
+        new TableColumn { Title = "Expires", PropertyName = "ExpireDate" },
+        new TableColumn { Title = "Actions", Sortable = false },
+    ];
+
+    private IEnumerable<AliasVaultUserRefreshToken> SortedRefreshTokenList => SortList(RefreshTokenList, SortColumn, SortDirection);
+
+    private void HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        StateHasChanged();
+    }
+
+    private IEnumerable<AliasVaultUserRefreshToken> SortList(List<AliasVaultUserRefreshToken> refreshTokens, string sortColumn, SortDirection sortDirection)
+    {
+        return sortColumn switch
+        {
+            "Id" => SortProperty(refreshTokens, r => r.Id, sortDirection),
+            "DeviceIdentifier" => SortProperty(refreshTokens, r => r.DeviceIdentifier, sortDirection),
+            "IpAddress" => SortProperty(refreshTokens, r => r.IpAddress, sortDirection),
+            "CreatedAt" => SortProperty(refreshTokens, r => r.CreatedAt, sortDirection),
+            "ExpireDate" => SortProperty(refreshTokens, r => r.ExpireDate, sortDirection),
+            _ => refreshTokens
+        };
+    }
+
+    private IEnumerable<T> SortProperty<T, TKey>(IEnumerable<T> source, Func<T, TKey> keySelector, SortDirection direction)
+    {
+        return direction == SortDirection.Ascending
+            ? source.OrderBy(keySelector)
+            : source.OrderByDescending(keySelector);
+    }
+
+    private async Task RevokeRefreshToken(AliasVaultUserRefreshToken entry)
+    {
+        await OnRevokeToken.InvokeAsync(entry);
+    }
+}
