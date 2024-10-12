@@ -4,3 +4,4 @@ using the `ResourceReaderUtility` class.
 
 Index:
 - `AliasClientDb_encrypted_base64_1.0.0` - Encrypted vault blob with client db version 1.0.0 used to test client db upgrade paths. This vault contains two test credentials that are checked in the tests after local client db upgrade.
+- `TestAttachment.txt` - Test attachment file that is uploaded during test.

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AuthPasswordChangeTest.cs" company="lanedirt">
+// <copyright file="AuthPasswordChangeTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -14,7 +14,7 @@ namespace AliasVault.E2ETests.Tests.Client.Shard5;
 [Category("ClientTests")]
 
 [TestFixture]
-public class AuthPasswordChangeTest : ClientPlaywrightTest
+public class AuthPasswordChangeTests : ClientPlaywrightTest
 {
     /// <summary>
     /// Test if changing password works correctly.

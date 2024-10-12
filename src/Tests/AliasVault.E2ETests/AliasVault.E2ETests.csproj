@@ -23,6 +23,7 @@
     <ItemGroup>
       <AdditionalFiles Include="..\..\stylecop.json" Link="stylecop.json" />
       <EmbeddedResource Include="TestData\AliasClientDb_encrypted_base64_1.0.0.txt" />
+      <EmbeddedResource Include="TestData\TestAttachment.txt" />
     </ItemGroup>
 
     <ItemGroup>
