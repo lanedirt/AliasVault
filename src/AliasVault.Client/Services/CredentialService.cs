@@ -228,25 +228,27 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         login.Service.UpdatedAt = DateTime.UtcNow;
 
         // Remove attachments that are no longer in the list
-        var existingAttachments = login.Attachments.ToList();
-        foreach (var existingAttachment in existingAttachments)
+        var attachmentsToRemove = login.Attachments.Where(existingAttachment =>
+            !loginObject.Attachments.Any(a => a.Id == existingAttachment.Id)).ToList();
+        foreach (var attachmentToRemove in attachmentsToRemove)
         {
-            if (!loginObject.Attachments.Any(a => a.Id != Guid.Empty && a.Id == existingAttachment.Id))
-            {
-                context.Entry(existingAttachment).State = EntityState.Deleted;
-            }
+            login.Attachments.Remove(attachmentToRemove);
+            context.Entry(attachmentToRemove).State = EntityState.Deleted;
         }
 
-        // Add new attachments
+        // Update existing attachments and add new ones
         foreach (var attachment in loginObject.Attachments)
         {
-            if (!login.Attachments.Any(a => attachment.Id != Guid.Empty && a.Id == attachment.Id))
+            var existingAttachment = login.Attachments.FirstOrDefault(a => a.Id == attachment.Id);
+            if (existingAttachment != null)
             {
-                login.Attachments.Add(attachment);
+                // Update existing attachment
+                context.Entry(existingAttachment).CurrentValues.SetValues(attachment);
             }
             else
             {
-                context.Entry(attachment).State = EntityState.Modified;
+                // Add new attachment
+                login.Attachments.Add(attachment);
             }
         }
 

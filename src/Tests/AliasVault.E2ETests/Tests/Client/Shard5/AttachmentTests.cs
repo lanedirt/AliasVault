@@ -118,8 +118,11 @@ public class AttachmentTests : ClientPlaywrightTest
         });
 
         // Check that the updated username and attachment name still appear on the alias page.
+        var usernameElement = await Page.QuerySelectorAsync("#username");
+        Assert.That(usernameElement, Is.Not.Null, "Username element not found.");
+        Assert.That(await usernameElement.InputValueAsync(), Is.EqualTo(updatedUsername), "Updated username does not appear on alias page.");
+
         pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain(updatedUsername), "Updated username does not appear on alias page.");
         Assert.That(pageContent, Does.Contain("TestAttachment.txt"), "Attachment name does not appear on alias page after update.");
 
         // Download the attachment
@@ -139,5 +142,64 @@ public class AttachmentTests : ClientPlaywrightTest
 
         // Clean up: delete the downloaded file
         File.Delete(downloadedFilePath);
+    }
+
+    /// <summary>
+    /// Test that uploading and deleting an attachment works correctly.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(3)]
+    public async Task UploadAndDeleteAttachment()
+    {
+        // Create a new alias with service name = "Test Service for Deletion".
+        var serviceName = "Test Service for Deletion";
+        await CreateCredentialEntry(
+            new Dictionary<string, string>
+            {
+                { "service-name", serviceName },
+            },
+            async () =>
+            {
+                // Upload file.
+                var fileInput = Page.Locator("input[type='file']");
+                var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+
+                // Create a temporary file with the content and original file name
+                var originalFileName = "TestAttachment.txt";
+                var tempFilePath = Path.Combine(Path.GetTempPath(), originalFileName);
+                await File.WriteAllBytesAsync(tempFilePath, fileContent);
+
+                // Set the file input using the temporary file
+                await fileInput.SetInputFilesAsync(tempFilePath);
+
+                // Delete the temporary file
+                File.Delete(tempFilePath);
+            });
+
+        // Check that the attachment name appears on the alias page.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("TestAttachment.txt"), "Uploaded attachment name does not appear on alias page.");
+
+        // Click the edit button
+        await Page.ClickAsync("text=Edit");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+
+        // Find and click the delete button for the attachment
+        var deleteButton = Page.Locator("button:has-text('Delete')").First;
+        await deleteButton.ClickAsync();
+
+        // Check that the attachment name no longer appears on the edit page
+        pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Not.Contain("TestAttachment.txt"), "Deleted attachment name still appears on edit page.");
+
+        // Save the credential
+        var saveButton = Page.Locator("text=Save Credentials").First;
+        await saveButton.ClickAsync();
+        await WaitForUrlAsync("credentials/**", "Credential updated successfully");
+
+        // Check that the attachment name does not appear on the view page
+        pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Not.Contain("TestAttachment.txt"), "Deleted attachment name appears on view page after saving.");
     }
 }
