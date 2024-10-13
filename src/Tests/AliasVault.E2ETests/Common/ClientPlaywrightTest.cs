@@ -202,7 +202,7 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Credentials created successfully");
+        await WaitForUrlAsync("credentials/**", "Credential created successfully");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
@@ -237,11 +237,11 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Credentials updated successfully");
+        await WaitForUrlAsync("credentials/**", "Credential updated successfully");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Credentials updated successfully"), "Credential not updated successfully.");
+        Assert.That(pageContent, Does.Contain("Credential updated successfully"), "Credential not updated successfully.");
     }
 
     /// <summary>
