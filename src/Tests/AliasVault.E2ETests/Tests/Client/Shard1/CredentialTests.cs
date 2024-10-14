@@ -116,7 +116,7 @@ public class CredentialTests : ClientPlaywrightTest
         await WaitForUrlAsync("credentials/**", "Delete");
 
         pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Credentials updated"), "Credential update confirmation message not shown.");
+        Assert.That(pageContent, Does.Contain("Credential updated"), "Credential update confirmation message not shown.");
         Assert.That(pageContent, Does.Contain(serviceNameAfter), "Credential not updated correctly.");
     }
 

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Tests.Client;
+namespace AliasVault.E2ETests.Tests.Client.Shard5;
 
 /// <summary>
 /// End-to-end tests for the database unlock functionality.

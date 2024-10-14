@@ -175,8 +175,9 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// Create new credential entry.
     /// </summary>
     /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
+    /// <param name="customLogic">Optional custom logic to execute after filling input fields.</param>
     /// <returns>Async task.</returns>
-    protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null)
+    protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null, Func<Task>? customLogic = null)
     {
         // Advance the time by 1 second to ensure the credential is created with a unique timestamp.
         // This is required for certain tests that check for the latest credential and/or latest vault.
@@ -193,9 +194,15 @@ public class ClientPlaywrightTest : PlaywrightTest
         await InputHelper.FillInputFields(formValues);
         await InputHelper.FillEmptyInputFieldsWithRandom();
 
+        // Execute custom logic if provided
+        if (customLogic != null)
+        {
+            await customLogic();
+        }
+
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Credentials created successfully");
+        await WaitForUrlAsync("credentials/**", "Credential created successfully");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
@@ -230,11 +237,11 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Credentials updated successfully");
+        await WaitForUrlAsync("credentials/**", "Credential updated successfully");
 
         // Check if the credential was created
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Credentials updated successfully"), "Credential not updated successfully.");
+        Assert.That(pageContent, Does.Contain("Credential updated successfully"), "Credential not updated successfully.");
     }
 
     /// <summary>
