@@ -37,6 +37,8 @@
     </div>
 </div>
 
+<Footer ShowBorder="false"></Footer>
+
 @code {
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -56,6 +58,6 @@
 
     private void NavigateToCreateAccount()
     {
-        NavigationManager.NavigateTo("/user/register");
+        NavigationManager.NavigateTo("/user/setup");
     }
 }

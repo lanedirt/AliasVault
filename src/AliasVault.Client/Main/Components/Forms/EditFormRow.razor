@@ -2,11 +2,11 @@
 <div class="relative">
     @if (Type == "textarea")
     {
-        <textarea id="@Id" style="height: 200px;" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged"></textarea>
+        <textarea id="@Id" style="height: 200px;" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder"></textarea>
     }
     else
     {
-        <input type="text" id="@Id" @onfocus="OnFocusEvent" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged">
+        <input type="text" id="@Id" autocomplete="off" @onfocus="OnFocusEvent" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder">
     }
 </div>
 
@@ -46,6 +46,12 @@
     /// </summary>
     [Parameter]
     public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Placeholder text for the input field.
+    /// </summary>
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {

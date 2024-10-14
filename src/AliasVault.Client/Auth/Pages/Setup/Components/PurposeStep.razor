@@ -1,0 +1,82 @@
+@using System.Timers
+
+<div class="w-full max-w-md mx-auto">
+    @if (isLoading)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+    }
+    <div class="@(isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300") w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="AliasVault Assistant">
+                </div>
+                <div class="ml-3 bg-blue-100 dark:bg-blue-900 rounded-lg p-3">
+                    <p class="text-sm text-gray-900 dark:text-white">
+                        Hi there! I'll help you get your AliasVault account setup.
+                    </p>
+                    <p class="text-sm text-gray-900 dark:text-white mt-3">
+                        In order to help you better, what's the main purpose you want to use AliasVault for?
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            @foreach (var purpose in Purposes)
+            {
+                <button @onclick="() => SelectPurpose(purpose.Key)"
+                        class="w-full text-left p-4 rounded-lg border @(Purpose == purpose.Key ? "border-blue-500 bg-blue-50 dark:bg-blue-900" : "border-gray-300 dark:border-gray-700") hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@purpose.Key</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">@purpose.Value</p>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Purpose { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> OnPurposeChange { get; set; }
+
+    [Parameter]
+    public bool IsPurposeSelected { get; set; }
+
+    private Dictionary<string, string> Purposes = new()
+    {
+        { "Personal Security", "I want to enhance my online security by creating unique identities and passwords for my personal accounts." },
+        { "Privacy Protection", "I'm concerned about online tracking and want to use email aliases to protect my privacy." },
+    };
+
+    private bool isLoading = true;
+    private Timer? loadingTimer;
+
+    protected override void OnInitialized()
+    {
+        loadingTimer = new Timer(300);
+        loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        loadingTimer.AutoReset = false;
+        loadingTimer.Start();
+    }
+
+    private void FinishLoading()
+    {
+        isLoading = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        loadingTimer?.Dispose();
+    }
+
+    private async Task SelectPurpose(string purpose)
+    {
+        await OnPurposeChange.InvokeAsync(purpose);
+    }
+}

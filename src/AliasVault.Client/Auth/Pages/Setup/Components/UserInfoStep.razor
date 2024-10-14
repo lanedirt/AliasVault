@@ -1,0 +1,87 @@
+@using System.Timers
+@implements IDisposable
+
+<div class="w-full max-w-md mx-auto">
+    @if (isLoading)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+    }
+    <div class="@(isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300") w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="AliasVault Assistant">
+                </div>
+                <div class="ml-3 bg-blue-100 dark:bg-blue-900 rounded-lg p-3">
+                    <p class="text-sm text-gray-900 dark:text-white">
+                        Great! Now, let's set up your username for AliasVault.
+                    </p>
+                    <p class="text-sm text-gray-900 dark:text-white mt-3">
+                        Please enter a username you'd like to use. This can be your email address or any unique name you prefer.
+                    </p>
+                    <p class="text-sm text-gray-900 dark:text-white mt-3 font-semibold">
+                        Remember: This is what you'll use to log in later, so make sure it's something you'll remember!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <EditFormRow Id="username" Label="Username" @bind-Value="Username" Placeholder="Enter your desired username or email" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _username = string.Empty;
+
+    /// <summary>
+    /// The username.
+    /// </summary>
+    public string Username
+    {
+        get => _username;
+        set
+        {
+            if (_username != value)
+            {
+                _username = value;
+                OnUsernameChange.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Event callback when the username changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnUsernameChange { get; set; }
+
+    private bool isLoading = true;
+    private Timer? loadingTimer;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        loadingTimer = new Timer(300);
+        loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        loadingTimer.AutoReset = false;
+        loadingTimer.Start();
+    }
+
+    private void FinishLoading()
+    {
+        isLoading = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        loadingTimer?.Dispose();
+    }
+}

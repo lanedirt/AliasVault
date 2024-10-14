@@ -1,0 +1,126 @@
+@page "/user/setup"
+@using AliasVault.Client.Auth.Pages.Setup.Components
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@layout Auth.Layout.EmptyLayout
+@attribute [AllowAnonymous]
+
+<div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="w-full max-w-md mx-auto flex flex-col @(currentStep == SetupStep.Welcome ? "justify-center" : "pt-8")">
+        <div>
+            @switch (currentStep)
+            {
+                case SetupStep.Welcome:
+                    <WelcomeStep />
+                    break;
+                case SetupStep.Purpose:
+                    <PurposeStep
+                        Purpose="@setupData.Purpose"
+                        OnPurposeChange="@((string purpose) => { setupData.Purpose = purpose; StateHasChanged(); })"
+                        IsPurposeSelected="@(!string.IsNullOrWhiteSpace(setupData.Purpose))" />
+                    break;
+                case SetupStep.PurposeInstructions:
+                    <PurposeInstructionsStep Purpose="@setupData.Purpose" />
+                    break;
+                case SetupStep.UserInfo:
+                    <UserInfoStep
+                        OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
+                    break;
+                /*case SetupStep.Password:
+                    <PasswordStep
+                        Password="@setupData.Password"
+                        OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
+                    break; */
+            }
+        </div>
+        <div class="fixed bottom-0 left-0 right-0 p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col lg:flex-row lg:justify-between">
+                <div class="lg:flex-grow">
+                    @if (currentStep != SetupStep.Welcome)
+                    {
+                        <button @onclick="GoBack" class="w-full lg:w-auto py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-gray-800 text-gray-800 dark:text-white font-semibold rounded-lg transition duration-300 ease-in-out mb-4 lg:mb-0">
+                            Go Back
+                        </button>
+                    }
+                </div>
+                <div class="lg:flex-shrink-0">
+                    @if (currentStep != SetupStep.Password)
+                    {
+                        <button @onclick="GoNext"
+                                class="w-full lg:w-auto py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(isNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
+                                disabled="@(!isNextEnabled)">
+                            Continue
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private SetupStep currentStep = SetupStep.Welcome;
+    private SetupData setupData = new();
+    private bool isNextEnabled => currentStep switch
+    {
+        SetupStep.Welcome => true,
+        SetupStep.Purpose => !string.IsNullOrWhiteSpace(setupData.Purpose),
+        SetupStep.PurposeInstructions => true,
+        SetupStep.UserInfo => !string.IsNullOrWhiteSpace(setupData.Username),
+        SetupStep.Password => !string.IsNullOrWhiteSpace(setupData.Password),
+        _ => false
+    };
+
+    private void GoBack()
+    {
+        switch (currentStep)
+        {
+            case SetupStep.Purpose:
+                currentStep = SetupStep.Welcome;
+                break;
+            case SetupStep.PurposeInstructions:
+                currentStep = SetupStep.Purpose;
+                break;
+            case SetupStep.UserInfo:
+                currentStep = SetupStep.PurposeInstructions;
+                break;
+            case SetupStep.Password:
+                currentStep = SetupStep.UserInfo;
+                break;
+        }
+    }
+
+    private void GoNext()
+    {
+        currentStep = currentStep switch
+        {
+            SetupStep.Welcome => SetupStep.Purpose,
+            SetupStep.Purpose => SetupStep.PurposeInstructions,
+            SetupStep.PurposeInstructions => SetupStep.UserInfo,
+            SetupStep.UserInfo => SetupStep.Password,
+            _ => currentStep
+        };
+    }
+
+    private void CompleteSetup()
+    {
+        // TODO: Implement the logic to save user information and create the account
+        // For example: await UserService.CreateUser(setupData.UserInfo, setupData.Password);
+        NavigationManager.NavigateTo("/");
+    }
+
+    private enum SetupStep
+    {
+        Welcome,
+        Purpose,
+        PurposeInstructions,
+        UserInfo,
+        Password
+    }
+
+    private class SetupData
+    {
+        public string Purpose { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
