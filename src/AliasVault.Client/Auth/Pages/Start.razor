@@ -1,0 +1,61 @@
+@page "/user/start"
+@using AliasVault.Client.Auth.Components
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@layout Auth.Layout.EmptyLayout
+@attribute [AllowAnonymous]
+
+<div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row">
+        <!-- Left column with image placeholder -->
+        <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
+            <div class="text-white text-4xl font-bold">
+                <!-- Replace this with an actual image -->
+                <img src="img/icon-500.png" alt="AliasVault" class="w-64 h-64" />
+            </div>
+        </div>
+
+        <!-- Right column with text and buttons -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center px-8 py-12">
+            <div class="w-full max-w-md">
+                <Logo />
+                <h2 class="text-3xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+                    The best way for your online safety
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                    Secure your digital identity with AliasVault
+                </p>
+                <div class="space-y-4">
+                    <button @onclick="NavigateToCreateAccount" class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
+                        Get started
+                    </button>
+                    <button @onclick="NavigateToLogin" class="w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 text-gray-800 dark:text-white font-semibold rounded-lg transition duration-300 ease-in-out">
+                        I already have an account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true) {
+            // Already authenticated, redirect to home page.
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/user/login");
+    }
+
+    private void NavigateToCreateAccount()
+    {
+        NavigationManager.NavigateTo("/user/register");
+    }
+}

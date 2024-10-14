@@ -1,18 +1,21 @@
 ﻿@inject NavigationManager NavigationManager
 @implements IDisposable
 
-<footer class="md:flex md:items-center md:justify-between px-4 2xl:px-0 py-6 md:py-10">
-    <p class="text-sm text-center text-gray-500 mb-4 md:mb-0">
-        © 2024 AliasVault. All rights reserved.
-    </p>
-    <ul class="flex flex-wrap items-center justify-center">
-        <li>
-            <a href="https://github.com/lanedirt/AliasVault" target="_blank" class="text-sm font-normal text-gray-500 hover:underline dark:text-gray-400">GitHub</a>
-        </li>
-    </ul>
+<footer class="relative lg:fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex flex-col lg:flex-row justify-between items-center">
+            <p class="text-sm text-center text-gray-500 mb-4 lg:mb-0">
+                © 2024 AliasVault. All rights reserved.
+            </p>
+            <div class="hidden lg:block text-center text-gray-400 text-sm">@RandomQuote</div>
+            <ul class="flex flex-wrap items-center justify-center">
+                <li>
+                    <a href="https://github.com/lanedirt/AliasVault" target="_blank" class="text-sm font-normal text-gray-500 hover:underline dark:text-gray-400">GitHub</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 </footer>
-
-<div class="text-center text-gray-400 text-sm pt-4 pb-2">@RandomQuote</div>
 
 @code {
     private static readonly string[] Quotes =
