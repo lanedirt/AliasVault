@@ -22,7 +22,7 @@
                     <PurposeInstructionsStep Purpose="@setupData.Purpose" />
                     break;
                 case SetupStep.UserInfo:
-                    <UserInfoStep
+                    <UsernameStep
                         OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
                     break;
                 /*case SetupStep.Password:

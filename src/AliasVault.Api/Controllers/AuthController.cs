@@ -396,6 +396,60 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
+    /// Validate username endpoint used to check if a username is available.
+    /// </summary>
+    /// <param name="model">ValidateUsernameRequest model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("validate-username")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateUsername([FromBody] ValidateUsernameRequest model)
+    {
+        if (string.IsNullOrWhiteSpace(model.Username))
+        {
+            return BadRequest("Username is required.");
+        }
+
+        var normalizedUsername = NormalizeUsername(model.Username);
+        var existingUser = await userManager.FindByNameAsync(normalizedUsername);
+
+        if (existingUser != null)
+        {
+            return BadRequest("Username is already in use.");
+        }
+
+        // Check if the username is valid (you can add more validation rules here)
+        if (!IsValidUsername(normalizedUsername))
+        {
+            return BadRequest("Invalid username format.");
+        }
+
+        return Ok("Username is available.");
+    }
+
+    /// <summary>
+    /// Normalizes a username by trimming and lowercasing it.
+    /// </summary>
+    /// <param name="username">The username to normalize.</param>
+    /// <returns>The normalized username.</returns>
+    private static string NormalizeUsername(string username)
+    {
+        return username.ToLowerInvariant().Trim();
+    }
+
+    /// <summary>
+    /// Validate username endpoint used to check if a username is available.
+    /// </summary>
+    /// <param name="username">The username to validate.</param>
+    /// <returns>True if the username is valid, false otherwise.</returns>
+    private static bool IsValidUsername(string username)
+    {
+        const int minimumUsernameLength = 3;
+
+        return !string.IsNullOrWhiteSpace(username) &&
+               username.Length >= minimumUsernameLength;
+    }
+
+    /// <summary>
     /// Generate a device identifier based on request headers. This is used to associate refresh tokens
     /// with a specific device for a specific user.
     ///

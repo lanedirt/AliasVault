@@ -1,0 +1,170 @@
+@using System.Timers
+@using System.Net.Http.Json
+@implements IDisposable
+
+<div class="w-full max-w-md mx-auto">
+    @if (isLoading)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+    }
+    <div class="@(isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300") w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0">
+                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="AliasVault Assistant">
+                </div>
+                <div class="ml-3 bg-blue-100 dark:bg-blue-900 rounded-lg p-3">
+                    <p class="text-sm text-gray-900 dark:text-white">
+                        Great! Now, let's set up your username for AliasVault.
+                    </p>
+                    <p class="text-sm text-gray-900 dark:text-white mt-3">
+                        Please enter a username you'd like to use. This can be your email address or any unique name you prefer.
+                    </p>
+                    <p class="text-sm text-gray-900 dark:text-white mt-3 font-semibold">
+                        Remember: This is what you'll use to log in later, so make sure it's something you'll remember!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <EditFormRow Id="username" Label="Username" @bind-Value="Username" Placeholder="Enter your desired username or email" OnFocus="@OnUsernameInputFocus" />
+                @if (isValidating)
+                {
+                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">Validating username...</div>
+                }
+                else if (isValid)
+                {
+                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">Username is available!</div>
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">@errorMessage</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _username = string.Empty;
+    private bool isValid = false;
+    private bool isValidating = false;
+    private string errorMessage = string.Empty;
+    private Timer? debounceTimer;
+
+    [Inject]
+    private HttpClient Http { get; set; } = null!;
+
+    public string Username
+    {
+        get => _username;
+        set
+        {
+            if (_username != value)
+            {
+                _username = value;
+                ValidateUsername();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> OnUsernameChange { get; set; }
+
+    private bool isLoading = true;
+    private Timer? loadingTimer;
+
+    protected override void OnInitialized()
+    {
+        loadingTimer = new Timer(300);
+        loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        loadingTimer.AutoReset = false;
+        loadingTimer.Start();
+
+        debounceTimer = new Timer(300);
+        debounceTimer.Elapsed += async (sender, e) => await ValidateUsernameDebounced();
+        debounceTimer.AutoReset = false;
+    }
+
+    private void FinishLoading()
+    {
+        isLoading = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ValidateUsername()
+    {
+        isValidating = true;
+        isValid = false;
+        errorMessage = string.Empty;
+        StateHasChanged();
+
+        debounceTimer?.Stop();
+        debounceTimer?.Start();
+    }
+
+    private async Task ValidateUsernameDebounced()
+    {
+        await InvokeAsync(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(Username))
+            {
+                isValidating = false;
+                isValid = false;
+                errorMessage = "Username is required.";
+                await OnUsernameChange.InvokeAsync(string.Empty);
+                StateHasChanged();
+                return;
+            }
+
+            try
+            {
+                var response = await Http.PostAsJsonAsync("api/v1/Auth/validate-username", new { Username });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    isValid = true;
+                    errorMessage = string.Empty;
+                    await OnUsernameChange.InvokeAsync(Username);
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    errorMessage = error;
+                    isValid = false;
+                    await OnUsernameChange.InvokeAsync(string.Empty);
+                }
+            }
+            catch
+            {
+                errorMessage = "An error occurred while validating the username.";
+                isValid = false;
+                await OnUsernameChange.InvokeAsync(string.Empty);
+            }
+            finally
+            {
+                isValidating = false;
+                StateHasChanged();
+            }
+        });
+    }
+
+    private void OnUsernameInputFocus(FocusEventArgs args)
+    {
+        // Reset validation state when the input is focused
+        isValid = false;
+        isValidating = false;
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        loadingTimer?.Dispose();
+        debounceTimer?.Dispose();
+    }
+}
