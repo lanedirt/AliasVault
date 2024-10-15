@@ -3,6 +3,12 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.EmptyLayout
 @attribute [AllowAnonymous]
+@inject IConfiguration Configuration
+@using System.Text.Json
+@using AliasVault.Shared.Models.WebApi.Auth
+@using AliasVault.Client.Utilities
+@using AliasVault.Cryptography.Client
+@using SecureRemotePassword
 
 <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
     <div class="w-full max-w-md mx-auto flex flex-col @(currentStep == SetupStep.Welcome ? "justify-center" : "pt-8")">
@@ -25,11 +31,11 @@
                     <UsernameStep
                         OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
                     break;
-                /*case SetupStep.Password:
+                case SetupStep.Password:
                     <PasswordStep
-                        Password="@setupData.Password"
+                        Username="@setupData.Username"
                         OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
-                    break; */
+                    break;
             }
         </div>
         <div class="fixed bottom-0 left-0 right-0 p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
@@ -43,7 +49,14 @@
                     }
                 </div>
                 <div class="lg:flex-shrink-0">
-                    @if (currentStep != SetupStep.Password)
+                    @if (currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(setupData.Password))
+                    {
+                        <button @onclick="CompleteSetup"
+                                class="w-full lg:w-auto py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
+                            Create Account
+                        </button>
+                    }
+                    else
                     {
                         <button @onclick="GoNext"
                                 class="w-full lg:w-auto py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(isNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
@@ -54,10 +67,18 @@
                 </div>
             </div>
         </div>
+        <button @onclick="CancelSetup" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
     </div>
 </div>
 
+<FullScreenLoadingIndicator @ref="LoadingIndicator"/>
+
 @code {
+    private FullScreenLoadingIndicator LoadingIndicator = new();
     private SetupStep currentStep = SetupStep.Welcome;
     private SetupData setupData = new();
     private bool isNextEnabled => currentStep switch
@@ -101,10 +122,73 @@
         };
     }
 
-    private void CompleteSetup()
+    private async Task CompleteSetup()
     {
-        // TODO: Implement the logic to save user information and create the account
-        // For example: await UserService.CreateUser(setupData.UserInfo, setupData.Password);
+        LoadingIndicator.Show();
+        StateHasChanged();
+
+        try
+        {
+            var client = new SrpClient();
+            var salt = client.GenerateSalt();
+
+            string encryptionType = Defaults.EncryptionType;
+            string encryptionSettings = Defaults.EncryptionSettings;
+            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null)
+            {
+                encryptionType = Configuration["CryptographyOverrideType"]!;
+                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
+            }
+
+            var passwordHash = await Encryption.DeriveKeyFromPasswordAsync(setupData.Password, salt, encryptionType, encryptionSettings);
+            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+            var srpSignup = Srp.PasswordChangeAsync(client, salt, setupData.Username, passwordHashString);
+
+            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                {
+                    GlobalNotificationService.AddErrorMessage(error);
+                }
+                StateHasChanged();
+                return;
+            }
+
+            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
+
+            if (tokenObject != null)
+            {
+                await AuthService.StoreEncryptionKeyAsync(passwordHash);
+                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
+                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+                GlobalNotificationService.AddSuccessMessage("Account created successfully!");
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                GlobalNotificationService.AddErrorMessage("An error occurred during registration.");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}");
+        }
+        finally
+        {
+            LoadingIndicator.Hide();
+            StateHasChanged();
+        }
+    }
+
+    private void CancelSetup()
+    {
         NavigationManager.NavigateTo("/");
     }
 
