@@ -29,6 +29,7 @@
                     break;
                 case SetupStep.UserInfo:
                     <UsernameStep
+                        DefaultUsername="@setupData.Username"
                         OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
                     break;
                 case SetupStep.Password:

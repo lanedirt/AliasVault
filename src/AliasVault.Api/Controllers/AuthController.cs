@@ -321,10 +321,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
-        // Validate username, disallow "admin" as a username.
-        if (string.Equals(model.Username, "admin", StringComparison.OrdinalIgnoreCase))
+        // Validate the username.
+        var (isValid, errorMessage) = ValidateUsername(model.Username);
+        if (!isValid)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(["Username 'admin' is not allowed."], 400));
+            return BadRequest(ServerValidationErrorResponse.Create([errorMessage], 400));
         }
 
         var user = new AliasVaultUser
@@ -417,10 +418,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return BadRequest("Username is already in use.");
         }
 
-        // Check if the username is valid (you can add more validation rules here)
-        if (!IsValidUsername(normalizedUsername))
+        // Validate the username
+        var (isValid, errorMessage) = ValidateUsername(normalizedUsername);
+
+        if (!isValid)
         {
-            return BadRequest("Invalid username format.");
+            return BadRequest(errorMessage);
         }
 
         return Ok("Username is available.");
@@ -437,16 +440,36 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     }
 
     /// <summary>
-    /// Validate username endpoint used to check if a username is available.
+    /// Validates if a given username meets the required criteria.
     /// </summary>
     /// <param name="username">The username to validate.</param>
-    /// <returns>True if the username is valid, false otherwise.</returns>
-    private static bool IsValidUsername(string username)
+    /// <returns>A tuple containing a boolean indicating if the username is valid, and an error message if it's invalid.</returns>
+    private static (bool IsValid, string ErrorMessage) ValidateUsername(string username)
     {
         const int minimumUsernameLength = 3;
+        const string adminUsername = "admin";
 
-        return !string.IsNullOrWhiteSpace(username) &&
-               username.Length >= minimumUsernameLength;
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, "Username cannot be empty or whitespace.");
+        }
+
+        if (username.Length < minimumUsernameLength)
+        {
+            return (false, $"Username must be at least {minimumUsernameLength} characters long.");
+        }
+
+        if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "Username 'admin' is not allowed.");
+        }
+
+        if (!username.All(char.IsLetterOrDigit))
+        {
+            return (false, $"Username '{username}' is invalid, can only contain letters or digits.");
+        }
+
+        return (true, string.Empty);
     }
 
     /// <summary>
