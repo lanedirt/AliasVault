@@ -298,7 +298,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Logout, AuthFailureReason.InvalidRefreshToken);

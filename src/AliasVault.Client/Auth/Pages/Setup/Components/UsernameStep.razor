@@ -1,6 +1,7 @@
 @using System.Timers
 @using System.Net.Http.Json
 @implements IDisposable
+@inject JsInteropService JsInteropService
 
 <div class="w-full max-w-md mx-auto">
     @if (isLoading)
@@ -106,6 +107,15 @@
         _debounceTimer = new Timer(300);
         _debounceTimer.Elapsed += async (sender, e) => await ValidateUsernameDebounced();
         _debounceTimer.AutoReset = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(100); // Give time for the DOM to update
+            await JsInteropService.FocusElementById("username");
+        }
     }
 
     private void FinishLoading()
