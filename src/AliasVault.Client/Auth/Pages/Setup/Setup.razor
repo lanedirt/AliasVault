@@ -13,7 +13,7 @@
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
     <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
         <div class="flex flex-col min-h-screen lg:min-h-0">
-            <div class="flex-grow p-8">
+            <div class="flex-grow p-8 pb-0">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(currentStep == SetupStep.Welcome ? "invisible" : "")">
@@ -35,13 +35,10 @@
                         <WelcomeStep />
                         break;
                     case SetupStep.Purpose:
-                        <PurposeStep
-                            Purpose="@setupData.Purpose"
-                            OnPurposeChange="@((string purpose) => { setupData.Purpose = purpose; StateHasChanged(); })"
-                            IsPurposeSelected="@(!string.IsNullOrWhiteSpace(setupData.Purpose))" />
+                        <TermsAndConditionsStep OnAgreedToTermsChanged="@HandleAgreedToTermsChanged" />
                         break;
                     case SetupStep.PurposeInstructions:
-                        <PurposeInstructionsStep Purpose="@setupData.Purpose" />
+                        <PurposeInstructionsStep />
                         break;
                     case SetupStep.UserInfo:
                         <UsernameStep
@@ -85,7 +82,7 @@
     private bool isNextEnabled => currentStep switch
     {
         SetupStep.Welcome => true,
-        SetupStep.Purpose => !string.IsNullOrWhiteSpace(setupData.Purpose),
+        SetupStep.Purpose => setupData.AgreedToTerms,
         SetupStep.PurposeInstructions => true,
         SetupStep.UserInfo => !string.IsNullOrWhiteSpace(setupData.Username),
         SetupStep.Password => !string.IsNullOrWhiteSpace(setupData.Password),
@@ -193,6 +190,12 @@
         NavigationManager.NavigateTo("/");
     }
 
+    private void HandleAgreedToTermsChanged(bool agreed)
+    {
+        setupData.AgreedToTerms = agreed;
+        StateHasChanged();
+    }
+
     private enum SetupStep
     {
         Welcome,
@@ -204,8 +207,26 @@
 
     private class SetupData
     {
-        public string Purpose { get; set; } = string.Empty;
+        public bool AgreedToTerms { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    private string GetStepTitle(SetupStep step)
+    {
+        return step switch
+        {
+            SetupStep.Welcome => "Welcome",
+            SetupStep.Purpose => "Terms and Conditions",
+            SetupStep.PurposeInstructions => "Purpose Instructions",
+            SetupStep.UserInfo => "Choose Username",
+            SetupStep.Password => "Set Password",
+            _ => "Setup"
+        };
+    }
+
+    private int GetProgressPercentage()
+    {
+        return (int)currentStep * 100 / (Enum.GetValues(typeof(SetupStep)).Length - 1);
     }
 }
