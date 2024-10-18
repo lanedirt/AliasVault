@@ -179,6 +179,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Assert that the claim was created on the server.
         var claim = await ApiDbContext.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == email);
+        Assert.That(claim, Is.Not.Null, "Claim for email address not found in database. Check if credential creation and claim creation are working correctly.");
 
         // Login as new user.
         await LogoutAndLoginAsNewUser();

@@ -464,6 +464,21 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return (false, "Username 'admin' is not allowed.");
         }
 
+        // Check if it's a valid email address
+        if (username.Contains('@'))
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(username);
+                return (addr.Address == username, string.Empty);
+            }
+            catch
+            {
+                return (false, $"'{username}' is not a valid email address.");
+            }
+        }
+
+        // If it's not an email, check if it only contains letters and digits
         if (!username.All(char.IsLetterOrDigit))
         {
             return (false, $"Username '{username}' is invalid, can only contain letters or digits.");

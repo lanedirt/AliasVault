@@ -38,9 +38,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         Assert.That(message, Does.Contain("Two-factor authentication is now successfully enabled."), "No success message displayed.");
 
         await Logout();
-
-        // Attempt to log in again with test credentials.
-        await WaitForUrlAsync("user/login", "Your username");
+        await NavigateToLogin();
 
         // Wait for the page to fully load.
         await Task.Delay(100);
@@ -80,9 +78,7 @@ public class TwoFactorAuthTests : TwoFactorAuthBase
         var (_, recoveryCode) = await EnableTwoFactor();
 
         await Logout();
-
-        // Attempt to log in again with test credentials.
-        await WaitForUrlAsync("user/login", "Your username");
+        await NavigateToLogin();
 
         // Wait for the page to fully load.
         await Task.Delay(100);

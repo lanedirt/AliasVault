@@ -28,9 +28,7 @@ public class RecoveryLockoutTests : TwoFactorAuthBase
         await EnableTwoFactor();
 
         await Logout();
-
-        // Attempt to log in again with test credentials.
-        await WaitForUrlAsync("user/login", "Your username");
+        await NavigateToLogin();
 
         // Wait for the page to fully load.
         await Task.Delay(100);
