@@ -10,70 +10,70 @@
 @using AliasVault.Cryptography.Client
 @using SecureRemotePassword
 
-<div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-    <div class="w-full max-w-md mx-auto flex flex-col @(currentStep == SetupStep.Welcome ? "justify-center" : "pt-8")">
-        <div>
-            @switch (currentStep)
-            {
-                case SetupStep.Welcome:
-                    <WelcomeStep />
-                    break;
-                case SetupStep.Purpose:
-                    <PurposeStep
-                        Purpose="@setupData.Purpose"
-                        OnPurposeChange="@((string purpose) => { setupData.Purpose = purpose; StateHasChanged(); })"
-                        IsPurposeSelected="@(!string.IsNullOrWhiteSpace(setupData.Purpose))" />
-                    break;
-                case SetupStep.PurposeInstructions:
-                    <PurposeInstructionsStep Purpose="@setupData.Purpose" />
-                    break;
-                case SetupStep.UserInfo:
-                    <UsernameStep
-                        DefaultUsername="@setupData.Username"
-                        OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
-                    break;
-                case SetupStep.Password:
-                    <PasswordStep
-                        Username="@setupData.Username"
-                        OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
-                    break;
-            }
-        </div>
-        <div class="fixed bottom-0 left-0 right-0 p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex flex-col lg:flex-row lg:justify-between">
-                <div class="lg:flex-grow">
-                    @if (currentStep != SetupStep.Welcome)
-                    {
-                        <button @onclick="GoBack" class="w-full lg:w-auto py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-gray-800 text-gray-800 dark:text-white font-semibold rounded-lg transition duration-300 ease-in-out mb-4 lg:mb-0">
-                            Go Back
-                        </button>
-                    }
-                </div>
-                <div class="lg:flex-shrink-0">
-                    @if (currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(setupData.Password))
-                    {
-                        <button @onclick="CompleteSetup"
-                                class="w-full lg:w-auto py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
-                            Create Account
-                        </button>
-                    }
-                    else
-                    {
-                        <button @onclick="GoNext"
-                                class="w-full lg:w-auto py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(isNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
-                                disabled="@(!isNextEnabled)">
-                            Continue
-                        </button>
-                    }
-                </div>
+<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
+        <div class="flex flex-col min-h-screen lg:min-h-0">
+            <div class="flex-grow p-8 pt-16 lg:pt-8">
+
+                @if (currentStep != SetupStep.Welcome)
+                {
+                    <button @onclick="GoBack" class="absolute top-4 lg:top-0 left-4 lg:left-auto lg:relative text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </button>
+                }
+
+                @switch (currentStep)
+                {
+                    case SetupStep.Welcome:
+                        <WelcomeStep />
+                        break;
+                    case SetupStep.Purpose:
+                        <PurposeStep
+                            Purpose="@setupData.Purpose"
+                            OnPurposeChange="@((string purpose) => { setupData.Purpose = purpose; StateHasChanged(); })"
+                            IsPurposeSelected="@(!string.IsNullOrWhiteSpace(setupData.Purpose))" />
+                        break;
+                    case SetupStep.PurposeInstructions:
+                        <PurposeInstructionsStep Purpose="@setupData.Purpose" />
+                        break;
+                    case SetupStep.UserInfo:
+                        <UsernameStep
+                            DefaultUsername="@setupData.Username"
+                            OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
+                        break;
+                    case SetupStep.Password:
+                        <PasswordStep
+                            Username="@setupData.Username"
+                            OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
+                        break;
+                }
+            </div>
+            <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
+                @if (currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(setupData.Password))
+                {
+                    <button @onclick="CompleteSetup"
+                            class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
+                        Create Account
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="GoNext"
+                            class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(isNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
+                            disabled="@(!isNextEnabled)">
+                        Continue
+                    </button>
+                }
             </div>
         </div>
-        <button @onclick="CancelSetup" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
     </div>
+    <button @onclick="CancelSetup" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+    </button>
 </div>
 
 <FullScreenLoadingIndicator @ref="LoadingIndicator"/>

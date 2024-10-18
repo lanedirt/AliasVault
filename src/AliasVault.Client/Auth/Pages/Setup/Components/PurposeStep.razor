@@ -3,12 +3,12 @@
 <div class="w-full max-w-md mx-auto">
     @if (isLoading)
     {
-        <div class="flex justify-center items-center h-64">
+        <div class="absolute inset-0 flex justify-center items-center z-10">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
         </div>
     }
-    <div class="@(isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300") w-full">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+    <div class="@(isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6 mb-6">
             <div class="flex items-start mb-4">
                 <div class="flex-shrink-0">
                     <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="AliasVault Assistant">
