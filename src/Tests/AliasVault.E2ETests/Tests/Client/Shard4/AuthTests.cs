@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [Category("ClientTests")]
-
 [TestFixture]
 public class AuthTests : ClientPlaywrightTest
 {
