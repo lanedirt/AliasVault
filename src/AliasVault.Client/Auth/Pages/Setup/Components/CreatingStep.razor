@@ -21,8 +21,6 @@
 </div>
 
 @code {
-    private bool IsLoading { get; set; } = true;
-
     /// <summary>
     /// The username to use for the new account.
     /// </summary>
@@ -34,6 +32,8 @@
     /// </summary>
     [Parameter]
     public string Password { get; set; } = string.Empty;
+
+    private bool IsLoading { get; set; } = true;
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -49,64 +49,16 @@
     {
         StateHasChanged();
 
-        try
+        var (success, errorMessage) = await UserRegistrationService.RegisterUserAsync(Username, Password);
+
+        if (success)
         {
-            var client = new SrpClient();
-            var salt = client.GenerateSalt();
-
-            string encryptionType = Defaults.EncryptionType;
-            string encryptionSettings = Defaults.EncryptionSettings;
-            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null)
-            {
-                encryptionType = Configuration["CryptographyOverrideType"]!;
-                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
-            }
-
-            var passwordHash = await Encryption.DeriveKeyFromPasswordAsync(Password, salt, encryptionType, encryptionSettings);
-            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-            var srpSignup = Srp.PasswordChangeAsync(client, salt, Username, passwordHashString);
-
-            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
-                {
-                    GlobalNotificationService.AddErrorMessage(error, true);
-                }
-                IsLoading = false;
-                StateHasChanged();
-                return;
-            }
-
-            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
-
-            if (tokenObject != null)
-            {
-                await AuthService.StoreEncryptionKeyAsync(passwordHash);
-                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
-                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-                await AuthStateProvider.GetAuthenticationStateAsync();
-
-                NavigationManager.NavigateTo("/");
-            }
-            else
-            {
-                IsLoading = false;
-                GlobalNotificationService.AddErrorMessage("An error occurred during registration.", true);
-                StateHasChanged();
-            }
+            NavigationManager.NavigateTo("/");
         }
-        catch (Exception ex)
-        {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
-        }
-        finally
+        else
         {
             IsLoading = false;
-
+            GlobalNotificationService.AddErrorMessage(errorMessage ?? "An error occurred during registration.", true);
             StateHasChanged();
         }
     }

@@ -1,13 +1,14 @@
+@implements IDisposable
 @using System.Timers
 
-<div class="w-full max-w-md mx-auto">
-    @if (isLoading)
+<div class="w-full mx-auto">
+    @if (_isLoading)
     {
         <div class="absolute inset-0 flex justify-center items-center z-10">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
         </div>
     }
-    <div class="@(isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
+    <div class="@(_isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Please read and agree to the following terms and conditions before proceeding.
@@ -45,31 +46,42 @@
     [Parameter]
     public bool AgreedToTerms { get; set; }
 
+    /// <summary>
+    /// The event callback for when the user has agreed to the terms and conditions.
+    /// </summary>
     [Parameter]
     public EventCallback<bool> OnAgreedToTermsChanged { get; set; }
 
-    private bool isLoading = true;
-    private Timer? loadingTimer;
+    private bool _isLoading = true;
+    private Timer? _loadingTimer;
 
-    protected override void OnInitialized()
+    /// <inheritdoc />
+    public void Dispose()
     {
-        loadingTimer = new Timer(300);
-        loadingTimer.Elapsed += (sender, e) => FinishLoading();
-        loadingTimer.AutoReset = false;
-        loadingTimer.Start();
+        _loadingTimer?.Dispose();
     }
 
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        _loadingTimer = new Timer(300);
+        _loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        _loadingTimer.AutoReset = false;
+        _loadingTimer.Start();
+    }
+
+    /// <summary>
+    /// Finishes the loading animation.
+    /// </summary>
     private void FinishLoading()
     {
-        isLoading = false;
+        _isLoading = false;
         InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose()
-    {
-        loadingTimer?.Dispose();
-    }
-
+    /// <summary>
+    /// Handles the user agreeing to the terms and conditions.
+    /// </summary>
     private async Task OnAgreedToTerms()
     {
         await OnAgreedToTermsChanged.InvokeAsync(AgreedToTerms);

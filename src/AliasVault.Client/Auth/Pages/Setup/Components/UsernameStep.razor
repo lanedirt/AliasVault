@@ -1,16 +1,15 @@
-@using System.Timers
-@using System.Net.Http.Json
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @implements IDisposable
-@inject JsInteropService JsInteropService
+@using System.Timers
 
-<div class="w-full max-w-md mx-auto">
-    @if (isLoading)
+<div class="w-full mx-auto">
+    @if (_isLoading)
     {
         <div class="absolute inset-0 flex justify-center items-center z-10">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
         </div>
     }
-    <div class="@(isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
+    <div class="@(_isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6 mb-6">
             <div class="flex items-start mb-4">
                 <div class="flex-shrink-0">
@@ -51,15 +50,6 @@
 </div>
 
 @code {
-    private string _username = string.Empty;
-    private bool _isValid = false;
-    private bool _isValidating = false;
-    private string _errorMessage = string.Empty;
-    private Timer? _debounceTimer;
-
-    [Inject]
-    private HttpClient Http { get; set; } = null!;
-
     /// <summary>
     /// The username that is previously entered by the user. When a user navigates with back/continue
     /// and entered a username already, the existing username might be provided by the parent component.
@@ -68,9 +58,21 @@
     public string DefaultUsername { get; set; } = string.Empty;
 
     /// <summary>
+    /// The event callback for when the username changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnUsernameChange { get; set; }
+
+    private string _username = string.Empty;
+    private bool _isValid = false;
+    private bool _isValidating = false;
+    private string _errorMessage = string.Empty;
+    private Timer? _debounceTimer;
+
+    /// <summary>
     /// The username that is entered by the user. This is the value that will be validated and sent to the parent component.
     /// </summary>
-    public string Username
+    private string Username
     {
         get => _username;
         set
@@ -83,12 +85,17 @@
         }
     }
 
-    [Parameter]
-    public EventCallback<string> OnUsernameChange { get; set; }
+    private bool _isLoading = true;
+    private Timer? _loadingTimer;
 
-    private bool isLoading = true;
-    private Timer? loadingTimer;
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _loadingTimer?.Dispose();
+        _debounceTimer?.Dispose();
+    }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         // Set the default username if provided.
@@ -99,16 +106,17 @@
             await ValidateUsernameDebounced();
         }
 
-        loadingTimer = new Timer(300);
-        loadingTimer.Elapsed += (sender, e) => FinishLoading();
-        loadingTimer.AutoReset = false;
-        loadingTimer.Start();
+        _loadingTimer = new Timer(300);
+        _loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        _loadingTimer.AutoReset = false;
+        _loadingTimer.Start();
 
         _debounceTimer = new Timer(300);
         _debounceTimer.Elapsed += async (sender, e) => await ValidateUsernameDebounced();
         _debounceTimer.AutoReset = false;
     }
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -119,12 +127,18 @@
         }
     }
 
+    /// <summary>
+    /// Finishes the loading animation.
+    /// </summary>
     private void FinishLoading()
     {
-        isLoading = false;
+        _isLoading = false;
         InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Validates the username immediately.
+    /// </summary>
     private void ValidateUsername()
     {
         _isValidating = true;
@@ -136,6 +150,9 @@
         _debounceTimer?.Start();
     }
 
+    /// <summary>
+    /// Validates the username after input has stopped.
+    /// </summary>
     private async Task ValidateUsernameDebounced()
     {
         await InvokeAsync(async () =>
@@ -182,6 +199,9 @@
         });
     }
 
+    /// <summary>
+    /// Handles the username input focus.
+    /// </summary>
     private void OnUsernameInputFocus(FocusEventArgs args)
     {
         // Reset validation state when the input is focused
@@ -189,11 +209,5 @@
         _isValidating = false;
         _errorMessage = string.Empty;
         StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        loadingTimer?.Dispose();
-        _debounceTimer?.Dispose();
     }
 }

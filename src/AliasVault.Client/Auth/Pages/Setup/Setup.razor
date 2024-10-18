@@ -48,9 +48,7 @@
                             OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
                         break;
                     case SetupStep.Password:
-                        <PasswordStep
-                            Username="@setupData.Username"
-                            OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
+                        <PasswordStep OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
                         break;
                     case SetupStep.Creating:
                         <CreatingStep Username="@setupData.Username" Password="@setupData.Password" />
