@@ -298,7 +298,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         // Check if the refresh token is valid.
         var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = context.AliasVaultUserRefreshTokens.FirstOrDefault(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
+        var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
         if (existingToken == null || existingToken.Value != model.RefreshToken)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Logout, AuthFailureReason.InvalidRefreshToken);
@@ -321,10 +321,11 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
-        // Validate username, disallow "admin" as a username.
-        if (string.Equals(model.Username, "admin", StringComparison.OrdinalIgnoreCase))
+        // Validate the username.
+        var (isValid, errorMessage) = ValidateUsername(model.Username);
+        if (!isValid)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(["Username 'admin' is not allowed."], 400));
+            return BadRequest(ServerValidationErrorResponse.Create([errorMessage], 400));
         }
 
         var user = new AliasVaultUser
@@ -393,6 +394,97 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         cache.Set(AuthHelper.CachePrefixEphemeral + user.UserName!, ephemeral.Secret, TimeSpan.FromMinutes(5));
 
         return Ok(new PasswordChangeInitiateResponse(latestVaultEncryptionSettings.Salt, ephemeral.Public, latestVaultEncryptionSettings.EncryptionType, latestVaultEncryptionSettings.EncryptionSettings));
+    }
+
+    /// <summary>
+    /// Validate username endpoint used to check if a username is available.
+    /// </summary>
+    /// <param name="model">ValidateUsernameRequest model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("validate-username")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ValidateUsername([FromBody] ValidateUsernameRequest model)
+    {
+        if (string.IsNullOrWhiteSpace(model.Username))
+        {
+            return BadRequest("Username is required.");
+        }
+
+        var normalizedUsername = NormalizeUsername(model.Username);
+        var existingUser = await userManager.FindByNameAsync(normalizedUsername);
+
+        if (existingUser != null)
+        {
+            return BadRequest("Username is already in use.");
+        }
+
+        // Validate the username
+        var (isValid, errorMessage) = ValidateUsername(normalizedUsername);
+
+        if (!isValid)
+        {
+            return BadRequest(errorMessage);
+        }
+
+        return Ok("Username is available.");
+    }
+
+    /// <summary>
+    /// Normalizes a username by trimming and lowercasing it.
+    /// </summary>
+    /// <param name="username">The username to normalize.</param>
+    /// <returns>The normalized username.</returns>
+    private static string NormalizeUsername(string username)
+    {
+        return username.ToLowerInvariant().Trim();
+    }
+
+    /// <summary>
+    /// Validates if a given username meets the required criteria.
+    /// </summary>
+    /// <param name="username">The username to validate.</param>
+    /// <returns>A tuple containing a boolean indicating if the username is valid, and an error message if it's invalid.</returns>
+    private static (bool IsValid, string ErrorMessage) ValidateUsername(string username)
+    {
+        const int minimumUsernameLength = 3;
+        const string adminUsername = "admin";
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, "Username cannot be empty or whitespace.");
+        }
+
+        if (username.Length < minimumUsernameLength)
+        {
+            return (false, $"Username must be at least {minimumUsernameLength} characters long.");
+        }
+
+        if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "Username 'admin' is not allowed.");
+        }
+
+        // Check if it's a valid email address
+        if (username.Contains('@'))
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(username);
+                return (addr.Address == username, string.Empty);
+            }
+            catch
+            {
+                return (false, $"'{username}' is not a valid email address.");
+            }
+        }
+
+        // If it's not an email, check if it only contains letters and digits
+        if (!username.All(char.IsLetterOrDigit))
+        {
+            return (false, $"Username '{username}' is invalid, can only contain letters or digits.");
+        }
+
+        return (true, string.Empty);
     }
 
     /// <summary>

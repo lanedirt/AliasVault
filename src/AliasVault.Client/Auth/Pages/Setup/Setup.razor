@@ -1,0 +1,198 @@
+@page "/user/setup"
+@using AliasVault.Client.Auth.Pages.Setup.Components
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@layout Auth.Layout.EmptyLayout
+@attribute [AllowAnonymous]
+
+<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
+        <div class="flex flex-col min-h-screen lg:min-h-0">
+            <div class="flex-grow p-8 pb-0">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(_currentStep == SetupStep.Welcome ? "invisible" : "")">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex-grow text-center">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@GetStepTitle(_currentStep)</h2>
+                    </div>
+                    <button @onclick="CancelSetup" class="text-gray-500 -mt-1 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                @if (GetProgressPercentage() > 0)
+                {
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700 mt-4">
+                        <div class="bg-primary-600 h-2.5 rounded-full" style="width: @(GetProgressPercentage())%"></div>
+                    </div>
+                }
+
+                @switch (_currentStep)
+                {
+                    case SetupStep.Welcome:
+                        <WelcomeStep />
+                        break;
+                    case SetupStep.TermsAndConditions:
+                        <TermsAndConditionsStep
+                            AgreedToTerms="@_setupData.AgreedToTerms"
+                            OnAgreedToTermsChanged="@HandleAgreedToTermsChanged" />
+                        break;
+                    case SetupStep.Username:
+                        <UsernameStep
+                            DefaultUsername="@_setupData.Username"
+                            OnUsernameChange="@((string username) => { _setupData.Username = username; StateHasChanged(); })" />
+                        break;
+                    case SetupStep.Password:
+                        <PasswordStep OnPasswordChange="@((string pwd) => { _setupData.Password = pwd; StateHasChanged(); })" />
+                        break;
+                    case SetupStep.Creating:
+                        <CreatingStep Username="@_setupData.Username" Password="@_setupData.Password" />
+                        break;
+                }
+            </div>
+            <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
+                @if (_currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(_setupData.Password))
+                {
+                    <button @onclick="GoNext"
+                            class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
+                        Create Account
+                    </button>
+                }
+                else if (_currentStep != SetupStep.Creating)
+                {
+                    <button @onclick="GoNext"
+                            class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(IsNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
+                            disabled="@(!IsNextEnabled)">
+                        Continue
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private SetupStep _currentStep = SetupStep.Welcome;
+    private readonly SetupData _setupData = new();
+
+    /// <summary>
+    /// Determines if the "Continue" button is enabled based on the current step and setup data.
+    /// </summary>
+    private bool IsNextEnabled => _currentStep switch
+    {
+        SetupStep.Welcome => true,
+        SetupStep.TermsAndConditions => _setupData.AgreedToTerms,
+        SetupStep.Username => !string.IsNullOrWhiteSpace(_setupData.Username),
+        SetupStep.Password => !string.IsNullOrWhiteSpace(_setupData.Password),
+        _ => false
+    };
+
+    /// <summary>
+    /// Get the title for the setup step.
+    /// </summary>
+    /// <param name="step">The current setup step.</param>
+    /// <returns>The title for the setup step.</returns>
+    private static string GetStepTitle(SetupStep step)
+    {
+        return step switch
+        {
+            SetupStep.Welcome => "Welcome to AliasVault",
+            SetupStep.TermsAndConditions => "Using AliasVault",
+            SetupStep.Username => "Choose Username",
+            SetupStep.Password => "Set Password",
+            SetupStep.Creating => "Creating Vault",
+            _ => "Setup"
+        };
+    }
+
+    /// <summary>
+    /// Navigates to the previous step in the setup process.
+    /// </summary>
+    private void GoBack()
+    {
+        switch (_currentStep)
+        {
+            case SetupStep.TermsAndConditions:
+                _currentStep = SetupStep.Welcome;
+                break;
+            case SetupStep.Username:
+                _currentStep = SetupStep.TermsAndConditions;
+                break;
+            case SetupStep.Password:
+                _currentStep = SetupStep.Username;
+                break;
+            case SetupStep.Creating:
+                _currentStep = SetupStep.Password;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Navigates to the next step in the setup process.
+    /// </summary>
+    private void GoNext()
+    {
+        _currentStep = _currentStep switch
+        {
+            SetupStep.Welcome => SetupStep.TermsAndConditions,
+            SetupStep.TermsAndConditions => SetupStep.Username,
+            SetupStep.Username => SetupStep.Password,
+            SetupStep.Password => SetupStep.Creating,
+            _ => _currentStep
+        };
+    }
+
+    /// <summary>
+    /// Cancels the setup process and navigates to the start page.
+    /// </summary>
+    private void CancelSetup()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    /// <summary>
+    /// Handles the change of the terms and conditions agreement.
+    /// </summary>
+    /// <param name="agreed">True if the terms and conditions are agreed to, false otherwise.</param>
+    private void HandleAgreedToTermsChanged(bool agreed)
+    {
+        _setupData.AgreedToTerms = agreed;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Enum representing the different steps in the setup process.
+    /// </summary>
+    private enum SetupStep
+    {
+        Welcome,
+        TermsAndConditions,
+        Username,
+        Password,
+        Creating
+    }
+
+    /// <summary>
+    /// Data class for storing setup data.
+    /// </summary>
+    private sealed class SetupData
+    {
+        public bool AgreedToTerms { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Calculates the progress percentage based on the current step in the setup process.
+    /// </summary>
+    /// <returns>The progress percentage as an integer.</returns>
+    private int GetProgressPercentage()
+    {
+        return (int)_currentStep * 100 / (Enum.GetValues(typeof(SetupStep)).Length - 1);
+    }
+}

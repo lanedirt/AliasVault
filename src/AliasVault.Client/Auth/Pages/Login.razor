@@ -9,26 +9,26 @@
 @using AliasVault.Cryptography.Client
 @using SecureRemotePassword
 
-@if (ShowTwoFactorAuthStep)
+@if (_showTwoFactorAuthStep)
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
         Two-factor authentication
     </h2>
 
-    <ServerValidationErrors @ref="ServerValidationErrors" />
+    <ServerValidationErrors @ref="_serverValidationErrors" />
 
     <p class="text-gray-700 dark:text-gray-300 mb-6">Your login is protected with an authenticator app. Enter your authenticator code below.</p>
     <div class="w-full">
-        <EditForm Model="LoginModel2Fa" FormName="login-with-2fa" OnValidSubmit="Handle2Fa" method="post" class="space-y-6">
+        <EditForm Model="_loginModel2Fa" FormName="login-with-2fa" OnValidSubmit="Handle2Fa" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
             <div>
                 <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Authenticator code</label>
-                <InputNumber @bind-Value="LoginModel2Fa.TwoFactorCode" id="two-factor-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
-                <ValidationMessage For="() => LoginModel2Fa.TwoFactorCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
+                <InputNumber @bind-Value="_loginModel2Fa.TwoFactorCode" id="two-factor-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
+                <ValidationMessage For="() => _loginModel2Fa.TwoFactorCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
             </div>
             <div class="flex items-start">
                 <div class="flex items-center h-5">
-                    <InputCheckbox @bind-Value="LoginModel2Fa.RememberMachine" id="remember-machine" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"/>
+                    <InputCheckbox @bind-Value="_loginModel2Fa.RememberMachine" id="remember-machine" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"/>
                 </div>
                 <div class="ml-3 text-sm">
                     <label for="remember-machine" class="font-medium text-gray-900 dark:text-white">Remember this machine</label>
@@ -42,25 +42,25 @@
         <button @onclick="LoginWithRecoveryCode" class="text-primary-600 hover:underline dark:text-primary-500">log in with a recovery code</button>.
     </p>
 }
-else if (ShowLoginWithRecoveryCodeStep)
+else if (_showLoginWithRecoveryCodeStep)
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
         Recovery code verification
     </h2>
 
-    <ServerValidationErrors @ref="ServerValidationErrors" />
+    <ServerValidationErrors @ref="_serverValidationErrors" />
 
     <p class="text-gray-700 dark:text-gray-300 mb-6">
         You have requested to log in with a recovery code. A recovery code is a one-time code that can be used to log in to your account.
         Note that if you don't manually disable 2FA after login, you will be asked for an authenticator code again at the next login.
     </p>
     <div class="w-full">
-        <EditForm Model="LoginModelRecoveryCode" FormName="login-with-recovery-code" OnValidSubmit="HandleRecoveryCode" method="post" class="space-y-6">
+        <EditForm Model="_loginModelRecoveryCode" FormName="login-with-recovery-code" OnValidSubmit="HandleRecoveryCode" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
             <div>
                 <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Recovery Code</label>
-                <InputText @bind-Value="LoginModelRecoveryCode.RecoveryCode" id="recovery-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
-                <ValidationMessage For="() => LoginModelRecoveryCode.RecoveryCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
+                <InputText @bind-Value="_loginModelRecoveryCode.RecoveryCode" id="recovery-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
+                <ValidationMessage For="() => _loginModelRecoveryCode.RecoveryCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
             </div>
             <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Log in</button>
         </EditForm>
@@ -73,28 +73,28 @@ else if (ShowLoginWithRecoveryCodeStep)
 else
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Sign in to AliasVault
+        Log in to AliasVault
     </h2>
 
-    <FullScreenLoadingIndicator @ref="LoadingIndicator"/>
-    <ServerValidationErrors @ref="ServerValidationErrors"/>
+    <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
+    <ServerValidationErrors @ref="_serverValidationErrors"/>
 
-    <EditForm Model="LoginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+    <EditForm Model="_loginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
         <DataAnnotationsValidator/>
         <div>
             <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
-            <InputTextField id="email" @bind-Value="LoginModel.Username" placeholder="name / name@company.com"/>
-            <ValidationMessage For="() => LoginModel.Username"/>
+            <InputTextField id="email" @bind-Value="_loginModel.Username" placeholder="name / name@company.com"/>
+            <ValidationMessage For="() => _loginModel.Username"/>
         </div>
         <div>
             <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-            <InputTextField id="password" @bind-Value="LoginModel.Password" type="password" placeholder="••••••••"/>
-            <ValidationMessage For="() => LoginModel.Password"/>
+            <InputTextField id="password" @bind-Value="_loginModel.Password" type="password" placeholder="••••••••"/>
+            <ValidationMessage For="() => _loginModel.Password"/>
         </div>
 
         <div class="flex items-start">
             <div class="flex items-center h-5">
-                <InputCheckbox @bind-Value="LoginModel.RememberMe" id="remember" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
+                <InputCheckbox @bind-Value="_loginModel.RememberMe" id="remember" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
             </div>
             <div class="ml-3 text-sm">
                 <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
@@ -104,23 +104,23 @@ else
 
         <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
         <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Not registered? <a href="/user/register" class="text-primary-700 hover:underline dark:text-primary-500">Create account</a>
+            No account yet? <a href="/user/setup" class="text-primary-700 hover:underline dark:text-primary-500">Create new vault</a>
         </div>
     </EditForm>
 }
 
 @code {
-    private readonly LoginModel LoginModel = new();
-    private readonly LoginModel2Fa LoginModel2Fa = new();
-    private readonly LoginModelRecoveryCode LoginModelRecoveryCode = new();
-    private FullScreenLoadingIndicator LoadingIndicator = new();
-    private ServerValidationErrors ServerValidationErrors = new();
-    private bool ShowTwoFactorAuthStep;
-    private bool ShowLoginWithRecoveryCodeStep;
+    private readonly LoginModel _loginModel = new();
+    private readonly LoginModel2Fa _loginModel2Fa = new();
+    private readonly LoginModelRecoveryCode _loginModelRecoveryCode = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
+    private bool _showTwoFactorAuthStep;
+    private bool _showLoginWithRecoveryCodeStep;
 
-    private SrpEphemeral ClientEphemeral = new();
-    private SrpSession ClientSession = new();
-    private byte[] PasswordHash = [];
+    private SrpEphemeral _clientEphemeral = new();
+    private SrpSession _clientSession = new();
+    private byte[] _passwordHash = [];
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -133,17 +133,30 @@ else
         }
     }
 
-    private void LoginWithAuthenticator()
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ShowLoginWithRecoveryCodeStep = false;
-        ShowTwoFactorAuthStep = true;
+        if (firstRender)
+        {
+            await Task.Delay(300); // Give time for the DOM to update
+            await JsInteropService.FocusElementById("email");
+        }
+    }
+
+    private async Task LoginWithAuthenticator()
+    {
+        _showLoginWithRecoveryCodeStep = false;
+        _showTwoFactorAuthStep = true;
         StateHasChanged();
+
+        await Task.Delay(100); // Give time for the DOM to update
+        await JsInteropService.FocusElementById("two-factor-code");
     }
 
     private void LoginWithRecoveryCode()
     {
-        ShowLoginWithRecoveryCodeStep = true;
-        ShowTwoFactorAuthStep = false;
+        _showLoginWithRecoveryCodeStep = true;
+        _showTwoFactorAuthStep = false;
         StateHasChanged();
     }
 
@@ -152,33 +165,33 @@ else
     /// </summary>
     private async Task HandleLogin()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
             var errors = await ProcessLoginAsync();
             foreach (var error in errors)
             {
-                ServerValidationErrors.AddError(error);
+                _serverValidationErrors.AddError(error);
             }
         }
 #if DEBUG
-        catch (Exception ex)
+    catch (Exception ex)
         {
-            // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
+        // If in debug mode show the actual exception.
+        _serverValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
         {
             // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally
         {
-            LoadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 
@@ -186,12 +199,12 @@ else
     /// Process the login request using username and password.
     /// </summary>
     /// <returns>List of errors if something went wrong.</returns>
-    protected async Task<List<string>> ProcessLoginAsync()
+    private async Task<List<string>> ProcessLoginAsync()
     {
         GlobalNotificationService.ClearMessages();
 
         // Sanitize username
-        var username = LoginModel.Username.ToLowerInvariant().Trim();
+        var username = _loginModel.Username.ToLowerInvariant().Trim();
 
         // Send request to server with username to get server ephemeral public key.
         var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(username));
@@ -208,24 +221,24 @@ else
             return
             [
                 "An error occurred while processing the login request.",
-            ];
+        ];
         }
 
         // 3. Client derives shared session key.
-        PasswordHash = await Encryption.DeriveKeyFromPasswordAsync(LoginModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
-        var passwordHashString = BitConverter.ToString(PasswordHash).Replace("-", string.Empty);
+        _passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_loginModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
+        var passwordHashString = BitConverter.ToString(_passwordHash).Replace("-", string.Empty);
 
-        ClientEphemeral = Srp.GenerateEphemeralClient();
+        _clientEphemeral = Srp.GenerateEphemeralClient();
         var privateKey = Srp.DerivePrivateKey(loginResponse.Salt, username, passwordHashString);
-        ClientSession = Srp.DeriveSessionClient(
+        _clientSession = Srp.DeriveSessionClient(
             privateKey,
-            ClientEphemeral.Secret,
+            _clientEphemeral.Secret,
             loginResponse.ServerEphemeral,
             loginResponse.Salt,
             username);
 
         // 4. Client sends proof of session key to server.
-        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof));
+        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof));
         responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
@@ -239,14 +252,13 @@ else
             return
             [
                 "An error occurred while processing the login request.",
-            ];
+        ];
         }
 
         // Check if 2FA is required, if yes, show 2FA step.
         if (validateLoginResponse.RequiresTwoFactor)
         {
-            ShowTwoFactorAuthStep = true;
-            StateHasChanged();
+            await LoginWithAuthenticator();
             return [];
         }
 
@@ -259,23 +271,23 @@ else
     /// </summary>
     private async Task HandleRecoveryCode()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
             // Sanitize username
-            var username = LoginModel.Username.ToLowerInvariant().Trim();
+            var username = _loginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModelRecoveryCode.RecoveryCode));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModelRecoveryCode.RecoveryCode));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
             {
                 foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
                 {
-                    ServerValidationErrors.AddError(error);
+                    _serverValidationErrors.AddError(error);
                 }
                 return;
             }
@@ -283,32 +295,32 @@ else
             var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
             if (validateLoginResponse == null)
             {
-                ServerValidationErrors.AddError("An error occurred while processing the login request.");
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
                 return;
             }
 
             var errors = await ProcessLoginVerify(validateLoginResponse);
             foreach (var error in errors)
             {
-                ServerValidationErrors.AddError(error);
+                _serverValidationErrors.AddError(error);
             }
         }
 #if DEBUG
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
+            _serverValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
         {
             // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally
         {
-            LoadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 
@@ -317,23 +329,23 @@ else
     /// </summary>
     private async Task Handle2Fa()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
             // Sanitize username
-            var username = LoginModel.Username.ToLowerInvariant().Trim();
+            var username = _loginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, LoginModel.RememberMe, ClientEphemeral.Public, ClientSession.Proof, LoginModel2Fa.TwoFactorCode ?? 0));
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModel2Fa.TwoFactorCode ?? 0));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
             {
                 foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
                 {
-                    ServerValidationErrors.AddError(error);
+                    _serverValidationErrors.AddError(error);
                 }
                 return;
             }
@@ -341,32 +353,32 @@ else
             var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
             if (validateLoginResponse == null)
             {
-                ServerValidationErrors.AddError("An error occurred while processing the login request.");
+                _serverValidationErrors.AddError("An error occurred while processing the login request.");
                 return;
             }
 
             var errors = await ProcessLoginVerify(validateLoginResponse);
             foreach (var error in errors)
             {
-                ServerValidationErrors.AddError(error);
+                _serverValidationErrors.AddError(error);
             }
         }
 #if DEBUG
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
+            _serverValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
         {
             // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally
         {
-            LoadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 
@@ -376,14 +388,14 @@ else
     private async Task<List<string>> ProcessLoginVerify(ValidateLoginResponse validateLoginResponse)
     {
         // 5. Client verifies proof.
-        Srp.VerifySession(ClientEphemeral.Public, ClientSession, validateLoginResponse.ServerSessionProof);
+        Srp.VerifySession(_clientEphemeral.Public, _clientSession, validateLoginResponse.ServerSessionProof);
 
         // Store the tokens in local storage.
         await AuthService.StoreAccessTokenAsync(validateLoginResponse.Token!.Token);
         await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token!.RefreshToken);
 
         // Store the encryption key in memory.
-        await AuthService.StoreEncryptionKeyAsync(PasswordHash);
+        await AuthService.StoreEncryptionKeyAsync(_passwordHash);
 
         await AuthStateProvider.GetAuthenticationStateAsync();
         GlobalNotificationService.ClearMessages();

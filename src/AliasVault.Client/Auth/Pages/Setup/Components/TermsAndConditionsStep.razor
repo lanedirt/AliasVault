@@ -1,0 +1,89 @@
+@implements IDisposable
+@using System.Timers
+
+<div class="w-full mx-auto">
+    @if (_isLoading)
+    {
+        <div class="absolute inset-0 flex justify-center items-center z-10">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+    }
+    <div class="@(_isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Please read and agree to the following terms and conditions before proceeding.
+            </p>
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-8 h-80 overflow-y-auto">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Terms and Conditions</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    AliasVault is designed to enhance your online security and protect your privacy. With AliasVault, you can create unique identities and email aliases for your various online accounts, helping you maintain control over your personal information and reduce the risk of identity theft.
+                    <br><br>
+                    By using AliasVault, you agree to the following terms:
+                    <br><br>
+                    1. You will not use AliasVault for any illegal purposes, including but not limited to fraud, identity theft, or impersonating real individuals.
+                    <br><br>
+                    2. You are responsible for maintaining the confidentiality of your account and any aliases created through AliasVault.
+                    <br><br>
+                    3. AliasVault reserves the right to terminate your account if we suspect any misuse or violation of these terms.
+                    <br><br>
+                    4. You understand that while AliasVault enhances your privacy, no system is completely foolproof, and you use the service at your own risk.
+                </p>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="agreeTerms" @bind="AgreedToTerms" @bind:after="OnAgreedToTerms" class="mr-2">
+                <label for="agreeTerms" class="text-sm font-bold text-gray-600 dark:text-gray-400">
+                    I have read and agree to the Terms and Conditions
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets a value indicating whether the user has agreed to the terms and conditions.
+    /// </summary>
+    [Parameter]
+    public bool AgreedToTerms { get; set; }
+
+    /// <summary>
+    /// The event callback for when the user has agreed to the terms and conditions.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> OnAgreedToTermsChanged { get; set; }
+
+    private bool _isLoading = true;
+    private Timer? _loadingTimer;
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _loadingTimer?.Dispose();
+    }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        _loadingTimer = new Timer(300);
+        _loadingTimer.Elapsed += (sender, e) => FinishLoading();
+        _loadingTimer.AutoReset = false;
+        _loadingTimer.Start();
+    }
+
+    /// <summary>
+    /// Finishes the loading animation.
+    /// </summary>
+    private void FinishLoading()
+    {
+        _isLoading = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Handles the user agreeing to the terms and conditions.
+    /// </summary>
+    private async Task OnAgreedToTerms()
+    {
+        await OnAgreedToTermsChanged.InvokeAsync(AgreedToTerms);
+    }
+}

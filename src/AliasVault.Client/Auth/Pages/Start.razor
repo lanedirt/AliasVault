@@ -1,0 +1,50 @@
+@page "/user/start"
+@using AliasVault.Client.Auth.Components
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@layout Auth.Layout.EmptyLayout
+@attribute [AllowAnonymous]
+
+<div class="flex lg:min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row">
+        <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
+            <div class="text-white text-4xl font-bold">
+                <img src="img/logo.svg" alt="AliasVault" class="w-64 h-64" />
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/2 flex items-center justify-center px-8 py-12">
+            <div class="w-full max-w-xl p-6 space-y-4 sm:p-8">
+                <Logo />
+                <h2 class="text-3xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+                    Password & Identity manager
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                    Your Privacy. Protected.
+                </p>
+                <div class="space-y-4">
+                    <a href="/user/setup" class="block w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out text-center">
+                        Create new vault
+                    </a>
+                    <a href="/user/login" class="block w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 text-gray-800 dark:text-white font-semibold rounded-lg transition duration-300 ease-in-out text-center">
+                        Log in with existing account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Footer ShowBorder="false"></Footer>
+
+@code {
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true) {
+            // Already authenticated, redirect to home page.
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

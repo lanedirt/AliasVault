@@ -1,50 +1,42 @@
 @page "/user/register"
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@inject HttpClient Http
-@inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
-@inject AuthService AuthService
-@inject IConfiguration Configuration
-@using System.Text.Json
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
-@using AliasVault.Client.Utilities
-@using AliasVault.Cryptography.Client
-@using SecureRemotePassword
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
     Create a new AliasVault account
 </h2>
 
-<FullScreenLoadingIndicator @ref="LoadingIndicator" />
-<ServerValidationErrors @ref="ServerValidationErrors" />
+<FullScreenLoadingIndicator @ref="_loadingIndicator" />
+<ServerValidationErrors @ref="_serverValidationErrors" />
 
-<EditForm Model="RegisterModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
+<EditForm Model="_registerModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
-        <InputTextField id="email" @bind-Value="RegisterModel.Username" placeholder="name / name@company.com" />
-        <ValidationMessage For="() => RegisterModel.Username"/>
+        <InputTextField id="email" @bind-Value="_registerModel.Username" placeholder="name / name@company.com" />
+        <ValidationMessage For="() => _registerModel.Username"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="RegisterModel.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => RegisterModel.Password"/>
+        <InputTextField id="password" @bind-Value="_registerModel.Password" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => _registerModel.Password"/>
     </div>
     <div>
         <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
-        <InputTextField id="password2" @bind-Value="RegisterModel.PasswordConfirm" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => RegisterModel.PasswordConfirm"/>
+        <InputTextField id="password2" @bind-Value="_registerModel.PasswordConfirm" type="password" placeholder="••••••••" />
+        <ValidationMessage For="() => _registerModel.PasswordConfirm"/>
     </div>
 
     <div class="flex items-start">
         <div class="flex items-center h-5">
-            <InputCheckbox id="terms" @bind-Value="RegisterModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
+            <InputCheckbox id="terms" @bind-Value="_registerModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
         </div>
         <div class="ml-3 text-sm">
             <label for="terms" class="font-medium text-gray-900 dark:text-white">I accept the <a href="https://github.com/lanedirt/AliasVault/blob/main/LICENSE.md" target="_blank" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
-            <ValidationMessage For="() => RegisterModel.AcceptTerms"/>
+            <ValidationMessage For="() => _registerModel.AcceptTerms"/>
         </div>
     </div>
 
@@ -55,73 +47,27 @@
 </EditForm>
 
 @code {
-    private readonly RegisterModel RegisterModel = new();
-    private FullScreenLoadingIndicator LoadingIndicator = new();
-    private ServerValidationErrors ServerValidationErrors = new();
+    private readonly RegisterModel _registerModel = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
 
-    async Task HandleRegister()
+    private async Task HandleRegister()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
-        try
+        var (success, errorMessage) = await UserRegistrationService.RegisterUserAsync(_registerModel.Username, _registerModel.Password);
+
+        if (success)
         {
-            var client = new SrpClient();
-            var salt = client.GenerateSalt();
-
-            byte[] passwordHash;
-            string encryptionType = Defaults.EncryptionType;
-            string encryptionSettings = Defaults.EncryptionSettings;
-            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null) {
-                // If cryptography type and settings override are present in appsettings.json, use them instead of defaults
-                // declared in code. This is used in certain cases e.g. E2E tests to speed up the process.
-                encryptionType = Configuration["CryptographyOverrideType"]!;
-                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
-            }
-
-            passwordHash = await Encryption.DeriveKeyFromPasswordAsync(RegisterModel.Password, salt, encryptionType, encryptionSettings);
-            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-            var srpSignup = Srp.PasswordChangeAsync(client, salt, RegisterModel.Username, passwordHashString);
-
-            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
-                {
-                    ServerValidationErrors.AddError(error);
-                }
-                StateHasChanged();
-                return;
-            }
-
-            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
-
-            if (tokenObject != null)
-            {
-                // Store the encryption key in memory.
-                await AuthService.StoreEncryptionKeyAsync(passwordHash);
-
-                // Store the token as a plain string in local storage
-                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
-                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-                await AuthStateProvider.GetAuthenticationStateAsync();
-            }
-            else
-            {
-                // Handle the case where the token is not present in the response
-                ServerValidationErrors.AddError("An error occured during registration.");
-                StateHasChanged();
-                return;
-            }
-
             NavigationManager.NavigateTo("/");
         }
-        finally
+        else
         {
-            LoadingIndicator.Hide();
+            _serverValidationErrors.AddError(errorMessage ?? "An error occurred during registration.");
+            StateHasChanged();
         }
+
+        _loadingIndicator.Hide();
     }
 }

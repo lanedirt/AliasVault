@@ -28,6 +28,12 @@ public class LoginBase : OwningComponentBase
     public required NavigationManager NavigationManager { get; set; }
 
     /// <summary>
+    /// Gets or sets the UserRegistrationService.
+    /// </summary>
+    [Inject]
+    public required UserRegistrationService UserRegistrationService { get; set; }
+
+    /// <summary>
     /// Gets or sets the HttpClient.
     /// </summary>
     [Inject]
@@ -50,6 +56,12 @@ public class LoginBase : OwningComponentBase
     /// </summary>
     [Inject]
     public required IJSRuntime Js { get; set; }
+
+    /// <summary>
+    /// Gets or sets the JsInteropService.
+    /// </summary>
+    [Inject]
+    public required JsInteropService JsInteropService { get; set; }
 
     /// <summary>
     /// Gets or sets the DbService.

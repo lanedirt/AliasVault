@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [Category("ClientTests")]
-
 [TestFixture]
 public class AuthTests : ClientPlaywrightTest
 {
@@ -121,6 +120,7 @@ public class AuthTests : ClientPlaywrightTest
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();
+        await NavigateToLogin();
 
         // Fill in wrong password 11 times. After 11 times, the account should be locked.
         // Note: the actual lockout happens on the 10th wrong attempt, but the lockout message is only displayed

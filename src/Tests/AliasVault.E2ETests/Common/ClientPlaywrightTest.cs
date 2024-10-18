@@ -132,9 +132,9 @@ public class ClientPlaywrightTest : PlaywrightTest
         Page = await Context.NewPageAsync();
         InputHelper = new(Page);
 
-        // Check that we get redirected to /user/login when accessing the root URL and not authenticated.
+        // Check that we get redirected to /user/start when accessing the root URL and not authenticated.
         await Page.GotoAsync(AppBaseUrl);
-        await WaitForUrlAsync("user/login");
+        await WaitForUrlAsync("user/start");
 
         // Register a new account here because every test requires this.
         await Register();
@@ -283,8 +283,10 @@ public class ClientPlaywrightTest : PlaywrightTest
     protected async Task Login(bool rememberMe = false)
     {
         // Check that we are on the login page after navigating to the base URL.
-        // We are expecting to not be authenticated and thus to be redirected to the login page.
+        // We are expecting to not be authenticated and thus to be redirected to the start page.
         await Page.GotoAsync(AppBaseUrl);
+        await WaitForUrlAsync("user/start", "Log in with");
+        await NavigateUsingBlazorRouter("user/login");
         await WaitForUrlAsync("user/login", "Your username");
 
         // Try to log in with test credentials.
@@ -315,7 +317,19 @@ public class ClientPlaywrightTest : PlaywrightTest
     protected async Task Logout()
     {
         await NavigateUsingBlazorRouter("user/logout");
-        await WaitForUrlAsync("user/login**", "Sign in to");
+        await WaitForUrlAsync("user/start**", "Log in with");
+    }
+
+    /// <summary>
+    /// Hard refresh and navigate to the login page.
+    /// </summary>
+    /// <returns>Task.</returns>
+    protected async Task NavigateToLogin()
+    {
+        await Page.GotoAsync(AppBaseUrl);
+        await WaitForUrlAsync("user/start", "Log in with");
+        await NavigateUsingBlazorRouter("user/login");
+        await WaitForUrlAsync("user/login", "Your username");
     }
 
     /// <summary>
@@ -344,8 +358,7 @@ public class ClientPlaywrightTest : PlaywrightTest
     protected async Task Register(bool checkForSuccess = true, string? username = null, string? password = null)
     {
         // Try to register a new account.
-        var registerButton = await WaitForAndGetElement("a[href='/user/register']");
-        await registerButton.ClickAsync();
+        await NavigateUsingBlazorRouter("user/register");
         await WaitForUrlAsync("user/register");
 
         // Try to register an account with the generated test credentials.

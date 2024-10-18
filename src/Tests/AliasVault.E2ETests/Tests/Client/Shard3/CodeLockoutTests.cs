@@ -27,8 +27,10 @@ public class CodeLockoutTests : TwoFactorAuthBase
         await DisableTwoFactorIfEnabled();
         await EnableTwoFactor();
         await Logout();
+        await NavigateToLogin();
 
         // Attempt to log in again with test credentials.
+        await NavigateUsingBlazorRouter("user/login");
         await WaitForUrlAsync("user/login", "Your username");
 
         // Wait for the page to fully load.
