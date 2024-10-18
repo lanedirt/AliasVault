@@ -11,18 +11,23 @@
 @using SecureRemotePassword
 
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-    <div class="w-full max-w-md mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
+    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
         <div class="flex flex-col min-h-screen lg:min-h-0">
-            <div class="flex-grow p-8 pt-16 lg:pt-8">
-
-                @if (currentStep != SetupStep.Welcome)
-                {
-                    <button @onclick="GoBack" class="absolute top-4 lg:top-0 left-4 lg:left-auto lg:relative text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            <div class="flex-grow p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(currentStep == SetupStep.Welcome ? "invisible" : "")">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button @onclick="CancelSetup" class="text-gray-500 -mt-1 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
-                }
+                </div>
 
                 @switch (currentStep)
                 {
@@ -69,11 +74,6 @@
             </div>
         </div>
     </div>
-    <button @onclick="CancelSetup" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-    </button>
 </div>
 
 <FullScreenLoadingIndicator @ref="LoadingIndicator"/>
