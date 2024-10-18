@@ -3,12 +3,6 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.EmptyLayout
 @attribute [AllowAnonymous]
-@inject IConfiguration Configuration
-@using System.Text.Json
-@using AliasVault.Shared.Models.WebApi.Auth
-@using AliasVault.Client.Utilities
-@using AliasVault.Cryptography.Client
-@using SecureRemotePassword
 
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
     <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
@@ -22,25 +16,33 @@
                             </svg>
                         </button>
                     </div>
+                    <div class="flex-grow text-center">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@GetStepTitle(currentStep)</h2>
+                    </div>
                     <button @onclick="CancelSetup" class="text-gray-500 -mt-1 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
+                @if (GetProgressPercentage() > 0)
+                {
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700 mt-4">
+                        <div class="bg-primary-600 h-2.5 rounded-full" style="width: @(GetProgressPercentage())%"></div>
+                    </div>
+                }
 
                 @switch (currentStep)
                 {
                     case SetupStep.Welcome:
                         <WelcomeStep />
                         break;
-                    case SetupStep.Purpose:
-                        <TermsAndConditionsStep OnAgreedToTermsChanged="@HandleAgreedToTermsChanged" />
+                    case SetupStep.TermsAndConditions:
+                        <TermsAndConditionsStep
+                            AgreedToTerms="@setupData.AgreedToTerms"
+                            OnAgreedToTermsChanged="@HandleAgreedToTermsChanged" />
                         break;
-                    case SetupStep.PurposeInstructions:
-                        <PurposeInstructionsStep />
-                        break;
-                    case SetupStep.UserInfo:
+                    case SetupStep.Username:
                         <UsernameStep
                             DefaultUsername="@setupData.Username"
                             OnUsernameChange="@((string username) => { setupData.Username = username; StateHasChanged(); })" />
@@ -50,17 +52,20 @@
                             Username="@setupData.Username"
                             OnPasswordChange="@((string pwd) => { setupData.Password = pwd; StateHasChanged(); })" />
                         break;
+                    case SetupStep.Creating:
+                        <CreatingStep Username="@setupData.Username" Password="@setupData.Password" />
+                        break;
                 }
             </div>
             <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
                 @if (currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(setupData.Password))
                 {
-                    <button @onclick="CompleteSetup"
+                    <button @onclick="GoNext"
                             class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
                         Create Account
                     </button>
                 }
-                else
+                else if (currentStep != SetupStep.Creating)
                 {
                     <button @onclick="GoNext"
                             class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(isNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
@@ -73,18 +78,14 @@
     </div>
 </div>
 
-<FullScreenLoadingIndicator @ref="LoadingIndicator"/>
-
 @code {
-    private FullScreenLoadingIndicator LoadingIndicator = new();
     private SetupStep currentStep = SetupStep.Welcome;
     private SetupData setupData = new();
     private bool isNextEnabled => currentStep switch
     {
         SetupStep.Welcome => true,
-        SetupStep.Purpose => setupData.AgreedToTerms,
-        SetupStep.PurposeInstructions => true,
-        SetupStep.UserInfo => !string.IsNullOrWhiteSpace(setupData.Username),
+        SetupStep.TermsAndConditions => setupData.AgreedToTerms,
+        SetupStep.Username => !string.IsNullOrWhiteSpace(setupData.Username),
         SetupStep.Password => !string.IsNullOrWhiteSpace(setupData.Password),
         _ => false
     };
@@ -93,17 +94,17 @@
     {
         switch (currentStep)
         {
-            case SetupStep.Purpose:
+            case SetupStep.TermsAndConditions:
                 currentStep = SetupStep.Welcome;
                 break;
-            case SetupStep.PurposeInstructions:
-                currentStep = SetupStep.Purpose;
-                break;
-            case SetupStep.UserInfo:
-                currentStep = SetupStep.PurposeInstructions;
+            case SetupStep.Username:
+                currentStep = SetupStep.TermsAndConditions;
                 break;
             case SetupStep.Password:
-                currentStep = SetupStep.UserInfo;
+                currentStep = SetupStep.Username;
+                break;
+            case SetupStep.Creating:
+                currentStep = SetupStep.Password;
                 break;
         }
     }
@@ -112,77 +113,12 @@
     {
         currentStep = currentStep switch
         {
-            SetupStep.Welcome => SetupStep.Purpose,
-            SetupStep.Purpose => SetupStep.PurposeInstructions,
-            SetupStep.PurposeInstructions => SetupStep.UserInfo,
-            SetupStep.UserInfo => SetupStep.Password,
+            SetupStep.Welcome => SetupStep.TermsAndConditions,
+            SetupStep.TermsAndConditions => SetupStep.Username,
+            SetupStep.Username => SetupStep.Password,
+            SetupStep.Password => SetupStep.Creating,
             _ => currentStep
         };
-    }
-
-    private async Task CompleteSetup()
-    {
-        LoadingIndicator.Show();
-        StateHasChanged();
-
-        try
-        {
-            var client = new SrpClient();
-            var salt = client.GenerateSalt();
-
-            string encryptionType = Defaults.EncryptionType;
-            string encryptionSettings = Defaults.EncryptionSettings;
-            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null)
-            {
-                encryptionType = Configuration["CryptographyOverrideType"]!;
-                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
-            }
-
-            var passwordHash = await Encryption.DeriveKeyFromPasswordAsync(setupData.Password, salt, encryptionType, encryptionSettings);
-            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
-            var srpSignup = Srp.PasswordChangeAsync(client, salt, setupData.Username, passwordHashString);
-
-            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
-            var responseContent = await result.Content.ReadAsStringAsync();
-
-            if (!result.IsSuccessStatusCode)
-            {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
-                {
-                    GlobalNotificationService.AddErrorMessage(error);
-                }
-                StateHasChanged();
-                return;
-            }
-
-            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
-
-            if (tokenObject != null)
-            {
-                await AuthService.StoreEncryptionKeyAsync(passwordHash);
-                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
-                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-                await AuthStateProvider.GetAuthenticationStateAsync();
-
-                GlobalNotificationService.AddSuccessMessage("Account created successfully!");
-                NavigationManager.NavigateTo("/");
-            }
-            else
-            {
-                GlobalNotificationService.AddErrorMessage("An error occurred during registration.");
-                StateHasChanged();
-            }
-        }
-        catch (Exception ex)
-        {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}");
-        }
-        finally
-        {
-            LoadingIndicator.Hide();
-            StateHasChanged();
-        }
     }
 
     private void CancelSetup()
@@ -199,10 +135,10 @@
     private enum SetupStep
     {
         Welcome,
-        Purpose,
-        PurposeInstructions,
-        UserInfo,
-        Password
+        TermsAndConditions,
+        Username,
+        Password,
+        Creating
     }
 
     private class SetupData
@@ -216,11 +152,11 @@
     {
         return step switch
         {
-            SetupStep.Welcome => "Welcome",
-            SetupStep.Purpose => "Terms and Conditions",
-            SetupStep.PurposeInstructions => "Purpose Instructions",
-            SetupStep.UserInfo => "Choose Username",
+            SetupStep.Welcome => "Welcome to AliasVault",
+            SetupStep.TermsAndConditions => "Using AliasVault",
+            SetupStep.Username => "Choose Username",
             SetupStep.Password => "Set Password",
+            SetupStep.Creating => "Creating Vault",
             _ => "Setup"
         };
     }

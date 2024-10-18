@@ -1,0 +1,113 @@
+@inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@layout Auth.Layout.EmptyLayout
+@attribute [AllowAnonymous]
+@inject IConfiguration Configuration
+@using System.Text.Json
+@using AliasVault.Client.Utilities
+@using AliasVault.Cryptography.Client
+@using AliasVault.Shared.Models.WebApi.Auth
+@using SecureRemotePassword
+
+<div class="w-full mx-auto">
+    <div class="relative inset-0 mt-10 z-10">
+        <GlobalNotificationDisplay />
+        @if (IsLoading)
+        {
+            <div class="flex justify-center items-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool IsLoading { get; set; } = true;
+
+    /// <summary>
+    /// The username to use for the new account.
+    /// </summary>
+    [Parameter]
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The password to use for the new account.
+    /// </summary>
+    [Parameter]
+    public string Password { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await CompleteSetup();
+        }
+    }
+
+    private async Task CompleteSetup()
+    {
+        StateHasChanged();
+
+        try
+        {
+            var client = new SrpClient();
+            var salt = client.GenerateSalt();
+
+            string encryptionType = Defaults.EncryptionType;
+            string encryptionSettings = Defaults.EncryptionSettings;
+            if (Configuration["CryptographyOverrideType"] is not null && Configuration["CryptographyOverrideSettings"] is not null)
+            {
+                encryptionType = Configuration["CryptographyOverrideType"]!;
+                encryptionSettings = Configuration["CryptographyOverrideSettings"]!;
+            }
+
+            var passwordHash = await Encryption.DeriveKeyFromPasswordAsync(Password, salt, encryptionType, encryptionSettings);
+            var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+            var srpSignup = Srp.PasswordChangeAsync(client, salt, Username, passwordHashString);
+
+            var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
+            var result = await Http.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                {
+                    GlobalNotificationService.AddErrorMessage(error, true);
+                }
+                IsLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            var tokenObject = JsonSerializer.Deserialize<TokenModel>(responseContent);
+
+            if (tokenObject != null)
+            {
+                await AuthService.StoreEncryptionKeyAsync(passwordHash);
+                await AuthService.StoreAccessTokenAsync(tokenObject.Token);
+                await AuthService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                IsLoading = false;
+                GlobalNotificationService.AddErrorMessage("An error occurred during registration.", true);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+        }
+        finally
+        {
+            IsLoading = false;
+
+            StateHasChanged();
+        }
+    }
+}

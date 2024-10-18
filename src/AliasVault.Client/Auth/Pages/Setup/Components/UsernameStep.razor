@@ -111,6 +111,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             await Task.Delay(100); // Give time for the DOM to update

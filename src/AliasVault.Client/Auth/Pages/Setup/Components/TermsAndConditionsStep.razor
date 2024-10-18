@@ -9,7 +9,6 @@
     }
     <div class="@(isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Using AliasVault</h2>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Please read and agree to the following terms and conditions before proceeding.
             </p>
@@ -30,7 +29,7 @@
                 </p>
             </div>
             <div class="flex items-center">
-                <input type="checkbox" id="agreeTerms" @bind="agreedToTerms" @bind:after="OnAgreedToTerms" class="mr-2">
+                <input type="checkbox" id="agreeTerms" @bind="AgreedToTerms" @bind:after="OnAgreedToTerms" class="mr-2">
                 <label for="agreeTerms" class="text-sm font-bold text-gray-600 dark:text-gray-400">
                     I have read and agree to the Terms and Conditions
                 </label>
@@ -40,12 +39,17 @@
 </div>
 
 @code {
+    /// <summary>
+    /// Gets or sets a value indicating whether the user has agreed to the terms and conditions.
+    /// </summary>
+    [Parameter]
+    public bool AgreedToTerms { get; set; }
+
     [Parameter]
     public EventCallback<bool> OnAgreedToTermsChanged { get; set; }
 
     private bool isLoading = true;
     private Timer? loadingTimer;
-    private bool agreedToTerms = false;
 
     protected override void OnInitialized()
     {
@@ -68,6 +72,6 @@
 
     private async Task OnAgreedToTerms()
     {
-        await OnAgreedToTermsChanged.InvokeAsync(agreedToTerms);
+        await OnAgreedToTermsChanged.InvokeAsync(AgreedToTerms);
     }
 }
