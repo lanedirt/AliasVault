@@ -5,8 +5,8 @@
 @attribute [AllowAnonymous]
 
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
-        <div class="flex flex-col min-h-screen lg:min-h-0">
+    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
+        <div class="flex flex-col flex-grow">
             <div class="flex-grow p-8 pb-0">
                 <div class="flex justify-between items-center mb-4">
                     <div>
@@ -55,7 +55,7 @@
                         break;
                 }
             </div>
-            <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
+            <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0 pb-safe">
                 @if (_currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(_setupData.Password))
                 {
                     <button @onclick="GoNext"
