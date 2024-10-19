@@ -202,4 +202,205 @@ public class AttachmentTests : ClientPlaywrightTest
         pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Not.Contain("TestAttachment.txt"), "Deleted attachment name appears on view page after saving.");
     }
+
+    /// <summary>
+    /// Test that uploading multiple attachments one by one works correctly.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(4)]
+    public async Task UploadMultipleAttachmentsOneByOne()
+    {
+        // Create a new alias with service name = "Test Service Multiple Attachments".
+        var serviceName = "Test Service Multiple Attachments";
+        var attachmentNames = new[] { "Attachment1.txt", "Attachment2.txt", "Attachment3.txt" };
+
+        await CreateCredentialEntry(
+            new Dictionary<string, string>
+            {
+                { "service-name", serviceName },
+            },
+            async () =>
+            {
+                var fileInput = Page.Locator("input[type='file']");
+                var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+
+                foreach (var attachmentName in attachmentNames)
+                {
+                    var tempFilePath = Path.Combine(Path.GetTempPath(), attachmentName);
+                    await File.WriteAllBytesAsync(tempFilePath, fileContent);
+
+                    // Set the file input for each file individually
+                    await fileInput.SetInputFilesAsync(tempFilePath);
+
+                    // Wait for the file to be uploaded and the UI to update
+                    await Page.WaitForSelectorAsync($"text={attachmentName}");
+
+                    // Delete the temporary file
+                    File.Delete(tempFilePath);
+                }
+            });
+
+        // Check that all attachment names appear on the alias page.
+        var pageContent = await Page.TextContentAsync("body");
+        foreach (var attachmentName in attachmentNames)
+        {
+            Assert.That(pageContent, Does.Contain(attachmentName), $"Uploaded attachment name '{attachmentName}' does not appear on alias page.");
+        }
+
+        // Verify that we can download each attachment
+        foreach (var attachmentName in attachmentNames)
+        {
+            var downloadPromise = Page.WaitForDownloadAsync();
+            await Page.ClickAsync($"text={attachmentName}");
+            var download = await downloadPromise;
+
+            var downloadedFilePath = await download.PathAsync();
+            var downloadedContent = await File.ReadAllBytesAsync(downloadedFilePath);
+
+            var originalContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+            Assert.That(downloadedContent, Is.EqualTo(originalContent), $"Downloaded file content for '{attachmentName}' does not match the original file content.");
+
+            File.Delete(downloadedFilePath);
+        }
+    }
+
+    /// <summary>
+    /// Test that adding multiple attachments to an existing credential works correctly.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(5)]
+    public async Task AddMultipleAttachmentsToExistingCredential()
+    {
+        // Create a new empty alias with service name = "Test Service Add Multiple Attachments".
+        var serviceName = "Test Service Add Multiple Attachments";
+        await CreateCredentialEntry(
+            new Dictionary<string, string>
+            {
+                { "service-name", serviceName },
+            });
+
+        // Edit the credential
+        await Page.ClickAsync("text=Edit");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+
+        var attachmentNames = new[] { "Attachment1.txt", "Attachment2.txt", "Attachment3.txt" };
+        var fileInput = Page.Locator("input[type='file']");
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+
+        foreach (var attachmentName in attachmentNames)
+        {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), attachmentName);
+            await File.WriteAllBytesAsync(tempFilePath, fileContent);
+
+            // Set the file input for each file individually
+            await fileInput.SetInputFilesAsync(tempFilePath);
+
+            // Wait for the file to be uploaded and the UI to update
+            await Page.WaitForSelectorAsync($"text={attachmentName}");
+
+            // Delete the temporary file
+            File.Delete(tempFilePath);
+        }
+
+        // Save the updated credential
+        var saveButton = Page.Locator("text=Save Credentials").First;
+        await saveButton.ClickAsync();
+        await WaitForUrlAsync("credentials/**", "Credential updated successfully");
+
+        // Check that all attachment names appear on the alias page.
+        var pageContent = await Page.TextContentAsync("body");
+        foreach (var attachmentName in attachmentNames)
+        {
+            Assert.That(pageContent, Does.Contain(attachmentName), $"Uploaded attachment name '{attachmentName}' does not appear on alias page.");
+        }
+
+        // Verify that we can download each attachment
+        foreach (var attachmentName in attachmentNames)
+        {
+            var downloadPromise = Page.WaitForDownloadAsync();
+            await Page.ClickAsync($"text={attachmentName}");
+            var download = await downloadPromise;
+
+            var downloadedFilePath = await download.PathAsync();
+            var downloadedContent = await File.ReadAllBytesAsync(downloadedFilePath);
+
+            var originalContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+            Assert.That(downloadedContent, Is.EqualTo(originalContent), $"Downloaded file content for '{attachmentName}' does not match the original file content.");
+
+            File.Delete(downloadedFilePath);
+        }
+    }
+
+    /// <summary>
+    /// Test that uploading multiple attachments simultaneously works correctly.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(6)]
+    public async Task UploadMultipleAttachmentsSimultaneously()
+    {
+        // Create a new alias with service name = "Test Service Multiple Attachments Simultaneous".
+        var serviceName = "Test Service Multiple Attachments Simultaneous";
+        var attachmentNames = new[] { "Attachment1.txt", "Attachment2.txt", "Attachment3.txt" };
+
+        await CreateCredentialEntry(
+            new Dictionary<string, string>
+            {
+                { "service-name", serviceName },
+            },
+            async () =>
+            {
+                var fileInput = Page.Locator("input[type='file']");
+                var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+
+                var tempFilePaths = new List<string>();
+
+                foreach (var attachmentName in attachmentNames)
+                {
+                    var tempFilePath = Path.Combine(Path.GetTempPath(), attachmentName);
+                    await File.WriteAllBytesAsync(tempFilePath, fileContent);
+                    tempFilePaths.Add(tempFilePath);
+                }
+
+                // Set the file input using all temporary files simultaneously
+                await fileInput.SetInputFilesAsync(tempFilePaths.ToArray());
+
+                // Wait for all files to be uploaded and the UI to update
+                foreach (var attachmentName in attachmentNames)
+                {
+                    await Page.WaitForSelectorAsync($"text={attachmentName}");
+                }
+
+                // Delete the temporary files
+                foreach (var tempFilePath in tempFilePaths)
+                {
+                    File.Delete(tempFilePath);
+                }
+            });
+
+        // Check that all attachment names appear on the alias page.
+        var pageContent = await Page.TextContentAsync("body");
+        foreach (var attachmentName in attachmentNames)
+        {
+            Assert.That(pageContent, Does.Contain(attachmentName), $"Uploaded attachment name '{attachmentName}' does not appear on alias page.");
+        }
+
+        // Verify that we can download each attachment
+        foreach (var attachmentName in attachmentNames)
+        {
+            var downloadPromise = Page.WaitForDownloadAsync();
+            await Page.ClickAsync($"text={attachmentName}");
+            var download = await downloadPromise;
+
+            var downloadedFilePath = await download.PathAsync();
+            var downloadedContent = await File.ReadAllBytesAsync(downloadedFilePath);
+
+            var originalContent = await ResourceReaderUtility.ReadEmbeddedResourceBytesAsync("AliasVault.E2ETests.TestData.TestAttachment.txt");
+            Assert.That(downloadedContent, Is.EqualTo(originalContent), $"Downloaded file content for '{attachmentName}' does not match the original file content.");
+
+            File.Delete(downloadedFilePath);
+        }
+    }
 }
