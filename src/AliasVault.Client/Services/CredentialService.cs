@@ -239,11 +239,14 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         // Update existing attachments and add new ones
         foreach (var attachment in loginObject.Attachments)
         {
-            var existingAttachment = login.Attachments.FirstOrDefault(a => a.Id == attachment.Id);
-            if (existingAttachment != null)
+            if (attachment.Id != Guid.Empty)
             {
-                // Update existing attachment
-                context.Entry(existingAttachment).CurrentValues.SetValues(attachment);
+                var existingAttachment = login.Attachments.FirstOrDefault(a => a.Id == attachment.Id);
+                if (existingAttachment != null)
+                {
+                    // Update existing attachment
+                    context.Entry(existingAttachment).CurrentValues.SetValues(attachment);
+                }
             }
             else
             {
