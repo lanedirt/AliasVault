@@ -48,9 +48,9 @@ print_logo() {
 stop_and_remove_containers() {
   printf "${CYAN}> Stopping and removing Docker containers...${NC}\n"
   if [ "$VERBOSE" = true ]; then
-    docker-compose down -v
+    docker compose down -v
   else
-    docker-compose down -v > /dev/null 2>&1
+    docker compose down -v > /dev/null 2>&1
   fi
   printf "${GREEN}> Docker containers stopped and removed.${NC}\n"
 }
@@ -59,9 +59,9 @@ stop_and_remove_containers() {
 remove_docker_images() {
   printf "${CYAN}> Removing Docker images...${NC}\n"
   if [ "$VERBOSE" = true ]; then
-    docker-compose down --rmi all
+    docker compose down --rmi all
   else
-    docker-compose down --rmi all > /dev/null 2>&1
+    docker compose down --rmi all > /dev/null 2>&1
   fi
   printf "${GREEN}> Docker images removed.${NC}\n"
 }
