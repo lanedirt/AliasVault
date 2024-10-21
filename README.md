@@ -1,9 +1,9 @@
 <div align="center">
 
-<h1><img src="https://main.aliasvault.net/icon-trimmed.png" width="40" /> AliasVault</h1>
+<h1><img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="40" /> AliasVault</h1>
 
 <p align="center">
-<a href="https://main.aliasvault.net">Live demo 🚀</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🏠</a> • <a href="#installation">Installation 📦</a>
+<a href="https://app.aliasvault.net">Live demo 🚀</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🏠</a> • <a href="#installation">Installation 📦</a>
 </p>
 
 <h3 align="center">
@@ -30,7 +30,7 @@ AliasVault is an open-source password and identity manager built with C# ASP.NET
 > Note: AliasVault is currently in active development and some features may not yet have been (fully) implemented. If you run into any issues, please create an issue on GitHub.
 
 ## Live demo
-A live demo of the app is available at [main.aliasvault.net](https://main.aliasvault.net) (nightly builds). You can create a free account to try it out yourself.
+A live demo of the app is available at the official website at [app.aliasvault.net](https://app.aliasvault.net) (up-to-date with `main` branch). You can create a free account to try it out yourself.
 
 <img width="700" alt="Screenshot 2024-07-12 at 14 58 29" src="https://github.com/user-attachments/assets/57103f67-dff0-4124-9b33-62137aab5578">
 
