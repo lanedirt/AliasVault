@@ -10,7 +10,7 @@
 
 <LayoutPageTitle>Sync</LayoutPageTitle>
 
-<div class="fixed inset-0 overflow-y-auto h-full w-full flex flex-col items-center justify-center">
+<div class="fixed inset-0 flex flex-col items-center justify-center px-6 pt-8 pb-8 h-full w-full">
     @if (CurrentDbState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
     {
         <ErrorVaultDecrypt />
