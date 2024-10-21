@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Components;
 /// This services handles all API requests to the AliasVault API and will add the access token to the request headers.
 /// If a 401 unauthorized is returned by the API it will intercept this response and attempt to automatically refresh the access token.
 /// </summary>
+/// <param name="serviceProvider">IServiceProvider instance.</param>
 public sealed class AliasVaultApiHandlerService(IServiceProvider serviceProvider) : DelegatingHandler
 {
     /// <summary>

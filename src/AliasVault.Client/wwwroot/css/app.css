@@ -34,3 +34,7 @@
 .validation-message {
     color: red;
 }
+
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
