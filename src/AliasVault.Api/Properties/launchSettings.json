@@ -10,7 +10,7 @@
         "DATA_PROTECTION_CERT_PASS": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5092"
+      "applicationUrl": "http://0.0.0.0:5092"
     },
     "https": {
       "commandName": "Project",
@@ -22,7 +22,7 @@
         "DATA_PROTECTION_CERT_PASS": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7223;http://localhost:5092"
+      "applicationUrl": "https://0.0.0.0:7223;http://0.0.0.0:5092"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -38,7 +38,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:39952",
+      "applicationUrl": "http://0.0.0.0:39952",
       "sslPort": 44368
     }
   }

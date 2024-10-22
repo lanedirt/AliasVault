@@ -4,10 +4,10 @@
 @layout Auth.Layout.EmptyLayout
 @attribute [AllowAnonymous]
 
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden">
-        <div class="flex flex-col min-h-screen lg:min-h-0">
-            <div class="flex-grow p-8 pb-0">
+<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
+    <div class="w-full mx-auto lg:max-w-xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
+        <div class="flex flex-col flex-grow">
+            <div class="flex-grow p-6 pt-4 lg:pt-6 pb-28 lg:pb-4">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(_currentStep == SetupStep.Welcome ? "invisible" : "")">
@@ -55,7 +55,7 @@
                         break;
                 }
             </div>
-            <div class="p-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
+            <div class="fixed lg:relative bottom-0 left-0 right-0 p-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
                 @if (_currentStep == SetupStep.Password && !string.IsNullOrWhiteSpace(_setupData.Password))
                 {
                     <button @onclick="GoNext"
@@ -135,7 +135,7 @@
     /// <summary>
     /// Navigates to the next step in the setup process.
     /// </summary>
-    private void GoNext()
+    private async Task GoNext()
     {
         _currentStep = _currentStep switch
         {
@@ -145,6 +145,9 @@
             SetupStep.Password => SetupStep.Creating,
             _ => _currentStep
         };
+
+        await JsInteropService.ScrollToTop();
+        StateHasChanged();
     }
 
     /// <summary>

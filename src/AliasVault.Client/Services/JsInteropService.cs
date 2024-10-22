@@ -229,6 +229,15 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     }
 
     /// <summary>
+    /// Scrolls to the top of the page.
+    /// </summary>
+    /// <returns>Task.</returns>
+    public async Task ScrollToTop()
+    {
+        await jsRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+    }
+
+    /// <summary>
     /// Represents the result of a WebAuthn get credential operation.
     /// </summary>
     private sealed class WebAuthnGetCredentialResult
