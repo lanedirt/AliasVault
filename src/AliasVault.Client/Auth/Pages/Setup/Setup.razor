@@ -135,7 +135,7 @@
     /// <summary>
     /// Navigates to the next step in the setup process.
     /// </summary>
-    private void GoNext()
+    private async Task GoNext()
     {
         _currentStep = _currentStep switch
         {
@@ -145,6 +145,9 @@
             SetupStep.Password => SetupStep.Creating,
             _ => _currentStep
         };
+
+        await JsInteropService.ScrollToTop();
+        StateHasChanged();
     }
 
     /// <summary>
