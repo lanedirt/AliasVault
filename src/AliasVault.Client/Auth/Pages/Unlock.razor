@@ -29,15 +29,15 @@ else
         Enter your master password in order to unlock your database.
     </p>
 
-    <FullScreenLoadingIndicator @ref="LoadingIndicator"/>
-    <ServerValidationErrors @ref="ServerValidationErrors"/>
+    <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
+    <ServerValidationErrors @ref="_serverValidationErrors"/>
 
-    <EditForm Model="UnlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
+    <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
         <DataAnnotationsValidator/>
         <div>
             <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-            <InputTextField id="password" @bind-Value="UnlockModel.Password" type="password" placeholder="••••••••"/>
-            <ValidationMessage For="() => UnlockModel.Password"/>
+            <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••"/>
+            <ValidationMessage For="() => _unlockModel.Password"/>
         </div>
 
         <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
@@ -53,22 +53,25 @@ else
 
 @code {
     private string? Username { get; set; }
-    private readonly UnlockModel UnlockModel = new();
-    private FullScreenLoadingIndicator LoadingIndicator = new();
-    private ServerValidationErrors ServerValidationErrors = new();
     private bool IsLoading { get; set; } = true;
     private bool IsWebAuthnLoading { get; set; } = true;
+    private readonly UnlockModel _unlockModel = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Do not await this call, as it is only to check if the user is still authenticated
-            // and does not need to block the page from rendering.
-            _ = Http.GetAsync("api/v1/Auth/status");
+            // Trigger status API call to check if the user is still authenticated.
+            // If user is not authenticated a redirect to the login page will be triggered automatically.
+            await Task.WhenAll(
+                Http.GetAsync("api/v1/Auth/status"),
+                StatusCheck()
+            );
 
-            await StatusCheck();
+            // Try to unlock with WebAuthn if enabled.
             await UnlockWithWebAuthn();
 
             IsLoading = false;
@@ -82,8 +85,8 @@ else
     /// </summary>
     private async Task UnlockSubmit()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
@@ -99,7 +102,7 @@ else
                 var errors = ApiResponseUtility.ParseErrorResponse(responseContent);
                 foreach (var error in errors)
                 {
-                    ServerValidationErrors.AddError(error);
+                    _serverValidationErrors.AddError(error);
                 }
                 return;
             }
@@ -107,19 +110,19 @@ else
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                ServerValidationErrors.AddError("An error occurred while processing the unlock request.");
+                _serverValidationErrors.AddError("An error occurred while processing the unlock request.");
                 return;
             }
 
             // 3. Client derives shared session key.
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(UnlockModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_unlockModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
 
             // Check if the password is correct locally by decrypting the test string.
             var validPassword = await AuthService.ValidateEncryptionKeyAsync(passwordHash);
 
             if (!validPassword)
             {
-                ServerValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
+                _serverValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
                 return;
             }
 
@@ -141,7 +144,7 @@ else
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
+            _serverValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
@@ -152,7 +155,7 @@ else
 #endif
         finally
         {
-            LoadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 
