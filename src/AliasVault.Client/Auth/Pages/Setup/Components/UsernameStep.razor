@@ -187,7 +187,7 @@
             }
             catch
             {
-                _errorMessage = "An error occurred while validating the username.";
+                _errorMessage = "An error occurred during communication with the AliasVault server.";
                 _isValid = false;
                 await OnUsernameChange.InvokeAsync(string.Empty);
             }
