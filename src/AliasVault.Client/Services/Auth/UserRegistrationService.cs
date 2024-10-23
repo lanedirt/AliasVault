@@ -16,34 +16,14 @@ using Microsoft.AspNetCore.Components.Authorization;
 using SecureRemotePassword;
 
 /// <summary>
-/// This service is responsible for registering a new user.
+/// Service responsible for handling user registration operations.
 /// </summary>
-public class UserRegistrationService
+/// <param name="httpClient">The HTTP client used for making registration requests.</param>
+/// <param name="authStateProvider">The provider that manages authentication state.</param>
+/// <param name="authService">The service handling authentication operations.</param>
+/// <param name="config">The application configuration.</param>
+public class UserRegistrationService(HttpClient httpClient, AuthenticationStateProvider authStateProvider, AuthService authService, Config config)
 {
-    private readonly HttpClient _httpClient;
-    private readonly AuthenticationStateProvider _authStateProvider;
-    private readonly AuthService _authService;
-    private readonly IConfiguration _configuration;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UserRegistrationService"/> class.
-    /// </summary>
-    /// <param name="httpClient">The HTTP client.</param>
-    /// <param name="authStateProvider">The authentication state provider.</param>
-    /// <param name="authService">The authentication service.</param>
-    /// <param name="configuration">The configuration.</param>
-    public UserRegistrationService(
-        HttpClient httpClient,
-        AuthenticationStateProvider authStateProvider,
-        AuthService authService,
-        IConfiguration configuration)
-    {
-        _httpClient = httpClient;
-        _authStateProvider = authStateProvider;
-        _authService = authService;
-        _configuration = configuration;
-    }
-
     /// <summary>
     /// Registers a new user asynchronously.
     /// </summary>
@@ -59,10 +39,10 @@ public class UserRegistrationService
 
             string encryptionType = Defaults.EncryptionType;
             string encryptionSettings = Defaults.EncryptionSettings;
-            if (_configuration["CryptographyOverrideType"] is not null && _configuration["CryptographyOverrideSettings"] is not null)
+            if (config.CryptographyOverrideType is not null && config.CryptographyOverrideSettings is not null)
             {
-                encryptionType = _configuration["CryptographyOverrideType"]!;
-                encryptionSettings = _configuration["CryptographyOverrideSettings"]!;
+                encryptionType = config.CryptographyOverrideType;
+                encryptionSettings = config.CryptographyOverrideSettings;
             }
 
             var passwordHash = await Encryption.DeriveKeyFromPasswordAsync(password, salt, encryptionType, encryptionSettings);
@@ -70,7 +50,7 @@ public class UserRegistrationService
             var srpSignup = Srp.PasswordChangeAsync(client, salt, username, passwordHashString);
 
             var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
-            var result = await _httpClient.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
+            var result = await httpClient.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -86,10 +66,10 @@ public class UserRegistrationService
                 return (false, "An error occurred during registration.");
             }
 
-            await _authService.StoreEncryptionKeyAsync(passwordHash);
-            await _authService.StoreAccessTokenAsync(tokenObject.Token);
-            await _authService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
-            await _authStateProvider.GetAuthenticationStateAsync();
+            await authService.StoreEncryptionKeyAsync(passwordHash);
+            await authService.StoreAccessTokenAsync(tokenObject.Token);
+            await authService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
+            await authStateProvider.GetAuthenticationStateAsync();
 
             return (true, null);
         }

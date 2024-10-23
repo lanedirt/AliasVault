@@ -21,9 +21,9 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 /// <param name="httpClient">The HTTP client.</param>
 /// <param name="localStorage">The local storage service.</param>
 /// <param name="environment">IWebAssemblyHostEnvironment instance.</param>
-/// <param name="configuration">IConfiguration instance.</param>
+/// <param name="config">Config instance.</param>
 /// <param name="jsInteropService">JSInteropService instance.</param>
-public sealed class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, IConfiguration configuration, JsInteropService jsInteropService)
+public sealed class AuthService(HttpClient httpClient, ILocalStorageService localStorage, IWebAssemblyHostEnvironment environment, Config config, JsInteropService jsInteropService)
 {
     private const string AccessTokenKey = "token";
     private const string RefreshTokenKey = "refreshToken";
@@ -107,7 +107,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// <returns>SrpArgonEncryption key as base64 string.</returns>
     public string GetEncryptionKeyAsBase64Async()
     {
-        if (environment.IsDevelopment() && configuration["UseDebugEncryptionKey"] == "true")
+        if (environment.IsDevelopment() && config.UseDebugEncryptionKey)
         {
             // When project runs in development mode a static encryption key will be used.
             // This allows to skip the unlock screen for faster development.
