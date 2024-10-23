@@ -22,7 +22,7 @@
         // Initialize empty database which removes unencrypted data.
         DbService.InitializeEmptyDatabase();
 
-        // Redirect to unlock page.
-        NavigationManager.NavigateTo("/unlock");
+        // Redirect to unlock page with SkipWebAuthn parameter set to true.
+        NavigationManager.NavigateTo("/unlock/true");
     }
 }

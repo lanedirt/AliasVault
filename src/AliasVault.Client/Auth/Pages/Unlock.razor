@@ -1,4 +1,5 @@
 @page "/unlock"
+@page "/unlock/{SkipWebAuthn:bool}"
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @inject ILogger<Unlock> Logger
 @layout Auth.Layout.MainLayout
@@ -25,54 +26,89 @@ else
         <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Username</h2>
     </div>
 
-    <p class="text-base font-normal text-gray-500 dark:text-gray-400">
-        Enter your master password in order to unlock your database.
-    </p>
-
-    <FullScreenLoadingIndicator @ref="LoadingIndicator"/>
-    <ServerValidationErrors @ref="ServerValidationErrors"/>
-
-    <EditForm Model="UnlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
-        <DataAnnotationsValidator/>
-        <div>
-            <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-            <InputTextField id="password" @bind-Value="UnlockModel.Password" type="password" placeholder="••••••••"/>
-            <ValidationMessage For="() => UnlockModel.Password"/>
+    @if (ShowWebAuthnButton)
+    {
+        <div class="mb-6">
+            <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
+                Quickly unlock your vault using your fingerprint, face ID, or security key. Or login with your password as a fallback.
+            </p>
+            <div class="flex space-x-4">
+                <button type="button" @onclick="UnlockWithWebAuthn" class="flex-grow inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                    <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                    Unlock with WebAuthn
+                </button>
+                <button type="button" @onclick="ShowPasswordLogin" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                    Login with password
+                </button>
+            </div>
         </div>
+    }
+    else
+    {
+        <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
+            Enter your master password to unlock your database.
+        </p>
 
-        <button type="submit" class="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-            <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
-            Unlock
-        </button>
+        <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
+        <ServerValidationErrors @ref="_serverValidationErrors"/>
 
-        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
-        </div>
-    </EditForm>
+        <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
+            <DataAnnotationsValidator/>
+            <div>
+                <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+                <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••"/>
+                <ValidationMessage For="() => _unlockModel.Password"/>
+            </div>
+
+            <button type="submit" class="w-full inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+                Unlock
+            </button>
+        </EditForm>
+    }
+
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-6">
+        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
+    </div>
 }
 
 @code {
+    /// <summary>
+    /// Skip automatic WebAuthn unlock during page load if set to true.
+    /// </summary>
+    [Parameter]
+    public bool SkipWebAuthn { get; set; }
+
     private string? Username { get; set; }
-    private readonly UnlockModel UnlockModel = new();
-    private FullScreenLoadingIndicator LoadingIndicator = new();
-    private ServerValidationErrors ServerValidationErrors = new();
     private bool IsLoading { get; set; } = true;
-    private bool IsWebAuthnLoading { get; set; } = true;
+    private bool IsWebAuthnLoading { get; set; }
+    private bool ShowWebAuthnButton { get; set; }
+    private readonly UnlockModel _unlockModel = new();
+    private FullScreenLoadingIndicator _loadingIndicator = new();
+    private ServerValidationErrors _serverValidationErrors = new();
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Do not await this call, as it is only to check if the user is still authenticated
-            // and does not need to block the page from rendering.
-            _ = Http.GetAsync("api/v1/Auth/status");
+            // Trigger status API call to check if the user is still authenticated.
+            // If user is not authenticated a redirect to the login page will be triggered automatically.
+            await Task.WhenAll(
+                Http.GetAsync("api/v1/Auth/status"),
+                StatusCheck()
+            );
 
-            await StatusCheck();
-            await UnlockWithWebAuthn();
+            // Always check if WebAuthn is enabled
+            ShowWebAuthnButton = await AuthService.IsWebAuthnEnabledAsync();
+
+            // Try to unlock with WebAuthn if enabled and not explicitly skipped
+            if (ShowWebAuthnButton && !SkipWebAuthn)
+            {
+                await UnlockWithWebAuthn();
+            }
 
             IsLoading = false;
-            IsWebAuthnLoading = false;
             StateHasChanged();
         }
     }
@@ -82,8 +118,8 @@ else
     /// </summary>
     private async Task UnlockSubmit()
     {
-        LoadingIndicator.Show();
-        ServerValidationErrors.Clear();
+        _loadingIndicator.Show();
+        _serverValidationErrors.Clear();
 
         try
         {
@@ -99,7 +135,7 @@ else
                 var errors = ApiResponseUtility.ParseErrorResponse(responseContent);
                 foreach (var error in errors)
                 {
-                    ServerValidationErrors.AddError(error);
+                    _serverValidationErrors.AddError(error);
                 }
                 return;
             }
@@ -107,19 +143,19 @@ else
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                ServerValidationErrors.AddError("An error occurred while processing the unlock request.");
+                _serverValidationErrors.AddError("An error occurred while processing the unlock request.");
                 return;
             }
 
             // 3. Client derives shared session key.
-            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(UnlockModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_unlockModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
 
             // Check if the password is correct locally by decrypting the test string.
             var validPassword = await AuthService.ValidateEncryptionKeyAsync(passwordHash);
 
             if (!validPassword)
             {
-                ServerValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
+                _serverValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
                 return;
             }
 
@@ -141,7 +177,7 @@ else
         catch (Exception ex)
         {
             // If in debug mode show the actual exception.
-            ServerValidationErrors.AddError(ex.ToString());
+            _serverValidationErrors.AddError(ex.ToString());
         }
 #else
         catch
@@ -152,7 +188,7 @@ else
 #endif
         finally
         {
-            LoadingIndicator.Hide();
+            _loadingIndicator.Hide();
         }
     }
 
@@ -240,6 +276,20 @@ else
             {
                 Logger.LogError(ex, "An error occurred while trying to unlock the vault with WebAuthn.");
             }
+            finally
+            {
+                IsWebAuthnLoading = false;
+                StateHasChanged();
+            }
         }
+    }
+
+    /// <summary>
+    /// Show the password login form.
+    /// </summary>
+    private void ShowPasswordLogin()
+    {
+        ShowWebAuthnButton = false;
+        StateHasChanged();
     }
 }
