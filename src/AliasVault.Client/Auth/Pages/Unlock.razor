@@ -9,6 +9,9 @@
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Cryptography.Client
 
+<FullScreenLoadingIndicator @ref="_loadingIndicator" />
+<ServerValidationErrors @ref="_serverValidationErrors" />
+
 @if (IsLoading) {
     <BoldLoadingIndicator />
 
@@ -38,7 +41,7 @@ else
                     Unlock with WebAuthn
                 </button>
                 <button type="button" @onclick="ShowPasswordLogin" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                    Login with password
+                    Unlock with password
                 </button>
             </div>
         </div>
@@ -48,9 +51,6 @@ else
         <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
             Enter your master password to unlock your database.
         </p>
-
-        <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
-        <ServerValidationErrors @ref="_serverValidationErrors"/>
 
         <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
             <DataAnnotationsValidator/>
@@ -94,10 +94,7 @@ else
         {
             // Trigger status API call to check if the user is still authenticated.
             // If user is not authenticated a redirect to the login page will be triggered automatically.
-            await Task.WhenAll(
-                Http.GetAsync("api/v1/Auth/status"),
-                StatusCheck()
-            );
+            await StatusCheck();
 
             // Always check if WebAuthn is enabled
             ShowWebAuthnButton = await AuthService.IsWebAuthnEnabledAsync();
@@ -124,7 +121,6 @@ else
         try
         {
             await StatusCheck();
-            await Http.GetAsync("api/v1/Auth/status");
 
             // Send request to server with email to get user salt.
             var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(Username!));
@@ -137,6 +133,7 @@ else
                 {
                     _serverValidationErrors.AddError(error);
                 }
+
                 return;
             }
 
@@ -183,7 +180,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            ServerValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
         }
 #endif
         finally
@@ -230,6 +227,20 @@ else
             GlobalNotificationService.ClearMessages();
             GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
             NavigationManager.NavigateTo("/user/login");
+            return;
+        }
+
+        // Make a request to the server to check if the user is still authenticated.
+        // If user has no valid authentication an automatic redirect to login page will take place.
+        try
+        {
+            await Http.GetAsync("api/v1/Auth/status");
+        }
+        catch (Exception ex)
+        {
+            _serverValidationErrors.AddError("Connection with the AliasVault servers failed. Please try again (later).");
+            Logger.LogError(ex, "An error occurred while checking the user status.");
+            StateHasChanged();
         }
     }
 
