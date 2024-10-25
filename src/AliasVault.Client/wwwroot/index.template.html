@@ -96,7 +96,7 @@
             const startTime = new Date().getTime();
             const minDisplayTime = 1000;
             const checkInterval = 500;
-            const refreshButtonTimeout = 15000;
+            const refreshButtonTimeout = 300000;
 
             const appElement = document.getElementById('app');
             const refreshButton = document.getElementById('refresh-button');
@@ -104,7 +104,7 @@
             appElement.style.visibility = 'hidden';
             loadingScreen.style.display = 'flex';
 
-            // Show refresh button after 15 seconds
+            // Show refresh button after 30 seconds
             setTimeout(() => {
                 refreshButton.classList.remove('hidden');
             }, refreshButtonTimeout);
