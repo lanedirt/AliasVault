@@ -1,60 +1,194 @@
 ﻿@page "/welcome"
 @inherits MainBase
 
-<div class="grid grid-cols-1 px-4 pt-6 dark:bg-gray-900">
-    <h1 class="mb-3 text-3xl font-bold text-gray-900 sm:text-4xl sm:leading-none sm:tracking-tight dark:text-white">Welcome to AliasVault</h1>
-    <p class="mb-6 text-lg font-normal text-gray-500 sm:text-xl dark:text-gray-400">It looks like you are new here. The instructions on this page will help to get you started.</p>
+<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
+    <div class="w-full mx-auto lg:max-w-4xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
+        <div class="flex flex-col flex-grow">
+            <div class="flex-grow p-6 pt-4 lg:pt-6 pb-28 lg:pb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex-grow text-center">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@GetStepTitle(_currentStep)</h2>
+                    </div>
+                </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Getting Started</h2>
-            <div class="space-y-4">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">How do I use AliasVault?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Create a random identity with an associated email address. To get started, simply click the "+ New Alias" button in the top right corner.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">What is the purpose of AliasVault?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">AliasVault keeps you safe online by providing unique passwords and email addresses for every service you use. This prevents your actual email from being used to link your accounts on different websites together.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Is my data secure?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Yes, AliasVault uses a zero-knowledge architecture. This means that your data is end-to-end encrypted on your device before being stored on the server. No one can see your login information, identities and even emails but you. Not even us.</p>
-                </div>
-            </div>
-        </div>
+                @if (GetProgressPercentage() > 0)
+                {
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700 mt-4">
+                        <div class="bg-primary-600 h-2.5 rounded-full" style="width: @(GetProgressPercentage())%"></div>
+                    </div>
+                }
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Get Started Now</h2>
-            <div class="mb-4">
-                <p class="text-gray-600 dark:text-gray-400">
-                    Go ahead and create a new login by clicking "+ New Alias" in the top right. Or explore these options:
-                    </p>
+                <EditForm Model="@_tutorialData" OnValidSubmit="HandleSubmit">
+                    @switch (_currentStep)
+                    {
+                        case TutorialStep.Welcome:
+                            <div class="space-y-4">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome to AliasVault!</h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Protect your online identity by using unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure identity.
+                                </p>
+                                <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
+                                    <li>Create unique identities for different services</li>
+                                    <li>Use temporary email addresses to protect your privacy</li>
+                                    <li>Generate and store random personal information</li>
+                                    <li>Access confirmation emails securely</li>
+                                </ul>
+                            </div>
+                            break;
+
+                        case TutorialStep.HowItWorks:
+                            <div class="space-y-4">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">How AliasVault Works</h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    When you need to sign up for a new service:
+                                </p>
+                                <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
+                                    <li>AliasVault generates a random identity with a secure email address</li>
+                                    <li>Use this information to sign up for the service</li>
+                                    <li>All emails are automatically forwarded to AliasVault</li>
+                                    <li>Your real email address stays private</li>
+                                </ol>
+                                <div class="mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+                                    <p class="text-sm text-blue-800 dark:text-blue-200">
+                                        <span class="font-semibold">Pro tip:</span> Create different identities for different types of services (social media, shopping, banking) to prevent cross-site tracking.
+                                    </p>
+                                </div>
+                            </div>
+                            break;
+
+                        case TutorialStep.EmailManagement:
+                            <div class="space-y-4">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Managing Your Emails</h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    AliasVault handles all your service-related emails:
+                                </p>
+                                <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
+                                    <li>Emails appear automatically in your AliasVault inbox</li>
+                                    <li>All emails are encrypted and only visible to you</li>
+                                    <li>Confirmation links open in a new tab</li>
+                                    <li>Easily manage and delete emails when no longer needed</li>
+                                </ol>
+                            </div>
+                            break;
+
+                        case TutorialStep.SecurityTips:
+                            <div class="space-y-4">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Privacy & Security Tips</h3>
+                                <div class="space-y-3">
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Keep Your Master Password Safe</h4>
+                                        <p class="text-gray-600 dark:text-gray-400">Your master password is the only way to access your vault. Store it securely and never share it.</p>
+                                    </div>
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Regular Backups</h4>
+                                        <p class="text-gray-600 dark:text-gray-400">Your vault is automatically backed up, but you can also export your data manually from settings.</p>
+                                    </div>
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Use Different Identities</h4>
+                                        <p class="text-gray-600 dark:text-gray-400">Create separate identities for different types of services to prevent tracking across websites.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            break;
+
+                        case TutorialStep.CreateFirstIdentity:
+                            <div class="space-y-4">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ready to Start?</h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Now that you know how AliasVault works, let's create your first secure identity!
+                                </p>
+                                <div class="mt-4">
+                                    <button @onclick="CreateFirstIdentity"
+                                            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
+                                        Create Your First Identity
+                                    </button>
+                                </div>
+                            </div>
+                            break;
+                    }
+                </EditForm>
             </div>
-            <div class="space-y-4">
-                <button @onclick="CreateIdentity" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Create First Identity (Advanced)
-                </button>
-                <button @onclick="ShowSettings" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Choose Default Language for New Identities
-                </button>
-                <button class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300 cursor-not-allowed opacity-75">
-                    Import Passwords from Existing Manager (coming soon)
-                </button>
+
+            <div class="fixed lg:relative bottom-0 left-0 right-0 p-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
+                @if (_currentStep != TutorialStep.SecurityTips)
+                {
+                    <button @onclick="GoNext"
+                            class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300">
+                        Continue
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="FinishTutorial"
+                            class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300">
+                        Get Started
+                    </button>
+                }
             </div>
         </div>
     </div>
-
 </div>
 
 @code {
-    private void CreateIdentity()
+    private TutorialStep _currentStep = TutorialStep.Welcome;
+    private readonly TutorialData _tutorialData = new();
+
+    private enum TutorialStep
+    {
+        Welcome,
+        HowItWorks,
+        EmailManagement,
+        SecurityTips,
+        CreateFirstIdentity
+    }
+
+    private class TutorialData
+    {
+        // Add any properties needed for the tutorial
+    }
+
+    private static string GetStepTitle(TutorialStep step)
+    {
+        return step switch
+        {
+            TutorialStep.Welcome => "Welcome to AliasVault",
+            TutorialStep.HowItWorks => "How It Works",
+            TutorialStep.EmailManagement => "Managing Emails",
+            TutorialStep.SecurityTips => "Security Tips",
+            TutorialStep.CreateFirstIdentity => "Get Started",
+            _ => "Tutorial"
+        };
+    }
+
+    private void HandleSubmit()
+    {
+        GoNext();
+    }
+
+    private void GoNext()
+    {
+        _currentStep = _currentStep switch
+        {
+            TutorialStep.Welcome => TutorialStep.HowItWorks,
+            TutorialStep.HowItWorks => TutorialStep.EmailManagement,
+            TutorialStep.EmailManagement => TutorialStep.SecurityTips,
+            TutorialStep.SecurityTips => TutorialStep.CreateFirstIdentity,
+            _ => _currentStep
+        };
+    }
+
+    private void CreateFirstIdentity()
     {
         NavigationManager.NavigateTo("credentials/create");
     }
 
-    private void ShowSettings()
+    private void FinishTutorial()
     {
-        NavigationManager.NavigateTo("settings/general");
+        NavigationManager.NavigateTo("credentials");
+    }
+
+    private int GetProgressPercentage()
+    {
+        return (int)_currentStep * 100 / (Enum.GetValues(typeof(TutorialStep)).Length - 1);
     }
 }
