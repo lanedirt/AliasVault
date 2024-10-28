@@ -27,40 +27,55 @@ public sealed class SettingsService
     private bool _initialized;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the tutorial has been completed.
+    /// Gets the DefaultEmailDomain setting.
     /// </summary>
-    public bool TutorialDone
-    {
-        get => GetSetting("TutorialDone", false);
-        set => SetSettingAsync("TutorialDone", value).GetAwaiter().GetResult();
-    }
+    /// <returns>Default email domain as string.</returns>
+    public string DefaultEmailDomain => GetSetting("DefaultEmailDomain");
 
     /// <summary>
-    /// Gets or sets the DefaultEmailDomain setting.
+    /// Gets a value indicating whether email refresh should be done automatically on the credentials page.
     /// </summary>
-    public string DefaultEmailDomain
-    {
-        get => GetSetting("DefaultEmailDomain");
-        set => SetSettingAsync("DefaultEmailDomain", value).GetAwaiter().GetResult();
-    }
+    /// <returns>AutoEmailRefresh setting as string.</returns>
+    public bool AutoEmailRefresh => GetSetting("AutoEmailRefresh", true);
 
     /// <summary>
-    /// Gets or sets a value indicating whether email refresh should be done automatically on the credentials page.
+    /// Gets the DefaultIdentityLanguage setting.
     /// </summary>
-    public bool AutoEmailRefresh
-    {
-        get => GetSetting("AutoEmailRefresh", true);
-        set => SetSettingAsync("AutoEmailRefresh", value).GetAwaiter().GetResult();
-    }
+    /// <returns>Default identity language as two-letter code.</returns>
+    public string DefaultIdentityLanguage => GetSetting<string>("DefaultIdentityLanguage", "en")!;
 
     /// <summary>
-    /// Gets or sets the DefaultIdentityLanguage setting.
+    /// Gets a value indicating whether the tutorial has been completed.
     /// </summary>
-    public string DefaultIdentityLanguage
-    {
-        get => GetSetting<string>("DefaultIdentityLanguage", "en")!;
-        set => SetSettingAsync("DefaultIdentityLanguage", value).GetAwaiter().GetResult();
-    }
+    public bool TutorialDone => GetSetting("TutorialDone", false);
+
+    /// <summary>
+    /// Sets the DefaultEmailDomain setting.
+    /// </summary>
+    /// <param name="value">The new DefaultEmailDomain setting.</param>
+    /// <returns>Task.</returns>
+    public Task SetDefaultEmailDomain(string value) => SetSettingAsync("DefaultEmailDomain", value);
+
+    /// <summary>
+    /// Sets the AutoEmailRefresh setting as a string.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetAutoEmailRefresh(bool value) => SetSettingAsync("AutoEmailRefresh", value);
+
+    /// <summary>
+    /// Sets the DefaultIdentityLanguage setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetDefaultIdentityLanguage(string value) => SetSettingAsync("DefaultIdentityLanguage", value);
+
+    /// <summary>
+    /// Sets the TutorialDone setting.
+    /// </summary>
+    /// <param name="value">Value to set.</param>
+    /// <returns>Task.</returns>
+    public Task SetTutorialDoneAsync(bool value) => SetSettingAsync("TutorialDone", value);
 
     /// <summary>
     /// Initializes the settings service asynchronously.

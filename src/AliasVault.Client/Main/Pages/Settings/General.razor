@@ -91,27 +91,27 @@
     /// <summary>
     /// Updates the default email domain.
     /// </summary>
-    private void UpdateDefaultEmailDomain()
+    private async Task UpdateDefaultEmailDomain()
     {
-        DbService.Settings.DefaultEmailDomain = DefaultEmailDomain;
+        await DbService.Settings.SetDefaultEmailDomain(DefaultEmailDomain);
         StateHasChanged();
     }
 
     /// <summary>
     /// Updates the auto email refresh setting.
     /// </summary>
-    private void UpdateAutoEmailRefresh()
+    private async Task UpdateAutoEmailRefresh()
     {
-        DbService.Settings.AutoEmailRefresh = AutoEmailRefresh;
+        await DbService.Settings.SetAutoEmailRefresh(AutoEmailRefresh);
         StateHasChanged();
     }
 
     /// <summary>
     /// Updates the auto email refresh setting.
     /// </summary>
-    private void UpdateDefaultIdentityLanguage()
+    private async Task UpdateDefaultIdentityLanguage()
     {
-        DbService.Settings.DefaultIdentityLanguage = DefaultIdentityLanguage;
+        await DbService.Settings.SetDefaultIdentityLanguage(DefaultIdentityLanguage);
         StateHasChanged();
     }
 }
