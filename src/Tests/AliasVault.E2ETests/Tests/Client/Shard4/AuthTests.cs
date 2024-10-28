@@ -55,7 +55,7 @@ public class AuthTests : ClientPlaywrightTest
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Getting Started"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain(WelcomeMessage), "No index content after logging in.");
 
         // Check if login has created an auth log entry.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
@@ -83,7 +83,7 @@ public class AuthTests : ClientPlaywrightTest
 
         // Check if the login was successful by verifying content.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Getting Started"), "No index content after logging in.");
+        Assert.That(pageContent, Does.Contain(WelcomeMessage), "No index content after logging in.");
 
         // Check if login has created an auth log entry.
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);

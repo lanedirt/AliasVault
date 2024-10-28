@@ -18,72 +18,70 @@
                     </div>
                 }
 
-                <EditForm Model="@_tutorialData" OnValidSubmit="HandleSubmit">
-                    @switch (_currentStep)
-                    {
-                        case TutorialStep.Welcome:
-                            <div class="space-y-4">
-                                <p class="text-gray-600 dark:text-gray-400">
-                                    Your account has been successfully created! Protect your online identity by using unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure alias.
+                @switch (_currentStep)
+                {
+                    case TutorialStep.Welcome:
+                        <div class="space-y-4">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Your account has been successfully created! Protect your online identity by using unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure alias.
+                            </p>
+                        </div>
+                        break;
+
+                    case TutorialStep.HowAliasVaultWorks:
+                        <div class="space-y-4">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                When you need to sign up for a new service:
+                            </p>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
+                                <li>AliasVault generates a random identity with a secure private email address</li>
+                                <li>Use this information to sign up for the service</li>
+                                <li>Received emails show up in this app and can be opened in your browser</li>
+                                <li>Your real email address and other personal information stay private</li>
+                            </ol>
+                            <div class="mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+                                <p class="text-sm text-blue-800 dark:text-blue-200">
+                                    <span class="font-semibold">Pro tip:</span> Create different identities for different types of services (social media, shopping, newsletters) to prevent cross-site tracking.
                                 </p>
                             </div>
-                            break;
+                        </div>
+                        break;
 
-                        case TutorialStep.HowAliasVaultWorks:
-                            <div class="space-y-4">
-                                <p class="text-gray-600 dark:text-gray-400">
-                                    When you need to sign up for a new service:
-                                </p>
-                                <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                                    <li>AliasVault generates a random identity with a secure private email address</li>
-                                    <li>Use this information to sign up for the service</li>
-                                    <li>Received emails show up in this app and can be opened in your browser</li>
-                                    <li>Your real email address and other personal information stay private</li>
-                                </ol>
-                                <div class="mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
-                                    <p class="text-sm text-blue-800 dark:text-blue-200">
-                                        <span class="font-semibold">Pro tip:</span> Create different identities for different types of services (social media, shopping, newsletters) to prevent cross-site tracking.
-                                    </p>
+                    case TutorialStep.SecurityTips:
+                        <div class="space-y-4">
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Privacy & Security Tips</h3>
+                            <div class="space-y-3">
+                                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Keep Your Master Password Safe</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Your master password is the only way to access your vault. Store it securely and never share it.</p>
+                                </div>
+                                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Settings</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Two-factor authentication adds an extra layer of security to your account. It requires you to enter a code from your authenticator app or provide a recovery code before your encrypted vault can be accessed.</p>
+                                </div>
+                                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Use Different Identities</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">Create separate identities for different types of services to prevent tracking across websites.</p>
                                 </div>
                             </div>
-                            break;
+                        </div>
+                        break;
 
-                        case TutorialStep.SecurityTips:
-                            <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Privacy & Security Tips</h3>
-                                <div class="space-y-3">
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                        <h4 class="font-semibold text-gray-900 dark:text-white">Keep Your Master Password Safe</h4>
-                                        <p class="text-gray-600 dark:text-gray-400">Your master password is the only way to access your vault. Store it securely and never share it.</p>
-                                    </div>
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                        <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Settings</h4>
-                                        <p class="text-gray-600 dark:text-gray-400">Two-factor authentication adds an extra layer of security to your account. It requires you to enter a code from your authenticator app or provide a recovery code before your encrypted vault can be accessed.</p>
-                                    </div>
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                        <h4 class="font-semibold text-gray-900 dark:text-white">Use Different Identities</h4>
-                                        <p class="text-gray-600 dark:text-gray-400">Create separate identities for different types of services to prevent tracking across websites.</p>
-                                    </div>
-                                </div>
+                    case TutorialStep.CreateFirstIdentity:
+                        <div class="space-y-4">
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ready to Start?</h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Now that you know how AliasVault works, let's create your first secure identity!
+                            </p>
+                            <div class="mt-4">
+                                <button @onclick="CreateFirstIdentity"
+                                        class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
+                                    Create Your First Identity
+                                </button>
                             </div>
-                            break;
-
-                        case TutorialStep.CreateFirstIdentity:
-                            <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ready to Start?</h3>
-                                <p class="text-gray-600 dark:text-gray-400">
-                                    Now that you know how AliasVault works, let's create your first secure identity!
-                                </p>
-                                <div class="mt-4">
-                                    <button @onclick="CreateFirstIdentity"
-                                            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
-                                        Create Your First Identity
-                                    </button>
-                                </div>
-                            </div>
-                            break;
-                    }
-                </EditForm>
+                        </div>
+                        break;
+                }
             </div>
 
             <div class="fixed lg:relative bottom-0 left-0 right-0 p-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 lg:bg-transparent lg:dark:bg-transparent lg:border-0">
@@ -108,7 +106,6 @@
 
 @code {
     private TutorialStep _currentStep = TutorialStep.Welcome;
-    private readonly TutorialData _tutorialData = new();
 
     private enum TutorialStep
     {
@@ -116,11 +113,6 @@
         HowAliasVaultWorks,
         SecurityTips,
         CreateFirstIdentity
-    }
-
-    private class TutorialData
-    {
-        // Add any properties needed for the tutorial
     }
 
     private static string GetStepTitle(TutorialStep step)
@@ -145,11 +137,6 @@
         {
             NavigationManager.NavigateTo("/");
         }
-    }
-
-    private async Task HandleSubmit()
-    {
-        await GoNext();
     }
 
     private async Task GoNext()
