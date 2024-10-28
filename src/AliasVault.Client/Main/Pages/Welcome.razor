@@ -1,10 +1,10 @@
 ﻿@page "/welcome"
 @inherits MainBase
 
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
+<div class="bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
     <div class="w-full mx-auto lg:max-w-4xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
         <div class="flex flex-col flex-grow">
-            <div class="flex-grow p-6 pt-4 lg:pt-6 pb-28 lg:pb-4">
+            <div class="flex-grow p-6 pt-4 lg:pt-6 lg:pb-4">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex-grow text-center">
                         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@GetStepTitle(_currentStep)</h2>
@@ -114,7 +114,6 @@
     {
         Welcome,
         HowAliasVaultWorks,
-        SecureEnvironment,
         SecurityTips,
         CreateFirstIdentity
     }
@@ -148,12 +147,12 @@
         }
     }
 
-    private void HandleSubmit()
+    private async Task HandleSubmit()
     {
-        GoNext();
+        await GoNext();
     }
 
-    private void GoNext()
+    private async Task GoNext()
     {
         _currentStep = _currentStep switch
         {
@@ -162,6 +161,8 @@
             TutorialStep.SecurityTips => TutorialStep.CreateFirstIdentity,
             _ => _currentStep
         };
+
+        await JsInteropService.ScrollToTop();
     }
 
     private void CreateFirstIdentity()
