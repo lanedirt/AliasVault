@@ -27,43 +27,40 @@ public sealed class SettingsService
     private bool _initialized;
 
     /// <summary>
-    /// Gets the DefaultEmailDomain setting.
+    /// Gets or sets a value indicating whether the tutorial has been completed.
     /// </summary>
-    /// <returns>Default email domain as string.</returns>
-    public string DefaultEmailDomain => GetSetting("DefaultEmailDomain");
+    public bool TutorialDone
+    {
+        get => GetSetting("TutorialDone", false);
+        set => SetSettingAsync("TutorialDone", value).GetAwaiter().GetResult();
+    }
 
     /// <summary>
-    /// Gets a value indicating whether email refresh should be done automatically on the credentials page.
+    /// Gets or sets the DefaultEmailDomain setting.
     /// </summary>
-    /// <returns>AutoEmailRefresh setting as string.</returns>
-    public bool AutoEmailRefresh => GetSetting("AutoEmailRefresh", true);
+    public string DefaultEmailDomain
+    {
+        get => GetSetting("DefaultEmailDomain");
+        set => SetSettingAsync("DefaultEmailDomain", value).GetAwaiter().GetResult();
+    }
 
     /// <summary>
-    /// Gets the DefaultIdentityLanguage setting.
+    /// Gets or sets a value indicating whether email refresh should be done automatically on the credentials page.
     /// </summary>
-    /// <returns>Default identity language as two-letter code.</returns>
-    public string DefaultIdentityLanguage => GetSetting<string>("DefaultIdentityLanguage", "en")!;
+    public bool AutoEmailRefresh
+    {
+        get => GetSetting("AutoEmailRefresh", true);
+        set => SetSettingAsync("AutoEmailRefresh", value).GetAwaiter().GetResult();
+    }
 
     /// <summary>
-    /// Sets the DefaultEmailDomain setting.
+    /// Gets or sets the DefaultIdentityLanguage setting.
     /// </summary>
-    /// <param name="value">The new DefaultEmailDomain setting.</param>
-    /// <returns>Task.</returns>
-    public Task SetDefaultEmailDomain(string value) => SetSettingAsync("DefaultEmailDomain", value);
-
-    /// <summary>
-    /// Sets the AutoEmailRefresh setting as a string.
-    /// </summary>
-    /// <param name="value">The new value.</param>
-    /// <returns>Task.</returns>
-    public Task SetAutoEmailRefresh(bool value) => SetSettingAsync("AutoEmailRefresh", value);
-
-    /// <summary>
-    /// Sets the DefaultIdentityLanguage setting.
-    /// </summary>
-    /// <param name="value">The new value.</param>
-    /// <returns>Task.</returns>
-    public Task SetDefaultIdentityLanguage(string value) => SetSettingAsync("DefaultIdentityLanguage", value);
+    public string DefaultIdentityLanguage
+    {
+        get => GetSetting<string>("DefaultIdentityLanguage", "en")!;
+        set => SetSettingAsync("DefaultIdentityLanguage", value).GetAwaiter().GetResult();
+    }
 
     /// <summary>
     /// Initializes the settings service asynchronously.

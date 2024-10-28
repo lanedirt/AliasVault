@@ -23,50 +23,41 @@
                     {
                         case TutorialStep.Welcome:
                             <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome to AliasVault!</h3>
                                 <p class="text-gray-600 dark:text-gray-400">
-                                    Protect your online identity by using unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure identity.
+                                    Your account has been successfully created! Protect your online identity by using unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure alias.
                                 </p>
-                                <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                                    <li>Create unique identities for different services</li>
-                                    <li>Use temporary email addresses to protect your privacy</li>
-                                    <li>Generate and store random personal information</li>
-                                    <li>Access confirmation emails securely</li>
-                                </ul>
                             </div>
                             break;
 
-                        case TutorialStep.HowItWorks:
+                        case TutorialStep.HowAliasVaultWorks:
                             <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">How AliasVault Works</h3>
                                 <p class="text-gray-600 dark:text-gray-400">
                                     When you need to sign up for a new service:
                                 </p>
                                 <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                                    <li>AliasVault generates a random identity with a secure email address</li>
+                                    <li>AliasVault generates a random identity with a secure private email address</li>
                                     <li>Use this information to sign up for the service</li>
-                                    <li>All emails are automatically forwarded to AliasVault</li>
-                                    <li>Your real email address stays private</li>
+                                    <li>Received emails show up in this app and can be opened in your browser</li>
+                                    <li>Your real email address and other personal information stay private</li>
                                 </ol>
                                 <div class="mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
                                     <p class="text-sm text-blue-800 dark:text-blue-200">
-                                        <span class="font-semibold">Pro tip:</span> Create different identities for different types of services (social media, shopping, banking) to prevent cross-site tracking.
+                                        <span class="font-semibold">Pro tip:</span> Create different identities for different types of services (social media, shopping, newsletters) to prevent cross-site tracking.
                                     </p>
                                 </div>
                             </div>
                             break;
 
-                        case TutorialStep.EmailManagement:
+                        case TutorialStep.SecureEnvironment:
                             <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Managing Your Emails</h3>
                                 <p class="text-gray-600 dark:text-gray-400">
-                                    AliasVault handles all your service-related emails:
+                                    AliasVault is built with security and privacy in mind:
                                 </p>
                                 <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                                    <li>Emails appear automatically in your AliasVault inbox</li>
-                                    <li>All emails are encrypted and only visible to you</li>
-                                    <li>Confirmation links open in a new tab</li>
-                                    <li>Easily manage and delete emails when no longer needed</li>
+                                    <li>All your data is encrypted in your browser with your master password</li>
+                                    <li>Emails are stored encrypted on the server and are only readable by you</li>
+                                    <li>Your master password never leaves your device</li>
+                                    <li>The source-code is open-source and available on GitHub</li>
                                 </ol>
                             </div>
                             break;
@@ -80,8 +71,8 @@
                                         <p class="text-gray-600 dark:text-gray-400">Your master password is the only way to access your vault. Store it securely and never share it.</p>
                                     </div>
                                     <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                        <h4 class="font-semibold text-gray-900 dark:text-white">Regular Backups</h4>
-                                        <p class="text-gray-600 dark:text-gray-400">Your vault is automatically backed up, but you can also export your data manually from settings.</p>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Settings</h4>
+                                        <p class="text-gray-600 dark:text-gray-400">Two-factor authentication adds an extra layer of security to your account. It requires you to enter a code from your authenticator app or provide a recovery code before your encrypted vault can be accessed.</p>
                                     </div>
                                     <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                         <h4 class="font-semibold text-gray-900 dark:text-white">Use Different Identities</h4>
@@ -136,8 +127,8 @@
     private enum TutorialStep
     {
         Welcome,
-        HowItWorks,
-        EmailManagement,
+        HowAliasVaultWorks,
+        SecureEnvironment,
         SecurityTips,
         CreateFirstIdentity
     }
@@ -152,12 +143,24 @@
         return step switch
         {
             TutorialStep.Welcome => "Welcome to AliasVault",
-            TutorialStep.HowItWorks => "How It Works",
-            TutorialStep.EmailManagement => "Managing Emails",
+            TutorialStep.HowAliasVaultWorks => "How AliasVault Works",
+            TutorialStep.SecureEnvironment => "Secure Environment",
             TutorialStep.SecurityTips => "Security Tips",
             TutorialStep.CreateFirstIdentity => "Get Started",
             _ => "Tutorial"
         };
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // If tutorial is already done, redirect to the home page.
+        if (DbService.Settings.TutorialDone)
+        {
+            NavigationManager.NavigateTo("/");
+        }
     }
 
     private void HandleSubmit()
@@ -169,9 +172,9 @@
     {
         _currentStep = _currentStep switch
         {
-            TutorialStep.Welcome => TutorialStep.HowItWorks,
-            TutorialStep.HowItWorks => TutorialStep.EmailManagement,
-            TutorialStep.EmailManagement => TutorialStep.SecurityTips,
+            TutorialStep.Welcome => TutorialStep.HowAliasVaultWorks,
+            TutorialStep.HowAliasVaultWorks => TutorialStep.SecureEnvironment,
+            TutorialStep.SecureEnvironment => TutorialStep.SecurityTips,
             TutorialStep.SecurityTips => TutorialStep.CreateFirstIdentity,
             _ => _currentStep
         };
@@ -184,6 +187,7 @@
 
     private void FinishTutorial()
     {
+        DbService.Settings.TutorialDone = true;
         NavigationManager.NavigateTo("credentials");
     }
 
