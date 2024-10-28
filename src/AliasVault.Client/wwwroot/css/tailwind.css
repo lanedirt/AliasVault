@@ -2750,6 +2750,18 @@ video {
     margin-top: 0px;
   }
 
+  .lg\:mt-12 {
+    margin-top: 3rem;
+  }
+
+  .lg\:mt-16 {
+    margin-top: 4rem;
+  }
+
+  .lg\:mt-20 {
+    margin-top: 5rem;
+  }
+
   .lg\:block {
     display: block;
   }
@@ -2760,6 +2772,10 @@ video {
 
   .lg\:hidden {
     display: none;
+  }
+
+  .lg\:h-dvh {
+    height: 100dvh;
   }
 
   .lg\:min-h-screen {

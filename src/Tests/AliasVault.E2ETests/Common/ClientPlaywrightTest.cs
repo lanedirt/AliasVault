@@ -382,7 +382,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         // Check if we get redirected to the root URL after registration which means we are logged in.
         if (checkForSuccess)
         {
-            await WaitForUrlAsync("welcome**", "Getting Started");
+            await WaitForUrlAsync("welcome**", "Your account has been successfully created");
         }
     }
 }
