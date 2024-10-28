@@ -80,7 +80,7 @@ public class UserSetupTests : ClientPlaywrightTest
         await continueButton.ClickAsync();
 
         // Verify that we end up on the welcome page which confirms the account has been successfully created.
-        await WaitForUrlAsync("welcome**", "Getting Started");
+        await WaitForUrlAsync("welcome**", WelcomeMessage);
     }
 
     /// <summary>

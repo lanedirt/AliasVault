@@ -17,7 +17,7 @@
             <EditForm Model="Model" OnValidSubmit="CreateIdentity">
                 <DataAnnotationsValidator />
                 <div class="mb-4">
-                    <EditFormRow Id="serviceName" Label="Service Name" @bind-Value="Model.ServiceName"></EditFormRow>
+                    <EditFormRow Id="serviceName" Label="Service Name" Placeholder="E.g. Facebook" @bind-Value="Model.ServiceName"></EditFormRow>
                     <ValidationMessage For="() => Model.ServiceName"/>
                 </div>
                 <div class="mb-4">

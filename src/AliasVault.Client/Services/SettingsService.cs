@@ -45,6 +45,11 @@ public sealed class SettingsService
     public string DefaultIdentityLanguage => GetSetting<string>("DefaultIdentityLanguage", "en")!;
 
     /// <summary>
+    /// Gets a value indicating whether the tutorial has been completed.
+    /// </summary>
+    public bool TutorialDone => GetSetting("TutorialDone", false);
+
+    /// <summary>
     /// Sets the DefaultEmailDomain setting.
     /// </summary>
     /// <param name="value">The new DefaultEmailDomain setting.</param>
@@ -64,6 +69,13 @@ public sealed class SettingsService
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
     public Task SetDefaultIdentityLanguage(string value) => SetSettingAsync("DefaultIdentityLanguage", value);
+
+    /// <summary>
+    /// Sets the TutorialDone setting.
+    /// </summary>
+    /// <param name="value">Value to set.</param>
+    /// <returns>Task.</returns>
+    public Task SetTutorialDoneAsync(bool value) => SetSettingAsync("TutorialDone", value);
 
     /// <summary>
     /// Initializes the settings service asynchronously.

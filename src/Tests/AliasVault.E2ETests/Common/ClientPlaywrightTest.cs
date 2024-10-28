@@ -30,6 +30,12 @@ public class ClientPlaywrightTest : PlaywrightTest
     private readonly WebApplicationClientFactoryFixture<AliasVault.E2ETests.Client.Server.Program> _clientFactory = new();
 
     /// <summary>
+    /// Gets the welcome message that is expected to be displayed on the index page.
+    /// This is used to verify that the user is logged in successfully.
+    /// </summary>
+    protected static string WelcomeMessage { get; } = "Your account has been successfully created";
+
+    /// <summary>
     /// Gets the time provider instance for mutating the current WebApi time in tests.
     /// </summary>
     protected TestTimeProvider ApiTimeProvider => _apiFactory.TimeProvider;
@@ -382,7 +388,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         // Check if we get redirected to the root URL after registration which means we are logged in.
         if (checkForSuccess)
         {
-            await WaitForUrlAsync("welcome**", "Getting Started");
+            await WaitForUrlAsync("welcome**", WelcomeMessage);
         }
     }
 }

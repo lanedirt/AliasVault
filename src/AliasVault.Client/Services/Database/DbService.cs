@@ -28,9 +28,9 @@ public sealed class DbService : IDisposable
     private readonly HttpClient _httpClient;
     private readonly DbServiceState _state = new();
     private readonly Config _config;
-    private readonly SettingsService _settingsService = new();
     private readonly ILogger<DbService> _logger;
     private readonly GlobalNotificationService _globalNotificationService;
+    private SettingsService _settingsService = new();
     private SqliteConnection? _sqlConnection;
     private AliasClientDbContext _dbContext;
     private long _vaultRevisionNumber;
@@ -411,6 +411,9 @@ public sealed class DbService : IDisposable
         // Reset the database state.
         _state.UpdateState(DbServiceState.DatabaseStatus.Uninitialized);
         _isSuccessfullyInitialized = false;
+
+        // Reset settings.
+        _settingsService = new();
 
         return (_sqlConnection, _dbContext);
     }
