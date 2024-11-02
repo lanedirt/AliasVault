@@ -7,7 +7,7 @@
 </p>
 
 <h3 align="center">
-Open-source password and identity manager
+Open-source password and alias manager
 </h3>
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/OGameX/releases)
@@ -19,11 +19,11 @@ Open-source password and identity manager
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 </div>
 
-AliasVault is an open-source password and identity manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
+AliasVault is an open-source password and alias manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each identity. Emails sent to these addresses are instantly visible in the AliasVault app.
+- **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app.
 - **Virtual identities**: Generate virtual identities and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for attackers to link your accounts.
 - **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
 
