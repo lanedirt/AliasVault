@@ -1,13 +1,14 @@
 ﻿@inject NavigationManager NavigationManager
+@using AliasVault.Shared.Core
 @implements IDisposable
 
 <footer class="relative lg:fixed bottom-0 left-0 right-0 dark:bg-gray-900 @(ShowBorder ? "border-t border-gray-200 dark:border-gray-700" : "")">
     <div class="container mx-auto px-4 py-4">
         <div class="flex flex-col lg:flex-row justify-between items-center">
             <p class="text-sm text-center text-gray-500 mb-4 lg:mb-0">
-                © 2024 AliasVault. All rights reserved.
+                © 2024 <span>@AppInfo.ApplicationName v@(AppInfo.GetFullVersion())</span>. All rights reserved.
             </p>
-            <div class="hidden lg:block text-center text-gray-400 text-sm">@RandomQuote</div>
+            <div class="hidden lg:block text-center text-gray-400 text-sm">@_randomQuote</div>
             <ul class="flex flex-wrap items-center justify-center">
                 <li>
                     <a href="https://github.com/lanedirt/AliasVault" target="_blank" class="text-sm font-normal text-gray-500 hover:underline dark:text-gray-400">GitHub</a>
@@ -32,7 +33,7 @@
         "Tip: Use the g+l (go lock) keyboard shortcut to lock the vault.",
     ];
 
-    private string RandomQuote = string.Empty;
+    private string _randomQuote = string.Empty;
 
     /// <inheritdoc />
     public void Dispose()
@@ -45,7 +46,7 @@
     {
         if (firstRender)
         {
-            RandomQuote = Quotes[Random.Shared.Next(Quotes.Length)];
+            _randomQuote = Quotes[Random.Shared.Next(Quotes.Length)];
             NavigationManager.LocationChanged += RefreshQuote;
         }
     }
@@ -55,7 +56,7 @@
     /// </summary>
     private void RefreshQuote(object? sender, LocationChangedEventArgs e)
     {
-        RandomQuote = Quotes[Random.Shared.Next(Quotes.Length)];
+        _randomQuote = Quotes[Random.Shared.Next(Quotes.Length)];
         StateHasChanged();
     }
 }

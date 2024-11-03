@@ -77,6 +77,7 @@
       <ProjectReference Include="..\Generators\AliasVault.Generators.Identity\AliasVault.Generators.Identity.csproj" />
       <ProjectReference Include="..\Generators\AliasVault.Generators.Password\AliasVault.Generators.Password.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
+      <ProjectReference Include="..\Shared\AliasVault.Shared.Core\AliasVault.Shared.Core.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\AliasVault.Cryptography.Client\AliasVault.Cryptography.Client.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.CsvImportExport\AliasVault.CsvImportExport.csproj" />
