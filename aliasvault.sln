@@ -65,6 +65,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Generators.Ident
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{DD359F0A-0180-4F8F-9E48-46213386BA4D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Shared.Core", "src\Shared\AliasVault.Shared.Core\AliasVault.Shared.Core.csproj", "{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,10 @@ Global
 		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80E74FBC-4EC8-45FB-B210-473337C484B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +196,7 @@ Global
 		{80E74FBC-4EC8-45FB-B210-473337C484B5} = {03D55CA4-20B3-4FEA-9ADD-3C7B5B10E0FE}
 		{59642CEF-D90A-4A6B-AD3F-9C6300D1E3FC} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
 		{15EFE0D0-F41B-47D7-86B7-8F840335CB82} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
+		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}
