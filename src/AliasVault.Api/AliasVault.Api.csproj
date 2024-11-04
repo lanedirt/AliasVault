@@ -23,7 +23,7 @@
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
         <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.2" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.2.0" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
