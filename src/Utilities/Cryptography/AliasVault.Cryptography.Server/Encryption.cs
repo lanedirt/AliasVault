@@ -56,15 +56,14 @@ public static class Encryption
     /// <returns>The encrypted symmetric key as a base64-encoded string.</returns>
     public static byte[] DecryptSymmetricKeyWithRsa(string ciphertext, string privateKey)
     {
-        using (var rsa = RSA.Create())
-        {
-            ImportPrivateKey(rsa, privateKey);
-            rsa.KeySize = 2048;
-            var rsaParams = RSAEncryptionPadding.OaepSHA256;
+        using var rsa = RSA.Create();
 
-            byte[] cipherBytes = Convert.FromBase64String(ciphertext);
-            return rsa.Decrypt(cipherBytes, rsaParams);
-        }
+        ImportPrivateKey(rsa, privateKey);
+        rsa.KeySize = 2048;
+        var rsaParams = RSAEncryptionPadding.OaepSHA256;
+
+        byte[] cipherBytes = Convert.FromBase64String(ciphertext);
+        return rsa.Decrypt(cipherBytes, rsaParams);
     }
 
     /// <summary>
