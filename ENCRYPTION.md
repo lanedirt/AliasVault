@@ -72,13 +72,15 @@ intended recipient. AliasVault implements RSA-OAEP with the following specificat
    - A public key that is sent to the server
 
 2. Email Reception Process: When an email arrives at the AliasVault email server:
-   - The server encrypts the email content using the recipient's public key
-   - The encrypted email is stored in the server's database
+   - The server generates a random 256-bit symmetric encryption key to encrypt the email contents
+   - The symmetric encryption key is encrypted using the recipient's asymmetric public key
+   - The encrypted email contents together with the encrypted symmetric encryption key are stored in the server's database
    - The original email content is never stored or logged
 
 3. Email Retrieval Process:
    - When a user accesses their emails, the encrypted content is retrieved from the server
-   - The client-side application decrypts the email using the user's private key that is stored in their vault
+   - The client-side application decrypts the symmetric encryption key using the user's private key that is stored in their vault
+   - The decrypted symmetric encryption key is used to decrypt the email contents
    - Decryption occurs entirely in the browser, maintaining end-to-end encryption
 
 This implementation ensures that:
