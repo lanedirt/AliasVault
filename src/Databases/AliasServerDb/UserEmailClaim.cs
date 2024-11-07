@@ -24,16 +24,18 @@ public class UserEmailClaim
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets user ID foreign key.
+    /// Gets or sets user ID foreign key. This can be null if the email claim was associated with a user that has since been deleted.
+    /// Email claims are meant to be preserved even if the user is deleted to prevent re-use of the email address.
     /// </summary>
     [StringLength(255)]
-    public string UserId { get; set; } = null!;
+    public string? UserId { get; set; }
 
     /// <summary>
-    /// Gets or sets foreign key to the AliasVaultUser object.
+    /// Gets or sets foreign key to the AliasVaultUser object. This can be null if the email claim was associated with a user that has since been deleted.
+    /// Email claims are meant to be preserved even if the user is deleted to prevent re-use of the email address.
     /// </summary>
     [ForeignKey("UserId")]
-    public virtual AliasVaultUser User { get; set; } = null!;
+    public virtual AliasVaultUser? User { get; set; }
 
     /// <summary>
     /// Gets or sets the full email address.
