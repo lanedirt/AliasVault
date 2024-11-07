@@ -1,5 +1,6 @@
 @page "/users/{id}/delete"
 @inherits MainBase
+@inject ILogger<Delete> Logger
 
 <LayoutPageTitle>Delete user</LayoutPageTitle>
 
@@ -78,6 +79,9 @@ else
         }
 
         GlobalLoadingSpinner.Show();
+
+        // Add log entry.
+        Logger.LogWarning("Deleted user {UserName} ({UserId}).", Obj.UserName, Obj.Id);
 
         DbContext.AliasVaultUsers.Remove(Obj);
         await DbContext.SaveChangesAsync();

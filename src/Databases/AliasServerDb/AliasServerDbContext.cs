@@ -208,18 +208,20 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure UserEmailClaim - AliasVaultUser relationship
+        // Note: when a user is deleted the email claims user FK's should be set to NULL
+        // so the claims themselves are preserved to prevent re-use of the email address.
         modelBuilder.Entity<UserEmailClaim>()
             .HasOne(l => l.User)
             .WithMany(c => c.EmailClaims)
             .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientSetNull);
 
         // Configure Email - UserEncryptionKey relationship
         modelBuilder.Entity<Email>()
             .HasOne(l => l.EncryptionKey)
             .WithMany(c => c.Emails)
             .HasForeignKey(l => l.UserEncryptionKeyId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Configure UserEncryptionKey - AliasVaultUser relationship
         modelBuilder.Entity<UserEncryptionKey>()
