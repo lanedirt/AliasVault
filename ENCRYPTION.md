@@ -2,7 +2,7 @@
 This document describes the encryption algorithms used by AliasVault in order to keep its user data secure.
 
 ## Overview
-AliasVault is built with a [zero-knowledge architecture](https://en.wikipedia.org/wiki/Zero-knowledge_service) and uses a combination of encryption algorithms to protect the users data which are stored in vaults.
+AliasVault features a [zero-knowledge architecture](https://en.wikipedia.org/wiki/Zero-knowledge_service) and uses a combination of encryption algorithms to protect the data of its users.
 
 The basic premise is that the master password chosen by the user upon registration forms the basis for all encryption
 and decryption operations. This master password is never transmitted over the network and only resides on the client.
