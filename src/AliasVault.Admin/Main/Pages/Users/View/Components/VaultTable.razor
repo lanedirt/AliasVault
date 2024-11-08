@@ -17,7 +17,7 @@
                 {
                     <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Current</span>
                 }
-                @if (_previousEntry != null && HasPasswordChanged(entry, _previousEntry))
+                @if (_previousEntry != null && HasPasswordChanged(entry, SortedVaultList))
                 {
                     <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Password Changed</span>
                 }
@@ -46,7 +46,7 @@
     [Parameter]
     public EventCallback<Vault> OnMakeCurrent { get; set; }
 
-    private string SortColumn { get; set; } = "UpdatedAt";
+    private string SortColumn { get; set; } = "RevisionNumber";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
     private Vault? _previousEntry;
 
@@ -90,9 +90,21 @@
         };
     }
 
-    private static bool HasPasswordChanged(Vault current, Vault previous)
+    /// <summary>
+    /// Checks if the password has changed between the current and previous vault entry based on revision number..
+    /// </summary>
+    private static bool HasPasswordChanged(Vault current, IEnumerable<Vault> vaultList)
     {
-        return current.Salt != previous.Salt || current.Verifier != previous.Verifier;
+        // Get the previous vault entry to compare to based on revision number.
+        var previousEntry = vaultList.FirstOrDefault(v => v.RevisionNumber == current.RevisionNumber - 1);
+
+        if (previousEntry == null)
+        {
+            // If the previous entry is null it means we have nothing to compare to so assume that it has not changed.
+            return false;
+        }
+
+        return current.Salt != previousEntry?.Salt || current.Verifier != previousEntry?.Verifier;
     }
 
     private async Task MakeCurrentAsync(Vault vault)
