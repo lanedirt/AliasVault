@@ -1,0 +1,118 @@
+%%{ init: { 'flowchart': { 'curve': 'basis' } } }%%
+graph TB
+    %% Legend
+    subgraph Legend["Legend"]
+        L_CRYPTO["Cryptographic Operations"]
+        L_STORAGE["Storage Elements"]
+        L_KEY["Keys and Sensitive Data"]
+        L_PROCESS["Process Steps"]
+        L_AUTH["Authentication Steps"]
+        L_FLOW["Email Processing Flow"]
+    end
+
+    subgraph Client["Client (Local Only Operations)"]
+        direction TB
+        MP[/"Master Password\n(never leaves client)"/]
+
+        subgraph KD["1. Key Derivation"]
+            A2["Argon2id"]
+            DK[/"Derived Key"/]
+            MP --> A2
+            A2 --> DK
+            DK --> |"used for vault\nencryption/decryption"| AES
+            DK --> |"used for authentication"| SRP_C
+        end
+
+        subgraph VE["3. Vault Operations"]
+            AES["AES256-GCM"]
+            VAULT["Encrypted Vault Contents"]
+            AES --> |"encrypt/decrypt"| VAULT
+        end
+
+        subgraph KP["4. Email Key Management"]
+            RSA["RSA/OAEP Key Generation"]
+            PRK[/"Private Key\n(stored in vault)"/]
+            PBK[/"Public Key"/]
+            RSA --> |"generates pair"| PRK
+            RSA --> |"generates pair"| PBK
+        end
+
+        subgraph ED["5. Email Decryption"]
+            PRK --> |"decrypt symmetric key"| SK[/"Symmetric Key\n(AES256)"/]
+            SK --> |"decrypt email"| DC["Decrypted Email"]
+        end
+    end
+
+    subgraph Server["Server"]
+        direction TB
+
+        subgraph AUTH["Authentication Flow"]
+            SRP_S["SRP Verification"]
+            subgraph FA["2FA (Optional)"]
+                TOTP["Time-based OTP"]
+                GA["Google Authenticator\nor Compatible App"]
+                VERIFY["Verify OTP Code"]
+                GA --> |"generate code"| TOTP
+                TOTP --> |"user enters"| VERIFY
+            end
+            JWT["Issue JWT Token"]
+            SRP_S --> FA
+            FA --> |"if 2FA enabled"| JWT
+            SRP_S --> |"if 2FA disabled"| JWT
+        end
+
+        subgraph VS["Vault Storage"]
+            EV["Encrypted Vault Data"]
+        end
+
+        subgraph ES["Email System"]
+            EC["Email Claims"]
+            PKS["Public Key Store"]
+
+            subgraph EP["Email Processing"]
+                CHECK{"Valid\nEmail Claim?"}
+                REJECT["Reject Email"]
+                ESK[/"Generate Random\nSymmetric Key"/]
+                EE["Encrypt Email\nContent"]
+                ESP["Encrypt Symmetric Key\nwith Public Key"]
+                EST["Store Encrypted Email\n& Encrypted Sym Key"]
+
+                CHECK --> |"No"| REJECT
+                CHECK --> |"Yes"| ESK
+                ESK --> EE
+                ESK --> ESP
+                EE --> EST
+                ESP --> EST
+            end
+        end
+    end
+
+    %% Client-Server Interactions
+    SRP_C["SRP Client"] <--> |"SRP Authentication"| SRP_S
+    AES <--> |"encrypted vault transfer"| EV
+    PBK --> |"register"| PKS
+    EST --> |"retrieve encrypted\nemail & sym key"| ED
+
+    %% Styling
+    classDef process fill:#ddd,stroke:#333,stroke-width:2px
+    classDef storage fill:#b7e3fc,stroke:#333,stroke-width:2px
+    classDef key fill:#fef08a,stroke:#333,stroke-width:2px
+    classDef crypto fill:#e9d5ff,stroke:#333,stroke-width:2px
+    classDef auth fill:#86efac,stroke:#333,stroke-width:2px
+    classDef flow fill:#fca5a5,stroke:#333,stroke-width:2px
+
+    %% Apply styles to legend
+    class L_CRYPTO crypto
+    class L_STORAGE storage
+    class L_KEY key
+    class L_PROCESS process
+    class L_AUTH auth
+    class L_FLOW flow
+
+    %% Apply styles to elements
+    class A2,SRP_C,SRP_S,RSA,AES crypto
+    class EV,EST storage
+    class MP,DK,PRK,PBK,SK,ESK key
+    class KD,VE,KP,ED process
+    class SRP_S,FA,JWT,TOTP,VERIFY auth
+    class CHECK,EP flow
