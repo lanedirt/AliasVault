@@ -104,7 +104,7 @@
             return false;
         }
 
-        return current.Salt != previousEntry?.Salt || current.Verifier != previousEntry?.Verifier;
+        return current.Salt != previousEntry.Salt || current.Verifier != previousEntry.Verifier;
     }
 
     private async Task MakeCurrentAsync(Vault vault)
