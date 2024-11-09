@@ -106,9 +106,9 @@ public class AdminPlaywrightTest : PlaywrightTest
         await submitButton.ClickAsync();
 
         // Wait for the dashboard to load.
-        await WaitForUrlAsync("**", "Welcome");
+        await WaitForUrlAsync("**", "Users");
 
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Welcome to the AliasVault admin portal"), "No entry page content visible after logging in to admin app.");
+        Assert.That(pageContent, Does.Contain("This page gives an overview of all registered users and the associated vaults"), "No entry page content visible after logging in to admin app.");
     }
 }

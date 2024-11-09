@@ -8,3 +8,14 @@
     Title="AliasVault Admin"
     Description="Welcome to the AliasVault admin portal.">
 </PageHeader>
+
+@code {
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Redirect to users page.
+        NavigationService.RedirectTo("/users");
+    }
+}
