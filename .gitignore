@@ -390,5 +390,5 @@ src/Tests/AliasVault.E2ETests/appsettings.Development.json
 .env
 
 # Draw.io diagram temp files
-*.drawio.bkp
+*.drawio.*
 
