@@ -3,6 +3,9 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
+# Add environment variable for opting out of telemetry which fixes
+# "error MSB4166: Child node "8" exited prematurely." issues.
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 WORKDIR /src
 
 # Install Python which is required by the WebAssembly tools

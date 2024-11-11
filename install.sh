@@ -245,6 +245,30 @@ set_smtp_tls_enabled() {
   fi
 }
 
+# Function to ask for support email
+set_support_email() {
+  printf "${CYAN}> Setting SUPPORT_EMAIL...${NC}\n"
+  if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
+    printf "Please enter the support email address that users can contact for issues accessing their vault (press Enter to disable): "
+    read -r support_email
+
+    echo "SUPPORT_EMAIL=${support_email}" >> "$ENV_FILE"
+
+    if [ -z "$support_email" ]; then
+      printf "${GREEN}> SUPPORT_EMAIL has been left empty in $ENV_FILE.${NC}\n"
+    else
+      printf "${GREEN}> SUPPORT_EMAIL has been set to '${support_email}' in $ENV_FILE.${NC}\n"
+    fi
+  else
+    support_email=$(grep "^SUPPORT_EMAIL=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ -z "$support_email" ]; then
+      printf "${GREEN}> SUPPORT_EMAIL already exists in $ENV_FILE but is empty.${NC}\n"
+    else
+      printf "${GREEN}> SUPPORT_EMAIL already exists in $ENV_FILE with value: ${support_email}${NC}\n"
+    fi
+  fi
+}
+
 # Function to build and run the Docker Compose stack with muted output unless an error occurs, showing progress indication
 build_and_run_docker_compose() {
     printf "${CYAN}> Building Docker Compose stack..."
@@ -340,6 +364,7 @@ main() {
         populate_data_protection_cert_pass || exit $?
         set_private_email_domains || exit $?
         set_smtp_tls_enabled || exit $?
+        set_support_email || exit $?
         generate_admin_password || exit $?
         printf "\n${YELLOW}+++ Building Docker containers +++${NC}\n"
         printf "\n"

@@ -57,4 +57,9 @@ public class Config
     /// For Argon2Id, this includes DegreeOfParallelism, MemorySize, and Iterations.
     /// </summary>
     public string? CryptographyOverrideSettings { get; set; }
+
+    /// <summary>
+    /// Gets or sets the support email address that users can contact for password recovery.
+    /// </summary>
+    public string? SupportEmail { get; set; }
 }

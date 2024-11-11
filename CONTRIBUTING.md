@@ -81,6 +81,7 @@ Here is an example file with the various options explained:
 {
     "ApiUrl": "http://localhost:5092",
     "PrivateEmailDomains": ["example.tld"],
+    "SupportEmail": "support@example.tld",
     "UseDebugEncryptionKey": "true",
     "CryptographyOverrideType" : "Argon2Id",
     "CryptographyOverrideSettings" : "{\"DegreeOfParallelism\":1,\"MemorySize\":1024,\"Iterations\":1}"
