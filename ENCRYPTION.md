@@ -12,21 +12,10 @@ the user's data remains secure.
 ## Encryption algorithms
 The following encryption algorithms are used by AliasVault:
 
-- [SRP](#srp)
 - [Argon2id](#argon2id)
+- [SRP](#srp)
 - [AES-GCM](#aes-gcm)
 - [RSA-OAEP](#rsa-oaep)
-
-### SRP
-The Secure Remote Password (SRP) protocol is used for authenticating a user with the AliasVault server during login.
-The SRP protocol is a password-authenticated key exchange protocol (PAKE). This means that the client and server can
-authenticate each other using a password, without sending the password itself over the network.
-
-With the use of SRP the master password never leaves the client. The client sends a verifier to the server,
-which is a value derived from the master password. The server uses this verifier to authenticate the client without
-having ever seen the actual master password.
-
-For more information see the [SRP protocol](https://en.wikipedia.org/wiki/Secure_Remote_Password_protocol) information on Wikipedia.
 
 ### Argon2id
 To derive a key from the master password, AliasVault uses the Argon2id key derivation function. Argon2id is a memory-hard
@@ -39,6 +28,17 @@ AliasVault uses Argon2id with the following default parameters:
 - Iterations: 2
 
 More information about Argon2id can be found on the [Argon2](https://en.wikipedia.org/wiki/Argon2) Wikipedia page.
+
+### SRP
+The Secure Remote Password (SRP) protocol is used for authenticating a user with the AliasVault server during login.
+The SRP protocol is a password-authenticated key exchange protocol (PAKE). This means that the client and server can
+authenticate each other using a password, without sending the password itself over the network.
+
+With the use of SRP the master password never leaves the client. The client sends a verifier to the server,
+which is a value derived from the master password. The server uses this verifier to authenticate the client without
+having ever seen the actual master password.
+
+For more information see the [SRP protocol](https://en.wikipedia.org/wiki/Secure_Remote_Password_protocol) information on Wikipedia.
 
 ### AES-256-GCM
 All user's vault data is fully encrypted on the client using the AES-256-GCM encryption algorithm, which stands for
