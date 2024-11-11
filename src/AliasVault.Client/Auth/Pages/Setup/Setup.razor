@@ -10,7 +10,7 @@
             <div class="flex-grow p-6 pt-4 lg:pt-6 pb-28 lg:pb-4">
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(_currentStep == SetupStep.Welcome ? "invisible" : "")">
+                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
@@ -35,9 +35,6 @@
                 <EditForm Model="@_setupData" OnValidSubmit="HandleSubmit">
                     @switch (_currentStep)
                     {
-                        case SetupStep.Welcome:
-                            <WelcomeStep />
-                            break;
                         case SetupStep.TermsAndConditions:
                             <TermsAndConditionsStep
                                 AgreedToTerms="@_setupData.AgreedToTerms"
@@ -80,7 +77,7 @@
 </div>
 
 @code {
-    private SetupStep _currentStep = SetupStep.Welcome;
+    private SetupStep _currentStep = SetupStep.TermsAndConditions;
     private readonly SetupData _setupData = new();
 
     /// <summary>
@@ -88,7 +85,6 @@
     /// </summary>
     private bool IsNextEnabled => _currentStep switch
     {
-        SetupStep.Welcome => true,
         SetupStep.TermsAndConditions => _setupData.AgreedToTerms,
         SetupStep.Username => !string.IsNullOrWhiteSpace(_setupData.Username),
         SetupStep.Password => !string.IsNullOrWhiteSpace(_setupData.Password),
@@ -104,7 +100,6 @@
     {
         return step switch
         {
-            SetupStep.Welcome => "Welcome to AliasVault",
             SetupStep.TermsAndConditions => "Using AliasVault",
             SetupStep.Username => "Choose Username",
             SetupStep.Password => "Set Password",
@@ -130,9 +125,6 @@
     {
         switch (_currentStep)
         {
-            case SetupStep.TermsAndConditions:
-                _currentStep = SetupStep.Welcome;
-                break;
             case SetupStep.Username:
                 _currentStep = SetupStep.TermsAndConditions;
                 break;
@@ -152,7 +144,6 @@
     {
         _currentStep = _currentStep switch
         {
-            SetupStep.Welcome => SetupStep.TermsAndConditions,
             SetupStep.TermsAndConditions => SetupStep.Username,
             SetupStep.Username => SetupStep.Password,
             SetupStep.Password => SetupStep.Creating,
@@ -186,7 +177,6 @@
     /// </summary>
     private enum SetupStep
     {
-        Welcome,
         TermsAndConditions,
         Username,
         Password,
