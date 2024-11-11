@@ -1,4 +1,4 @@
-# ENCRYPTION.md
+# SECURITY.md
 This document describes the encryption algorithms used by AliasVault in order to keep its user data secure.
 
 ## Overview
@@ -16,6 +16,10 @@ The following encryption algorithms are used by AliasVault:
 - [SRP](#srp)
 - [AES-GCM](#aes-gcm)
 - [RSA-OAEP](#rsa-oaep)
+
+Below is a detailed explanation of each encryption algorithm.
+
+For more information about how these algorithms are specifically used in AliasVault, see the [Security Architecture](docs/security-architecture.md) document.
 
 ### Argon2id
 To derive a key from the master password, AliasVault uses the Argon2id key derivation function. Argon2id is a memory-hard
@@ -89,6 +93,3 @@ This implementation ensures that:
 - Even if the server is compromised, email contents remain encrypted and unreadable
 
 More information about RSA-OAEP can be found on the [RSA-OAEP](https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding) Wikipedia page.
-
-
-
