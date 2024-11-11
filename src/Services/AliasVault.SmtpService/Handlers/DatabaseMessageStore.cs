@@ -87,7 +87,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
     }
 
-      /// <summary>
+    /// <summary>
     /// Load the email message from the buffer.
     /// </summary>
     /// <param name="buffer">Buffer which contains the email contents.</param>

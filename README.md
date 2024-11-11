@@ -24,7 +24,7 @@ AliasVault is an open-source password and alias manager built with C# ASP.NET te
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
 - **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app.
-- **Virtual identities**: Generate virtual identities and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for attackers to link your accounts.
+- **Alias generation**: Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
 - **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
 
 > Note: AliasVault is currently in active development and some features may not yet have been (fully) implemented. If you run into any issues, please create an issue on GitHub.
@@ -32,7 +32,7 @@ AliasVault is an open-source password and alias manager built with C# ASP.NET te
 ## Live demo
 A live demo of the app is available at the official website at [app.aliasvault.net](https://app.aliasvault.net) (up-to-date with `main` branch). You can create a free account to try it out yourself.
 
-<img width="700" alt="Screenshot 2024-07-12 at 14 58 29" src="https://github.com/user-attachments/assets/57103f67-dff0-4124-9b33-62137aab5578">
+<img width="700" alt="Screenshot of AliasVault" src="docs/img/screenshot.png">
 
 ## Installation
 To install AliasVault on your local machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
@@ -56,7 +56,7 @@ $ cd AliasVault
 $ chmod +x install.sh && ./install.sh
 ```
 
-Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/setup/1-manually-setup-docker.md) for more information.
+Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.
 
 ### 2. Ready to use
 The install script executed in step #1 will output the URL where the app is available. By default this is http://localhost:80 for the client and http://localhost:8080 for the admin.
@@ -71,6 +71,17 @@ The install script executed in step #1 will output the URL where the app is avai
 - To reset the admin password, run the install.sh script with the `--reset-admin-password` flag.
 - To uninstall AliasVault, make the uninstall script executable with `chmod +x uninstall.sh` first, then run the script: `./uninstall.sh`.
 This will remove all containers, images, and volumes related to AliasVault. It will keep all files and configuration intact however, so you can easily reinstall AliasVault later.
+
+## Security & Architecture
+AliasVault takes security seriously and implements various measures to protect your data:
+
+- All sensitive user data is encrypted end-to-end using industry-standard encryption algorithms. This includes the complete vault contents and all received emails.
+- Your master password never leaves your device.
+- Zero-knowledge architecture ensures the server never has access to your unencrypted data
+
+For detailed information about our encryption implementation and security architecture, see the following documents:
+- [SECURITY.md](SECURITY.md)
+- [Security Architecture (Diagram)](docs/security-architecture.md)
 
 ## Tech stack / credits
 The following technologies, frameworks and libraries are used in this project:

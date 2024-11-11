@@ -10,4 +10,3 @@ At the time of writing (2024-10-04), only some browsers support the required PRF
 2. Enable the `Experimental Web Platform features` flag.
 3. Restart the browser.
 4. Now it should be possible to use the built-in chrome password manager to unlock the vault.
-```

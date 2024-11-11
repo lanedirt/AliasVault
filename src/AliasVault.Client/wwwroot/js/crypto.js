@@ -7,7 +7,10 @@ window.cryptoInterop = {
         const key = await window.crypto.subtle.importKey(
             "raw",
             Uint8Array.from(atob(base64Key), c => c.charCodeAt(0)),
-            { name: "AES-GCM" },
+            {
+                name: "AES-GCM",
+                length: 256,
+            },
             false,
             ["encrypt"]
         );
@@ -36,7 +39,10 @@ window.cryptoInterop = {
         const key = await window.crypto.subtle.importKey(
             "raw",
             Uint8Array.from(atob(base64Key), c => c.charCodeAt(0)),
-            { name: "AES-GCM" },
+            {
+                name: "AES-GCM",
+                length: 256,
+            },
             false,
             ["decrypt"]
         );
