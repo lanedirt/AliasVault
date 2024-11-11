@@ -32,13 +32,6 @@ public class UserSetupTests : ClientPlaywrightTest
         var createVaultButton = await WaitForAndGetElement("a:has-text('Create new vault')");
         await createVaultButton.ClickAsync();
 
-        // Wait for the setup page to load.
-        await WaitForUrlAsync("user/setup", "Welcome to AliasVault");
-
-        // Press the continue button.
-        var continueButton = await WaitForAndGetElement("button:has-text('Continue')");
-        await continueButton.ClickAsync();
-
         // Wait for the terms and conditions to load.
         await WaitForUrlAsync("user/setup", "Terms and Conditions");
 
@@ -50,7 +43,7 @@ public class UserSetupTests : ClientPlaywrightTest
         await Task.Delay(100);
 
         // Press the continue button.
-        continueButton = await WaitForAndGetElement("button:has-text('Continue')");
+        var continueButton = await WaitForAndGetElement("button:has-text('Continue')");
         await continueButton.ClickAsync();
 
         // Wait for the username step to load.
@@ -100,13 +93,6 @@ public class UserSetupTests : ClientPlaywrightTest
         var createVaultButton = await WaitForAndGetElement("a:has-text('Create new vault')");
         await createVaultButton.ClickAsync();
 
-        // Wait for the setup page to load.
-        await WaitForUrlAsync("user/setup", "Welcome to AliasVault");
-
-        // Press the continue button.
-        var continueButton = await WaitForAndGetElement("button:has-text('Continue')");
-        await continueButton.ClickAsync();
-
         // Wait for the terms and conditions to load.
         await WaitForUrlAsync("user/setup", "Terms and Conditions");
 
@@ -118,7 +104,7 @@ public class UserSetupTests : ClientPlaywrightTest
         await Task.Delay(100);
 
         // Press the continue button.
-        continueButton = await WaitForAndGetElement("button:has-text('Continue')");
+        var continueButton = await WaitForAndGetElement("button:has-text('Continue')");
         await continueButton.ClickAsync();
 
         // Wait for the username step to load.
