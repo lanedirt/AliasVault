@@ -11,6 +11,7 @@ using System.Data.Common;
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -49,9 +50,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     }
 
     /// <summary>
-    /// Gets or sets the URL the web application host will listen on.
+    /// Gets or sets the port the web application kestrel host will listen on.
     /// </summary>
-    public string HostUrl { get; set; } = "https://localhost:5001";
+    public int Port { get; set; } = 5001;
 
     /// <summary>
     /// Gets the time provider instance for mutating the current time in tests.
@@ -87,28 +88,23 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <inheritdoc />
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        var dummyHost = builder.Build();
+        builder.ConfigureWebHost(webHostBuilder =>
+        {
+            webHostBuilder.UseKestrel(opt => opt.ListenLocalhost(Port));
+            webHostBuilder.ConfigureServices(s => s.AddSingleton<IServer, KestrelTestServer>());
+        });
 
-        builder.ConfigureWebHost(webHostBuilder => webHostBuilder.UseKestrel());
-
-        var host = builder.Build();
-        host.Start();
+        var host = base.CreateHost(builder);
 
         // Get the DbContextFactory instance and store it for later use during tests.
         _dbContextFactory = host.Services.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
 
-        // This delay prevents "ERR_CONNECTION_REFUSED" errors
-        // which happened like 1 out of 10 times when running tests.
-        Thread.Sleep(100);
-
-        return dummyHost;
+        return host;
     }
 
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseUrls(HostUrl);
-
         SetEnvironmentVariables();
 
         builder.ConfigureServices(services =>
@@ -133,19 +129,13 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
     private static void RemoveExistingRegistrations(IServiceCollection services)
     {
-        var descriptorsToRemove = new[]
-        {
-            services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextFactory<AliasServerDbContext>)),
-            services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AliasServerDbContext>)),
-            services.SingleOrDefault(d => d.ServiceType == typeof(ITimeProvider)),
-        };
+        var descriptorsToRemove = services.Where(d =>
+            d.ServiceType.ToString().Contains("AliasServerDbContext") ||
+            d.ServiceType == typeof(ITimeProvider)).ToList();
 
         foreach (var descriptor in descriptorsToRemove)
         {
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            services.Remove(descriptor);
         }
     }
 

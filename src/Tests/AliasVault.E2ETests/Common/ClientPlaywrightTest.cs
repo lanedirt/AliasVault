@@ -85,11 +85,11 @@ public class ClientPlaywrightTest : PlaywrightTest
         ApiBaseUrl = "http://localhost:" + apiPort + "/";
 
         // Start WebAPI in-memory.
-        _apiFactory.HostUrl = "http://localhost:" + apiPort;
+        _apiFactory.Port = apiPort;
         _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM in-memory.
-        _clientFactory.HostUrl = "http://localhost:" + appPort;
+        _clientFactory.Port = appPort;
         _clientFactory.CreateDefaultClient();
 
         await SetupPlaywrightBrowserAndContext();

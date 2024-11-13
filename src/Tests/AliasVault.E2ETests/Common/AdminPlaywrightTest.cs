@@ -58,7 +58,7 @@ public class AdminPlaywrightTest : PlaywrightTest
         AppBaseUrl = "http://localhost:" + appPort + "/";
 
         // Start Admin project in-memory.
-        _webAppFactory.HostUrl = "http://localhost:" + appPort;
+        _webAppFactory.Port = appPort;
         _webAppFactory.CreateDefaultClient();
 
         await SetupPlaywrightBrowserAndContext();
