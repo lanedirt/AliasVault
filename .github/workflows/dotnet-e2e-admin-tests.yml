@@ -16,7 +16,7 @@ jobs:
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
-                  dotnet-version: 8.0.304
+                  dotnet-version: 9.0.x
 
             - name: Install dependencies
               run: dotnet workload install wasm-tools
@@ -25,7 +25,7 @@ jobs:
               run: dotnet build
 
             - name: Ensure browsers are installed
-              run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install --with-deps
+              run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
             - name: Run AdminTests with retry
               uses: nick-fields/retry@v3

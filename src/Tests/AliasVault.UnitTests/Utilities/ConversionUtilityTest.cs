@@ -90,7 +90,7 @@ public partial class ConversionUtilityTest
         string anchorHtml = "<a href=\"test.html\" target=\"_blank\">test anchor text</a>";
         string convertedAnchorTags = ConversionUtility.ConvertAnchorTagsToOpenInNewTab(anchorHtml);
 
-        int targetBlankCount = TargetBlankRegex().Matches(convertedAnchorTags).Count;
+        int targetBlankCount = Regex.Matches(convertedAnchorTags, "target=\"_blank\"", RegexOptions.NonBacktracking).Count;
 
         Assert.Multiple(() =>
         {
@@ -104,11 +104,4 @@ public partial class ConversionUtilityTest
             Assert.That(convertedAnchorTags, Does.Contain(">test anchor text</a>"), "The anchor text should be preserved.");
         });
     }
-
-    /// <summary>
-    /// Regex to match an anchor tag with an href attribute, generated at compile time.
-    /// </summary>
-    /// <returns></returns>
-    [GeneratedRegex("target=\"_blank\"")]
-    private static partial Regex TargetBlankRegex();
 }

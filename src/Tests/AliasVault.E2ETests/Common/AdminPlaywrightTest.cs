@@ -14,8 +14,8 @@ using AliasServerDb;
 /// </summary>
 public class AdminPlaywrightTest : PlaywrightTest
 {
-    private static readonly int _basePort = 5700;
-    private static int _currentPort = _basePort;
+    private const int BasePort = 5700;
+    private static int _currentPort = BasePort;
 
     /// <summary>
     /// For starting the Admin project in-memory.
@@ -58,7 +58,7 @@ public class AdminPlaywrightTest : PlaywrightTest
         AppBaseUrl = "http://localhost:" + appPort + "/";
 
         // Start Admin project in-memory.
-        _webAppFactory.HostUrl = "http://localhost:" + appPort;
+        _webAppFactory.Port = appPort;
         _webAppFactory.CreateDefaultClient();
 
         await SetupPlaywrightBrowserAndContext();

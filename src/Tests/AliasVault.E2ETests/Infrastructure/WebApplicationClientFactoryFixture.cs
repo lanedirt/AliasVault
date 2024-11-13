@@ -8,7 +8,9 @@
 namespace AliasVault.E2ETests.Infrastructure;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 /// <summary>
@@ -19,30 +21,19 @@ public class WebApplicationClientFactoryFixture<TEntryPoint> : WebApplicationFac
     where TEntryPoint : class
 {
     /// <summary>
-    /// Gets or sets the URL the web application host will listen on.
+    /// Gets or sets the port the web application kestrel host will listen on.
     /// </summary>
-    public string HostUrl { get; set; } = "https://localhost:5002";
-
-    /// <inheritdoc />
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseUrls(HostUrl);
-    }
+    public int Port { get; set; } = 5002;
 
     /// <inheritdoc />
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        var dummyHost = builder.Build();
+        builder.ConfigureWebHost(webHostBuilder =>
+        {
+            webHostBuilder.UseKestrel(opt => opt.ListenLocalhost(Port));
+            webHostBuilder.ConfigureServices(s => s.AddSingleton<IServer, KestrelTestServer>());
+        });
 
-        builder.ConfigureWebHost(webHostBuilder => webHostBuilder.UseKestrel());
-
-        var host = builder.Build();
-        host.Start();
-
-        // This delay prevents "ERR_CONNECTION_REFUSED" errors
-        // which happened like 1 out of 10 times when running tests.
-        Thread.Sleep(100);
-
-        return dummyHost;
+        return base.CreateHost(builder);
     }
 }

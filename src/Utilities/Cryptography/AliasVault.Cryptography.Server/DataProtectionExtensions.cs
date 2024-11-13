@@ -10,7 +10,6 @@ namespace AliasVault.Cryptography.Server;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -29,10 +28,9 @@ public static class DataProtectionExtensions
         this IServiceCollection services,
         string applicationName)
     {
-        string certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS")
+        var certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS")
                               ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS is not set in configuration or environment variables.");
-
-        string certPath = "../../certificates/AliasVault.DataProtection.pfx";
+        var certPath = "../../certificates/AliasVault.DataProtection.pfx";
         if (certPassword == "Development")
         {
             certPath = Path.Combine(AppContext.BaseDirectory, "AliasVault.DataProtection.Development.pfx");
@@ -46,7 +44,7 @@ public static class DataProtectionExtensions
         }
         else
         {
-            cert = new X509Certificate2(certPath, certPassword);
+            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
         }
 
         services.AddDataProtection()

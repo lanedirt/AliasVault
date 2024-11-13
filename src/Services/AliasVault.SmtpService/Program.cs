@@ -97,9 +97,8 @@ builder.Services.AddSingleton(
             // If we don't do this, the certificate will be loaded without the private key and
             // will throw error on Windows:
             // "The TLS server credential's certificate does not have a private key information property attached to it"
-            cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
-
-            return cert;
+            var certBytes = cert.Export(X509ContentType.Pfx, "password");
+            return X509CertificateLoader.LoadPkcs12(certBytes, "password", X509KeyStorageFlags.EphemeralKeySet);
         }
     });
 

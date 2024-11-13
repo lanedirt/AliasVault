@@ -16,8 +16,8 @@ using Microsoft.Playwright;
 /// </summary>
 public class ClientPlaywrightTest : PlaywrightTest
 {
-    private static readonly int _basePort = 5600;
-    private static int _currentPort = _basePort;
+    private const int BasePort = 5600;
+    private static int _currentPort = BasePort;
 
     /// <summary>
     /// For starting the WebAPI project in-memory.
@@ -85,11 +85,11 @@ public class ClientPlaywrightTest : PlaywrightTest
         ApiBaseUrl = "http://localhost:" + apiPort + "/";
 
         // Start WebAPI in-memory.
-        _apiFactory.HostUrl = "http://localhost:" + apiPort;
+        _apiFactory.Port = apiPort;
         _apiFactory.CreateDefaultClient();
 
         // Start Blazor WASM in-memory.
-        _clientFactory.HostUrl = "http://localhost:" + appPort;
+        _clientFactory.Port = appPort;
         _clientFactory.CreateDefaultClient();
 
         await SetupPlaywrightBrowserAndContext();

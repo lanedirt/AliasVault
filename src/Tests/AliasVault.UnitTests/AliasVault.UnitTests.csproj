@@ -1,23 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <RootNamespace>AliasVault.Tests</RootNamespace>
+        <LangVersion>13</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <DocumentationFile>bin\Debug\net8.0\AliasVault.UnitTests.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net9.0\AliasVault.UnitTests.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <DocumentationFile>bin\Release\net8.0\AliasVault.UnitTests.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net9.0\AliasVault.UnitTests.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

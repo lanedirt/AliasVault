@@ -11,12 +11,21 @@
 </div>
 
 @code {
+    /// <summary>
+    /// Title tag text of the loading indicator.
+    /// </summary>
     [Parameter]
     public string Title { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Whether the loading indicator is spinning.
+    /// </summary>
     [Parameter]
     public bool Spinning { get; set; } = true;
 
+    /// <summary>
+    /// The content to display inside the loading indicator.
+    /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 }

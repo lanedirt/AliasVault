@@ -7,8 +7,8 @@
 
 namespace AliasVault.Tests.Utilities;
 
+using System.Security.Cryptography;
 using AliasVault.Cryptography.Client;
-using Org.BouncyCastle.Crypto;
 using SecureRemotePassword;
 
 /// <summary>
@@ -31,7 +31,7 @@ public class SrpArgonEncryptionTests
 
         // Derive a key from the password using Argon2id
         byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
-        Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
+        Console.WriteLine($"Derived key: {key.Length} bytes (hex: {Convert.ToHexString(key).Replace("-", string.Empty)})");
 
         // SymmetricEncrypt the plaintext
         string encrypted = Cryptography.Server.Encryption.SymmetricEncrypt(plaintext, key);
@@ -90,7 +90,7 @@ public class SrpArgonEncryptionTests
         // SymmetricDecrypt the ciphertext using a different key
         byte[] key2 = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync("your-password2", salt);
 
-        Assert.Throws<InvalidCipherTextException>(() => Cryptography.Server.Encryption.SymmetricDecrypt(encrypted, key2));
+        Assert.Throws<AuthenticationTagMismatchException>(() => Cryptography.Server.Encryption.SymmetricDecrypt(encrypted, key2));
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public class SrpArgonEncryptionTests
         var salt = client.GenerateSalt();
 
         byte[] passwordHash = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync(password, salt);
-        var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+        var passwordHashString = Convert.ToHexString(passwordHash).Replace("-", string.Empty);
         var srpSignup = Srp.PasswordChangeAsync(client, salt, email, passwordHashString);
 
         var privateKey = srpSignup.PrivateKey;

@@ -10,6 +10,14 @@ jobs:
         name: Build and analyze
         runs-on: windows-latest
         steps:
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                  dotnet-version: '9.0.x'
+
+            - name: Install WASM workload
+              run: dotnet workload install wasm-tools
+
             - name: Set up JDK 17
               uses: actions/setup-java@v3
               with:
