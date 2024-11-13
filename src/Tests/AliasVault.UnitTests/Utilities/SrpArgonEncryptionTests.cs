@@ -31,7 +31,7 @@ public class SrpArgonEncryptionTests
 
         // Derive a key from the password using Argon2id
         byte[] key = await Encryption.DeriveKeyFromPasswordAsync(password, salt);
-        Console.WriteLine($"Derived key: {key.Length} bytes (hex: {BitConverter.ToString(key).Replace("-", string.Empty)})");
+        Console.WriteLine($"Derived key: {key.Length} bytes (hex: {Convert.ToHexString(key).Replace("-", string.Empty)})");
 
         // SymmetricEncrypt the plaintext
         string encrypted = Cryptography.Server.Encryption.SymmetricEncrypt(plaintext, key);
@@ -109,7 +109,7 @@ public class SrpArgonEncryptionTests
         var salt = client.GenerateSalt();
 
         byte[] passwordHash = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync(password, salt);
-        var passwordHashString = BitConverter.ToString(passwordHash).Replace("-", string.Empty);
+        var passwordHashString = Convert.ToHexString(passwordHash).Replace("-", string.Empty);
         var srpSignup = Srp.PasswordChangeAsync(client, salt, email, passwordHashString);
 
         var privateKey = srpSignup.PrivateKey;

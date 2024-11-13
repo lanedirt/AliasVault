@@ -84,8 +84,7 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-/*builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");*/
-
+builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromDays(30);

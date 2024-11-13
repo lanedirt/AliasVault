@@ -44,7 +44,7 @@ public static class DataProtectionExtensions
         }
         else
         {
-            cert = X509Certificate2.CreateFromPemFile(certPath, certPath);
+            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
         }
 
         services.AddDataProtection()
