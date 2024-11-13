@@ -27,11 +27,13 @@
 }
 
 @code {
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         ModalService.OnChange += StateHasChanged;
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         ModalService.OnChange -= StateHasChanged;

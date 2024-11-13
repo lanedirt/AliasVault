@@ -10,10 +10,6 @@ namespace AliasVault.Cryptography.Server;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Modes;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Security;
 
 /// <summary>
 /// RSA/AES and Argon2id encryption methods.
@@ -86,23 +82,22 @@ public static class Encryption
     /// <returns>The encrypted string (ciphertext).</returns>
     public static byte[] SymmetricEncrypt(byte[] plainBytes, byte[] key)
     {
-        byte[] iv = new byte[12];
-        SecureRandom random = new();
-        random.NextBytes(iv);
+        byte[] nonce = new byte[AesGcm.NonceByteSizes.MaxSize]; // 12 bytes
+        RandomNumberGenerator.Fill(nonce);
 
-        GcmBlockCipher gcm = new(new AesEngine());
-        AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
-        gcm.Init(true, parameters);
+        byte[] ciphertext = new byte[plainBytes.Length];
+        byte[] tag = new byte[AesGcm.TagByteSizes.MaxSize]; // 16 bytes
 
-        byte[] ciphertextBytes = new byte[gcm.GetOutputSize(plainBytes.Length)];
-        int outputLength = gcm.ProcessBytes(plainBytes, 0, plainBytes.Length, ciphertextBytes, 0);
-        gcm.DoFinal(ciphertextBytes, outputLength);
+        using var aesGcm = new AesGcm(key, AesGcm.TagByteSizes.MaxSize);
+        aesGcm.Encrypt(nonce, plainBytes, ciphertext, tag);
 
-        byte[] combined = new byte[iv.Length + ciphertextBytes.Length];
-        Array.Copy(iv, 0, combined, 0, iv.Length);
-        Array.Copy(ciphertextBytes, 0, combined, iv.Length, ciphertextBytes.Length);
+        // Combine nonce + ciphertext + tag
+        byte[] result = new byte[nonce.Length + ciphertext.Length + tag.Length];
+        Buffer.BlockCopy(nonce, 0, result, 0, nonce.Length);
+        Buffer.BlockCopy(ciphertext, 0, result, nonce.Length, ciphertext.Length);
+        Buffer.BlockCopy(tag, 0, result, nonce.Length + ciphertext.Length, tag.Length);
 
-        return combined;
+        return result;
     }
 
     /// <summary>
@@ -125,21 +120,23 @@ public static class Encryption
     /// <returns>The original plaintext string.</returns>
     public static byte[] SymmetricDecrypt(byte[] encryptedBytes, byte[] key)
     {
-        byte[] iv = new byte[12];
-        byte[] cipherBytes = new byte[encryptedBytes.Length - iv.Length];
+        int nonceSize = AesGcm.NonceByteSizes.MaxSize;
+        int tagSize = AesGcm.TagByteSizes.MaxSize;
 
-        Array.Copy(encryptedBytes, 0, iv, 0, iv.Length);
-        Array.Copy(encryptedBytes, iv.Length, cipherBytes, 0, cipherBytes.Length);
+        // Extract nonce, ciphertext, and tag
+        byte[] nonce = new byte[nonceSize];
+        byte[] tag = new byte[tagSize];
+        byte[] ciphertext = new byte[encryptedBytes.Length - nonceSize - tagSize];
 
-        GcmBlockCipher gcm = new(new AesEngine());
-        AeadParameters parameters = new(new KeyParameter(key), 128, iv, null);
-        gcm.Init(false, parameters);
+        Buffer.BlockCopy(encryptedBytes, 0, nonce, 0, nonceSize);
+        Buffer.BlockCopy(encryptedBytes, nonceSize, ciphertext, 0, ciphertext.Length);
+        Buffer.BlockCopy(encryptedBytes, nonceSize + ciphertext.Length, tag, 0, tagSize);
 
-        byte[] plaintextBytes = new byte[gcm.GetOutputSize(cipherBytes.Length)];
-        int outputLength = gcm.ProcessBytes(cipherBytes, 0, cipherBytes.Length, plaintextBytes, 0);
-        gcm.DoFinal(plaintextBytes, outputLength);
+        byte[] plaintext = new byte[ciphertext.Length];
+        using var aesGcm = new AesGcm(key, tagSize);
+        aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
 
-        return plaintextBytes;
+        return plaintext;
     }
 
     /// <summary>
