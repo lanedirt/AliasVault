@@ -16,8 +16,8 @@ using Microsoft.Playwright;
 /// </summary>
 public class ClientPlaywrightTest : PlaywrightTest
 {
-    private static readonly int _basePort = 5600;
-    private static int _currentPort = _basePort;
+    private const int BasePort = 5600;
+    private static int _currentPort = BasePort;
 
     /// <summary>
     /// For starting the WebAPI project in-memory.

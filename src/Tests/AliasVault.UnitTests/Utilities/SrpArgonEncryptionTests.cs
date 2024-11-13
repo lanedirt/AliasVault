@@ -7,6 +7,7 @@
 
 namespace AliasVault.Tests.Utilities;
 
+using System.Security.Cryptography;
 using AliasVault.Cryptography.Client;
 using SecureRemotePassword;
 
@@ -89,7 +90,7 @@ public class SrpArgonEncryptionTests
         // SymmetricDecrypt the ciphertext using a different key
         byte[] key2 = await Cryptography.Client.Encryption.DeriveKeyFromPasswordAsync("your-password2", salt);
 
-        Assert.Throws<Exception>(() => Cryptography.Server.Encryption.SymmetricDecrypt(encrypted, key2));
+        Assert.Throws<AuthenticationTagMismatchException>(() => Cryptography.Server.Encryption.SymmetricDecrypt(encrypted, key2));
     }
 
     /// <summary>

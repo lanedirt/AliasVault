@@ -11,14 +11,14 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-        <DocumentationFile>bin\Debug\net8.0\AliasVault.Client.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net9.0\AliasVault.Client.xml</DocumentationFile>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <CacheBuster>dev</CacheBuster>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <DebugSymbols>true</DebugSymbols>
-        <DocumentationFile>bin\Release\net8.0\AliasVault.Client.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net9.0\AliasVault.Client.xml</DocumentationFile>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <Optimize>True</Optimize>
         <CacheBuster>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</CacheBuster>

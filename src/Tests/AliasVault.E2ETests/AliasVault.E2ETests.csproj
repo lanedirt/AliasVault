@@ -11,13 +11,13 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Debug\net8.0\AliasVault.E2ETests.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\net9.0\AliasVault.E2ETests.xml</DocumentationFile>
       <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Release\net8.0\AliasVault.E2ETests.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\net9.0\AliasVault.E2ETests.xml</DocumentationFile>
       <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
 

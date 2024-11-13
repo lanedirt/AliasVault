@@ -9,12 +9,12 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Debug\net8.0\FaviconExtractor.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\net9.0\FaviconExtractor.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-      <DocumentationFile>bin\Release\net8.0\FaviconExtractor.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\net9.0\FaviconExtractor.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

@@ -12,12 +12,12 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\net8.0\AliasVault.SmtpService.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\net9.0\AliasVault.SmtpService.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Release\net8.0\AliasVault.SmtpService.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\net9.0\AliasVault.SmtpService.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

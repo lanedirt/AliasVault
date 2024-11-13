@@ -40,7 +40,7 @@ builder.Services.AddLogging(logging =>
 });
 
 builder.Services.AddAliasVaultSqliteConfiguration();
-builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
+/*builder.Services.AddAliasVaultDataProtection("AliasVault.Api"); */
 
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
