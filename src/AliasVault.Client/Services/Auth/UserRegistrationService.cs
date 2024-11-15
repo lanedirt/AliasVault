@@ -50,7 +50,7 @@ public class UserRegistrationService(HttpClient httpClient, AuthenticationStateP
             var srpSignup = Srp.PasswordChangeAsync(client, salt, username, passwordHashString);
 
             var registerRequest = new RegisterRequest(srpSignup.Username, srpSignup.Salt, srpSignup.Verifier, encryptionType, encryptionSettings);
-            var result = await httpClient.PostAsJsonAsync("api/v1/Auth/register", registerRequest);
+            var result = await httpClient.PostAsJsonAsync("v1/Auth/register", registerRequest);
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)

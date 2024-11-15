@@ -138,7 +138,7 @@ else
             Addresses = emailClaimList,
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"api/v1/EmailBox/bulk");
+        var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
         request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
 
         try
@@ -245,7 +245,7 @@ else
     /// </summary>
     private async Task ShowAliasVaultEmailInModal(int emailId)
     {
-        EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"api/v1/Email/{emailId}");
+        EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"v1/Email/{emailId}");
         if (mail != null)
         {
             // Decrypt the email content locally.

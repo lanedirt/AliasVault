@@ -59,9 +59,9 @@ $ chmod +x install.sh && ./install.sh
 Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.
 
 ### 2. Ready to use
-The install script executed in step #1 will output the URL where the app is available. By default this is http://localhost:80 for the client and http://localhost:8080 for the admin.
+The install script executed in step #1 will output the URL where the app is available. By default this is https://localhost for the client and https://localhost/admin for the admin portal.
 
-> Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file.
+> Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file for the `nginx` (reverse-proxy) container.
 
 #### Note for first time build:
 - When running the init script for the first time, it may take a few minutes for Docker to download all dependencies. Subsequent builds will be faster.

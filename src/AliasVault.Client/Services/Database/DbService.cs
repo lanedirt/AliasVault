@@ -106,7 +106,7 @@ public sealed class DbService : IDisposable
     {
         try
         {
-            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>($"api/v1/Vault/merge?currentRevisionNumber={_vaultRevisionNumber}");
+            var vaultsToMerge = await _httpClient.GetFromJsonAsync<VaultMergeResponse>($"v1/Vault/merge?currentRevisionNumber={_vaultRevisionNumber}");
             if (vaultsToMerge == null || vaultsToMerge.Vaults.Count == 0)
             {
                 // No vaults to merge found, set error state.
@@ -558,7 +558,7 @@ public sealed class DbService : IDisposable
         // Load from webapi.
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<VaultGetResponse>("api/v1/Vault");
+            var response = await _httpClient.GetFromJsonAsync<VaultGetResponse>("v1/Vault");
             if (response is not null)
             {
                 if (response.Status == VaultStatus.MergeRequired)
@@ -621,7 +621,7 @@ public sealed class DbService : IDisposable
 
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/v1/Vault", vaultObject);
+            var response = await _httpClient.PostAsJsonAsync("v1/Vault", vaultObject);
 
             // Ensure the request was successful
             response.EnsureSuccessStatusCode();

@@ -169,7 +169,7 @@
 
             try
             {
-                var response = await Http.PostAsJsonAsync("api/v1/Auth/validate-username", new { Username });
+                var response = await Http.PostAsJsonAsync("v1/Auth/validate-username", new { Username });
 
                 if (response.IsSuccessStatusCode)
                 {

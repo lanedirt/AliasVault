@@ -140,22 +140,22 @@ create_env_file() {
   fi
 }
 
-# Function to check and populate the .env file with API_URL
-populate_api_url() {
-  printf "${CYAN}> Checking API_URL...${NC}\n"
-  if ! grep -q "^API_URL=" "$ENV_FILE" || [ -z "$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-    DEFAULT_API_URL="http://localhost:81"
-    read -p "Enter the base URL where the API will be hosted (press Enter for default: $DEFAULT_API_URL): " USER_API_URL
-    API_URL=${USER_API_URL:-$DEFAULT_API_URL}
-    if grep -q "^API_URL=" "$ENV_FILE"; then
-      awk -v url="$API_URL" '/^API_URL=/ {$0="API_URL="url} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+# Function to populate HOSTNAME
+populate_hostname() {
+  printf "${CYAN}> Checking HOSTNAME...${NC}\n"
+  if ! grep -q "^HOSTNAME=" "$ENV_FILE" || [ -z "$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    DEFAULT_HOSTNAME="localhost"
+    read -p "Enter the hostname where AliasVault will be hosted (press Enter for default: $DEFAULT_HOSTNAME): " USER_HOSTNAME
+    HOSTNAME=${USER_HOSTNAME:-$DEFAULT_HOSTNAME}
+    if grep -q "^HOSTNAME=" "$ENV_FILE"; then
+      awk -v hostname="$HOSTNAME" '/^HOSTNAME=/ {$0="HOSTNAME="hostname} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     else
-      echo "API_URL=${API_URL}" >> "$ENV_FILE"
+      echo "HOSTNAME=${HOSTNAME}" >> "$ENV_FILE"
     fi
-    printf "${GREEN}> API_URL has been set to $API_URL in $ENV_FILE.${NC}\n"
+    printf "${GREEN}> HOSTNAME has been set to $HOSTNAME in $ENV_FILE.${NC}\n"
   else
-    API_URL=$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)
-    printf "${GREEN}> API_URL already exists in $ENV_FILE with value: $API_URL${NC}\n"
+    HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+    printf "${GREEN}> HOSTNAME already exists in $ENV_FILE with value: $HOSTNAME${NC}\n"
   fi
 }
 
@@ -359,7 +359,7 @@ main() {
         printf "${YELLOW}+++ Initializing .env file +++${NC}\n"
         printf "\n"
         create_env_file || exit $?
-        populate_api_url || exit $?
+        populate_hostname || exit $?
         populate_jwt_key || exit $?
         populate_data_protection_cert_pass || exit $?
         set_private_email_domains || exit $?
@@ -381,14 +381,14 @@ main() {
     printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
     printf "\n"
     if [ "$ADMIN_PASSWORD" != "" ]; then
-      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Admin Panel: https://$HOSTNAME/admin\n"
       printf "Username: admin\n"
       printf "Password: $ADMIN_PASSWORD\n"
       printf "\n"
       printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
       printf "\n"
     else
-      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Admin Panel: https://$HOSTNAME/admin\n"
       printf "Username: admin\n"
       printf "Password: (Previously set. Run this command with --reset-password to generate a new one.)\n"
       printf "\n"
@@ -397,8 +397,7 @@ main() {
     printf "\n"
     printf "${CYAN}In order to start using AliasVault and create your own vault, log into the client website:${NC}\n"
     printf "\n"
-    printf "Client Website: http://localhost:80/\n"
-    printf "You can create your own account from there.\n"
+    printf "Client Website: https://$HOSTNAME/\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
 }

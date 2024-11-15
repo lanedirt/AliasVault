@@ -3,13 +3,12 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
-# Add environment variable for opting out of telemetry which fixes
-# "error MSB4166: Child node "8" exited prematurely." issues.
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV MSBUILDDEBUGPATH=/src/msbuild-logs
 WORKDIR /src
 
-# Install Python which is required by the WebAssembly tools
-RUN apt-get update && apt-get install -y python3 && apt-get clean
+# Create the debug directory and install Python which is required by the WebAssembly tools
+RUN mkdir -p /src/msbuild-logs && apt-get update && apt-get install -y python3 && apt-get clean
 
 # Install the WebAssembly tools
 RUN dotnet workload install wasm-tools
@@ -30,12 +29,13 @@ RUN dotnet publish "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/
 
 # Final stage
 FROM nginx:1.24.0 AS final
-
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
-COPY /src/AliasVault.Client/entrypoint.sh /app/
+COPY /src/AliasVault.Client/entrypoint.sh /app/entrypoint.sh
+
 RUN chmod +x /app/entrypoint.sh
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+
+EXPOSE 3000
+ENV ASPNETCORE_URLS=http://+:3000
 ENTRYPOINT ["/app/entrypoint.sh"]

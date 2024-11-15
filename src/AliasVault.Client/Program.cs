@@ -54,12 +54,11 @@ builder.Services.AddScoped(sp =>
 {
     var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
     var httpClient = httpClientFactory.CreateClient("AliasVault.Api");
-    if (builder.Configuration["ApiUrl"] is null)
-    {
-        throw new InvalidOperationException("The 'ApiUrl' configuration value is required.");
-    }
+    var apiConfig = sp.GetRequiredService<Config>();
 
-    httpClient.BaseAddress = new Uri(builder.Configuration["ApiUrl"]!);
+    // Ensure the API URL ends with a forward slash
+    var baseUrl = apiConfig.ApiUrl.TrimEnd('/') + "/";
+    httpClient.BaseAddress = new Uri(baseUrl);
     return httpClient;
 });
 builder.Services.AddTransient<AliasVaultApiHandlerService>();

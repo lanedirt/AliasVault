@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 /// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
 public class SecurityController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)

@@ -39,7 +39,7 @@ using SecureRemotePassword;
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multistep login process.</param>
 /// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
 /// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
 public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService) : ControllerBase

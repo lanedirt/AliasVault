@@ -9,12 +9,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net9.0\InitializationCLI.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\net9.0\AliasVault.InstallCli.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net9.0\InitializationCLI.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\net9.0\AliasVault.InstallCli.xml</DocumentationFile>
       <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 

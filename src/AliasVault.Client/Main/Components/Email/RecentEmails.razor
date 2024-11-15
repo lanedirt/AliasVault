@@ -285,7 +285,7 @@
     /// </summary>
     private async Task LoadAliasVaultEmails()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"api/v1/EmailBox/{EmailAddress}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"v1/EmailBox/{EmailAddress}");
         try
         {
             var response = await HttpClient.SendAsync(request);
@@ -351,7 +351,7 @@
     /// </summary>
     private async Task ShowAliasVaultEmailInModal(int emailId)
     {
-        EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"api/v1/Email/{emailId}");
+        EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"v1/Email/{emailId}");
         if (mail != null)
         {
             // Decrypt the email content locally.

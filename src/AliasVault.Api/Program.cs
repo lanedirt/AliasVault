@@ -157,6 +157,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("CorsPolicy");
 
+// If the ASPNETCORE_PATHBASE environment variable is set, use it as the path base
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE")))
+{
+    app.UsePathBase(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE"));
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,25 +1,29 @@
 services:
-    admin:
-        image: aliasvault-admin
+    nginx:
         build:
             context: .
-            dockerfile: src/AliasVault.Admin/Dockerfile
+            dockerfile: Dockerfile
         ports:
-            - "8080:8082"
+            - "80:80"
+            - "443:443"
         volumes:
-            - ./certificates:/certificates:rw
-            - ./database:/database:rw
-            - ./logs:/logs:rw
+            - ./certificates/ssl:/etc/nginx/ssl:rw
+        depends_on:
+            - admin
+            - client
+            - api
+            - smtp
         restart: always
-        env_file:
-            - .env
+
     client:
         image: aliasvault-client
         build:
             context: .
             dockerfile: src/AliasVault.Client/Dockerfile
-        ports:
-            - "80:8080"
+        volumes:
+            - ./logs/msbuild:/src/msbuild-logs:rw
+        expose:
+            - "3000"
         restart: always
         env_file:
             - .env
@@ -29,15 +33,30 @@ services:
         build:
             context: .
             dockerfile: src/AliasVault.Api/Dockerfile
-        ports:
-            - "81:8081"
+        expose:
+            - "3001"
         volumes:
-            - ./certificates:/certificates:rw
             - ./database:/database:rw
+            - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
         env_file:
             - .env
         restart: always
+
+    admin:
+        image: aliasvault-admin
+        build:
+            context: .
+            dockerfile: src/AliasVault.Admin/Dockerfile
+        expose:
+            - "3002"
+        volumes:
+            - ./database:/database:rw
+            - ./certificates/app:/certificates/app:rw
+            - ./logs:/logs:rw
+        restart: always
+        env_file:
+            - .env
 
     smtp:
         image: aliasvault-smtp
