@@ -47,7 +47,7 @@ public static class CertificateGenerator
                 DateTimeOffset.UtcNow.AddDays(-1),
                 DateTimeOffset.UtcNow.AddYears(validityYears));
 
-            return X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx, password), password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            return X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx, password), password, X509KeyStorageFlags.Exportable);
         }
     }
 
