@@ -7,11 +7,8 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV MSBUILDDEBUGPATH=/src/msbuild-logs
 WORKDIR /src
 
-# Create the debug directory
-RUN mkdir -p /src/msbuild-logs
-
-# Install Python which is required by the WebAssembly tools
-RUN apt-get update && apt-get install -y python3 && apt-get clean
+# Create the debug directory and install Python which is required by the WebAssembly tools
+RUN mkdir -p /src/msbuild-logs && apt-get update && apt-get install -y python3 && apt-get clean
 
 # Install the WebAssembly tools
 RUN dotnet workload install wasm-tools
