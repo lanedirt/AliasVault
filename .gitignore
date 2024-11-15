@@ -394,6 +394,6 @@ src/Tests/AliasVault.E2ETests/appsettings.Development.json
 *.drawio.*
 
 # Certificates
-certificates/*.crt
-certificates/*.key
-certificates/*.pfx
+certificates/**/*.crt
+certificates/**/*.key
+certificates/**/*.pfx
