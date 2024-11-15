@@ -381,14 +381,14 @@ main() {
     printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
     printf "\n"
     if [ "$ADMIN_PASSWORD" != "" ]; then
-      printf "Admin Panel: https://localhost:4431/\n"
+      printf "Admin Panel: https://$HOSTNAME/admin\n"
       printf "Username: admin\n"
       printf "Password: $ADMIN_PASSWORD\n"
       printf "\n"
       printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
       printf "\n"
     else
-      printf "Admin Panel: https://localhost:4431/\n"
+      printf "Admin Panel: https://$HOSTNAME/admin\n"
       printf "Username: admin\n"
       printf "Password: (Previously set. Run this command with --reset-password to generate a new one.)\n"
       printf "\n"
@@ -397,9 +397,7 @@ main() {
     printf "\n"
     printf "${CYAN}In order to start using AliasVault and create your own vault, log into the client website:${NC}\n"
     printf "\n"
-    printf "Client Website: https://localhost:443/\n"
-    printf "${YELLOW}Note: The client website will automatically redirect from HTTP (port 80) to HTTPS (port 443)${NC}\n"
-    printf "You can create your own account from there.\n"
+    printf "Client Website: https://$HOSTNAME/\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
 }
