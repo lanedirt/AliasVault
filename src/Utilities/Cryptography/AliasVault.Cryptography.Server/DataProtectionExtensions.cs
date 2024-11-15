@@ -44,7 +44,7 @@ public static class DataProtectionExtensions
         }
         else
         {
-            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
+            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
         }
 
         services.AddDataProtection()
