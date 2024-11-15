@@ -18,6 +18,7 @@ using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -104,8 +105,25 @@ else
     app.UseHsts();
 }
 
+// If the ASPNETCORE_PATHBASE environment variable is set, use it as the path base for the application.
+// This is required for running the admin interface behind a reverse proxy on the same port as the client app.
+// E.g. default Docker Compose setup makes admin app available on /admin path.
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE")))
+{
+    app.UsePathBase(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE"));
+}
+
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+});
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

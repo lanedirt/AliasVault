@@ -140,22 +140,22 @@ create_env_file() {
   fi
 }
 
-# Function to populate API_URL
-populate_api_url() {
-  printf "${CYAN}> Checking API_URL...${NC}\n"
-  if ! grep -q "^API_URL=" "$ENV_FILE" || [ -z "$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-    DEFAULT_API_URL="https://localhost:4430"
-    read -p "Enter the base URL where the API will be hosted (press Enter for default: $DEFAULT_API_URL): " USER_API_URL
-    API_URL=${USER_API_URL:-$DEFAULT_API_URL}
-    if grep -q "^API_URL=" "$ENV_FILE"; then
-      awk -v url="$API_URL" '/^API_URL=/ {$0="API_URL="url} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+# Function to populate HOSTNAME
+populate_hostname() {
+  printf "${CYAN}> Checking HOSTNAME...${NC}\n"
+  if ! grep -q "^HOSTNAME=" "$ENV_FILE" || [ -z "$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    DEFAULT_HOSTNAME="localhost"
+    read -p "Enter the hostname where AliasVault will be hosted (press Enter for default: $DEFAULT_HOSTNAME): " USER_HOSTNAME
+    HOSTNAME=${USER_HOSTNAME:-$DEFAULT_HOSTNAME}
+    if grep -q "^HOSTNAME=" "$ENV_FILE"; then
+      awk -v hostname="$HOSTNAME" '/^HOSTNAME=/ {$0="HOSTNAME="hostname} 1' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     else
-      echo "API_URL=${API_URL}" >> "$ENV_FILE"
+      echo "HOSTNAME=${HOSTNAME}" >> "$ENV_FILE"
     fi
-    printf "${GREEN}> API_URL has been set to $API_URL in $ENV_FILE.${NC}\n"
+    printf "${GREEN}> HOSTNAME has been set to $HOSTNAME in $ENV_FILE.${NC}\n"
   else
-    API_URL=$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)
-    printf "${GREEN}> API_URL already exists in $ENV_FILE with value: $API_URL${NC}\n"
+    HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+    printf "${GREEN}> HOSTNAME already exists in $ENV_FILE with value: $HOSTNAME${NC}\n"
   fi
 }
 
@@ -359,7 +359,7 @@ main() {
         printf "${YELLOW}+++ Initializing .env file +++${NC}\n"
         printf "\n"
         create_env_file || exit $?
-        populate_api_url || exit $?
+        populate_hostname || exit $?
         populate_jwt_key || exit $?
         populate_data_protection_cert_pass || exit $?
         set_private_email_domains || exit $?
