@@ -27,9 +27,9 @@ COPY --from=publish /app/publish .
 COPY /src/AliasVault.Admin/entrypoint.sh /app
 
 # Create SSL directory
-RUN mkdir -p /app/ssl && chmod 755 /app/ssl
+RUN mkdir -p /app/ssl && chmod 755 /app/ssl \
+&& chmod +x /app/entrypoint.sh
 
-RUN chmod +x /app/entrypoint.sh
 EXPOSE 4431
 ENV ASPNETCORE_URLS=https://+:4431
 ENTRYPOINT ["/app/entrypoint.sh"]

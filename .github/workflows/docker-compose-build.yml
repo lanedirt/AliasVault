@@ -38,7 +38,7 @@ jobs:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:443)
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with 200 OK. Check if client app is configured correctly."
                     exit 1
@@ -52,7 +52,7 @@ jobs:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:4430)
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:4430)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
                     exit 1
@@ -66,7 +66,7 @@ jobs:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:4431/user/login)
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:4431/user/login)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
                     exit 1

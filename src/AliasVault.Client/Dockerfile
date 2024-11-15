@@ -40,9 +40,8 @@ COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
 COPY /src/AliasVault.Client/entrypoint.sh /app/
 
 # Create SSL directory
-RUN mkdir -p /etc/nginx/ssl && chmod 755 /etc/nginx/ssl
-
-RUN chmod +x /app/entrypoint.sh
+RUN mkdir -p /etc/nginx/ssl && chmod 755 /etc/nginx/ssl \
+&& chmod +x /app/entrypoint.sh
 
 EXPOSE 80 443
 ENV ASPNETCORE_URLS=http://+:80;https://+:443
