@@ -27,7 +27,7 @@ public class ApiLoggingTests : ClientPlaywrightTest
         // Call webapi endpoint that throws an exception.
         try
         {
-            await Page.GotoAsync(ApiBaseUrl + "api/v1/Test/Error");
+            await Page.GotoAsync(ApiBaseUrl + "v1/Test/Error");
             await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         }
         catch
