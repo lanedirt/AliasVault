@@ -123,7 +123,7 @@ else
             await StatusCheck();
 
             // Send request to server with email to get user salt.
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(Username!));
+            var result = await Http.PostAsJsonAsync("v1/Auth/login", new LoginInitiateRequest(Username!));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -234,7 +234,7 @@ else
         // If user has no valid authentication an automatic redirect to login page will take place.
         try
         {
-            await Http.GetAsync("api/v1/Auth/status");
+            await Http.GetAsync("v1/Auth/status");
         }
         catch (Exception ex)
         {

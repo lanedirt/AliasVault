@@ -40,35 +40,35 @@ jobs:
               command: |
                   http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
                   if [ "$http_code" -ne 200 ]; then
-                    echo "Service did not respond with 200 OK. Check if client app is configured correctly."
+                    echo "Service did not respond with 200 OK. Check if client app and/or nginx is configured correctly."
                     exit 1
                   else
                     echo "Service responded with 200 OK"
                   fi
 
-      -   name: Test if localhost:4430 (WebApi) responds
+      -   name: Test if localhost:443/api (WebApi) responds
           uses: nick-fields/retry@v3
           with:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:4430)
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
                   if [ "$http_code" -ne 200 ]; then
-                    echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
+                    echo "Service did not respond with expected 200 OK. Check if WebApi and/or nginx is configured correctly."
                     exit 1
                   else
                     echo "Service responded with $http_code"
                   fi
 
-      -   name: Test if localhost:4431 (Admin) responds
+      -   name: Test if localhost:443/admin (Admin) responds
           uses: nick-fields/retry@v3
           with:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:4431/user/login)
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
                   if [ "$http_code" -ne 200 ]; then
-                    echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
+                    echo "Service did not respond with expected 200 OK. Check if admin app and/or nginx is configured correctly."
                     exit 1
                   else
                     echo "Service responded with $http_code"

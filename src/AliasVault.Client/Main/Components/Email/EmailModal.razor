@@ -147,7 +147,7 @@
 
         try
         {
-            var response = await HttpClient.DeleteAsync($"api/v1/Email/{Email.Id}");
+            var response = await HttpClient.DeleteAsync($"v1/Email/{Email.Id}");
             if (response.IsSuccessStatusCode)
             {
                 GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);

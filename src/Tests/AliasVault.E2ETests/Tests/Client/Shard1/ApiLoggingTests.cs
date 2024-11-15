@@ -38,7 +38,7 @@ public class ApiLoggingTests : ClientPlaywrightTest
         // Read from database to check if the log entry was created.
         var logEntry = await ApiDbContext.Logs.Where(x => x.Application == "AliasVault.Api").OrderByDescending(x => x.Id).FirstOrDefaultAsync();
 
-        Assert.That(logEntry, Is.Not.Null, "Log entry for triggered exception not found in database. Check Serilog configuration and /api/v1/Test/Error endpoint.");
+        Assert.That(logEntry, Is.Not.Null, "Log entry for triggered exception not found in database. Check Serilog configuration and /v1/Test/Error endpoint.");
         Assert.That(logEntry.Exception, Does.Contain("Test error"), "Log entry in database does not contain expected message. Check exception and Serilog configuration.");
     }
 }

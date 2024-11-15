@@ -375,7 +375,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             try
             {
                 var apiReturn =
-                    await httpClient.GetFromJsonAsync<FaviconExtractModel>($"api/v1/Favicon/Extract?url={url}");
+                    await httpClient.GetFromJsonAsync<FaviconExtractModel>($"v1/Favicon/Extract?url={url}");
                 if (apiReturn?.Image is not null)
                 {
                     credentialObject.Service.Logo = apiReturn.Image;

@@ -207,7 +207,7 @@ else
         var username = _loginModel.Username.ToLowerInvariant().Trim();
 
         // Send request to server with username to get server ephemeral public key.
-        var result = await Http.PostAsJsonAsync("api/v1/Auth/login", new LoginInitiateRequest(username));
+        var result = await Http.PostAsJsonAsync("v1/Auth/login", new LoginInitiateRequest(username));
         var responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
@@ -238,7 +238,7 @@ else
             username);
 
         // 4. Client sends proof of session key to server.
-        result = await Http.PostAsJsonAsync("api/v1/Auth/validate", new ValidateLoginRequest(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof));
+        result = await Http.PostAsJsonAsync("v1/Auth/validate", new ValidateLoginRequest(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof));
         responseContent = await result.Content.ReadAsStringAsync();
 
         if (!result.IsSuccessStatusCode)
@@ -280,7 +280,7 @@ else
             var username = _loginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModelRecoveryCode.RecoveryCode));
+            var result = await Http.PostAsJsonAsync("v1/Auth/validate-recovery-code", new ValidateLoginRequestRecoveryCode(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModelRecoveryCode.RecoveryCode));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)
@@ -338,7 +338,7 @@ else
             var username = _loginModel.Username.ToLowerInvariant().Trim();
 
             // Validate 2-factor auth code auth and login
-            var result = await Http.PostAsJsonAsync("api/v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModel2Fa.TwoFactorCode ?? 0));
+            var result = await Http.PostAsJsonAsync("v1/Auth/validate-2fa", new ValidateLoginRequest2Fa(username, _loginModel.RememberMe, _clientEphemeral.Public, _clientSession.Proof, _loginModel2Fa.TwoFactorCode ?? 0));
             var responseContent = await result.Content.ReadAsStringAsync();
 
             if (!result.IsSuccessStatusCode)

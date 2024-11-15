@@ -73,7 +73,7 @@
     {
         IsLoading = true;
         StateHasChanged();
-        var authlogResponse = await Http.GetFromJsonAsync<List<AuthLogModel>>("api/v1/Security/authlogs");
+        var authlogResponse = await Http.GetFromJsonAsync<List<AuthLogModel>>("v1/Security/authlogs");
         if (authlogResponse is not null)
         {
             AuthLogs = authlogResponse;

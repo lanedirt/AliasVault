@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 /// Base controller that concrete controllers can extend from if all requests require authentication.
 /// </summary>
 /// <param name="userManager">UserManager instance.</param>
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [Authorize]
 public abstract class AuthenticatedRequestController(UserManager<AliasVaultUser> userManager) : ControllerBase

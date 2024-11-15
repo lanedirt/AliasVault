@@ -46,7 +46,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         var accessToken = await GetAccessTokenAsync();
         var refreshToken = await GetRefreshTokenAsync();
         var tokenInput = new TokenModel { Token = accessToken, RefreshToken = refreshToken };
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Auth/refresh")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "v1/Auth/refresh")
         {
             Content = JsonContent.Create(tokenInput),
         };
@@ -319,7 +319,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
             RefreshToken = await GetRefreshTokenAsync(),
         };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/Auth/revoke")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "v1/Auth/revoke")
         {
             Content = JsonContent.Create(tokenInput),
         };

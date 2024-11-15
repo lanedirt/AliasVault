@@ -35,7 +35,10 @@ FROM nginx:1.24.0 AS final
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
+COPY /src/AliasVault.Client/entrypoint.sh /app/entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
 ENV ASPNETCORE_URLS=http://+:3000
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/app/entrypoint.sh"]
