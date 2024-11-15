@@ -140,11 +140,11 @@ create_env_file() {
   fi
 }
 
-# Function to check and populate the .env file with API_URL
+# Function to populate API_URL
 populate_api_url() {
   printf "${CYAN}> Checking API_URL...${NC}\n"
   if ! grep -q "^API_URL=" "$ENV_FILE" || [ -z "$(grep "^API_URL=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-    DEFAULT_API_URL="http://localhost:81"
+    DEFAULT_API_URL="https://localhost:4430"
     read -p "Enter the base URL where the API will be hosted (press Enter for default: $DEFAULT_API_URL): " USER_API_URL
     API_URL=${USER_API_URL:-$DEFAULT_API_URL}
     if grep -q "^API_URL=" "$ENV_FILE"; then
@@ -381,14 +381,14 @@ main() {
     printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
     printf "\n"
     if [ "$ADMIN_PASSWORD" != "" ]; then
-      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Admin Panel: https://localhost:4431/\n"
       printf "Username: admin\n"
       printf "Password: $ADMIN_PASSWORD\n"
       printf "\n"
       printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
       printf "\n"
     else
-      printf "Admin Panel: http://localhost:8080/\n"
+      printf "Admin Panel: https://localhost:4431/\n"
       printf "Username: admin\n"
       printf "Password: (Previously set. Run this command with --reset-password to generate a new one.)\n"
       printf "\n"
@@ -397,7 +397,8 @@ main() {
     printf "\n"
     printf "${CYAN}In order to start using AliasVault and create your own vault, log into the client website:${NC}\n"
     printf "\n"
-    printf "Client Website: http://localhost:80/\n"
+    printf "Client Website: https://localhost:443/\n"
+    printf "${YELLOW}Note: The client website will automatically redirect from HTTP (port 80) to HTTPS (port 443)${NC}\n"
     printf "You can create your own account from there.\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"

@@ -5,21 +5,26 @@ services:
             context: .
             dockerfile: src/AliasVault.Admin/Dockerfile
         ports:
-            - "8080:8082"
+            - "4431:4431"
         volumes:
-            - ./certificates:/certificates:rw
+            - ./certificates/app:/certificates:rw
+            - ./certificates/ssl/admin:/app/ssl:rw
             - ./database:/database:rw
             - ./logs:/logs:rw
         restart: always
         env_file:
             - .env
+
     client:
         image: aliasvault-client
         build:
             context: .
             dockerfile: src/AliasVault.Client/Dockerfile
         ports:
-            - "80:8080"
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./certificates/ssl/client:/etc/nginx/ssl:rw
         restart: always
         env_file:
             - .env
@@ -30,9 +35,10 @@ services:
             context: .
             dockerfile: src/AliasVault.Api/Dockerfile
         ports:
-            - "81:8081"
+            - "4430:4430"
         volumes:
-            - ./certificates:/certificates:rw
+            - ./certificates/app:/certificates:rw
+            - ./certificates/ssl/api:/app/ssl:rw
             - ./database:/database:rw
             - ./logs:/logs:rw
         env_file:

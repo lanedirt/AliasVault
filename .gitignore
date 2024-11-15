@@ -393,3 +393,7 @@ src/Tests/AliasVault.E2ETests/appsettings.Development.json
 # Draw.io diagram temp files
 *.drawio.*
 
+# Certificates
+certificates/*.crt
+certificates/*.key
+certificates/*.pfx
