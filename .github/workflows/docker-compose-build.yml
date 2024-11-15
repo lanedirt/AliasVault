@@ -32,13 +32,13 @@ jobs:
         run: |
             # Wait for a few seconds
             sleep 10
-      -   name: Test if localhost:80 (WASM app) responds
+      -   name: Test if localhost:443 (WASM app) responds
           uses: nick-fields/retry@v3
           with:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:443)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with 200 OK. Check if client app is configured correctly."
                     exit 1
@@ -46,15 +46,29 @@ jobs:
                     echo "Service responded with 200 OK"
                   fi
 
-      -   name: Test if localhost:81 (WebApi) responds
+      -   name: Test if localhost:4430 (WebApi) responds
           uses: nick-fields/retry@v3
           with:
               timeout_minutes: 2
               max_attempts: 3
               command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:81)
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:4430)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with expected 200 OK. Check if WebApi is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with $http_code"
+                  fi
+
+      -   name: Test if localhost:4431 (Admin) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -s -o /dev/null -w "%{http_code}" https://localhost:4431/user/login)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
                     exit 1
                   else
                     echo "Service responded with $http_code"
@@ -73,16 +87,13 @@ jobs:
                     echo "SmtpService responded on port 2525"
                   fi
 
-      -   name: Test if localhost:8080 (Admin) responds
-          uses: nick-fields/retry@v3
-          with:
-              timeout_minutes: 2
-              max_attempts: 3
-              command: |
-                  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/user/login)
-                  if [ "$http_code" -ne 200 ]; then
-                    echo "Service did not respond with expected 200 OK. Check if admin app is configured correctly."
-                    exit 1
-                  else
-                    echo "Service responded with $http_code"
-                  fi
+      - name: Test install.sh --reset-password output
+        run: |
+          output=$(./install.sh --reset-password)
+          if ! echo "$output" | grep -E '^Password: [a-zA-Z0-9]{8,}$'; then
+            echo "Password reset output format is incorrect. Expected format: 'Password: <at least 8 chars>'"
+            echo "Actual output: $output"
+            exit 1
+          else
+            echo "Password reset output format is correct"
+          fi
