@@ -4,11 +4,11 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
-ENV MSBUILDDEBUGPATH=/app/msbuild-logs
+ENV MSBUILDDEBUGPATH=/src/msbuild-logs
 WORKDIR /src
 
 # Create the debug directory
-RUN mkdir -p /app/msbuild-logs
+RUN mkdir -p /src/msbuild-logs
 
 # Install Python which is required by the WebAssembly tools
 RUN apt-get update && apt-get install -y python3 && apt-get clean

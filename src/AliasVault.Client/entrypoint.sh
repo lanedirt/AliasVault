@@ -26,7 +26,7 @@ if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
 fi
 
 # Replace the default URL with the actual API URL constructed from hostname
-sed -i "s|http://localhost:5092|https://${HOSTNAME}|g" /usr/share/nginx/html/appsettings.json
+sed -i "s|http://localhost:5092|https://${HOSTNAME}/api|g" /usr/share/nginx/html/appsettings.json
 
 # Convert comma-separated list to JSON array
 json_array=$(echo $PRIVATE_EMAIL_DOMAINS | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')

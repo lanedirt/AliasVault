@@ -30,7 +30,7 @@ public static class DataProtectionExtensions
     {
         var certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS")
                               ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS is not set in configuration or environment variables.");
-        var certPath = "../../certificates/AliasVault.DataProtection.pfx";
+        var certPath = "../../certificates/app/AliasVault.DataProtection.pfx";
         if (certPassword == "Development")
         {
             certPath = Path.Combine(AppContext.BaseDirectory, "AliasVault.DataProtection.Development.pfx");

@@ -113,15 +113,14 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBAS
     app.UsePathBase(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE"));
 }
 
-app.UseStaticFiles();
-app.UseAntiforgery();
-
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto,
 });
 
+app.UseStaticFiles();
 app.UseRouting();
+app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 

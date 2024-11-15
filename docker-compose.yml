@@ -21,7 +21,7 @@ services:
             context: .
             dockerfile: src/AliasVault.Client/Dockerfile
         volumes:
-            - ./logs/msbuild:/app/msbuild-logs:rw
+            - ./logs:/src/msbuild-logs:rw
         expose:
             - "3000"
         restart: always
