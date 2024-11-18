@@ -93,7 +93,7 @@ public static class DbMergeUtility
                 // Record exists, compare UpdatedAt if it exists.
                 logger.LogDebug("Comparing UpdatedAt in {tableName}.", tableName);
                 logger.LogDebug("UpdatedAt: {existingRecord}", existingRecord);
-                var baseUpdatedAt = DateTime.Parse((string)existingRecord, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+                var baseUpdatedAt = DateTime.Parse((string)existingRecord, CultureInfo.InvariantCulture);
                 if (updatedAt > baseUpdatedAt)
                 {
                     // Source record is newer, update the base record.

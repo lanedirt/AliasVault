@@ -72,7 +72,6 @@ public static class StartupTasks
 
                 // Clear existing recovery codes
                 await userManager.GenerateNewTwoFactorRecoveryCodesAsync(adminUser, 0);
-
                 await userManager.UpdateAsync(adminUser);
 
                 Console.WriteLine("Admin password hash updated.");

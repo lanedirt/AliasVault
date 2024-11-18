@@ -72,7 +72,7 @@ public class AuthBase : OwningComponentBase
         // Redirect to home if the user is already authenticated
         if (SignInManager.IsSignedIn(user))
         {
-            NavigationService.RedirectTo("/");
+            NavigationService.RedirectTo("./");
         }
     }
 }
