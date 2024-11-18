@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Repository information used for downloading files and images from GitHub
+REPO_OWNER="lanedirt"
+REPO_NAME="AliasVault"
+REPO_BRANCH="main"
+GITHUB_RAW_URL="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${REPO_BRANCH}"
+GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
+
+# Required files and directories
+REQUIRED_DIRS=(
+    "certificates/ssl"
+    "certificates/app"
+    "database"
+    "logs"
+    "logs/msbuild"
+)
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -43,19 +59,19 @@ parse_args() {
 
     while [[ $# -gt 0 ]]; do
         case $1 in
-            /install|/i)
+            install|i)
                 COMMAND="install"
                 shift
                 ;;
-            /build|/b)
+            build|b)
                 COMMAND="build"
                 shift
                 ;;
-            /uninstall|/u)
+            uninstall|u)
                 COMMAND="uninstall"
                 shift
                 ;;
-            /reset-password|/reset-admin-password|/rp)
+            reset-password|reset-admin-password|rp)
                 COMMAND="reset-password"
                 shift
                 ;;
@@ -100,11 +116,61 @@ main() {
         "reset-password")
             generate_admin_password
             if [ $? -eq 0 ]; then
-                restart_docker_containers
+                recreate_docker_containers
                 print_password_reset_message
             fi
             ;;
     esac
+}
+
+# Function to create required directories
+create_directories() {
+    printf "${CYAN}> Checking workspace...${NC}\n"
+
+    local dirs_needed=false
+    for dir in "${REQUIRED_DIRS[@]}"; do
+        if [ ! -d "$dir" ]; then
+            if [ "$dirs_needed" = false ]; then
+                printf "  ${CYAN}> Creating required directories...${NC}\n"
+                dirs_needed=true
+            fi
+            mkdir -p "$dir"
+            if [ $? -ne 0 ]; then
+                printf "  ${RED}> Failed to create directory: $dir${NC}\n"
+                exit 1
+            fi
+        fi
+    done
+    if [ "$dirs_needed" = true ]; then
+        printf "  ${GREEN}> Directories created successfully.${NC}\n"
+    else
+        printf "  ${GREEN}> All required directories already exist.${NC}\n"
+    fi
+}
+
+# Function to initialize workspace
+initialize_workspace() {
+    create_directories
+    handle_docker_compose
+}
+
+# Function to handle docker-compose.yml
+handle_docker_compose() {
+    printf "${CYAN}> Checking docker-compose.yml...${NC}\n"
+
+    if [ -f "docker-compose.yml" ]; then
+        printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
+        return 0
+    fi
+
+    printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
+    if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml" > /dev/null 2>&1; then
+        printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
+        return 0
+    else
+        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
+        exit 1
+    fi
 }
 
 # Function to print the logo
@@ -120,17 +186,17 @@ print_logo() {
 
 # Function to create .env file
 create_env_file() {
-    printf "${CYAN}> Creating .env file...${NC}\n"
+    printf "${CYAN}> Checking .env file...${NC}\n"
     if [ ! -f "$ENV_FILE" ]; then
         if [ -f "$ENV_EXAMPLE_FILE" ]; then
             cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
-            printf "${GREEN}> .env file created from .env.example.${NC}\n"
+            printf "  ${GREEN}> New.env file created from .env.example.${NC}\n"
         else
             touch "$ENV_FILE"
-            printf "${YELLOW}> .env file created as empty because .env.example was not found.${NC}\n"
+            printf "  ${YELLOW}> New blank .env file created.${NC}\n"
         fi
     else
-        printf "${GREEN}> .env file already exists.${NC}\n"
+        printf "  ${GREEN}> .env file already exists.${NC}\n"
     fi
 }
 
@@ -144,6 +210,7 @@ populate_hostname() {
         update_env_var "HOSTNAME" "$HOSTNAME"
     else
         HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+        printf "  ${GREEN}> HOSTNAME already exists.${NC}\n"
     fi
 }
 
@@ -152,6 +219,8 @@ populate_jwt_key() {
     if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         JWT_KEY=$(openssl rand -base64 32)
         update_env_var "JWT_KEY" "$JWT_KEY"
+    else
+        printf "  ${GREEN}> JWT_KEY already exists.${NC}\n"
     fi
 }
 
@@ -160,28 +229,29 @@ populate_data_protection_cert_pass() {
     if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         CERT_PASS=$(openssl rand -base64 32)
         update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
+    else
+        printf "  ${GREEN}> DATA_PROTECTION_CERT_PASS already exists.${NC}\n"
     fi
 }
 
 set_private_email_domains() {
-    printf "${CYAN}> Setting PRIVATE_EMAIL_DOMAINS...${NC}\n"
+    printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         printf "Please enter the domains that should be allowed to receive email, separated by commas (press Enter to disable email support): "
         read -r private_email_domains
 
-        # Set default value if user input is empty
         private_email_domains=${private_email_domains:-"DISABLED.TLD"}
         update_env_var "PRIVATE_EMAIL_DOMAINS" "$private_email_domains"
 
         if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "${RED}SMTP is disabled.${NC}\n"
+            printf "  ${RED}SMTP is disabled.${NC}\n"
         fi
     else
         private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
         if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "${GREEN}> PRIVATE_EMAIL_DOMAINS already exists in $ENV_FILE.${NC} ${RED}SMTP is disabled.${NC}\n"
+            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC} ${RED}Private email domains are disabled.${NC}\n"
         else
-            printf "${GREEN}> PRIVATE_EMAIL_DOMAINS already exists in $ENV_FILE with value: ${private_email_domains}${NC}\n"
+            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC}\n"
         fi
     fi
 }
@@ -190,6 +260,8 @@ set_smtp_tls_enabled() {
     printf "${CYAN}> Checking SMTP_TLS_ENABLED...${NC}\n"
     if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
         update_env_var "SMTP_TLS_ENABLED" "false"
+    else
+        printf "  ${GREEN}> SMTP_TLS_ENABLED already exists.${NC}\n"
     fi
 }
 
@@ -198,6 +270,8 @@ set_support_email() {
     if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
         read -p "Enter support email address (optional, press Enter to skip): " SUPPORT_EMAIL
         update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
+    else
+        printf "  ${GREEN}> SUPPORT_EMAIL already exists.${NC}\n"
     fi
 }
 
@@ -206,8 +280,7 @@ generate_admin_password() {
     printf "${CYAN}> Generating admin password...${NC}\n"
     PASSWORD=$(openssl rand -base64 12)
 
-    # Use pre-built image from GitHub Container Registry
-    if ! docker pull ghcr.io/lanedirt/aliasvault-installcli:latest > /dev/null 2>&1; then
+    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
         printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
         if [ "$VERBOSE" = true ]; then
             docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
@@ -228,26 +301,23 @@ generate_admin_password() {
                 fi
             )
         fi
-        # Store hash in a variable and check if it's not empty
         HASH=$(docker run --rm installcli "$PASSWORD")
         if [ -z "$HASH" ]; then
             printf "${RED}> Error: Failed to generate password hash${NC}\n"
             exit 1
         fi
     else
-        # Store hash in a variable and check if it's not empty
-        HASH=$(docker run --rm ghcr.io/lanedirt/aliasvault-installcli:latest "$PASSWORD")
+        HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}-installcli:latest "$PASSWORD")
         if [ -z "$HASH" ]; then
             printf "${RED}> Error: Failed to generate password hash${NC}\n"
             exit 1
         fi
     fi
 
-    # Update env vars (only if we have a valid hash)
     if [ -n "$HASH" ]; then
         update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
         update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-        printf "   ==> New admin password: $PASSWORD\n"
+        printf "  ==> New admin password: $PASSWORD\n"
     fi
 }
 
@@ -256,14 +326,12 @@ update_env_var() {
     local key=$1
     local value=$2
 
-    # Remove existing line with this key if it exists
     if [ -f "$ENV_FILE" ]; then
         sed -i.bak "/^${key}=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
     fi
 
-    # Append the new key-value pair
     echo "$key=$value" >> "$ENV_FILE"
-    printf "${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
+    printf "  ${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
 }
 
 # Function to print success message
@@ -284,7 +352,7 @@ print_success_message() {
     else
         printf "Admin Panel: https://${HOSTNAME}/admin\n"
         printf "Username: admin\n"
-        printf "Password: (Previously set. Use --reset-password to generate new one.)\n"
+        printf "Password: (Previously set. Use ./install.sh reset-password to generate new one.)\n"
     fi
     printf "\n"
     printf "${CYAN}===========================${NC}\n"
@@ -296,15 +364,15 @@ print_success_message() {
     printf "${MAGENTA}=========================================================${NC}\n"
 }
 
-# Function to restart Docker containers
-restart_docker_containers() {
-    printf "${CYAN}> Restarting Docker containers...${NC}\n"
+# Function to recreate (restart) Docker containers
+recreate_docker_containers() {
+    printf "${CYAN}> Recreating Docker containers...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose restart
+        docker compose up -d --force-recreate
     else
-        docker compose restart > /dev/null 2>&1
+        docker compose up -d --force-recreate > /dev/null 2>&1
     fi
-    printf "${GREEN}> Docker containers restarted.${NC}\n"
+    printf "${GREEN}> Docker containers recreated.${NC}\n"
 }
 
 # Function to print password reset success message
@@ -322,6 +390,9 @@ print_password_reset_message() {
 handle_install() {
     printf "${YELLOW}+++ Installing AliasVault +++${NC}\n"
     printf "\n"
+
+    # Initialize workspace which makes sure all required directories and files exist
+    initialize_workspace
 
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
@@ -342,11 +413,11 @@ handle_install() {
     printf "\n"
 
     images=(
-        "ghcr.io/lanedirt/aliasvault-reverse-proxy:latest"
-        "ghcr.io/lanedirt/aliasvault-api:latest"
-        "ghcr.io/lanedirt/aliasvault-client:latest"
-        "ghcr.io/lanedirt/aliasvault-admin:latest"
-        "ghcr.io/lanedirt/aliasvault-smtp:latest"
+        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:latest"
+        "${GITHUB_CONTAINER_REGISTRY}-api:latest"
+        "${GITHUB_CONTAINER_REGISTRY}-client:latest"
+        "${GITHUB_CONTAINER_REGISTRY}-admin:latest"
+        "${GITHUB_CONTAINER_REGISTRY}-smtp:latest"
     )
 
     for image in "${images[@]}"; do
@@ -375,6 +446,21 @@ handle_install() {
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
     printf "\n"
+
+    # Check for required build files
+    if [ ! -f "docker-compose.build.yml" ] || [ ! -d "src" ]; then
+        printf "${RED}Error: Required files for building from source are missing.${NC}\n"
+        printf "\n"
+        printf "To build AliasVault from source, you need:\n"
+        printf "1. docker-compose.build.yml file\n"
+        printf "2. src/ directory with the complete source code\n"
+        printf "\n"
+        printf "Please clone the complete repository using:\n"
+        printf "git clone https://github.com/${REPO_OWNER}/${REPO_NAME}.git\n"
+        printf "\n"
+        printf "Alternatively, you can use '/install' to pull pre-built images.\n"
+        exit 1
+    fi
 
     # Initialize environment with proper error handling
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
@@ -450,12 +536,12 @@ handle_uninstall() {
 
     printf "${CYAN}> Stopping and removing Docker containers...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml down -v || {
+        docker compose -f docker-compose.yml down -v || {
             printf "${RED}> Failed to stop and remove Docker containers${NC}\n"
             exit 1
         }
     else
-        docker compose -f docker-compose.yml -f docker-compose.build.yml down -v > /dev/null 2>&1 || {
+        docker compose -f docker-compose.yml down -v > /dev/null 2>&1 || {
             printf "${RED}> Failed to stop and remove Docker containers${NC}\n"
             exit 1
         }
@@ -464,12 +550,12 @@ handle_uninstall() {
 
     printf "${CYAN}> Removing Docker images...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml down --rmi all || {
+        docker compose -f docker-compose.yml down --rmi all || {
             printf "${RED}> Failed to remove Docker images${NC}\n"
             exit 1
         }
     else
-        docker compose -f docker-compose.yml -f docker-compose.build.yml down --rmi all > /dev/null 2>&1 || {
+        docker compose -f docker-compose.yml down --rmi all > /dev/null 2>&1 || {
             printf "${RED}> Failed to remove Docker images${NC}\n"
             exit 1
         }
