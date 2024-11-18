@@ -1,0 +1,100 @@
+# This workflow will test if pulling the latest Docker Compose containers from the registry works.
+name: Docker Compose Pull
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-docker:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:26.0.0
+        options: --privileged
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set permissions and run install.sh
+        run: |
+          chmod +x install.sh
+          ./install.sh
+
+      - name: Set up Docker Compose
+        run: |
+            # Change the exposed host port of the SmtpService from 25 to 2525 because port 25 is not allowed in GitHub Actions
+            sed -i 's/25\:25/2525\:25/g' docker-compose.yml
+            docker compose -f docker-compose.yml up -d
+
+      - name: Wait for services to be up
+        run: |
+            # Wait for a few seconds
+            sleep 10
+      -   name: Test if localhost:443 (WASM app) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with 200 OK. Check if client app and/or nginx is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with 200 OK"
+                  fi
+
+      -   name: Test if localhost:443/api (WebApi) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with expected 200 OK. Check if WebApi and/or nginx is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with $http_code"
+                  fi
+
+      -   name: Test if localhost:443/admin (Admin) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
+                  if [ "$http_code" -ne 200 ]; then
+                    echo "Service did not respond with expected 200 OK. Check if admin app and/or nginx is configured correctly."
+                    exit 1
+                  else
+                    echo "Service responded with $http_code"
+                  fi
+
+      -   name: Test if localhost:2525 (SmtpService) responds
+          uses: nick-fields/retry@v3
+          with:
+              timeout_minutes: 2
+              max_attempts: 3
+              command: |
+                  if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+                    echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
+                    exit 1
+                  else
+                    echo "SmtpService responded on port 2525"
+                  fi
+
+      - name: Test install.sh --reset-password output
+        run: |
+          output=$(./install.sh --reset-password)
+          if ! echo "$output" | grep -E '^New admin password: [a-zA-Z0-9]{8,}$'; then
+            echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 chars>'"
+            echo "Actual output: $output"
+            exit 1
+          else
+            echo "Password reset output format is correct"
+          fi
