@@ -52,12 +52,12 @@ This README provides step-by-step instructions for manually setting up AliasVaul
 
    Build the Docker image for password hashing:
    ```
-   docker build -t initcli -f src/Utilities/InitializationCLI/Dockerfile .
+   docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
    ```
 
    Generate the password hash:
    ```
-   docker run --rm initcli "<your_prefered_admin_password_here>"
+   docker run --rm installcli "<your_prefered_admin_password_here>"
    ```
 
    Add the password hash and generation timestamp to the .env file:

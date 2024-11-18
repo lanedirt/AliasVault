@@ -1,3 +1,4 @@
+# This workflow will publish new Docker images to the GitHub Container Registry when a new release is published.
 name: Publish Docker Images
 
 on:
@@ -76,3 +77,11 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
+
+      - name: Build and push InstallCli image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Utilities/AliasVault.InstallCli/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}

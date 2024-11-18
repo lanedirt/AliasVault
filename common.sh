@@ -122,13 +122,13 @@ generate_admin_password() {
     PASSWORD=$(openssl rand -base64 12)
 
     # Use pre-built image from GitHub Container Registry
-    if ! docker pull ghcr.io/lanedirt/aliasvault-initcli:latest > /dev/null 2>&1; then
+    if ! docker pull ghcr.io/lanedirt/aliasvault-installcli:latest > /dev/null 2>&1; then
         printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
         if [ "$VERBOSE" = true ]; then
-            docker build -t initcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
+            docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
         else
             (
-                docker build -t initcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
+                docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
                 BUILD_PID=$!
                 while kill -0 $BUILD_PID 2>/dev/null; do
                     printf "."
@@ -143,9 +143,9 @@ generate_admin_password() {
                 fi
             )
         fi
-        HASH=$(docker run --rm initcli "$PASSWORD")
+        HASH=$(docker run --rm installcli "$PASSWORD")
     else
-        HASH=$(docker run --rm ghcr.io/lanedirt/aliasvault-initcli:latest "$PASSWORD")
+        HASH=$(docker run --rm ghcr.io/lanedirt/aliasvault-installcli:latest "$PASSWORD")
     fi
 
     # Update env vars
