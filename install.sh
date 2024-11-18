@@ -95,7 +95,6 @@ parse_args() {
 # Main function
 main() {
     parse_args "$@"
-    print_logo
 
     # Check if command is empty (should not happen with updated parse_args)
     if [ -z "$COMMAND" ]; then
@@ -103,6 +102,7 @@ main() {
         exit 1
     fi
 
+    print_logo
     case $COMMAND in
         "install")
             handle_install

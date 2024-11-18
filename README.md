@@ -56,7 +56,7 @@ curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/main/in
 
 # Make install script executable and run it
 chmod +x install.sh
-./install.sh
+./install.sh install
 ```
 
 ### 2. Build from Source
@@ -66,8 +66,8 @@ git clone https://github.com/lanedirt/AliasVault.git
 cd AliasVault
 
 # Make build script executable and run it
-chmod +x build.sh
-./build.sh
+chmod +x install.sh
+./install.sh build
 ```
 
 Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.

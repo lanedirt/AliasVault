@@ -21,7 +21,7 @@ jobs:
       - name: Set permissions and run install.sh
         run: |
           chmod +x install.sh
-          ./install.sh --verbose
+          ./install.sh install --verbose
 
       - name: Set up Docker Compose
         run: |
@@ -88,9 +88,9 @@ jobs:
                     echo "SmtpService responded on port 2525"
                   fi
 
-      - name: Test install.sh --reset-password output
+      - name: Test install.sh reset-password output
         run: |
-          output=$(./install.sh --reset-password)
+          output=$(./install.sh reset-password)
           if ! echo "$output" | grep -E '.*New admin password: [A-Za-z0-9]{8,}.*'; then
             echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 base64 chars>'"
             echo "Actual output: $output"

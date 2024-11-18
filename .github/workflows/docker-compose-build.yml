@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set permissions and run build.sh
+      - name: Set permissions and run install.sh
         run: |
-          chmod +x build.sh
-          ./build.sh --verbose
+          chmod +x install.sh
+          ./install.sh build --verbose
 
       - name: Set up Docker Compose
         run: |
@@ -88,9 +88,9 @@ jobs:
                     echo "SmtpService responded on port 2525"
                   fi
 
-      - name: Test build.sh --reset-password output
+      - name: Test install.sh reset-password output
         run: |
-          output=$(./build.sh --reset-password)
+          output=$(./install.sh reset-password)
           if ! echo "$output" | grep -E '.*New admin password: [A-Za-z0-9]{8,}.*'; then
             echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 chars>'"
             echo "Actual output: $output"
