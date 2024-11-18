@@ -117,6 +117,7 @@ set_support_email() {
     fi
 }
 
+# Function to generate admin password
 generate_admin_password() {
     printf "${CYAN}> Generating admin password...${NC}\n"
     PASSWORD=$(openssl rand -base64 12)
@@ -143,27 +144,41 @@ generate_admin_password() {
                 fi
             )
         fi
+        # Store hash in a variable and check if it's not empty
         HASH=$(docker run --rm installcli "$PASSWORD")
+        if [ -z "$HASH" ]; then
+            printf "${RED}> Error: Failed to generate password hash${NC}\n"
+            exit 1
+        fi
     else
+        # Store hash in a variable and check if it's not empty
         HASH=$(docker run --rm ghcr.io/lanedirt/aliasvault-installcli:latest "$PASSWORD")
+        if [ -z "$HASH" ]; then
+            printf "${RED}> Error: Failed to generate password hash${NC}\n"
+            exit 1
+        fi
     fi
 
-    # Update env vars
-    update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
-    update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-
-    printf "   ==> New admin password: $PASSWORD\n"
+    # Update env vars (only if we have a valid hash)
+    if [ -n "$HASH" ]; then
+        update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
+        update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+        printf "   ==> New admin password: $PASSWORD\n"
+    fi
 }
 
 # Helper function to update environment variables
 update_env_var() {
     local key=$1
     local value=$2
-    if grep -q "^$key=" "$ENV_FILE"; then
-        sed -i.bak "s|^$key=.*|$key=$value|" "$ENV_FILE" && rm "$ENV_FILE.bak"
-    else
-        echo "$key=$value" >> "$ENV_FILE"
+
+    # Remove existing line with this key if it exists
+    if [ -f "$ENV_FILE" ]; then
+        sed -i.bak "/^${key}=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
     fi
+
+    # Append the new key-value pair
+    echo "$key=$value" >> "$ENV_FILE"
     printf "${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
 }
 
