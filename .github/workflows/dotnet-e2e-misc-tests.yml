@@ -1,3 +1,4 @@
+# This workflow will test if running the E2E Misc tests via Playwright CLI works.
 name: .NET E2E Misc Tests (Playwright)
 
 on:

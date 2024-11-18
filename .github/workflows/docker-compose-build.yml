@@ -1,3 +1,4 @@
+# This workflow will test if building the Docker Compose containers from scratch works.
 name: Docker Compose Build
 
 on:
@@ -17,10 +18,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set permissions and run install.sh
+      - name: Set permissions and run build.sh
         run: |
-          chmod +x install.sh
-          ./install.sh
+          chmod +x build.sh
+          ./build.sh
 
       - name: Set up Docker Compose
         run: |
@@ -87,11 +88,11 @@ jobs:
                     echo "SmtpService responded on port 2525"
                   fi
 
-      - name: Test install.sh --reset-password output
+      - name: Test build.sh --reset-password output
         run: |
-          output=$(./install.sh --reset-password)
-          if ! echo "$output" | grep -E '^Password: [a-zA-Z0-9]{8,}$'; then
-            echo "Password reset output format is incorrect. Expected format: 'Password: <at least 8 chars>'"
+          output=$(./build.sh --reset-password)
+          if ! echo "$output" | grep -E '^New admin password: [a-zA-Z0-9]{8,}$'; then
+            echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 chars>'"
             echo "Actual output: $output"
             exit 1
           else

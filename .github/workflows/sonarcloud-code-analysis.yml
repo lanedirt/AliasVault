@@ -1,3 +1,4 @@
+# This workflow will perform a SonarCloud code analysis on every push to the main branch or when a pull request is opened, synchronized, or reopened.
 name: SonarCloud code analysis
 on:
     push:
