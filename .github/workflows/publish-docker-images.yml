@@ -1,0 +1,74 @@
+name: Publish Docker Images
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/AliasVault.Api/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-api:latest,${{ env.REGISTRY }}/${{ github.repository }}-api:${{ github.ref_name }}
+
+      - name: Build and push Client image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/AliasVault.Client/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-client:latest,${{ env.REGISTRY }}/${{ github.repository }}-client:${{ github.ref_name }}
+
+      - name: Build and push Admin image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/AliasVault.Admin/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-admin:latest,${{ env.REGISTRY }}/${{ github.repository }}-admin:${{ github.ref_name }}
+
+      - name: Build and push SMTP image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Services/AliasVault.SmtpService/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-smtp:latest,${{ env.REGISTRY }}/${{ github.repository }}-smtp:${{ github.ref_name }}
+
+      - name: Build and push Reverse Proxy image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ github.repository }}-reverse-proxy:${{ github.ref_name }}
