@@ -1,5 +1,6 @@
 services:
-    nginx:
+    reverse-proxy:
+        image: aliasvault-reverse-proxy
         build:
             context: .
             dockerfile: Dockerfile
