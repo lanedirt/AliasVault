@@ -43,6 +43,7 @@ show_usage() {
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
+    printf "  -y, --yes        Automatic yes to prompts (for uninstall)\n"
     printf "  --help            Show this help message\n"
 }
 
@@ -50,6 +51,7 @@ show_usage() {
 parse_args() {
     COMMAND=""  # Remove default command
     VERBOSE=false
+    FORCE_YES=false
 
     # Show usage if no arguments provided
     if [ $# -eq 0 ]; then
@@ -77,6 +79,10 @@ parse_args() {
                 ;;
             --verbose)
                 VERBOSE=true
+                shift
+                ;;
+            -y|--yes)
+                FORCE_YES=true
                 shift
                 ;;
             --help)
@@ -526,12 +532,15 @@ handle_uninstall() {
     printf "${YELLOW}+++ Uninstalling AliasVault +++${NC}\n"
     printf "\n"
 
-    # Ask for confirmation before proceeding
-    read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N] " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        printf "${YELLOW}> Uninstall cancelled.${NC}\n"
-        exit 0
+    # Check if -y flag was passed
+    if [ "$FORCE_YES" != "true" ]; then
+        # Ask for confirmation before proceeding
+        read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            printf "${YELLOW}> Uninstall cancelled.${NC}\n"
+            exit 0
+        fi
     fi
 
     printf "${CYAN}> Stopping and removing Docker containers...${NC}\n"
