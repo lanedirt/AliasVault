@@ -44,7 +44,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 - Linux (Ubuntu or RHEL based distros recommended)
 - 512MB RAM
 - 1 vCPU
-- 32GB disk space
+- At least 16GB disk space (more users and emails will require more space)
 - Docker installed
 - No Git required
 
