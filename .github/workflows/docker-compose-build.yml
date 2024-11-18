@@ -21,7 +21,7 @@ jobs:
       - name: Set permissions and run build.sh
         run: |
           chmod +x build.sh
-          ./build.sh
+          ./build.sh --verbose
 
       - name: Set up Docker Compose
         run: |
