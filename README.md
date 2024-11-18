@@ -35,6 +35,11 @@ A live demo of the app is available at the official website at [app.aliasvault.n
 <img width="700" alt="Screenshot of AliasVault" src="docs/img/screenshot.png">
 
 ## Installation
+
+Choose one of the following installation methods:
+
+### Option 1: Quick Install (using pre-built images)
+
 To install AliasVault on your local machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
 
 ### Requirements:
@@ -42,18 +47,27 @@ To install AliasVault on your local machine, follow the steps below. Note: the i
 - Docker
 - Git
 
-### 1. Clone and run install script
+### 1. Quick Install (using pre-built images)
 AliasVault comes with a install script that prepares the .env file, builds the Docker image, and starts the AliasVault containers.
 
 ```bash
-# Clone this Git repository to "AliasVault" directory
-$ git clone https://github.com/lanedirt/AliasVault.git
+# Download install script
+curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/main/install.sh
 
-# Go to the project directory
-$ cd AliasVault
+# Make install script executable and run it
+chmod +x install.sh
+./install.sh
+```
 
-# Make install script executable and run it.
-$ chmod +x install.sh && ./install.sh
+### 2. Build from Source
+```bash
+# Clone the repository
+git clone https://github.com/lanedirt/AliasVault.git
+cd AliasVault
+
+# Make build script executable and run it
+chmod +x build.sh
+./build.sh
 ```
 
 Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.

@@ -1,9 +1,6 @@
 services:
     reverse-proxy:
-        image: aliasvault-reverse-proxy
-        build:
-            context: .
-            dockerfile: Dockerfile
+        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
         ports:
             - "80:80"
             - "443:443"
@@ -17,10 +14,7 @@ services:
         restart: always
 
     client:
-        image: aliasvault-client
-        build:
-            context: .
-            dockerfile: src/AliasVault.Client/Dockerfile
+        image: ghcr.io/lanedirt/aliasvault-client:latest
         volumes:
             - ./logs/msbuild:/src/msbuild-logs:rw
         expose:
@@ -30,10 +24,7 @@ services:
             - .env
 
     api:
-        image: aliasvault-api
-        build:
-            context: .
-            dockerfile: src/AliasVault.Api/Dockerfile
+        image: ghcr.io/lanedirt/aliasvault-api:latest
         expose:
             - "3001"
         volumes:
@@ -45,10 +36,7 @@ services:
         restart: always
 
     admin:
-        image: aliasvault-admin
-        build:
-            context: .
-            dockerfile: src/AliasVault.Admin/Dockerfile
+        image: ghcr.io/lanedirt/aliasvault-admin:latest
         expose:
             - "3002"
         volumes:
@@ -60,10 +48,7 @@ services:
             - .env
 
     smtp:
-        image: aliasvault-smtp
-        build:
-            context: .
-            dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
+        image: ghcr.io/lanedirt/aliasvault-smtp:latest
         ports:
             - "25:25"
             - "587:587"

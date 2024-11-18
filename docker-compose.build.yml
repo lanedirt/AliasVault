@@ -1,0 +1,30 @@
+services:
+    reverse-proxy:
+        image: aliasvault-reverse-proxy
+        build:
+            context: .
+            dockerfile: Dockerfile
+
+    client:
+        image: aliasvault-client
+        build:
+            context: .
+            dockerfile: src/AliasVault.Client/Dockerfile
+
+    api:
+        image: aliasvault-api
+        build:
+            context: .
+            dockerfile: src/AliasVault.Api/Dockerfile
+
+    admin:
+        image: aliasvault-admin
+        build:
+            context: .
+            dockerfile: src/AliasVault.Admin/Dockerfile
+
+    smtp:
+        image: aliasvault-smtp
+        build:
+            context: .
+            dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
