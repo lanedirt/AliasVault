@@ -52,7 +52,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 # Download install script
 curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/main/install.sh
 
-# Make install script executable and run it
+# Make install script executable and run it. This will create the .env file, pull the Docker images, and start the AliasVault containers.
 chmod +x install.sh
 ./install.sh install
 ```
@@ -71,7 +71,7 @@ Building from source requires more resources:
 git clone https://github.com/lanedirt/AliasVault.git
 cd AliasVault
 
-# Make build script executable and run it
+# Make build script executable and run it. This will create the .env file, build the Docker images from source, and start the AliasVault containers.
 chmod +x install.sh
 ./install.sh build
 ```
