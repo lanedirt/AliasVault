@@ -89,11 +89,11 @@ else
         GlobalNotificationService.AddSuccessMessage("User successfully deleted.");
         GlobalLoadingSpinner.Hide();
 
-        NavigationService.RedirectTo("/users");
+        NavigationService.RedirectTo("users");
     }
 
     private void Cancel()
     {
-        NavigationService.RedirectTo("/users/" + Id);
+        NavigationService.RedirectTo("users/" + Id);
     }
 }

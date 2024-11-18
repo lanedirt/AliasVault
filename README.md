@@ -10,7 +10,7 @@
 Open-source password and alias manager
 </h3>
 
-[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/OGameX/releases)
+[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/docker-compose-build.yml?label=docker-compose%20build">](https://github.com/lanedirt/AliasVault/actions/workflows/docker-compose-build.yml)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-integration-tests.yml?label=integration tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
@@ -35,42 +35,66 @@ A live demo of the app is available at the official website at [app.aliasvault.n
 <img width="700" alt="Screenshot of AliasVault" src="docs/img/screenshot.png">
 
 ## Installation
-To install AliasVault on your local machine, follow the steps below. Note: the install process is tested on MacOS and Linux. It should work on Windows too, but you might need to adjust some commands.
 
-### Requirements:
-- Access to a terminal
-- Docker
-- Git
+Choose one of the following installation methods:
 
-### 1. Clone and run install script
-AliasVault comes with a install script that prepares the .env file, builds the Docker image, and starts the AliasVault containers.
+### Option 1: Quick Install (Pre-built Images)
+
+This method uses pre-built Docker images and works on minimal hardware specifications:
+- Linux (Ubuntu or RHEL based distros recommended)
+- 512MB RAM
+- 1 vCPU
+- At least 16GB disk space (more users and emails will require more space)
+- Docker installed
+- No Git required
 
 ```bash
-# Clone this Git repository to "AliasVault" directory
-$ git clone https://github.com/lanedirt/AliasVault.git
+# Download install script
+curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/main/install.sh
 
-# Go to the project directory
-$ cd AliasVault
-
-# Make install script executable and run it.
-$ chmod +x install.sh && ./install.sh
+# Make install script executable and run it. This will create the .env file, pull the Docker images, and start the AliasVault containers.
+chmod +x install.sh
+./install.sh install
 ```
 
-Note: if you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.
+### Option 2: Build from Source
 
-### 2. Ready to use
-The install script executed in step #1 will output the URL where the app is available. By default this is https://localhost for the client and https://localhost/admin for the admin portal.
+Building from source requires more resources:
+- Minimum 2GB RAM (more RAM will speed up build time)
+- At least 1 vCPU
+- 40GB+ disk space (for dependencies and build artifacts)
+- Docker installed
+- Git installed
+
+```bash
+# Clone the repository
+git clone https://github.com/lanedirt/AliasVault.git
+cd AliasVault
+
+# Make build script executable and run it. This will create the .env file, build the Docker images from source, and start the AliasVault containers.
+chmod +x install.sh
+./install.sh build
+```
+
+Note: If you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.
+
+### Post-Installation
+
+The install script will output the URL where the app is available. By default this is:
+- Client: https://localhost
+- Admin portal: https://localhost/admin
 
 > Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file for the `nginx` (reverse-proxy) container.
 
-#### Note for first time build:
-- When running the init script for the first time, it may take a few minutes for Docker to download all dependencies. Subsequent builds will be faster.
+#### First Time Setup Notes:
+- When building from source for the first time, it may take several minutes for Docker to download and compile all dependencies. Subsequent builds will be faster.
 - A SQLite database file will be created in `./database/AliasServerDb.sqlite`. This file will store all (encrypted) password vaults. It should be kept secure and not shared.
 
-#### Other useful commands:
-- To reset the admin password, run the install.sh script with the `--reset-admin-password` flag.
-- To uninstall AliasVault, make the uninstall script executable with `chmod +x uninstall.sh` first, then run the script: `./uninstall.sh`.
-This will remove all containers, images, and volumes related to AliasVault. It will keep all files and configuration intact however, so you can easily reinstall AliasVault later.
+#### Useful Commands:
+- To reset the admin password: `./install.sh reset-password`
+- To uninstall AliasVault: `./install.sh uninstall`
+  This will remove all containers, images, and volumes related to AliasVault while keeping configuration files intact for future reinstallation.
+- If something goes wrong you can run the install script in verbose mode to get more information: `./install.sh [command] --verbose`
 
 ## Security & Architecture
 AliasVault takes security seriously and implements various measures to protect your data:

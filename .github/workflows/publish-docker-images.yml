@@ -1,3 +1,4 @@
+# This workflow will publish new Docker images to the GitHub Container Registry when a new release is published.
 name: Publish Docker Images
 
 on:
@@ -20,6 +21,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Convert repository name to lowercase
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -31,7 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
 
       - name: Build and push API image
         uses: docker/build-push-action@v5
@@ -39,7 +44,7 @@ jobs:
           context: .
           file: src/AliasVault.Api/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-api:latest,${{ env.REGISTRY }}/${{ github.repository }}-api:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
 
       - name: Build and push Client image
         uses: docker/build-push-action@v5
@@ -47,7 +52,7 @@ jobs:
           context: .
           file: src/AliasVault.Client/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-client:latest,${{ env.REGISTRY }}/${{ github.repository }}-client:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
 
       - name: Build and push Admin image
         uses: docker/build-push-action@v5
@@ -55,7 +60,7 @@ jobs:
           context: .
           file: src/AliasVault.Admin/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-admin:latest,${{ env.REGISTRY }}/${{ github.repository }}-admin:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
 
       - name: Build and push SMTP image
         uses: docker/build-push-action@v5
@@ -63,7 +68,7 @@ jobs:
           context: .
           file: src/Services/AliasVault.SmtpService/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-smtp:latest,${{ env.REGISTRY }}/${{ github.repository }}-smtp:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
 
       - name: Build and push Reverse Proxy image
         uses: docker/build-push-action@v5
@@ -71,4 +76,12 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ github.repository }}-reverse-proxy:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
+
+      - name: Build and push InstallCli image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Utilities/AliasVault.InstallCli/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
