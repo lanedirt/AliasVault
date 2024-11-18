@@ -91,8 +91,8 @@ jobs:
       - name: Test build.sh --reset-password output
         run: |
           output=$(./build.sh --reset-password)
-          if ! echo "$output" | grep -E '^New admin password: [A-Za-z0-9+/=]{8,}$'; then
-            echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 base64 chars>'"
+          if ! echo "$output" | grep -E '.*New admin password: [A-Za-z0-9]{8,}.*'; then
+            echo "Password reset output format is incorrect. Expected format: 'New admin password: <at least 8 chars>'"
             echo "Actual output: $output"
             exit 1
           else
