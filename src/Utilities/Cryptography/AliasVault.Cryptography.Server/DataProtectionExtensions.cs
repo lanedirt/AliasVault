@@ -30,21 +30,21 @@ public static class DataProtectionExtensions
     {
         var certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS")
                               ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS is not set in configuration or environment variables.");
-        var certPath = "../../certificates/app/AliasVault.DataProtection.pfx";
+        var certPath = $"../../certificates/app/{applicationName}.DataProtection.pfx";
         if (certPassword == "Development")
         {
-            certPath = Path.Combine(AppContext.BaseDirectory, "AliasVault.DataProtection.Development.pfx");
+            certPath = Path.Combine(AppContext.BaseDirectory, $"{applicationName}.DataProtection.Development.pfx");
         }
 
         X509Certificate2 cert;
         if (!File.Exists(certPath))
         {
-            cert = CertificateGenerator.GeneratePfx("AliasVault.DataProtection", certPassword);
+            cert = CertificateGenerator.GeneratePfx($"{applicationName}.DataProtection", certPassword);
             CertificateGenerator.SaveCertificateToFile(cert, certPassword, certPath);
         }
         else
         {
-            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
+            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, X509KeyStorageFlags.DefaultKeySet);
         }
 
         services.AddDataProtection()

@@ -33,7 +33,7 @@ var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH"
 config.AdminPasswordHash = adminPasswordHash;
 
 var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
-config.LastPasswordChanged = DateTime.ParseExact(lastPasswordChanged, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+config.LastPasswordChanged = DateTime.Parse(lastPasswordChanged, CultureInfo.InvariantCulture);
 
 builder.Services.AddSingleton(config);
 
