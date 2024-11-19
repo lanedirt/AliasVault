@@ -44,6 +44,7 @@ public class EmailController(ILogger<VaultController> logger, IDbContextFactory<
         {
             Id = email!.Id,
             Subject = email.Subject,
+            FromDisplay = email.From,
             FromDomain = email.FromDomain,
             FromLocal = email.FromLocal,
             ToDomain = email.ToDomain,
