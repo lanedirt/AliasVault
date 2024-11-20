@@ -760,7 +760,7 @@ configure_letsencrypt() {
     # Request certificate using a temporary certbot container
     printf "${CYAN}> Requesting Let's Encrypt certificate...${NC}\n"
     docker run --rm \
-        --network aliasvault_default \
+        --network aliasvault_network \
         -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
         -v ./certificates/letsencrypt/www:/var/www/certbot:rw \
         certbot/certbot certonly \
