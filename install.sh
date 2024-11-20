@@ -400,6 +400,23 @@ print_password_reset_message() {
     printf "\n"
 }
 
+# Function to get docker compose command with appropriate config files
+get_docker_compose_command() {
+    local base_command="docker compose -f docker-compose.yml"
+
+    # Check if using build configuration
+    if [ "$1" = "build" ]; then
+        base_command="$base_command -f docker-compose.build.yml"
+    fi
+
+    # Check if Let's Encrypt is enabled
+    if grep -q "^LETSENCRYPT_ENABLED=true" "$ENV_FILE" 2>/dev/null; then
+        base_command="$base_command -f docker-compose.letsencrypt.yml"
+    fi
+
+    echo "$base_command"
+}
+
 # Function to handle installation
 handle_install() {
     printf "${YELLOW}+++ Installing AliasVault +++${NC}\n"
@@ -447,9 +464,9 @@ handle_install() {
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose up -d || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
+        $(get_docker_compose_command) up -d || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
     else
-        docker compose up -d > /dev/null 2>&1 || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
+        $(get_docker_compose_command) up -d > /dev/null 2>&1 || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
     fi
 
     # Only show success message if we made it here without errors
@@ -495,13 +512,13 @@ handle_build() {
 
     printf "${CYAN}> Building Docker Compose stack...${NC}"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml build || {
+        $(get_docker_compose_command "build") build || {
             printf "\n${RED}> Failed to build Docker Compose stack${NC}\n"
             exit 1
         }
     else
         (
-            docker compose -f docker-compose.yml -f docker-compose.build.yml build > install_compose_build_output.log 2>&1 &
+            $(get_docker_compose_command "build") build > install_compose_build_output.log 2>&1 &
             BUILD_PID=$!
             while kill -0 $BUILD_PID 2>/dev/null; do
                 printf "."
@@ -519,12 +536,12 @@ handle_build() {
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml up -d || {
+        $(get_docker_compose_command "build") up -d || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }
     else
-        docker compose -f docker-compose.yml -f docker-compose.build.yml up -d > /dev/null 2>&1 || {
+        $(get_docker_compose_command "build") up -d > /dev/null 2>&1 || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }
@@ -657,7 +674,7 @@ configure_letsencrypt() {
 
     # Verify DNS is properly configured
     printf "\n${YELLOW}Important: Before proceeding, ensure that:${NC}\n"
-    printf "1. Your domain (${CYAN}${HOSTNAME}${NC}) is pointed to this server's IP address\n"
+    printf "1. Your domain (${CYAN}${CURRENT_HOSTNAME}${NC}) is externally resolvable to this server's IP address\n"
     printf "2. Ports 80 and 443 are open and accessible from the internet\n"
     printf "\n"
 
@@ -668,6 +685,9 @@ configure_letsencrypt() {
         exit 0
     fi
 
+    # Update .env to indicate Let's Encrypt is enabled
+    update_env_var "LETSENCRYPT_ENABLED" "true"
+
     # Stop existing containers
     printf "${CYAN}> Stopping existing containers...${NC}\n"
     docker compose down
@@ -675,13 +695,19 @@ configure_letsencrypt() {
     # Create certbot directory
     mkdir -p ./certificates/letsencrypt
 
+    # Create Docker network with proper labels
+    printf "${CYAN}> Creating Docker network...${NC}\n"
+    docker network create aliasvault_default \
+        --label com.docker.compose.network=default \
+        --label com.docker.compose.project=aliasvault 2>/dev/null || true
+
     # Initialize Let's Encrypt configuration
     printf "${CYAN}> Initializing Let's Encrypt...${NC}\n"
-    docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up certbot
+    $(get_docker_compose_command) up certbot
 
     # Restart containers with new configuration
     printf "${CYAN}> Restarting services with Let's Encrypt configuration...${NC}\n"
-    docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
+    $(get_docker_compose_command) up -d
 
     printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
 }
