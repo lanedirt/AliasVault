@@ -151,6 +151,7 @@ create_directories() {
                 dirs_needed=true
             fi
             mkdir -p "$dir"
+            chmod -R 755 "$dir"
             if [ $? -ne 0 ]; then
                 printf "  ${RED}> Failed to create directory: $dir${NC}\n"
                 exit 1
