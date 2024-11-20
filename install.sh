@@ -46,7 +46,7 @@ show_usage() {
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
-    printf "  -y, --yes        Automatic yes to prompts (for uninstall)\n"
+    printf "  -y, --yes         Automatic yes to prompts (for uninstall)\n"
     printf "  --help            Show this help message\n"
 }
 
@@ -639,14 +639,34 @@ handle_ssl_configuration() {
         exit 1
     fi
 
-    # Get the current hostname from .env
+    # Get the current hostname and SSL config from .env
     CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+    LETSENCRYPT_ENABLED=$(grep "^LETSENCRYPT_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "${CYAN}About SSL Certificates:${NC}\n"
+    printf "A default installation of AliasVault comes with a self-signed SSL certificate.\n"
+    printf "While self-signed certificates provide encryption, they will show security warnings in browsers.\n"
+    printf "\n"
+    printf "AliasVault also supports generating valid SSL certificates via Let's Encrypt.\n"
+    printf "Let's Encrypt certificates are trusted by browsers and will not show security warnings.\n"
+    printf "However, Let's Encrypt requires that:\n"
+    printf "  - AliasVault is reachable from the internet via port 80/443\n"
+    printf "  - You have configured a valid domain name (not localhost)\n"
+    printf "\n"
+    printf "Let's Encrypt certificates will be automatically renewed before expiry.\n"
+    printf "\n"
+    printf "${CYAN}Current Configuration:${NC}\n"
+    if [ "$LETSENCRYPT_ENABLED" = "true" ]; then
+        printf "Currently using: ${GREEN}Let's Encrypt certificates${NC}\n"
+    else
+        printf "Currently using: ${YELLOW}Self-signed certificates${NC}\n"
+    fi
 
     printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
     printf "\n"
     printf "SSL Options:\n"
-    printf "1) Configure Let's Encrypt (recommended for production)\n"
-    printf "2) Generate new self-signed certificate\n"
+    printf "1) Activate and/or request new Let's Encrypt certificate (recommended for production)\n"
+    printf "2) Activate and/or generate new self-signed certificate\n"
     printf "3) Cancel\n"
     printf "\n"
 
