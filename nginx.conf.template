@@ -43,7 +43,7 @@ http {
         # Handle ACME challenge first
         location /.well-known/acme-challenge/ {
             allow all;
-            alias /var/www/certbot/;
+            root /var/www/certbot;
             try_files $uri =404;
             default_type "text/plain";
             add_header Cache-Control "no-cache";
