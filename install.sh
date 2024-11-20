@@ -11,6 +11,8 @@ GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lowe
 REQUIRED_DIRS=(
     "certificates/ssl"
     "certificates/app"
+    "certificates/letsencrypt"
+    "certificates/letsencrypt/www"
     "database"
     "logs"
     "logs/msbuild"
@@ -35,15 +37,16 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  /install           Install AliasVault by pulling pre-built images from GitHub Container Registry (default)\n"
-    printf "  /build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
-    printf "  /reset-password    Reset admin password\n"
-    printf "  /uninstall         Uninstall AliasVault\n"
+    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (default)\n"
+    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  reset-password    Reset admin password\n"
+    printf "  uninstall         Uninstall AliasVault\n"
+    printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
 
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
-    printf "  -y, --yes        Automatic yes to prompts (for uninstall)\n"
+    printf "  -y, --yes         Automatic yes to prompts (for uninstall)\n"
     printf "  --help            Show this help message\n"
 }
 
@@ -75,6 +78,10 @@ parse_args() {
                 ;;
             reset-password|reset-admin-password|rp)
                 COMMAND="reset-password"
+                shift
+                ;;
+            configure-ssl|ssl)
+                COMMAND="configure-ssl"
                 shift
                 ;;
             --verbose)
@@ -126,6 +133,9 @@ main() {
                 print_password_reset_message
             fi
             ;;
+        "configure-ssl")
+            handle_ssl_configuration
+            ;;
     esac
 }
 
@@ -141,6 +151,7 @@ create_directories() {
                 dirs_needed=true
             fi
             mkdir -p "$dir"
+            chmod -R 755 "$dir"
             if [ $? -ne 0 ]; then
                 printf "  ${RED}> Failed to create directory: $dir${NC}\n"
                 exit 1
@@ -392,6 +403,23 @@ print_password_reset_message() {
     printf "\n"
 }
 
+# Function to get docker compose command with appropriate config files
+get_docker_compose_command() {
+    local base_command="docker compose -f docker-compose.yml"
+
+    # Check if using build configuration
+    if [ "$1" = "build" ]; then
+        base_command="$base_command -f docker-compose.build.yml"
+    fi
+
+    # Check if Let's Encrypt is enabled
+    if grep -q "^LETSENCRYPT_ENABLED=true" "$ENV_FILE" 2>/dev/null; then
+        base_command="$base_command -f docker-compose.letsencrypt.yml"
+    fi
+
+    echo "$base_command"
+}
+
 # Function to handle installation
 handle_install() {
     printf "${YELLOW}+++ Installing AliasVault +++${NC}\n"
@@ -439,9 +467,9 @@ handle_install() {
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose up -d || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
+        $(get_docker_compose_command) up -d || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
     else
-        docker compose up -d > /dev/null 2>&1 || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
+        $(get_docker_compose_command) up -d > /dev/null 2>&1 || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
     fi
 
     # Only show success message if we made it here without errors
@@ -487,13 +515,13 @@ handle_build() {
 
     printf "${CYAN}> Building Docker Compose stack...${NC}"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml build || {
+        $(get_docker_compose_command "build") build || {
             printf "\n${RED}> Failed to build Docker Compose stack${NC}\n"
             exit 1
         }
     else
         (
-            docker compose -f docker-compose.yml -f docker-compose.build.yml build > install_compose_build_output.log 2>&1 &
+            $(get_docker_compose_command "build") build > install_compose_build_output.log 2>&1 &
             BUILD_PID=$!
             while kill -0 $BUILD_PID 2>/dev/null; do
                 printf "."
@@ -511,12 +539,12 @@ handle_build() {
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        docker compose -f docker-compose.yml -f docker-compose.build.yml up -d || {
+        $(get_docker_compose_command "build") up -d || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }
     else
-        docker compose -f docker-compose.yml -f docker-compose.build.yml up -d > /dev/null 2>&1 || {
+        $(get_docker_compose_command "build") up -d > /dev/null 2>&1 || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }
@@ -535,8 +563,7 @@ handle_uninstall() {
     # Check if -y flag was passed
     if [ "$FORCE_YES" != "true" ]; then
         # Ask for confirmation before proceeding
-        read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N] " -n 1 -r
-        echo
+        read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N]: " REPLY
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             printf "${YELLOW}> Uninstall cancelled.${NC}\n"
             exit 0
@@ -599,6 +626,183 @@ handle_uninstall() {
     printf "Thank you for using AliasVault!\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
+}
+
+# Function to handle SSL configuration
+handle_ssl_configuration() {
+    printf "${YELLOW}+++ SSL Certificate Configuration +++${NC}\n"
+    printf "\n"
+
+    # Check if AliasVault is installed
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "${RED}Error: AliasVault must be installed first.${NC}\n"
+        exit 1
+    fi
+
+    # Get the current hostname and SSL config from .env
+    CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+    LETSENCRYPT_ENABLED=$(grep "^LETSENCRYPT_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "${CYAN}About SSL Certificates:${NC}\n"
+    printf "A default installation of AliasVault comes with a self-signed SSL certificate.\n"
+    printf "While self-signed certificates provide encryption, they will show security warnings in browsers.\n"
+    printf "\n"
+    printf "AliasVault also supports generating valid SSL certificates via Let's Encrypt.\n"
+    printf "Let's Encrypt certificates are trusted by browsers and will not show security warnings.\n"
+    printf "However, Let's Encrypt requires that:\n"
+    printf "  - AliasVault is reachable from the internet via port 80/443\n"
+    printf "  - You have configured a valid domain name (not localhost)\n"
+    printf "\n"
+    printf "Let's Encrypt certificates will be automatically renewed before expiry.\n"
+    printf "\n"
+    printf "${CYAN}Current Configuration:${NC}\n"
+    if [ "$LETSENCRYPT_ENABLED" = "true" ]; then
+        printf "Currently using: ${GREEN}Let's Encrypt certificates${NC}\n"
+    else
+        printf "Currently using: ${YELLOW}Self-signed certificates${NC}\n"
+    fi
+
+    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
+    printf "\n"
+    printf "SSL Options:\n"
+    printf "1) Activate and/or request new Let's Encrypt certificate (recommended for production)\n"
+    printf "2) Activate and/or generate new self-signed certificate\n"
+    printf "3) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-3]: " ssl_option
+
+    case $ssl_option in
+        1)
+            configure_letsencrypt
+            ;;
+        2)
+            generate_self_signed_cert
+            ;;
+        3)
+            printf "${YELLOW}SSL configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to configure Let's Encrypt
+configure_letsencrypt() {
+    printf "${CYAN}> Configuring Let's Encrypt SSL certificate...${NC}\n"
+
+    # Check if hostname is localhost
+    if [ "$CURRENT_HOSTNAME" = "localhost" ]; then
+        printf "${RED}Error: Let's Encrypt certificates cannot be issued for 'localhost'.${NC}\n"
+        printf "${YELLOW}Please configure a valid publically resolvable domain name (e.g. mydomain.com) before setting up Let's Encrypt.${NC}\n"
+        exit 1
+    fi
+
+    # Check if hostname is a valid domain
+    if ! [[ "$CURRENT_HOSTNAME" =~ \.[a-zA-Z]{2,}$ ]]; then
+        printf "${RED}Error: Invalid hostname '${CURRENT_HOSTNAME}'.${NC}\n"
+        printf "${YELLOW}Please configure a valid publically resolvable domain name (e.g. mydomain.com) before setting up Let's Encrypt.${NC}\n"
+        exit 1
+    fi
+
+    # Verify DNS is properly configured
+    printf "\n${YELLOW}Important: Before proceeding, ensure that:${NC}\n"
+    printf "1. AliasVault is currently running and accessible at ${CYAN}https://${CURRENT_HOSTNAME}${NC}\n"
+    printf "2. Your domain (${CYAN}${CURRENT_HOSTNAME}${NC}) is externally resolvable to this server's IP address\n"
+    printf "3. Ports 80 and 443 are open and accessible from the internet\n"
+    printf "\n"
+
+    read -p "Have you completed these steps? [y/N]: " REPLY
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        printf "${YELLOW}> Let's Encrypt configuration cancelled.${NC}\n"
+        exit 0
+    fi
+
+    # Get contact email for Let's Encrypt
+    SUPPORT_EMAIL=$(grep "^SUPPORT_EMAIL=" "$ENV_FILE" | cut -d '=' -f2)
+    LETSENCRYPT_EMAIL=""
+
+    while true; do
+        printf "\nPlease enter a valid email address that will be used for Let's Encrypt certificate notifications:\n"
+        read -p "Email: " LETSENCRYPT_EMAIL
+        if [[ "$LETSENCRYPT_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+            printf "Confirm using ${CYAN}${LETSENCRYPT_EMAIL}${NC} for Let's Encrypt notifications? [y/N] "
+            read REPLY
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                break
+            fi
+        else
+            printf "${RED}Invalid email format. Please try again.${NC}\n"
+        fi
+    done
+
+    # Create certbot directories
+    printf "${CYAN}> Creating Let's Encrypt directories...${NC}\n"
+    mkdir -p ./certificates/letsencrypt/www
+
+    # Request certificate using a temporary certbot container
+    printf "${CYAN}> Requesting Let's Encrypt certificate...${NC}\n"
+    docker run --rm \
+        --network aliasvault_default \
+        -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
+        -v ./certificates/letsencrypt/www:/var/www/certbot:rw \
+        certbot/certbot certonly \
+        --webroot \
+        --webroot-path=/var/www/certbot \
+        --email "$LETSENCRYPT_EMAIL" \
+        --agree-tos \
+        --no-eff-email \
+        --non-interactive \
+        --domains ${CURRENT_HOSTNAME} \
+        --force-renewal
+
+    if [ $? -ne 0 ]; then
+        printf "${RED}Failed to obtain Let's Encrypt certificate.${NC}\n"
+        exit 1
+    fi
+
+    # Fix permissions on Let's Encrypt directories and files
+    sudo chmod -R 755 ./certificates/letsencrypt
+
+    # Ensure private keys remain secure
+    sudo find ./certificates/letsencrypt -type f -name "privkey*.pem" -exec chmod 600 {} \;
+    sudo find ./certificates/letsencrypt -type f -name "fullchain*.pem" -exec chmod 644 {} \;
+
+    # Update .env to indicate Let's Encrypt is enabled
+    update_env_var "LETSENCRYPT_ENABLED" "true"
+
+    # Restart only the reverse proxy with new configuration so it loads the new certificate
+    printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
+    $(get_docker_compose_command) up -d reverse-proxy
+
+    printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
+}
+
+# Function to generate self-signed certificate
+generate_self_signed_cert() {
+    printf "${CYAN}> Generating new self-signed certificate...${NC}\n"
+
+    # Disable Let's Encrypt
+    update_env_var "LETSENCRYPT_ENABLED" "false"
+
+    # Stop existing containers
+    printf "${CYAN}> Stopping existing containers...${NC}\n"
+    docker compose down
+
+    # Remove existing certificates
+    rm -f ./certificates/ssl/cert.pem ./certificates/ssl/key.pem
+
+    # Remove Let's Encrypt directories
+    rm -rf ./certificates/letsencrypt
+
+    # Start containers (which will generate new self-signed certs)
+    printf "${CYAN}> Restarting services...${NC}\n"
+    docker compose up -d
+
+    printf "${GREEN}> New self-signed certificate has been generated successfully!${NC}\n"
 }
 
 main "$@"

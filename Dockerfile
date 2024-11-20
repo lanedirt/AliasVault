@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-# Install OpenSSL for certificate generation
+# Install OpenSSL
 RUN apk add --no-cache openssl
 
 # Copy configuration and entrypoint script

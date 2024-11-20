@@ -398,3 +398,4 @@ certificates/**/*.crt
 certificates/**/*.key
 certificates/**/*.pfx
 certificates/**/*.pem
+certificates/letsencrypt/**

@@ -6,12 +6,16 @@ services:
             - "443:443"
         volumes:
             - ./certificates/ssl:/etc/nginx/ssl:rw
+            - ./certificates/letsencrypt:/etc/nginx/ssl-letsencrypt:rw
+            - ./certificates/letsencrypt/www:/var/www/certbot:rw
         depends_on:
             - admin
             - client
             - api
             - smtp
         restart: always
+        env_file:
+            - .env
 
     client:
         image: ghcr.io/lanedirt/aliasvault-client:latest
@@ -58,3 +62,7 @@ services:
         env_file:
             - .env
         restart: always
+
+networks:
+    aliasvault:
+        name: aliasvault_default
