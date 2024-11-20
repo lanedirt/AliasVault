@@ -173,21 +173,35 @@ initialize_workspace() {
 
 # Function to handle docker-compose.yml
 handle_docker_compose() {
-    printf "${CYAN}> Checking docker-compose.yml...${NC}\n"
+    printf "${CYAN}> Checking docker-compose files...${NC}\n"
 
-    if [ -f "docker-compose.yml" ]; then
-        printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
-        return 0
-    fi
-
-    printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
-    if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml" > /dev/null 2>&1; then
-        printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
-        return 0
+    # Check and download main docker-compose.yml
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
+        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml" > /dev/null 2>&1; then
+            printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
+        else
+            printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
+            exit 1
+        fi
     else
-        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
-        exit 1
+        printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
     fi
+
+    # Check and download docker-compose.letsencrypt.yml
+    if [ ! -f "docker-compose.letsencrypt.yml" ]; then
+        printf "  ${CYAN}> Downloading docker-compose.letsencrypt.yml...${NC}"
+        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.letsencrypt.yml" -o "docker-compose.letsencrypt.yml" > /dev/null 2>&1; then
+            printf "\n  ${GREEN}> docker-compose.letsencrypt.yml downloaded successfully.${NC}\n"
+        else
+            printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
+            exit 1
+        fi
+    else
+        printf "  ${GREEN}> docker-compose.letsencrypt.yml already exists.${NC}\n"
+    fi
+
+    return 0
 }
 
 # Function to print the logo
@@ -776,7 +790,7 @@ configure_letsencrypt() {
 
     # Restart only the reverse proxy with new configuration so it loads the new certificate
     printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
-    $(get_docker_compose_command) up -d reverse-proxy
+    $(get_docker_compose_command) up -d reverse-proxy --force-recreate
 
     printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
 }
