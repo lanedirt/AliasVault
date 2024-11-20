@@ -725,14 +725,7 @@ configure_letsencrypt() {
     printf "${CYAN}> Creating Let's Encrypt directories...${NC}\n"
     mkdir -p ./certificates/letsencrypt/www
 
-    # Stop existing containers and remove old certificates
-    printf "${CYAN}> Stopping existing containers...${NC}\n"
-    docker compose down
-    rm -rf ./certificates/letsencrypt/live
-    rm -rf ./certificates/letsencrypt/archive
-    rm -rf ./certificates/letsencrypt/renewal
-
-    # Create Docker network with proper labels
+    # Create Docker network if it doesn't exist
     printf "${CYAN}> Creating Docker network...${NC}\n"
     docker network create aliasvault_default \
         --label com.docker.compose.network=default \
@@ -749,15 +742,24 @@ configure_letsencrypt() {
         --network aliasvault_default \
         -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
         -v ./certificates/letsencrypt/www:/var/www/certbot:rw \
-        certbot/certbot certonly --webroot \
+        certbot/certbot certonly \
+        --webroot \
         --webroot-path=/var/www/certbot \
-        --email ${LETSENCRYPT_EMAIL} \
-        --agree-tos --no-eff-email \
+        --email "$LETSENCRYPT_EMAIL" \
+        --agree-tos \
+        --no-eff-email \
+        --non-interactive \
+        --domains ${HOSTNAME} \
         --force-renewal
 
-    # Restart containers with new configuration
-    printf "${CYAN}> Restarting services with Let's Encrypt configuration...${NC}\n"
-    $(get_docker_compose_command) up -d
+    if [ $? -ne 0 ]; then
+        printf "${RED}Failed to obtain Let's Encrypt certificate.${NC}\n"
+        exit 1
+    fi
+
+    # Restart only the reverse proxy with new configuration
+    printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
+    $(get_docker_compose_command) up -d reverse-proxy
 
     printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
 }
