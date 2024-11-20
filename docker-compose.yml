@@ -6,7 +6,7 @@ services:
             - "443:443"
         volumes:
             - ./certificates/ssl:/etc/nginx/ssl:rw
-            - ./certificates/letsencrypt:/etc/letsencrypt:rw
+            - ./certificates/letsencrypt:/etc/nginx/ssl-letsencrypt:rw
             - ./certificates/letsencrypt/www:/var/www/certbot:rw
         depends_on:
             - admin

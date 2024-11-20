@@ -68,8 +68,8 @@ http {
 
         # Override based on ${LETSENCRYPT_ENABLED}
         if ($letsencrypt_enabled = "true") {
-            set $ssl_certificate /etc/letsencrypt/live/${HOSTNAME}/fullchain.pem;
-            set $ssl_certificate_key /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
+            set $ssl_certificate /etc/nginx/ssl-letsencrypt/live/${HOSTNAME}/fullchain.pem;
+            set $ssl_certificate_key /etc/nginx/ssl-letsencrypt/live/${HOSTNAME}/privkey.pem;
         }
 
         ssl_certificate $ssl_certificate;
