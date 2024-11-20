@@ -248,6 +248,19 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
             optionsBuilder
                 .UseSqlite(configuration.GetConnectionString("AliasServerDbContext"))
                 .UseLazyLoadingProxies();
+
+            // Set busy timeout using PRAGMA to avoid "The database file is locked" error.
+            var connection = Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA busy_timeout = 5000;";
+                command.ExecuteNonQuery();
+            }
         }
     }
 }
