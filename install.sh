@@ -37,11 +37,11 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  /install           Install AliasVault by pulling pre-built images from GitHub Container Registry (default)\n"
-    printf "  /build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
-    printf "  /reset-password    Reset admin password\n"
-    printf "  /uninstall         Uninstall AliasVault\n"
-    printf "  /configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (default)\n"
+    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  reset-password    Reset admin password\n"
+    printf "  uninstall         Uninstall AliasVault\n"
+    printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -744,6 +744,13 @@ configure_letsencrypt() {
         exit 1
     fi
 
+    # Fix permissions on Let's Encrypt directories and files
+    sudo chmod -R 755 ./certificates/letsencrypt
+
+    # Ensure private keys remain secure
+    sudo find ./certificates/letsencrypt -type f -name "privkey*.pem" -exec chmod 600 {} \;
+    sudo find ./certificates/letsencrypt -type f -name "fullchain*.pem" -exec chmod 644 {} \;
+
     # Update .env to indicate Let's Encrypt is enabled
     update_env_var "LETSENCRYPT_ENABLED" "true"
 
@@ -767,6 +774,9 @@ generate_self_signed_cert() {
 
     # Remove existing certificates
     rm -f ./certificates/ssl/cert.pem ./certificates/ssl/key.pem
+
+    # Remove Let's Encrypt directories
+    rm -rf ./certificates/letsencrypt
 
     # Start containers (which will generate new self-signed certs)
     printf "${CYAN}> Restarting services...${NC}\n"
