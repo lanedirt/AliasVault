@@ -1,9 +1,9 @@
 FROM nginx:alpine
 
-# Install OpenSSL and envsubst (which is part of gettext)
-RUN apk add --no-cache openssl gettext
+# Install OpenSSL
+RUN apk add --no-cache openssl
 
-# Copy configuration template and entrypoint script
+# Copy configuration and entrypoint script
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY entrypoint.sh /docker-entrypoint.sh
 

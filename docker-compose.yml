@@ -16,8 +16,6 @@ services:
         restart: always
         env_file:
             - .env
-        networks:
-            - aliasvault
 
     client:
         image: ghcr.io/lanedirt/aliasvault-client:latest
@@ -28,8 +26,6 @@ services:
         restart: always
         env_file:
             - .env
-        networks:
-            - aliasvault
 
     api:
         image: ghcr.io/lanedirt/aliasvault-api:latest
@@ -42,8 +38,6 @@ services:
         env_file:
             - .env
         restart: always
-        networks:
-            - aliasvault
 
     admin:
         image: ghcr.io/lanedirt/aliasvault-admin:latest
@@ -56,8 +50,6 @@ services:
         restart: always
         env_file:
             - .env
-        networks:
-            - aliasvault
 
     smtp:
         image: ghcr.io/lanedirt/aliasvault-smtp:latest
@@ -70,10 +62,7 @@ services:
         env_file:
             - .env
         restart: always
-        networks:
-            - aliasvault
 
 networks:
     aliasvault:
         name: aliasvault_default
-        external: true
