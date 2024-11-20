@@ -26,7 +26,7 @@
                 </button>
             </div>
             <div class="mt-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400">From: @Email?.FromDisplay</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">From: @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">To: @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email?.DateSystem</p>
             </div>
