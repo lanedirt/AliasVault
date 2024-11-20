@@ -670,7 +670,21 @@ handle_ssl_configuration() {
 
 # Function to configure Let's Encrypt
 configure_letsencrypt() {
-    printf "${CYAN}> Configuring Let's Encrypt...${NC}\n"
+    printf "${CYAN}> Configuring Let's Encrypt SSL certificate...${NC}\n"
+
+    # Check if hostname is localhost
+    if [ "$CURRENT_HOSTNAME" = "localhost" ]; then
+        printf "${RED}Error: Let's Encrypt certificates cannot be issued for 'localhost'.${NC}\n"
+        printf "${YELLOW}Please configure a valid publically resolvable domain name (e.g. mydomain.com) before setting up Let's Encrypt.${NC}\n"
+        exit 1
+    fi
+
+    # Check if hostname is a valid domain
+    if ! [[ "$CURRENT_HOSTNAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
+        printf "${RED}Error: Invalid hostname '${CURRENT_HOSTNAME}'.${NC}\n"
+        printf "${YELLOW}Please configure a valid publically resolvable domain name (e.g. mydomain.com) before setting up Let's Encrypt.${NC}\n"
+        exit 1
+    fi
 
     # Verify DNS is properly configured
     printf "\n${YELLOW}Important: Before proceeding, ensure that:${NC}\n"
@@ -685,15 +699,38 @@ configure_letsencrypt() {
         exit 0
     fi
 
+    # Get contact email for Let's Encrypt
+    SUPPORT_EMAIL=$(grep "^SUPPORT_EMAIL=" "$ENV_FILE" | cut -d '=' -f2)
+    LETSENCRYPT_EMAIL=""
+
+    while true; do
+        printf "\nPlease enter a valid email address that will be used for Let's Encrypt certificate notifications:\n"
+        read -p "Email: " LETSENCRYPT_EMAIL
+        if [[ "$LETSENCRYPT_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+            printf "Confirm using ${CYAN}${LETSENCRYPT_EMAIL}${NC} for Let's Encrypt notifications? [y/N] "
+            read -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                break
+            fi
+        else
+            printf "${RED}Invalid email format. Please try again.${NC}\n"
+        fi
+    done
+
     # Update .env to indicate Let's Encrypt is enabled
     update_env_var "LETSENCRYPT_ENABLED" "true"
 
-    # Stop existing containers
+    # Create certbot directories
+    printf "${CYAN}> Creating Let's Encrypt directories...${NC}\n"
+    mkdir -p ./certificates/letsencrypt/www
+
+    # Stop existing containers and remove old certificates
     printf "${CYAN}> Stopping existing containers...${NC}\n"
     docker compose down
-
-    # Create certbot directory
-    mkdir -p ./certificates/letsencrypt
+    rm -rf ./certificates/letsencrypt/live
+    rm -rf ./certificates/letsencrypt/archive
+    rm -rf ./certificates/letsencrypt/renewal
 
     # Create Docker network with proper labels
     printf "${CYAN}> Creating Docker network...${NC}\n"
@@ -701,9 +738,22 @@ configure_letsencrypt() {
         --label com.docker.compose.network=default \
         --label com.docker.compose.project=aliasvault 2>/dev/null || true
 
-    # Initialize Let's Encrypt configuration
-    printf "${CYAN}> Initializing Let's Encrypt...${NC}\n"
-    $(get_docker_compose_command) up certbot
+    # Start the reverse proxy first to handle ACME challenge
+    printf "${CYAN}> Starting reverse proxy for ACME challenge...${NC}\n"
+    $(get_docker_compose_command) up -d reverse-proxy
+    sleep 5  # Give nginx time to start
+
+    # Request initial certificate using a temporary certbot container
+    printf "${CYAN}> Requesting initial Let's Encrypt certificate...${NC}\n"
+    docker run --rm \
+        --network aliasvault_default \
+        -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
+        -v ./certificates/letsencrypt/www:/var/www/certbot:rw \
+        certbot/certbot certonly --webroot \
+        --webroot-path=/var/www/certbot \
+        --email ${LETSENCRYPT_EMAIL} \
+        --agree-tos --no-eff-email \
+        --force-renewal
 
     # Restart containers with new configuration
     printf "${CYAN}> Restarting services with Let's Encrypt configuration...${NC}\n"
