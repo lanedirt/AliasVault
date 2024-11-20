@@ -4,7 +4,7 @@ FROM nginx:alpine
 RUN apk add --no-cache openssl gettext
 
 # Copy configuration template and entrypoint script
-COPY nginx.conf.template /etc/nginx/nginx.conf.template
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY entrypoint.sh /docker-entrypoint.sh
 
 # Create SSL directory
