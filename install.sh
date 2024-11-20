@@ -680,7 +680,7 @@ configure_letsencrypt() {
     fi
 
     # Check if hostname is a valid domain
-    if ! [[ "$CURRENT_HOSTNAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
+    if ! [[ "$CURRENT_HOSTNAME" =~ \.[a-zA-Z]{2,}$ ]]; then
         printf "${RED}Error: Invalid hostname '${CURRENT_HOSTNAME}'.${NC}\n"
         printf "${YELLOW}Please configure a valid publically resolvable domain name (e.g. mydomain.com) before setting up Let's Encrypt.${NC}\n"
         exit 1
