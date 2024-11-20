@@ -563,8 +563,7 @@ handle_uninstall() {
     # Check if -y flag was passed
     if [ "$FORCE_YES" != "true" ]; then
         # Ask for confirmation before proceeding
-        read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N] " -n 1 -r
-        echo
+        read -p "Are you sure you want to uninstall AliasVault? This will remove all containers and images. [y/N]: " REPLY
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             printf "${YELLOW}> Uninstall cancelled.${NC}\n"
             exit 0
@@ -691,12 +690,12 @@ configure_letsencrypt() {
 
     # Verify DNS is properly configured
     printf "\n${YELLOW}Important: Before proceeding, ensure that:${NC}\n"
-    printf "1. Your domain (${CYAN}${CURRENT_HOSTNAME}${NC}) is externally resolvable to this server's IP address\n"
-    printf "2. Ports 80 and 443 are open and accessible from the internet\n"
+    printf "1. AliasVault is currently running and accessible at ${CYAN}https://${CURRENT_HOSTNAME}${NC}\n"
+    printf "2. Your domain (${CYAN}${CURRENT_HOSTNAME}${NC}) is externally resolvable to this server's IP address\n"
+    printf "3. Ports 80 and 443 are open and accessible from the internet\n"
     printf "\n"
 
-    read -p "Have you completed these steps? [y/N] " -n 1 -r
-    echo
+    read -p "Have you completed these steps? [y/N]: " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         printf "${YELLOW}> Let's Encrypt configuration cancelled.${NC}\n"
         exit 0
@@ -711,8 +710,7 @@ configure_letsencrypt() {
         read -p "Email: " LETSENCRYPT_EMAIL
         if [[ "$LETSENCRYPT_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
             printf "Confirm using ${CYAN}${LETSENCRYPT_EMAIL}${NC} for Let's Encrypt notifications? [y/N] "
-            read -n 1 -r
-            echo
+            read REPLY
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 break
             fi
@@ -721,26 +719,12 @@ configure_letsencrypt() {
         fi
     done
 
-    # Update .env to indicate Let's Encrypt is enabled
-    update_env_var "LETSENCRYPT_ENABLED" "true"
-
     # Create certbot directories
     printf "${CYAN}> Creating Let's Encrypt directories...${NC}\n"
     mkdir -p ./certificates/letsencrypt/www
 
-    # Create Docker network if it doesn't exist
-    printf "${CYAN}> Creating Docker network...${NC}\n"
-    docker network create aliasvault_default \
-        --label com.docker.compose.network=default \
-        --label com.docker.compose.project=aliasvault 2>/dev/null || true
-
-    # Start the reverse proxy first to handle ACME challenge
-    printf "${CYAN}> Starting reverse proxy for ACME challenge...${NC}\n"
-    $(get_docker_compose_command) up -d reverse-proxy
-    sleep 5  # Give nginx time to start
-
-    # Request initial certificate using a temporary certbot container
-    printf "${CYAN}> Requesting initial Let's Encrypt certificate...${NC}\n"
+    # Request certificate using a temporary certbot container
+    printf "${CYAN}> Requesting Let's Encrypt certificate...${NC}\n"
     docker run --rm \
         --network aliasvault_default \
         -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
@@ -760,7 +744,10 @@ configure_letsencrypt() {
         exit 1
     fi
 
-    # Restart only the reverse proxy with new configuration
+    # Update .env to indicate Let's Encrypt is enabled
+    update_env_var "LETSENCRYPT_ENABLED" "true"
+
+    # Restart only the reverse proxy with new configuration so it loads the new certificate
     printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
     $(get_docker_compose_command) up -d reverse-proxy
 
