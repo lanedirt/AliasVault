@@ -749,7 +749,7 @@ configure_letsencrypt() {
         --agree-tos \
         --no-eff-email \
         --non-interactive \
-        --domains ${HOSTNAME} \
+        --domains ${CURRENT_HOSTNAME} \
         --force-renewal
 
     if [ $? -ne 0 ]; then
