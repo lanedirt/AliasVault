@@ -11,6 +11,8 @@ GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lowe
 REQUIRED_DIRS=(
     "certificates/ssl"
     "certificates/app"
+    "certificates/letsencrypt"
+    "certificates/letsencrypt/www"
     "database"
     "logs"
     "logs/msbuild"

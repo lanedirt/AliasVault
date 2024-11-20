@@ -1,11 +1,4 @@
 services:
-  reverse-proxy:
-    volumes:
-      - ./certificates/letsencrypt:/etc/letsencrypt:rw
-      - ./certificates/letsencrypt/www:/var/www/certbot:rw
-    environment:
-      - USE_LETSENCRYPT=true
-
   certbot:
     image: certbot/certbot
     volumes:

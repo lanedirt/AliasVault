@@ -6,12 +6,16 @@ services:
             - "443:443"
         volumes:
             - ./certificates/ssl:/etc/nginx/ssl:rw
+            - ./certificates/letsencrypt:/etc/letsencrypt:rw
+            - ./certificates/letsencrypt/www:/var/www/certbot:rw
         depends_on:
             - admin
             - client
             - api
             - smtp
         restart: always
+        env_file:
+            - .env
         networks:
             - aliasvault
 

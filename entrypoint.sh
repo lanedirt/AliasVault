@@ -16,5 +16,10 @@ if [ ! -f /etc/nginx/ssl/cert.pem ] || [ ! -f /etc/nginx/ssl/key.pem ]; then
     chmod 600 /etc/nginx/ssl/key.pem
 fi
 
+export LETSENCRYPT_ENABLED
+export HOSTNAME
+
+envsubst '${LETSENCRYPT_ENABLED} ${HOSTNAME}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+
 # Start nginx
 nginx -g "daemon off;"

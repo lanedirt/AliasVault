@@ -36,34 +36,21 @@ http {
     gzip_http_version 1.1;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 
-    # Add this inside the http block, before the server blocks
-    map $USE_LETSENCRYPT $ssl_certificate {
-        default /etc/nginx/ssl/cert.pem;
-        true    /etc/letsencrypt/live/${HOSTNAME}/fullchain.pem;
-    }
-
-    map $USE_LETSENCRYPT $ssl_certificate_key {
-        default /etc/nginx/ssl/key.pem;
-        true    /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
-    }
-
     server {
         listen 80;
         server_name _;
 
-        # Let's Encrypt validation is served by certbot generated html files
-        location ^~ /.well-known/acme-challenge/ {
+        # Handle ACME challenge first
+        location /.well-known/acme-challenge/ {
             allow all;
-            root /var/www/certbot;
+            alias /var/www/certbot/;
             try_files $uri =404;
-
-            # Ensure proper content type
             default_type "text/plain";
-
-            # Disable caching for these files
             add_header Cache-Control "no-cache";
+            break;
         }
 
+        # Then redirect all other HTTP traffic to HTTPS
         location / {
             return 301 https://$host$request_uri;
         }
@@ -73,17 +60,20 @@ http {
         listen 443 ssl;
         server_name _;
 
-        ssl_certificate     $ssl_certificate;
-        ssl_certificate_key $ssl_certificate_key;
+        # Default values
+        set $ssl_certificate /etc/nginx/ssl/cert.pem;
+        set $ssl_certificate_key /etc/nginx/ssl/key.pem;
 
-        # Client app (root path)
-        location / {
-            proxy_pass http://client;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        set $letsencrypt_enabled ${LETSENCRYPT_ENABLED};
+
+        # Override based on ${LETSENCRYPT_ENABLED}
+        if ($letsencrypt_enabled = "true") {
+            set $ssl_certificate /etc/letsencrypt/live/${HOSTNAME}/fullchain.pem;
+            set $ssl_certificate_key /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
         }
+
+        ssl_certificate         $ssl_certificate;
+        ssl_certificate_key $ssl_certificate_key;
 
         # Admin interface
         location /admin {
@@ -103,6 +93,15 @@ http {
         # API endpoints
         location /api {
             proxy_pass http://api;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        # Client app (root path)
+        location / {
+            proxy_pass http://client;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-Proto $scheme;
