@@ -39,6 +39,7 @@ show_usage() {
     printf "  /build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
     printf "  /reset-password    Reset admin password\n"
     printf "  /uninstall         Uninstall AliasVault\n"
+    printf "  /configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -75,6 +76,10 @@ parse_args() {
                 ;;
             reset-password|reset-admin-password|rp)
                 COMMAND="reset-password"
+                shift
+                ;;
+            configure-ssl|ssl)
+                COMMAND="configure-ssl"
                 shift
                 ;;
             --verbose)
@@ -125,6 +130,9 @@ main() {
                 recreate_docker_containers
                 print_password_reset_message
             fi
+            ;;
+        "configure-ssl")
+            handle_ssl_configuration
             ;;
     esac
 }
@@ -599,6 +607,101 @@ handle_uninstall() {
     printf "Thank you for using AliasVault!\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
+}
+
+# Function to handle SSL configuration
+handle_ssl_configuration() {
+    printf "${YELLOW}+++ SSL Certificate Configuration +++${NC}\n"
+    printf "\n"
+
+    # Check if AliasVault is installed
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "${RED}Error: AliasVault must be installed first.${NC}\n"
+        exit 1
+    fi
+
+    # Get the current hostname from .env
+    CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
+    printf "\n"
+    printf "SSL Options:\n"
+    printf "1) Configure Let's Encrypt (recommended for production)\n"
+    printf "2) Generate new self-signed certificate\n"
+    printf "3) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-3]: " ssl_option
+
+    case $ssl_option in
+        1)
+            configure_letsencrypt
+            ;;
+        2)
+            generate_self_signed_cert
+            ;;
+        3)
+            printf "${YELLOW}SSL configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to configure Let's Encrypt
+configure_letsencrypt() {
+    printf "${CYAN}> Configuring Let's Encrypt...${NC}\n"
+
+    # Verify DNS is properly configured
+    printf "\n${YELLOW}Important: Before proceeding, ensure that:${NC}\n"
+    printf "1. Your domain (${CYAN}${HOSTNAME}${NC}) is pointed to this server's IP address\n"
+    printf "2. Ports 80 and 443 are open and accessible from the internet\n"
+    printf "\n"
+
+    read -p "Have you completed these steps? [y/N] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        printf "${YELLOW}> Let's Encrypt configuration cancelled.${NC}\n"
+        exit 0
+    fi
+
+    # Stop existing containers
+    printf "${CYAN}> Stopping existing containers...${NC}\n"
+    docker compose down
+
+    # Create certbot directory
+    mkdir -p ./certificates/letsencrypt
+
+    # Initialize Let's Encrypt configuration
+    printf "${CYAN}> Initializing Let's Encrypt...${NC}\n"
+    docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up certbot
+
+    # Restart containers with new configuration
+    printf "${CYAN}> Restarting services with Let's Encrypt configuration...${NC}\n"
+    docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
+
+    printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
+}
+
+# Function to generate self-signed certificate
+generate_self_signed_cert() {
+    printf "${CYAN}> Generating new self-signed certificate...${NC}\n"
+
+    # Stop existing containers
+    printf "${CYAN}> Stopping existing containers...${NC}\n"
+    docker compose down
+
+    # Remove existing certificates
+    rm -f ./certificates/ssl/cert.pem ./certificates/ssl/key.pem
+
+    # Start containers (which will generate new self-signed certs)
+    printf "${CYAN}> Restarting services...${NC}\n"
+    docker compose up -d
+
+    printf "${GREEN}> New self-signed certificate has been generated successfully!${NC}\n"
 }
 
 main "$@"

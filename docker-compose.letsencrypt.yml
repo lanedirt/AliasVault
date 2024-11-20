@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  reverse-proxy:
+    volumes:
+      - ./certificates/letsencrypt:/etc/letsencrypt:rw
+    environment:
+      - USE_LETSENCRYPT=true
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certificates/letsencrypt:/etc/letsencrypt:rw
+      - ./certificates/letsencrypt/www:/var/www/certbot:rw
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
