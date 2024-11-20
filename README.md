@@ -44,9 +44,8 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 - Linux (Ubuntu or RHEL based distros recommended)
 - 512MB RAM
 - 1 vCPU
-- At least 16GB disk space (more users and emails will require more space)
+- At least 16GB disk space
 - Docker installed
-- No Git required
 
 ```bash
 # Download install script
@@ -96,7 +95,7 @@ The install script will output the URL where the app is available. By default th
   This will remove all containers, images, and volumes related to AliasVault while keeping configuration files intact for future reinstallation.
 - If something goes wrong you can run the install script in verbose mode to get more information: `./install.sh [command] --verbose`
 
-## Security & Architecture
+## Security Architecture
 AliasVault takes security seriously and implements various measures to protect your data:
 
 - All sensitive user data is encrypted end-to-end using industry-standard encryption algorithms. This includes the complete vault contents and all received emails.
@@ -105,7 +104,7 @@ AliasVault takes security seriously and implements various measures to protect y
 
 For detailed information about our encryption implementation and security architecture, see the following documents:
 - [SECURITY.md](SECURITY.md)
-- [Security Architecture (Diagram)](docs/security-architecture.md)
+- [Security Architecture Diagram](docs/security-architecture.md)
 
 ## Tech stack / credits
 The following technologies, frameworks and libraries are used in this project:
