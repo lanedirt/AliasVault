@@ -770,6 +770,9 @@ configure_letsencrypt() {
 generate_self_signed_cert() {
     printf "${CYAN}> Generating new self-signed certificate...${NC}\n"
 
+    # Disable Let's Encrypt
+    update_env_var "LETSENCRYPT_ENABLED" "false"
+
     # Stop existing containers
     printf "${CYAN}> Stopping existing containers...${NC}\n"
     docker compose down

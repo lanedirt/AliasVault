@@ -72,7 +72,7 @@ http {
             set $ssl_certificate_key /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
         }
 
-        ssl_certificate         $ssl_certificate;
+        ssl_certificate $ssl_certificate;
         ssl_certificate_key $ssl_certificate_key;
 
         # Admin interface
