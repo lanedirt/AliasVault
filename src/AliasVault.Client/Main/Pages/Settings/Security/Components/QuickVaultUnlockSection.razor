@@ -85,7 +85,7 @@
     /// </summary>
     public async Task DisableWebAuthn()
     {
-        await AuthService.SetWebAuthnEnabledAsync(false, string.Empty, string.Empty, string.Empty);
+        await AuthService.SetWebAuthnEnabledAsync(false);
         GlobalNotificationService.AddSuccessMessage("Quick Vault Unlock is successfully disabled.", true);
         await LoadData();
     }
