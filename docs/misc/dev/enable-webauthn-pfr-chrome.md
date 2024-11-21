@@ -1,3 +1,12 @@
+---
+layout: default
+title: Enable WebAuthn
+parent: Development
+grand_parent: Miscellaneous
+nav_order: 1
+---
+
+# WebAuthn
 The webauthn implementation in order to quick unlock the vault requires the use of a FIDO2 authenticator.
 
 This can be either the built-in browser authenticator or an external authenticator like a Yubikey.

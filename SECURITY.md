@@ -19,7 +19,7 @@ The following encryption algorithms are used by AliasVault:
 
 Below is a detailed explanation of each encryption algorithm.
 
-For more information about how these algorithms are specifically used in AliasVault, see the [Security Architecture](docs/security-architecture.md) document.
+For more information about how these algorithms are specifically used in AliasVault, see the [Architecture Documentation](https://docs.aliasvault.net/architecture) section on the documentation site.
 
 ### Argon2id
 To derive a key from the master password, AliasVault uses the Argon2id key derivation function. Argon2id is a memory-hard

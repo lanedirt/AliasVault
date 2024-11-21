@@ -1,3 +1,13 @@
+---
+layout: default
+title: Upgrade the AliasClientDb EF model
+parent: Development
+grand_parent: Miscellaneous
+nav_order: 3
+---
+
+# Upgrade the AliasClientDb EF model
+
 To upgrade the AliasClientDb EF model, follow these steps:
 
 1. Make changes to the AliasClientDb EF model in the `AliasClientDb` project.

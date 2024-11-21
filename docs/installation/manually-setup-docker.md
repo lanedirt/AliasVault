@@ -1,6 +1,13 @@
+---
+layout: default
+title: Manual Setup
+parent: Installation Guide
+nav_order: 2
+---
+
 # Manual Setup Instructions for AliasVault
 
-This README provides step-by-step instructions for manually setting up AliasVault without using the `install.sh` script. Follow these steps if you prefer to execute all statements yourself.
+If you prefer to manually set up AliasVault, this README provides step-by-step instructions. Follow these steps if you prefer to execute all statements yourself.
 
 ## Prerequisites
 
