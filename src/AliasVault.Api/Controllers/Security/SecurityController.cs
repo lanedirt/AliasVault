@@ -48,6 +48,7 @@ public class SecurityController(IDbContextFactory<AliasServerDbContext> dbContex
                 ExpireDate = x.ExpireDate,
                 CreatedAt = x.CreatedAt,
             })
+            .Where(x => x.ExpireDate > DateTime.UtcNow)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
