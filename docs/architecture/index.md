@@ -1,4 +1,11 @@
-# Security Architecture
+---
+layout: default
+title: Architecture
+has_children: true
+nav_order: 3
+---
+
+# Architecture
 
 AliasVault implements a zero-knowledge architecture where sensitive user data and passwords never leave the client device in unencrypted form. Below is a detailed explanation of how the system secures user data and communications.
 
@@ -6,12 +13,12 @@ AliasVault implements a zero-knowledge architecture where sensitive user data an
 The security architecture diagram below illustrates all encryption and authentication processes used in AliasVault to secure user data and communications.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="diagrams/security-architecture/aliasvault-security-architecture-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="diagrams/security-architecture/aliasvault-security-architecture-light.svg">
-  <img alt="AliasVault Security Architecture Diagram" src="diagrams/security-architecture/aliasvault-security-architecture-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="../assets/diagrams/security-architecture/aliasvault-security-architecture-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="../assets/diagrams/security-architecture/aliasvault-security-architecture-light.svg">
+  <img alt="AliasVault Security Architecture Diagram" src="../assets/diagrams/security-architecture/aliasvault-security-architecture-light.svg">
 </picture>
 
-You can also view the diagram in a browser-friendly HTML format: [AliasVault Security Architecture](diagrams/security-architecture/aliasvault-security-architecture.html)
+You can also view the diagram in a browser-friendly HTML format: [AliasVault Security Architecture](https://lanedirt.github.io/AliasVault/assets/diagrams/security-architecture/aliasvault-security-architecture.html)
 
 ## Key Components and Process Flow
 

@@ -32,7 +32,7 @@ AliasVault is an open-source password and alias manager built with C# ASP.NET te
 ## Live demo
 A live demo of the app is available at the official website at [app.aliasvault.net](https://app.aliasvault.net) (up-to-date with `main` branch). You can create a free account to try it out yourself.
 
-<img width="700" alt="Screenshot of AliasVault" src="docs/img/screenshot.png">
+<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">
 
 ## Installation
 

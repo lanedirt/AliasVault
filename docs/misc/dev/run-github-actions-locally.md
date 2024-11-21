@@ -1,3 +1,11 @@
+---
+layout: default
+title: 1. Run GitHub Actions Locally
+parent: Development
+grand_parent: Miscellaneous
+nav_order: 1
+---
+
 # Run GitHub Actions Locally
 
 This guide will help you set up and run GitHub Actions locally on Linux, which can be useful for debugging and testing your workflows without pushing changes to the repository.

@@ -1,3 +1,12 @@
+---
+layout: default
+title: Configure SQLite for use with WebAssembly
+parent: Development
+grand_parent: Miscellaneous
+nav_order: 2
+---
+
+# Configure SQLite for use with WebAssembly
 To configure SQLite for use with WebAssembly follow these steps:
 
 1. Add NuGet package

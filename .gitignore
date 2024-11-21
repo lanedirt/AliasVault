@@ -399,3 +399,8 @@ certificates/**/*.key
 certificates/**/*.pfx
 certificates/**/*.pem
 certificates/letsencrypt/**
+
+# Docs
+docs/_site
+docs/vendor
+docs/.bundle

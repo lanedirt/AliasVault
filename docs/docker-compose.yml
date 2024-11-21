@@ -1,0 +1,12 @@
+services:
+    jekyll:
+        build: .
+        volumes:
+            - .:/srv/jekyll
+        ports:
+            - "4000:4000"
+        command: bundle exec jekyll serve --host 0.0.0.0 --watch --force_polling --livereload
+        environment:
+            - JEKYLL_ENV=development
+            - JEKYLL_NO_CACHE=true
+            - DISABLE_DISK_CACHE=true
