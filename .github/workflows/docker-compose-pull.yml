@@ -17,7 +17,18 @@ jobs:
         options: --privileged
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Get repository and branch information
+        id: repo-info
+        run: |
+          echo "REPO_FULL_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+
+      - name: Download install script from current branch
+        run: |
+          INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO_FULL_NAME/$BRANCH_NAME/install.sh"
+          echo "Downloading install script from: $INSTALL_SCRIPT_URL"
+          curl -f -o install.sh "$INSTALL_SCRIPT_URL"
+
       - name: Set permissions and run install.sh
         run: |
           chmod +x install.sh
