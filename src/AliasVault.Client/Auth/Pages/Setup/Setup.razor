@@ -10,7 +10,7 @@
             <div class="flex-grow p-6 pt-4 lg:pt-6 pb-28 lg:pb-4">
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <button @onclick="GoBack" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 @(_currentStep == SetupStep.TermsAndConditions ? "invisible" : "")">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
