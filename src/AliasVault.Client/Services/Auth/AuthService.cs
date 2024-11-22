@@ -194,7 +194,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// <param name="webauthSalt">WebAuthn salt.</param>
     /// <param name="webauthCredentialDerivedKey">WebAuthn credential derived key.</param>
     /// <returns>Task.</returns>
-    public async Task SetWebAuthnEnabledAsync(bool enabled, string? webauthCredentialId, string? webauthSalt, string? webauthCredentialDerivedKey)
+    public async Task SetWebAuthnEnabledAsync(bool enabled, string? webauthCredentialId = null, string? webauthSalt = null, string? webauthCredentialDerivedKey = null)
     {
         await localStorage.SetItemAsStringAsync("webAuthnEnabled", enabled.ToString().ToLower());
 
@@ -311,7 +311,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     private async Task RevokeTokenAsync()
     {
         // Remove webauthn enabled flag.
-        await SetWebAuthnEnabledAsync(false, null, null, null);
+        await SetWebAuthnEnabledAsync(false);
 
         var tokenInput = new TokenModel
         {

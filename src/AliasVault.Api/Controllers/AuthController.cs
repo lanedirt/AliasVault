@@ -137,8 +137,6 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return Ok(new ValidateLoginResponse(true, string.Empty, null));
         }
 
-        // If 2FA is not required, then it means the user is successfully authenticated at this point.
-
         // Reset failed login attempts.
         await userManager.ResetAccessFailedCountAsync(user);
 
@@ -284,6 +282,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        // If the token is not provided, return bad request.
+        if (string.IsNullOrWhiteSpace(model.RefreshToken))
+        {
+            return BadRequest("Refresh token is required.");
+        }
+
         var principal = GetPrincipalFromToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
@@ -297,16 +301,18 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         }
 
         // Check if the refresh token is valid.
-        var deviceIdentifier = GenerateDeviceIdentifier(Request);
-        var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.DeviceIdentifier == deviceIdentifier);
-        if (existingToken == null || existingToken.Value != model.RefreshToken)
+        var providedTokenExists = await context.AliasVaultUserRefreshTokens.AnyAsync(t => t.UserId == user.Id && t.Value == model.RefreshToken);
+        if (!providedTokenExists)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Logout, AuthFailureReason.InvalidRefreshToken);
             return Unauthorized("Invalid refresh token");
         }
 
-        // Remove the existing refresh token.
-        context.AliasVaultUserRefreshTokens.Remove(existingToken);
+        // Remove the provided refresh token and any other existing refresh tokens that are issued to the current device ID.
+        // This to make sure all tokens are revoked for this device that user is "logging out" from.
+        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+        var allDeviceTokens = await context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && (t.Value == model.RefreshToken || t.DeviceIdentifier == deviceIdentifier)).ToListAsync();
+        context.AliasVaultUserRefreshTokens.RemoveRange(allDeviceTokens);
         await context.SaveChangesAsync();
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.Logout);
@@ -705,8 +711,14 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             // New refresh token lifetime is the same as the existing one.
             var existingTokenLifetime = existingToken.ExpireDate - existingToken.CreatedAt;
 
+            // Retrieve new refresh token.
+            var newRefreshToken = await GenerateRefreshToken(user, existingTokenLifetime, existingToken.Value);
+
+            // After successfully retrieving new refresh token, remove the existing one by saving changes.
+            await context.SaveChangesAsync();
+
             // Return new refresh token.
-            return await GenerateRefreshToken(user, existingTokenLifetime, existingToken.Value);
+            return newRefreshToken;
         }
         finally
         {
