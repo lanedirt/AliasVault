@@ -5,7 +5,7 @@ parent: Installation Guide
 nav_order: 2
 ---
 
-# Manual Setup Instructions for AliasVault
+# Manual Setup
 
 If you prefer to manually set up AliasVault, this README provides step-by-step instructions. Follow these steps if you prefer to execute all statements yourself.
 

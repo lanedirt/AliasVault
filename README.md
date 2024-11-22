@@ -3,7 +3,7 @@
 <h1><img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="40" /> AliasVault</h1>
 
 <p align="center">
-<a href="https://app.aliasvault.net">Live demo 🚀</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🏠</a> • <a href="#installation">Installation 📦</a>
+<a href="https://app.aliasvault.net">Live demo 🔥</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> • <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> • <a href="#installation">Installation ⚙️</a>
 </p>
 
 <h3 align="center">
@@ -17,6 +17,12 @@ Open-source password and alias manager
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-e2e-client-tests.yml?label=e2e tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-client-tests.yml)
 [<img src="https://img.shields.io/sonar/coverage/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=test code coverage">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
+</div>
+
+<div align="center">
+
+[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=join%20discord%20chat&color=%237289da">](https://discord.gg/DsaXMTEtpF)
+
 </div>
 
 AliasVault is an open-source password and alias manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
@@ -36,15 +42,16 @@ A live demo of the app is available at the official website at [app.aliasvault.n
 
 ## Installation
 
-Choose one of the following installation methods:
+To install AliasVault, the easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
 
-### Option 1: Quick Install (Pre-built Images)
+### 1. Install using install script
 
 This method uses pre-built Docker images and works on minimal hardware specifications:
-- Linux (Ubuntu or RHEL based distros recommended)
-- 512MB RAM
+
+- Linux VM with root access (Ubuntu or RHEL based distros recommended)
 - 1 vCPU
-- At least 16GB disk space
+- 512MB RAM
+- 16GB disk space
 - Docker installed
 
 ```bash
@@ -56,28 +63,7 @@ chmod +x install.sh
 ./install.sh install
 ```
 
-### Option 2: Build from Source
-
-Building from source requires more resources:
-- Minimum 2GB RAM (more RAM will speed up build time)
-- At least 1 vCPU
-- 40GB+ disk space (for dependencies and build artifacts)
-- Docker installed
-- Git installed
-
-```bash
-# Clone the repository
-git clone https://github.com/lanedirt/AliasVault.git
-cd AliasVault
-
-# Make build script executable and run it. This will create the .env file, build the Docker images from source, and start the AliasVault containers.
-chmod +x install.sh
-./install.sh build
-```
-
-Note: If you do not wish to run the script, you can set up the environment variables and build the Docker image and containers manually instead. See the [manual setup instructions](docs/install/1-manually-setup-docker.md) for more information.
-
-### Post-Installation
+### 2. Post-Installation
 
 The install script will output the URL where the app is available. By default this is:
 - Client: https://localhost
@@ -85,17 +71,15 @@ The install script will output the URL where the app is available. By default th
 
 > Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file for the `nginx` (reverse-proxy) container.
 
-#### First Time Setup Notes:
-- When building from source for the first time, it may take several minutes for Docker to download and compile all dependencies. Subsequent builds will be faster.
-- A SQLite database file will be created in `./database/AliasServerDb.sqlite`. This file will store all (encrypted) password vaults. It should be kept secure and not shared.
+## Detailed documentation
+For more detailed information about the installation process and other topics, please see the official documentation website:
+- [Documentation website (docs.aliasvault.net) 📚](https://docs.aliasvault.net)
 
-#### Useful Commands:
-- To reset the admin password: `./install.sh reset-password`
-- To uninstall AliasVault: `./install.sh uninstall`
-  This will remove all containers, images, and volumes related to AliasVault while keeping configuration files intact for future reinstallation.
-- If something goes wrong you can run the install script in verbose mode to get more information: `./install.sh [command] --verbose`
+Here you can also find step-by-step instructions on how to install AliasVault to e.g. Azure, AWS and other popular cloud providers.
 
 ## Security Architecture
+<a href="https://docs.aliasvault.net/architecture"><img alt="AliasVault Security Architecture Diagram" src="docs/assets/diagrams/security-architecture/aliasvault-security-architecture-thumb.jpg" width="343"></a>
+
 AliasVault takes security seriously and implements various measures to protect your data:
 
 - All sensitive user data is encrypted end-to-end using industry-standard encryption algorithms. This includes the complete vault contents and all received emails.
@@ -104,7 +88,9 @@ AliasVault takes security seriously and implements various measures to protect y
 
 For detailed information about our encryption implementation and security architecture, see the following documents:
 - [SECURITY.md](SECURITY.md)
-- [Security Architecture Diagram](docs/security-architecture.md)
+- [Security Architecture Diagram](https://docs.aliasvault.net/architecture)
+
+
 
 ## Tech stack / credits
 The following technologies, frameworks and libraries are used in this project:
