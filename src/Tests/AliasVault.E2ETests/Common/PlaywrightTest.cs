@@ -201,7 +201,7 @@ public abstract class PlaywrightTest
     /// </summary>
     protected void SetRandomTestUserCredentials()
     {
-        TestUserUsername = $"{Guid.NewGuid()}@test.com";
+        TestUserUsername = $"{Guid.NewGuid().ToString()[..10]}@test.com";
         TestUserPassword = Guid.NewGuid().ToString();
     }
 
