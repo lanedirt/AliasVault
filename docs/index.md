@@ -12,7 +12,7 @@ permalink: /
 Open-source password and identity manager with email alias generation and zero-knowledge architecture.
 {: .fs-6 .fw-300 }
 
-[Installation](./installation){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [View on GitHub](https://github.com/lanedirt/AliasVault){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---

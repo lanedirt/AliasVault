@@ -2,7 +2,7 @@
 layout: default
 title: Uninstall
 parent: Installation Guide
-nav_order: 5
+nav_order: 4
 ---
 
 # Uninstall

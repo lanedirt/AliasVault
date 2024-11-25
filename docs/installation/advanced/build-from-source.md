@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Build from Source
-parent: Installation Guide
+parent: Advanced
 nav_order: 1
 ---
 
