@@ -29,7 +29,7 @@ public abstract class PlaywrightTest
     /// <summary>
     /// Gets or sets random unique account email that is used for the test.
     /// </summary>
-    protected virtual string TestUserUsername { get; set; } = $"{Guid.NewGuid()}@test.com";
+    protected virtual string TestUserUsername { get; set; } = $"{Guid.NewGuid().ToString()[..10]}@test.com";
 
     /// <summary>
     /// Gets or sets random unique account password that is used for the test.
@@ -201,7 +201,7 @@ public abstract class PlaywrightTest
     /// </summary>
     protected void SetRandomTestUserCredentials()
     {
-        TestUserUsername = $"{Guid.NewGuid()}@test.com";
+        TestUserUsername = $"{Guid.NewGuid().ToString()[..10]}@test.com";
         TestUserPassword = Guid.NewGuid().ToString();
     }
 
