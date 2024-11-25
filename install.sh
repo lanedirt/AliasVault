@@ -324,22 +324,14 @@ populate_data_protection_cert_pass() {
 set_private_email_domains() {
     printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        printf "Please enter the domains that should be allowed to receive email, separated by commas (press Enter to disable email support): "
-        read -r private_email_domains
+        update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
+    fi
 
-        private_email_domains=${private_email_domains:-"DISABLED.TLD"}
-        update_env_var "PRIVATE_EMAIL_DOMAINS" "$private_email_domains"
-
-        if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "  ${RED}SMTP is disabled.${NC}\n"
-        fi
+    private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ "$private_email_domains" = "DISABLED.TLD" ]; then
+        printf "  ${RED}Email server is disabled.${NC} Enable with /install.sh configure-email command.\n"
     else
-        private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
-        if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC} ${RED}Private email domains are disabled.${NC}\n"
-        else
-            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC}\n"
-        fi
+        printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
 }
 
