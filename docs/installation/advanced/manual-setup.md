@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Manual Setup
-parent: Installation Guide
+parent: Advanced
 nav_order: 2
 ---
 

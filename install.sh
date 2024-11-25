@@ -41,6 +41,7 @@ show_usage() {
     printf "  uninstall         Uninstall AliasVault\n"
     printf "  update            Update AliasVault to the latest version\n"
     printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  configure-email   Configure email domains for receiving emails\n"
     printf "  start             Start AliasVault containers\n"
     printf "  stop              Stop AliasVault containers\n"
     printf "  restart           Restart AliasVault containers\n"
@@ -92,6 +93,10 @@ parse_args() {
             ;;
         configure-ssl|ssl)
             COMMAND="configure-ssl"
+            shift
+            ;;
+        configure-email|email)
+            COMMAND="configure-email"
             shift
             ;;
         start|s)
@@ -171,6 +176,9 @@ main() {
             ;;
         "configure-ssl")
             handle_ssl_configuration
+            ;;
+        "configure-email")
+            handle_email_configuration
             ;;
         "start")
             handle_start
@@ -316,22 +324,14 @@ populate_data_protection_cert_pass() {
 set_private_email_domains() {
     printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        printf "Please enter the domains that should be allowed to receive email, separated by commas (press Enter to disable email support): "
-        read -r private_email_domains
+        update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
+    fi
 
-        private_email_domains=${private_email_domains:-"DISABLED.TLD"}
-        update_env_var "PRIVATE_EMAIL_DOMAINS" "$private_email_domains"
-
-        if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "  ${RED}SMTP is disabled.${NC}\n"
-        fi
+    private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ "$private_email_domains" = "DISABLED.TLD" ]; then
+        printf "  ${RED}Email server is disabled.${NC} Enable with /install.sh configure-email command.\n"
     else
-        private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
-        if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC} ${RED}Private email domains are disabled.${NC}\n"
-        else
-            printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists.${NC}\n"
-        fi
+        printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
 }
 
@@ -741,6 +741,147 @@ handle_ssl_configuration() {
             exit 1
             ;;
     esac
+}
+
+# Function to handle email server configuration
+# Function to handle email server configuration
+handle_email_configuration() {
+    # Setup trap for Ctrl+C and other interrupts
+    trap 'printf "\n${YELLOW}Configuration cancelled by user.${NC}\n"; exit 1' INT TERM
+
+    printf "${YELLOW}+++ Email Server Configuration +++${NC}\n"
+    printf "\n"
+
+    # Check if AliasVault is installed
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "${RED}Error: AliasVault must be installed first.${NC}\n"
+        exit 1
+    fi
+
+    # Get current email domains from .env
+    CURRENT_DOMAINS=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "${CYAN}About Email Server:${NC}\n"
+    printf "AliasVault includes a built-in email server for handling virtual email addresses.\n"
+    printf "When enabled, it can receive emails for one or more configured domains.\n"
+    printf "Each domain must have an MX record in DNS configuration pointing to this server's hostname.\n"
+    printf "\n"
+    printf "${CYAN}Current Configuration:${NC}\n"
+
+    if [ "$CURRENT_DOMAINS" = "DISABLED.TLD" ]; then
+        printf "Email Server Status: ${RED}Disabled${NC}\n"
+    else
+        printf "Email Server Status: ${GREEN}Enabled${NC}\n"
+        printf "Active Domains: ${CYAN}${CURRENT_DOMAINS}${NC}\n"
+    fi
+
+    printf "\n"
+    printf "Email Server Options:\n"
+    printf "1) Enable email server / Update domains\n"
+    printf "2) Disable email server\n"
+    printf "3) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-3]: " email_option
+
+    case $email_option in
+        1)
+            while true; do
+                printf "\n${CYAN}Enter domain(s) for email server${NC}\n"
+                printf "For multiple domains, separate with commas (e.g. domain1.com,domain2.com)\n"
+                printf "IMPORTANT: Each domain must have an MX record in DNS pointing to this server.\n"
+                read -p "Domains: " new_domains
+
+                if [ -z "$new_domains" ]; then
+                    printf "${RED}Error: Domains cannot be empty${NC}\n"
+                    continue
+                fi
+
+                printf "\n${CYAN}You entered the following domains:${NC}\n"
+                IFS=',' read -ra DOMAIN_ARRAY <<< "$new_domains"
+                for domain in "${DOMAIN_ARRAY[@]}"; do
+                    printf "  - ${GREEN}${domain}${NC}\n"
+                done
+                printf "\n"
+
+                read -p "Are these domains correct? (y/n): " confirm
+                if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+                    break
+                fi
+            done
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Continue with restart? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Configuration cancelled.${NC}\n"
+                exit 0
+            fi
+
+            # Update .env file and restart
+            if ! update_env_var "PRIVATE_EMAIL_DOMAINS" "$new_domains"; then
+                printf "${RED}Failed to update configuration.${NC}\n"
+                exit 1
+            fi
+
+            printf "${GREEN}Email server configuration updated${NC}\n"
+            printf "Restarting AliasVault services...\n"
+
+            if ! handle_restart; then
+                printf "${RED}Failed to restart services.${NC}\n"
+                exit 1
+            fi
+
+            # Only show next steps if everything succeeded
+            printf "\n${CYAN}The email server is now succesfully configured.${NC}\n"
+            printf "\n"
+            printf "To test the email server:\n"
+            printf "   a. Log in to your AliasVault account\n"
+            printf "   b. Create a new alias using one of your configured private domains\n"
+            printf "   c. Send a test email from an external email service (e.g., Gmail)\n"
+            printf "   d. Check if the email appears in your AliasVault inbox\n"
+            printf "\n"
+            printf "If emails don't arrive, please verify:\n"
+            printf "   > DNS MX records are correctly configured\n"
+            printf "   > Your server's firewall allows incoming traffic on port 25 and 587\n"
+            printf "   > Your ISP/hosting provider doesn't block SMTP traffic\n"
+            printf "\n"
+            ;;
+        2)
+            printf "${YELLOW}Warning: Docker containers need to be restarted after disabling the email server.${NC}\n"
+            read -p "Continue with disable and restart? (y/n): " disable_confirm
+
+            if [ "$disable_confirm" != "y" ] && [ "$disable_confirm" != "Y" ]; then
+                printf "${YELLOW}Configuration cancelled.${NC}\n"
+                exit 0
+            fi
+
+            # Disable email server
+            if ! update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"; then
+                printf "${RED}Failed to update configuration.${NC}\n"
+                exit 1
+            fi
+
+            printf "${YELLOW}Email server disabled${NC}\n"
+            printf "Restarting AliasVault services...\n"
+
+            if ! handle_restart; then
+                printf "${RED}Failed to restart services.${NC}\n"
+                exit 1
+            fi
+            ;;
+        3)
+            printf "${YELLOW}Email configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+
+    # Remove the trap before normal exit
+    trap - INT TERM
 }
 
 # Function to configure Let's Encrypt

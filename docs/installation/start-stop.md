@@ -2,7 +2,7 @@
 layout: default
 title: Start/stop
 parent: Installation Guide
-nav_order: 3
+nav_order: 2
 ---
 
 # Starting and stopping AliasVault
