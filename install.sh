@@ -480,11 +480,7 @@ handle_install() {
     # Start containers
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
-    if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command) up -d || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
-    else
-        $(get_docker_compose_command) up -d > /dev/null 2>&1 || { printf "${RED}> Failed to start Docker containers${NC}\n"; exit 1; }
-    fi
+    recreate_docker_containers
 
     # Only show success message if we made it here without errors
     print_success_message
@@ -553,12 +549,12 @@ handle_build() {
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command "build") up -d || {
+        $(get_docker_compose_command "build") up -d --force-recreate || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }
     else
-        $(get_docker_compose_command "build") up -d > /dev/null 2>&1 || {
+        $(get_docker_compose_command "build") up -d --force-recreate > /dev/null 2>&1 || {
             printf "${RED}> Failed to start Docker Compose stack${NC}\n"
             exit 1
         }

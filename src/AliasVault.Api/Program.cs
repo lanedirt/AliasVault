@@ -26,6 +26,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
+builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
 builder.Services.AddScoped<AuthLoggingService>();
@@ -40,8 +41,6 @@ builder.Services.AddLogging(logging =>
 });
 
 builder.Services.AddAliasVaultSqliteConfiguration();
-builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
-
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;

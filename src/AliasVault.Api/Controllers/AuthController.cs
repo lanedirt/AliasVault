@@ -244,6 +244,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        // If the token is not provided, return bad request.
+        if (string.IsNullOrWhiteSpace(tokenModel.RefreshToken))
+        {
+            return BadRequest("Refresh token is required.");
+        }
+
         var principal = GetPrincipalFromToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {

@@ -37,6 +37,8 @@ config.LastPasswordChanged = DateTime.Parse(lastPasswordChanged, CultureInfo.Inv
 
 builder.Services.AddSingleton(config);
 
+builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -85,7 +87,6 @@ builder.Services.AddIdentityCore<AdminUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromDays(30);

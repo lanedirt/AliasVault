@@ -18,19 +18,14 @@ COPY ["src/AliasVault.Client/AliasVault.Client.csproj", "src/AliasVault.Client/"
 RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj"
 COPY . .
 
-# Build the Client project
+# Build and publish
 WORKDIR "/src/src/AliasVault.Client"
-RUN dotnet build "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
-
-# Publish the Client project
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 # Final stage
 FROM nginx:1.24.0 AS final
 WORKDIR /usr/share/nginx/html
-COPY --from=publish /app/publish/wwwroot .
+COPY --from=build /app/publish/wwwroot .
 COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
 COPY /src/AliasVault.Client/entrypoint.sh /app/entrypoint.sh
 
