@@ -237,7 +237,6 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // If the options are not already configured, use the appsettings.json file.
         if (!optionsBuilder.IsConfigured)
         {
             var configuration = new ConfigurationBuilder()
@@ -245,11 +244,14 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            // Add SQLite connection with enhanced settings
             optionsBuilder
-                .UseSqlite(configuration.GetConnectionString("AliasServerDbContext"))
+                .UseSqlite(
+                    configuration.GetConnectionString("AliasServerDbContext") + ";Mode=ReadWriteCreate;Cache=Shared",
+                    options => options.CommandTimeout(60))
                 .UseLazyLoadingProxies();
 
-            // Set busy timeout using PRAGMA to avoid "The database file is locked" error.
+            // Set additional PRAGMA settings
             var connection = Database.GetDbConnection();
             if (connection.State != System.Data.ConnectionState.Open)
             {
@@ -258,7 +260,13 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
 
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = "PRAGMA busy_timeout = 5000;";
+                // Increase busy timeout
+                command.CommandText = @"
+                    PRAGMA busy_timeout = 30000;
+                    PRAGMA journal_mode = WAL;
+                    PRAGMA synchronous = FULL;
+                    PRAGMA temp_store = MEMORY;
+                    PRAGMA mmap_size = 1073741824;";
                 command.ExecuteNonQuery();
             }
         }
