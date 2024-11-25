@@ -37,11 +37,15 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (default)\n"
-    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
-    printf "  reset-password    Reset admin password\n"
+    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
     printf "  uninstall         Uninstall AliasVault\n"
+    printf "  update            Update AliasVault to the latest version\n"
     printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  start             Start AliasVault containers\n"
+    printf "  stop              Stop AliasVault containers\n"
+    printf "  restart           Restart AliasVault containers\n"
+    printf "  reset-password    Reset admin password\n"
+    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -82,6 +86,22 @@ parse_args() {
                 ;;
             configure-ssl|ssl)
                 COMMAND="configure-ssl"
+                shift
+                ;;
+            start|s)
+                COMMAND="start"
+                shift
+                ;;
+            stop|st)
+                COMMAND="stop"
+                shift
+                ;;
+            restart|r)
+                COMMAND="restart"
+                shift
+                ;;
+            update|up)
+                COMMAND="update"
                 shift
                 ;;
             --verbose)
@@ -135,6 +155,18 @@ main() {
             ;;
         "configure-ssl")
             handle_ssl_configuration
+            ;;
+        "start")
+            handle_start
+            ;;
+        "stop")
+            handle_stop
+            ;;
+        "restart")
+            handle_restart
+            ;;
+        "update")
+            handle_update
             ;;
     esac
 }
@@ -434,57 +466,31 @@ get_docker_compose_command() {
     echo "$base_command"
 }
 
-# Function to handle installation
+# Function to handle initial installation or reinstallation
 handle_install() {
-    printf "${YELLOW}+++ Installing AliasVault +++${NC}\n"
-    printf "\n"
+    # Check for existing version
+    local current_version=""
+    if grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
+        current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
+        printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
+        printf "${YELLOW}> AliasVault is already installed.${NC}\n"
+        printf "1. To reinstall the current version (${current_version}), continue with this script\n"
+        printf "2. To check for updates and to install the latest version, use: ./install.sh update\n"
+        printf "\n"
 
-    # Initialize workspace which makes sure all required directories and files exist
-    initialize_workspace
-
-    # Initialize environment
-    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
-    populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
-    populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
-    populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
-    set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
-    set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
-
-    # Only generate admin password if not already set
-    if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        generate_admin_password || { printf "${RED}> Failed to generate admin password${NC}\n"; exit 1; }
-    fi
-
-    # Pull images from GitHub Container Registry
-    printf "\n${YELLOW}+++ Pulling Docker images +++${NC}\n"
-    printf "\n"
-
-    images=(
-        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:latest"
-        "${GITHUB_CONTAINER_REGISTRY}-api:latest"
-        "${GITHUB_CONTAINER_REGISTRY}-client:latest"
-        "${GITHUB_CONTAINER_REGISTRY}-admin:latest"
-        "${GITHUB_CONTAINER_REGISTRY}-smtp:latest"
-    )
-
-    for image in "${images[@]}"; do
-        printf "${CYAN}> Pulling $image...${NC}\n"
-        if [ "$VERBOSE" = true ]; then
-            docker pull $image || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
-        else
-            docker pull $image > /dev/null 2>&1 || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+        read -p "Would you like to reinstall the current version? [y/N]: " REPLY
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            printf "${YELLOW}> Installation cancelled.${NC}\n"
+            exit 0
         fi
-    done
 
-    # Start containers
-    printf "\n${YELLOW}+++ Starting services +++${NC}\n"
-    printf "\n"
-    recreate_docker_containers
-
-    # Only show success message if we made it here without errors
-    print_success_message
+        handle_install_version "$current_version"
+    else
+        # First time installation, use latest
+        handle_install_version "latest"
+    fi
 }
+
 
 # Function to handle build
 handle_build() {
@@ -812,6 +818,151 @@ generate_self_signed_cert() {
     docker compose up -d
 
     printf "${GREEN}> New self-signed certificate has been generated successfully!${NC}\n"
+}
+
+# New functions to handle container lifecycle:
+handle_start() {
+    printf "${CYAN}> Starting AliasVault containers...${NC}\n"
+    $(get_docker_compose_command) up -d
+    printf "${GREEN}> AliasVault containers started successfully.${NC}\n"
+}
+
+handle_stop() {
+    printf "${CYAN}> Stopping AliasVault containers...${NC}\n"
+    if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
+        printf "${YELLOW}> No containers are currently running.${NC}\n"
+        exit 0
+    fi
+
+    $(get_docker_compose_command) down
+    printf "${GREEN}> AliasVault containers stopped successfully.${NC}\n"
+}
+
+handle_restart() {
+    printf "${CYAN}> Restarting AliasVault containers...${NC}\n"
+    $(get_docker_compose_command) down
+    $(get_docker_compose_command) up -d
+    printf "${GREEN}> AliasVault containers restarted successfully.${NC}\n"
+}
+
+# Function to handle updates
+handle_update() {
+    printf "${YELLOW}+++ Checking for AliasVault updates +++${NC}\n"
+    printf "\n"
+
+    # Check current version
+    if ! grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
+        printf "${YELLOW}> No version information found. Running first-time update check...${NC}\n"
+        handle_install_version "latest"
+        return
+    fi
+
+    current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
+    latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+    if [ -z "$latest_version" ]; then
+        printf "${RED}> Failed to check for updates. Please try again later.${NC}\n"
+        exit 1
+    fi
+
+    printf "${CYAN}> Current version: ${current_version}${NC}\n"
+    printf "${CYAN}> Latest version: ${latest_version}${NC}\n"
+    printf "\n"
+
+    if [ "$current_version" = "$latest_version" ]; then
+        printf "${GREEN}> You are already running the latest version of AliasVault!${NC}\n"
+        exit 0
+    fi
+
+    printf "${YELLOW}> A new version of AliasVault is available!${NC}\n"
+    printf "\n"
+    printf "${MAGENTA}Important:${NC}\n"
+    printf "1. It's recommended to backup your database before updating\n"
+    printf "2. The update process will restart all containers\n"
+    printf "\n"
+
+    read -p "Would you like to update to the latest version? [y/N]: " REPLY
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        printf "${YELLOW}> Update cancelled.${NC}\n"
+        exit 0
+    fi
+
+    printf "${CYAN}> Updating AliasVault...${NC}\n"
+    handle_install_version "$latest_version"
+
+    printf "${GREEN}> Update completed successfully!${NC}\n"
+}
+
+# Function to perform the actual installation with specific version
+handle_install_version() {
+    local target_version="$1"
+
+    # If latest, get actual version number from GitHub API
+    if [ "$target_version" = "latest" ]; then
+        local actual_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ -n "$actual_version" ]; then
+            target_version="$actual_version"
+        fi
+    fi
+
+    printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
+    printf "\n"
+
+    # Initialize workspace which makes sure all required directories and files exist
+    initialize_workspace
+
+    # Initialize environment
+    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
+    populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+    populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
+    populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
+    set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
+    set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
+    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
+
+    # Only generate admin password if not already set
+    if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        generate_admin_password || { printf "${RED}> Failed to generate admin password${NC}\n"; exit 1; }
+    fi
+
+    # Pull images from GitHub Container Registry
+    printf "\n${YELLOW}+++ Pulling Docker images +++${NC}\n"
+    printf "\n"
+
+    printf "${CYAN}> Installing version: ${target_version}${NC}\n"
+
+    local tag="$target_version"
+    if [ "$target_version" = "latest" ]; then
+        tag="latest"
+    fi
+
+    images=(
+        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${tag}"
+        "${GITHUB_CONTAINER_REGISTRY}-api:${tag}"
+        "${GITHUB_CONTAINER_REGISTRY}-client:${tag}"
+        "${GITHUB_CONTAINER_REGISTRY}-admin:${tag}"
+        "${GITHUB_CONTAINER_REGISTRY}-smtp:${tag}"
+    )
+
+    for image in "${images[@]}"; do
+        printf "${CYAN}> Pulling $image...${NC}\n"
+        if [ "$VERBOSE" = true ]; then
+            docker pull $image || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+        else
+            docker pull $image > /dev/null 2>&1 || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+        fi
+    done
+
+    # Save version to .env
+    update_env_var "ALIASVAULT_VERSION" "$target_version"
+
+    # Start containers
+    printf "\n${YELLOW}+++ Starting services +++${NC}\n"
+    printf "\n"
+    recreate_docker_containers
+
+    # Only show success message if we made it here without errors
+    print_success_message
 }
 
 main "$@"
