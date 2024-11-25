@@ -77,8 +77,19 @@ jobs:
             # Exit with error if any service failed
             if [ "$failed" = true ]; then
               # Get container logs
-              echo "Container Logs:"
-              docker compose logs
+              echo "Container Logs admin:"
+              docker compose logs admin
+              echo "Container Logs api:"
+              docker compose logs api
+              echo "Container Logs client:"
+              docker compose logs client
+              echo "Container Logs smtp:"
+              docker compose logs smtp
+              echo "Container Logs reverse-proxy:"
+              docker compose logs reverse-proxy
+
+              # Restart containers for next test in case of failure
+              docker compose restart
               exit 1
             fi
 
