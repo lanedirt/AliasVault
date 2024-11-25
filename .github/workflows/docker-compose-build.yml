@@ -32,14 +32,14 @@ jobs:
       - name: Wait for services to be up
         run: |
             # Wait for a few seconds
-            sleep 10
-      -   name: Test if localhost:443 (WASM app) responds
-          uses: nick-fields/retry@v3
-          with:
-              timeout_minutes: 2
-              max_attempts: 3
-              command: |
-                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
+            sleep 15
+      - name: Test if localhost:443 (WASM app) responds
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+              http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with 200 OK. Check if client app and/or nginx is configured correctly."
                     exit 1
@@ -47,13 +47,13 @@ jobs:
                     echo "Service responded with 200 OK"
                   fi
 
-      -   name: Test if localhost:443/api (WebApi) responds
-          uses: nick-fields/retry@v3
-          with:
-              timeout_minutes: 2
-              max_attempts: 3
-              command: |
-                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
+      - name: Test if localhost:443/api (WebApi) responds
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+              http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
                   if [ "$http_code" -ne 200 ]; then
                     echo "Service did not respond with expected 200 OK. Check if WebApi and/or nginx is configured correctly."
                     exit 1
@@ -61,32 +61,32 @@ jobs:
                     echo "Service responded with $http_code"
                   fi
 
-      -   name: Test if localhost:443/admin (Admin) responds
-          uses: nick-fields/retry@v3
-          with:
-              timeout_minutes: 2
-              max_attempts: 3
-              command: |
-                  http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
-                  if [ "$http_code" -ne 200 ]; then
-                    echo "Service did not respond with expected 200 OK. Check if admin app and/or nginx is configured correctly."
-                    exit 1
-                  else
-                    echo "Service responded with $http_code"
-                  fi
+      - name: Test if localhost:443/admin (Admin) responds
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+              http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
+              if [ "$http_code" -ne 200 ]; then
+                echo "Service did not respond with expected 200 OK. Check if admin app and/or nginx is configured correctly."
+                exit 1
+              else
+                echo "Service responded with $http_code"
+              fi
 
-      -   name: Test if localhost:2525 (SmtpService) responds
-          uses: nick-fields/retry@v3
-          with:
-              timeout_minutes: 2
-              max_attempts: 3
-              command: |
-                  if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
-                    echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
-                    exit 1
-                  else
-                    echo "SmtpService responded on port 2525"
-                  fi
+      - name: Test if localhost:2525 (SmtpService) responds
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+              if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+                echo "SmtpService did not respond on port 2525. Check if the SmtpService service is running."
+                exit 1
+              else
+                echo "SmtpService responded on port 2525"
+              fi
 
       - name: Test install.sh reset-password output
         run: |
