@@ -502,28 +502,28 @@ handle_install() {
         return
     fi
 
-    # Check for existing version
-    local current_version=""
-    if grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
-        current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
-        printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
-        printf "${YELLOW}> AliasVault is already installed.${NC}\n"
-        printf "1. To reinstall the current version (${current_version}), continue with this script\n"
-        printf "2. To check for updates and to install the latest version, use: ./install.sh update\n"
-        printf "3. To install a specific version, use: ./install.sh install <version>\n"
-        printf "\n"
+    # Check if .env exists before reading
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
+            current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
+            printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
+            printf "${YELLOW}> AliasVault is already installed.${NC}\n"
+            printf "1. To reinstall the current version (${current_version}), continue with this script\n"
+            printf "2. To check for updates and to install the latest version, use: ./install.sh update\n"
+            printf "3. To install a specific version, use: ./install.sh install <version>\n\n"
 
-        read -p "Would you like to reinstall the current version? [y/N]: " REPLY
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            printf "${YELLOW}> Installation cancelled.${NC}\n"
-            exit 0
+            read -p "Would you like to reinstall the current version? [y/N]: " REPLY
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                printf "${YELLOW}> Installation cancelled.${NC}\n"
+                exit 0
+            fi
+
+            handle_install_version "$current_version"
+            return
         fi
-
-        handle_install_version "$current_version"
-    else
-        # First time installation, use latest
-        handle_install_version "latest"
     fi
+
+    handle_install_version "latest"
 }
 
 # Function to handle build
@@ -829,6 +829,10 @@ configure_letsencrypt() {
     # Restart only the reverse proxy with new configuration so it loads the new certificate
     printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
     $(get_docker_compose_command) up -d reverse-proxy --force-recreate
+
+    # Starting certbot container to renew certificates automatically
+    printf "${CYAN}> Starting new certbot container to renew certificates automatically...${NC}\n"
+    $(get_docker_compose_command) up -d certbot
 
     printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
 }
