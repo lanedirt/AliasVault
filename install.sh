@@ -830,6 +830,10 @@ configure_letsencrypt() {
     printf "${CYAN}> Restarting reverse proxy with Let's Encrypt configuration...${NC}\n"
     $(get_docker_compose_command) up -d reverse-proxy --force-recreate
 
+    # Starting certbot container to renew certificates automatically
+    printf "${CYAN}> Starting new certbot container to renew certificates automatically...${NC}\n"
+    $(get_docker_compose_command) up -d certbot
+
     printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
 }
 
