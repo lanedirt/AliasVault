@@ -73,7 +73,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 if (toAddressesFailCount == toAddressesCount)
                 {
                     // No valid recipients given.
-                    logger.LogWarning("No valid recipients in email, returning error to sender.");
+                    logger.LogInformation("No valid recipients in email, returning error to sender.");
                     return SmtpResponse.NoValidRecipientsGiven;
                 }
             }
@@ -291,7 +291,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         if (toAddress is null || !config.AllowedToDomains.Contains(toAddress.Host.ToLowerInvariant()))
         {
             // ToAddress domain is not allowed.
-            logger.LogWarning(
+            logger.LogInformation(
                 "Rejected email: email for {ToAddress} is not allowed. Domain not in allowed domain list.",
                 toAddress?.User + "@" + toAddress?.Host);
             return false;
