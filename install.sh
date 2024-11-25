@@ -56,54 +56,74 @@ show_usage() {
 
 # Function to parse command line arguments
 parse_args() {
-    COMMAND=""  # Remove default command
+    COMMAND=""
     VERBOSE=false
     FORCE_YES=false
+    COMMAND_ARG=""
 
-    # Show usage if no arguments provided
     if [ $# -eq 0 ]; then
         show_usage
         exit 0
     fi
 
+    # First argument is always the command
+    case $1 in
+        install|i)
+            COMMAND="install"
+            shift
+            # Check for version argument
+            if [ $# -gt 0 ] && [[ ! "$1" =~ ^- ]]; then
+                COMMAND_ARG="$1"
+                shift
+            fi
+            ;;
+        # Other commands remain unchanged
+        build|b)
+            COMMAND="build"
+            shift
+            ;;
+        uninstall|u)
+            COMMAND="uninstall"
+            shift
+            ;;
+        reset-password|reset-admin-password|rp)
+            COMMAND="reset-password"
+            shift
+            ;;
+        configure-ssl|ssl)
+            COMMAND="configure-ssl"
+            shift
+            ;;
+        start|s)
+            COMMAND="start"
+            shift
+            ;;
+        stop|st)
+            COMMAND="stop"
+            shift
+            ;;
+        restart|r)
+            COMMAND="restart"
+            shift
+            ;;
+        update|up)
+            COMMAND="update"
+            shift
+            ;;
+        --help)
+            show_usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_usage
+            exit 1
+            ;;
+    esac
+
+    # Parse remaining flags
     while [[ $# -gt 0 ]]; do
         case $1 in
-            install|i)
-                COMMAND="install"
-                shift
-                ;;
-            build|b)
-                COMMAND="build"
-                shift
-                ;;
-            uninstall|u)
-                COMMAND="uninstall"
-                shift
-                ;;
-            reset-password|reset-admin-password|rp)
-                COMMAND="reset-password"
-                shift
-                ;;
-            configure-ssl|ssl)
-                COMMAND="configure-ssl"
-                shift
-                ;;
-            start|s)
-                COMMAND="start"
-                shift
-                ;;
-            stop|st)
-                COMMAND="stop"
-                shift
-                ;;
-            restart|r)
-                COMMAND="restart"
-                shift
-                ;;
-            update|up)
-                COMMAND="update"
-                shift
-                ;;
             --verbose)
                 VERBOSE=true
                 shift
@@ -111,10 +131,6 @@ parse_args() {
             -y|--yes)
                 FORCE_YES=true
                 shift
-                ;;
-            --help)
-                show_usage
-                exit 0
                 ;;
             *)
                 echo "Unknown option: $1"
@@ -138,7 +154,7 @@ main() {
     print_logo
     case $COMMAND in
         "install")
-            handle_install
+            handle_install "$COMMAND_ARG"
             ;;
         "build")
             handle_build
@@ -397,6 +413,16 @@ update_env_var() {
     printf "  ${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
 }
 
+# Helper function to delete environment variables
+delete_env_var() {
+    local key=$1
+
+    if [ -f "$ENV_FILE" ]; then
+        sed -i.bak "/^${key}=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        printf "  ${GREEN}> $key has been removed from $ENV_FILE.${NC}\n"
+    fi
+}
+
 # Function to print success message
 print_success_message() {
     printf "\n"
@@ -468,6 +494,14 @@ get_docker_compose_command() {
 
 # Function to handle initial installation or reinstallation
 handle_install() {
+    local specified_version="$1"
+
+    # If version specified, install that version directly
+    if [ -n "$specified_version" ]; then
+        handle_install_version "$specified_version"
+        return
+    fi
+
     # Check for existing version
     local current_version=""
     if grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
@@ -476,6 +510,7 @@ handle_install() {
         printf "${YELLOW}> AliasVault is already installed.${NC}\n"
         printf "1. To reinstall the current version (${current_version}), continue with this script\n"
         printf "2. To check for updates and to install the latest version, use: ./install.sh update\n"
+        printf "3. To install a specific version, use: ./install.sh install <version>\n"
         printf "\n"
 
         read -p "Would you like to reinstall the current version? [y/N]: " REPLY
@@ -490,7 +525,6 @@ handle_install() {
         handle_install_version "latest"
     fi
 }
-
 
 # Function to handle build
 handle_build() {
@@ -599,6 +633,9 @@ handle_uninstall() {
         }
     fi
     printf "${GREEN}> Docker containers stopped and removed.${NC}\n"
+
+    # Remove version from .env
+    delete_env_var "ALIASVAULT_VERSION" ""
 
     printf "${CYAN}> Removing Docker images...${NC}\n"
     if [ "$VERBOSE" = true ]; then
