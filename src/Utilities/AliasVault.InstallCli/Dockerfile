@@ -13,16 +13,11 @@ RUN dotnet restore "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.cs
 # Copy the entire source code
 COPY . .
 
-# Build the project
-RUN dotnet build "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj"  \
-    -c "$BUILD_CONFIGURATION" -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj"  \
+# Build and publish in one step
+RUN dotnet publish "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj" \
     -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AliasVault.InstallCli.dll"]
