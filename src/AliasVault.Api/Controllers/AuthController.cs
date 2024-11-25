@@ -459,6 +459,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static (bool IsValid, string ErrorMessage) ValidateUsername(string username)
     {
         const int minimumUsernameLength = 3;
+        const int maximumUsernameLength = 40;
         const string adminUsername = "admin";
 
         if (string.IsNullOrWhiteSpace(username))
@@ -468,7 +469,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
 
         if (username.Length < minimumUsernameLength)
         {
-            return (false, $"Username must be at least {minimumUsernameLength} characters long.");
+            return (false, $"Username too short: must be at least {minimumUsernameLength} characters long.");
+        }
+
+        if (username.Length > maximumUsernameLength)
+        {
+            return (false, $"Username too long: cannot be longer than {maximumUsernameLength} characters.");
         }
 
         if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
