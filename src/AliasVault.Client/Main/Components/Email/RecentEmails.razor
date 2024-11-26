@@ -134,7 +134,10 @@
         else
         {
             // Cancel polling.
-            PollingCancellationTokenSource?.Cancel();
+            if (PollingCancellationTokenSource is not null)
+            {
+                await PollingCancellationTokenSource.CancelAsync();
+            }
         }
         StateHasChanged();
     }
@@ -209,7 +212,11 @@
     /// <returns>Task.</returns>
     private async Task StartPolling()
     {
-        PollingCancellationTokenSource?.Cancel();
+        if (PollingCancellationTokenSource is not null)
+        {
+            await PollingCancellationTokenSource.CancelAsync();
+        }
+
         PollingCancellationTokenSource = new CancellationTokenSource();
 
         try
