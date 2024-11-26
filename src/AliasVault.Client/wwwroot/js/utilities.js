@@ -298,3 +298,9 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
         return { Error: "WEBAUTHN_CREATE_ERROR", Message: createError.message };
     }
 }
+
+window.registerVisibilityCallback = function (dotnetHelper) {
+    document.addEventListener("visibilitychange", function () {
+        dotnetHelper.invokeMethodAsync('OnVisibilityChange', !document.hidden);
+    });
+};
