@@ -9,6 +9,7 @@ namespace AliasVault.Client.Services;
 
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -236,6 +237,16 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     {
         await jsRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
     }
+
+    /// <summary>
+    /// Registers a visibility callback which is invoked when the visibility of component changes in client.
+    /// </summary>
+    /// <typeparam name="TComponent">Component type.</typeparam>
+    /// <param name="objRef">DotNetObjectReference.</param>
+    /// <returns>Task.</returns>
+    public async Task RegisterVisibilityCallback<TComponent>(DotNetObjectReference<TComponent> objRef)
+        where TComponent : class =>
+        await jsRuntime.InvokeVoidAsync("window.registerVisibilityCallback", objRef);
 
     /// <summary>
     /// Represents the result of a WebAuthn get credential operation.
