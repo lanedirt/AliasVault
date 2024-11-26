@@ -262,16 +262,14 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             return Unauthorized("User not found (name-2)");
         }
 
-        // Check if the refresh token is valid.
-        var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.Value == tokenModel.RefreshToken);
-        if (existingToken == null || existingToken.ExpireDate < timeProvider.UtcNow)
+        // Generate new tokens for the user.
+        var token = await GenerateNewTokensForUser(user, tokenModel.RefreshToken);
+        if (token == null)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
-            return Unauthorized("Refresh token expired");
+            return Unauthorized("Invalid refresh token");
         }
 
-        // Generate new tokens for the user.
-        var token = await GenerateNewTokensForUser(user, existingToken);
         await context.SaveChangesAsync();
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.TokenRefresh);
@@ -684,9 +682,9 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     /// to the database.
     /// </summary>
     /// <param name="user">The user to generate the tokens for.</param>
-    /// <param name="existingToken">The existing token that is being replaced (optional).</param>
-    /// <returns>TokenModel which includes new access and refresh token.</returns>
-    private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, AliasVaultUserRefreshToken existingToken)
+    /// <param name="existingTokenValue">The existing token value that is being replaced (optional).</param>
+    /// <returns>TokenModel which includes new access and refresh token. Returns null if provided refresh token is invalid.</returns>
+    private async Task<TokenModel?> GenerateNewTokensForUser(AliasVaultUser user, string existingTokenValue)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         await Semaphore.WaitAsync();
@@ -699,7 +697,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             var existingTokenReuseWindow = timeProvider.UtcNow.AddSeconds(-30);
             var existingTokenReuse = await context.AliasVaultUserRefreshTokens
                 .FirstOrDefaultAsync(t => t.UserId == user.Id &&
-                                            t.PreviousTokenValue == existingToken.Value &&
+                                            t.PreviousTokenValue == existingTokenValue &&
                                             t.CreatedAt > existingTokenReuseWindow);
 
             if (existingTokenReuse is not null)
@@ -711,20 +709,19 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             }
 
             // Remove the existing refresh token.
-            var tokenToDelete = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.Id == existingToken.Id);
+            var tokenToDelete = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.Value == existingTokenValue);
             if (tokenToDelete is null)
             {
-                await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
-                throw new InvalidOperationException("Refresh token does not exist (anymore).");
+                return null;
             }
 
             context.AliasVaultUserRefreshTokens.Remove(tokenToDelete);
 
             // New refresh token lifetime is the same as the existing one.
-            var existingTokenLifetime = existingToken.ExpireDate - existingToken.CreatedAt;
+            var existingTokenLifetime = tokenToDelete.ExpireDate - tokenToDelete.CreatedAt;
 
             // Retrieve new refresh token.
-            var newRefreshToken = await GenerateRefreshToken(user, existingTokenLifetime, existingToken.Value);
+            var newRefreshToken = await GenerateRefreshToken(user, existingTokenLifetime, tokenToDelete.Value);
 
             // After successfully retrieving new refresh token, remove the existing one by saving changes.
             await context.SaveChangesAsync();
