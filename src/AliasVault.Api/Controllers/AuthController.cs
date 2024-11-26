@@ -343,7 +343,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
             UserName = model.Username,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
-            PasswordChangedAt = DateTime.UtcNow,
+            PasswordChangedAt = timeProvider.UtcNow,
         };
 
         user.Vaults.Add(new AliasServerDb.Vault
@@ -708,20 +708,20 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
                 return new TokenModel { Token = accessToken, RefreshToken = existingTokenReuse.Value };
             }
 
-            // Remove the existing refresh token.
-            var tokenToDelete = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.Value == existingTokenValue);
-            if (tokenToDelete is null)
+            // Check if the refresh token still exists and is not expired.
+            var existingToken = await context.AliasVaultUserRefreshTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.Value == existingTokenValue);
+            if (existingToken == null || existingToken.ExpireDate < timeProvider.UtcNow)
             {
                 return null;
             }
 
-            context.AliasVaultUserRefreshTokens.Remove(tokenToDelete);
+            context.AliasVaultUserRefreshTokens.Remove(existingToken);
 
             // New refresh token lifetime is the same as the existing one.
-            var existingTokenLifetime = tokenToDelete.ExpireDate - tokenToDelete.CreatedAt;
+            var existingTokenLifetime = existingToken.ExpireDate - existingToken.CreatedAt;
 
             // Retrieve new refresh token.
-            var newRefreshToken = await GenerateRefreshToken(user, existingTokenLifetime, tokenToDelete.Value);
+            var newRefreshToken = await GenerateRefreshToken(user, existingTokenLifetime, existingToken.Value);
 
             // After successfully retrieving new refresh token, remove the existing one by saving changes.
             await context.SaveChangesAsync();
