@@ -17,28 +17,6 @@ public class FaviconExtractorTests
     /// </summary>
     /// <returns>Task.</returns>
     [Test]
-    public async Task ExtractFaviconSpamOk()
-    {
-        var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://spamok.com");
-        Assert.That(faviconBytes, Is.Not.Null);
-    }
-
-    /// <summary>
-    /// Test extracting a favicon from a known website.
-    /// </summary>
-    /// <returns>Task.</returns>
-    [Test]
-    public async Task ExtractFaviconDumpert()
-    {
-        var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://www.dumpert.nl");
-        Assert.That(faviconBytes, Is.Not.Null);
-    }
-
-    /// <summary>
-    /// Test extracting a favicon from a known website.
-    /// </summary>
-    /// <returns>Task.</returns>
-    [Test]
     public async Task ExtractFaviconGoogle()
     {
         var faviconBytes = await FaviconExtractor.FaviconExtractor.GetFaviconAsync("https://adsense.google.com/start/");

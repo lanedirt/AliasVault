@@ -74,16 +74,16 @@ AliasVault includes a built-in email server that can handle multiple custom doma
 
 To set up the email server, you need the following:
 - Public IPv4 address
-- Access to DNS record management for your domain
 - Open ports (25 and 587) in server firewall for SMTP traffic
+- Access to DNS record management for your domain
 
 ### a) DNS Configuration
 Configure the following DNS records for your domain:
 
-| Name | Type | Content                   | TTL |
-|------|------|---------------------------|-----|
-| mail | A | `<your-server-public-ip>` | 3600 |
-| @ | MX | `mail.<your-domain>`  | 3600 |
+| Name | Type | Priority | Content                   | TTL |
+|------|------|----------|---------------------------|-----|
+| mail | A    |          | `<your-server-public-ip>` | 3600 |
+| @    | MX   | 10       | `mail.<your-domain>`      | 3600 |
 
 > Note: Replace `<your-server-public-ip>` and `<your-domain>` with your actual values.
 
@@ -118,6 +118,7 @@ If successful, you'll see a connection establishment message. Press Ctrl+C to ex
 3. Once configured, you can:
    - Create new aliases in the AliasVault client
    - Use your custom domain(s) for email addresses
+     - Note: you can configure the default domain for new aliases in the AliasVault client in Menu > Settings > Email Settings > Default Email Domain
    - Start receiving emails on your aliases
 
 {: .note }
