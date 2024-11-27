@@ -266,8 +266,8 @@ print_logo() {
     printf "    _    _ _           __      __         _ _   \n"
     printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n"
     printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n"
-    printf " / ___ \| | | (_| \__ \  \  /  (_| | |_| | | |_ \n"
-    printf "/_/   \_\_|_|\__,_|___/   \/  \__,_|\__,_|_|\__|\n"
+    printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n"
+    printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n"
     printf "${NC}\n"
 }
 
@@ -329,7 +329,7 @@ set_private_email_domains() {
 
     private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
     if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf "  ${RED}Email server is disabled.${NC} Enable with /install.sh configure-email command.\n"
+        printf "  ${RED}Email server is disabled.${NC} To enable use ./install.sh configure-email command.\n"
     else
         printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
@@ -1050,8 +1050,8 @@ handle_update() {
         exit 1
     fi
 
-    printf "${CYAN}> Current version: ${current_version}${NC}\n"
-    printf "${CYAN}> Latest version: ${latest_version}${NC}\n"
+    printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
+    printf "${CYAN}> Latest AliasVault version: ${latest_version}${NC}\n"
     printf "\n"
 
     if [ "$current_version" = "$latest_version" ]; then
@@ -1140,8 +1140,8 @@ check_install_script_update() {
             return 0
         fi
     else
-        printf "${CYAN}> Current version: ${current_version}${NC}\n"
-        printf "${CYAN}> Latest version: ${new_version}${NC}\n"
+        printf "${CYAN}> Current install script version: ${current_version}${NC}\n"
+        printf "${CYAN}> Latest install script version: ${new_version}${NC}\n"
 
         # Compare versions using semver comparison
         if [ "$current_version" = "$new_version" ]; then
