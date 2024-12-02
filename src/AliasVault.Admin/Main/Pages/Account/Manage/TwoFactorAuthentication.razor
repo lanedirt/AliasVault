@@ -1,15 +1,13 @@
 ﻿@page "/account/manage/2fa"
 
 @using Microsoft.AspNetCore.Identity
-
 @inject UserManager<AdminUser> UserManager
-@inject SignInManager<AdminUser> SignInManager
 
 <LayoutPageTitle>Two-factor authentication (2FA)</LayoutPageTitle>
 
 @if (is2FaEnabled)
 {
-    <div class="mx-auto mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Two-factor authentication (2FA)</h3>
 
         @if (recoveryCodesLeft == 0)
@@ -41,7 +39,7 @@
     </div>
 }
 
-<div class="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+<div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Authenticator app</h4>
     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
         @if (!hasAuthenticator)
