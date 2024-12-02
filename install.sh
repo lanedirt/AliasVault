@@ -234,13 +234,24 @@ handle_docker_compose() {
     # Check and download main docker-compose.yml
     if [ ! -f "docker-compose.yml" ]; then
         printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
-        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml" > /dev/null 2>&1; then
+        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml.tmp" > /dev/null 2>&1; then
+            # Replace the :latest tag with the specific version if provided
+            if [ -n "$1" ] && [ "$1" != "latest" ]; then
+                sed "s/:latest/:$1/g" docker-compose.yml.tmp > docker-compose.yml
+                rm docker-compose.yml.tmp
+            else
+                mv docker-compose.yml.tmp docker-compose.yml
+            fi
             printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
         else
             printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
             exit 1
         fi
     else
+        # Update existing docker-compose.yml with correct version if provided
+        if [ -n "$1" ] && [ "$1" != "latest" ]; then
+            sed -i.bak "s/:latest/:$1/g" docker-compose.yml && rm -f docker-compose.yml.bak
+        fi
         printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
     fi
 
@@ -1205,6 +1216,9 @@ handle_install_version() {
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
+
+    # Update docker-compose files with correct version so we pull the correct images
+    handle_docker_compose "$target_version"
 
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
