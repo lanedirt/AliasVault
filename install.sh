@@ -37,16 +37,17 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
-    printf "  uninstall         Uninstall AliasVault\n"
-    printf "  update            Update AliasVault to the latest version\n"
-    printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
-    printf "  configure-email   Configure email domains for receiving emails\n"
-    printf "  start             Start AliasVault containers\n"
-    printf "  stop              Stop AliasVault containers\n"
-    printf "  restart           Restart AliasVault containers\n"
-    printf "  reset-password    Reset admin password\n"
-    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  install               Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
+    printf "  uninstall             Uninstall AliasVault\n"
+    printf "  update                Update AliasVault to the latest version\n"
+    printf "  update-installer      Check and update install.sh script if newer version available\n"
+    printf "  configure-ssl         Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  configure-email       Configure email domains for receiving emails\n"
+    printf "  start                 Start AliasVault containers\n"
+    printf "  stop                  Stop AliasVault containers\n"
+    printf "  restart               Restart AliasVault containers\n"
+    printf "  reset-password        Reset admin password\n"
+    printf "  build                 Build AliasVault from source (takes longer and requires sufficient specs)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -113,6 +114,10 @@ parse_args() {
             ;;
         update|up)
             COMMAND="update"
+            shift
+            ;;
+        update-installer|cs)
+            COMMAND="update-installer"
             shift
             ;;
         --help)
@@ -191,6 +196,10 @@ main() {
             ;;
         "update")
             handle_update
+            ;;
+        "update-installer")
+            check_install_script_update
+            exit $?
             ;;
     esac
 }
@@ -1070,6 +1079,13 @@ handle_update() {
         exit 0
     fi
 
+    if [ "$FORCE_YES" = true ]; then
+        printf "${CYAN}> Updating AliasVault to the latest version...${NC}\n"
+        handle_install_version "$latest_version"
+        printf "${GREEN}> Update completed successfully!${NC}\n"
+        return
+    fi
+
     printf "${YELLOW}> A new version of AliasVault is available!${NC}\n"
     printf "\n"
     printf "${MAGENTA}Important:${NC}\n"
@@ -1171,6 +1187,16 @@ check_install_script_update() {
     fi
 
     # If we get here, an update is available
+    if [ "$FORCE_YES" = true ]; then
+        printf "${CYAN}> Updating install script...${NC}\n"
+        cp "install.sh" "install.sh.backup"
+        mv "install.sh.tmp" "install.sh"
+        chmod +x "install.sh"
+        printf "${GREEN}> Install script updated successfully.${NC}\n"
+        printf "${GREEN}> Backup of previous version saved as install.sh.backup${NC}\n"
+        exit 0
+    fi
+
     printf "${YELLOW}> A new version of the install script is available.${NC}\n"
     printf "Would you like to update the install script before proceeding? [Y/n]: "
     read -r reply
