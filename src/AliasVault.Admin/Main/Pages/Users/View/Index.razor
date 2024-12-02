@@ -97,7 +97,7 @@ else
     private int TwoFactorKeysCount { get; set; }
     private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
     private List<Vault> VaultList { get; set; } = [];
-    private List<UserEmailClaim> EmailClaimList { get; set; } = [];
+    private List<UserEmailClaimWithCount> EmailClaimList { get; set; } = [];
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -171,7 +171,18 @@ else
             .ToListAsync();
 
         // Load all email claims for this user.
-        EmailClaimList = await DbContext.UserEmailClaims.Where(x => x.UserId == User.Id)
+        EmailClaimList = await DbContext.UserEmailClaims
+            .Where(x => x.UserId == User.Id)
+            .Select(x => new UserEmailClaimWithCount
+            {
+                Id = x.Id,
+                Address = x.Address,
+                AddressLocal = x.AddressLocal,
+                AddressDomain = x.AddressDomain,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                EmailCount = DbContext.Emails.Count(e => e.To == x.Address)
+            })
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 
