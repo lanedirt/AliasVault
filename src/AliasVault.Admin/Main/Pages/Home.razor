@@ -6,16 +6,231 @@
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
     Title="AliasVault Admin"
-    Description="Welcome to the AliasVault admin portal.">
+    Description="Welcome to the AliasVault admin portal. Below you can find statistics about recent email activity and active users.">
+    <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
 </PageHeader>
 
-@code {
-    /// <inheritdoc />
-    protected override void OnInitialized()
+<div class="px-4">
+    @if (IsLoading)
     {
-        base.OnInitialized();
+        <LoadingIndicator />
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- Active Users Card -->
+            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Active users</h3>
+                    <button
+                        @onclick="ToggleUserNames"
+                        class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        @(ShowUserNames ? "Hide names" : "Show names")
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last24Hours</h4>
+                        @if (ShowUserNames)
+                        {
+                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                <ul>
+                                    @foreach (var user in UserStats.Last24HourUsers)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last7Days</h4>
+                        @if (ShowUserNames)
+                        {
+                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                <ul>
+                                    @foreach (var user in UserStats.Last7DayUsers)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last14Days</h4>
+                        @if (ShowUserNames)
+                        {
+                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                <ul>
+                                    @foreach (var user in UserStats.Last14DayUsers)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
 
-        // Redirect to users page.
-        NavigationService.RedirectTo("users");
+            <!-- Registration Statistics Card -->
+            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">User registrations</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last24Hours</h4>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last7Days</h4>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last14Days</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Statistics Card -->
+            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent emails received</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last24Hours</h4>
+                    </div>
+                    <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last7Days</h4>
+                    </div>
+                    <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
+                        <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last14Days</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private EmailStatistics EmailStats { get; set; } = new();
+    private UserStatistics UserStats { get; set; } = new();
+    private bool ShowUserNames { get; set; } = false;
+    private RegistrationStatistics RegistrationStats { get; set; } = new();
+
+    private class EmailStatistics
+    {
+        public int Last24Hours { get; set; }
+        public int Last7Days { get; set; }
+        public int Last14Days { get; set; }
+    }
+
+    private class UserStatistics
+    {
+        public int Last24Hours { get; set; }
+        public int Last7Days { get; set; }
+        public int Last14Days { get; set; }
+        public List<string> Last24HourUsers { get; set; } = new();
+        public List<string> Last7DayUsers { get; set; } = new();
+        public List<string> Last14DayUsers { get; set; } = new();
+    }
+
+    private class RegistrationStatistics
+    {
+        public int Last24Hours { get; set; }
+        public int Last7Days { get; set; }
+        public int Last14Days { get; set; }
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        var now = DateTime.UtcNow;
+        var last24Hours = now.AddHours(-24);
+        var last7Days = now.AddDays(-7);
+        var last14Days = now.AddDays(-14);
+
+        // Get email statistics
+        var emailQuery = DbContext.Emails.AsQueryable();
+        EmailStats = new EmailStatistics
+        {
+            Last24Hours = await emailQuery.CountAsync(e => e.DateSystem >= last24Hours),
+            Last7Days = await emailQuery.CountAsync(e => e.DateSystem >= last7Days),
+            Last14Days = await emailQuery.CountAsync(e => e.DateSystem >= last14Days)
+        };
+
+        // Get user statistics
+        var (count24h, users24h) = await GetActiveUserCount(last24Hours);
+        var (count7d, users7d) = await GetActiveUserCount(last7Days);
+        var (count14d, users14d) = await GetActiveUserCount(last14Days);
+
+        UserStats = new UserStatistics
+        {
+            Last24Hours = count24h,
+            Last7Days = count7d,
+            Last14Days = count14d,
+            Last24HourUsers = users24h,
+            Last7DayUsers = users7d,
+            Last14DayUsers = users14d
+        };
+
+        // Get registration statistics
+        var registrationQuery = DbContext.AliasVaultUsers.AsQueryable();
+        RegistrationStats = new RegistrationStatistics
+        {
+            Last24Hours = await registrationQuery.CountAsync(u => u.CreatedAt >= last24Hours),
+            Last7Days = await registrationQuery.CountAsync(u => u.CreatedAt >= last7Days),
+            Last14Days = await registrationQuery.CountAsync(u => u.CreatedAt >= last14Days)
+        };
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task<(int count, List<string> users)> GetActiveUserCount(DateTime since)
+    {
+        // Get unique users who either:
+        // 1. Have successful auth logs
+        // 2. Have updated their vault
+        var activeUsers = await DbContext.AuthLogs
+            .Where(l => l.Timestamp >= since && l.IsSuccess)
+            .Select(l => l.Username)
+            .Union(
+                DbContext.Vaults
+                    .Where(v => v.UpdatedAt >= since)
+                    .Select(v => v.User.UserName!)
+            )
+            .Distinct()
+            .ToListAsync();
+
+        return (activeUsers.Count, activeUsers);
+    }
+
+    private void ToggleUserNames()
+    {
+        ShowUserNames = !ShowUserNames;
+        StateHasChanged();
     }
 }
