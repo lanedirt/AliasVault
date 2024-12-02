@@ -37,16 +37,17 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  install           Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
-    printf "  uninstall         Uninstall AliasVault\n"
-    printf "  update            Update AliasVault to the latest version\n"
-    printf "  configure-ssl     Configure SSL certificates (Let's Encrypt or self-signed)\n"
-    printf "  configure-email   Configure email domains for receiving emails\n"
-    printf "  start             Start AliasVault containers\n"
-    printf "  stop              Stop AliasVault containers\n"
-    printf "  restart           Restart AliasVault containers\n"
-    printf "  reset-password    Reset admin password\n"
-    printf "  build             Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  install               Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
+    printf "  uninstall             Uninstall AliasVault\n"
+    printf "  update                Update AliasVault to the latest version\n"
+    printf "  update-installer      Check and update install.sh script if newer version available\n"
+    printf "  configure-ssl         Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  configure-email       Configure email domains for receiving emails\n"
+    printf "  start                 Start AliasVault containers\n"
+    printf "  stop                  Stop AliasVault containers\n"
+    printf "  restart               Restart AliasVault containers\n"
+    printf "  reset-password        Reset admin password\n"
+    printf "  build                 Build AliasVault from source (takes longer and requires sufficient specs)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -113,6 +114,10 @@ parse_args() {
             ;;
         update|up)
             COMMAND="update"
+            shift
+            ;;
+        update-installer|cs)
+            COMMAND="update-installer"
             shift
             ;;
         --help)
@@ -192,6 +197,10 @@ main() {
         "update")
             handle_update
             ;;
+        "update-installer")
+            check_install_script_update
+            exit $?
+            ;;
     esac
 }
 
@@ -234,13 +243,24 @@ handle_docker_compose() {
     # Check and download main docker-compose.yml
     if [ ! -f "docker-compose.yml" ]; then
         printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
-        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml" > /dev/null 2>&1; then
+        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml.tmp" > /dev/null 2>&1; then
+            # Replace the :latest tag with the specific version if provided
+            if [ -n "$1" ] && [ "$1" != "latest" ]; then
+                sed "s/:latest/:$1/g" docker-compose.yml.tmp > docker-compose.yml
+                rm docker-compose.yml.tmp
+            else
+                mv docker-compose.yml.tmp docker-compose.yml
+            fi
             printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
         else
             printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
             exit 1
         fi
     else
+        # Update existing docker-compose.yml with correct version if provided
+        if [ -n "$1" ] && [ "$1" != "latest" ]; then
+            sed -i.bak "s/:latest/:$1/g" docker-compose.yml && rm -f docker-compose.yml.bak
+        fi
         printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
     fi
 
@@ -1059,6 +1079,13 @@ handle_update() {
         exit 0
     fi
 
+    if [ "$FORCE_YES" = true ]; then
+        printf "${CYAN}> Updating AliasVault to the latest version...${NC}\n"
+        handle_install_version "$latest_version"
+        printf "${GREEN}> Update completed successfully!${NC}\n"
+        return
+    fi
+
     printf "${YELLOW}> A new version of AliasVault is available!${NC}\n"
     printf "\n"
     printf "${MAGENTA}Important:${NC}\n"
@@ -1160,6 +1187,16 @@ check_install_script_update() {
     fi
 
     # If we get here, an update is available
+    if [ "$FORCE_YES" = true ]; then
+        printf "${CYAN}> Updating install script...${NC}\n"
+        cp "install.sh" "install.sh.backup"
+        mv "install.sh.tmp" "install.sh"
+        chmod +x "install.sh"
+        printf "${GREEN}> Install script updated successfully.${NC}\n"
+        printf "${GREEN}> Backup of previous version saved as install.sh.backup${NC}\n"
+        exit 0
+    fi
+
     printf "${YELLOW}> A new version of the install script is available.${NC}\n"
     printf "Would you like to update the install script before proceeding? [Y/n]: "
     read -r reply
@@ -1205,6 +1242,9 @@ handle_install_version() {
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
+
+    # Update docker-compose files with correct version so we pull the correct images
+    handle_docker_compose "$target_version"
 
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
