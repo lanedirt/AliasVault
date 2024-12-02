@@ -21,6 +21,17 @@ To update to the latest version, run the install script with the `update` option
 ./install.sh update
 ```
 
+> Tip: to skip the confirmation prompts and automatically proceed with the update, use the `-y` flag: `./install.sh update -y`
+
+## Updating the installer script
+The installer script can check for and apply updates to itself. This is done as part of the `update` command. However you can also update the installer script separately with the `update-installer` command. This is useful if you want to update the installer script without updating AliasVault itself, e.g. as a separate step during CI/CD pipeline.
+
+```bash
+./install.sh update-installer
+```
+
+> Tip: to skip the confirmation prompts and automatically proceed with the update, use the `-y` flag: `./install.sh update-installer -y`
+
 ## Installing a specific version
 To install a specific version and skip the automatic version checks, run the install script with the `install` option and specify the version you want to install.
 
