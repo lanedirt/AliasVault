@@ -34,7 +34,7 @@ jobs:
           timeout_minutes: 5
           max_attempts: 5
           command: |
-            sleep 5
+            sleep 15
 
             # Array of endpoints to test
             declare -A endpoints=(
