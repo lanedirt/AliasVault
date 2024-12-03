@@ -1,0 +1,64 @@
+<div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent emails received</h3>
+    </div>
+    @if (IsLoading)
+    {
+        <LoadingIndicator />
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last24Hours</h4>
+            </div>
+            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last7Days</h4>
+            </div>
+            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Last14Days</h4>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private EmailStatistics EmailStats { get; set; } = new();
+
+    /// <summary>
+    /// Refreshes the data displayed on the card.
+    /// </summary>
+    public async Task RefreshData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        var now = DateTime.UtcNow;
+        var last24Hours = now.AddHours(-24);
+        var last7Days = now.AddDays(-7);
+        var last14Days = now.AddDays(-14);
+
+        // Get email statistics
+        var emailQuery = DbContext.Emails.AsQueryable();
+        EmailStats = new EmailStatistics
+        {
+            Last24Hours = await emailQuery.CountAsync(e => e.DateSystem >= last24Hours),
+            Last7Days = await emailQuery.CountAsync(e => e.DateSystem >= last7Days),
+            Last14Days = await emailQuery.CountAsync(e => e.DateSystem >= last14Days)
+        };
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private sealed class EmailStatistics
+    {
+        public int Last24Hours { get; set; }
+        public int Last7Days { get; set; }
+        public int Last14Days { get; set; }
+    }
+}
