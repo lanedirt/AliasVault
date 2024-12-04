@@ -2,8 +2,8 @@ services:
     reverse-proxy:
         image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
         ports:
-            - "80:80"
-            - "443:443"
+            - "${HTTP_PORT:-80}:80"
+            - "${HTTPS_PORT:-443}:443"
         volumes:
             - ./certificates/ssl:/etc/nginx/ssl:rw
             - ./certificates/letsencrypt:/etc/nginx/ssl-letsencrypt:rw
@@ -54,8 +54,8 @@ services:
     smtp:
         image: ghcr.io/lanedirt/aliasvault-smtp:latest
         ports:
-            - "25:25"
-            - "587:587"
+            - "${SMTP_PORT:-25}:25"
+            - "${SMTP_TLS_PORT:-587}:587"
         volumes:
             - ./database:/database:rw
             - ./logs:/logs:rw

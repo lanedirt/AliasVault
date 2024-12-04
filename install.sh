@@ -420,6 +420,37 @@ generate_admin_password() {
     fi
 }
 
+# Function to set default ports
+set_default_ports() {
+    printf "${CYAN}> Checking default ports...${NC}\n"
+
+    # Web ports
+    if ! grep -q "^HTTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "HTTP_PORT" "80"
+    else
+        printf "  ${GREEN}> HTTP_PORT already exists.${NC}\n"
+    fi
+
+    if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "HTTPS_PORT" "443"
+    else
+        printf "  ${GREEN}> HTTPS_PORT already exists.${NC}\n"
+    fi
+
+    # SMTP ports
+    if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "SMTP_PORT" "25"
+    else
+        printf "  ${GREEN}> SMTP_PORT already exists.${NC}\n"
+    fi
+
+    if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "SMTP_TLS_PORT" "587"
+    else
+        printf "  ${GREEN}> SMTP_TLS_PORT already exists.${NC}\n"
+    fi
+}
+
 # Helper function to update environment variables
 update_env_var() {
     local key=$1
@@ -432,6 +463,7 @@ update_env_var() {
     echo "$key=$value" >> "$ENV_FILE"
     printf "  ${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
 }
+
 
 # Helper function to delete environment variables
 delete_env_var() {
@@ -574,6 +606,7 @@ handle_build() {
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
+    set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -1254,6 +1287,7 @@ handle_install_version() {
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
+    set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then

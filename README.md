@@ -69,7 +69,7 @@ The install script will output the URL where the app is available. By default th
 - Client: https://localhost
 - Admin portal: https://localhost/admin
 
-> Note: If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file for the `nginx` (reverse-proxy) container.
+> Note: If you want to change the default AliasVault ports you can do so in the `.env` file.
 
 ## Detailed documentation
 For more detailed information about the installation process and other topics, please see the official documentation website:
