@@ -1,0 +1,54 @@
+﻿@page "/"
+@using AliasVault.Admin.Main.Pages.Dashboard.Components
+@inherits MainBase
+
+<LayoutPageTitle>Home</LayoutPageTitle>
+
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="AliasVault Admin"
+    Description="Welcome to the AliasVault admin portal. Below you can find statistics about recent email activity and active users.">
+    <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
+
+<div class="px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <ActiveUsersCard @ref="_activeUsersCard" />
+        <RegistrationStatisticsCard @ref="_registrationStatisticsCard" />
+        <EmailStatisticsCard @ref="_emailStatisticsCard" />
+    </div>
+</div>
+
+@code {
+    private ActiveUsersCard? _activeUsersCard;
+    private RegistrationStatisticsCard? _registrationStatisticsCard;
+    private EmailStatisticsCard? _emailStatisticsCard;
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshData();
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the data displayed on the cards.
+    /// </summary>
+    private async Task RefreshData()
+    {
+        if (_activeUsersCard != null &&
+            _registrationStatisticsCard != null &&
+            _emailStatisticsCard != null)
+        {
+            await Task.WhenAll(
+                _activeUsersCard.RefreshData(),
+                _registrationStatisticsCard.RefreshData(),
+                _emailStatisticsCard.RefreshData()
+            );
+        }
+    }
+}

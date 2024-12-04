@@ -23,7 +23,7 @@ using Microsoft.JSInterop;
 /// Also, a default set of breadcrumbs is added in the parent OnInitialized method.
 /// </summary>
 [Authorize]
-public class MainBase : OwningComponentBase
+public abstract class MainBase : OwningComponentBase
 {
     /// <summary>
     /// Gets or sets the NavigationService instance responsible for handling navigation, replaces the default NavigationManager.

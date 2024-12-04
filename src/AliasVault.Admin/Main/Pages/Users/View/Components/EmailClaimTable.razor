@@ -7,6 +7,7 @@
             <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
             <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
             <SortableTableColumn>@entry.Address</SortableTableColumn>
+            <SortableTableColumn>@entry.EmailCount</SortableTableColumn>
         </SortableTableRow>
     }
 </SortableTable>
@@ -16,7 +17,7 @@
     /// Gets or sets the list of email claims to display.
     /// </summary>
     [Parameter]
-    public List<UserEmailClaim> EmailClaimList { get; set; } = [];
+    public List<UserEmailClaimWithCount> EmailClaimList { get; set; } = [];
 
     private string SortColumn { get; set; } = "CreatedAt";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
@@ -25,9 +26,10 @@
         new TableColumn { Title = "ID", PropertyName = "Id" },
         new TableColumn { Title = "Created", PropertyName = "CreatedAt" },
         new TableColumn { Title = "Email", PropertyName = "Address" },
+        new TableColumn { Title = "Email Count", PropertyName = "EmailCount" },
     ];
 
-    private IEnumerable<UserEmailClaim> SortedEmailClaimList => SortList(EmailClaimList, SortColumn, SortDirection);
+    private IEnumerable<UserEmailClaimWithCount> SortedEmailClaimList => SortList(EmailClaimList, SortColumn, SortDirection);
 
     private void HandleSortChanged((string column, SortDirection direction) sort)
     {
@@ -36,13 +38,14 @@
         StateHasChanged();
     }
 
-    private static IEnumerable<UserEmailClaim> SortList(List<UserEmailClaim> emailClaims, string sortColumn, SortDirection sortDirection)
+    private static IEnumerable<UserEmailClaimWithCount> SortList(List<UserEmailClaimWithCount> emailClaims, string sortColumn, SortDirection sortDirection)
     {
         return sortColumn switch
         {
             "Id" => SortableTable.SortListByProperty(emailClaims, e => e.Id, sortDirection),
             "CreatedAt" => SortableTable.SortListByProperty(emailClaims, e => e.CreatedAt, sortDirection),
             "Address" => SortableTable.SortListByProperty(emailClaims, e => e.Address, sortDirection),
+            "EmailCount" => SortableTable.SortListByProperty(emailClaims, e => e.EmailCount, sortDirection),
             _ => emailClaims
         };
     }

@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 /// All pages that inherit from this class will receive default injected components that are used globally.
 /// Also, a default set of breadcrumbs is added in the parent OnInitialized method.
 /// </summary>
-public class MainBase : OwningComponentBase
+public abstract class MainBase : OwningComponentBase
 {
     private const string ReturnUrlKey = "returnUrl";
     private bool _parametersInitialSet;
