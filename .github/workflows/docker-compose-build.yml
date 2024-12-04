@@ -18,15 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Create .env file with custom SMTP port as port 25 is not allowed in GitHub Actions
+        run: |
+          echo "SMTP_PORT=2525" > .env
+
       - name: Set permissions and run install.sh
         run: |
           chmod +x install.sh
           ./install.sh build --verbose
-
-      - name: Set up Docker Compose
-        run: |
-          sed -i 's/25\:25/2525\:25/g' docker-compose.yml
-          docker compose -f docker-compose.yml up -d
 
       - name: Test if services are responding
         uses: nick-fields/retry@v3

@@ -37,7 +37,7 @@ chmod +x install.sh
 ```bash
 ./install.sh install
 ```
-> **Note**: AliasVault binds to ports 80 and 443 by default. If you want to change the default AliasVault ports you can do so in the `docker-compose.yml` file for the `reverse-proxy` (nginx) container. Afterwards re-run the `./install.sh install` command to restart the containers with the new port settings.
+> **Note**: AliasVault binds to ports 80 and 443 by default. If you want to change the default AliasVault ports you can do so in the `.env` file. Afterwards re-run the `./install.sh install` command to restart the containers with the new port settings.
 
 3. After the script completes, you can access AliasVault at:
   - Client: `https://localhost`
