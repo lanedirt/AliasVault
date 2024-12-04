@@ -5,7 +5,8 @@
 REPO_OWNER="lanedirt"
 REPO_NAME="AliasVault"
 REPO_BRANCH="main"
-GITHUB_RAW_URL="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${REPO_BRANCH}"
+GITHUB_RAW_URL_REPO="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}"
+GITHUB_RAW_URL_REPO_BRANCH="$GITHUB_RAW_URL_REPO/$REPO_BRANCH"
 GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
 
 # Required files and directories
@@ -233,48 +234,36 @@ create_directories() {
 # Function to initialize workspace
 initialize_workspace() {
     create_directories
-    handle_docker_compose
 }
 
 # Function to handle docker-compose.yml
 handle_docker_compose() {
-    printf "${CYAN}> Checking docker-compose files...${NC}\n"
+    local version_tag="$1"
+    printf "${CYAN}> Downloading latest docker-compose files...${NC}\n"
 
-    # Check and download main docker-compose.yml
-    if [ ! -f "docker-compose.yml" ]; then
-        printf "  ${CYAN}> Downloading docker-compose.yml...${NC}"
-        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.yml" -o "docker-compose.yml.tmp" > /dev/null 2>&1; then
-            # Replace the :latest tag with the specific version if provided
-            if [ -n "$1" ] && [ "$1" != "latest" ]; then
-                sed "s/:latest/:$1/g" docker-compose.yml.tmp > docker-compose.yml
-                rm docker-compose.yml.tmp
-            else
-                mv docker-compose.yml.tmp docker-compose.yml
-            fi
-            printf "\n  ${GREEN}> docker-compose.yml downloaded successfully.${NC}\n"
+    # Download and overwrite docker-compose.yml
+    printf "  ${GREEN}> Downloading docker-compose.yml for version ${version_tag}...${NC}"
+    if curl -sSf "${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.yml" -o "docker-compose.yml.tmp" > /dev/null 2>&1; then
+        # Replace the :latest tag with the specific version if provided
+        if [ -n "$version_tag" ] && [ "$version_tag" != "latest" ]; then
+            sed "s/:latest/:$version_tag/g" docker-compose.yml.tmp > docker-compose.yml
+            rm docker-compose.yml.tmp
         else
-            printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
-            exit 1
+            mv docker-compose.yml.tmp docker-compose.yml
         fi
+        printf "\n  ${CYAN}> docker-compose.yml downloaded successfully.${NC}\n"
     else
-        # Update existing docker-compose.yml with correct version if provided
-        if [ -n "$1" ] && [ "$1" != "latest" ]; then
-            sed -i.bak "s/:latest/:$1/g" docker-compose.yml && rm -f docker-compose.yml.bak
-        fi
-        printf "  ${GREEN}> docker-compose.yml already exists.${NC}\n"
+        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/blob/${version_tag}/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
+        exit 1
     fi
 
-    # Check and download docker-compose.letsencrypt.yml
-    if [ ! -f "docker-compose.letsencrypt.yml" ]; then
-        printf "  ${CYAN}> Downloading docker-compose.letsencrypt.yml...${NC}"
-        if curl -sSf "${GITHUB_RAW_URL}/docker-compose.letsencrypt.yml" -o "docker-compose.letsencrypt.yml" > /dev/null 2>&1; then
-            printf "\n  ${GREEN}> docker-compose.letsencrypt.yml downloaded successfully.${NC}\n"
-        else
-            printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
-            exit 1
-        fi
+    # Download and overwrite docker-compose.letsencrypt.yml
+    printf "  ${GREEN}> Downloading docker-compose.letsencrypt.yml for version ${version_tag}...${NC}"
+    if curl -sSf "${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.letsencrypt.yml" -o "docker-compose.letsencrypt.yml" > /dev/null 2>&1; then
+        printf "\n  ${CYAN}> docker-compose.letsencrypt.yml downloaded successfully.${NC}\n"
     else
-        printf "  ${GREEN}> docker-compose.letsencrypt.yml already exists.${NC}\n"
+        printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/blob/${version_tag}/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
+        exit 1
     fi
 
     return 0
@@ -594,7 +583,7 @@ handle_build() {
         printf "Please clone the complete repository using:\n"
         printf "git clone https://github.com/${REPO_OWNER}/${REPO_NAME}.git\n"
         printf "\n"
-        printf "Alternatively, you can use '/install' to pull pre-built images.\n"
+        printf "Alternatively, you can use './install.sh install' to pull pre-built images.\n"
         exit 1
     fi
 
@@ -1178,7 +1167,7 @@ check_install_script_update() {
     printf "${CYAN}> Checking for install script updates...${NC}\n"
 
     # Download latest install.sh to temporary file
-    if ! curl -sSf "${GITHUB_RAW_URL}/install.sh" -o "install.sh.tmp"; then
+    if ! curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/install.sh" -o "install.sh.tmp"; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
         return 1
@@ -1300,17 +1289,12 @@ handle_install_version() {
 
     printf "${CYAN}> Installing version: ${target_version}${NC}\n"
 
-    local tag="$target_version"
-    if [ "$target_version" = "latest" ]; then
-        tag="latest"
-    fi
-
     images=(
-        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${tag}"
-        "${GITHUB_CONTAINER_REGISTRY}-api:${tag}"
-        "${GITHUB_CONTAINER_REGISTRY}-client:${tag}"
-        "${GITHUB_CONTAINER_REGISTRY}-admin:${tag}"
-        "${GITHUB_CONTAINER_REGISTRY}-smtp:${tag}"
+        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}-api:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}-client:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}-admin:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}-smtp:${target_version}"
     )
 
     for image in "${images[@]}"; do
