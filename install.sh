@@ -1295,6 +1295,7 @@ handle_install_version() {
         "${GITHUB_CONTAINER_REGISTRY}-client:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-admin:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-smtp:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}-task-runner:${target_version}"
     )
 
     for image in "${images[@]}"; do
