@@ -9,7 +9,9 @@ using System.Reflection;
 using AliasServerDb;
 using AliasServerDb.Configuration;
 using AliasVault.Logging;
+using AliasVault.Shared.Server.Services;
 using AliasVault.TaskRunner;
+using AliasVault.TaskRunner.Tasks;
 using AliasVault.TaskRunner.Workers;
 using AliasVault.WorkerStatus.ServiceExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +37,11 @@ builder.Services.AddAliasVaultSqliteConfiguration();
 // -----------------------------------------------------------------------
 // Register hosted services via Status library wrapper in order to monitor and control (start/stop) them via the database.
 // -----------------------------------------------------------------------
+builder.Services.AddSingleton<ServerSettingsService>();
+
+// Define the tasks that will be executed by the TaskRunner.
+builder.Services.AddTransient<IMaintenanceTask, LogCleanupTask>();
+
 builder.Services.AddStatusHostedService<TaskRunnerWorker, AliasServerDbContext>(Assembly.GetExecutingAssembly().GetName().Name!);
 
 var host = builder.Build();
