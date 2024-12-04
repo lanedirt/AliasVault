@@ -7,8 +7,6 @@
 
 namespace AliasVault.IntegrationTests.TaskRunner;
 
-using AliasServerDb;
-using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
@@ -31,18 +29,11 @@ public class TaskRunnerTests
     /// <summary>
     /// Setup logic for every test.
     /// </summary>
-    /// <returns>Task.</returns>
     [SetUp]
-    public async Task Setup()
+    public void Setup()
     {
         _testHostBuilder = new TestHostBuilder();
         _testHost = _testHostBuilder.Build();
-
-        // Seed the database before starting the service.
-        await SeedDatabase();
-
-        // Start the service so it can run the tasks on the test data.
-        await _testHost.StartAsync();
     }
 
     /// <summary>
@@ -63,6 +54,9 @@ public class TaskRunnerTests
     [Test]
     public async Task EmailCleanup()
     {
+        // Arrange
+        await InitializeWithTestData();
+
         // Assert
         var dbContext = _testHostBuilder.GetDbContext();
         var emails = await dbContext.Emails.ToListAsync();
@@ -76,10 +70,11 @@ public class TaskRunnerTests
     [Test]
     public async Task LogCleanup()
     {
+        // Arrange
+        await InitializeWithTestData();
+
         // Assert
         var dbContext = _testHostBuilder.GetDbContext();
-
-        // Check general logs
         var generalLogs = await dbContext.Logs.ToListAsync();
         Assert.That(generalLogs.Count, Is.EqualTo(50), "Only recent general logs should remain");
     }
@@ -91,6 +86,9 @@ public class TaskRunnerTests
     [Test]
     public async Task AuthLogCleanup()
     {
+        // Arrange
+        await InitializeWithTestData();
+
         // Assert
         var dbContext = _testHostBuilder.GetDbContext();
 
@@ -99,167 +97,99 @@ public class TaskRunnerTests
         Assert.That(authLogs.Count, Is.EqualTo(50), "Only recent auth logs should remain");
     }
 
-    /// <summary>
-    /// Seeds the database with test data.
+     /// <summary>
+    /// Tests that the TaskRunner does not run tasks before the maintenance time.
     /// </summary>
-    private async Task SeedDatabase()
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task MaintenanceTimeInFutureDoesNotRun()
     {
-        // Seed the database with settings
+        // Seed database with generic test data.
+        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+
+        // Update maintenance time in database to future to ensure the task runner doesn't execute yet.
+
+        // Get current time and set maintenance time to 2 hours in the future
+        var now = DateTime.Now;
+        var futureTime = now.AddHours(2);
+
+        // Make sure we don't exceed midnight
+        if (futureTime.Day != now.Day)
+        {
+            futureTime = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
+        }
+
+        // Update maintenance time in database
+        var dbContext = _testHostBuilder.GetDbContext();
+        var maintenanceTimeSetting = await dbContext.ServerSettings
+            .FirstAsync(s => s.Key == "MaintenanceTime");
+        maintenanceTimeSetting.Value = futureTime.ToString("HH:mm");
+        await dbContext.SaveChangesAsync();
+
+        // Get initial email count
+        var initialEmailCount = await dbContext.Emails.CountAsync();
+
+        // Start the service.
+        await _testHost.StartAsync();
+
+        // Verify email count hasn't changed (tasks haven't run)
+        var currentEmailCount = await dbContext.Emails.CountAsync();
+        Assert.That(currentEmailCount, Is.EqualTo(initialEmailCount), "Email count changed despite maintenance time being in the future. Check if TaskRunner is respecting the maintenance time setting.");
+    }
+
+    /// <summary>
+    /// Tests that the TaskRunner does not run tasks when the current day is excluded.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task MaintenanceTimeExcludedDayDoesNotRun()
+    {
+        // Seed database with generic test data.
+        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+
+        // Get current day of week (1-7, Monday = 1, Sunday = 7)
+        var currentDay = (int)DateTime.Now.DayOfWeek;
+        if (currentDay == 0)
+        {
+            currentDay = 7; // Convert Sunday from 0 to 7
+        }
+
+        // Update maintenance settings in database to exclude current day
         var dbContext = _testHostBuilder.GetDbContext();
 
-        // Configure maintenance settings
-        var settings = new List<ServerSetting>
-        {
-            new() { Key = "EmailRetentionDays", Value = "30" },
-            new() { Key = "GeneralLogRetentionDays", Value = "45" },
-            new() { Key = "AuthLogRetentionDays", Value = "60" },
-            new() { Key = "MaxEmailsPerUser", Value = "100" },
-            new() { Key = "MaintenanceTime", Value = "03:30" },
-            new() { Key = "TaskRunnerDays", Value = "1,2,3,4,5,6,7" },
-        };
+        // Set maintenance time to midnight
+        var maintenanceTimeSetting = await dbContext.ServerSettings
+            .FirstAsync(s => s.Key == "MaintenanceTime");
+        maintenanceTimeSetting.Value = "00:00";
 
-        await dbContext.ServerSettings.AddRangeAsync(settings);
-
-        // Create test user
-        var user = new AliasVaultUser
-        {
-            UserName = "testuser",
-            Email = "testuser@example.tld",
-        };
-        dbContext.AliasVaultUsers.Add(user);
-        await dbContext.SaveChangesAsync();
-
-        // Create encryption key for the user
-        var encryptionKey = new UserEncryptionKey
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            PublicKey = "test-encryption-key",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-        };
-        dbContext.UserEncryptionKeys.Add(encryptionKey);
-        await dbContext.SaveChangesAsync();
-
-        // Seed old emails (older than 30 days)
-        var oldEmails = new List<Email>();
-        for (int i = 0; i < 50; i++)
-        {
-            oldEmails.Add(new Email
-            {
-                Subject = $"Old Email {i}",
-                From = "sender@example.com",
-                FromLocal = "sender",
-                FromDomain = "example.com",
-                To = "testuser@example.tld",
-                ToLocal = "testuser",
-                ToDomain = "example.tld",
-                Date = DateTime.UtcNow.AddDays(-45),
-                DateSystem = DateTime.UtcNow.AddDays(-45),
-                MessagePlain = "Test message",
-                MessagePreview = "Test message",
-                MessageSource = "Test source",
-                EncryptedSymmetricKey = "dummy-key",
-                UserEncryptionKeyId = encryptionKey.Id,
-            });
-        }
-
-        await dbContext.Emails.AddRangeAsync(oldEmails);
-
-        // Seed recent emails (within 30 days)
-        var recentEmails = new List<Email>();
-        for (int i = 0; i < 50; i++)
-        {
-            recentEmails.Add(new Email
-            {
-                Subject = $"Recent Email {i}",
-                From = "sender@example.com",
-                FromLocal = "sender",
-                FromDomain = "example.com",
-                To = "testuser@example.tld",
-                ToLocal = "testuser",
-                ToDomain = "example.tld",
-                Date = DateTime.UtcNow.AddDays(-1),
-                DateSystem = DateTime.UtcNow.AddDays(-1),
-                MessagePlain = "Test message",
-                MessagePreview = "Test message",
-                MessageSource = "Test source",
-                EncryptedSymmetricKey = "dummy-key",
-                UserEncryptionKeyId = encryptionKey.Id,
-            });
-        }
-
-        await dbContext.Emails.AddRangeAsync(recentEmails);
-
-        // Add old general logs (older than 45 days)
-        var oldLogs = new List<Log>();
-        for (int i = 0; i < 50; i++)
-        {
-            oldLogs.Add(new Log
-            {
-                Application = "TestApp",
-                SourceContext = "TestContext",
-                Message = $"Old Log {i}",
-                MessageTemplate = $"Old Log {i}",
-                Level = "Information",
-                TimeStamp = DateTime.UtcNow.AddDays(-60),
-                Exception = string.Empty,
-                Properties = "{}",
-                LogEvent = "{}",
-            });
-        }
-
-        await dbContext.Logs.AddRangeAsync(oldLogs);
-
-        // Add recent logs (within 45 days)
-        var recentLogs = new List<Log>();
-        for (int i = 0; i < 50; i++)
-        {
-            recentLogs.Add(new Log
-            {
-                Application = "TestApp",
-                SourceContext = "TestContext",
-                Message = $"Recent Log {i}",
-                MessageTemplate = $"Recent Log {i}",
-                Level = "Information",
-                TimeStamp = DateTime.UtcNow.AddDays(-1),
-                Exception = string.Empty,
-                Properties = "{}",
-                LogEvent = "{}",
-            });
-        }
-
-        await dbContext.Logs.AddRangeAsync(recentLogs);
-
-        // Add old auth logs (older than 60 days)
-        var oldAuthLogs = new List<AuthLog>();
-        for (int i = 0; i < 50; i++)
-        {
-            oldAuthLogs.Add(new AuthLog
-            {
-                Username = "testuser",
-                EventType = AuthEventType.Login,
-                IsSuccess = true,
-                Timestamp = DateTime.UtcNow.AddDays(-70),
-            });
-        }
-
-        await dbContext.AuthLogs.AddRangeAsync(oldAuthLogs);
-
-        var recentAuthLogs = new List<AuthLog>();
-        for (int i = 0; i < 50; i++)
-        {
-            recentAuthLogs.Add(new AuthLog
-            {
-                Username = "testuser",
-                EventType = AuthEventType.Login,
-                IsSuccess = true,
-                Timestamp = DateTime.UtcNow.AddDays(-1),
-            });
-        }
-
-        await dbContext.AuthLogs.AddRangeAsync(recentAuthLogs);
+        // Set task runner days to all days except current day
+        var taskRunnerDays = Enumerable.Range(1, 7)
+            .Where(d => d != currentDay)
+            .ToList();
+        var taskRunnerDaysSetting = await dbContext.ServerSettings
+            .FirstAsync(s => s.Key == "TaskRunnerDays");
+        taskRunnerDaysSetting.Value = string.Join(",", taskRunnerDays);
 
         await dbContext.SaveChangesAsync();
+
+        // Get initial email count
+        var initialEmailCount = await dbContext.Emails.CountAsync();
+
+        // Start the service
+        await _testHost.StartAsync();
+
+        // Verify email count hasn't changed (tasks haven't run)
+        var currentEmailCount = await dbContext.Emails.CountAsync();
+        Assert.That(currentEmailCount, Is.EqualTo(initialEmailCount), "Email count changed despite current day being excluded from maintenance days. Check if TaskRunner is respecting the task runner days setting.");
+    }
+
+    /// <summary>
+    /// Initializes the test with test data.
+    /// </summary>
+    /// <returns>Task.</returns>
+    protected async Task InitializeWithTestData()
+    {
+        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+        await _testHost.StartAsync();
     }
 }
