@@ -12,9 +12,9 @@ namespace AliasVault.TaskRunner;
 /// </summary>
 public class Config
 {
+    // TODO: update config properties to only use the ones that are needed for TaskRunner.
+
     /// <summary>
-    /// TODO: update config properties to only use the ones that are needed for TaskRunner.
-    /// TOOD: If none are needed, remove this class.
     /// Gets or sets whether TLS is enabled for the SMTP service.
     /// </summary>
     public string SmtpTlsEnabled { get; set; } = "false";

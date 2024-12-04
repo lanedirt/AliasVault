@@ -17,5 +17,6 @@ public class TaskRunnerWorker(ILogger<TaskRunnerWorker> logger) : BackgroundServ
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogWarning("AliasVault.TaskRunnerWorker started at: {Time}", DateTimeOffset.Now);
+        await Task.Delay(1000);
     }
 }

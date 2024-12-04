@@ -9,6 +9,7 @@ using System.Reflection;
 using AliasServerDb;
 using AliasServerDb.Configuration;
 using AliasVault.Logging;
+using AliasVault.TaskRunner;
 using AliasVault.TaskRunner.Workers;
 using AliasVault.WorkerStatus.ServiceExtensions;
 using Microsoft.EntityFrameworkCore;
