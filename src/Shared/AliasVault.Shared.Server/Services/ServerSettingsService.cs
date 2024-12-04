@@ -9,6 +9,7 @@ namespace AliasVault.Shared.Server.Services;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AliasServerDb;
@@ -104,7 +105,11 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
             AuthLogRetentionDays = int.TryParse(settings.GetValueOrDefault("AuthLogRetentionDays"), out var authDays) ? authDays : 90,
             EmailRetentionDays = int.TryParse(settings.GetValueOrDefault("EmailRetentionDays"), out var emailDays) ? emailDays : 30,
             MaxEmailsPerUser = int.TryParse(settings.GetValueOrDefault("MaxEmailsPerUser"), out var maxEmails) ? maxEmails : 100,
-            MaintenanceTime = TimeOnly.TryParse(settings.GetValueOrDefault("MaintenanceTime") ?? "00:00", out var time) ? time : new TimeOnly(0, 0),
+            MaintenanceTime = TimeOnly.TryParse(
+                settings.GetValueOrDefault("MaintenanceTime") ?? "00:00",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var time) ? time : new TimeOnly(0, 0),
             TaskRunnerDays = settings.GetValueOrDefault("TaskRunnerDays")?.Split(',').Select(int.Parse).ToList() ?? new List<int> { 1, 2, 3, 4, 5, 6, 7 },
         };
     }
@@ -120,7 +125,7 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
         await SetSettingAsync("AuthLogRetentionDays", model.AuthLogRetentionDays.ToString());
         await SetSettingAsync("EmailRetentionDays", model.EmailRetentionDays.ToString());
         await SetSettingAsync("MaxEmailsPerUser", model.MaxEmailsPerUser.ToString());
-        await SetSettingAsync("MaintenanceTime", model.MaintenanceTime.ToString("HH:mm"));
+        await SetSettingAsync("MaintenanceTime", model.MaintenanceTime.ToString("HH:mm", CultureInfo.InvariantCulture));
         await SetSettingAsync("TaskRunnerDays", string.Join(",", model.TaskRunnerDays));
     }
 }

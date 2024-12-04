@@ -12,7 +12,7 @@ COPY . .
 
 # Build and publish the application
 WORKDIR "/src/src/Services/AliasVault.TaskRunner"
-RUN dotnet publish "./AliasVault.TaskRunner.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./AliasVault.TaskRunner.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

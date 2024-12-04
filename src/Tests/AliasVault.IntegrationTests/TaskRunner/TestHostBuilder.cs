@@ -62,7 +62,6 @@ public class TestHostBuilder
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton(new Config());
                 services.AddSingleton(_dbConnection);
 
                 services.AddDbContextFactory<AliasServerDbContext>((sp, options) =>

@@ -50,7 +50,7 @@
     /// <summary>
     /// The state of a service.
     /// </summary>
-    private class ServiceState
+    private sealed class ServiceState
     {
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
@@ -98,9 +98,17 @@
     }
 
     /// <summary>
+    /// Checks if the heartbeat is valid (within the last 5 minutes).
+    /// </summary>
+    private static bool IsHeartbeatValid(DateTime lastHeartbeat)
+    {
+        return DateTime.Now <= lastHeartbeat.AddMinutes(5);
+    }
+
+    /// <summary>
     /// Gets the CSS classes for a service button based on its current state.
     /// </summary>
-    private string GetServiceButtonClasses(ServiceState service)
+    private static string GetServiceButtonClasses(ServiceState service)
     {
         string buttonClass = "cursor-pointer ";
 
@@ -123,17 +131,9 @@
     /// <summary>
     /// Gets the tooltip text for a service button based on its last heartbeat.
     /// </summary>
-    private string GetButtonTooltip(DateTime lastHeartbeat)
+    private static string GetButtonTooltip(DateTime lastHeartbeat)
     {
         return IsHeartbeatValid(lastHeartbeat) ? "" : "Heartbeat offline";
-    }
-
-    /// <summary>
-    /// Checks if the heartbeat is valid (within the last 5 minutes).
-    /// </summary>
-    private bool IsHeartbeatValid(DateTime lastHeartbeat)
-    {
-        return DateTime.Now <= lastHeartbeat.AddMinutes(5);
     }
 
     /// <summary>

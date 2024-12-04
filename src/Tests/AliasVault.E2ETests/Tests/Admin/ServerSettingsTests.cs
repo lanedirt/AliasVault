@@ -84,7 +84,10 @@ public class ServerSettingsTests : AdminPlaywrightTest
         // Verify weekend days are still unchecked
         var sundayChecked = await Page.Locator("input[id='day_7']").IsCheckedAsync();
         var saturdayChecked = await Page.Locator("input[id='day_6']").IsCheckedAsync();
-        Assert.That(sundayChecked, Is.False, "Sunday checkbox should be unchecked");
-        Assert.That(saturdayChecked, Is.False, "Saturday checkbox should be unchecked");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sundayChecked, Is.False, "Sunday checkbox should be unchecked");
+            Assert.That(saturdayChecked, Is.False, "Saturday checkbox should be unchecked");
+        });
     }
 }

@@ -60,7 +60,7 @@ public class TaskRunnerTests
         // Assert
         var dbContext = _testHostBuilder.GetDbContext();
         var emails = await dbContext.Emails.ToListAsync();
-        Assert.That(emails.Count, Is.EqualTo(50));
+        Assert.That(emails, Has.Count.EqualTo(50));
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class TaskRunnerTests
         // Assert
         var dbContext = _testHostBuilder.GetDbContext();
         var generalLogs = await dbContext.Logs.ToListAsync();
-        Assert.That(generalLogs.Count, Is.EqualTo(50), "Only recent general logs should remain");
+        Assert.That(generalLogs, Has.Count.EqualTo(50), "Only recent general logs should remain");
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ public class TaskRunnerTests
 
         // Check auth logs
         var authLogs = await dbContext.AuthLogs.ToListAsync();
-        Assert.That(authLogs.Count, Is.EqualTo(50), "Only recent auth logs should remain");
+        Assert.That(authLogs, Has.Count.EqualTo(50), "Only recent auth logs should remain");
     }
 
      /// <summary>
@@ -116,7 +116,7 @@ public class TaskRunnerTests
         // Make sure we don't exceed midnight
         if (futureTime.Day != now.Day)
         {
-            futureTime = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
+            futureTime = new DateTime(now.Year, now.Month, now.Day, 23, 59, 5, DateTimeKind.Local);
         }
 
         // Update maintenance time in database

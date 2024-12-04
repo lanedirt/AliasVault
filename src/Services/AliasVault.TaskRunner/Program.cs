@@ -10,7 +10,6 @@ using AliasServerDb;
 using AliasServerDb.Configuration;
 using AliasVault.Logging;
 using AliasVault.Shared.Server.Services;
-using AliasVault.TaskRunner;
 using AliasVault.TaskRunner.Tasks;
 using AliasVault.TaskRunner.Workers;
 using AliasVault.WorkerStatus.ServiceExtensions;
@@ -20,17 +19,6 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../../logs");
-
-// Create global config object, get values from environment variables.
-Config config = new Config();
-var emailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")
-                   ?? throw new KeyNotFoundException("PRIVATE_EMAIL_DOMAINS environment variable is not set.");
-config.AllowedToDomains = emailDomains.Split(',').ToList();
-
-var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")
-                 ?? throw new KeyNotFoundException("SMTP_TLS_ENABLED environment variable is not set.");
-config.SmtpTlsEnabled = tlsEnabled;
-builder.Services.AddSingleton(config);
 
 builder.Services.AddAliasVaultSqliteConfiguration();
 
