@@ -70,6 +70,14 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
 
+      - name: Build and push TaskRunner image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Services/AliasVault.TaskRunner/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
+
       - name: Build and push Reverse Proxy image
         uses: docker/build-push-action@v5
         with:
