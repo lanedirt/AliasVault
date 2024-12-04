@@ -65,6 +65,9 @@ services:
 
     task-runner:
         image: ghcr.io/lanedirt/aliasvault-task-runner:latest
+        volumes:
+            - ./database:/database:rw
+            - ./logs:/logs:rw
         restart: always
         env_file:
             - .env
