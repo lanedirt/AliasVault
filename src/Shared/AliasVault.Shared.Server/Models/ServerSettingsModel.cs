@@ -23,7 +23,7 @@ public class ServerSettingsModel
     public int AuthLogRetentionDays { get; set; } = 30;
 
     /// <summary>
-    /// Gets or sets the email retention days. Defaults to 0 (disabled).
+    /// Gets or sets the email retention days. Defaults to 0 (unlimited).
     /// </summary>
     public int EmailRetentionDays { get; set; }
 
