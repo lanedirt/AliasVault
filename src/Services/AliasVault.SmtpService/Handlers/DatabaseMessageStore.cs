@@ -298,7 +298,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
 
         // Check if the local part of the toAddress is a known alias (claimed by a user)
-        var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
         var toAddressLocal = toAddress.User.ToLowerInvariant();
         var toAddressDomain = toAddress.Host.ToLowerInvariant();
         var userEmailClaim = await dbContext.UserEmailClaims
@@ -348,7 +348,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
     /// <param name="userEncryptionKey">The public key of the user to encrypt the mail contents with.</param>
     private async Task<int> InsertEmailIntoDatabase(MimeMessage message, MailAddress toAddress, UserEncryptionKey userEncryptionKey)
     {
-        var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var newEmail = ConvertMimeMessageToEmail(message, toAddress);
         newEmail = EmailEncryption.EncryptEmail(newEmail, userEncryptionKey);
