@@ -53,6 +53,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticati
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddScoped<ConfirmModalService>();
+builder.Services.AddScoped<ServerSettingsService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 
 builder.Services.AddAuthentication(options =>

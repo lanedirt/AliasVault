@@ -1,0 +1,98 @@
+@page "/settings/server"
+@inject ServerSettingsService SettingsService
+@using AliasVault.Admin.Models
+@inherits MainBase
+
+<LayoutPageTitle>Server settings</LayoutPageTitle>
+
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Server settings"
+    Description="Configure AliasVault server settings.">
+    <CustomActions>
+        <ConfirmButton OnClick="SaveSettings">Save changes</ConfirmButton>
+    </CustomActions>
+</PageHeader>
+
+<div class="px-4">
+    <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Data Retention</h3>
+        <div class="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
+            <div>
+                <label for="generalLogRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">General Log Retention (days)</label>
+                <input type="number" @bind="Settings.GeneralLogRetentionDays" id="generalLogRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            </div>
+            <div>
+                <label for="authLogRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Auth Log Retention (days)</label>
+                <input type="number" @bind="Settings.AuthLogRetentionDays" id="authLogRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            </div>
+            <div>
+                <label for="emailRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email Retention (days)</label>
+                <input type="number" @bind="Settings.EmailRetentionDays" id="emailRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            </div>
+            <div>
+                <label for="maxEmails" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Max Emails per User</label>
+                <input type="number" @bind="Settings.MaxEmailsPerUser" id="maxEmails" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 for unlimited emails</p>
+            </div>
+        </div>
+
+        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Maintenance Schedule</h3>
+        <div class="mb-4">
+            <label for="schedule" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Time (24h format)</label>
+            <input type="time" @bind="Settings.MaintenanceTime" id="schedule" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Time when maintenance tasks are run</p>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Run on Days</label>
+            <div class="flex flex-wrap gap-4">
+                @foreach (var day in DaysOfWeek)
+                {
+                    var isSelected = Settings.TaskRunnerDays.Contains(day.Key);
+                    <div class="flex items-center">
+                        <input type="checkbox" checked="@isSelected" @onchange="@(e => ToggleDay(day.Key))" id="@($"day_{day.Key}")" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="@($"day_{day.Key}")" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">@day.Value</label>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ServerSettingsModel Settings { get; set; } = new();
+
+    private readonly Dictionary<int, string> DaysOfWeek = new()
+    {
+        { 1, "Monday" },
+        { 2, "Tuesday" },
+        { 3, "Wednesday" },
+        { 4, "Thursday" },
+        { 5, "Friday" },
+        { 6, "Saturday" },
+        { 7, "Sunday" }
+    };
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        Settings = await SettingsService.GetAllSettingsAsync();
+    }
+
+    private void ToggleDay(int day)
+    {
+        if (Settings.TaskRunnerDays.Contains(day))
+            Settings.TaskRunnerDays.Remove(day);
+        else
+            Settings.TaskRunnerDays.Add(day);
+    }
+
+    private async Task SaveSettings()
+    {
+        await SettingsService.SaveSettingsAsync(Settings);
+        GlobalNotificationService.AddSuccessMessage("Settings saved successfully", true);
+    }
+}
