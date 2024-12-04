@@ -89,11 +89,8 @@ public class EmailController(ILogger<VaultController> logger, IDbContextFactory<
             return errorResult;
         }
 
-        // Delete associated attachments
-        context.EmailAttachments.RemoveRange(email!.Attachments);
-
-        // Delete the email
-        context.Emails.Remove(email);
+        // Delete the email - attachments will be cascade deleted
+        context.Emails.Remove(email!);
 
         try
         {
