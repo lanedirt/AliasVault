@@ -127,6 +127,11 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public DbSet<AuthLog> AuthLogs { get; set; }
 
     /// <summary>
+    /// Gets or sets the ServerSettings DbSet.
+    /// </summary>
+    public DbSet<ServerSetting> ServerSettings { get; set; } = null!;
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>
@@ -237,38 +242,25 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
+        if (optionsBuilder.IsConfigured)
         {
-            var configuration = new ConfigurationBuilder()
+            return;
+        }
+
+        var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            // Add SQLite connection with enhanced settings
-            var connectionString = configuration.GetConnectionString("AliasServerDbContext") +
-                ";Mode=ReadWriteCreate;Cache=Shared" +
-                ";Journal Mode=WAL" +
-                ";Synchronous=Normal" +
-                ";Busy Timeout=30000";
+        // Add SQLite connection with enhanced settings
+        var connectionString = configuration.GetConnectionString("AliasServerDbContext") +
+            ";Mode=ReadWriteCreate;Cache=Shared" +
+            ";Journal Mode=WAL" +
+            ";Synchronous=Normal" +
+            ";Busy Timeout=30000";
 
-            optionsBuilder
-                .UseSqlite(connectionString, options => options.CommandTimeout(60))
-                .UseLazyLoadingProxies();
-
-            // Set additional PRAGMA settings
-            var connection = Database.GetDbConnection();
-            if (connection.State != System.Data.ConnectionState.Open)
-            {
-                connection.Open();
-            }
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    PRAGMA temp_store = MEMORY;
-                    PRAGMA mmap_size = 1073741824;";
-                command.ExecuteNonQuery();
-            }
-        }
+        optionsBuilder
+            .UseSqlite(connectionString, options => options.CommandTimeout(60))
+            .UseLazyLoadingProxies();
     }
 }

@@ -12,7 +12,7 @@ COPY . .
 
 # Build and publish the application
 WORKDIR "/src/src/Services/AliasVault.SmtpService"
-RUN dotnet publish "./AliasVault.SmtpService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./AliasVault.SmtpService.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

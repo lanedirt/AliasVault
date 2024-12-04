@@ -17,6 +17,7 @@ using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
+using AliasVault.Shared.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -53,6 +54,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticati
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddScoped<ConfirmModalService>();
+builder.Services.AddScoped<ServerSettingsService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 
 builder.Services.AddAuthentication(options =>

@@ -31,6 +31,12 @@
     {
         if (firstRender)
         {
+            // Check if 2FA is enabled. If not, show a one-time warning on the dashboard.
+            if (!UserService.User().TwoFactorEnabled)
+            {
+                GlobalNotificationService.AddWarningMessage("Two-factor authentication is not enabled. It is recommended to enable it in Account Settings for better security.", true);
+            }
+
             await RefreshData();
         }
     }

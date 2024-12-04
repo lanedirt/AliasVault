@@ -139,10 +139,7 @@ public class GlobalNotificationService
             messages.Add(new KeyValuePair<string, string>("error", message));
         }
 
-        // Clear messages
-        SuccessMessages.Clear();
-        InfoMessages.Clear();
-        ErrorMessages.Clear();
+        ClearMessages();
 
         return messages;
     }

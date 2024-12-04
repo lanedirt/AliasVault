@@ -28,3 +28,9 @@ services:
         build:
             context: .
             dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
+
+    task-runner:
+        image: aliasvault-task-runner
+        build:
+            context: .
+            dockerfile: src/Services/AliasVault.TaskRunner/Dockerfile

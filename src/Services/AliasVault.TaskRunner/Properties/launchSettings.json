@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "AliasVault.TaskRunner": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "PRIVATE_EMAIL_DOMAINS": "example.tld",
+        "SMTP_TLS_ENABLED": "false"
+      },
+      "dotnetRunMessages": true
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json"
+}

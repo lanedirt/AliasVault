@@ -1,0 +1,240 @@
+﻿@using AliasVault.WorkerStatus.Database
+@inherits MainBase
+
+@foreach (var service in Services)
+{
+    <button @onclick="() => ServiceClick(service.Name)"
+            class="@GetServiceButtonClasses(service) mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white"
+            disabled="@(!IsHeartbeatValid(service.LastHeartbeat))"
+            title="@GetButtonTooltip(service.LastHeartbeat)">
+        <span>@service.DisplayName</span>
+        @if (service.IsPending)
+        {
+            <svg class="animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        }
+    </button>
+}
+
+@code {
+    /// <summary>
+    /// The names of the services to display.
+    /// </summary>
+    [Parameter]
+    public List<string> ServiceNames { get; set; } = ["AliasVault.SmtpService", "AliasVault.TaskRunner"];
+
+    /// <summary>
+    /// The display names of the services to display.
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, string> ServiceDisplayNames { get; set; } = new();
+
+    /// <summary>
+    /// The statuses of the services.
+    /// </summary>
+    private List<WorkerServiceStatus> ServiceStatus = [];
+
+    /// <summary>
+    /// Whether the page is initializing.
+    /// </summary>
+    private bool InitInProgress;
+
+    /// <summary>
+    /// The interval to refresh the page.
+    /// </summary>
+    private readonly int AutoRefreshInterval = 5000;
+    private CancellationTokenSource? _timerCancellationTokenSource;
+
+    /// <summary>
+    /// The state of a service.
+    /// </summary>
+    private sealed class ServiceState
+    {
+        public string Name { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public bool Status { get; set; }
+        public bool IsPending { get; set; }
+        public DateTime LastHeartbeat { get; set; }
+    }
+
+    private List<ServiceState> Services { get; set; } = [];
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        Services = ServiceNames.Select(name => new ServiceState
+        {
+            Name = name,
+            DisplayName = ServiceDisplayNames.GetValueOrDefault(name, name)
+        }).ToList();
+
+        await base.OnInitializedAsync();
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            _timerCancellationTokenSource = new CancellationTokenSource();
+            _ = RunPeriodicRefreshAsync(_timerCancellationTokenSource.Token);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            _timerCancellationTokenSource?.Cancel();
+            _timerCancellationTokenSource?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Checks if the heartbeat is valid (within the last 5 minutes).
+    /// </summary>
+    private static bool IsHeartbeatValid(DateTime lastHeartbeat)
+    {
+        return DateTime.Now <= lastHeartbeat.AddMinutes(5);
+    }
+
+    /// <summary>
+    /// Gets the CSS classes for a service button based on its current state.
+    /// </summary>
+    private static string GetServiceButtonClasses(ServiceState service)
+    {
+        string buttonClass = "cursor-pointer ";
+
+        if (!IsHeartbeatValid(service.LastHeartbeat))
+        {
+            buttonClass += "bg-gray-600";
+        }
+        else if (service.Status)
+        {
+            buttonClass += "bg-green-600";
+        }
+        else
+        {
+            buttonClass += "bg-red-600";
+        }
+
+        return buttonClass;
+    }
+
+    /// <summary>
+    /// Gets the tooltip text for a service button based on its last heartbeat.
+    /// </summary>
+    private static string GetButtonTooltip(DateTime lastHeartbeat)
+    {
+        return IsHeartbeatValid(lastHeartbeat) ? "" : "Heartbeat offline";
+    }
+
+    /// <summary>
+    /// Handles a click on a service button.
+    /// </summary>
+    private async Task ServiceClick(string serviceName)
+    {
+        var service = Services.First(s => s.Name == serviceName);
+
+        if (!IsHeartbeatValid(service.LastHeartbeat))
+        {
+            return;
+        }
+
+        service.IsPending = true;
+        StateHasChanged();
+
+        service.Status = !service.Status;
+        await UpdateServiceStatus(serviceName, service.Status);
+
+        service.IsPending = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Initializes the page.
+    /// </summary>
+    private async Task InitPage()
+    {
+        if (InitInProgress || Services.Any(s => s.IsPending))
+        {
+            return;
+        }
+
+        try
+        {
+            InitInProgress = true;
+            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
+
+            foreach (var service in Services)
+            {
+                var entry = ServiceStatus.Find(x => x.ServiceName == service.Name);
+                if (entry != null)
+                {
+                    service.LastHeartbeat = entry.Heartbeat;
+                    service.Status = IsHeartbeatValid(service.LastHeartbeat) && entry.CurrentStatus == "Started";
+                }
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        finally
+        {
+            InitInProgress = false;
+        }
+    }
+
+    /// <summary>
+    /// Updates the status of a service.
+    /// </summary>
+    private async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
+    {
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
+        if (entry != null)
+        {
+            string newDesiredStatus = newStatus ? "Started" : "Stopped";
+            entry.DesiredStatus = newDesiredStatus;
+            await dbContext.SaveChangesAsync();
+
+            var timeout = DateTime.Now.AddSeconds(30);
+            while (true)
+            {
+                if (DateTime.Now > timeout)
+                {
+                    return false;
+                }
+
+                dbContext = await DbContextFactory.CreateDbContextAsync();
+                var check = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
+                if (check.CurrentStatus == newDesiredStatus)
+                {
+                    return true;
+                }
+                await Task.Delay(1000);
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Refreshes the service status periodically.
+    /// </summary>
+    private async Task RunPeriodicRefreshAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await InitPage();
+            await Task.Delay(AutoRefreshInterval, cancellationToken);
+        }
+    }
+}
