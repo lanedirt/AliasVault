@@ -17,6 +17,7 @@ using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
+using AliasVault.Shared.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
