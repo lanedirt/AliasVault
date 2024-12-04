@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Admin.Models;
+namespace AliasVault.Shared.Server.Models;
 
 /// <summary>
 /// Server settings model.

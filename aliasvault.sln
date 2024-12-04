@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Shared.Core", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.TaskRunner", "src\Services\AliasVault.TaskRunner\AliasVault.TaskRunner.csproj", "{D631A936-DD1C-40CC-B735-BD0A5D4F46A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliasVault.Shared.Server", "src\Shared\AliasVault.Shared.Server\AliasVault.Shared.Server.csproj", "{34FADEB6-4B56-463B-B359-F844B43D76D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,10 @@ Global
 		{D631A936-DD1C-40CC-B735-BD0A5D4F46A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D631A936-DD1C-40CC-B735-BD0A5D4F46A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D631A936-DD1C-40CC-B735-BD0A5D4F46A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34FADEB6-4B56-463B-B359-F844B43D76D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34FADEB6-4B56-463B-B359-F844B43D76D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34FADEB6-4B56-463B-B359-F844B43D76D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34FADEB6-4B56-463B-B359-F844B43D76D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -204,6 +210,7 @@ Global
 		{15EFE0D0-F41B-47D7-86B7-8F840335CB82} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
 		{40CA41BF-9E67-4D0A-A3F8-38B94992E4CA} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
 		{D631A936-DD1C-40CC-B735-BD0A5D4F46A1} = {8A477241-B96C-4174-968D-D40CB77F1ECD}
+		{34FADEB6-4B56-463B-B359-F844B43D76D9} = {DD359F0A-0180-4F8F-9E48-46213386BA4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FEE82475-C009-4762-8113-A6563D9DC49E}

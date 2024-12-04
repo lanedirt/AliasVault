@@ -5,32 +5,23 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Admin.Services;
+namespace AliasVault.Shared.Server.Services;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AliasServerDb;
-using AliasVault.Admin.Models;
+using AliasVault.Shared.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Server settings service.
 /// </summary>
-public class ServerSettingsService
+/// <param name="dbContextFactory">IDbContextFactory instance.</param>
+public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbContextFactory)
 {
-    private readonly AliasServerDbContext _dbContext;
     private readonly Dictionary<string, string?> _cache = new();
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ServerSettingsService"/> class.
-    /// </summary>
-    /// <param name="dbContext">The database context.</param>
-    public ServerSettingsService(AliasServerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
 
     /// <summary>
     /// Gets the setting async.
@@ -44,7 +35,9 @@ public class ServerSettingsService
             return cachedValue;
         }
 
-        var setting = await _dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
+
         _cache[key] = setting?.Value;
         return setting?.Value;
     }
@@ -63,7 +56,8 @@ public class ServerSettingsService
             return;
         }
 
-        var setting = await _dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
         var now = DateTime.UtcNow;
 
         // If setting exists and value hasn't changed, return early
@@ -83,7 +77,7 @@ public class ServerSettingsService
                 CreatedAt = now,
                 UpdatedAt = now,
             };
-            _dbContext.ServerSettings.Add(setting);
+            dbContext.ServerSettings.Add(setting);
         }
         else
         {
@@ -91,7 +85,7 @@ public class ServerSettingsService
             setting.UpdatedAt = now;
         }
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
         _cache[key] = value;
     }
 
@@ -101,7 +95,8 @@ public class ServerSettingsService
     /// <returns>The settings.</returns>
     public async Task<ServerSettingsModel> GetAllSettingsAsync()
     {
-        var settings = await _dbContext.ServerSettings.ToDictionaryAsync(x => x.Key, x => x.Value);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        var settings = await dbContext.ServerSettings.ToDictionaryAsync(x => x.Key, x => x.Value);
 
         return new ServerSettingsModel
         {
