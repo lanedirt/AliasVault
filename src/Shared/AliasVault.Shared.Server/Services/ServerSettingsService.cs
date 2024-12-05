@@ -99,19 +99,53 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
         var settings = await dbContext.ServerSettings.ToDictionaryAsync(x => x.Key, x => x.Value);
 
-        return new ServerSettingsModel
+        // Create model with defaults
+        var model = new ServerSettingsModel();
+
+        // Only override if parsing succeeds
+        if (int.TryParse(settings.GetValueOrDefault("GeneralLogRetentionDays"), out var generalDays))
         {
-            GeneralLogRetentionDays = int.TryParse(settings.GetValueOrDefault("GeneralLogRetentionDays"), out var generalDays) ? generalDays : 30,
-            AuthLogRetentionDays = int.TryParse(settings.GetValueOrDefault("AuthLogRetentionDays"), out var authDays) ? authDays : 90,
-            EmailRetentionDays = int.TryParse(settings.GetValueOrDefault("EmailRetentionDays"), out var emailDays) ? emailDays : 30,
-            MaxEmailsPerUser = int.TryParse(settings.GetValueOrDefault("MaxEmailsPerUser"), out var maxEmails) ? maxEmails : 100,
-            MaintenanceTime = TimeOnly.TryParse(
-                settings.GetValueOrDefault("MaintenanceTime") ?? "00:00",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var time) ? time : new TimeOnly(0, 0),
-            TaskRunnerDays = settings.GetValueOrDefault("TaskRunnerDays")?.Split(',').Select(int.Parse).ToList() ?? new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-        };
+            model.GeneralLogRetentionDays = generalDays;
+        }
+
+        if (int.TryParse(settings.GetValueOrDefault("AuthLogRetentionDays"), out var authDays))
+        {
+            model.AuthLogRetentionDays = authDays;
+        }
+
+        if (int.TryParse(settings.GetValueOrDefault("EmailRetentionDays"), out var emailDays))
+        {
+            model.EmailRetentionDays = emailDays;
+        }
+
+        if (int.TryParse(settings.GetValueOrDefault("MaxEmailsPerUser"), out var maxEmails))
+        {
+            model.MaxEmailsPerUser = maxEmails;
+        }
+
+        if (TimeOnly.TryParse(
+            settings.GetValueOrDefault("MaintenanceTime") ?? "00:00",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out var time))
+        {
+            model.MaintenanceTime = time;
+        }
+
+        var taskRunnerDaysStr = settings.GetValueOrDefault("TaskRunnerDays");
+        if (!string.IsNullOrEmpty(taskRunnerDaysStr))
+        {
+            try
+            {
+                model.TaskRunnerDays = taskRunnerDaysStr.Split(',').Select(int.Parse).ToList();
+            }
+            catch (FormatException)
+            {
+                // Keep default if parsing fails
+            }
+        }
+
+        return model;
     }
 
     /// <summary>
