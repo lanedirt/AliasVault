@@ -25,7 +25,7 @@ Open-source password and alias manager
 
 </div>
 
-AliasVault is an open-source password and alias manager built with C# ASP.NET technology. AliasVault can be self-hosted on your own server with Docker, providing a secure and private solution for managing your online identities and passwords.
+AliasVault is an end-to-end encrypted password and alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. The core of AliasVault is built with C# ASP.NET Blazor WASM technology. AliasVault can be self-hosted on your own server with Docker.
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
