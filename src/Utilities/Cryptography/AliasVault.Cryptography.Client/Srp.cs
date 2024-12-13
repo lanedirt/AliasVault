@@ -26,7 +26,9 @@ public static class Srp
     /// <returns>SrpSignup model.</returns>
     public static SrpPasswordChange PasswordChangeAsync(SrpClient client, string salt, string username, string passwordHashString)
     {
-        // Derive a key from the password using Argon2id
+        // Derive a key from the password using Argon2id.
+        // Make sure the username is lowercase as the SRP protocol is case sensitive.
+        username = username.ToLowerInvariant();
 
         // Signup or password change: client generates a salt and verifier.
         var privateKey = DerivePrivateKey(salt, username, passwordHashString);
@@ -44,6 +46,9 @@ public static class Srp
     /// <returns>Private key as string.</returns>
     public static string DerivePrivateKey(string salt, string username, string passwordHashString)
     {
+        // Make sure the username is lowercase as the SRP protocol is case sensitive.
+        username = username.ToLowerInvariant();
+
         var client = new SrpClient();
         return client.DerivePrivateKey(salt, username, passwordHashString);
     }
@@ -80,6 +85,9 @@ public static class Srp
     /// <returns>session.</returns>
     public static SrpSession DeriveSessionClient(string privateKey, string clientSecretEphemeral, string serverEphemeralPublic, string salt, string username)
     {
+        // Make sure the username is lowercase as the SRP protocol is case sensitive.
+        username = username.ToLowerInvariant();
+
         var client = new SrpClient();
         return client.DeriveSession(
             clientSecretEphemeral,
@@ -101,6 +109,9 @@ public static class Srp
     /// <returns>SrpSession.</returns>
     public static SrpSession? DeriveSessionServer(string serverEphemeralSecret, string clientEphemeralPublic, string salt, string username, string verifier, string clientSessionProof)
     {
+        // Make sure the username is lowercase as the SRP protocol is case sensitive.
+        username = username.ToLowerInvariant();
+
         try
         {
             var server = new SrpServer();

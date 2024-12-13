@@ -68,11 +68,49 @@ public class AuthTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if logging out and logging in works.
+    /// Test if logging in with different case variations of username works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(3)]
+    public async Task CapitalizedUsernameTest()
+    {
+        // Logout current user
+        await Logout();
+
+        // Create a new user with capital letters in username
+        var capitalUsername = "TestUser@Example.com";
+        await Register(checkForSuccess: true, username: capitalUsername);
+        await Logout();
+
+        // Test Case 1: Try to login with lowercase version of the username
+        var lowercaseUsername = capitalUsername.ToLower();
+        await LoginWithUsername(lowercaseUsername);
+        await VerifySuccessfulLogin();
+
+        // Test Case 2: Try to login with exact capitalized username
+        await Logout();
+        await LoginWithUsername(capitalUsername);
+        await VerifySuccessfulLogin();
+
+        // Test Case 3: Create new user with lowercase
+        await Logout();
+        var lowercaseUser = "testuser2@example.com";
+        await Register(checkForSuccess: true, username: lowercaseUser);
+        await Logout();
+
+        // Try logging in with uppercase version
+        var uppercaseVersion = lowercaseUser.ToUpper();
+        await LoginWithUsername(uppercaseVersion);
+        await VerifySuccessfulLogin();
+    }
+
+    /// <summary>
+    /// Test if logging out and logging in works.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(4)]
     public async Task LogoutAndLoginRememberMeTest()
     {
         await Logout();
@@ -101,7 +139,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(4)]
+    [Order(5)]
     public async Task RegisterFormWarningTest()
     {
         await Logout();
@@ -116,7 +154,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(5)]
+    [Order(6)]
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();
@@ -151,5 +189,42 @@ public class AuthTests : ClientPlaywrightTest
         await WaitForUrlAsync("user/login**", "locked out");
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("locked out"), "No account lockout message.");
+    }
+
+    /// <summary>
+    /// Login with a given username.
+    /// </summary>
+    /// <param name="username">The username to login with.</param>
+    /// <returns>Async task.</returns>
+    private async Task LoginWithUsername(string username)
+    {
+        await NavigateToLogin();
+
+        var emailField = await WaitForAndGetElement("input[id='email']");
+        var passwordField = await WaitForAndGetElement("input[id='password']");
+        await emailField.FillAsync(username);
+        await passwordField.FillAsync(TestUserPassword);
+
+        var loginButton = await WaitForAndGetElement("button[type='submit']");
+        await loginButton.ClickAsync();
+    }
+
+    /// <summary>
+    /// Verify that a login was successful.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    private async Task VerifySuccessfulLogin()
+    {
+        // Wait for the index page to load which should show "Credentials" in the top menu.
+        await WaitForUrlAsync("**", "Credentials");
+
+        // Check if the login was successful by verifying content.
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(WelcomeMessage), "No index content after logging in.");
+
+        // Check if login has created an auth log entry.
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x =>
+            x.EventType == AuthEventType.Login);
+        Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
     }
 }
