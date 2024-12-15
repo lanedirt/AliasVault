@@ -148,11 +148,7 @@ public class TaskRunnerTests
         await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
 
         // Get current day of week (1-7, Monday = 1, Sunday = 7)
-        var currentDay = (int)DateTime.Now.DayOfWeek;
-        if (currentDay == 0)
-        {
-            currentDay = 7; // Convert Sunday from 0 to 7
-        }
+        var currentDay = (int)DateTime.Now.DayOfWeek + 1;
 
         // Update maintenance settings in database to exclude current day
         var dbContext = _testHostBuilder.GetDbContext();

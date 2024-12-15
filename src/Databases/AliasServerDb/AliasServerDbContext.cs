@@ -134,6 +134,11 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public DbSet<ServerSetting> ServerSettings { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the TaskRunnerJobs DbSet.
+    /// </summary>
+    public DbSet<TaskRunnerJob> TaskRunnerJobs { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>

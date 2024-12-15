@@ -52,6 +52,13 @@ public class LogCleanupTask : IMaintenanceTask
                 .Where(x => x.TimeStamp < cutoffDate)
                 .ExecuteDeleteAsync(cancellationToken);
             _logger.LogWarning("Deleted {Count} general log entries older than {Days} days", deletedCount, settings.GeneralLogRetentionDays);
+
+            // Delete old task runner jobs
+            var jobCutoffDate = DateTime.UtcNow.AddDays(-settings.GeneralLogRetentionDays);
+            var deletedJobCount = await dbContext.TaskRunnerJobs
+                .Where(x => x.RunDate < jobCutoffDate)
+                .ExecuteDeleteAsync(cancellationToken);
+            _logger.LogWarning("Deleted {Count} task runner job entries older than {Days} days", deletedJobCount, settings.GeneralLogRetentionDays);
         }
 
         if (settings.AuthLogRetentionDays > 0)
