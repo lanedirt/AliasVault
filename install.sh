@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.9.3
+# @version 0.9.4
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
@@ -253,7 +253,7 @@ handle_docker_compose() {
         fi
         printf "\n  ${CYAN}> docker-compose.yml downloaded successfully.${NC}\n"
     else
-        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/blob/${version_tag}/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
+        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
         exit 1
     fi
 
@@ -262,7 +262,7 @@ handle_docker_compose() {
     if curl -sSf "${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.letsencrypt.yml" -o "docker-compose.letsencrypt.yml" > /dev/null 2>&1; then
         printf "\n  ${CYAN}> docker-compose.letsencrypt.yml downloaded successfully.${NC}\n"
     else
-        printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/blob/${version_tag}/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
+        printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
         exit 1
     fi
 
