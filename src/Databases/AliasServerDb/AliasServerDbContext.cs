@@ -25,6 +25,7 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     /// </summary>
     public AliasServerDbContext()
     {
+        SetPragmaSettings();
     }
 
     /// <summary>
@@ -34,6 +35,7 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
         : base(options)
     {
+        SetPragmaSettings();
     }
 
     /// <summary>
@@ -254,13 +256,34 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
 
         // Add SQLite connection with enhanced settings
         var connectionString = configuration.GetConnectionString("AliasServerDbContext") +
-            ";Mode=ReadWriteCreate;Cache=Shared" +
-            ";Journal Mode=WAL" +
-            ";Synchronous=Normal" +
-            ";Busy Timeout=30000";
+                               ";Mode=ReadWriteCreate;Cache=Shared";
 
         optionsBuilder
             .UseSqlite(connectionString, options => options.CommandTimeout(60))
             .UseLazyLoadingProxies();
+    }
+
+    /// <summary>
+    /// Sets up the PRAGMA settings for SQLite.
+    /// </summary>
+    private void SetPragmaSettings()
+    {
+        var connection = Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            connection.Open();
+        }
+
+        using (var command = connection.CreateCommand())
+        {
+            // Increase busy timeout
+            command.CommandText = @"
+                    PRAGMA busy_timeout = 30000;
+                    PRAGMA journal_mode = WAL;
+                    PRAGMA synchronous = NORMAL;
+                    PRAGMA temp_store = MEMORY;
+                    PRAGMA mmap_size = 1073741824;";
+            command.ExecuteNonQuery();
+        }
     }
 }
