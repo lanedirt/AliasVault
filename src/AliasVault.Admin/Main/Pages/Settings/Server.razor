@@ -1,7 +1,10 @@
 @page "/settings/server"
 @inject ServerSettingsService SettingsService
+@inject ILogger<ServerSettingsService> Logger
+@using AliasVault.Shared.Models.Enums
 @using AliasVault.Shared.Server.Models
 @using AliasVault.Shared.Server.Services
+@using AliasVault.Admin.Main.Pages.Settings.Components
 @inherits MainBase
 
 <LayoutPageTitle>Server settings</LayoutPageTitle>
@@ -11,6 +14,7 @@
     Title="Server settings"
     Description="Configure AliasVault server settings.">
     <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
         <ConfirmButton OnClick="SaveSettings">Save changes</ConfirmButton>
     </CustomActions>
 </PageHeader>
@@ -40,7 +44,9 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 for unlimited emails</p>
             </div>
         </div>
+    </div>
 
+    <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Maintenance Schedule</h3>
         <div class="mb-4">
             <label for="schedule" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Time (24h format)</label>
@@ -60,12 +66,23 @@
                 }
             </div>
         </div>
+
+        <div class="mb-4">
+            <h4 class="mb-2 text-md font-medium text-gray-900 dark:text-white">Manual Execution</h4>
+            <ConfirmButton OnClick="RunMaintenanceTasksNow">Run Maintenance Tasks Now</ConfirmButton>
+        </div>
+    </div>
+
+    <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Maintenance History</h3>
+        <TaskRunnerHistory @ref="_taskRunnerHistoryComponent" />
     </div>
 </div>
 
 @code {
-    private ServerSettingsModel Settings { get; set; } = new();
+    private TaskRunnerHistory? _taskRunnerHistoryComponent;
 
+    private ServerSettingsModel Settings { get; set; } = new();
     private readonly Dictionary<int, string> DaysOfWeek = new()
     {
         { 1, "Monday" },
@@ -86,14 +103,64 @@
     private void ToggleDay(int day)
     {
         if (Settings.TaskRunnerDays.Contains(day))
+        {
             Settings.TaskRunnerDays.Remove(day);
+        }
         else
+        {
             Settings.TaskRunnerDays.Add(day);
+        }
     }
 
     private async Task SaveSettings()
     {
         await SettingsService.SaveSettingsAsync(Settings);
         GlobalNotificationService.AddSuccessMessage("Settings saved successfully", true);
+    }
+
+    private async Task RunMaintenanceTasksNow()
+    {
+        try
+        {
+            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            var job = new TaskRunnerJob
+            {
+                Name = nameof(TaskRunnerJobType.Maintenance),
+                RunDate = DateTime.Now.Date,
+                StartTime = TimeOnly.FromDateTime(DateTime.Now),
+                Status = TaskRunnerJobStatus.Pending,
+                IsOnDemand = true
+            };
+
+            dbContext.TaskRunnerJobs.Add(job);
+            await dbContext.SaveChangesAsync();
+
+            // Refresh the history component to show the new job
+            if (_taskRunnerHistoryComponent != null)
+            {
+                await _taskRunnerHistoryComponent.RefreshData();
+            }
+
+            Logger.LogWarning("Maintenance tasks manually queued.");
+            GlobalNotificationService.AddSuccessMessage("Maintenance tasks queued. They will be executed on the next polling cycle (default every minute). Check the logs for details.", true);
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Failed to start maintenance tasks: {ex.Message}", true);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the data displayed on the page.
+    /// </summary>
+    private async Task RefreshData()
+    {
+        Settings = await SettingsService.GetAllSettingsAsync();
+
+        // Refresh the history component to show the new job
+        if (_taskRunnerHistoryComponent != null)
+        {
+            await _taskRunnerHistoryComponent.RefreshData();
+        }
     }
 }
