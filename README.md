@@ -1,5 +1,7 @@
 <div align="center">
 
+🌟 **If you find this project useful, please consider giving it a star!** 🌟
+
 <h1><img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="40" /> AliasVault</h1>
 
 <p align="center">
