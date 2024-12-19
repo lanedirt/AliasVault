@@ -94,9 +94,9 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// to prevent any conflicts during future vault saves.
     /// </summary>
     /// <param name="username">The username of the currently logged-in user.</param>
-    public void StoreUsername(string username)
+    public void StoreUsername(string? username)
     {
-        _username = username;
+        _username = username ?? string.Empty;
     }
 
     /// <summary>

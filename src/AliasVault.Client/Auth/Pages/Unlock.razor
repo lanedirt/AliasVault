@@ -157,6 +157,7 @@ else
             }
 
             // Store the encryption key in memory.
+            AuthService.StoreUsername(Username);
             await AuthService.StoreEncryptionKeyAsync(passwordHash);
 
             // Redirect to the page the user was trying to access before if set.
