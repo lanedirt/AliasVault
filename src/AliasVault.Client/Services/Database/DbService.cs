@@ -142,7 +142,7 @@ public sealed class DbService : IDisposable
                 await command.ExecuteNonQueryAsync();
             }
 
-            // Merge each database into the base.
+            // Merge every remote database into the current database.
             foreach (var connection in sqlConnections)
             {
                 foreach (var table in tables)
@@ -643,8 +643,7 @@ public sealed class DbService : IDisposable
                 if (vaultUpdateResponse.Status == VaultStatus.MergeRequired)
                 {
                     _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
-                    await MergeDatabasesAsync();
-                    return false;
+                    return await MergeDatabasesAsync();
                 }
 
                 _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
