@@ -74,10 +74,16 @@
         if (await DbService.MigrateDatabaseAsync())
         {
             // Save the database to the server.
-            await DbService.SaveDatabaseAsync();
-
-            // Migration successful.
-            GlobalNotificationService.AddSuccessMessage("Vault upgrade successful.", true);
+            if (await DbService.SaveDatabaseAsync())
+            {
+                // Migration successful.
+                GlobalNotificationService.AddSuccessMessage("Vault upgrade successful.", true);
+            }
+            else
+            {
+                // Migration failed
+                ErrorMessage = "Database upgrade successful but failed to save to server. Please try again or contact support.";
+            }
         }
         else
         {
