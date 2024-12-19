@@ -182,8 +182,9 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// </summary>
     /// <param name="formValues">Dictionary with html element ids and values to input as field value.</param>
     /// <param name="customLogic">Optional custom logic to execute after filling input fields.</param>
+    /// <param name="checkForSuccess">Whether to check for success message after creating credential entry.</param>
     /// <returns>Async task.</returns>
-    protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null, Func<Task>? customLogic = null)
+    protected async Task CreateCredentialEntry(Dictionary<string, string>? formValues = null, Func<Task>? customLogic = null, bool checkForSuccess = true)
     {
         // Advance the time by 1 second to ensure the credential is created with a unique timestamp.
         // This is required for certain tests that check for the latest credential and/or latest vault.
@@ -208,11 +209,15 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         var submitButton = Page.Locator("text=Save Credentials").First;
         await submitButton.ClickAsync();
-        await WaitForUrlAsync("credentials/**", "Credential created successfully");
 
-        // Check if the credential was created
-        var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
+        if (checkForSuccess)
+        {
+            await WaitForUrlAsync("credentials/**", "Credential created successfully");
+
+            // Check if the credential was created
+            var pageContent = await Page.TextContentAsync("body");
+            Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
+        }
     }
 
     /// <summary>

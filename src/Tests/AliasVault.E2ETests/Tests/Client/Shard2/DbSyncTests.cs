@@ -197,7 +197,10 @@ public class DbSyncTests : ClientPlaywrightTest
             await NavigateUsingBlazorRouter("credentials");
             await WaitForUrlAsync("credentials", "Find all of your credentials");
 
-            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestB" } });
+            await CreateCredentialEntry(new Dictionary<string, string> { { "service-name", "TestB" } }, null, false);
+
+            // Wait for 1 second to ensure the page is loaded.
+            await Task.Delay(1000);
         });
 
         // Assert that merge failed error message is shown.
