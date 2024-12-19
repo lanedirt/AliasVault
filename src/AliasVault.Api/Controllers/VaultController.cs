@@ -89,6 +89,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
                 Status = VaultStatus.Ok,
                 Vault = new Shared.Models.WebApi.Vault.Vault
                 {
+                    Username = user.UserName!,
                     Blob = string.Empty,
                     Version = string.Empty,
                     CurrentRevisionNumber = 0,
@@ -121,6 +122,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
             Status = VaultStatus.Ok,
             Vault = new Shared.Models.WebApi.Vault.Vault
             {
+                Username = user.UserName!,
                 Blob = vault.VaultBlob,
                 Version = vault.Version,
                 CurrentRevisionNumber = vault.RevisionNumber,
@@ -159,6 +161,7 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         {
             Vaults = vaultsToMerge.Select(x => new Shared.Models.WebApi.Vault.Vault
             {
+                Username = user.UserName!,
                 Blob = x.VaultBlob,
                 Version = x.Version,
                 CurrentRevisionNumber = x.RevisionNumber,
@@ -185,6 +188,15 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         if (user == null)
         {
             return Unauthorized();
+        }
+
+        // Compare the logged-in username with the username in the provided vault model.
+        // If they do not match reject the request. This is important because it's
+        // possible that a user has logged in with a different username than the one
+        // that is being used to update the vault (e.g. if working with multiple tabs).
+        if (user.UserName != model.Username)
+        {
+            return BadRequest("The currently logged on user is not the owner of the vault being saved. Please save your changes locally and log out and in again.");
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
@@ -254,6 +266,15 @@ public class VaultController(ILogger<VaultController> logger, IDbContextFactory<
         if (user == null)
         {
             return Unauthorized();
+        }
+
+        // Compare the logged-in username with the username in the provided vault model.
+        // If they do not match reject the request. This is important because it's
+        // possible that a user has logged in with a different username than the one
+        // that is being used to update the vault (e.g. if working with multiple tabs).
+        if (model.Username != user.UserName)
+        {
+            return BadRequest("The currently logged on user is not the owner of the vault being saved. Please save your changes locally and log out and in again.");
         }
 
         // Validate the SRP session (actual password check).

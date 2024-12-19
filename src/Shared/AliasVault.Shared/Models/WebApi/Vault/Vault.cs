@@ -13,6 +13,11 @@ namespace AliasVault.Shared.Models.WebApi.Vault;
 public class Vault
 {
     /// <summary>
+    /// Gets or sets the username that owns the vault.
+    /// </summary>
+    public required string Username { get; set; }
+
+    /// <summary>
     /// Gets or sets the vault blob.
     /// </summary>
     public required string Blob { get; set; }

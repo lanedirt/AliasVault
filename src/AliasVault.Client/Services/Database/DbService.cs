@@ -374,12 +374,14 @@ public sealed class DbService : IDisposable
     /// <returns>Vault object.</returns>
     public async Task<Vault> PrepareVaultForUploadAsync(string encryptedDatabase)
     {
+        var username = _authService.GetUsername();
         var databaseVersion = await GetCurrentDatabaseVersionAsync();
         var encryptionKey = await GetOrCreateEncryptionKeyAsync();
         var credentialsCount = await _dbContext.Credentials.Where(x => !x.IsDeleted).CountAsync();
         var emailAddresses = await GetEmailClaimListAsync();
         return new Vault
         {
+            Username = username,
             Blob = encryptedDatabase,
             Version = databaseVersion,
             CurrentRevisionNumber = _vaultRevisionNumber,

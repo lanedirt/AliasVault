@@ -390,6 +390,9 @@ else
         // 5. Client verifies proof.
         Srp.VerifySession(_clientEphemeral.Public, _clientSession, validateLoginResponse.ServerSessionProof);
 
+        // Store username in local memory for comparing later when trying to save new vaults.
+        AuthService.StoreUsername(_loginModel.Username);
+
         // Store the tokens in local storage.
         await AuthService.StoreAccessTokenAsync(validateLoginResponse.Token!.Token);
         await AuthService.StoreRefreshTokenAsync(validateLoginResponse.Token!.RefreshToken);

@@ -66,6 +66,7 @@ public class UserRegistrationService(HttpClient httpClient, AuthenticationStateP
                 return (false, "An error occurred during registration.");
             }
 
+            authService.StoreUsername(username);
             await authService.StoreEncryptionKeyAsync(passwordHash);
             await authService.StoreAccessTokenAsync(tokenObject.Token);
             await authService.StoreRefreshTokenAsync(tokenObject.RefreshToken);
