@@ -4,7 +4,7 @@
         The recovery codes below are used to access your account in case you lose access to your authenticator device.
         Make a photo or write them down and store them in a secure location. Do not share them with anyone.
     </div>
-    <div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4">
+    <div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4 dark:bg-gray-700 dark:border-primary-500 dark:text-gray-200">
         <p class="font-semibold">
             Store these recovery codes in a safe place.
         </p>
@@ -18,7 +18,7 @@
         @foreach (var recoveryCode in RecoveryCodes)
         {
             <div>
-                <code class="block p-2">@recoveryCode</code>
+                <code class="block p-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200">@recoveryCode</code>
             </div>
         }
     </div>

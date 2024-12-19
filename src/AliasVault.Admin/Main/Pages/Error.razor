@@ -3,21 +3,21 @@
 
 <LayoutPageTitle>Error</LayoutPageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger dark:text-red-400">Error.</h1>
+<h2 class="text-danger dark:text-red-400">An error occurred while processing your request.</h2>
 
 @if (ShowRequestId)
 {
     <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
+        <strong>Request ID:</strong> <code class="dark:bg-gray-700 dark:text-gray-200">@RequestId</code>
     </p>
 }
 
-<h3>Development Mode</h3>
-<p>
+<h3 class="dark:text-white">Development Mode</h3>
+<p class="dark:text-gray-300">
     Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
 </p>
-<p>
+<p class="dark:text-gray-300">
     <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
     It can result in displaying sensitive information from exceptions to end users.
     For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
