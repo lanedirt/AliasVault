@@ -11,7 +11,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using AliasVault.Shared.Models.WebApi.Auth;
 using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 /// <summary>
@@ -34,6 +33,14 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// </summary>
     private const string EncryptionTestString = "aliasvault-test-string";
 
+    /// <summary>
+    /// The username of the currently logged-in user to prevent any conflicts during future vault saves.
+    /// </summary>
+    private string _username = string.Empty;
+
+    /// <summary>
+    /// The encryption key used to encrypt and decrypt the vault data.
+    /// </summary>
     private byte[] _encryptionKey = new byte[32];
 
     /// <summary>
@@ -42,7 +49,6 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     /// <returns>The new access token.</returns>
     public async Task<string?> RefreshTokenAsync()
     {
-        // Your logic to get the refresh token and request a new access token
         var accessToken = await GetAccessTokenAsync();
         var refreshToken = await GetRefreshTokenAsync();
         var tokenInput = new TokenModel { Token = accessToken, RefreshToken = refreshToken };
@@ -71,6 +77,26 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Retrieves the username of the currently logged-in user.
+    /// </summary>
+    /// <returns>The currently logged-in user's username.</returns>
+    public string GetUsername()
+    {
+        return _username;
+    }
+
+    /// <summary>
+    /// Stores the username of the vault owner in local memory. This value will be sent to the server during
+    /// vault updates to ensure that the API is updating the correct vault of the correct user preventing any conflicts
+    /// or vault corruption.
+    /// </summary>
+    /// <param name="username">The username of the currently logged-in user and owner of the vault being loaded.</param>
+    public void StoreUsername(string? username)
+    {
+        _username = username ?? string.Empty;
     }
 
     /// <summary>
@@ -292,6 +318,7 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
         }
 
         // Remove the tokens from local storage.
+        _username = string.Empty;
         await localStorage.RemoveItemAsync(AccessTokenKey);
         await localStorage.RemoveItemAsync(RefreshTokenKey);
     }

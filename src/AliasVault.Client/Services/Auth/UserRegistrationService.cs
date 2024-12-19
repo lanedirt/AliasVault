@@ -66,6 +66,8 @@ public class UserRegistrationService(HttpClient httpClient, AuthenticationStateP
                 return (false, "An error occurred during registration.");
             }
 
+            // Store username of the loaded vault in memory to send to server as sanity check when updating the vault later.
+            authService.StoreUsername(username);
             await authService.StoreEncryptionKeyAsync(passwordHash);
             await authService.StoreAccessTokenAsync(tokenObject.Token);
             await authService.StoreRefreshTokenAsync(tokenObject.RefreshToken);

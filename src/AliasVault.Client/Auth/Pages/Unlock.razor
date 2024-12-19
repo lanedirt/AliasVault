@@ -14,7 +14,6 @@
 
 @if (IsLoading) {
     <BoldLoadingIndicator />
-
 }
 else if (IsWebAuthnLoading) {
     <BoldLoadingIndicator />
@@ -205,7 +204,7 @@ else
         }
 
         // Check if encryption key test string is available. If not
-        // user should login again.
+        // user should log in again.
         if (!await AuthService.HasEncryptionKeyTestStringAsync())
         {
             // Clear all tokens and redirect to login page.

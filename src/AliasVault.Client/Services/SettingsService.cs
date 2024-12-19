@@ -8,6 +8,7 @@
 namespace AliasVault.Client.Services;
 
 using System;
+using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
@@ -263,6 +264,10 @@ public sealed class SettingsService
         // is returned by subsequent local reads.
         _settings[key] = value;
 
-        await _dbService.SaveDatabaseAsync();
+        var success = await _dbService.SaveDatabaseAsync();
+        if (!success)
+        {
+            throw new DataException("Error saving database to server after setting update.");
+        }
     }
 }
