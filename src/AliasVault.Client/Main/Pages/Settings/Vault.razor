@@ -134,9 +134,15 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             }
 
             // Save the database.
-            await DbService.SaveDatabaseAsync();
-
-            ImportSuccessMessage = $"Successfully imported {importedCredentials.Count} credentials.";
+            var success = await DbService.SaveDatabaseAsync();
+            if (success)
+            {
+                ImportSuccessMessage = $"Successfully imported {importedCredentials.Count} credentials.";
+            }
+            else
+            {
+                ImportErrorMessage = "Error saving database.";
+            }
         }
         catch (Exception ex)
         {

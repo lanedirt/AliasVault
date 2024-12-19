@@ -115,12 +115,14 @@ public sealed class DbService : IDisposable
             }
 
             var sqlConnections = new List<SqliteConnection>();
-
             _logger.LogInformation("Merging databases...");
 
             // Decrypt and instantiate each vault as a separate in-memory SQLite database.
             foreach (var vault in vaultsToMerge.Vaults)
             {
+                // Store username of the loaded vault in memory to send to server as sanity check when updating the vault later.
+                _authService.StoreUsername(vault.Username);
+
                 var decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
 
                 _logger.LogInformation("Decrypted vault {VaultUpdatedAt}.", vault.UpdatedAt);
@@ -190,9 +192,7 @@ public sealed class DbService : IDisposable
             _logger.LogInformation("Databases merged successfully.");
 
             // Save the newly merged database to the server.
-            await SaveDatabaseAsync();
-
-            return true;
+            return await SaveDatabaseAsync();
         }
         catch (Exception ex)
         {
@@ -248,8 +248,8 @@ public sealed class DbService : IDisposable
     /// <summary>
     /// Saves the database to the remote server.
     /// </summary>
-    /// <returns>Task.</returns>
-    public async Task SaveDatabaseAsync()
+    /// <returns>Bool which indicates if saving database to server was successful.</returns>
+    public async Task<bool> SaveDatabaseAsync()
     {
         // Set the initial state of the database service.
         _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
@@ -266,6 +266,8 @@ public sealed class DbService : IDisposable
             _logger.LogInformation("Database successfully saved to server.");
             _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
+
+        return success;
     }
 
     /// <summary>
@@ -572,6 +574,9 @@ public sealed class DbService : IDisposable
                 var vault = response.Vault!;
                 _vaultRevisionNumber = vault.CurrentRevisionNumber;
 
+                // Store username of the loaded vault in memory to send to server as sanity check when updating the vault later.
+                _authService.StoreUsername(vault.Username);
+
                 // Check if vault blob is empty, if so, we don't need to do anything and the initial vault created
                 // on client is sufficient.
                 if (string.IsNullOrEmpty(vault.Blob))
@@ -721,7 +726,11 @@ public sealed class DbService : IDisposable
         if (deleteCount > 0)
         {
             // Save the database to the server to persist the cleanup.
-            await SaveDatabaseAsync();
+            var success = await SaveDatabaseAsync();
+            if (!success)
+            {
+                throw new DataException("Error saving database to server after attachment deletion.");
+            }
         }
     }
 

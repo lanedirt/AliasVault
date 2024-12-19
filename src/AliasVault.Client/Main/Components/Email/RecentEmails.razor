@@ -305,9 +305,6 @@
             return;
         }
 
-        Error = string.Empty;
-        StateHasChanged();
-
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
@@ -319,6 +316,8 @@
         {
             await LoadAliasVaultEmails();
         }
+
+        StateHasChanged();
     }
 
     /// <summary>
@@ -440,6 +439,8 @@
         }
 
         MailboxEmails = await EmailService.DecryptEmailList(MailboxEmails);
+
+        Error = string.Empty;
     }
 
     /// <summary>

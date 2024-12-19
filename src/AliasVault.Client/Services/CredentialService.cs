@@ -164,9 +164,11 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         // Add password.
         login.Passwords.Add(loginObject.Passwords.First());
 
-        if (saveToDb)
+        // Save the database to the server if saveToDb is true.
+        if (saveToDb && !await dbService.SaveDatabaseAsync())
         {
-            await dbService.SaveDatabaseAsync();
+            // If saving database to server failed, return empty guid to indicate error.
+            return Guid.Empty;
         }
 
         return login.Id;
@@ -255,7 +257,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             }
         }
 
-        await dbService.SaveDatabaseAsync();
+        // Save the database to the server.
+        if (!await dbService.SaveDatabaseAsync())
+        {
+            // If saving database failed, return empty guid to indicate error.
+            return Guid.Empty;
+        }
 
         return login.Id;
     }
@@ -332,8 +339,8 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     /// is required in order to synchronize the deletion of entries across multiple client vault versions.
     /// </summary>
     /// <param name="id">Id of alias to delete.</param>
-    /// <returns>Task.</returns>
-    public async Task SoftDeleteEntryAsync(Guid id)
+    /// <returns>Bool which indicates if deletion and saving database was successful.</returns>
+    public async Task<bool> SoftDeleteEntryAsync(Guid id)
     {
         var context = await dbService.GetDbContextAsync();
 
@@ -357,7 +364,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         service.IsDeleted = true;
         service.UpdatedAt = DateTime.UtcNow;
 
-        await dbService.SaveDatabaseAsync();
+        return await dbService.SaveDatabaseAsync();
     }
 
     /// <summary>
