@@ -27,8 +27,8 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 var config = new Config();
-var publicRegistration = Environment.GetEnvironmentVariable("PUBLIC_REGISTRATION") ?? "false";
-config.PublicRegistration = bool.Parse(publicRegistration);
+var publicRegistrationEnabled = Environment.GetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED") ?? "false";
+config.PublicRegistrationEnabled = bool.Parse(publicRegistrationEnabled);
 
 builder.Services.AddSingleton(config);
 

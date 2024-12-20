@@ -372,11 +372,11 @@ set_support_email() {
 }
 
 set_public_registration() {
-    printf "${CYAN}> Checking PUBLIC_REGISTRATION...${NC}\n"
-    if ! grep -q "^PUBLIC_REGISTRATION=" "$ENV_FILE" || [ -z "$(grep "^PUBLIC_REGISTRATION=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "PUBLIC_REGISTRATION" "true"
+    printf "${CYAN}> Checking PUBLIC_REGISTRATION_ENABLED...${NC}\n"
+    if ! grep -q "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
     else
-        printf "  ${GREEN}> PUBLIC_REGISTRATION already exists.${NC}\n"
+        printf "  ${GREEN}> PUBLIC_REGISTRATION_ENABLED already exists.${NC}\n"
     fi
 }
 

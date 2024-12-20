@@ -15,5 +15,5 @@ public class Config
     /// <summary>
     /// Gets or sets a value indicating whether public registration is enabled.
     /// </summary>
-    public bool PublicRegistration { get; set; }
+    public bool PublicRegistrationEnabled { get; set; }
 }

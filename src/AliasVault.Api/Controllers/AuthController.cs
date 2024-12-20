@@ -333,7 +333,7 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
         // Check if public registration is disabled in the configuration.
-        if (!config.PublicRegistration)
+        if (!config.PublicRegistrationEnabled)
         {
             return BadRequest(ServerValidationErrorResponse.Create(["New account registration is currently disabled on this server. Please contact the administrator."], 400));
         }
