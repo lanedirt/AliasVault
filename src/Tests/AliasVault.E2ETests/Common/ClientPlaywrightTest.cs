@@ -96,21 +96,24 @@ public class ClientPlaywrightTest : PlaywrightTest
 
         // Intercept Blazor WASM app requests to override appsettings.json
         string[] privateEmailDomains = ["example.tld", "example2.tld"];
+        var appSettings = new
+        {
+            ApiUrl = ApiBaseUrl.TrimEnd('/'),
+            PrivateEmailDomains = privateEmailDomains,
+            PublicRegistrationEnabled = "true",
+            CryptographyOverrideType = "Argon2Id",
+            CryptographyOverrideSettings = "{\"DegreeOfParallelism\":1,\"MemorySize\":1024,\"Iterations\":1}",
+        };
 
         await Context.RouteAsync(
             "**/appsettings.json",
             async route =>
             {
-                var response = new
-                {
-                    ApiUrl = ApiBaseUrl.TrimEnd('/'),
-                    PrivateEmailDomains = privateEmailDomains,
-                };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
                     {
                         ContentType = "application/json",
-                        Body = System.Text.Json.JsonSerializer.Serialize(response),
+                        Body = System.Text.Json.JsonSerializer.Serialize(appSettings),
                     });
             });
 
@@ -118,20 +121,11 @@ public class ClientPlaywrightTest : PlaywrightTest
             "**/appsettings.Development.json",
             async route =>
             {
-                var response = new
-                {
-                    ApiUrl = ApiBaseUrl.TrimEnd('/'),
-                    PrivateEmailDomains = privateEmailDomains,
-
-                    // Override encryption settings for faster testing.
-                    CryptographyOverrideType = "Argon2Id",
-                    CryptographyOverrideSettings = "{\"DegreeOfParallelism\":1,\"MemorySize\":1024,\"Iterations\":1}",
-                };
                 await route.FulfillAsync(
                     new RouteFulfillOptions
                     {
                         ContentType = "application/json",
-                        Body = System.Text.Json.JsonSerializer.Serialize(response),
+                        Body = System.Text.Json.JsonSerializer.Serialize(appSettings),
                     });
             });
 

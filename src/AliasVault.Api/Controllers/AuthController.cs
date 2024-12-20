@@ -39,10 +39,11 @@ using SecureRemotePassword;
 /// <param name="cache">IMemoryCache instance for persisting SRP values during multistep login process.</param>
 /// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
 /// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
+/// <param name="config">Config instance.</param>
 [Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService) : ControllerBase
+public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService, Config config) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid username or password.
@@ -331,6 +332,12 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
+        // Check if public registration is disabled in the configuration.
+        if (!config.PublicRegistrationEnabled)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(["New account registration is currently disabled on this server. Please contact the administrator."], 400));
+        }
+
         // Validate the username.
         var (isValid, errorMessage) = ValidateUsername(model.Username);
         if (!isValid)

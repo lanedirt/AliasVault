@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.9.4
+# @version 0.10.0
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
@@ -38,17 +38,18 @@ show_usage() {
     printf "Usage: $0 [COMMAND] [OPTIONS]\n"
     printf "\n"
     printf "Commands:\n"
-    printf "  install               Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
-    printf "  uninstall             Uninstall AliasVault\n"
-    printf "  update                Update AliasVault to the latest version\n"
-    printf "  update-installer      Check and update install.sh script if newer version available\n"
-    printf "  configure-ssl         Configure SSL certificates (Let's Encrypt or self-signed)\n"
-    printf "  configure-email       Configure email domains for receiving emails\n"
-    printf "  start                 Start AliasVault containers\n"
-    printf "  stop                  Stop AliasVault containers\n"
-    printf "  restart               Restart AliasVault containers\n"
-    printf "  reset-password        Reset admin password\n"
-    printf "  build                 Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  install                   Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
+    printf "  uninstall                 Uninstall AliasVault\n"
+    printf "  update                    Update AliasVault to the latest version\n"
+    printf "  update-installer          Check and update install.sh script if newer version available\n"
+    printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
+    printf "  configure-email           Configure email domains for receiving emails\n"
+    printf "  configure-registration    Configure new account registration (enable or disable)\n"
+    printf "  start                     Start AliasVault containers\n"
+    printf "  stop                      Stop AliasVault containers\n"
+    printf "  restart                   Restart AliasVault containers\n"
+    printf "  reset-password            Reset admin password\n"
+    printf "  build                     Build AliasVault from source (takes longer and requires sufficient specs)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -99,6 +100,10 @@ parse_args() {
             ;;
         configure-email|email)
             COMMAND="configure-email"
+            shift
+            ;;
+        configure-registration|registration)
+            COMMAND="configure-registration"
             shift
             ;;
         start|s)
@@ -185,6 +190,9 @@ main() {
             ;;
         "configure-email")
             handle_email_configuration
+            ;;
+        "configure-registration")
+            handle_registration_configuration
             ;;
         "start")
             handle_start
@@ -363,6 +371,15 @@ set_support_email() {
     fi
 }
 
+set_public_registration() {
+    printf "${CYAN}> Checking PUBLIC_REGISTRATION_ENABLED...${NC}\n"
+    if ! grep -q "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
+    else
+        printf "  ${GREEN}> PUBLIC_REGISTRATION_ENABLED already exists.${NC}\n"
+    fi
+}
+
 # Function to generate admin password
 generate_admin_password() {
     printf "${CYAN}> Generating admin password...${NC}\n"
@@ -533,6 +550,80 @@ get_docker_compose_command() {
     echo "$base_command"
 }
 
+# Add this new function for handling registration configuration
+handle_registration_configuration() {
+    printf "${YELLOW}+++ Public Registration Configuration +++${NC}\n"
+    printf "\n"
+
+    # Check if AliasVault is installed
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "${RED}Error: AliasVault must be installed first.${NC}\n"
+        exit 1
+    fi
+
+    # Get current registration setting
+    CURRENT_SETTING=$(grep "^PUBLIC_REGISTRATION=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "${CYAN}About Public Registration:${NC}\n"
+    printf "Public registration allows new users to create their own accounts on your AliasVault instance.\n"
+    printf "When disabled, no new accounts can be created.\n"
+    printf "\n"
+    printf "${CYAN}Current Configuration:${NC}\n"
+    if [ "$CURRENT_SETTING" = "true" ]; then
+        printf "Public Registration: ${GREEN}Enabled${NC}\n"
+    else
+        printf "Public Registration: ${RED}Disabled${NC}\n"
+    fi
+
+    printf "\n"
+    printf "Options:\n"
+    printf "1) Enable public registration\n"
+    printf "2) Disable public registration\n"
+    printf "3) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-3]: " reg_option
+
+    case $reg_option in
+        1)
+            update_env_var "PUBLIC_REGISTRATION" "true"
+            printf "${GREEN}> Public registration has been enabled.${NC}\n"
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Restart now? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Please restart manually to apply the changes.${NC}\n"
+                exit 0
+            fi
+
+            handle_restart
+            ;;
+        2)
+            update_env_var "PUBLIC_REGISTRATION" "false"
+            printf "${YELLOW}> Public registration has been disabled.${NC}\n"
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Restart now? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Please restart manually to apply the changes.${NC}\n"
+                exit 0
+            fi
+
+            handle_restart
+            ;;
+        3)
+            printf "${YELLOW}Registration configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+}
+
 # Function to handle initial installation or reinstallation
 handle_install() {
     local specified_version="$1"
@@ -596,6 +687,8 @@ handle_build() {
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
+    set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
+
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -786,7 +879,6 @@ handle_ssl_configuration() {
 }
 
 # Function to handle email server configuration
-# Function to handle email server configuration
 handle_email_configuration() {
     # Setup trap for Ctrl+C and other interrupts
     trap 'printf "\n${YELLOW}Configuration cancelled by user.${NC}\n"; exit 1' INT TERM
@@ -852,14 +944,6 @@ handle_email_configuration() {
                 fi
             done
 
-            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
-            read -p "Continue with restart? (y/n): " restart_confirm
-
-            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
-                printf "${YELLOW}Configuration cancelled.${NC}\n"
-                exit 0
-            fi
-
             # Update .env file and restart
             if ! update_env_var "PRIVATE_EMAIL_DOMAINS" "$new_domains"; then
                 printf "${RED}Failed to update configuration.${NC}\n"
@@ -867,6 +951,15 @@ handle_email_configuration() {
             fi
 
             printf "${GREEN}Email server configuration updated${NC}\n"
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Restart now? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Please restart manually to apply the changes.${NC}\n"
+                exit 0
+            fi
+
             printf "Restarting AliasVault services...\n"
 
             if ! handle_restart; then
@@ -1277,6 +1370,7 @@ handle_install_version() {
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
+    set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then

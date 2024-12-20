@@ -62,4 +62,9 @@ public class Config
     /// Gets or sets the support email address that users can contact for password recovery.
     /// </summary>
     public string? SupportEmail { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether public registration is enabled.
+    /// </summary>
+    public bool PublicRegistrationEnabled { get; set; }
 }

@@ -41,5 +41,8 @@ else
     sed -i "s|\"SupportEmail\": \".*\"|\"SupportEmail\": \"\"|g" /usr/share/nginx/html/appsettings.json
 fi
 
+# Update public registration enabled in appsettings.json
+sed -i "s|\"PublicRegistrationEnabled\": \".*\"|\"PublicRegistrationEnabled\": \"$PUBLIC_REGISTRATION_ENABLED\"|g" /usr/share/nginx/html/appsettings.json
+
 # Start the application
 nginx -g "daemon off;"

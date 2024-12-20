@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using AliasServerDb;
 using AliasServerDb.Configuration;
+using AliasVault.Api;
 using AliasVault.Api.Jwt;
 using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
@@ -24,6 +25,13 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+var config = new Config();
+var publicRegistrationEnabled = Environment.GetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED") ?? "false";
+config.PublicRegistrationEnabled = bool.Parse(publicRegistrationEnabled);
+
+builder.Services.AddSingleton(config);
+
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
 builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
