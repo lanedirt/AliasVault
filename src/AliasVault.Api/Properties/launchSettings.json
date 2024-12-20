@@ -7,7 +7,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JWT_KEY": "12345678901234567890123456789012",
-        "DATA_PROTECTION_CERT_PASS": "Development"
+        "DATA_PROTECTION_CERT_PASS": "Development",
+        "PUBLIC_REGISTRATION": "true"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://0.0.0.0:5092"
@@ -19,7 +20,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JWT_KEY": "12345678901234567890123456789012",
-        "DATA_PROTECTION_CERT_PASS": "Development"
+        "DATA_PROTECTION_CERT_PASS": "Development",
+        "PUBLIC_REGISTRATION": "true"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://0.0.0.0:7223"
