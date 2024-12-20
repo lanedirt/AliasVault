@@ -121,6 +121,7 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     {
         Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
         Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
+        Environment.SetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED", "true");
     }
 
     /// <summary>
