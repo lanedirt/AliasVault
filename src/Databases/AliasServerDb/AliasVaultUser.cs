@@ -25,6 +25,11 @@ public class AliasVaultUser : IdentityUser
     public DateTime PasswordChangedAt { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the user is blocked and should not be able to log in.
+    /// </summary>
+    public bool Blocked { get; set; }
+
+    /// <summary>
     /// Gets or sets updated timestamp.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
