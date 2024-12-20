@@ -128,7 +128,21 @@ If you encounter any issues, feel free to open an issue on the [GitHub repositor
 
 ---
 
-## 4. Troubleshooting
+## 4. Configure Account Registration
+
+By default, AliasVault is configured to allow public registration of new accounts. This means that anyone can create a new account on your server.
+
+If you want to disable public registration, you can do so by running the install script with the `configure-registration` option and then choosing option 2.
+
+```bash
+./install.sh configure-registration
+```
+
+> Note: disabling public registration means the ability to create new accounts in the AliasVault client is disabled for everyone, including administrators. Accounts cannot be created outside of the client because of the end-to-end encryption employed by AliasVault. So make sure you have created your own account(s) before disabling public registration.
+
+---
+
+## 5. Troubleshooting
 
 ### Resetting the admin password
 If you have lost your admin password, you can reset it by running the install script with the `reset-password` option. This will generate a new random password and update the .env file with it. After that it will restart the AliasVault containers to apply the changes.
