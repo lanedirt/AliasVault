@@ -30,14 +30,19 @@ else
             @foreach (var user in UserList)
             {
                 <SortableTableRow>
-                    <SortableTableColumn IsPrimary="true">@user.Id</SortableTableColumn>
-                    <SortableTableColumn>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn IsPrimary="true">@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
                     <SortableTableColumn>@user.UserName</SortableTableColumn>
                     <SortableTableColumn>@user.VaultCount</SortableTableColumn>
                     <SortableTableColumn>@user.EmailClaimCount</SortableTableColumn>
                     <SortableTableColumn>@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</SortableTableColumn>
                     <SortableTableColumn><StatusPill Enabled="user.TwoFactorEnabled" /></SortableTableColumn>
                     <SortableTableColumn>@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>
+                        @if (user.Blocked)
+                        {
+                            <StatusPill Enabled="false" TextFalse="Blocked" />
+                        }
+                    </SortableTableColumn>
                     <SortableTableColumn>
                         <LinkButton Color="primary" Href="@($"users/{user.Id}")" Text="View" />
                     </SortableTableColumn>
@@ -49,7 +54,6 @@ else
 
 @code {
     private readonly List<TableColumn> _tableColumns = [
-        new TableColumn { Title = "ID", PropertyName = "Id" },
         new TableColumn { Title = "Registered", PropertyName = "CreatedAt" },
         new TableColumn { Title = "Username", PropertyName = "UserName" },
         new TableColumn { Title = "# Vaults", PropertyName = "VaultCount" },
@@ -57,6 +61,7 @@ else
         new TableColumn { Title = "Storage", PropertyName = "VaultStorageInKb" },
         new TableColumn { Title = "2FA", PropertyName = "TwoFactorEnabled" },
         new TableColumn { Title = "LastVaultUpdate", PropertyName = "LastVaultUpdate" },
+        new TableColumn { Title = "Status", Sortable = false },
         new TableColumn { Title = "Actions", Sortable = false},
     ];
 
@@ -130,6 +135,7 @@ else
                 u.UserName,
                 u.CreatedAt,
                 u.TwoFactorEnabled,
+                u.Blocked,
                 Vaults = u.Vaults.Select(v => new
                 {
                     v.FileSize,
@@ -147,6 +153,7 @@ else
             Id = user.Id,
             UserName = user.UserName?.ToLower() ?? "N/A",
             TwoFactorEnabled = user.TwoFactorEnabled,
+            Blocked = user.Blocked,
             CreatedAt = user.CreatedAt,
             VaultCount = user.Vaults.Count(),
             EmailClaimCount = user.EmailClaims.Count(),

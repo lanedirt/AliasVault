@@ -33,6 +33,11 @@ public class UserViewModel
     public bool TwoFactorEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the user is blocked.
+    /// </summary>
+    public bool Blocked { get; set; }
+
+    /// <summary>
     /// Gets or sets the vault count.
     /// </summary>
     public int VaultCount { get; set; }

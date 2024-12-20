@@ -48,6 +48,11 @@ public enum AuthFailureReason
     InvalidRefreshToken = 6,
 
     /// <summary>
+    /// Indicates that the account is manually blocked by an administrator.
+    /// </summary>
+    AccountBlocked = 7,
+
+    /// <summary>
     /// Indicates that the failure reason was unknown.
     /// </summary>
     Unknown = 99,

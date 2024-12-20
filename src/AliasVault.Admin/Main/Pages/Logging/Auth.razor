@@ -49,7 +49,7 @@ else
                     <SortableTableColumn>@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
                     <SortableTableColumn>@log.Username</SortableTableColumn>
                     <SortableTableColumn>@log.EventType</SortableTableColumn>
-                    <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="Failed" /></SortableTableColumn>
+                    <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="@log.FailureReason.ToString()" /></SortableTableColumn>
                     <SortableTableColumn>@log.IpAddress</SortableTableColumn>
                 </SortableTableRow>
             }
