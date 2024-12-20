@@ -562,7 +562,7 @@ handle_registration_configuration() {
     fi
 
     # Get current registration setting
-    CURRENT_SETTING=$(grep "^PUBLIC_REGISTRATION=" "$ENV_FILE" | cut -d '=' -f2)
+    CURRENT_SETTING=$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
 
     printf "${CYAN}About Public Registration:${NC}\n"
     printf "Public registration allows new users to create their own accounts on your AliasVault instance.\n"
@@ -586,7 +586,7 @@ handle_registration_configuration() {
 
     case $reg_option in
         1)
-            update_env_var "PUBLIC_REGISTRATION" "true"
+            update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
             printf "${GREEN}> Public registration has been enabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
@@ -600,7 +600,7 @@ handle_registration_configuration() {
             handle_restart
             ;;
         2)
-            update_env_var "PUBLIC_REGISTRATION" "false"
+            update_env_var "PUBLIC_REGISTRATION_ENABLED" "false"
             printf "${YELLOW}> Public registration has been disabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
