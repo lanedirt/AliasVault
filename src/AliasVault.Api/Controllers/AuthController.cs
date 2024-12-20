@@ -60,9 +60,14 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
     private static readonly string[] InvalidRecoveryCode = ["Invalid recovery code."];
 
     /// <summary>
-    /// Error message for invalid 2-factor authentication recovery code.
+    /// Error message for too many failed login attempts.
     /// </summary>
-    private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes.."];
+    private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes."];
+
+    /// <summary>
+    /// Error message for if user is (manually) blocked by admin.
+    /// </summary>
+    private static readonly string[] AccountBlocked = ["Your account has been disabled. If you believe this is a mistake, please contact support."];
 
     /// <summary>
     /// Semaphore to prevent concurrent access to the database when generating new tokens for a user.
@@ -100,6 +105,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
             return BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400));
+        }
+
+        // Check if the account is blocked.
+        if (user.Blocked)
+        {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.AccountBlocked);
+            return BadRequest(ServerValidationErrorResponse.Create(AccountBlocked, 400));
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
@@ -260,6 +272,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         if (user == null)
         {
             return Unauthorized("User not found (name-2)");
+        }
+
+        // Check if the account is blocked.
+        if (user.Blocked)
+        {
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.AccountBlocked);
+            return Unauthorized("Account blocked");
         }
 
         // Generate new tokens for the user.
@@ -601,6 +620,13 @@ public class AuthController(IDbContextFactory<AliasServerDbContext> dbContextFac
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
             return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400)));
+        }
+
+        // Check if the account is blocked.
+        if (user.Blocked)
+        {
+            await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.AccountBlocked);
+            return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountBlocked, 400)));
         }
 
         // Validate the SRP session (actual password check).
