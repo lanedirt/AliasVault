@@ -407,3 +407,6 @@ certificates/letsencrypt/**
 docs/_site
 docs/vendor
 docs/.bundle
+
+# Database files
+database/postgres

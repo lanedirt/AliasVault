@@ -43,7 +43,7 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - ./database:/var/lib/postgresql/data:rw
+            - ./database/postgres:/var/lib/postgresql/data:rw
         environment:
             POSTGRES_DB: aliasvault
             POSTGRES_USER: aliasvault
