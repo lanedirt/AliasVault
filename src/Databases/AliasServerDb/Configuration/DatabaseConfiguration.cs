@@ -7,9 +7,6 @@
 
 namespace AliasServerDb.Configuration;
 
-using System.Data.Common;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,39 +19,29 @@ public static class DatabaseConfiguration
     /// Configures SQLite for use with Entity Framework Core.
     /// </summary>
     /// <param name="services">The IServiceCollection to add the DbContext to.</param>
+    /// <param name="configuration">The IConfiguration to use for the connection string.</param>
     /// <returns>The IServiceCollection for method chaining.</returns>
-    public static IServiceCollection AddAliasVaultSqliteConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddAliasVaultDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var dbProvider = configuration.GetValue<string>("DatabaseProvider")?.ToLower() ?? "sqlite";
 
-        var connectionString = configuration.GetConnectionString("AliasServerDbContext");
-        if (string.IsNullOrEmpty(connectionString))
+        switch (dbProvider)
         {
-            throw new InvalidOperationException("Connection string 'AliasServerDbContext' not found.");
+            case "postgresql":
+                services.AddScoped<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
+                break;
+            case "sqlite":
+            default:
+                services.AddScoped<IAliasServerDbContextFactory, SqliteDbContextFactory>();
+                break;
         }
 
-        var sqliteConnectionStringBuilder = new SqliteConnectionStringBuilder(connectionString)
+        services.AddScoped<AliasServerDbContext>(sp =>
         {
-            Cache = SqliteCacheMode.Private,
-            Mode = SqliteOpenMode.ReadWriteCreate,
-        };
-
-        services.AddDbContextFactory<AliasServerDbContext>(options =>
-        {
-            options.UseSqlite(CreateAndConfigureSqliteConnection(sqliteConnectionStringBuilder.ConnectionString), sqliteOptions =>
-            {
-                sqliteOptions.CommandTimeout(60);
-            }).UseLazyLoadingProxies();
+            var factory = sp.GetRequiredService<IAliasServerDbContextFactory>();
+            return factory.CreateDbContext();
         });
 
         return services;
-    }
-
-    private static SqliteConnection CreateAndConfigureSqliteConnection(string connectionString)
-    {
-        var connection = new SqliteConnection(connectionString);
-        connection.Open();
-        return connection;
     }
 }

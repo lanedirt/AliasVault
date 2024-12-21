@@ -18,12 +18,12 @@ using Microsoft.Extensions.Configuration;
 /// we have two separate user objects, one for the admin panel and one for the vault. We manually
 /// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public abstract class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyContext
+public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
     /// </summary>
-    protected AliasServerDbContext()
+    public AliasServerDbContext()
     {
     }
 
@@ -31,7 +31,7 @@ public abstract class AliasServerDbContext : WorkerStatusDbContext, IDataProtect
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
     /// </summary>
     /// <param name="options">DbContextOptions.</param>
-    protected AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
+    public AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
         : base(options)
     {
     }

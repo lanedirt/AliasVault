@@ -69,7 +69,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/user/login";
 });
 
-builder.Services.AddAliasVaultSqliteConfiguration();
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddIdentityCore<AdminUser>(options =>
     {
@@ -133,7 +133,7 @@ app.MapRazorComponents<App>()
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    await using var db = await container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContextAsync();
+    await using var db = container.GetRequiredService<IAliasServerDbContextFactory>().CreateDbContext();
     await db.Database.MigrateAsync();
 
     await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);

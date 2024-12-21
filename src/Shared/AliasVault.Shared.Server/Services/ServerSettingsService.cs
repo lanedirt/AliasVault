@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 /// Server settings service.
 /// </summary>
 /// <param name="dbContextFactory">IDbContextFactory instance.</param>
-public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbContextFactory)
+public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory)
 {
     private readonly Dictionary<string, string?> _cache = new();
 
@@ -36,7 +36,7 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
             return cachedValue;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        await using var dbContext = dbContextFactory.CreateDbContext();
         var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
 
         _cache[key] = setting?.Value;
@@ -57,7 +57,7 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
             return;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        await using var dbContext = dbContextFactory.CreateDbContext();
         var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
         var now = DateTime.UtcNow;
 
@@ -96,7 +96,7 @@ public class ServerSettingsService(IDbContextFactory<AliasServerDbContext> dbCon
     /// <returns>The settings.</returns>
     public async Task<ServerSettingsModel> GetAllSettingsAsync()
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(CancellationToken.None);
+        await using var dbContext = dbContextFactory.CreateDbContext();
         var settings = await dbContext.ServerSettings.ToDictionaryAsync(x => x.Key, x => x.Value);
 
         // Create model with defaults
