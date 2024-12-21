@@ -689,7 +689,6 @@ handle_build() {
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
 
-
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         generate_admin_password || { printf "${RED}> Failed to generate admin password${NC}\n"; exit 1; }

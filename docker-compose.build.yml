@@ -34,3 +34,17 @@ services:
         build:
             context: .
             dockerfile: src/Services/AliasVault.TaskRunner/Dockerfile
+
+    postgres:
+        image: aliasvault-postgres
+        build:
+            context: .
+            dockerfile: Dockerfile.postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./database:/var/lib/postgresql/data:rw
+        environment:
+            POSTGRES_DB: aliasvault
+            POSTGRES_USER: aliasvault
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
