@@ -18,24 +18,22 @@ using Microsoft.Extensions.Configuration;
 /// we have two separate user objects, one for the admin panel and one for the vault. We manually
 /// define the Identity tables in the OnModelCreating method.
 /// </summary>
-public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyContext
+public abstract class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
     /// </summary>
-    public AliasServerDbContext()
+    protected AliasServerDbContext()
     {
-        SetPragmaSettings();
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasServerDbContext"/> class.
     /// </summary>
     /// <param name="options">DbContextOptions.</param>
-    public AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
+    protected AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
         : base(options)
     {
-        SetPragmaSettings();
     }
 
     /// <summary>
@@ -241,54 +239,5 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
             .WithMany(c => c.EncryptionKeys)
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    /// <summary>
-    /// Sets up the connection string if it is not already configured.
-    /// </summary>
-    /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (optionsBuilder.IsConfigured)
-        {
-            return;
-        }
-
-        var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-        // Add SQLite connection with enhanced settings
-        var connectionString = configuration.GetConnectionString("AliasServerDbContext") +
-                               ";Mode=ReadWriteCreate;Cache=Shared";
-
-        optionsBuilder
-            .UseSqlite(connectionString, options => options.CommandTimeout(60))
-            .UseLazyLoadingProxies();
-    }
-
-    /// <summary>
-    /// Sets up the PRAGMA settings for SQLite.
-    /// </summary>
-    private void SetPragmaSettings()
-    {
-        var connection = Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-        {
-            connection.Open();
-        }
-
-        using (var command = connection.CreateCommand())
-        {
-            // Increase busy timeout
-            command.CommandText = @"
-                    PRAGMA busy_timeout = 30000;
-                    PRAGMA journal_mode = WAL;
-                    PRAGMA synchronous = NORMAL;
-                    PRAGMA temp_store = MEMORY;
-                    PRAGMA mmap_size = 1073741824;";
-            command.ExecuteNonQuery();
-        }
     }
 }
