@@ -24,16 +24,6 @@ public class UserService(IAliasServerDbContextFactory dbContextFactory, UserMana
     private AdminUser? _user;
 
     /// <summary>
-    /// The roles of the current user.
-    /// </summary>
-    private List<string> _userRoles = [];
-
-    /// <summary>
-    /// Whether the current user is an admin or not.
-    /// </summary>
-    private bool _isAdmin;
-
-    /// <summary>
     /// Allow other components to subscribe to changes in the event object.
     /// </summary>
     public event Action OnChange = () => { };
@@ -85,15 +75,6 @@ public class UserService(IAliasServerDbContextFactory dbContextFactory, UserMana
     }
 
     /// <summary>
-    /// Returns whether current user is admin or not.
-    /// </summary>
-    /// <returns>Boolean which indicates if user is admin.</returns>
-    public bool CurrentUserIsAdmin()
-    {
-        return _isAdmin;
-    }
-
-    /// <summary>
     /// Returns current logged on user based on HttpContext.
     /// </summary>
     /// <returns>Async task.</returns>
@@ -109,70 +90,11 @@ public class UserService(IAliasServerDbContextFactory dbContextFactory, UserMana
             if (user != null)
             {
                 _user = user;
-
-                // Load all roles for current user.
-                var roles = await userManager.GetRolesAsync(User());
-                _userRoles = roles.ToList();
-
-                // Define if current user is admin.
-                _isAdmin = _userRoles.Contains(AdminRole);
             }
         }
 
         // Notify listeners that the user has been loaded.
         NotifyStateChanged();
-    }
-
-    /// <summary>
-    /// Returns current logged on user roles based on HttpContext.
-    /// </summary>
-    /// <returns>List of roles.</returns>
-    public async Task<List<string>> GetCurrentUserRolesAsync()
-    {
-        var roles = await userManager.GetRolesAsync(User());
-
-        return roles.ToList();
-    }
-
-    /// <summary>
-    /// Search for users based on search term.
-    /// </summary>
-    /// <param name="searchTerm">Search term.</param>
-    /// <returns>List of users matching the search term.</returns>
-    public async Task<List<AdminUser>> SearchUsersAsync(string searchTerm)
-    {
-        return await userManager.Users.Where(x => x.UserName != null && x.UserName.Contains(searchTerm)).Take(5).ToListAsync();
-    }
-
-    /// <summary>
-    /// Create a new user.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <param name="password">Password.</param>
-    /// <param name="roles">Roles.</param>
-    /// <returns>List of errors if there are any.</returns>
-    public async Task<List<string>> CreateUserAsync(AdminUser user, string password, List<string> roles)
-    {
-        var errors = await ValidateUser(user, password, isUpdate: false);
-        if (errors.Count > 0)
-        {
-            return errors;
-        }
-
-        var result = await userManager.CreateAsync(user, password);
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                errors.Add(error.Description);
-            }
-
-            return errors;
-        }
-
-        errors = await UpdateUserRolesAsync(user, roles);
-
-        return errors;
     }
 
     /// <summary>
@@ -225,48 +147,6 @@ public class UserService(IAliasServerDbContextFactory dbContextFactory, UserMana
 
             return errors;
         }
-
-        return errors;
-    }
-
-    /// <summary>
-    /// Checks if supplied password is correct for the user.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <param name="password">The password to check.</param>
-    /// <returns>Boolean indicating whether supplied password is valid and matches what is stored in the database.</returns>
-    public async Task<bool> CheckPasswordAsync(AdminUser user, string password)
-    {
-        if (password.Length == 0)
-        {
-            return false;
-        }
-
-        return await userManager.CheckPasswordAsync(user, password);
-    }
-
-    /// <summary>
-    /// Update user roles. This is a separate method because it is called from both CreateUserAsync and UpdateUserAsync.
-    /// </summary>
-    /// <param name="user">User object.</param>
-    /// <param name="roles">New roles for the user.</param>
-    /// <returns>List of errors if any.</returns>
-    private async Task<List<string>> UpdateUserRolesAsync(AdminUser user, List<string> roles)
-    {
-        List<string> errors = new();
-
-        var currentRoles = await userManager.GetRolesAsync(user);
-        if (user.Id == User().Id && currentRoles.Contains(AdminRole) && !roles.Contains(AdminRole))
-        {
-            errors.Add("You cannot remove the Admin role from yourself if you are an Admin.");
-            return errors;
-        }
-
-        var rolesToAdd = roles.Except(currentRoles).ToList();
-        var rolesToRemove = currentRoles.Except(roles).ToList();
-
-        await userManager.AddToRolesAsync(user, rolesToAdd);
-        await userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
         return errors;
     }
