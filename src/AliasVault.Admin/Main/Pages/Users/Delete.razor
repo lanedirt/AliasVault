@@ -60,7 +60,8 @@ else
         if (firstRender)
         {
             // Load existing Obj.
-            Obj = await DbContext.AliasVaultUsers.FindAsync(Id);
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+            Obj = await dbContext.AliasVaultUsers.FindAsync(Id);
 
             // Hide loading spinner
             IsLoading = false;
@@ -83,8 +84,9 @@ else
         // Add log entry.
         Logger.LogWarning("Deleted user {UserName} ({UserId}).", Obj.UserName, Obj.Id);
 
-        DbContext.AliasVaultUsers.Remove(Obj);
-        await DbContext.SaveChangesAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        dbContext.AliasVaultUsers.Remove(Obj);
+        await dbContext.SaveChangesAsync();
 
         GlobalNotificationService.AddSuccessMessage("User successfully deleted.");
         GlobalLoadingSpinner.Hide();

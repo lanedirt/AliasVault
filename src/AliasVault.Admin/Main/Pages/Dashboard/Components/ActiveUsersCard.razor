@@ -105,11 +105,13 @@
         // Get unique users who either:
         // 1. Have successful auth logs
         // 2. Have updated their vault
-        var activeUsers = await DbContext.AuthLogs
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        var activeUsers = await dbContext.AuthLogs
             .Where(l => l.Timestamp >= since && l.IsSuccess)
             .Select(l => l.Username)
             .Union(
-                DbContext.Vaults
+                dbContext.Vaults
                     .Where(v => v.UpdatedAt >= since)
                     .Select(v => v.User.UserName!)
             )

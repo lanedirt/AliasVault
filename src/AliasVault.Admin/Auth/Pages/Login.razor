@@ -64,7 +64,6 @@
         var user = await UserManager.FindByNameAsync(Input.UserName);
         if (user == null)
         {
-
             await AuthLoggingService.LogAuthEventFailAsync(Input.UserName, AuthEventType.Login, AuthFailureReason.InvalidUsername);
             ServerValidationErrors.AddError("Error: Invalid login attempt.");
             return;

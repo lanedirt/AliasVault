@@ -135,7 +135,8 @@ else
     {
         if (firstRender)
         {
-            ServiceNames = await DbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+            ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
             await RefreshData();
         }
     }
@@ -151,7 +152,8 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        var query = DbContext.Logs.AsQueryable();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.Logs.AsQueryable();
 
         if (!string.IsNullOrEmpty(SearchTerm))
         {
@@ -218,8 +220,9 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        DbContext.Logs.RemoveRange(DbContext.Logs);
-        await DbContext.SaveChangesAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        dbContext.Logs.RemoveRange(dbContext.Logs);
+        await dbContext.SaveChangesAsync();
         await RefreshData();
 
         IsLoading = false;

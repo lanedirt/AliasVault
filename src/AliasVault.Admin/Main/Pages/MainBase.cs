@@ -50,12 +50,6 @@ public abstract class MainBase : OwningComponentBase
     protected JsInvokeService JsInvokeService { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the AliasServerDbContext instance.
-    /// </summary>
-    [Inject]
-    protected AliasServerDbContext DbContext { get; set; } = null!;
-
-    /// <summary>
     /// Gets or sets the IAliasServerDbContextFactory instance.
     /// </summary>
     [Inject]
@@ -89,6 +83,15 @@ public abstract class MainBase : OwningComponentBase
     /// Gets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; } = new();
+
+    /// <summary>
+    /// Gets the AliasServerDbContext instance asynchronously.
+    /// </summary>
+    /// <returns>The AliasServerDbContext instance.</returns>
+    protected async Task<AliasServerDbContext> GetDbContextAsync()
+    {
+        return await DbContextFactory.CreateDbContextAsync();
+    }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()

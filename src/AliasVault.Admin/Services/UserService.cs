@@ -15,10 +15,10 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// User service for managing users.
 /// </summary>
-/// <param name="dbContext">AliasServerDbContext instance.</param>
+/// <param name="dbContextFactory">AliasServerDbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 /// <param name="httpContextAccessor">HttpContextManager instance.</param>
-public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> userManager, IHttpContextAccessor httpContextAccessor)
+public class UserService(IAliasServerDbContextFactory dbContextFactory, UserManager<AdminUser> userManager, IHttpContextAccessor httpContextAccessor)
 {
     private const string AdminRole = "Admin";
     private AdminUser? _user;
@@ -104,6 +104,7 @@ public class UserService(AliasServerDbContext dbContext, UserManager<AdminUser> 
             // Load user from database. Use a new context everytime to ensure we get the latest data.
             var userName = httpContextAccessor.HttpContext?.User.Identity?.Name ?? string.Empty;
 
+            var dbContext = await dbContextFactory.CreateDbContextAsync();
             var user = await dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
             if (user != null)
             {
