@@ -156,7 +156,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             MessageHtml = message.HtmlBody,
             MessagePlain = message.TextBody,
             MessageSource = message.ToString(),
-            Date = message.Date.DateTime,
+            Date = message.Date.DateTime.ToUniversalTime(),
             DateSystem = DateTime.UtcNow,
             Visible = true,
         };
@@ -254,7 +254,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             Filename = attachment.ContentDisposition?.FileName ?? string.Empty,
             MimeType = attachment.ContentType.MimeType,
             Filesize = fileBytes.Length,
-            Date = DateTime.Now,
+            Date = DateTime.UtcNow,
         };
     }
 
