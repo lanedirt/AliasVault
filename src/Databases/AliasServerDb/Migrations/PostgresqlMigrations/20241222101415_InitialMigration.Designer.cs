@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AliasServerDb.Migrations.PostgresqlMigrations
 {
     [DbContext(typeof(AliasServerDbContextPostgresql))]
-    [Migration("20241221225053_InitialMigration")]
+    [Migration("20241222101415_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -253,7 +253,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<int>("EventType")
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("FailureReason")
                         .HasColumnType("integer");
@@ -438,7 +438,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<string>("Application")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Exception")
                         .IsRequired()
@@ -447,7 +447,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("LogEvent")
                         .IsRequired()
@@ -468,7 +468,8 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
 
                     b.Property<string>("SourceContext")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("timestamp with time zone");
@@ -521,7 +522,8 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("RunDate")
                         .HasColumnType("timestamp with time zone");

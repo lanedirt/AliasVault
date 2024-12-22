@@ -27,7 +27,7 @@ public class TaskRunnerJob
     /// Gets or sets the name of the task runner job.
     /// </summary>
     [Required]
-    [Column(TypeName = "nvarchar(50)")]
+    [MaxLength(50)]
     public string Name { get; set; } = null!;
 
     /// <summary>
