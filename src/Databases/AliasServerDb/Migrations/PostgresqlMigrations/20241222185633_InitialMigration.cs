@@ -265,7 +265,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ServiceName = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
+                    ServiceName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     CurrentStatus = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     DesiredStatus = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Heartbeat = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)

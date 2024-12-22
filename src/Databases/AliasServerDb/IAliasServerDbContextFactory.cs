@@ -7,6 +7,8 @@
 
 namespace AliasServerDb;
 
+using Microsoft.EntityFrameworkCore;
+
 /// <summary>
 /// The AliasServerDbContextFactory interface.
 /// </summary>
@@ -17,6 +19,12 @@ public interface IAliasServerDbContextFactory
     /// </summary>
     /// <returns>The AliasServerDbContext.</returns>
     AliasServerDbContext CreateDbContext();
+
+    /// <summary>
+    /// Configures the DbContext options.
+    /// </summary>
+    /// <param name="optionsBuilder">The DbContextOptionsBuilder.</param>
+    void ConfigureDbContextOptions(DbContextOptionsBuilder optionsBuilder);
 
     /// <summary>
     /// Creates a new AliasServerDbContext asynchronously.

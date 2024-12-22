@@ -26,7 +26,7 @@ using SmtpServer.Storage;
 /// <param name="logger">ILogger instance.</param>
 /// <param name="config">Config instance.</param>
 /// <param name="dbContextFactory">IDbContextFactory instance.</param>
-public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config config, IDbContextFactory<AliasServerDbContext> dbContextFactory) : MessageStore
+public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config config, IAliasServerDbContextFactory dbContextFactory) : MessageStore
 {
     /// <summary>
     /// Override the SaveAsync method to save the email into the database.

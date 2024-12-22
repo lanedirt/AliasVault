@@ -30,11 +30,7 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
     public AliasServerDbContext CreateDbContext()
     {
         var optionsBuilder = new DbContextOptionsBuilder<AliasServerDbContext>();
-        var connectionString = _configuration.GetConnectionString("AliasServerDbContext");
-
-        optionsBuilder
-            .UseNpgsql(connectionString, options => options.CommandTimeout(60))
-            .UseLazyLoadingProxies();
+        ConfigureDbContextOptions(optionsBuilder);
 
         return new AliasServerDbContextPostgresql(optionsBuilder.Options);
     }
@@ -43,5 +39,15 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
     public Task<AliasServerDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default)
     {
         return Task.FromResult(CreateDbContext());
+    }
+
+    /// <inheritdoc/>
+    public void ConfigureDbContextOptions(DbContextOptionsBuilder optionsBuilder)
+    {
+        var connectionString = _configuration.GetConnectionString("AliasServerDbContext");
+
+        optionsBuilder
+            .UseNpgsql(connectionString, options => options.CommandTimeout(60))
+            .UseLazyLoadingProxies();
     }
 }

@@ -27,16 +27,21 @@ public class SqliteDbContextFactory : IAliasServerDbContextFactory
     }
 
     /// <inheritdoc/>
-    public AliasServerDbContext CreateDbContext()
+    public void ConfigureDbContextOptions(DbContextOptionsBuilder optionsBuilder)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AliasServerDbContext>();
         var connectionString = _configuration.GetConnectionString("AliasServerDbContext") +
                              ";Mode=ReadWriteCreate;Cache=Shared";
 
         optionsBuilder
             .UseSqlite(connectionString, options => options.CommandTimeout(60))
             .UseLazyLoadingProxies();
+    }
 
+    /// <inheritdoc/>
+    public AliasServerDbContext CreateDbContext()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AliasServerDbContext>();
+        ConfigureDbContextOptions(optionsBuilder);
         return new AliasServerDbContextSqlite(optionsBuilder.Options);
     }
 

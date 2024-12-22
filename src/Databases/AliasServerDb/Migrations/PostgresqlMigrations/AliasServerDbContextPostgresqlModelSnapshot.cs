@@ -696,7 +696,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<string>("ServiceName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar");
+                        .HasColumnType("character varying(255)");
 
                     b.HasKey("Id");
 

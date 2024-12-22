@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AliasServerDb.Migrations.PostgresqlMigrations
 {
     [DbContext(typeof(AliasServerDbContextPostgresql))]
-    [Migration("20241222101415_InitialMigration")]
+    [Migration("20241222185633_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -699,7 +699,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<string>("ServiceName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar");
+                        .HasColumnType("character varying(255)");
 
                     b.HasKey("Id");
 

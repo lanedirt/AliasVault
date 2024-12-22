@@ -24,7 +24,7 @@ public class TaskRunnerWorker(
     ILogger<TaskRunnerWorker> logger,
     IEnumerable<IMaintenanceTask> tasks,
     ServerSettingsService settingsService,
-    IDbContextFactory<AliasServerDbContext> dbContextFactory) : BackgroundService
+    IAliasServerDbContextFactory dbContextFactory) : BackgroundService
 {
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

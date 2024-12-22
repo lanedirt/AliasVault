@@ -25,17 +25,26 @@ public static class DatabaseConfiguration
     {
         var dbProvider = configuration.GetValue<string>("DatabaseProvider")?.ToLower() ?? "sqlite";
 
+        // Add custom DbContextFactory registration which supports multiple database providers.
         switch (dbProvider)
         {
             case "postgresql":
-                services.AddScoped<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
+                services.AddSingleton<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
                 break;
             case "sqlite":
             default:
-                services.AddScoped<IAliasServerDbContextFactory, SqliteDbContextFactory>();
+                services.AddSingleton<IAliasServerDbContextFactory, SqliteDbContextFactory>();
                 break;
         }
 
+        // Updated DbContextFactory registration
+        services.AddDbContextFactory<AliasServerDbContext>((sp, options) =>
+        {
+            var factory = sp.GetRequiredService<IAliasServerDbContextFactory>();
+            factory.ConfigureDbContextOptions(options);  // Let the factory configure the options directly
+        });
+
+        // Add scoped DbContext registration based on the factory
         services.AddScoped<AliasServerDbContext>(sp =>
         {
             var factory = sp.GetRequiredService<IAliasServerDbContextFactory>();

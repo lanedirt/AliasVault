@@ -102,7 +102,7 @@
     /// </summary>
     private static bool IsHeartbeatValid(DateTime lastHeartbeat)
     {
-        return DateTime.Now <= lastHeartbeat.AddMinutes(5);
+        return DateTime.UtcNow <= lastHeartbeat.AddMinutes(5);
     }
 
     /// <summary>
@@ -205,10 +205,10 @@
             entry.DesiredStatus = newDesiredStatus;
             await dbContext.SaveChangesAsync();
 
-            var timeout = DateTime.Now.AddSeconds(30);
+            var timeout = DateTime.UtcNow.AddSeconds(30);
             while (true)
             {
-                if (DateTime.Now > timeout)
+                if (DateTime.UtcNow > timeout)
                 {
                     return false;
                 }

@@ -17,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 public class LogCleanupTask : IMaintenanceTask
 {
     private readonly ILogger<LogCleanupTask> _logger;
-    private readonly IDbContextFactory<AliasServerDbContext> _dbContextFactory;
+    private readonly IAliasServerDbContextFactory _dbContextFactory;
     private readonly ServerSettingsService _settingsService;
 
     /// <summary>
@@ -28,7 +28,7 @@ public class LogCleanupTask : IMaintenanceTask
     /// <param name="settingsService">The settings service.</param>
     public LogCleanupTask(
         ILogger<LogCleanupTask> logger,
-        IDbContextFactory<AliasServerDbContext> dbContextFactory,
+        IAliasServerDbContextFactory dbContextFactory,
         ServerSettingsService settingsService)
     {
         _logger = logger;

@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 public class RefreshTokenCleanupTask : IMaintenanceTask
 {
     private readonly ILogger<RefreshTokenCleanupTask> _logger;
-    private readonly IDbContextFactory<AliasServerDbContext> _dbContextFactory;
+    private readonly IAliasServerDbContextFactory _dbContextFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RefreshTokenCleanupTask"/> class.
@@ -25,7 +25,7 @@ public class RefreshTokenCleanupTask : IMaintenanceTask
     /// <param name="dbContextFactory">The database context factory.</param>
     public RefreshTokenCleanupTask(
         ILogger<RefreshTokenCleanupTask> logger,
-        IDbContextFactory<AliasServerDbContext> dbContextFactory)
+        IAliasServerDbContextFactory dbContextFactory)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
