@@ -48,7 +48,7 @@ builder.Services.AddLogging(logging =>
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
 });
 
-builder.Services.AddAliasVaultSqliteConfiguration();
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;
@@ -178,7 +178,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    await using var db = await container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>().CreateDbContextAsync();
+    await using var db = await container.GetRequiredService<IAliasServerDbContextFactory>().CreateDbContextAsync();
     await db.Database.MigrateAsync();
 }
 

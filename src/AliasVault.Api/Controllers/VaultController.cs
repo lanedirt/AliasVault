@@ -36,7 +36,7 @@ using Microsoft.Extensions.Caching.Memory;
 /// <param name="authLoggingService">AuthLoggingService instance.</param>
 /// <param name="cache">IMemoryCache instance.</param>
 [ApiVersion("1")]
-public class VaultController(ILogger<VaultController> logger, IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache) : AuthenticatedRequestController(userManager)
+public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Error message for providing an invalid current password (during password change).

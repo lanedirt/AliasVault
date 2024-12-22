@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 [ApiController]
 [Route("/")]
-public class RootController(IDbContextFactory<AliasServerDbContext> dbContextFactory) : ControllerBase
+public class RootController(IAliasServerDbContextFactory dbContextFactory) : ControllerBase
 {
     /// <summary>
     /// Root endpoint that returns a 200 OK if the database connection is successful
