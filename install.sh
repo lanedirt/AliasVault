@@ -357,7 +357,7 @@ set_private_email_domains() {
 
     private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
     if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf "  Email server is disabled. To enable use ./install.sh configure-email command.\n"
+        printf "  ${GREEN}> Email server is disabled. To enable use ./install.sh configure-email command.${NC}\n"
     else
         printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
