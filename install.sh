@@ -357,7 +357,7 @@ set_private_email_domains() {
 
     private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
     if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf "  ${RED}Email server is disabled.${NC} To enable use ./install.sh configure-email command.\n"
+        printf "  Email server is disabled. To enable use ./install.sh configure-email command.\n"
     else
         printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
@@ -692,12 +692,12 @@ handle_build() {
     # Initialize environment with proper error handling
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
     populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
 
@@ -1375,12 +1375,12 @@ handle_install_version() {
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
     populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
 

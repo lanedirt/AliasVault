@@ -23,25 +23,27 @@ public static class DatabaseConfiguration
     /// <returns>The IServiceCollection for method chaining.</returns>
     public static IServiceCollection AddAliasVaultDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        // Check for environment variable first, then fall back to configuration
+        // Check for environment variables first, then fall back to configuration
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__AliasServerDbContext");
         var dbProvider = Environment.GetEnvironmentVariable("DatabaseProvider")?.ToLower()
             ?? configuration.GetValue<string>("DatabaseProvider")?.ToLower()
             ?? "postgresql";
 
-        // Create a new configuration if we have an environment-provided connection string
+        // Create a new configuration if we have environment-provided values
         if (!string.IsNullOrEmpty(connectionString))
         {
             var configDictionary = new Dictionary<string, string?>
             {
                 ["ConnectionStrings:AliasServerDbContext"] = connectionString,
+                ["DatabaseProvider"] = dbProvider,
             };
 
             var configurationBuilder = new ConfigurationBuilder()
-                .AddConfiguration(configuration)
                 .AddInMemoryCollection(configDictionary);
 
-            configuration = configurationBuilder.Build();
+            // Only add the original configuration after our environment variables
+            // This ensures environment variables take precedence
+            configurationBuilder.AddConfiguration(configuration).Build();
         }
 
         // Add custom DbContextFactory registration which supports multiple database providers
