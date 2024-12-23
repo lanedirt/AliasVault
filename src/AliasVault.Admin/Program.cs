@@ -38,7 +38,7 @@ config.LastPasswordChanged = DateTime.Parse(lastPasswordChanged, CultureInfo.Inv
 
 builder.Services.AddSingleton(config);
 
-builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
+builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
