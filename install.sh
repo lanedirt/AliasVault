@@ -338,6 +338,17 @@ populate_data_protection_cert_pass() {
     fi
 }
 
+populate_postgres_password() {
+    printf "${CYAN}> Checking POSTGRES_PASSWORD...${NC}\n"
+    if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        # Generate a strong random password with 32 characters
+        POSTGRES_PASS=$(openssl rand -base64 32)
+        update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
+    else
+        printf "  ${GREEN}> POSTGRES_PASSWORD already exists.${NC}\n"
+    fi
+}
+
 set_private_email_domains() {
     printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -683,6 +694,7 @@ handle_build() {
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
+    populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
@@ -1365,6 +1377,7 @@ handle_install_version() {
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
+    populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }

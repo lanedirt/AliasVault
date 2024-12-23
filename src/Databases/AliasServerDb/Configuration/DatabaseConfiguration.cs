@@ -23,9 +23,28 @@ public static class DatabaseConfiguration
     /// <returns>The IServiceCollection for method chaining.</returns>
     public static IServiceCollection AddAliasVaultDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var dbProvider = configuration.GetValue<string>("DatabaseProvider")?.ToLower() ?? "sqlite";
+        // Check for environment variable first, then fall back to configuration
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__AliasServerDbContext");
+        var dbProvider = Environment.GetEnvironmentVariable("DatabaseProvider")?.ToLower()
+            ?? configuration.GetValue<string>("DatabaseProvider")?.ToLower()
+            ?? "postgresql";
 
-        // Add custom DbContextFactory registration which supports multiple database providers.
+        // Create a new configuration if we have an environment-provided connection string
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            var configDictionary = new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:AliasServerDbContext"] = connectionString,
+            };
+
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddConfiguration(configuration)
+                .AddInMemoryCollection(configDictionary);
+
+            configuration = configurationBuilder.Build();
+        }
+
+        // Add custom DbContextFactory registration which supports multiple database providers
         switch (dbProvider)
         {
             case "postgresql":
@@ -41,7 +60,7 @@ public static class DatabaseConfiguration
         services.AddDbContextFactory<AliasServerDbContext>((sp, options) =>
         {
             var factory = sp.GetRequiredService<IAliasServerDbContextFactory>();
-            factory.ConfigureDbContextOptions(options);  // Let the factory configure the options directly
+            factory.ConfigureDbContextOptions(options);
         });
 
         // Add scoped DbContext registration based on the factory

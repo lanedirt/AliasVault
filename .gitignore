@@ -272,6 +272,10 @@ ServiceFabricBackup/
 *.sqlite-shm
 *.sqlite-wal
 
+# SQL files
+*.sql
+*.sql.gz
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout
