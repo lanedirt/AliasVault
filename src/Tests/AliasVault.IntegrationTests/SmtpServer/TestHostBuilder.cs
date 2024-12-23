@@ -65,7 +65,7 @@ public class TestHostBuilder : IAsyncDisposable
         _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
 
         // Create a connection to 'postgres' database to ensure the test database exists
-        using (var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=aliasvault;Password=password"))
+        using (var conn = new NpgsqlConnection("Host=localhost;Port=5433;Database=postgres;Username=aliasvault;Password=password"))
         {
             conn.Open();
             using (var cmd = conn.CreateCommand())
@@ -78,7 +78,7 @@ public class TestHostBuilder : IAsyncDisposable
         }
 
         // Create a connection to the new test database
-        var dbConnection = new NpgsqlConnection($"Host=localhost;Port=5432;Database={_tempDbName};Username=aliasvault;Password=password");
+        var dbConnection = new NpgsqlConnection($"Host=localhost;Port=5433;Database={_tempDbName};Username=aliasvault;Password=password");
 
         return Build(dbConnection);
     }
@@ -162,7 +162,7 @@ public class TestHostBuilder : IAsyncDisposable
         if (!string.IsNullOrEmpty(_tempDbName))
         {
             // Create a connection to 'postgres' database to drop the test database
-            using var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=aliasvault;Password=password");
+            using var conn = new NpgsqlConnection("Host=localhost;Port=5433;Database=postgres;Username=aliasvault;Password=password");
             await conn.OpenAsync();
 
             // First terminate existing connections

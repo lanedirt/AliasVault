@@ -73,7 +73,7 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
         if (!string.IsNullOrEmpty(_tempDbName))
         {
             // Create a connection to 'postgres' database to drop the test database
-            using var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=aliasvault;Password=password");
+            using var conn = new NpgsqlConnection("Host=localhost;Port=5433;Database=postgres;Username=aliasvault;Password=password");
             await conn.OpenAsync();
 
             // First terminate existing connections

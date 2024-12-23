@@ -50,6 +50,7 @@ show_usage() {
     printf "  restart                   Restart AliasVault containers\n"
     printf "  reset-password            Reset admin password\n"
     printf "  build                     Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  configure-dev-db          Configure development database (for local development only)\n"
 
     printf "\n"
     printf "Options:\n"
@@ -124,6 +125,10 @@ parse_args() {
             ;;
         update-installer|cs)
             COMMAND="update-installer"
+            shift
+            ;;
+        configure-dev-db|dev-db)
+            COMMAND="configure-dev-db"
             shift
             ;;
         --help)
@@ -209,6 +214,9 @@ main() {
         "update-installer")
             check_install_script_update
             exit $?
+            ;;
+        "configure-dev-db")
+            configure_dev_database
             ;;
     esac
 }
@@ -1436,6 +1444,97 @@ handle_install_version() {
 
     # Only show success message if we made it here without errors
     print_success_message
+}
+
+# Function to handle development database configuration
+configure_dev_database() {
+    printf "${YELLOW}+++ Development Database Configuration +++${NC}\n"
+    printf "\n"
+
+    if [ ! -f "docker-compose.dev.yml" ]; then
+        printf "${CYAN}> Downloading docker-compose.dev.yml...${NC}\n"
+        curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/docker-compose.dev.yml" -o "docker-compose.dev.yml"
+    fi
+
+    # Check current status
+    if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+        DEV_DB_STATUS="running"
+    else
+        DEV_DB_STATUS="stopped"
+    fi
+
+    printf "${CYAN}About Development Database:${NC}\n"
+    printf "A separate PostgreSQL instance for development purposes that:\n"
+    printf "  - Runs on port 5433 (to avoid conflicts)\n"
+    printf "  - Uses simple credentials (password: 'password')\n"
+    printf "  - Stores data separately from production\n"
+    printf "\n"
+    printf "${CYAN}Current Status:${NC}\n"
+    if [ "$DEV_DB_STATUS" = "running" ]; then
+        printf "Development Database: ${GREEN}Running${NC}\n"
+    else
+        printf "Development Database: ${YELLOW}Stopped${NC}\n"
+    fi
+    printf "\n"
+    printf "Options:\n"
+    printf "1) Start development database\n"
+    printf "2) Stop development database\n"
+    printf "3) View connection details\n"
+    printf "4) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-4]: " dev_db_option
+
+    case $dev_db_option in
+        1)
+            if [ "$DEV_DB_STATUS" = "running" ]; then
+                printf "${YELLOW}> Development database is already running.${NC}\n"
+            else
+                printf "${CYAN}> Starting development database...${NC}\n"
+                docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d
+                printf "${GREEN}> Development database started successfully.${NC}\n"
+            fi
+            print_dev_db_details
+            ;;
+        2)
+            if [ "$DEV_DB_STATUS" = "stopped" ]; then
+                printf "${YELLOW}> Development database is already stopped.${NC}\n"
+            else
+                printf "${CYAN}> Stopping development database...${NC}\n"
+                docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                printf "${GREEN}> Development database stopped successfully.${NC}\n"
+            fi
+            ;;
+        3)
+            print_dev_db_details
+            ;;
+        4)
+            printf "${YELLOW}Configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to print development database connection details
+print_dev_db_details() {
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
+    printf "\n"
+    printf "${CYAN}Development Database Connection Details:${NC}\n"
+    printf "Host: localhost\n"
+    printf "Port: 5433\n"
+    printf "Database: aliasvault\n"
+    printf "Username: aliasvault\n"
+    printf "Password: password\n"
+    printf "\n"
+    printf "Connection string:\n"
+    printf "Host=localhost;Port=5433;Database=aliasvault;Username=aliasvault;Password=password\n"
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
 }
 
 main "$@"

@@ -3,7 +3,7 @@ layout: default
 title: PostgreSQL Commands
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 1
+nav_order: 2
 ---
 
 # PostgreSQL Commands
