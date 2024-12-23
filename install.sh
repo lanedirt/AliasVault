@@ -338,8 +338,21 @@ populate_data_protection_cert_pass() {
     fi
 }
 
-populate_postgres_password() {
-    printf "${CYAN}> Checking POSTGRES_PASSWORD...${NC}\n"
+populate_postgres_credentials() {
+    printf "${CYAN}> Checking Postgres credentials...${NC}\n"
+
+    if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_DB" "aliasvault"
+    else
+        printf "  ${GREEN}> POSTGRES_DB already exists.${NC}\n"
+    fi
+
+    if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_USER" "aliasvault"
+    else
+        printf "  ${GREEN}> POSTGRES_USER already exists.${NC}\n"
+    fi
+
     if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         # Generate a strong random password with 32 characters
         POSTGRES_PASS=$(openssl rand -base64 32)
@@ -695,7 +708,7 @@ handle_build() {
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
-    populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
+    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
@@ -1378,7 +1391,7 @@ handle_install_version() {
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
-    populate_postgres_password || { printf "${RED}> Failed to set PostgreSQL password${NC}\n"; exit 1; }
+    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
