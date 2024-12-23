@@ -22,14 +22,13 @@
                 await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
 
                 // Redirect to the home page with hard refresh.
-                NavigationService.RedirectTo("/", true);
+                NavigationService.RedirectTo("./", true);
             }
-            catch (Exception ex)
+            catch
             {
                 // Hard refresh current page if sign out fails. When an interactive server session is already started
                 // the sign-out will fail because it tries to mutate cookies which is only possible when the server
                 // session is not started yet.
-                Console.WriteLine(ex);
                 await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
                 NavigationService.RedirectTo(NavigationService.Uri, true);
             }
