@@ -1,49 +1,49 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-ARG TARGETARCH
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV MSBUILDDEBUGPATH=/src/msbuild-logs
-WORKDIR /source
+WORKDIR /src
+
+# Create the debug directory
+RUN mkdir -p /src/msbuild-logs
 
 # Install Python which is required by the WebAssembly tools
 RUN apt-get update && apt-get install -y python3 && apt-get clean
+# Create the debug directory and install Python which is required by the WebAssembly tools
+RUN mkdir -p /src/msbuild-logs && apt-get update && apt-get install -y python3 && apt-get clean
 
 # Install the WebAssembly tools
 RUN dotnet workload install wasm-tools
 
-# Copy all project files first
+# Copy the project files and restore dependencies
 COPY ["src/AliasVault.Client/AliasVault.Client.csproj", "src/AliasVault.Client/"]
-COPY ["src/Databases/AliasClientDb/AliasClientDb.csproj", "src/Databases/AliasClientDb/"]
-COPY ["src/Utilities/Cryptography/AliasVault.Cryptography.Client/AliasVault.Cryptography.Client.csproj", "src/Utilities/Cryptography/AliasVault.Cryptography.Client/"]
-COPY ["src/Utilities/AliasVault.FaviconExtractor/AliasVault.FaviconExtractor.csproj", "src/Utilities/AliasVault.FaviconExtractor/"]
-COPY ["src/Generators/AliasVault.Generators.Identity/AliasVault.Generators.Identity.csproj", "src/Generators/AliasVault.Generators.Identity/"]
-COPY ["src/Utilities/AliasVault.CsvImportExport/AliasVault.CsvImportExport.csproj", "src/Utilities/AliasVault.CsvImportExport/"]
-COPY ["src/Shared/AliasVault.Shared/AliasVault.Shared.csproj", "src/Shared/AliasVault.Shared/"]
-COPY ["src/Shared/AliasVault.Shared.Core/AliasVault.Shared.Core.csproj", "src/Shared/AliasVault.Shared.Core/"]
-COPY ["src/Generators/AliasVault.Generators.Password/AliasVault.Generators.Password.csproj", "src/Generators/AliasVault.Generators.Password/"]
-COPY ["src/Shared/AliasVault.RazorComponents/AliasVault.RazorComponents.csproj", "src/Shared/AliasVault.RazorComponents/"]
-
-# Restore all packages
-RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj" -a $TARGETARCH
-
-# Copy everything else and build
+RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj"
 COPY . .
-RUN dotnet publish "src/AliasVault.Client/AliasVault.Client.csproj" \
-    -a $TARGETARCH \
+
+# Build the Client project
+WORKDIR "/src/src/AliasVault.Client"
+RUN dotnet build "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
+
+# Publish the Client project
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "AliasVault.Client.csproj" \
     -c "$BUILD_CONFIGURATION" \
     --no-restore \
     -o /app/publish \
-    /p:UseAppHost=false
+    /p:UseAppHost=false \
+    /p:WasmNativeStrip=false \
+    /p:EmccInitialHeapSize=268435456
 
 # Final stage
-FROM nginx:1.24.0-alpine
+FROM nginx:1.24.0 AS final
 WORKDIR /usr/share/nginx/html
-COPY --from=build /app/publish/wwwroot .
-COPY src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
-COPY src/AliasVault.Client/entrypoint.sh /app/entrypoint.sh
+COPY --from=publish /app/publish/wwwroot .
+COPY /src/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf
+COPY /src/AliasVault.Client/entrypoint.sh /app/entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh
 
