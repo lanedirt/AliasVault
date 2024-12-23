@@ -39,7 +39,8 @@ services:
         env_file:
             - .env
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
         environment:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
@@ -55,7 +56,8 @@ services:
         env_file:
             - .env
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
         environment:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
@@ -71,7 +73,8 @@ services:
         env_file:
             - .env
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
         environment:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
@@ -84,7 +87,8 @@ services:
         env_file:
             - .env
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
         environment:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
@@ -95,3 +99,9 @@ services:
         env_file:
             - .env
         restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U aliasvault"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
