@@ -44,7 +44,14 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
     /// <inheritdoc/>
     public void ConfigureDbContextOptions(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = _configuration.GetConnectionString("AliasServerDbContext");
+        // Check environment variable first.
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__AliasServerDbContext");
+
+        // If no environment variable, fall back to configuration.
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            connectionString = _configuration.GetConnectionString("AliasServerDbContext");
+        }
 
         optionsBuilder
             .UseNpgsql(connectionString, options => options.CommandTimeout(60))

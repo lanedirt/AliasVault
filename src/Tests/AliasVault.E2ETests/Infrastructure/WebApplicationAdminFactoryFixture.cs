@@ -7,15 +7,11 @@
 
 namespace AliasVault.E2ETests.Infrastructure;
 
-using System.Data.Common;
 using AliasServerDb;
 using AliasVault.Admin.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
@@ -125,37 +121,14 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
         SetEnvironmentVariables();
-
-        builder.ConfigureAppConfiguration((context, configBuilder) =>
-        {
-            configBuilder.Sources.Clear();
-
-            _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
-
-            configBuilder.AddJsonFile("appsettings.json", optional: true);
-            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["DatabaseProvider"] = "postgresql",
-                ["ConnectionStrings:AliasServerDbContext"] = $"Host=localhost;Port=5432;Database={_tempDbName};Username=aliasvault;Password=password",
-            });
-        });
 
         builder.ConfigureServices(services =>
         {
             RemoveExistingRegistrations(services);
             AddNewRegistrations(services);
         });
-    }
-
-    /// <summary>
-    /// Sets the required environment variables for testing.
-    /// </summary>
-    private static void SetEnvironmentVariables()
-    {
-        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
-        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
-        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
     }
 
     /// <summary>
@@ -174,17 +147,22 @@ public class WebApplicationAdminFactoryFixture<TEntryPoint> : WebApplicationFact
     }
 
     /// <summary>
+    /// Sets the required environment variables for testing.
+    /// </summary>
+    private void SetEnvironmentVariables()
+    {
+        Environment.SetEnvironmentVariable("ConnectionStrings__AliasServerDbContext", "Host=postgres;Database=" + _tempDbName + ";Username=aliasvault;Password=password");
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_HASH", "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==");
+        Environment.SetEnvironmentVariable("ADMIN_PASSWORD_GENERATED", "2024-01-01T00:00:00Z");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
+    }
+
+    /// <summary>
     /// Adds new service registrations.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
     private void AddNewRegistrations(IServiceCollection services)
     {
-        // Add the DbContextFactory
-        /*services.AddDbContextFactory<AliasServerDbContext>(options =>
-        {
-            options.UseSqlite(_dbConnection).UseLazyLoadingProxies();
-        });*/
-
         // Add the VersionedContentService
         services.AddSingleton(new VersionedContentService("../../../../../AliasVault.Admin/wwwroot"));
 

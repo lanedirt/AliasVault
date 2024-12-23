@@ -7,15 +7,11 @@
 
 namespace AliasVault.E2ETests.Infrastructure;
 
-using System.Data.Common;
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
@@ -130,37 +126,14 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
         SetEnvironmentVariables();
-
-        builder.ConfigureAppConfiguration((context, configBuilder) =>
-        {
-            configBuilder.Sources.Clear();
-
-            _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
-
-            configBuilder.AddJsonFile("appsettings.json", optional: true);
-            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["DatabaseProvider"] = "postgresql",
-                ["ConnectionStrings:AliasServerDbContext"] = $"Host=localhost;Port=5432;Database={_tempDbName};Username=aliasvault;Password=password",
-            });
-        });
 
         builder.ConfigureServices(services =>
         {
             RemoveExistingRegistrations(services);
             AddNewRegistrations(services);
         });
-    }
-
-    /// <summary>
-    /// Sets the required environment variables for testing.
-    /// </summary>
-    private static void SetEnvironmentVariables()
-    {
-        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
-        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
-        Environment.SetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED", "true");
     }
 
     /// <summary>
@@ -179,18 +152,22 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     }
 
     /// <summary>
+    /// Sets the required environment variables for testing.
+    /// </summary>
+    private void SetEnvironmentVariables()
+    {
+        Environment.SetEnvironmentVariable("ConnectionStrings__AliasServerDbContext", "Host=postgres;Database=" + _tempDbName + ";Username=aliasvault;Password=password");
+        Environment.SetEnvironmentVariable("JWT_KEY", "12345678901234567890123456789012");
+        Environment.SetEnvironmentVariable("DATA_PROTECTION_CERT_PASS", "Development");
+        Environment.SetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED", "true");
+    }
+
+    /// <summary>
     /// Adds new service registrations.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>
     private void AddNewRegistrations(IServiceCollection services)
     {
-        // Add the DbContextFactory
-        /*services.AddDbContextFactory<AliasServerDbContext>(options =>
-        {
-            options.UseSqlite(_dbConnection).UseLazyLoadingProxies();
-        });*/
-        // services.AddSingleton<IAliasServerDbContextFactory, SqliteDbContextFactory>();
-
         // Add TestTimeProvider
         services.AddSingleton<ITimeProvider>(TimeProvider);
     }
