@@ -105,6 +105,7 @@ public class SmtpServerTests
     {
         await _testHost.StopAsync();
         _testHost.Dispose();
+        await _testHostBuilder.DisposeAsync();
     }
 
     /// <summary>

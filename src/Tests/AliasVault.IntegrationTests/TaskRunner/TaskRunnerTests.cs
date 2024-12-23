@@ -7,6 +7,7 @@
 
 namespace AliasVault.IntegrationTests.TaskRunner;
 
+using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
@@ -45,6 +46,7 @@ public class TaskRunnerTests
     {
         await _testHost.StopAsync();
         _testHost.Dispose();
+        await _testHostBuilder.DisposeAsync();
     }
 
     /// <summary>
@@ -58,7 +60,7 @@ public class TaskRunnerTests
         await InitializeWithTestData();
 
         // Assert
-        var dbContext = _testHostBuilder.GetDbContext();
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
         var emails = await dbContext.Emails.ToListAsync();
         Assert.That(emails, Has.Count.EqualTo(50));
     }
@@ -74,7 +76,7 @@ public class TaskRunnerTests
         await InitializeWithTestData();
 
         // Assert
-        var dbContext = _testHostBuilder.GetDbContext();
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
         var generalLogs = await dbContext.Logs.ToListAsync();
         Assert.That(generalLogs, Has.Count.EqualTo(50), "Only recent general logs should remain");
     }
@@ -90,7 +92,7 @@ public class TaskRunnerTests
         await InitializeWithTestData();
 
         // Assert
-        var dbContext = _testHostBuilder.GetDbContext();
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
 
         // Check auth logs
         var authLogs = await dbContext.AuthLogs.ToListAsync();
@@ -105,7 +107,8 @@ public class TaskRunnerTests
     public async Task MaintenanceTimeInFutureDoesNotRun()
     {
         // Seed database with generic test data.
-        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SeedData.SeedDatabase(dbContext);
 
         // Update maintenance time in database to future to ensure the task runner doesn't execute yet.
 
@@ -120,7 +123,6 @@ public class TaskRunnerTests
         }
 
         // Update maintenance time in database
-        var dbContext = _testHostBuilder.GetDbContext();
         var maintenanceTimeSetting = await dbContext.ServerSettings
             .FirstAsync(s => s.Key == "MaintenanceTime");
         maintenanceTimeSetting.Value = futureTime.ToString("HH:mm");
@@ -145,14 +147,13 @@ public class TaskRunnerTests
     public async Task MaintenanceTimeExcludedDayDoesNotRun()
     {
         // Seed database with generic test data.
-        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SeedData.SeedDatabase(dbContext);
 
         // Get current day of week (1-7, Monday = 1, Sunday = 7)
         var currentDay = (int)DateTime.Now.DayOfWeek + 1;
 
         // Update maintenance settings in database to exclude current day
-        var dbContext = _testHostBuilder.GetDbContext();
-
         // Set maintenance time to midnight
         var maintenanceTimeSetting = await dbContext.ServerSettings
             .FirstAsync(s => s.Key == "MaintenanceTime");
@@ -185,7 +186,44 @@ public class TaskRunnerTests
     /// <returns>Task.</returns>
     protected async Task InitializeWithTestData()
     {
-        await SeedData.SeedDatabase(_testHostBuilder.GetDbContext());
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SeedData.SeedDatabase(dbContext);
         await _testHost.StartAsync();
+
+        // Wait for the maintenance job to complete instead of using a fixed delay
+        await WaitForMaintenanceJobCompletion();
+    }
+
+    /// <summary>
+    /// Waits for the maintenance job to complete.
+    /// </summary>
+    /// <param name="timeoutSeconds">The timeout in seconds.</param>
+    /// <returns>Task.</returns>
+    protected async Task WaitForMaintenanceJobCompletion(int timeoutSeconds = 10)
+    {
+        var startTime = DateTime.Now;
+        var timeout = startTime.AddSeconds(timeoutSeconds);
+
+        while (DateTime.Now < timeout)
+        {
+            await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+            var job = await dbContext.TaskRunnerJobs
+                .OrderByDescending(j => j.Id)
+                .FirstOrDefaultAsync();
+
+            if (job != null && (job.Status == TaskRunnerJobStatus.Finished || job.Status == TaskRunnerJobStatus.Error))
+            {
+                if (job.Status == TaskRunnerJobStatus.Error)
+                {
+                    Assert.Fail($"Maintenance job failed with error: {job.ErrorMessage}");
+                }
+
+                return;
+            }
+
+            await Task.Delay(500); // Poll every 500ms
+        }
+
+        Assert.Fail($"Maintenance job did not complete within {timeoutSeconds} seconds");
     }
 }

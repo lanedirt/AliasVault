@@ -36,7 +36,7 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
             return cachedValue;
         }
 
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
 
         _cache[key] = setting?.Value;
@@ -57,7 +57,7 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
             return;
         }
 
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var setting = await dbContext.ServerSettings.FirstOrDefaultAsync(x => x.Key == key);
         var now = DateTime.UtcNow;
 
@@ -96,7 +96,7 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
     /// <returns>The settings.</returns>
     public async Task<ServerSettingsModel> GetAllSettingsAsync()
     {
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var settings = await dbContext.ServerSettings.ToDictionaryAsync(x => x.Key, x => x.Value);
 
         // Create model with defaults

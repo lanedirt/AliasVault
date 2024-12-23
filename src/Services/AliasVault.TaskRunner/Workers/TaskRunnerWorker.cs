@@ -35,7 +35,7 @@ public class TaskRunnerWorker(
         {
             await using var dbContext = await dbContextFactory.CreateDbContextAsync(stoppingToken);
             var settings = await settingsService.GetAllSettingsAsync();
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var today = now.Date;
 
             // Check for on-demand run request
@@ -95,7 +95,7 @@ public class TaskRunnerWorker(
     /// <param name="stoppingToken">The cancellation token.</param>
     private async Task ExecuteMaintenanceTasks(TaskRunnerJob job, AliasServerDbContext dbContext, CancellationToken stoppingToken)
     {
-        logger.LogWarning("Starting maintenance tasks at {Time} (On-demand: {IsOnDemand})", DateTime.Now, job.IsOnDemand);
+        logger.LogWarning("Starting maintenance tasks at {Time} (On-demand: {IsOnDemand})", DateTime.UtcNow, job.IsOnDemand);
 
         try
         {
@@ -124,7 +124,7 @@ public class TaskRunnerWorker(
         }
         finally
         {
-            job.EndTime = TimeOnly.FromDateTime(DateTime.Now);
+            job.EndTime = TimeOnly.FromDateTime(DateTime.UtcNow);
             await dbContext.SaveChangesAsync(stoppingToken);
         }
 
