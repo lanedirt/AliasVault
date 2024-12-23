@@ -171,7 +171,7 @@
         try
         {
             InitInProgress = true;
-            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
             ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
 
             foreach (var service in Services)
@@ -197,7 +197,7 @@
     /// </summary>
     private async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
     {
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
         if (entry != null)
         {
@@ -213,8 +213,8 @@
                     return false;
                 }
 
-                dbContext = await DbContextFactory.CreateDbContextAsync();
-                var check = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
+                await using var dbContextInner = await DbContextFactory.CreateDbContextAsync();
+                var check = await dbContextInner.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
                 if (check.CurrentStatus == newDesiredStatus)
                 {
                     return true;

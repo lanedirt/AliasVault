@@ -84,15 +84,6 @@ public abstract class MainBase : OwningComponentBase
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; } = new();
 
-    /// <summary>
-    /// Gets the AliasServerDbContext instance asynchronously.
-    /// </summary>
-    /// <returns>The AliasServerDbContext instance.</returns>
-    protected async Task<AliasServerDbContext> GetDbContextAsync()
-    {
-        return await DbContextFactory.CreateDbContextAsync();
-    }
-
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {

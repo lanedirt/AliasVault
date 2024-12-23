@@ -20,18 +20,12 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="httpContextAccessor">HttpContextManager instance.</param>
 public class UserService(IAliasServerDbContextFactory dbContextFactory, UserManager<AdminUser> userManager, IHttpContextAccessor httpContextAccessor)
 {
-    private const string AdminRole = "Admin";
     private AdminUser? _user;
 
     /// <summary>
     /// Allow other components to subscribe to changes in the event object.
     /// </summary>
     public event Action OnChange = () => { };
-
-    /// <summary>
-    /// Gets a value indicating whether the User is loaded and available, false if not. Use this before accessing User() method.
-    /// </summary>
-    public bool UserLoaded => _user != null;
 
     /// <summary>
     /// Returns all users.
@@ -85,7 +79,7 @@ public class UserService(IAliasServerDbContextFactory dbContextFactory, UserMana
             // Load user from database. Use a new context everytime to ensure we get the latest data.
             var userName = httpContextAccessor.HttpContext?.User.Identity?.Name ?? string.Empty;
 
-            var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             var user = await dbContext.AdminUsers.FirstOrDefaultAsync(u => u.UserName == userName);
             if (user != null)
             {

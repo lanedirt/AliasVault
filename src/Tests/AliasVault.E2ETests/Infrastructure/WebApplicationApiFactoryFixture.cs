@@ -15,8 +15,10 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 
 /// <summary>
 /// API web application factory fixture for integration tests.
@@ -26,14 +28,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     where TEntryPoint : class
 {
     /// <summary>
-    /// The DbConnection instance that is created for the test.
-    /// </summary>
-    private DbConnection _dbConnection;
-
-    /// <summary>
     /// The DbContextFactory instance that is created for the test.
     /// </summary>
-    private IDbContextFactory<AliasServerDbContext> _dbContextFactory = null!;
+    private IAliasServerDbContextFactory _dbContextFactory = null!;
 
     /// <summary>
     /// The cached DbContext instance that can be used during the test.
@@ -41,13 +38,9 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     private AliasServerDbContext? _dbContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WebApplicationApiFactoryFixture{TEntryPoint}"/> class.
+    /// The name of the temporary test database.
     /// </summary>
-    public WebApplicationApiFactoryFixture()
-    {
-        _dbConnection = new SqliteConnection("DataSource=:memory:");
-        _dbConnection.Open();
-    }
+    private string? _tempDbName;
 
     /// <summary>
     /// Gets or sets the port the web application kestrel host will listen on.
@@ -75,14 +68,46 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     }
 
     /// <summary>
-    /// Disposes the DbConnection instance.
+    /// Disposes the DbConnection instance and drops the temporary database.
     /// </summary>
-    /// <returns>ValueTask.</returns>
-    public override ValueTask DisposeAsync()
+    /// <returns>Task.</returns>
+    public override async ValueTask DisposeAsync()
     {
-        _dbConnection.Dispose();
+        if (_dbContext != null)
+        {
+            await _dbContext.DisposeAsync();
+            _dbContext = null;
+        }
+
+        if (!string.IsNullOrEmpty(_tempDbName))
+        {
+            // Create a connection to 'postgres' database to drop the test database
+            using var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=aliasvault;Password=password");
+            await conn.OpenAsync();
+
+            // First terminate existing connections
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = $"""
+                    SELECT pg_terminate_backend(pid)
+                    FROM pg_stat_activity
+                    WHERE datname = '{_tempDbName}';
+                    """;
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            // Then drop the database in a separate command
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = $"""
+                    DROP DATABASE IF EXISTS "{_tempDbName}";
+                    """;
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
         GC.SuppressFinalize(this);
-        return base.DisposeAsync();
+        await base.DisposeAsync();
     }
 
     /// <inheritdoc />
@@ -97,7 +122,7 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
         var host = base.CreateHost(builder);
 
         // Get the DbContextFactory instance and store it for later use during tests.
-        _dbContextFactory = host.Services.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
+        _dbContextFactory = host.Services.GetRequiredService<IAliasServerDbContextFactory>();
 
         return host;
     }
@@ -106,6 +131,20 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         SetEnvironmentVariables();
+
+        builder.ConfigureAppConfiguration((context, configBuilder) =>
+        {
+            configBuilder.Sources.Clear();
+
+            _tempDbName = $"aliasdb_test_{Guid.NewGuid()}";
+
+            configBuilder.AddJsonFile("appsettings.json", optional: true);
+            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["DatabaseProvider"] = "postgresql",
+                ["ConnectionStrings:AliasServerDbContext"] = $"Host=localhost;Port=5432;Database={_tempDbName};Username=aliasvault;Password=password",
+            });
+        });
 
         builder.ConfigureServices(services =>
         {
@@ -131,7 +170,6 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     private static void RemoveExistingRegistrations(IServiceCollection services)
     {
         var descriptorsToRemove = services.Where(d =>
-            d.ServiceType.ToString().Contains("AliasServerDbContext") ||
             d.ServiceType == typeof(ITimeProvider)).ToList();
 
         foreach (var descriptor in descriptorsToRemove)
@@ -147,10 +185,11 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     private void AddNewRegistrations(IServiceCollection services)
     {
         // Add the DbContextFactory
-        services.AddDbContextFactory<AliasServerDbContext>(options =>
+        /*services.AddDbContextFactory<AliasServerDbContext>(options =>
         {
             options.UseSqlite(_dbConnection).UseLazyLoadingProxies();
-        });
+        });*/
+        // services.AddSingleton<IAliasServerDbContextFactory, SqliteDbContextFactory>();
 
         // Add TestTimeProvider
         services.AddSingleton<ITimeProvider>(TimeProvider);

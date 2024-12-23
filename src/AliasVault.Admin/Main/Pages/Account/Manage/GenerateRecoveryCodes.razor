@@ -7,9 +7,9 @@
 
 <LayoutPageTitle>Generate two-factor authentication (2FA) recovery codes</LayoutPageTitle>
 
-@if (recoveryCodes is not null)
+@if (_recoveryCodes is not null)
 {
-    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()"/>
+    <ShowRecoveryCodes RecoveryCodes="_recoveryCodes.ToArray()"/>
 }
 else
 {
@@ -35,14 +35,20 @@ else
 }
 
 @code {
-    private IEnumerable<string>? recoveryCodes;
+    private IEnumerable<string>? _recoveryCodes;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        var isTwoFactorEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        var isTwoFactorEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
         if (!isTwoFactorEnabled)
         {
             throw new InvalidOperationException("Cannot generate recovery codes for user because they do not have 2FA enabled.");
@@ -51,11 +57,16 @@ else
 
     private async Task GenerateCodes()
     {
-        var userId = await UserManager.GetUserIdAsync(UserService.User());
-        recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(UserService.User(), 10);
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        _recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
         GlobalNotificationService.AddSuccessMessage("You have generated new recovery codes.");
 
-        Logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", userId);
+        Logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", UserService.User().Id);
     }
 
 }

@@ -64,7 +64,7 @@
     /// </summary>
     public async Task RefreshData()
     {
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var query = dbContext.TaskRunnerJobs.AsQueryable();
 
         // Apply sorting

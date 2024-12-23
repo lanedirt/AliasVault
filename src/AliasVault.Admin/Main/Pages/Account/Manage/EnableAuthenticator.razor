@@ -13,6 +13,12 @@
 
 <LayoutPageTitle>Configure authenticator app</LayoutPageTitle>
 
+@if (_isLoading)
+{
+    <LoadingIndicator />
+    return;
+}
+
 @if (RecoveryCodes is not null)
 {
     <ShowRecoveryCodes RecoveryCodes="RecoveryCodes.ToArray()"/>
@@ -69,15 +75,20 @@ else
     private string? SharedKey { get; set; }
     private string? AuthenticatorUri { get; set; }
     private IEnumerable<string>? RecoveryCodes { get; set; }
+    private bool _isLoading = true;
 
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
-    /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnInitializedAsync();
-        await LoadSharedKeyAndQrCodeUriAsync(UserService.User());
-        await JsInvokeService.RetryInvokeAsync("generateQrCode", TimeSpan.Zero, 5, "authenticator-uri");
+        if (firstRender)
+        {
+            await LoadSharedKeyAndQrCodeUriAsync();
+            _isLoading = false;
+            StateHasChanged();
+            await JsInvokeService.RetryInvokeAsync("generateQrCode", TimeSpan.Zero, 5, "authenticator-uri");
+        }
     }
 
     private async Task OnValidSubmitAsync()
@@ -85,8 +96,13 @@ else
         // Strip spaces and hyphens
         var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-        var is2FaTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
-            UserService.User(), UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        var is2FaTokenValid = await UserManager.VerifyTwoFactorTokenAsync(user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
         if (!is2FaTokenValid)
         {
@@ -94,25 +110,31 @@ else
             return;
         }
 
-        await UserManager.SetTwoFactorEnabledAsync(UserService.User(), true);
+        await UserManager.SetTwoFactorEnabledAsync(user, true);
         await AuthLoggingService.LogAuthEventSuccessAsync(UserService.User().UserName!, AuthEventType.TwoFactorAuthEnable);
         Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", UserService.User().Id);
         GlobalNotificationService.AddSuccessMessage("Your authenticator app has been verified.");
 
-        if (await UserManager.CountRecoveryCodesAsync(UserService.User()) == 0)
+        if (await UserManager.CountRecoveryCodesAsync(user) == 0)
         {
-            RecoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(UserService.User(), 10);
+            RecoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
         }
         else
         {
-            // Navigate back to the two factor authentication page.
+            // Navigate back to the two-factor authentication page.
             NavigationService.RedirectTo("account/manage/2fa", forceLoad: true);
         }
     }
 
-    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(AdminUser user)
+    private async ValueTask LoadSharedKeyAndQrCodeUriAsync()
     {
-        // Load the authenticator key & QR code URI to display on the form
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        // Load the authenticator key & QR code URI to display on the form.
         var unformattedKey = await UserManager.GetAuthenticatorKeyAsync(user);
         if (string.IsNullOrEmpty(unformattedKey))
         {
@@ -126,7 +148,7 @@ else
         AuthenticatorUri = GenerateQrCodeUri(username!, unformattedKey!);
     }
 
-    private string FormatKey(string unformattedKey)
+    private static string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
         int currentPosition = 0;
