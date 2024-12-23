@@ -130,6 +130,11 @@ parse_args() {
         configure-dev-db|dev-db)
             COMMAND="configure-dev-db"
             shift
+            # Check for direct option argument
+            if [ $# -gt 0 ] && [[ ! "$1" =~ ^- ]]; then
+                COMMAND_ARG="$1"
+                shift
+            fi
             ;;
         --help)
             show_usage
@@ -1454,6 +1459,33 @@ configure_dev_database() {
     if [ ! -f "docker-compose.dev.yml" ]; then
         printf "${CYAN}> Downloading docker-compose.dev.yml...${NC}\n"
         curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/docker-compose.dev.yml" -o "docker-compose.dev.yml"
+    fi
+
+    # Check if direct option was provided
+    if [ -n "$COMMAND_ARG" ]; then
+        case $COMMAND_ARG in
+            1|start)
+                if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                    printf "${YELLOW}> Development database is already running.${NC}\n"
+                else
+                    printf "${CYAN}> Starting development database...${NC}\n"
+                    docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d
+                    printf "${GREEN}> Development database started successfully.${NC}\n"
+                fi
+                print_dev_db_details
+                return
+                ;;
+            0|stop)
+                if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                    printf "${YELLOW}> Development database is already stopped.${NC}\n"
+                else
+                    printf "${CYAN}> Stopping development database...${NC}\n"
+                    docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                    printf "${GREEN}> Development database stopped successfully.${NC}\n"
+                fi
+                return
+                ;;
+        esac
     fi
 
     # Check current status

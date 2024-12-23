@@ -25,6 +25,14 @@ jobs:
             - name: Build
               run: dotnet build
 
+            - name: Start dev database
+              run: ./install.sh configure-dev-db start
+
+            - name: Wait for database to be up
+              run: |
+                # Wait for a few seconds
+                sleep 5
+
             - name: Ensure browsers are installed
               run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
