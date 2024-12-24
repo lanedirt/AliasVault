@@ -8,6 +8,7 @@
 namespace AliasServerDb;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
@@ -55,5 +56,30 @@ public class AliasServerDbContextPostgresql : AliasServerDbContext
         optionsBuilder
             .UseNpgsql(connectionString, options => options.CommandTimeout(60))
             .UseLazyLoadingProxies();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Configure all DateTime properties to use timestamp with time zone in UTC
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetColumnType("timestamp with time zone");
+
+                    // Add value converter for DateTime properties
+                    var converter = new ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+                    property.SetValueConverter(converter);
+                }
+            }
+        }
     }
 }

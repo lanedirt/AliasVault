@@ -24,6 +24,11 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     public override int Port { get; set; } = 5001;
 
     /// <summary>
+    /// Gets the time provider instance for mutating the current time in tests.
+    /// </summary>
+    public TestTimeProvider TimeProvider { get; private set; } = new();
+
+    /// <summary>
     /// Removes existing service registrations.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to modify.</param>

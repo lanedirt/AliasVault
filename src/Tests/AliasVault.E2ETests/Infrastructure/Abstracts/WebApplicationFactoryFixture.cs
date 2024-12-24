@@ -44,11 +44,6 @@ public abstract class WebApplicationFactoryFixture<TEntryPoint> : WebApplication
     public abstract int Port { get; set; }
 
     /// <summary>
-    /// Gets the time provider instance for mutating the current time in tests.
-    /// </summary>
-    public TestTimeProvider TimeProvider { get; private set; } = new();
-
-    /// <summary>
     /// Returns the DbContext instance for the test. This can be used to seed the database with test data.
     /// </summary>
     /// <returns>AliasServerDbContext instance.</returns>

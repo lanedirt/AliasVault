@@ -44,6 +44,8 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
     /// <inheritdoc/>
     public void ConfigureDbContextOptions(DbContextOptionsBuilder optionsBuilder)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         // Check environment variable first.
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__AliasServerDbContext");
 

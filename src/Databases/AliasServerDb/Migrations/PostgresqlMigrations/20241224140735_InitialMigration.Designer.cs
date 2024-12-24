@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AliasServerDb.Migrations.PostgresqlMigrations
 {
     [DbContext(typeof(AliasServerDbContextPostgresql))]
-    [Migration("20241224113431_LegacyTimestamp")]
-    partial class LegacyTimestamp
+    [Migration("20241224140735_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,7 +65,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastPasswordChanged")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -136,7 +136,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasColumnType("text");
@@ -157,7 +157,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("PasswordChangedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
@@ -175,7 +175,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
                         .HasColumnType("text");
@@ -192,7 +192,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeviceIdentifier")
                         .IsRequired()
@@ -201,7 +201,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
 
                     b.Property<DateTime>("ExpireDate")
                         .HasMaxLength(255)
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(45)
@@ -277,7 +277,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(255)
@@ -314,10 +314,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DateSystem")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EncryptedSymmetricKey")
                         .IsRequired()
@@ -404,7 +404,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("bytea");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmailId")
                         .HasColumnType("integer");
@@ -472,7 +472,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -490,10 +490,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Value")
                         .HasColumnType("text");
@@ -526,7 +526,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("RunDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
@@ -561,10 +561,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .HasMaxLength(255)
@@ -587,7 +587,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("boolean");
@@ -598,7 +598,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -619,7 +619,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CredentialsCount")
                         .HasColumnType("integer");
@@ -647,7 +647,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -694,7 +694,7 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("Heartbeat")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ServiceName")
                         .IsRequired()
