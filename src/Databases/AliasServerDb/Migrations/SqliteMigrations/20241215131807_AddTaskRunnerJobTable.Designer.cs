@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(AliasServerDbContext))]
+    [DbContext(typeof(AliasServerDbContextSqlite))]
     [Migration("20241215131807_AddTaskRunnerJobTable")]
     partial class AddTaskRunnerJobTable
     {

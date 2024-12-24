@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(AliasServerDbContext))]
+    [DbContext(typeof(AliasServerDbContextSqlite))]
     [Migration("20240729150925_AddEncryptionKeyTables")]
     partial class AddEncryptionKeyTables
     {

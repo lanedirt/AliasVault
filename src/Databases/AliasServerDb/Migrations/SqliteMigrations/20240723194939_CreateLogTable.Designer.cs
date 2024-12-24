@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(AliasServerDbContext))]
+    [DbContext(typeof(AliasServerDbContextSqlite))]
     [Migration("20240723194939_CreateLogTable")]
     partial class CreateLogTable
     {

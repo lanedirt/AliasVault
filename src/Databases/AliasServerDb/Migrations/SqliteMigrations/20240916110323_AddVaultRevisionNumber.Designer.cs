@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(AliasServerDbContext))]
+    [DbContext(typeof(AliasServerDbContextSqlite))]
     [Migration("20240916110323_AddVaultRevisionNumber")]
     partial class AddVaultRevisionNumber
     {

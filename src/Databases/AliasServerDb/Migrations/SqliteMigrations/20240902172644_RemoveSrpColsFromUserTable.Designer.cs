@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(AliasServerDbContext))]
+    [DbContext(typeof(AliasServerDbContextSqlite))]
     [Migration("20240902172644_RemoveSrpColsFromUserTable")]
     partial class RemoveSrpColsFromUserTable
     {
