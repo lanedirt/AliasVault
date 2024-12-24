@@ -37,6 +37,8 @@ public class AliasServerDbContextPostgresql : AliasServerDbContext
     /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         if (optionsBuilder.IsConfigured)
         {
             return;
