@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 // Add return type for top-level statements
-return await Program.Run(args);
+return await Run(args);
 
 /// <summary>
 /// Handles the migration of data between SQLite and PostgreSQL databases and password hashing utilities.
 /// </summary>
-public partial class Program
+public static partial class Program
 {
     /// <summary>
     /// Runs the program with the given arguments.
@@ -222,15 +222,6 @@ public partial class Program
 
         if (items.Count > 0)
         {
-            // Remove any existing entries in the destination table
-            var existingEntries = await destination.ToListAsync();
-            if (existingEntries.Any())
-            {
-                Console.WriteLine($"Removing {existingEntries.Count} existing entries from {tableName}...");
-                destination.RemoveRange(existingEntries);
-                await destinationContext.SaveChangesAsync();
-            }
-
             const int batchSize = 30;
             foreach (var batch in items.Chunk(batchSize))
             {
@@ -242,26 +233,7 @@ public partial class Program
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    // Handle concurrency conflict
-                    foreach (var entry in ex.Entries)
-                    {
-                        // Get current values from database
-                        var databaseValues = await entry.GetDatabaseValuesAsync();
-
-                        if (databaseValues == null)
-                        {
-                            // Row was deleted
-                            entry.State = EntityState.Detached;
-                        }
-                        else
-                        {
-                            // Update the original values with the database values
-                            entry.OriginalValues.SetValues(databaseValues);
-
-                            // Retry the save operation
-                            await destinationContext.SaveChangesAsync();
-                        }
-                    }
+                    await HandleConcurrencyConflict(ex, destinationContext);
                 }
             }
         }
@@ -270,6 +242,31 @@ public partial class Program
         if (await source.CountAsync() > await destination.CountAsync())
         {
             throw new ArgumentException($"The amount of records in the source is greater than the destination. Check if the migration is working correctly.");
+        }
+    }
+
+    /// <summary>
+    /// Handles a concurrency conflict by updating the original values with the database values.
+    /// </summary>
+    /// <param name="ex">The DbUpdateConcurrencyException that occurred.</param>
+    /// <param name="destinationContext">The destination database context.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private static async Task HandleConcurrencyConflict(
+        DbUpdateConcurrencyException ex,
+        DbContext destinationContext)
+    {
+        foreach (var entry in ex.Entries)
+        {
+            var databaseValues = await entry.GetDatabaseValuesAsync();
+            if (databaseValues == null)
+            {
+                entry.State = EntityState.Detached;
+            }
+            else
+            {
+                entry.OriginalValues.SetValues(databaseValues);
+                await destinationContext.SaveChangesAsync();
+            }
         }
     }
 }

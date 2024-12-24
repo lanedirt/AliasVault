@@ -52,7 +52,6 @@ public static class DatabaseConfiguration
             case "postgresql":
                 services.AddSingleton<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
                 break;
-            case "sqlite":
             default:
                 services.AddSingleton<IAliasServerDbContextFactory, SqliteDbContextFactory>();
                 break;

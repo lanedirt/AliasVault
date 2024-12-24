@@ -133,7 +133,7 @@ app.MapRazorComponents<App>()
 using (var scope = app.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    await using var db = container.GetRequiredService<IAliasServerDbContextFactory>().CreateDbContext();
+    await using var db = await container.GetRequiredService<IAliasServerDbContextFactory>().CreateDbContextAsync();
     await db.Database.MigrateAsync();
 
     await StartupTasks.CreateRolesIfNotExist(scope.ServiceProvider);

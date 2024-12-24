@@ -149,5 +149,7 @@ public class TestHostBuilder : IAsyncDisposable
                 await cmd.ExecuteNonQueryAsync();
             }
         }
+
+        GC.SuppressFinalize(this);
     }
 }
