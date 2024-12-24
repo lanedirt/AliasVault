@@ -51,6 +51,7 @@ show_usage() {
     printf "  reset-password            Reset admin password\n"
     printf "  build                     Build AliasVault from source (takes longer and requires sufficient specs)\n"
     printf "  configure-dev-db          Configure development database (for local development only)\n"
+    printf "  migrate-db                Migrate data from SQLite to PostgreSQL\n"
 
     printf "\n"
     printf "Options:\n"
@@ -135,6 +136,10 @@ parse_args() {
                 COMMAND_ARG="$1"
                 shift
             fi
+            ;;
+        migrate-db|migrate)
+            COMMAND="migrate-db"
+            shift
             ;;
         --help)
             show_usage
@@ -222,6 +227,9 @@ main() {
             ;;
         "configure-dev-db")
             configure_dev_database
+            ;;
+        "migrate-db")
+            handle_migrate_db
             ;;
     esac
 }
@@ -1567,6 +1575,87 @@ print_dev_db_details() {
     printf "Host=localhost;Port=5433;Database=aliasvault;Username=aliasvault;Password=password\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
+}
+
+# Function to handle database migration
+handle_migrate_db() {
+    printf "${YELLOW}+++ Database Migration Tool +++${NC}\n"
+    printf "\n"
+
+    # Check for old SQLite database
+    SQLITE_DB="database/AliasServerDb.sqlite"
+    if [ ! -f "$SQLITE_DB" ]; then
+        printf "${RED}Error: SQLite database not found at ${SQLITE_DB}${NC}\n"
+        exit 1
+    fi
+
+    # Get the absolute path of the SQLite database
+    SQLITE_DB_ABS=$(realpath "$SQLITE_DB")
+    SQLITE_DB_DIR=$(dirname "$SQLITE_DB_ABS")
+    SQLITE_DB_NAME=$(basename "$SQLITE_DB_ABS")
+
+    # Get PostgreSQL password from .env file
+    POSTGRES_PASSWORD=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)
+    if [ -z "$POSTGRES_PASSWORD" ]; then
+        printf "${RED}Error: POSTGRES_PASSWORD not found in .env file${NC}\n"
+        exit 1
+    fi
+
+     # Get network name in lowercase
+    NETWORK_NAME="$(pwd | xargs basename)_default" | tr '[:upper:]' '[:lower:]'
+
+    printf "\n${YELLOW}Warning: This will migrate data from your SQLite database to PostgreSQL.${NC}\n"
+    printf "Source database: ${CYAN}${SQLITE_DB_ABS}${NC}\n"
+    printf "Target: PostgreSQL database (using connection string from docker-compose.yml)\n"
+    printf "Make sure you have backed up your data before proceeding.\n"
+    read -p "Continue with migration? [y/N]: " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        printf "${YELLOW}Migration cancelled.${NC}\n"
+        exit 0
+    fi
+
+    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 > /dev/null 2>&1; then
+        printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
+        if [ "$VERBOSE" = true ]; then
+            docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
+        else
+            (
+                docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
+                BUILD_PID=$!
+                while kill -0 $BUILD_PID 2>/dev/null; do
+                    printf "."
+                    sleep 1
+                done
+                printf "\n"
+                wait $BUILD_PID
+                BUILD_EXIT_CODE=$?
+                if [ $BUILD_EXIT_CODE -ne 0 ]; then
+                    printf "\n${RED}> Error building Docker image. Check install_build_output.log for details.${NC}\n"
+                    exit $BUILD_EXIT_CODE
+                fi
+            )
+        fi
+        # Run migration with volume mount and connection string
+        HASH=$(docker run --rm \
+            --network="${NETWORK_NAME}" \
+            -v "${SQLITE_DB_DIR}:/sqlite" \
+            -e "CONNECTION_STRING=Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}" \
+            ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 migrate-sqlite "/sqlite/${SQLITE_DB_NAME}")
+    else
+        # Run migration with volume mount using pre-built image
+        HASH=$(docker run --rm \
+            --network="${NETWORK_NAME}" \
+            -v "${SQLITE_DB_DIR}:/sqlite" \
+            -e "CONNECTION_STRING=Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}" \
+            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}")
+    fi
+
+    if [ -z "$HASH" ]; then
+        printf "${RED}> Migration failed. Please check the error messages above.${NC}\n"
+        exit 1
+    fi
+
+    printf "${GREEN}> Migration completed successfully!${NC}\n"
 }
 
 main "$@"

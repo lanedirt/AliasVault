@@ -44,18 +44,18 @@ public partial class Program
                 return HashPassword(args[1]);
 
             case "migrate-sqlite":
-                if (args.Length != 2)
+                if (args.Length != 3)
                 {
-                    Console.WriteLine("Usage: migrate-sqlite <path-to-sqlite-db>");
+                    Console.WriteLine("Usage: migrate-sqlite <path-to-sqlite-db> <postgresql-connection-string>");
                     return 1;
                 }
 
-                return await MigrateSqliteToPostgres(args[1]);
+                return await MigrateSqliteToPostgres(args[1], args[2]);
 
             default:
                 Console.WriteLine("Unknown command. Available commands:");
                 Console.WriteLine("  hash-password <password>");
-                Console.WriteLine("  migrate-sqlite <path-to-sqlite-db>");
+                Console.WriteLine("  migrate-sqlite <path-to-sqlite-db> <postgresql-connection-string>");
                 return 1;
         }
     }
@@ -80,11 +80,12 @@ public partial class Program
     /// Migrates data from a SQLite database to a PostgreSQL database.
     /// </summary>
     /// <param name="sqliteDbPath">The file path to the source SQLite database.</param>
+    /// <param name="pgConnString">The connection string to the PostgreSQL database.</param>
     /// <returns>
     /// Returns 0 if migration was successful, 1 if an error occurred.
     /// </returns>
     /// <exception cref="Exception">Thrown when a migration error occurs.</exception>
-    private static async Task<int> MigrateSqliteToPostgres(string sqliteDbPath)
+    private static async Task<int> MigrateSqliteToPostgres(string sqliteDbPath, string pgConnString)
     {
         try
         {
@@ -98,7 +99,6 @@ public partial class Program
 
             // Create connections to both databases
             var sqliteConnString = $"Data Source={sqliteDbPath}";
-            var pgConnString = "Host=localhost;Port=5433;Database=aliasvault;Username=aliasvault;Password=password";
 
             // Create contexts
             var optionsBuilderSqlite = new DbContextOptionsBuilder<AliasServerDbContext>()
