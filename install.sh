@@ -1659,7 +1659,7 @@ handle_migrate_db() {
     SQLITE_DB_NAME=$(basename "$SQLITE_DB_ABS")
 
     # Get PostgreSQL password from .env file
-    POSTGRES_PASSWORD=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)
+    POSTGRES_PASSWORD=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d= -f2-)
     if [ -z "$POSTGRES_PASSWORD" ]; then
         printf "${RED}Error: POSTGRES_PASSWORD not found in .env file${NC}\n"
         exit 1
@@ -1670,9 +1670,17 @@ handle_migrate_db() {
     NETWORK_NAME=$(echo "$NETWORK_NAME" | tr '[:upper:]' '[:lower:]')
 
     printf "\n${YELLOW}Warning: This will migrate data from your SQLite database to PostgreSQL.${NC}\n"
+    printf "\n"
+    printf "This is a one-time operation necessary when upgrading from <= 0.9.x to 0.10.0+ and only needs to be run once.\n"
+    printf "\n"
     printf "Source database: ${CYAN}${SQLITE_DB_ABS}${NC}\n"
     printf "Target: PostgreSQL database (using connection string from docker-compose.yml)\n"
     printf "Make sure you have backed up your data before proceeding.\n"
+
+    printf "\n${RED}WARNING: This operation will DELETE ALL EXISTING DATA in the PostgreSQL database.${NC}\n"
+    printf "${RED}Only proceed if you understand that any current PostgreSQL data will be permanently lost.${NC}\n"
+    printf "\n"
+
     read -p "Continue with migration? [y/N]: " confirm
     if [[ ! $confirm =~ ^[Yy]$ ]]; then
         printf "${YELLOW}Migration cancelled.${NC}\n"
@@ -1705,14 +1713,14 @@ handle_migrate_db() {
         docker run --rm \
             --network="${NETWORK_NAME}" \
             -v "${SQLITE_DB_DIR}:/sqlite" \
-            ${GITHUB_CONTAINER_REGISTRY}-installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
+            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
     else
         # Run migration with volume mount using pre-built image
         docker run --rm \
             --network="${NETWORK_NAME}" \
             -v "${SQLITE_DB_DIR}:/sqlite" \
-            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
-    fi
+            ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
+     fi
 
     printf "${GREEN}> Check migration output above for details.${NC}\n"
 }

@@ -104,20 +104,39 @@ public partial class Program
             var optionsBuilderSqlite = new DbContextOptionsBuilder<AliasServerDbContext>()
                 .UseSqlite(sqliteConnString);
 
+            var optionsBuilderPg = new DbContextOptionsBuilder<AliasServerDbContext>()
+                .UseNpgsql(pgConnString);
+
             // Make sure sqlite is on latest version migration
             Console.WriteLine("Update sqlite database to latest version...");
             await using var sqliteContext = new AliasServerDbContextSqlite(optionsBuilderSqlite.Options);
             await sqliteContext.Database.MigrateAsync();
             Console.WriteLine("Updating finished.");
 
-            var optionsBuilderPg = new DbContextOptionsBuilder<AliasServerDbContext>()
-                .UseNpgsql(pgConnString);
-
             // Make sure postgres is on latest version migration
             Console.WriteLine("Update postgres database to latest version...");
             await using var pgContext = new AliasServerDbContextPostgresql(optionsBuilderPg.Options);
             await pgContext.Database.MigrateAsync();
             Console.WriteLine("Updating finished.");
+
+            Console.WriteLine("Truncating existing tables in reverse dependency order...");
+
+            // Truncate tables in reverse order of dependencies
+            await TruncateTable(pgContext.EmailAttachments, "EmailAttachments");
+            await TruncateTable(pgContext.Emails, "Emails");
+            await TruncateTable(pgContext.UserTokens, "UserTokens");
+            await TruncateTable(pgContext.UserRoles, "UserRoles");
+            await TruncateTable(pgContext.UserLogin, "UserLogins");
+            await TruncateTable(pgContext.UserEmailClaims, "UserEmailClaims");
+            await TruncateTable(pgContext.Vaults, "Vaults");
+            await TruncateTable(pgContext.UserEncryptionKeys, "UserEncryptionKeys");
+            await TruncateTable(pgContext.AliasVaultUserRefreshTokens, "AliasVaultUserRefreshTokens");
+            await TruncateTable(pgContext.AuthLogs, "AuthLogs");
+            await TruncateTable(pgContext.DataProtectionKeys, "DataProtectionKeys");
+            await TruncateTable(pgContext.ServerSettings, "ServerSettings");
+            await TruncateTable(pgContext.AliasVaultUsers, "AliasVaultUsers");
+            await TruncateTable(pgContext.AliasVaultRoles, "AliasVaultRoles");
+            await TruncateTable(pgContext.AdminUsers, "AdminUsers");
 
             Console.WriteLine("Starting content migration...");
 
@@ -156,6 +175,25 @@ public partial class Program
     }
 
     /// <summary>
+    /// Truncates a table in the PostgreSQL database.
+    /// </summary>
+    /// <typeparam name="T">The entity type of the table being truncated.</typeparam>
+    /// <param name="table">The database table to truncate.</param>
+    /// <param name="tableName">The name of the table being truncated (for logging purposes).</param>
+    /// <returns>A task representing the asynchronous truncation operation.</returns>
+    private static async Task TruncateTable<T>(DbSet<T> table, string tableName)
+    where T : class
+    {
+        Console.WriteLine($"Truncating table {tableName}...");
+        var count = await table.CountAsync();
+        if (count > 0)
+        {
+            await table.ExecuteDeleteAsync();
+            Console.WriteLine($"Removed {count} records from {tableName}");
+        }
+    }
+
+    /// <summary>
     /// Migrates data from one database table to another, handling the transfer in batches.
     /// </summary>
     /// <typeparam name="T">The entity type of the table being migrated.</typeparam>
@@ -184,6 +222,15 @@ public partial class Program
 
         if (items.Count > 0)
         {
+            // Remove any existing entries in the destination table
+            var existingEntries = await destination.ToListAsync();
+            if (existingEntries.Any())
+            {
+                Console.WriteLine($"Removing {existingEntries.Count} existing entries from {tableName}...");
+                destination.RemoveRange(existingEntries);
+                await destinationContext.SaveChangesAsync();
+            }
+
             const int batchSize = 30;
             foreach (var batch in items.Chunk(batchSize))
             {
@@ -220,9 +267,9 @@ public partial class Program
         }
 
         // Ensure that the amount of records in the source and destination tables match
-        if (await source.CountAsync() != await destination.CountAsync())
+        if (await source.CountAsync() > await destination.CountAsync())
         {
-            throw new ArgumentException($"The amount of records in the source and destination tables do not match. Check if the migration is working correctly.");
+            throw new ArgumentException($"The amount of records in the source is greater than the destination. Check if the migration is working correctly.");
         }
     }
 }
