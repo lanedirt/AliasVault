@@ -116,7 +116,6 @@ public partial class Program
             // Make sure postgres is on latest version migration
             Console.WriteLine("Update postgres database to latest version...");
             await using var pgContext = new AliasServerDbContextPostgresql(optionsBuilderPg.Options);
-            await pgContext.Database.EnsureDeletedAsync();
             await pgContext.Database.MigrateAsync();
             Console.WriteLine("Updating finished.");
 

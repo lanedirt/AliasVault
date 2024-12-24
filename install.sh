@@ -45,11 +45,12 @@ show_usage() {
     printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
     printf "  configure-email           Configure email domains for receiving emails\n"
     printf "  configure-registration    Configure new account registration (enable or disable)\n"
-    printf "  start                     Start AliasVault containers\n"
-    printf "  stop                      Stop AliasVault containers\n"
-    printf "  restart                   Restart AliasVault containers\n"
+    printf "  start                     Start AliasVault containers using remote images\n"
+    printf "  stop                      Stop AliasVault containers using remote images\n"
+    printf "  restart                   Restart AliasVault containers using remote images\n"
     printf "  reset-password            Reset admin password\n"
-    printf "  build                     Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  build [operation]         Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "                            Optional operations: start|stop|restart (uses locally built images)\n"
     printf "  configure-dev-db          Configure development database (for local development only)\n"
     printf "  migrate-db                Migrate data from SQLite to PostgreSQL\n"
 
@@ -58,6 +59,17 @@ show_usage() {
     printf "  --verbose         Show detailed output\n"
     printf "  -y, --yes         Automatic yes to prompts (for uninstall)\n"
     printf "  --help            Show this help message\n"
+    printf "\n"
+    printf "Examples:\n"
+    printf "  $0 install                Install AliasVault using remote images\n"
+    printf "  $0 install start          Install AliasVault using remote images and start containers\n"
+    printf "  $0 install stop           Stop containers using remote images\n"
+    printf "  $0 install restart        Restart containers using remote images\n"
+    printf "  $0 build                  Build from source\n"
+    printf "  $0 build start            Start using local images\n"
+    printf "  $0 build stop             Stop containers using local build configuration\n"
+    printf "  $0 build restart          Restart containers using local build configuration\n"
+
 }
 
 # Function to parse command line arguments
@@ -83,10 +95,23 @@ parse_args() {
                 shift
             fi
             ;;
-        # Other commands remain unchanged
         build|b)
             COMMAND="build"
             shift
+            # Check for additional operation argument
+            if [ $# -gt 0 ] && [[ ! "$1" =~ ^- ]]; then
+                case $1 in
+                    start|stop|restart)
+                        COMMAND_ARG="$1"
+                        shift
+                        ;;
+                    *)
+                        echo "Invalid build operation: $1"
+                        echo "Valid operations are: start, stop, restart"
+                        exit 1
+                        ;;
+                esac
+            fi
             ;;
         uninstall|u)
             COMMAND="uninstall"
@@ -184,11 +209,25 @@ main() {
 
     print_logo
     case $COMMAND in
+        "build")
+            if [ -z "$COMMAND_ARG" ]; then
+                handle_build
+            else
+                case $COMMAND_ARG in
+                    "start")
+                        handle_start "build"
+                        ;;
+                    "stop")
+                        handle_stop "build"
+                        ;;
+                    "restart")
+                        handle_restart "build"
+                        ;;
+                esac
+            fi
+            ;;
         "install")
             handle_install "$COMMAND_ARG"
-            ;;
-        "build")
-            handle_build
             ;;
         "uninstall")
             handle_uninstall
@@ -196,7 +235,6 @@ main() {
         "reset-password")
             generate_admin_password
             if [ $? -eq 0 ]; then
-                recreate_docker_containers
                 print_password_reset_message
             fi
             ;;
@@ -572,7 +610,12 @@ print_password_reset_message() {
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
-    printf "${GREEN}The admin password is successfully reset, see the output above. You can now login to the admin panel using this new password.${NC}\n"
+    printf "${GREEN}The admin password has been successfully reset, see the output above.${NC}\n"
+    printf "\n"
+    printf "${YELLOW}Important: You must restart the admin container for the new password to take effect:${NC}\n"
+    printf "  docker compose restart admin\n"
+    printf "\n"
+    printf "After restarting, you can login to the admin panel using the new password.\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
@@ -1184,26 +1227,42 @@ generate_self_signed_cert() {
 
 # New functions to handle container lifecycle:
 handle_start() {
+    local mode="$1"
     printf "${CYAN}> Starting AliasVault containers...${NC}\n"
-    $(get_docker_compose_command) up -d
+    if [ "$mode" = "build" ]; then
+        $(get_docker_compose_command "build") up -d
+    else
+        $(get_docker_compose_command) up -d
+    fi
     printf "${GREEN}> AliasVault containers started successfully.${NC}\n"
 }
 
 handle_stop() {
+    local mode="$1"
     printf "${CYAN}> Stopping AliasVault containers...${NC}\n"
     if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
         printf "${YELLOW}> No containers are currently running.${NC}\n"
         exit 0
     fi
 
-    $(get_docker_compose_command) down
+    if [ "$mode" = "build" ]; then
+        $(get_docker_compose_command "build") down
+    else
+        $(get_docker_compose_command) down
+    fi
     printf "${GREEN}> AliasVault containers stopped successfully.${NC}\n"
 }
 
 handle_restart() {
+    local mode="$1"
     printf "${CYAN}> Restarting AliasVault containers...${NC}\n"
-    $(get_docker_compose_command) down
-    $(get_docker_compose_command) up -d
+    if [ "$mode" = "build" ]; then
+        $(get_docker_compose_command "build") down
+        $(get_docker_compose_command "build") up -d
+    else
+        $(get_docker_compose_command) down
+        $(get_docker_compose_command) up -d
+    fi
     printf "${GREEN}> AliasVault containers restarted successfully.${NC}\n"
 }
 
@@ -1453,7 +1512,12 @@ handle_install_version() {
     # Start containers
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
-    recreate_docker_containers
+    if [ "$VERBOSE" = true ]; then
+        docker compose up -d --force-recreate
+    else
+        docker compose up -d --force-recreate > /dev/null 2>&1
+    fi
+    printf "${GREEN}> Docker containers recreated.${NC}\n"
 
     # Only show success message if we made it here without errors
     print_success_message
@@ -1602,7 +1666,8 @@ handle_migrate_db() {
     fi
 
      # Get network name in lowercase
-    NETWORK_NAME="$(pwd | xargs basename)_default" | tr '[:upper:]' '[:lower:]'
+    NETWORK_NAME="$(pwd | xargs basename)_default"
+    NETWORK_NAME=$(echo "$NETWORK_NAME" | tr '[:upper:]' '[:lower:]')
 
     printf "\n${YELLOW}Warning: This will migrate data from your SQLite database to PostgreSQL.${NC}\n"
     printf "Source database: ${CYAN}${SQLITE_DB_ABS}${NC}\n"
@@ -1635,27 +1700,21 @@ handle_migrate_db() {
                 fi
             )
         fi
+
         # Run migration with volume mount and connection string
-        HASH=$(docker run --rm \
+        docker run --rm \
             --network="${NETWORK_NAME}" \
             -v "${SQLITE_DB_DIR}:/sqlite" \
-            -e "CONNECTION_STRING=Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}" \
-            ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 migrate-sqlite "/sqlite/${SQLITE_DB_NAME}")
+            ${GITHUB_CONTAINER_REGISTRY}-installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
     else
         # Run migration with volume mount using pre-built image
-        HASH=$(docker run --rm \
+        docker run --rm \
             --network="${NETWORK_NAME}" \
             -v "${SQLITE_DB_DIR}:/sqlite" \
-            -e "CONNECTION_STRING=Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}" \
-            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}")
+            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
     fi
 
-    if [ -z "$HASH" ]; then
-        printf "${RED}> Migration failed. Please check the error messages above.${NC}\n"
-        exit 1
-    fi
-
-    printf "${GREEN}> Migration completed successfully!${NC}\n"
+    printf "${GREEN}> Check migration output above for details.${NC}\n"
 }
 
 main "$@"
