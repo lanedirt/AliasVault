@@ -11,7 +11,7 @@
 @inject EmailService EmailService
 @using System.Timers
 @inject ILogger<RecentEmails> Logger
-@implements IDisposable
+@implements IAsyncDisposable
 
 @if (EmailModalVisible)
 {
@@ -100,54 +100,74 @@
     private bool EmailModalVisible { get; set; }
     private string Error { get; set; } = string.Empty;
 
-    private bool IsRefreshing { get; set; } = true;
     private bool IsLoading { get; set; } = true;
 
     private bool IsSpamOk { get; set; } = false;
 
-    private bool IsPageVisible { get; set; } = true;
-    private CancellationTokenSource? PollingCancellationTokenSource { get; set; }
     private const int ACTIVE_TAB_REFRESH_INTERVAL = 2000; // 2 seconds
-    private readonly SemaphoreSlim RefreshSemaphore = new(1, 1);
-    private DateTime LastRefreshTime = DateTime.MinValue;
+
+    private PeriodicTimer? _refreshTimer;
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     /// <summary>
-    /// Callback invoked by JavaScript when the page visibility changes.
+    /// Callback invoked by JavaScript when the page visibility changes. This is used to start/stop the polling for new emails.
     /// </summary>
-    /// <param name="isVisible">Boolean whether the page is visible or not.</param>
-    /// <returns>Task.</returns>
+    /// <param name="isVisible">Indicates whether the page is visible or not.</param>
     [JSInvokable]
     public async Task OnVisibilityChange(bool isVisible)
     {
-        IsPageVisible = isVisible;
-        if (isVisible)
+        if (isVisible && DbService.Settings.AutoEmailRefresh)
         {
-            // Only enable auto-refresh if the setting is enabled.
-            if (DbService.Settings.AutoEmailRefresh)
-            {
-                await StartPolling();
-            }
-
-            // Refresh immediately when tab becomes visible
-            await ManualRefresh();
+            await StartPolling();
         }
         else
         {
-            // Cancel polling.
-            if (PollingCancellationTokenSource is not null)
+            await StopPolling();
+        }
+
+        // Refresh immediately when tab becomes visible
+        if (isVisible)
+        {
+            await ManualRefresh();
+        }
+    }
+
+    private async Task StartPolling()
+    {
+        await StopPolling();
+
+        // Create a new CancellationTokenSource since the old one might have been cancelled
+        _cancellationTokenSource = new CancellationTokenSource();
+        _refreshTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(ACTIVE_TAB_REFRESH_INTERVAL));
+
+        try
+        {
+            while (await _refreshTimer.WaitForNextTickAsync(_cancellationTokenSource.Token))
             {
-                await PollingCancellationTokenSource.CancelAsync();
+                await LoadRecentEmailsAsync();
             }
         }
-        StateHasChanged();
+        catch (OperationCanceledException)
+        {
+            // Normal cancellation, ignore
+        }
+    }
+
+    private async Task StopPolling()
+    {
+        if (_refreshTimer is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _refreshTimer.Dispose();
+            _refreshTimer = null;
+        }
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        PollingCancellationTokenSource?.Cancel();
-        PollingCancellationTokenSource?.Dispose();
-        RefreshSemaphore.Dispose();
+        await StopPolling();
+        _cancellationTokenSource.Dispose();
     }
 
     /// <inheritdoc />
@@ -161,16 +181,11 @@
         }
 
         // Check if email has a known SpamOK domain, if not, don't show this component.
-        if (IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress))
-        {
-            ShowComponent = true;
-        }
+        ShowComponent = IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress);
         IsSpamOk = IsSpamOkDomain(EmailAddress);
 
-        // Set up visibility change detection
         await JsInteropService.RegisterVisibilityCallback(DotNetObjectReference.Create(this));
 
-        // Only enable auto-refresh if the setting is enabled.
         if (DbService.Settings.AutoEmailRefresh)
         {
             await StartPolling();
@@ -204,65 +219,6 @@
         }
 
         IsSpamOk = IsSpamOkDomain(EmailAddress);
-    }
-
-    /// <summary>
-    /// Start the polling for new emails.
-    /// </summary>
-    /// <returns>Task.</returns>
-    private async Task StartPolling()
-    {
-        if (PollingCancellationTokenSource is not null)
-        {
-            await PollingCancellationTokenSource.CancelAsync();
-        }
-
-        PollingCancellationTokenSource = new CancellationTokenSource();
-
-        try
-        {
-            while (!PollingCancellationTokenSource.Token.IsCancellationRequested)
-            {
-                if (IsPageVisible)
-                {
-                    // Only auto refresh when the tab is visible.
-                    await RefreshWithThrottling();
-                    await Task.Delay(ACTIVE_TAB_REFRESH_INTERVAL, PollingCancellationTokenSource.Token);
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Normal cancellation, ignore
-        }
-    }
-
-    /// <summary>
-    /// Refresh the emails with throttling to prevent multiple refreshes at the same time.
-    /// </summary>
-    /// <returns></returns>
-    private async Task RefreshWithThrottling()
-    {
-        if (!await RefreshSemaphore.WaitAsync(0)) // Don't wait if a refresh is in progress
-        {
-            return;
-        }
-
-        try
-        {
-            var timeSinceLastRefresh = DateTime.UtcNow - LastRefreshTime;
-            if (timeSinceLastRefresh.TotalMilliseconds < ACTIVE_TAB_REFRESH_INTERVAL)
-            {
-                return;
-            }
-
-            await LoadRecentEmailsAsync();
-            LastRefreshTime = DateTime.UtcNow;
-        }
-        finally
-        {
-            RefreshSemaphore.Release();
-        }
     }
 
     /// <summary>
