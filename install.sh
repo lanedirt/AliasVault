@@ -1452,6 +1452,7 @@ handle_install_version() {
     printf "${CYAN}> Installing version: ${target_version}${NC}\n"
 
     images=(
+        "${GITHUB_CONTAINER_REGISTRY}-postgres:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-api:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-client:${target_version}"
