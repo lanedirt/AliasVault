@@ -226,7 +226,34 @@ public static partial class Program
 
         if (items.Count > 0)
         {
-            const int batchSize = 30;
+            // Get entity type from the model to check annotations
+            var entityType = destinationContext.Model.FindEntityType(typeof(T));
+
+            foreach (var item in items)
+            {
+                // Check each property for MaxLength annotation
+                foreach (var property in entityType!.GetProperties())
+                {
+                    // Only process string properties
+                    if (property.ClrType == typeof(string))
+                    {
+                        var maxLength = property.GetMaxLength();
+                        if (maxLength.HasValue)
+                        {
+                            var propertyInfo = typeof(T).GetProperty(property.Name);
+                            var value = propertyInfo?.GetValue(item) as string;
+
+                            if (value?.Length > maxLength.Value)
+                            {
+                                propertyInfo?.SetValue(item, value.Substring(0, maxLength.Value));
+                                Console.WriteLine($"Truncated {property.Name} in {tableName} from {value.Length} to {maxLength.Value} characters");
+                            }
+                        }
+                    }
+                }
+            }
+
+            const int batchSize = 50;
             foreach (var batch in items.Chunk(batchSize))
             {
                 try
