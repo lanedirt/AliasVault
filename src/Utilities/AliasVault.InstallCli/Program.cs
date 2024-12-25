@@ -135,6 +135,7 @@ public static partial class Program
             await TruncateTable(pgContext.AuthLogs, "AuthLogs");
             await TruncateTable(pgContext.DataProtectionKeys, "DataProtectionKeys");
             await TruncateTable(pgContext.ServerSettings, "ServerSettings");
+            await TruncateTable(pgContext.TaskRunnerJobs, "TaskRunnerJobs");
             await TruncateTable(pgContext.AliasVaultUsers, "AliasVaultUsers");
             await TruncateTable(pgContext.AliasVaultRoles, "AliasVaultRoles");
             await TruncateTable(pgContext.AdminUsers, "AdminUsers");
@@ -145,6 +146,7 @@ public static partial class Program
             await MigrateTable(sqliteContext.AliasVaultRoles, pgContext.AliasVaultRoles, pgContext, "AliasVaultRoles");
             await MigrateTable(sqliteContext.AliasVaultUsers, pgContext.AliasVaultUsers, pgContext, "AliasVaultUsers");
             await MigrateTable(sqliteContext.ServerSettings, pgContext.ServerSettings, pgContext, "ServerSettings");
+            await MigrateTable(sqliteContext.TaskRunnerJobs, pgContext.TaskRunnerJobs, pgContext, "TaskRunnerJobs");
             await MigrateTable(sqliteContext.DataProtectionKeys, pgContext.DataProtectionKeys, pgContext, "DataProtectionKeys", true);
             await MigrateTable(sqliteContext.Logs, pgContext.Logs, pgContext, "Logs", true);
             await MigrateTable(sqliteContext.AuthLogs, pgContext.AuthLogs, pgContext, "AuthLogs", true);
