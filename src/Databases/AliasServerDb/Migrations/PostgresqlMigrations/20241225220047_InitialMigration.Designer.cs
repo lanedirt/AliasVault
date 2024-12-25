@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AliasServerDb.Migrations.PostgresqlMigrations
 {
     [DbContext(typeof(AliasServerDbContextPostgresql))]
-    [Migration("20241224140735_InitialMigration")]
+    [Migration("20241225220047_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -857,7 +857,8 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                 {
                     b.HasOne("AliasServerDb.AliasVaultUser", "User")
                         .WithMany("EmailClaims")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });

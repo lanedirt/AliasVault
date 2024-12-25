@@ -854,7 +854,8 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                 {
                     b.HasOne("AliasServerDb.AliasVaultUser", "User")
                         .WithMany("EmailClaims")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });

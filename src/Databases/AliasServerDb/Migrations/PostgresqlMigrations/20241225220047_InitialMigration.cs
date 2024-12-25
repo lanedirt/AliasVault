@@ -319,7 +319,8 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         name: "FK_UserEmailClaims_AliasVaultUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AliasVaultUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(

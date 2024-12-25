@@ -221,10 +221,10 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
         // Note: when a user is deleted the email claims user FK's should be set to NULL
         // so the claims themselves are preserved to prevent re-use of the email address.
         modelBuilder.Entity<UserEmailClaim>()
-            .HasOne(l => l.User)
-            .WithMany(c => c.EmailClaims)
-            .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.ClientSetNull);
+            .HasOne(e => e.User)
+            .WithMany(u => u.EmailClaims)
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Configure Email - UserEncryptionKey relationship
         modelBuilder.Entity<Email>()
