@@ -266,6 +266,7 @@ public static partial class Program
                 {
                     Console.WriteLine($"Concurrency conflict occurred during migration of {tableName}...");
                     await HandleConcurrencyConflict(ex, destinationContext);
+                    Console.WriteLine($"Concurrency conflict resolved, {batch.Length} records inserted");
                 }
             }
 
@@ -316,7 +317,5 @@ public static partial class Program
                 await destinationContext.SaveChangesAsync();
             }
         }
-
-        Console.WriteLine($"Concurrency conflict resolved, {ex.Entries.Count} records inserted");
     }
 }
