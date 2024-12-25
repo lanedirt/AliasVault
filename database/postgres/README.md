@@ -1,0 +1,1 @@
+This is the default location where the postgres database files are stored.

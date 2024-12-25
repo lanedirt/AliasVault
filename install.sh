@@ -1425,7 +1425,6 @@ handle_install_version() {
     # Update docker-compose files with correct version so we pull the correct images
     handle_docker_compose "$target_version"
 
-
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
