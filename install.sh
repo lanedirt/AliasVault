@@ -57,18 +57,9 @@ show_usage() {
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
-    printf "  -y, --yes         Automatic yes to prompts (for uninstall)\n"
+    printf "  -y, --yes         Automatic yes to prompts\n"
     printf "  --help            Show this help message\n"
     printf "\n"
-    printf "Examples:\n"
-    printf "  $0 install                Install AliasVault using remote images\n"
-    printf "  $0 install start          Install AliasVault using remote images and start containers\n"
-    printf "  $0 install stop           Stop containers using remote images\n"
-    printf "  $0 install restart        Restart containers using remote images\n"
-    printf "  $0 build                  Build from source\n"
-    printf "  $0 build start            Start using local images\n"
-    printf "  $0 build stop             Stop containers using local build configuration\n"
-    printf "  $0 build restart          Restart containers using local build configuration\n"
 
 }
 
@@ -210,21 +201,7 @@ main() {
     print_logo
     case $COMMAND in
         "build")
-            if [ -z "$COMMAND_ARG" ]; then
-                handle_build
-            else
-                case $COMMAND_ARG in
-                    "start")
-                        handle_start "build"
-                        ;;
-                    "stop")
-                        handle_stop "build"
-                        ;;
-                    "restart")
-                        handle_restart "build"
-                        ;;
-                esac
-            fi
+            handle_build
             ;;
         "install")
             handle_install "$COMMAND_ARG"
@@ -235,6 +212,12 @@ main() {
         "reset-password")
             generate_admin_password
             if [ $? -eq 0 ]; then
+                printf "${CYAN}> Restarting admin container...${NC}\n"
+                if [ "$VERBOSE" = true ]; then
+                    $(get_docker_compose_command) up -d --force-recreate admin
+                else
+                    $(get_docker_compose_command) up -d --force-recreate admin > /dev/null 2>&1
+                fi
                 print_password_reset_message
             fi
             ;;
@@ -596,13 +579,14 @@ print_success_message() {
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    printf "${CYAN}> Recreating Docker containers...${NC}\n"
+    printf "${CYAN}> (Re)creating Docker containers...${NC}\n"
+
     if [ "$VERBOSE" = true ]; then
-        docker compose up -d --force-recreate
+        $(get_docker_compose_command) up -d --force-recreate
     else
-        docker compose up -d --force-recreate > /dev/null 2>&1
+        $(get_docker_compose_command) up -d --force-recreate > /dev/null 2>&1
     fi
-    printf "${GREEN}> Docker containers recreated.${NC}\n"
+    printf "${GREEN}> Docker containers (re)created successfully.${NC}\n"
 }
 
 # Function to print password reset success message
@@ -611,11 +595,6 @@ print_password_reset_message() {
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
     printf "${GREEN}The admin password has been successfully reset, see the output above.${NC}\n"
-    printf "\n"
-    printf "${YELLOW}Important: You must restart the admin container for the new password to take effect:${NC}\n"
-    printf "  docker compose restart admin\n"
-    printf "\n"
-    printf "After restarting, you can login to the admin panel using the new password.\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
@@ -626,7 +605,7 @@ get_docker_compose_command() {
     local base_command="docker compose -f docker-compose.yml"
 
     # Check if using build configuration
-    if [ "$1" = "build" ]; then
+    if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null; then
         base_command="$base_command -f docker-compose.build.yml"
     fi
 
@@ -749,6 +728,8 @@ handle_install() {
 # Function to handle build
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
+    # Set deployment mode to build to ensure container lifecycle uses build configuration
+    set_deployment_mode "build"
     printf "\n"
 
     # Check for required build files
@@ -811,17 +792,9 @@ handle_build() {
     printf "\n${GREEN}> Docker Compose stack built successfully.${NC}\n"
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
-    if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command "build") up -d --force-recreate || {
-            printf "${RED}> Failed to start Docker Compose stack${NC}\n"
-            exit 1
-        }
-    else
-        $(get_docker_compose_command "build") up -d --force-recreate > /dev/null 2>&1 || {
-            printf "${RED}> Failed to start Docker Compose stack${NC}\n"
-            exit 1
-        }
-    fi
+
+    recreate_docker_containers
+
     printf "${GREEN}> Docker Compose stack started successfully.${NC}\n"
 
     # Only show success message if we made it here without errors
@@ -1227,42 +1200,26 @@ generate_self_signed_cert() {
 
 # New functions to handle container lifecycle:
 handle_start() {
-    local mode="$1"
     printf "${CYAN}> Starting AliasVault containers...${NC}\n"
-    if [ "$mode" = "build" ]; then
-        $(get_docker_compose_command "build") up -d
-    else
-        $(get_docker_compose_command) up -d
-    fi
+    $(get_docker_compose_command) up -d
     printf "${GREEN}> AliasVault containers started successfully.${NC}\n"
 }
 
 handle_stop() {
-    local mode="$1"
     printf "${CYAN}> Stopping AliasVault containers...${NC}\n"
     if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
         printf "${YELLOW}> No containers are currently running.${NC}\n"
         exit 0
     fi
 
-    if [ "$mode" = "build" ]; then
-        $(get_docker_compose_command "build") down
-    else
-        $(get_docker_compose_command) down
-    fi
+    $(get_docker_compose_command) down
     printf "${GREEN}> AliasVault containers stopped successfully.${NC}\n"
 }
 
 handle_restart() {
-    local mode="$1"
     printf "${CYAN}> Restarting AliasVault containers...${NC}\n"
-    if [ "$mode" = "build" ]; then
-        $(get_docker_compose_command "build") down
-        $(get_docker_compose_command "build") up -d
-    else
-        $(get_docker_compose_command) down
-        $(get_docker_compose_command) up -d
-    fi
+    $(get_docker_compose_command) down
+    $(get_docker_compose_command) up -d
     printf "${GREEN}> AliasVault containers restarted successfully.${NC}\n"
 }
 
@@ -1457,6 +1414,8 @@ handle_install_version() {
     fi
 
     printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
+    # Set deployment mode to install to ensure container lifecycle uses install configuration
+    set_deployment_mode "install"
     printf "\n"
 
     # Initialize workspace which makes sure all required directories and files exist
@@ -1464,6 +1423,7 @@ handle_install_version() {
 
     # Update docker-compose files with correct version so we pull the correct images
     handle_docker_compose "$target_version"
+
 
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
@@ -1723,6 +1683,16 @@ handle_migrate_db() {
      fi
 
     printf "${GREEN}> Check migration output above for details.${NC}\n"
+}
+
+# Function to set deployment mode in .env
+set_deployment_mode() {
+    local mode=$1
+    if [ "$mode" != "build" ] && [ "$mode" != "install" ]; then
+        printf "${RED}Invalid deployment mode: $mode${NC}\n"
+        exit 1
+    fi
+    update_env_var "DEPLOYMENT_MODE" "$mode"
 }
 
 main "$@"
