@@ -131,6 +131,7 @@ public static partial class Program
             await TruncateTable(pgContext.Vaults, "Vaults");
             await TruncateTable(pgContext.UserEncryptionKeys, "UserEncryptionKeys");
             await TruncateTable(pgContext.AliasVaultUserRefreshTokens, "AliasVaultUserRefreshTokens");
+            await TruncateTable(pgContext.Logs, "Logs");
             await TruncateTable(pgContext.AuthLogs, "AuthLogs");
             await TruncateTable(pgContext.DataProtectionKeys, "DataProtectionKeys");
             await TruncateTable(pgContext.ServerSettings, "ServerSettings");
@@ -144,8 +145,9 @@ public static partial class Program
             await MigrateTable(sqliteContext.AliasVaultRoles, pgContext.AliasVaultRoles, pgContext, "AliasVaultRoles");
             await MigrateTable(sqliteContext.AliasVaultUsers, pgContext.AliasVaultUsers, pgContext, "AliasVaultUsers");
             await MigrateTable(sqliteContext.ServerSettings, pgContext.ServerSettings, pgContext, "ServerSettings");
-            await MigrateTable(sqliteContext.DataProtectionKeys, pgContext.DataProtectionKeys, pgContext, "DataProtectionKeys");
-            await MigrateTable(sqliteContext.AuthLogs, pgContext.AuthLogs, pgContext, "AuthLogs");
+            await MigrateTable(sqliteContext.DataProtectionKeys, pgContext.DataProtectionKeys, pgContext, "DataProtectionKeys", true);
+            await MigrateTable(sqliteContext.Logs, pgContext.Logs, pgContext, "Logs", true);
+            await MigrateTable(sqliteContext.AuthLogs, pgContext.AuthLogs, pgContext, "AuthLogs", true);
             await MigrateTable(sqliteContext.AdminUsers, pgContext.AdminUsers, pgContext, "AdminUsers");
 
             // Then migrate tables with foreign key dependencies
@@ -160,8 +162,8 @@ public static partial class Program
             await MigrateTable(sqliteContext.UserTokens, pgContext.UserTokens, pgContext, "UserTokens");
 
             // Email related tables (last due to dependencies)
-            await MigrateTable(sqliteContext.Emails, pgContext.Emails, pgContext, "Emails");
-            await MigrateTable(sqliteContext.EmailAttachments, pgContext.EmailAttachments, pgContext, "EmailAttachments");
+            await MigrateTable(sqliteContext.Emails, pgContext.Emails, pgContext, "Emails", true);
+            await MigrateTable(sqliteContext.EmailAttachments, pgContext.EmailAttachments, pgContext, "EmailAttachments", true);
 
             Console.WriteLine("Migration completed successfully!");
             return 0;
@@ -201,6 +203,7 @@ public static partial class Program
     /// <param name="destination">The destination database table.</param>
     /// <param name="destinationContext">The destination database context.</param>
     /// <param name="tableName">The name of the table being migrated (for logging purposes).</param>
+    /// <param name="resetSequence">Whether to reset the sequence for the table after migration.</param>
     /// <returns>A task representing the asynchronous migration operation.</returns>
     /// <exception cref="ArgumentException">
     /// Thrown when the number of records in source and destination tables don't match after migration.
@@ -212,7 +215,8 @@ public static partial class Program
         DbSet<T> source,
         DbSet<T> destination,
         DbContext destinationContext,
-        string tableName)
+        string tableName,
+        bool resetSequence = false)
         where T : class
     {
         Console.WriteLine($"Migrating {tableName}...");
@@ -234,6 +238,22 @@ public static partial class Program
                 catch (DbUpdateConcurrencyException ex)
                 {
                     await HandleConcurrencyConflict(ex, destinationContext);
+                }
+            }
+
+            // Only reset sequence if requested
+            if (resetSequence && destinationContext.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+            {
+                var tablePgName = destinationContext.Model.FindEntityType(typeof(T))?.GetTableName();
+                if (!string.IsNullOrEmpty(tablePgName))
+                {
+                    var schema = destinationContext.Model.FindEntityType(typeof(T))?.GetSchema() ?? "public";
+                    var sql = $"""
+                        SELECT setval(pg_get_serial_sequence('{schema}."{tablePgName}"', 'Id'),
+                        (SELECT COALESCE(MAX("Id"::integer), 0) + 1 FROM {schema}."{tablePgName}"), false);
+                        """;
+                    await destinationContext.Database.ExecuteSqlRawAsync(sql);
+                    Console.WriteLine($"Reset sequence for {tableName}");
                 }
             }
         }
