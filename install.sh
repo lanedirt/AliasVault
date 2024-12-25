@@ -733,6 +733,9 @@ handle_build() {
     set_deployment_mode "build"
     printf "\n"
 
+    # Initialize workspace which makes sure all required directories and files exist
+    initialize_workspace
+
     # Check for required build files
     if [ ! -f "docker-compose.build.yml" ] || [ ! -d "src" ]; then
         printf "${RED}Error: Required files for building from source are missing.${NC}\n"
