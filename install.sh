@@ -1,12 +1,10 @@
 #!/bin/bash
-# @version 0.10.0
+# @version 0.9.4
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
 REPO_NAME="AliasVault"
-REPO_BRANCH="main"
 GITHUB_RAW_URL_REPO="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}"
-GITHUB_RAW_URL_REPO_BRANCH="$GITHUB_RAW_URL_REPO/$REPO_BRANCH"
 GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
 
 # Required files and directories
@@ -1324,8 +1322,15 @@ compare_versions() {
 check_install_script_update() {
     printf "${CYAN}> Checking for install script updates...${NC}\n"
 
-    # Download latest install.sh to temporary file
-    if ! curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/install.sh" -o "install.sh.tmp"; then
+    # Get latest release version
+    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+    if [ -z "$latest_version" ]; then
+        printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
+        return 1
+    fi
+
+    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/install.sh" -o "install.sh.tmp"; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
         return 1
@@ -1493,8 +1498,8 @@ configure_dev_database() {
     printf "\n"
 
     if [ ! -f "docker-compose.dev.yml" ]; then
-        printf "${CYAN}> Downloading docker-compose.dev.yml...${NC}\n"
-        curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/docker-compose.dev.yml" -o "docker-compose.dev.yml"
+        printf "${RED}> The docker-compose.dev.yml file is missing. This file is required to start the development database. Please checkout the full GitHub repository and try again.${NC}\n"
+        return 1
     fi
 
     # Check if direct option was provided
@@ -1605,7 +1610,7 @@ print_dev_db_details() {
     printf "${MAGENTA}=========================================================${NC}\n"
 }
 
-# Function to handle database migration
+# Function to handle database migration. This is a one-time operation necessary when upgrading from <= 0.9.x to 0.10.0+ and only needs to be run once.
 handle_migrate_db() {
     printf "${YELLOW}+++ Database Migration Tool +++${NC}\n"
     printf "\n"
