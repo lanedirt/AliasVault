@@ -16,6 +16,7 @@ REQUIRED_DIRS=(
     "certificates/letsencrypt"
     "certificates/letsencrypt/www"
     "database"
+    "database/postgres"
     "logs"
     "logs/msbuild"
 )
