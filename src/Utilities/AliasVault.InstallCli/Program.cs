@@ -264,6 +264,7 @@ public static partial class Program
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
+                    Console.WriteLine($"Concurrency conflict occurred during migration of {tableName}...");
                     await HandleConcurrencyConflict(ex, destinationContext);
                 }
             }
@@ -315,5 +316,7 @@ public static partial class Program
                 await destinationContext.SaveChangesAsync();
             }
         }
+
+        Console.WriteLine($"Concurrency conflict resolved, {ex.Entries.Count} records inserted");
     }
 }
