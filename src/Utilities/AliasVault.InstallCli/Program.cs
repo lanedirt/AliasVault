@@ -8,6 +8,7 @@
 using AliasServerDb;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 // Add return type for top-level statements
 return await Run(args);
@@ -233,26 +234,7 @@ public static partial class Program
 
             foreach (var item in items)
             {
-                // Check each property for MaxLength annotation
-                foreach (var property in entityType!.GetProperties())
-                {
-                    // Only process string properties
-                    if (property.ClrType == typeof(string))
-                    {
-                        var maxLength = property.GetMaxLength();
-                        if (maxLength.HasValue)
-                        {
-                            var propertyInfo = typeof(T).GetProperty(property.Name);
-                            var value = propertyInfo?.GetValue(item) as string;
-
-                            if (value?.Length > maxLength.Value)
-                            {
-                                propertyInfo?.SetValue(item, value.Substring(0, maxLength.Value));
-                                Console.WriteLine($"Truncated {property.Name} in {tableName} from {value.Length} to {maxLength.Value} characters");
-                            }
-                        }
-                    }
-                }
+                HandleMaxLengthConstraints(item, entityType!, tableName);
             }
 
             const int batchSize = 50;
@@ -272,20 +254,10 @@ public static partial class Program
                 }
             }
 
-            // Only reset sequence if requested
+            // Handle sequence reset logic...
             if (resetSequence && destinationContext.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
             {
-                var tablePgName = destinationContext.Model.FindEntityType(typeof(T))?.GetTableName();
-                if (!string.IsNullOrEmpty(tablePgName))
-                {
-                    var schema = destinationContext.Model.FindEntityType(typeof(T))?.GetSchema() ?? "public";
-                    var sql = $"""
-                        SELECT setval(pg_get_serial_sequence('{schema}."{tablePgName}"', 'Id'),
-                        (SELECT COALESCE(MAX("Id"::integer), 0) + 1 FROM {schema}."{tablePgName}"), false);
-                        """;
-                    await destinationContext.Database.ExecuteSqlRawAsync(sql);
-                    Console.WriteLine($"Reset sequence for {tableName}");
-                }
+                await ResetSequence<T>(destinationContext, tableName);
             }
         }
 
@@ -293,6 +265,60 @@ public static partial class Program
         if (await source.CountAsync() > await destination.CountAsync())
         {
             throw new ArgumentException($"The amount of records in the source is greater than the destination. Check if the migration is working correctly.");
+        }
+    }
+
+    /// <summary>
+    /// Handles max length constraints for string properties in an entity.
+    /// </summary>
+    /// <typeparam name="T">The entity type containing the properties to be processed.</typeparam>
+    /// <param name="item">The entity instance containing the properties to be processed.</param>
+    /// <param name="entityType">The entity type to be processed.</param>
+    /// <param name="tableName">The name of the table being processed (for logging purposes).</param>
+    private static void HandleMaxLengthConstraints<T>(T item, IEntityType entityType, string tableName)
+        where T : class
+    {
+        foreach (var property in entityType.GetProperties())
+        {
+            // Only process string properties
+            if (property.ClrType == typeof(string))
+            {
+                var maxLength = property.GetMaxLength();
+                if (maxLength.HasValue)
+                {
+                    var propertyInfo = typeof(T).GetProperty(property.Name);
+                    var value = propertyInfo?.GetValue(item) as string;
+
+                    if (value?.Length > maxLength.Value)
+                    {
+                        propertyInfo!.SetValue(item, value.Substring(0, maxLength.Value));
+                        Console.WriteLine($"Truncated {property.Name} in {tableName} from {value.Length} to {maxLength.Value} characters");
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resets the sequence for a table in the PostgreSQL database.
+    /// </summary>
+    /// <typeparam name="T">The entity type of the table being reset.</typeparam>
+    /// <param name="destinationContext">The destination database context.</param>
+    /// <param name="tableName">The name of the table being reset (for logging purposes).</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private static async Task ResetSequence<T>(DbContext destinationContext, string tableName)
+        where T : class
+    {
+        var tablePgName = destinationContext.Model.FindEntityType(typeof(T))?.GetTableName();
+        if (!string.IsNullOrEmpty(tablePgName))
+        {
+            var schema = destinationContext.Model.FindEntityType(typeof(T))?.GetSchema() ?? "public";
+            var sql = $"""
+                SELECT setval(pg_get_serial_sequence('{schema}."{tablePgName}"', 'Id'),
+                (SELECT COALESCE(MAX("Id"::integer), 0) + 1 FROM {schema}."{tablePgName}"), false);
+                """;
+            await destinationContext.Database.ExecuteSqlRawAsync(sql);
+            Console.WriteLine($"Reset sequence for {tableName}");
         }
     }
 
