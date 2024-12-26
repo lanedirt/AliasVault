@@ -1510,7 +1510,7 @@ configure_dev_database() {
                     printf "${YELLOW}> Development database is already running.${NC}\n"
                 else
                     printf "${CYAN}> Starting development database...${NC}\n"
-                    docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d
+                    docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
                     printf "${GREEN}> Development database started successfully.${NC}\n"
                 fi
                 print_dev_db_details
@@ -1564,7 +1564,7 @@ configure_dev_database() {
                 printf "${YELLOW}> Development database is already running.${NC}\n"
             else
                 printf "${CYAN}> Starting development database...${NC}\n"
-                docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d
+                docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
                 printf "${GREEN}> Development database started successfully.${NC}\n"
             fi
             print_dev_db_details

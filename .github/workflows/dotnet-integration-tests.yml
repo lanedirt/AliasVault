@@ -28,18 +28,5 @@ jobs:
     - name: Start dev database
       run: ./install.sh configure-dev-db start
 
-    - name: Wait for database to be up
-      run: |
-        timeout=30
-        while ! nc -z localhost 5433; do
-          if [ "$timeout" -le "0" ]; then
-            echo "Timed out waiting for database"
-            exit 1
-          fi
-          echo "Waiting for database to be available on port 5433..."
-          sleep 1
-          timeout=$((timeout-1))
-        done
-
     - name: Run integration tests
       run: dotnet test src/Tests/AliasVault.IntegrationTests --no-build --verbosity normal
