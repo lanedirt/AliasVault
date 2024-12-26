@@ -1469,9 +1469,9 @@ handle_install_version() {
     for image in "${images[@]}"; do
         printf "${CYAN}> Pulling $image...${NC}\n"
         if [ "$VERBOSE" = true ]; then
-            docker pull $image || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+            docker pull $image || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
         else
-            docker pull $image > /dev/null 2>&1 || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+            docker pull $image > /dev/null 2>&1 || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
         fi
     done
 
