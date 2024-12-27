@@ -54,15 +54,17 @@ public class CodeLockoutTests : TwoFactorAuthBase
         for (var i = 0; i < 11; i++)
         {
             await Page.Locator("input[id='two-factor-code']").FillAsync("000000");
-            var submitButton = Page.Locator("button[type='submit']");
-            await submitButton.ClickAsync();
 
             if (i == 10)
             {
                 break;
             }
 
+            // Form should auto-submit after entering the code.
             await WaitForUrlAsync("user/login**", "Invalid authenticator code.");
+
+            // Clear the input field for the next attempt.
+            await Page.Locator("input[id='two-factor-code']").FillAsync(string.Empty);
         }
 
         // Wait for account lockout message.
