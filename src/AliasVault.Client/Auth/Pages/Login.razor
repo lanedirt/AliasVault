@@ -24,7 +24,11 @@
             <DataAnnotationsValidator/>
             <div>
                 <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Authenticator code</label>
-                <InputNumber @bind-Value="_loginModel2Fa.TwoFactorCode" id="two-factor-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
+                <InputNumber @bind-Value="_loginModel2Fa.TwoFactorCode"
+                            id="two-factor-code"
+                            @oninput="OnTwoFactorCodeInput"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            autocomplete="off"/>
                 <ValidationMessage For="() => _loginModel2Fa.TwoFactorCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
             </div>
             <div class="flex items-start">
@@ -416,5 +420,25 @@ else
         }
 
         return [];
+    }
+
+    /// <summary>
+    /// Auto submit the 2FA code when 6 digits are entered.
+    /// </summary>
+    /// <param name="e"></param>
+    private async Task OnTwoFactorCodeInput(ChangeEventArgs e)
+    {
+        if (e.Value?.ToString()?.Length >= 6)
+        {
+            // Update the blazor model with the current value.
+            _loginModel2Fa.TwoFactorCode = int.Parse(e.Value.ToString()!);
+            
+            // Submit the form.
+            await Handle2Fa();
+        }
+        else
+        {
+            _serverValidationErrors.Clear();
+        }
     }
 }
