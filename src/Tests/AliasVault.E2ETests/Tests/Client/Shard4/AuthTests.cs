@@ -62,10 +62,12 @@ public class AuthTests : ClientPlaywrightTest
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
 
-        // Check if the refresh token is stored in the database and its expiration date is set 4 hours in the future.
+        // Check if the refresh token is stored in the database and its expiration date is set to the short lifetime
+        // because the "Remember me" checkbox was not checked.
+        var settings = await ApiServerSettings.GetAllSettingsAsync();
         var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
         Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
-        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(4)), "Refresh token expiration date is not 4 hours in the future.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(settings.RefreshTokenLifetimeShort)), "Refresh token expiration date does not match the configured short lifetime while rememberMe was not checked.");
     }
 
     /// <summary>
@@ -128,11 +130,12 @@ public class AuthTests : ClientPlaywrightTest
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Login);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
 
-        // Check if the refresh token is stored in the database and its expiration date is set 7 days in the future
+        // Check if the refresh token is stored in the database and its expiration date is set to the long lifetime
         // because the "Remember me" checkbox was checked.
+        var settings = await ApiServerSettings.GetAllSettingsAsync();
         var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
         Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
-        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddDays(7)), "Refresh token expiration date is not 7 days in the future while rememberMe checkbox was checked.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(settings.RefreshTokenLifetimeLong)), "Refresh token expiration date does not match the configured long lifetime while rememberMe was checked.");
     }
 
     /// <summary>
