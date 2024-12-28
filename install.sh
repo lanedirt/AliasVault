@@ -318,6 +318,44 @@ handle_docker_compose() {
     return 0
 }
 
+# Function to check and update install.sh for specific version
+check_install_script_version() {
+    local target_version="$1"
+    printf "${CYAN}> Checking install script version for ${target_version}...${NC}\n"
+
+    # Get remote install.sh for target version
+    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${target_version}/install.sh" -o "install.sh.tmp"; then
+        printf "${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
+        rm -f install.sh.tmp
+        return 1
+    fi
+
+    # Get versions
+    local current_version=$(extract_version "install.sh")
+    local target_script_version=$(extract_version "install.sh.tmp")
+
+    # Check if versions could be extracted
+    if [ -z "$current_version" ] || [ -z "$target_script_version" ]; then
+        printf "${YELLOW}> Could not determine script versions. Falling back to file comparison...${NC}\n"
+        if ! cmp -s "install.sh" "install.sh.tmp"; then
+            printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            return 2
+        fi
+    else
+        printf "${CYAN}> Current install script version: ${current_version}${NC}\n"
+        printf "${CYAN}> Target install script version: ${target_script_version}${NC}\n"
+
+        if [ "$current_version" != "$target_script_version" ]; then
+            printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            return 2
+        fi
+    fi
+
+    printf "${GREEN}> Install script is up to date for version ${target_version}.${NC}\n"
+    rm -f install.sh.tmp
+    return 0
+}
+
 # Function to print the logo
 print_logo() {
     printf "${MAGENTA}"
@@ -1429,6 +1467,40 @@ handle_install_version() {
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
+
+    # Check if install script needs updating for this version
+    check_install_script_version "$target_version"
+    local check_result=$?
+
+    if [ $check_result -eq 2 ]; then
+        if [ "$FORCE_YES" = true ]; then
+            printf "${CYAN}> Updating install script to match version ${target_version}...${NC}\n"
+        else
+            printf "${YELLOW}> A different version of the install script is required for installing version ${target_version}.${NC}\n"
+            read -p "Would you like to self-update the install script before proceeding? [Y/n]: " reply
+            if [[ $reply =~ ^[Nn]$ ]]; then
+                printf "${YELLOW}> Continuing with current install script version.${NC}\n"
+                rm -f install.sh.tmp
+            fi
+        fi
+
+        if [ "$FORCE_YES" = true ] || [[ ! $reply =~ ^[Nn]$ ]]; then
+            # Create backup of current script
+            cp "install.sh" "install.sh.backup"
+
+            if mv "install.sh.tmp" "install.sh"; then
+                chmod +x "install.sh"
+                printf "${GREEN}> Install script updated successfully.${NC}\n"
+                printf "${GREEN}> Backup of previous version saved as install.sh.backup${NC}\n"
+                printf "${YELLOW}> Please run the same install command again to continue with the installation.${NC}\n"
+                exit 0
+            else
+                printf "${RED}> Failed to update install script. Continuing with current version.${NC}\n"
+                mv "install.sh.backup" "install.sh"
+                rm -f install.sh.tmp
+            fi
+        fi
+    fi
 
     # Update docker-compose files with correct version so we pull the correct images
     handle_docker_compose "$target_version"
