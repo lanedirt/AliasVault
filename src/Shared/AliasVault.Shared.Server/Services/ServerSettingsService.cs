@@ -145,6 +145,16 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
             }
         }
 
+        if (int.TryParse(settings.GetValueOrDefault("RefreshTokenLifetimeShort"), out var shortLifetime))
+        {
+            model.RefreshTokenLifetimeShort = shortLifetime;
+        }
+
+        if (int.TryParse(settings.GetValueOrDefault("RefreshTokenLifetimeLong"), out var longLifetime))
+        {
+            model.RefreshTokenLifetimeLong = longLifetime;
+        }
+
         return model;
     }
 
@@ -161,5 +171,7 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
         await SetSettingAsync("MaxEmailsPerUser", model.MaxEmailsPerUser.ToString());
         await SetSettingAsync("MaintenanceTime", model.MaintenanceTime.ToString("HH:mm", CultureInfo.InvariantCulture));
         await SetSettingAsync("TaskRunnerDays", string.Join(",", model.TaskRunnerDays));
+        await SetSettingAsync("RefreshTokenLifetimeShort", model.RefreshTokenLifetimeShort.ToString());
+        await SetSettingAsync("RefreshTokenLifetimeLong", model.RefreshTokenLifetimeLong.ToString());
     }
 }

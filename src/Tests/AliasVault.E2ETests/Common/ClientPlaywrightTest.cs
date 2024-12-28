@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Common;
 
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
+using AliasVault.Shared.Server.Services;
 using Microsoft.Playwright;
 
 /// <summary>
@@ -44,6 +45,11 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// Gets the db context for the WebAPI project.
     /// </summary>
     protected AliasServerDbContext ApiDbContext => _apiFactory.GetDbContext();
+
+    /// <summary>
+    /// Gets the server settings service for the WebAPI project.
+    /// </summary>
+    protected ServerSettingsService ApiServerSettings => _apiFactory.GetServerSettings();
 
     /// <summary>
     /// Gets or sets the base URL where the WebAPI project runs on including random port.

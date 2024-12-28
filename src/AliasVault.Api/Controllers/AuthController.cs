@@ -20,6 +20,7 @@ using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Models.WebApi.PasswordChange;
 using AliasVault.Shared.Providers.Time;
+using AliasVault.Shared.Server.Services;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,10 +41,11 @@ using SecureRemotePassword;
 /// <param name="timeProvider">ITimeProvider instance. This returns the time which can be mutated for testing.</param>
 /// <param name="authLoggingService">AuthLoggingService instance. This is used to log auth attempts to the database.</param>
 /// <param name="config">Config instance.</param>
+/// <param name="settingsService">ServerSettingsService instance.</param>
 [Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService, Config config) : ControllerBase
+public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService, Config config, ServerSettingsService settingsService) : ControllerBase
 {
     /// <summary>
     /// Error message for invalid username or password.
@@ -688,18 +690,14 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     private async Task<TokenModel> GenerateNewTokensForUser(AliasVaultUser user, bool extendedLifetime = false)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
+        var settings = await settingsService.GetAllSettingsAsync();
 
         await Semaphore.WaitAsync();
         try
         {
-            // Determine the refresh token lifetime.
-            // - 4 hours by default.
-            // - 7 days if "remember me" was checked during login.
-            var refreshTokenLifetime = TimeSpan.FromHours(4);
-            if (extendedLifetime)
-            {
-                refreshTokenLifetime = TimeSpan.FromDays(7);
-            }
+            // Use server settings for refresh token lifetime.
+            var refreshTokenLifetimeHours = extendedLifetime ? settings.RefreshTokenLifetimeLong : settings.RefreshTokenLifetimeShort;
+            var refreshTokenLifetime = TimeSpan.FromHours(refreshTokenLifetimeHours);
 
             // Return new refresh token.
             return await GenerateRefreshToken(user, refreshTokenLifetime);

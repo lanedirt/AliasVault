@@ -41,4 +41,16 @@ public class ServerSettingsModel
     /// Gets or sets the task runner days. Defaults to all days of the week.
     /// </summary>
     public List<int> TaskRunnerDays { get; set; } = [1, 2, 3, 4, 5, 6, 7];
+
+    /// <summary>
+    /// Gets or sets the short refresh token lifetime in hours. Defaults to 8 hours.
+    /// Used when "Remember me" is not checked.
+    /// </summary>
+    public int RefreshTokenLifetimeShort { get; set; } = 8;
+
+    /// <summary>
+    /// Gets or sets the long refresh token lifetime in hours. Defaults to 336 hours / 14 days.
+    /// Used when "Remember me" is checked.
+    /// </summary>
+    public int RefreshTokenLifetimeLong { get; set; } = 336;
 }

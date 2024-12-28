@@ -15,6 +15,7 @@ using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
 using AliasVault.Shared.Providers.Time;
+using AliasVault.Shared.Server.Services;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -38,6 +39,7 @@ builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
 builder.Services.AddScoped<AuthLoggingService>();
+builder.Services.AddScoped<ServerSettingsService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddLogging(logging =>

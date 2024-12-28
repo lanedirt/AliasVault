@@ -9,6 +9,7 @@ namespace AliasVault.E2ETests.Infrastructure.Abstracts;
 
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
+using AliasVault.Shared.Server.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -32,6 +33,11 @@ public abstract class WebApplicationFactoryFixture<TEntryPoint> : WebApplication
     /// The cached DbContext instance that can be used during the test.
     /// </summary>
     private AliasServerDbContext? _dbContext;
+
+    /// <summary>
+    /// The ServerSettingsService instance that is created for the test.
+    /// </summary>
+    private IServiceScope? _scope;
 
     /// <summary>
     /// The name of the temporary test database.
@@ -59,6 +65,17 @@ public abstract class WebApplicationFactoryFixture<TEntryPoint> : WebApplication
     }
 
     /// <summary>
+    /// Gets the ServerSettingsService instance for mutating server settings in tests.
+    /// </summary>
+    /// <returns>ServerSettingsService instance.</returns>
+    public ServerSettingsService GetServerSettings()
+    {
+        _scope?.Dispose();
+        _scope = Services.CreateScope();
+        return _scope.ServiceProvider.GetRequiredService<ServerSettingsService>();
+    }
+
+    /// <summary>
     /// Disposes the DbConnection instance and drops the temporary database.
     /// </summary>
     /// <returns>Task.</returns>
@@ -69,6 +86,8 @@ public abstract class WebApplicationFactoryFixture<TEntryPoint> : WebApplication
             await _dbContext.DisposeAsync();
             _dbContext = null;
         }
+
+        _scope?.Dispose();
 
         if (!string.IsNullOrEmpty(_tempDbName))
         {
