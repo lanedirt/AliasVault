@@ -31,12 +31,13 @@ public class AuthTests : ClientPlaywrightTest
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after registration.");
 
-        // Check if the refresh token is stored in the database and its expiration date is set 7 days in the future
+        // Check if the refresh token is stored in the database and its expiration date is set to the long lifetime
         // after registration. The registration page does not have a "Remember me" checkbox, but it is assumed that
-        // the device is trusted so the refresh token will be valid for the extended duration: 7 days.
+        // the device is trusted so the refresh token will be valid for the extended duration.
+        var settings = await ApiServerSettings.GetAllSettingsAsync();
         var refreshToken = await ApiDbContext.AliasVaultUserRefreshTokens.FirstOrDefaultAsync();
         Assert.That(refreshToken, Is.Not.Null, "Refresh token not found in database after login.");
-        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddDays(7)), "Refresh token expiration date is not 7 days in the future while rememberMe checkbox was checked.");
+        Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(settings.RefreshTokenLifetimeLong)), "Refresh token expiration date does not match the configured long lifetime while rememberMe was checked.");
     }
 
     /// <summary>

@@ -10,6 +10,7 @@ namespace AliasVault.E2ETests.Infrastructure;
 using System.Data.Common;
 using AliasServerDb;
 using AliasVault.Shared.Providers.Time;
+using AliasVault.Shared.Server.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -34,6 +35,11 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     /// The DbContextFactory instance that is created for the test.
     /// </summary>
     private IDbContextFactory<AliasServerDbContext> _dbContextFactory = null!;
+
+    /// <summary>
+    /// The ServerSettingsService instance that is created for the test.
+    /// </summary>
+    private IServiceScope? _scope;
 
     /// <summary>
     /// The cached DbContext instance that can be used during the test.
@@ -75,11 +81,23 @@ public class WebApplicationApiFactoryFixture<TEntryPoint> : WebApplicationFactor
     }
 
     /// <summary>
+    /// Gets the ServerSettingsService instance for mutating server settings in tests.
+    /// </summary>
+    /// <returns>ServerSettingsService instance.</returns>
+    public ServerSettingsService GetServerSettings()
+    {
+        _scope?.Dispose();
+        _scope = Services.CreateScope();
+        return _scope.ServiceProvider.GetRequiredService<ServerSettingsService>();
+    }
+
+    /// <summary>
     /// Disposes the DbConnection instance.
     /// </summary>
     /// <returns>ValueTask.</returns>
     public override ValueTask DisposeAsync()
     {
+        _scope?.Dispose();
         _dbConnection.Dispose();
         GC.SuppressFinalize(this);
         return base.DisposeAsync();
