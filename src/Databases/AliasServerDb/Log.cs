@@ -26,13 +26,13 @@ public class Log
     /// Gets or sets the application name associated with the log entry.
     /// </summary>
     [Required]
-    [Column(TypeName = "nvarchar(50)")]
+    [MaxLength(50)]
     public string Application { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the source context that triggered this log message.
     /// </summary>
-    [Column(TypeName = "nvarchar(255)")]
+    [MaxLength(255)]
     public string SourceContext { get; set; } = null!;
 
     /// <summary>
@@ -48,7 +48,7 @@ public class Log
     /// <summary>
     /// Gets or sets the log level.
     /// </summary>
-    [Column(TypeName = "nvarchar(128)")]
+    [MaxLength(128)]
     public string Level { get; set; } = null!;
 
     /// <summary>

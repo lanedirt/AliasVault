@@ -1,9 +1,9 @@
 services:
-    reverse-proxy:
-        image: aliasvault-reverse-proxy
+    postgres:
+        image: aliasvault-postgres
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: src/Databases/AliasServerDb/Dockerfile
 
     client:
         image: aliasvault-client
@@ -22,6 +22,12 @@ services:
         build:
             context: .
             dockerfile: src/AliasVault.Admin/Dockerfile
+
+    reverse-proxy:
+        image: aliasvault-reverse-proxy
+        build:
+            context: .
+            dockerfile: Dockerfile
 
     smtp:
         image: aliasvault-smtp

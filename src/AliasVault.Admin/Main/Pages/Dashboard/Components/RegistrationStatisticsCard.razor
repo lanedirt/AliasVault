@@ -43,7 +43,8 @@
         var last14Days = now.AddDays(-14);
 
         // Get registration statistics
-        var registrationQuery = DbContext.AliasVaultUsers.AsQueryable();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var registrationQuery = dbContext.AliasVaultUsers.AsQueryable();
         RegistrationStats = new RegistrationStatistics
         {
             Last24Hours = await registrationQuery.CountAsync(u => u.CreatedAt >= last24Hours),

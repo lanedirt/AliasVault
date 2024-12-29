@@ -5,29 +5,29 @@
 
 <LayoutPageTitle>Two-factor authentication (2FA)</LayoutPageTitle>
 
-@if (is2FaEnabled)
+@if (_is2FaEnabled)
 {
     <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Two-factor authentication (2FA)</h3>
 
-        @if (recoveryCodesLeft == 0)
+        @if (_recoveryCodesLeft == 0)
         {
             <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900 dark:text-red-100">
                 <p class="font-bold">You have no recovery codes left.</p>
                 <p>You must <a href="account/manage/generate-recovery-codes" class="text-red-800 dark:text-red-200 underline">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
             </div>
         }
-        else if (recoveryCodesLeft == 1)
+        else if (_recoveryCodesLeft == 1)
         {
             <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900 dark:text-red-100">
                 <p class="font-bold">You have 1 recovery code left.</p>
                 <p>You can <a href="account/manage/generate-recovery-codes" class="text-red-800 dark:text-red-200 underline">generate a new set of recovery codes</a>.</p>
             </div>
         }
-        else if (recoveryCodesLeft <= 3)
+        else if (_recoveryCodesLeft <= 3)
         {
             <div class="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100">
-                <p class="font-bold">You have @recoveryCodesLeft recovery codes left.</p>
+                <p class="font-bold">You have @_recoveryCodesLeft recovery codes left.</p>
                 <p>You should <a href="account/manage/generate-recovery-codes" class="text-yellow-800 dark:text-yellow-200 underline">generate a new set of recovery codes</a>.</p>
             </div>
         }
@@ -42,7 +42,7 @@
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Authenticator app</h4>
     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-        @if (!hasAuthenticator)
+        @if (!_hasAuthenticator)
         {
             <LinkButton Href="account/manage/enable-authenticator" Color="primary" Text="Add authenticator app" />
         }
@@ -55,17 +55,23 @@
 </div>
 
 @code {
-    private bool hasAuthenticator;
-    private int recoveryCodesLeft;
-    private bool is2FaEnabled;
+    private bool _hasAuthenticator;
+    private int _recoveryCodesLeft;
+    private bool _is2FaEnabled;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(UserService.User()) is not null;
-        is2FaEnabled = await UserManager.GetTwoFactorEnabledAsync(UserService.User());
-        recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(UserService.User());
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        _hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(user) is not null;
+        _is2FaEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
+        _recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(user);
     }
 }

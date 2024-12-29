@@ -30,15 +30,19 @@
 @code {
     private async Task OnSubmitAsync()
     {
-        await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
-        await UserManager.ResetAuthenticatorKeyAsync(UserService.User());
-        var userId = await UserManager.GetUserIdAsync(UserService.User());
-        Logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", userId);
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        await UserManager.SetTwoFactorEnabledAsync(user, false);
+        await UserManager.ResetAuthenticatorKeyAsync(user);
+        Logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", UserService.User().Id);
 
         GlobalNotificationService.AddSuccessMessage("Your authenticator app key has been reset, you will need to re-configure your authenticator app using the new key.");
 
-        NavigationService.RedirectTo(
-            "account/manage/2fa");
+        NavigationService.RedirectTo("account/manage/2fa");
     }
 
 }

@@ -119,8 +119,8 @@
             var response = await client.DeleteAsync($"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
             if (response.IsSuccessStatusCode)
             {
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
                 await OnEmailDeleted.InvokeAsync(Email.Id);
+                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
                 await Close();
             }
             else
@@ -150,8 +150,8 @@
             var response = await HttpClient.DeleteAsync($"v1/Email/{Email.Id}");
             if (response.IsSuccessStatusCode)
             {
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
                 await OnEmailDeleted.InvokeAsync(Email.Id);
+                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
                 await Close();
             }
             else

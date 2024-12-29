@@ -131,7 +131,8 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        var query = DbContext.AuthLogs.AsQueryable();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.AuthLogs.AsQueryable();
 
         if (!string.IsNullOrEmpty(SearchTerm))
         {
@@ -215,8 +216,9 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        DbContext.AuthLogs.RemoveRange(DbContext.AuthLogs);
-        await DbContext.SaveChangesAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        dbContext.AuthLogs.RemoveRange(dbContext.AuthLogs);
+        await dbContext.SaveChangesAsync();
         await RefreshData();
 
         IsLoading = false;

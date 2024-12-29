@@ -138,12 +138,12 @@
     {
         try
         {
-            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
             var job = new TaskRunnerJob
             {
                 Name = nameof(TaskRunnerJobType.Maintenance),
-                RunDate = DateTime.Now.Date,
-                StartTime = TimeOnly.FromDateTime(DateTime.Now),
+                RunDate = DateTime.UtcNow.Date,
+                StartTime = TimeOnly.FromDateTime(DateTime.UtcNow),
                 Status = TaskRunnerJobStatus.Pending,
                 IsOnDemand = true
             };

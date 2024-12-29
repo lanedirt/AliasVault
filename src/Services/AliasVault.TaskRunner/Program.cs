@@ -20,7 +20,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../../logs");
 
-builder.Services.AddAliasVaultSqliteConfiguration();
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 
 // -----------------------------------------------------------------------
 // Register hosted services via Status library wrapper in order to monitor and control (start/stop) them via the database.
@@ -40,7 +40,7 @@ var host = builder.Build();
 using (var scope = host.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var factory = container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
+    var factory = container.GetRequiredService<IAliasServerDbContextFactory>();
     await using var context = await factory.CreateDbContextAsync();
     await context.Database.MigrateAsync();
 }

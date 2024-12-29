@@ -272,6 +272,10 @@ ServiceFabricBackup/
 *.sqlite-shm
 *.sqlite-wal
 
+# SQL files
+*.sql
+*.sql.gz
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout
@@ -407,3 +411,7 @@ certificates/letsencrypt/**
 docs/_site
 docs/vendor
 docs/.bundle
+
+# Database files
+database/postgres
+database/postgres-dev

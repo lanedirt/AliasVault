@@ -25,7 +25,6 @@ public class WorkerServiceStatus
     /// </summary>
     [Required]
     [StringLength(255)]
-    [Column(TypeName = "varchar")]
     public string ServiceName { get; set; } = null!;
 
     /// <summary>

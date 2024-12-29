@@ -212,6 +212,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     {
         await _testHost.StopAsync();
         _testHost.Dispose();
+        await _testHostBuilder.DisposeAsync();
     }
 
     /// <summary>

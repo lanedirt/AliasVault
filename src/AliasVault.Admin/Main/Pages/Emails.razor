@@ -90,7 +90,8 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        IQueryable<Email> query = DbContext.Emails;
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        IQueryable<Email> query = dbContext.Emails;
 
         // Apply sort
         switch (SortColumn)

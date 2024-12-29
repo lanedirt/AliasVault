@@ -43,7 +43,8 @@
         var last14Days = now.AddDays(-14);
 
         // Get email statistics
-        var emailQuery = DbContext.Emails.AsQueryable();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var emailQuery = dbContext.Emails.AsQueryable();
         EmailStats = new EmailStatistics
         {
             Last24Hours = await emailQuery.CountAsync(e => e.DateSystem >= last24Hours),

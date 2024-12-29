@@ -20,7 +20,7 @@ To get AliasVault up and running quickly, run the install script to pull pre-bui
 ### Hardware requirements
 - Linux VM with root access (Ubuntu or RHEL based distros recommended)
 - 1 vCPU
-- 512MB RAM
+- 1GB RAM
 - 16GB disk space
 - Docker installed
 

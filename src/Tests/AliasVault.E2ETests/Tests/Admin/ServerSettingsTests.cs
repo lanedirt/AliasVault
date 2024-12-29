@@ -38,8 +38,8 @@ public class ServerSettingsTests : AdminPlaywrightTest
         await Page.Locator("input[id='schedule']").FillAsync("03:30");
 
         // Uncheck Sunday and Saturday from maintenance days
-        await Page.Locator("input[id='day_7']").UncheckAsync(); // Sunday
         await Page.Locator("input[id='day_6']").UncheckAsync(); // Saturday
+        await Page.Locator("input[id='day_7']").UncheckAsync(); // Sunday
 
         // Save changes
         var saveButton = Page.Locator("text=Save changes");
@@ -74,6 +74,9 @@ public class ServerSettingsTests : AdminPlaywrightTest
         // Refresh page and verify values persist
         await Page.ReloadAsync();
         await WaitForUrlAsync("settings/server", "Server settings");
+
+        // Wait for 0.5sec to ensure the page is fully loaded.
+        await Task.Delay(500);
 
         var generalLogRetentionValue = await Page.Locator("input[id='generalLogRetention']").InputValueAsync();
         Assert.That(generalLogRetentionValue, Is.EqualTo("45"), "General log retention value not persisted after refresh");

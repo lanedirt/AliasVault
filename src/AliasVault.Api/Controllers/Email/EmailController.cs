@@ -22,7 +22,7 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class EmailController(ILogger<VaultController> logger, IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class EmailController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Get the newest version of the vault for the current user.

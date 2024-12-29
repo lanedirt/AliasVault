@@ -34,7 +34,7 @@ var tlsEnabled = Environment.GetEnvironmentVariable("SMTP_TLS_ENABLED")
 config.SmtpTlsEnabled = tlsEnabled;
 builder.Services.AddSingleton(config);
 
-builder.Services.AddAliasVaultSqliteConfiguration();
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 builder.Services.AddTransient<IMessageStore, DatabaseMessageStore>();
 builder.Services.AddSingleton(
     provider =>
@@ -112,7 +112,7 @@ var host = builder.Build();
 using (var scope = host.Services.CreateScope())
 {
     var container = scope.ServiceProvider;
-    var factory = container.GetRequiredService<IDbContextFactory<AliasServerDbContext>>();
+    var factory = container.GetRequiredService<IAliasServerDbContextFactory>();
     await using var context = await factory.CreateDbContextAsync();
     await context.Database.MigrateAsync();
 }

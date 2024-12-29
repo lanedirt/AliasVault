@@ -23,7 +23,7 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="dbContextFactory">DbContext instance.</param>
 /// <param name="userManager">UserManager instance.</param>
 [ApiVersion("1")]
-public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class EmailBoxController(IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Returns a list of emails for the provided email address.
@@ -41,9 +41,11 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             return Unauthorized("Not authenticated.");
         }
 
+        var sanitizedEmail = to.Trim().ToLower();
+
         // See if this user has a valid claim to the email address.
         var emailClaim = await context.UserEmailClaims
-            .FirstOrDefaultAsync(x => x.Address == to);
+            .FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
 
         if (emailClaim is null)
         {
@@ -51,7 +53,7 @@ public class EmailBoxController(IDbContextFactory<AliasServerDbContext> dbContex
             {
                 Message = "No claim exists for this email address.",
                 Code = "CLAIM_DOES_NOT_EXIST",
-                Details = new { ProvidedEmail = to },
+                Details = new { ProvidedEmail = sanitizedEmail },
                 StatusCode = StatusCodes.Status400BadRequest,
                 Timestamp = DateTime.UtcNow,
             });

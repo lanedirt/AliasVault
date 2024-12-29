@@ -25,5 +25,8 @@ jobs:
     - name: Build
       run: dotnet build
 
+    - name: Start dev database
+      run: ./install.sh configure-dev-db start
+
     - name: Run integration tests
       run: dotnet test src/Tests/AliasVault.IntegrationTests --no-build --verbosity normal

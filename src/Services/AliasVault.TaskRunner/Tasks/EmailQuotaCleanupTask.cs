@@ -17,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 public class EmailQuotaCleanupTask : IMaintenanceTask
 {
     private readonly ILogger<EmailQuotaCleanupTask> _logger;
-    private readonly IDbContextFactory<AliasServerDbContext> _dbContextFactory;
+    private readonly IAliasServerDbContextFactory _dbContextFactory;
     private readonly ServerSettingsService _settingsService;
 
     /// <summary>
@@ -28,7 +28,7 @@ public class EmailQuotaCleanupTask : IMaintenanceTask
     /// <param name="settingsService">The settings service.</param>
     public EmailQuotaCleanupTask(
         ILogger<EmailQuotaCleanupTask> logger,
-        IDbContextFactory<AliasServerDbContext> dbContextFactory,
+        IAliasServerDbContextFactory dbContextFactory,
         ServerSettingsService settingsService)
     {
         _logger = logger;

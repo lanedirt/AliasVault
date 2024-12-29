@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore;
 [Route("v{version:apiVersion}/[controller]")]
 [ApiController]
 [ApiVersion("1")]
-public class SecurityController(IDbContextFactory<AliasServerDbContext> dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
+public class SecurityController(IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Returns list of active sessions (refresh tokens) for the current user.

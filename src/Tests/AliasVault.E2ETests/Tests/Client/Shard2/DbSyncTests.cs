@@ -245,6 +245,6 @@ public class DbSyncTests : ClientPlaywrightTest
 
         // Execute custom client actions.
         await clientActions();
-        return await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
+        return await ApiDbContext.Vaults.OrderByDescending(x => x.RevisionNumber).FirstAsync();
     }
 }

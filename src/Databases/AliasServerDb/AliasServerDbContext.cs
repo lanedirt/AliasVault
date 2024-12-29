@@ -25,7 +25,6 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     /// </summary>
     public AliasServerDbContext()
     {
-        SetPragmaSettings();
     }
 
     /// <summary>
@@ -35,7 +34,6 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public AliasServerDbContext(DbContextOptions<AliasServerDbContext> options)
         : base(options)
     {
-        SetPragmaSettings();
     }
 
     /// <summary>
@@ -223,10 +221,10 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
         // Note: when a user is deleted the email claims user FK's should be set to NULL
         // so the claims themselves are preserved to prevent re-use of the email address.
         modelBuilder.Entity<UserEmailClaim>()
-            .HasOne(l => l.User)
-            .WithMany(c => c.EmailClaims)
-            .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.ClientSetNull);
+            .HasOne(e => e.User)
+            .WithMany(u => u.EmailClaims)
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Configure Email - UserEncryptionKey relationship
         modelBuilder.Entity<Email>()
@@ -241,54 +239,5 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
             .WithMany(c => c.EncryptionKeys)
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    /// <summary>
-    /// Sets up the connection string if it is not already configured.
-    /// </summary>
-    /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (optionsBuilder.IsConfigured)
-        {
-            return;
-        }
-
-        var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-        // Add SQLite connection with enhanced settings
-        var connectionString = configuration.GetConnectionString("AliasServerDbContext") +
-                               ";Mode=ReadWriteCreate;Cache=Shared";
-
-        optionsBuilder
-            .UseSqlite(connectionString, options => options.CommandTimeout(60))
-            .UseLazyLoadingProxies();
-    }
-
-    /// <summary>
-    /// Sets up the PRAGMA settings for SQLite.
-    /// </summary>
-    private void SetPragmaSettings()
-    {
-        var connection = Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-        {
-            connection.Open();
-        }
-
-        using (var command = connection.CreateCommand())
-        {
-            // Increase busy timeout
-            command.CommandText = @"
-                    PRAGMA busy_timeout = 30000;
-                    PRAGMA journal_mode = WAL;
-                    PRAGMA synchronous = NORMAL;
-                    PRAGMA temp_store = MEMORY;
-                    PRAGMA mmap_size = 1073741824;";
-            command.ExecuteNonQuery();
-        }
     }
 }

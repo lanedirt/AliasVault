@@ -102,7 +102,7 @@
     /// </summary>
     private static bool IsHeartbeatValid(DateTime lastHeartbeat)
     {
-        return DateTime.Now <= lastHeartbeat.AddMinutes(5);
+        return DateTime.UtcNow <= lastHeartbeat.AddMinutes(5);
     }
 
     /// <summary>
@@ -171,7 +171,7 @@
         try
         {
             InitInProgress = true;
-            var dbContext = await DbContextFactory.CreateDbContextAsync();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
             ServiceStatus = await dbContext.WorkerServiceStatuses.ToListAsync();
 
             foreach (var service in Services)
@@ -197,7 +197,7 @@
     /// </summary>
     private async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
     {
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
         if (entry != null)
         {
@@ -205,16 +205,16 @@
             entry.DesiredStatus = newDesiredStatus;
             await dbContext.SaveChangesAsync();
 
-            var timeout = DateTime.Now.AddSeconds(30);
+            var timeout = DateTime.UtcNow.AddSeconds(30);
             while (true)
             {
-                if (DateTime.Now > timeout)
+                if (DateTime.UtcNow > timeout)
                 {
                     return false;
                 }
 
-                dbContext = await DbContextFactory.CreateDbContextAsync();
-                var check = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
+                await using var dbContextInner = await DbContextFactory.CreateDbContextAsync();
+                var check = await dbContextInner.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
                 if (check.CurrentStatus == newDesiredStatus)
                 {
                     return true;

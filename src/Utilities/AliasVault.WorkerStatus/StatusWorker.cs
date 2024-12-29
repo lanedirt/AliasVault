@@ -99,7 +99,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
         globalServiceStatus.Status = entry.CurrentStatus;
         globalServiceStatus.CurrentStatus = entry.CurrentStatus;
 
-        entry.Heartbeat = DateTime.Now;
+        entry.Heartbeat = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
         return entry;
@@ -122,7 +122,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
         globalServiceStatus.Status = status;
         globalServiceStatus.CurrentStatus = status;
 
-        statusEntry.Heartbeat = DateTime.Now;
+        statusEntry.Heartbeat = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
     }
 

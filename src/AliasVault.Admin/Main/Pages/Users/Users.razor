@@ -115,7 +115,8 @@ else
         IsLoading = true;
         StateHasChanged();
 
-        IQueryable<AliasVaultUser> query = DbContext.AliasVaultUsers;
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        IQueryable<AliasVaultUser> query = dbContext.AliasVaultUsers;
 
         if (SearchTerm.Length > 0)
         {

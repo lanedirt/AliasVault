@@ -50,16 +50,10 @@ public abstract class MainBase : OwningComponentBase
     protected JsInvokeService JsInvokeService { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the AliasServerDbContext instance.
+    /// Gets or sets the IAliasServerDbContextFactory instance.
     /// </summary>
     [Inject]
-    protected AliasServerDbContext DbContext { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the AliasServerDbContextFactory instance.
-    /// </summary>
-    [Inject]
-    protected IDbContextFactory<AliasServerDbContext> DbContextFactory { get; set; } = null!;
+    protected IAliasServerDbContextFactory DbContextFactory { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the GlobalLoadingService in order to manipulate the global loading spinner animation.

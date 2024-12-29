@@ -135,10 +135,11 @@ else
         StateHasChanged();
 
         // Load the aliases from the webapi via AliasService.
-        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
 
         // Get count of user authenticator tokens.
-        TwoFactorKeysCount = await DbContext.UserTokens.CountAsync(x => x.UserId == User!.Id && x.Name == "AuthenticatorKey");
+        TwoFactorKeysCount = await dbContext.UserTokens.CountAsync(x => x.UserId == User!.Id && x.Name == "AuthenticatorKey");
 
         if (User is null)
         {
@@ -149,7 +150,7 @@ else
         }
 
         // Load all active refresh tokens for this user to show which devices are logged in.
-        RefreshTokenList = await DbContext.AliasVaultUserRefreshTokens.Where(x => x.UserId == User.Id).Select(x => new AliasVaultUserRefreshToken()
+        RefreshTokenList = await dbContext.AliasVaultUserRefreshTokens.Where(x => x.UserId == User.Id).Select(x => new AliasVaultUserRefreshToken()
             {
                 Id = x.Id,
                 DeviceIdentifier = x.DeviceIdentifier,
@@ -162,7 +163,7 @@ else
             .ToListAsync();
 
         // Load all vaults for this user (do not load the actual file content for performance reasons).
-        VaultList = await DbContext.Vaults.Where(x => x.UserId == User.Id).Select(x => new Vault
+        VaultList = await dbContext.Vaults.Where(x => x.UserId == User.Id).Select(x => new Vault
             {
                 Id = x.Id,
                 Version = x.Version,
@@ -182,7 +183,7 @@ else
             .ToListAsync();
 
         // Load all email claims for this user.
-        EmailClaimList = await DbContext.UserEmailClaims
+        EmailClaimList = await dbContext.UserEmailClaims
             .Where(x => x.UserId == User.Id)
             .Select(x => new UserEmailClaimWithCount
             {
@@ -192,7 +193,7 @@ else
                 AddressDomain = x.AddressDomain,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                EmailCount = DbContext.Emails.Count(e => e.To == x.Address)
+                EmailCount = dbContext.Emails.Count(e => e.To == x.Address)
             })
             .OrderBy(x => x.CreatedAt)
             .ToListAsync();
@@ -206,12 +207,13 @@ else
     /// </summary>
     private async Task RevokeRefreshToken(AliasVaultUserRefreshToken entry)
     {
-        var token = await DbContext.AliasVaultUserRefreshTokens.FindAsync(entry.Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var token = await dbContext.AliasVaultUserRefreshTokens.FindAsync(entry.Id);
 
         if (token != null)
         {
-            DbContext.AliasVaultUserRefreshTokens.Remove(token);
-            await DbContext.SaveChangesAsync();
+            dbContext.AliasVaultUserRefreshTokens.Remove(token);
+            await dbContext.SaveChangesAsync();
             await RefreshData();
         }
     }
@@ -222,12 +224,13 @@ else
     /// </summary>
     private async Task EnableTwoFactor()
     {
-        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
 
         if (User != null)
         {
             User.TwoFactorEnabled = true;
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             await RefreshData();
         }
     }
@@ -239,12 +242,13 @@ else
     /// </summary>
     private async Task DisableTwoFactor()
     {
-        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
 
         if (User != null)
         {
             User.TwoFactorEnabled = false;
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             await RefreshData();
         }
     }
@@ -256,16 +260,17 @@ else
     /// </summary>
     private async Task ResetTwoFactor()
     {
-        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
 
         if (User != null)
         {
             // Remove all authenticator keys and recovery codes.
-            await DbContext.UserTokens
+            await dbContext.UserTokens
                 .Where(x => x.UserId == User.Id && (x.Name == "AuthenticatorKey" || x.Name == "RecoveryCodes"))
-                .ForEachAsync(x => DbContext.UserTokens.Remove(x));
+                .ForEachAsync(x => dbContext.UserTokens.Remove(x));
 
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             await RefreshData();
         }
     }
@@ -276,6 +281,7 @@ else
     /// <param name="vault">The vault to make current.</param>
     private async Task MakeCurrentAsync(Vault vault)
     {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         if (await ConfirmModalService.ShowConfirmation(
                 title: "Confirm Vault Restoration",
                 message: @"Are you sure you want to restore this specific vault and make it the active one?
@@ -286,7 +292,7 @@ Important notes:
 
 Do you want to proceed with the restoration?")) {
             // Load vault
-            var currentVault = await DbContext.Vaults.FindAsync(vault.Id);
+            var currentVault = await dbContext.Vaults.FindAsync(vault.Id);
             if (currentVault == null)
             {
                 return;
@@ -296,7 +302,7 @@ Do you want to proceed with the restoration?")) {
             currentVault.RevisionNumber = VaultList.MaxBy(x => x.RevisionNumber)!.RevisionNumber + 1;
 
             // Save it.
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
 
             // Reload the page.
             await RefreshData();
@@ -308,12 +314,13 @@ Do you want to proceed with the restoration?")) {
     /// </summary>
     private async Task ToggleBlockStatus()
     {
-        User = await DbContext.AliasVaultUsers.FindAsync(Id);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
 
         if (User != null)
         {
             User.Blocked = !User.Blocked;
-            await DbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             await RefreshData();
         }
     }

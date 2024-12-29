@@ -1,21 +1,17 @@
 services:
-    reverse-proxy:
-        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
-        ports:
-            - "${HTTP_PORT:-80}:80"
-            - "${HTTPS_PORT:-443}:443"
+    postgres:
+        image: ghcr.io/lanedirt/aliasvault-postgres:latest
         volumes:
-            - ./certificates/ssl:/etc/nginx/ssl:rw
-            - ./certificates/letsencrypt:/etc/nginx/ssl-letsencrypt:rw
-            - ./certificates/letsencrypt/www:/var/www/certbot:rw
-        depends_on:
-            - admin
-            - client
-            - api
-            - smtp
-        restart: always
+            - ./database/postgres:/var/lib/postgresql/data:rw
         env_file:
             - .env
+        restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U aliasvault"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
 
     client:
         image: ghcr.io/lanedirt/aliasvault-client:latest
@@ -38,6 +34,11 @@ services:
         restart: always
         env_file:
             - .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     admin:
         image: ghcr.io/lanedirt/aliasvault-admin:latest
@@ -47,6 +48,29 @@ services:
             - ./database:/database:rw
             - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
+        restart: always
+        env_file:
+            - .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
+
+    reverse-proxy:
+        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
+        ports:
+            - "${HTTP_PORT:-80}:80"
+            - "${HTTPS_PORT:-443}:443"
+        volumes:
+            - ./certificates/ssl:/etc/nginx/ssl:rw
+            - ./certificates/letsencrypt:/etc/nginx/ssl-letsencrypt:rw
+            - ./certificates/letsencrypt/www:/var/www/certbot:rw
+        depends_on:
+            - admin
+            - client
+            - api
+            - smtp
         restart: always
         env_file:
             - .env
@@ -62,6 +86,11 @@ services:
         restart: always
         env_file:
             - .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     task-runner:
         image: ghcr.io/lanedirt/aliasvault-task-runner:latest
@@ -71,3 +100,8 @@ services:
         restart: always
         env_file:
             - .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"

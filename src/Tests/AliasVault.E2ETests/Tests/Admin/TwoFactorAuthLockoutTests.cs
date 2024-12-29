@@ -29,6 +29,9 @@ public class TwoFactorAuthLockoutTests : AdminPlaywrightTest
         var enable2FaButton = Page.GetByRole(AriaRole.Link, new() { Name = "Add authenticator app" });
         await enable2FaButton.ClickAsync();
 
+        // Wait for QR code to appear.
+        await WaitForUrlAsync("account/manage/enable-authenticator", "Scan the QR Code or enter this key");
+
         // Extract secret key from page.
         var secretKey = await Page.TextContentAsync("kbd");
 

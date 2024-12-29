@@ -9,7 +9,7 @@ nav_order: 1
 Instead of using the pre-built Docker images, you can also build the images from source yourself. This allows you to build a specific version of AliasVault and/or to make changes to the source code.
 
 Building from source requires more resources:
-- Minimum 2GB RAM (more RAM will speed up build time)
+- Minimum 4GB RAM (more RAM will speed up build time)
 - At least 1 vCPU
 - 40GB+ disk space (for dependencies and build artifacts)
 - Docker installed

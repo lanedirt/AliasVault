@@ -36,6 +36,10 @@ public static class DataProtectionExtensions
             certPath = Path.Combine(AppContext.BaseDirectory, $"{applicationName}.DataProtection.Development.pfx");
         }
 
+        var certificateFlags = X509KeyStorageFlags.MachineKeySet |
+                              X509KeyStorageFlags.PersistKeySet |
+                              X509KeyStorageFlags.Exportable;
+
         X509Certificate2 cert;
         if (!File.Exists(certPath))
         {
@@ -44,7 +48,7 @@ public static class DataProtectionExtensions
         }
         else
         {
-            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, X509KeyStorageFlags.DefaultKeySet);
+            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, certificateFlags);
         }
 
         services.AddDataProtection()

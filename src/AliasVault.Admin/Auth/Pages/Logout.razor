@@ -8,11 +8,13 @@
     protected override async Task OnInitializedAsync()
     {
         // Sign out the user.
-        // NOTE: the try/catch below is a workaround for the issue that the sign out does not work when
+        // NOTE: the try/catch below is a workaround for the issue that the sign-out does not work when
         // the server session is already started.
         try
         {
+            await UserService.LoadCurrentUserAsync();
             var username = UserService.User().UserName;
+
             try
             {
                 await SignInManager.SignOutAsync();
@@ -20,12 +22,12 @@
                 await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
 
                 // Redirect to the home page with hard refresh.
-                NavigationService.RedirectTo("/", true);
+                NavigationService.RedirectTo("./", true);
             }
             catch
             {
                 // Hard refresh current page if sign out fails. When an interactive server session is already started
-                // the sign out will fail because it tries to mutate cookies which is only possible when the server
+                // the sign-out will fail because it tries to mutate cookies which is only possible when the server
                 // session is not started yet.
                 await AuthLoggingService.LogAuthEventSuccessAsync(username!, AuthEventType.Logout);
                 NavigationService.RedirectTo(NavigationService.Uri, true);

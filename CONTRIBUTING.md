@@ -26,16 +26,16 @@ cp .github/hooks/commit-msg .git/hooks/commit-msg
 chmod +x .git/hooks/commit-msg
 ```
 
-### 3. Install the latest version of .NET SDK 8
+### 3. Install the latest version of .NET SDK 9
 
 ```bash
-# Install .NET SDK 8
+# Install .NET SDK 9
 
 # On MacOS via brew:
 brew install --cask dotnet-sdk
 
 # On Windows via winget
-winget install Microsoft.DotNet.SDK.8
+winget install Microsoft.DotNet.SDK.9
 ```
 
 ### 4. Install dotnet CLI EF Tools
@@ -51,13 +51,26 @@ export PATH="$PATH:$HOME/.dotnet/tools"
 dotnet ef
 ```
 
-### 5. Run Tailwind CSS compiler while changing HTML files to update compiled CSS
+### 5. Install dev database
+AliasVault uses PostgreSQL as its database. In order to run the project locally from Visual Studio / Rider you will need to install the dev database. You can do this
+by running the following command. This will start a separate PostgreSQL instance on port 5433 accessible via the `localhost:5433` address.
 
 ```bash
-npm run build:css
+./install.sh configure-dev-db
 ```
 
-### 6. Install Playwright in order to locally run NUnit E2E (end-to-end) tests
+This will start the dev database and create a new database for the project.
+
+### 6. Run Tailwind CSS compiler when changing HTML files to update compiled CSS
+
+```bash
+# For Admin project (in the admin project directory)
+npm run build:admin-css
+# For Client project (in the client project directory)
+npm run build:client-css
+```
+
+### 7. Install Playwright in order to locally run NUnit E2E (end-to-end) tests
 
 ```bash
 # First install PowerShell for Mac (if you don't have it already)
@@ -66,10 +79,10 @@ brew install powershell/tap/powershell
 dotnet tool install --global Microsoft.Playwright.CLI
 # Run Playwright install script to download local browsers
 # Note: make sure the E2E test project has been built at least once so the bin dir exists.
-pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net8.0/playwright.ps1 install
+pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install
 ```
 
-### 7. Create AliasVault.Client appsettings.Development.json
+### 8. Create AliasVault.Client appsettings.Development.json
 The WASM client app supports a development specific appsettings.json file. This appsettings file is optional but can override various options to make debugging easier.
 
 

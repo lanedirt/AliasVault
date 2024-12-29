@@ -3,7 +3,7 @@ layout: default
 title: Enable WebAuthn
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 1
+nav_order: 9
 ---
 
 # WebAuthn

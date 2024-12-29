@@ -31,7 +31,13 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        if (!await UserManager.GetTwoFactorEnabledAsync(UserService.User()))
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        if (!await UserManager.GetTwoFactorEnabledAsync(user))
         {
             throw new InvalidOperationException("Cannot disable 2FA for user as it's not currently enabled.");
         }
@@ -39,7 +45,13 @@
 
     private async Task OnSubmitAsync()
     {
-        var disable2FaResult = await UserManager.SetTwoFactorEnabledAsync(UserService.User(), false);
+        var user = await UserManager.FindByIdAsync(UserService.User().Id);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        var disable2FaResult = await UserManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2FaResult.Succeeded)
         {
             await AuthLoggingService.LogAuthEventFailAsync(UserService.User().UserName!, AuthEventType.TwoFactorAuthDisable, AuthFailureReason.Unknown);

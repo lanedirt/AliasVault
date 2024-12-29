@@ -52,7 +52,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 
 - Linux VM with root access (Ubuntu or RHEL based distros recommended)
 - 1 vCPU
-- 512MB RAM
+- 1GB RAM
 - 16GB disk space
 - Docker installed
 

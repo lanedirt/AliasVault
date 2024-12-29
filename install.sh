@@ -1,12 +1,10 @@
 #!/bin/bash
-# @version 0.10.0
+# @version 0.9.4
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
 REPO_NAME="AliasVault"
-REPO_BRANCH="main"
 GITHUB_RAW_URL_REPO="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}"
-GITHUB_RAW_URL_REPO_BRANCH="$GITHUB_RAW_URL_REPO/$REPO_BRANCH"
 GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
 
 # Required files and directories
@@ -16,6 +14,7 @@ REQUIRED_DIRS=(
     "certificates/letsencrypt"
     "certificates/letsencrypt/www"
     "database"
+    "database/postgres"
     "logs"
     "logs/msbuild"
 )
@@ -45,17 +44,22 @@ show_usage() {
     printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
     printf "  configure-email           Configure email domains for receiving emails\n"
     printf "  configure-registration    Configure new account registration (enable or disable)\n"
-    printf "  start                     Start AliasVault containers\n"
-    printf "  stop                      Stop AliasVault containers\n"
-    printf "  restart                   Restart AliasVault containers\n"
+    printf "  start                     Start AliasVault containers using remote images\n"
+    printf "  stop                      Stop AliasVault containers using remote images\n"
+    printf "  restart                   Restart AliasVault containers using remote images\n"
     printf "  reset-password            Reset admin password\n"
-    printf "  build                     Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "  build [operation]         Build AliasVault from source (takes longer and requires sufficient specs)\n"
+    printf "                            Optional operations: start|stop|restart (uses locally built images)\n"
+    printf "  configure-dev-db          Configure development database (for local development only)\n"
+    printf "  migrate-db                Migrate data from SQLite to PostgreSQL\n"
 
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
-    printf "  -y, --yes         Automatic yes to prompts (for uninstall)\n"
+    printf "  -y, --yes         Automatic yes to prompts\n"
     printf "  --help            Show this help message\n"
+    printf "\n"
+
 }
 
 # Function to parse command line arguments
@@ -81,10 +85,23 @@ parse_args() {
                 shift
             fi
             ;;
-        # Other commands remain unchanged
         build|b)
             COMMAND="build"
             shift
+            # Check for additional operation argument
+            if [ $# -gt 0 ] && [[ ! "$1" =~ ^- ]]; then
+                case $1 in
+                    start|stop|restart)
+                        COMMAND_ARG="$1"
+                        shift
+                        ;;
+                    *)
+                        echo "Invalid build operation: $1"
+                        echo "Valid operations are: start, stop, restart"
+                        exit 1
+                        ;;
+                esac
+            fi
             ;;
         uninstall|u)
             COMMAND="uninstall"
@@ -124,6 +141,19 @@ parse_args() {
             ;;
         update-installer|cs)
             COMMAND="update-installer"
+            shift
+            ;;
+        configure-dev-db|dev-db)
+            COMMAND="configure-dev-db"
+            shift
+            # Check for direct option argument
+            if [ $# -gt 0 ] && [[ ! "$1" =~ ^- ]]; then
+                COMMAND_ARG="$1"
+                shift
+            fi
+            ;;
+        migrate-db|migrate)
+            COMMAND="migrate-db"
             shift
             ;;
         --help)
@@ -169,11 +199,11 @@ main() {
 
     print_logo
     case $COMMAND in
-        "install")
-            handle_install "$COMMAND_ARG"
-            ;;
         "build")
             handle_build
+            ;;
+        "install")
+            handle_install "$COMMAND_ARG"
             ;;
         "uninstall")
             handle_uninstall
@@ -181,7 +211,12 @@ main() {
         "reset-password")
             generate_admin_password
             if [ $? -eq 0 ]; then
-                recreate_docker_containers
+                printf "${CYAN}> Restarting admin container...${NC}\n"
+                if [ "$VERBOSE" = true ]; then
+                    $(get_docker_compose_command) up -d --force-recreate admin
+                else
+                    $(get_docker_compose_command) up -d --force-recreate admin > /dev/null 2>&1
+                fi
                 print_password_reset_message
             fi
             ;;
@@ -209,6 +244,12 @@ main() {
         "update-installer")
             check_install_script_update
             exit $?
+            ;;
+        "configure-dev-db")
+            configure_dev_database
+            ;;
+        "migrate-db")
+            handle_migrate_db
             ;;
     esac
 }
@@ -277,6 +318,44 @@ handle_docker_compose() {
     return 0
 }
 
+# Function to check and update install.sh for specific version
+check_install_script_version() {
+    local target_version="$1"
+    printf "${CYAN}> Checking install script version for ${target_version}...${NC}\n"
+
+    # Get remote install.sh for target version
+    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${target_version}/install.sh" -o "install.sh.tmp"; then
+        printf "${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
+        rm -f install.sh.tmp
+        return 1
+    fi
+
+    # Get versions
+    local current_version=$(extract_version "install.sh")
+    local target_script_version=$(extract_version "install.sh.tmp")
+
+    # Check if versions could be extracted
+    if [ -z "$current_version" ] || [ -z "$target_script_version" ]; then
+        printf "${YELLOW}> Could not determine script versions. Falling back to file comparison...${NC}\n"
+        if ! cmp -s "install.sh" "install.sh.tmp"; then
+            printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            return 2
+        fi
+    else
+        printf "${CYAN}> Current install script version: ${current_version}${NC}\n"
+        printf "${CYAN}> Target install script version: ${target_script_version}${NC}\n"
+
+        if [ "$current_version" != "$target_script_version" ]; then
+            printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            return 2
+        fi
+    fi
+
+    printf "${GREEN}> Install script is up to date for version ${target_version}.${NC}\n"
+    rm -f install.sh.tmp
+    return 0
+}
+
 # Function to print the logo
 print_logo() {
     printf "${MAGENTA}"
@@ -338,6 +417,30 @@ populate_data_protection_cert_pass() {
     fi
 }
 
+populate_postgres_credentials() {
+    printf "${CYAN}> Checking Postgres credentials...${NC}\n"
+
+    if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_DB" "aliasvault"
+    else
+        printf "  ${GREEN}> POSTGRES_DB already exists.${NC}\n"
+    fi
+
+    if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_USER" "aliasvault"
+    else
+        printf "  ${GREEN}> POSTGRES_USER already exists.${NC}\n"
+    fi
+
+    if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        # Generate a strong random password with 32 characters
+        POSTGRES_PASS=$(openssl rand -base64 32)
+        update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
+    else
+        printf "  ${GREEN}> POSTGRES_PASSWORD already exists.${NC}\n"
+    fi
+}
+
 set_private_email_domains() {
     printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -346,7 +449,7 @@ set_private_email_domains() {
 
     private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
     if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf "  ${RED}Email server is disabled.${NC} To enable use ./install.sh configure-email command.\n"
+        printf "  ${GREEN}> Email server is disabled. To enable use ./install.sh configure-email command.${NC}\n"
     else
         printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
     fi
@@ -513,13 +616,14 @@ print_success_message() {
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    printf "${CYAN}> Recreating Docker containers...${NC}\n"
+    printf "${CYAN}> (Re)creating Docker containers...${NC}\n"
+
     if [ "$VERBOSE" = true ]; then
-        docker compose up -d --force-recreate
+        $(get_docker_compose_command) up -d --force-recreate
     else
-        docker compose up -d --force-recreate > /dev/null 2>&1
+        $(get_docker_compose_command) up -d --force-recreate > /dev/null 2>&1
     fi
-    printf "${GREEN}> Docker containers recreated.${NC}\n"
+    printf "${GREEN}> Docker containers (re)created successfully.${NC}\n"
 }
 
 # Function to print password reset success message
@@ -527,7 +631,7 @@ print_password_reset_message() {
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
-    printf "${GREEN}The admin password is successfully reset, see the output above. You can now login to the admin panel using this new password.${NC}\n"
+    printf "${GREEN}The admin password has been successfully reset, see the output above.${NC}\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
     printf "\n"
@@ -538,7 +642,7 @@ get_docker_compose_command() {
     local base_command="docker compose -f docker-compose.yml"
 
     # Check if using build configuration
-    if [ "$1" = "build" ]; then
+    if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null; then
         base_command="$base_command -f docker-compose.build.yml"
     fi
 
@@ -661,7 +765,12 @@ handle_install() {
 # Function to handle build
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
+    # Set deployment mode to build to ensure container lifecycle uses build configuration
+    set_deployment_mode "build"
     printf "\n"
+
+    # Initialize workspace which makes sure all required directories and files exist
+    initialize_workspace
 
     # Check for required build files
     if [ ! -f "docker-compose.build.yml" ] || [ ! -d "src" ]; then
@@ -681,14 +790,14 @@ handle_build() {
     # Initialize environment with proper error handling
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
+    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
-
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -723,17 +832,9 @@ handle_build() {
     printf "\n${GREEN}> Docker Compose stack built successfully.${NC}\n"
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
-    if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command "build") up -d --force-recreate || {
-            printf "${RED}> Failed to start Docker Compose stack${NC}\n"
-            exit 1
-        }
-    else
-        $(get_docker_compose_command "build") up -d --force-recreate > /dev/null 2>&1 || {
-            printf "${RED}> Failed to start Docker Compose stack${NC}\n"
-            exit 1
-        }
-    fi
+
+    recreate_docker_containers
+
     printf "${GREEN}> Docker Compose stack started successfully.${NC}\n"
 
     # Only show success message if we made it here without errors
@@ -1259,8 +1360,15 @@ compare_versions() {
 check_install_script_update() {
     printf "${CYAN}> Checking for install script updates...${NC}\n"
 
-    # Download latest install.sh to temporary file
-    if ! curl -sSf "${GITHUB_RAW_URL_REPO_BRANCH}/install.sh" -o "install.sh.tmp"; then
+    # Get latest release version
+    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+    if [ -z "$latest_version" ]; then
+        printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
+        return 1
+    fi
+
+    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/install.sh" -o "install.sh.tmp"; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
         return 1
@@ -1353,10 +1461,46 @@ handle_install_version() {
     fi
 
     printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
+    # Set deployment mode to install to ensure container lifecycle uses install configuration
+    set_deployment_mode "install"
     printf "\n"
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
+
+    # Check if install script needs updating for this version
+    check_install_script_version "$target_version"
+    local check_result=$?
+
+    if [ $check_result -eq 2 ]; then
+        if [ "$FORCE_YES" = true ]; then
+            printf "${CYAN}> Updating install script to match version ${target_version}...${NC}\n"
+        else
+            printf "${YELLOW}> A different version of the install script is required for installing version ${target_version}.${NC}\n"
+            read -p "Would you like to self-update the install script before proceeding? [Y/n]: " reply
+            if [[ $reply =~ ^[Nn]$ ]]; then
+                printf "${YELLOW}> Continuing with current install script version.${NC}\n"
+                rm -f install.sh.tmp
+            fi
+        fi
+
+        if [ "$FORCE_YES" = true ] || [[ ! $reply =~ ^[Nn]$ ]]; then
+            # Create backup of current script
+            cp "install.sh" "install.sh.backup"
+
+            if mv "install.sh.tmp" "install.sh"; then
+                chmod +x "install.sh"
+                printf "${GREEN}> Install script updated successfully.${NC}\n"
+                printf "${GREEN}> Backup of previous version saved as install.sh.backup${NC}\n"
+                printf "${YELLOW}> Please run the same install command again to continue with the installation.${NC}\n"
+                exit 0
+            else
+                printf "${RED}> Failed to update install script. Continuing with current version.${NC}\n"
+                mv "install.sh.backup" "install.sh"
+                rm -f install.sh.tmp
+            fi
+        fi
+    fi
 
     # Update docker-compose files with correct version so we pull the correct images
     handle_docker_compose "$target_version"
@@ -1364,11 +1508,12 @@ handle_install_version() {
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
+    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
     set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
 
@@ -1384,6 +1529,7 @@ handle_install_version() {
     printf "${CYAN}> Installing version: ${target_version}${NC}\n"
 
     images=(
+        "${GITHUB_CONTAINER_REGISTRY}-postgres:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-api:${target_version}"
         "${GITHUB_CONTAINER_REGISTRY}-client:${target_version}"
@@ -1395,9 +1541,9 @@ handle_install_version() {
     for image in "${images[@]}"; do
         printf "${CYAN}> Pulling $image...${NC}\n"
         if [ "$VERBOSE" = true ]; then
-            docker pull $image || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+            docker pull $image || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
         else
-            docker pull $image > /dev/null 2>&1 || { printf "${RED}> Failed to pull image: $image${NC}\n"; exit 1; }
+            docker pull $image > /dev/null 2>&1 || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
         fi
     done
 
@@ -1407,10 +1553,227 @@ handle_install_version() {
     # Start containers
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
-    recreate_docker_containers
+    if [ "$VERBOSE" = true ]; then
+        docker compose up -d --force-recreate
+    else
+        docker compose up -d --force-recreate > /dev/null 2>&1
+    fi
+    printf "${GREEN}> Docker containers recreated.${NC}\n"
 
     # Only show success message if we made it here without errors
     print_success_message
+}
+
+# Function to handle development database configuration
+configure_dev_database() {
+    printf "${YELLOW}+++ Development Database Configuration +++${NC}\n"
+    printf "\n"
+
+    if [ ! -f "docker-compose.dev.yml" ]; then
+        printf "${RED}> The docker-compose.dev.yml file is missing. This file is required to start the development database. Please checkout the full GitHub repository and try again.${NC}\n"
+        return 1
+    fi
+
+    # Check if direct option was provided
+    if [ -n "$COMMAND_ARG" ]; then
+        case $COMMAND_ARG in
+            1|start)
+                if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                    printf "${YELLOW}> Development database is already running.${NC}\n"
+                else
+                    printf "${CYAN}> Starting development database...${NC}\n"
+                    docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
+                    printf "${GREEN}> Development database started successfully.${NC}\n"
+                fi
+                print_dev_db_details
+                return
+                ;;
+            0|stop)
+                if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                    printf "${YELLOW}> Development database is already stopped.${NC}\n"
+                else
+                    printf "${CYAN}> Stopping development database...${NC}\n"
+                    docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                    printf "${GREEN}> Development database stopped successfully.${NC}\n"
+                fi
+                return
+                ;;
+        esac
+    fi
+
+    # Check current status
+    if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+        DEV_DB_STATUS="running"
+    else
+        DEV_DB_STATUS="stopped"
+    fi
+
+    printf "${CYAN}About Development Database:${NC}\n"
+    printf "A separate PostgreSQL instance for development purposes that:\n"
+    printf "  - Runs on port 5433 (to avoid conflicts)\n"
+    printf "  - Uses simple credentials (password: 'password')\n"
+    printf "  - Stores data separately from production\n"
+    printf "\n"
+    printf "${CYAN}Current Status:${NC}\n"
+    if [ "$DEV_DB_STATUS" = "running" ]; then
+        printf "Development Database: ${GREEN}Running${NC}\n"
+    else
+        printf "Development Database: ${YELLOW}Stopped${NC}\n"
+    fi
+    printf "\n"
+    printf "Options:\n"
+    printf "1) Start development database\n"
+    printf "2) Stop development database\n"
+    printf "3) View connection details\n"
+    printf "4) Cancel\n"
+    printf "\n"
+
+    read -p "Select an option [1-4]: " dev_db_option
+
+    case $dev_db_option in
+        1)
+            if [ "$DEV_DB_STATUS" = "running" ]; then
+                printf "${YELLOW}> Development database is already running.${NC}\n"
+            else
+                printf "${CYAN}> Starting development database...${NC}\n"
+                docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
+                printf "${GREEN}> Development database started successfully.${NC}\n"
+            fi
+            print_dev_db_details
+            ;;
+        2)
+            if [ "$DEV_DB_STATUS" = "stopped" ]; then
+                printf "${YELLOW}> Development database is already stopped.${NC}\n"
+            else
+                printf "${CYAN}> Stopping development database...${NC}\n"
+                docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                printf "${GREEN}> Development database stopped successfully.${NC}\n"
+            fi
+            ;;
+        3)
+            print_dev_db_details
+            ;;
+        4)
+            printf "${YELLOW}Configuration cancelled.${NC}\n"
+            exit 0
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to print development database connection details
+print_dev_db_details() {
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
+    printf "\n"
+    printf "${CYAN}Development Database Connection Details:${NC}\n"
+    printf "Host: localhost\n"
+    printf "Port: 5433\n"
+    printf "Database: aliasvault\n"
+    printf "Username: aliasvault\n"
+    printf "Password: password\n"
+    printf "\n"
+    printf "Connection string:\n"
+    printf "Host=localhost;Port=5433;Database=aliasvault;Username=aliasvault;Password=password\n"
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
+}
+
+# Function to handle database migration. This is a one-time operation necessary when upgrading from <= 0.9.x to 0.10.0+ and only needs to be run once.
+handle_migrate_db() {
+    printf "${YELLOW}+++ Database Migration Tool +++${NC}\n"
+    printf "\n"
+
+    # Check for old SQLite database
+    SQLITE_DB="database/AliasServerDb.sqlite"
+    if [ ! -f "$SQLITE_DB" ]; then
+        printf "${RED}Error: SQLite database not found at ${SQLITE_DB}${NC}\n"
+        exit 1
+    fi
+
+    # Get the absolute path of the SQLite database
+    SQLITE_DB_ABS=$(realpath "$SQLITE_DB")
+    SQLITE_DB_DIR=$(dirname "$SQLITE_DB_ABS")
+    SQLITE_DB_NAME=$(basename "$SQLITE_DB_ABS")
+
+    # Get PostgreSQL password from .env file
+    POSTGRES_PASSWORD=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d= -f2-)
+    if [ -z "$POSTGRES_PASSWORD" ]; then
+        printf "${RED}Error: POSTGRES_PASSWORD not found in .env file${NC}\n"
+        exit 1
+    fi
+
+     # Get network name in lowercase
+    NETWORK_NAME="$(pwd | xargs basename)_default"
+    NETWORK_NAME=$(echo "$NETWORK_NAME" | tr '[:upper:]' '[:lower:]')
+
+    printf "\n${YELLOW}Warning: This will migrate data from your SQLite database to PostgreSQL.${NC}\n"
+    printf "\n"
+    printf "This is a one-time operation necessary when upgrading from <= 0.9.x to 0.10.0+ and only needs to be run once.\n"
+    printf "\n"
+    printf "Source database: ${CYAN}${SQLITE_DB_ABS}${NC}\n"
+    printf "Target: PostgreSQL database (using connection string from docker-compose.yml)\n"
+    printf "Make sure you have backed up your data before proceeding.\n"
+
+    printf "\n${RED}WARNING: This operation will DELETE ALL EXISTING DATA in the PostgreSQL database.${NC}\n"
+    printf "${RED}Only proceed if you understand that any current PostgreSQL data will be permanently lost.${NC}\n"
+    printf "\n"
+
+    read -p "Continue with migration? [y/N]: " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        printf "${YELLOW}Migration cancelled.${NC}\n"
+        exit 0
+    fi
+
+    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 > /dev/null 2>&1; then
+        printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
+        if [ "$VERBOSE" = true ]; then
+            docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
+        else
+            (
+                docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
+                BUILD_PID=$!
+                while kill -0 $BUILD_PID 2>/dev/null; do
+                    printf "."
+                    sleep 1
+                done
+                printf "\n"
+                wait $BUILD_PID
+                BUILD_EXIT_CODE=$?
+                if [ $BUILD_EXIT_CODE -ne 0 ]; then
+                    printf "\n${RED}> Error building Docker image. Check install_build_output.log for details.${NC}\n"
+                    exit $BUILD_EXIT_CODE
+                fi
+            )
+        fi
+
+        # Run migration with volume mount and connection string
+        docker run --rm \
+            --network="${NETWORK_NAME}" \
+            -v "${SQLITE_DB_DIR}:/sqlite" \
+            installcli migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
+    else
+        # Run migration with volume mount using pre-built image
+        docker run --rm \
+            --network="${NETWORK_NAME}" \
+            -v "${SQLITE_DB_DIR}:/sqlite" \
+            ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
+     fi
+
+    printf "${GREEN}> Check migration output above for details.${NC}\n"
+}
+
+# Function to set deployment mode in .env
+set_deployment_mode() {
+    local mode=$1
+    if [ "$mode" != "build" ] && [ "$mode" != "install" ]; then
+        printf "${RED}Invalid deployment mode: $mode${NC}\n"
+        exit 1
+    fi
+    update_env_var "DEPLOYMENT_MODE" "$mode"
 }
 
 main "$@"

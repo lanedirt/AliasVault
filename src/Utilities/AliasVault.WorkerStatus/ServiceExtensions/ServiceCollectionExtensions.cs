@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         where TWorker : class, IHostedService
         where TContext : DbContext, IWorkerStatusDbContext
     {
-        services.TryAddSingleton<TWorker>(); // Register the inner service
+        services.TryAddSingleton<TWorker>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, StatusHostedService<TWorker>>());
 
         // Only add these required helper services if they are not already registered.
