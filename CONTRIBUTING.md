@@ -3,12 +3,12 @@ We welcome contributions to AliasVault. Please read the guidelines on the offici
 
 https://docs.aliasvault.net/misc/dev/contributing.html
 
-If the URL above is not available, the raw documentation can be found in the `docs` folder in this repository.
+> Tip: if the URL above is not available, the raw doc pages can also be found in the `docs` folder in this repository.
 
 ## Contributing to the documentation
 The docs are built using Jekyll and automatically deploy to GitHub Pages via GitHub Actions. You can build the docs locally by running `docker compose up` in in the `./docs` folder.
 
-The docs site is based on the open-source template called Just The Docs. Find more information about the template in the [official docs](https://just-the-docs.github.io/just-the-docs/).
+The docs site is based on the open-source template called Just The Docs. Find more information about how this template works in the [official docs](https://just-the-docs.github.io/just-the-docs/).
 
 
 To make changes to the AliasVault documentation please make a PR that directly edits the `docs` markdown files in this repository.
