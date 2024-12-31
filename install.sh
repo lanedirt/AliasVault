@@ -50,9 +50,12 @@ show_usage() {
     printf "  reset-password            Reset admin password\n"
     printf "  build [operation]         Build AliasVault from source (takes longer and requires sufficient specs)\n"
     printf "                            Optional operations: start|stop|restart (uses locally built images)\n"
-    printf "  configure-dev-db          Configure development database (for local development only)\n"
-    printf "  migrate-db                Migrate data from SQLite to PostgreSQL\n"
-
+    printf "\n"
+    printf "  db-export                 Export database to file\n"
+    printf "  db-import                 Import database from file\n"
+    printf "\n"
+    printf "  configure-dev-db          Enable/disable development database (for local development only)\n"
+    printf "  migrate-db                Migrate data from SQLite to PostgreSQL when upgrading from a version prior to 0.10.0\n"
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
@@ -156,6 +159,14 @@ parse_args() {
             COMMAND="migrate-db"
             shift
             ;;
+        db-export)
+            COMMAND="db-export"
+            shift
+            ;;
+        db-import)
+            COMMAND="db-import"
+            shift
+            ;;
         --help)
             show_usage
             exit 0
@@ -250,6 +261,12 @@ main() {
             ;;
         "migrate-db")
             handle_migrate_db
+            ;;
+        "db-export")
+            handle_db_export
+            ;;
+        "db-import")
+            handle_db_import
             ;;
     esac
 }
@@ -358,13 +375,13 @@ check_install_script_version() {
 
 # Function to print the logo
 print_logo() {
-    printf "${MAGENTA}"
-    printf "    _    _ _           __      __         _ _   \n"
-    printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n"
-    printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n"
-    printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n"
-    printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n"
-    printf "${NC}\n"
+    printf "${MAGENTA}" >&2
+    printf "    _    _ _           __      __         _ _   \n" >&2
+    printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n" >&2
+    printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n" >&2
+    printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n" >&2
+    printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n" >&2
+    printf "${NC}\n" >&2
 }
 
 # Function to create .env file
@@ -1720,6 +1737,7 @@ handle_migrate_db() {
 
     printf "\n${RED}WARNING: This operation will DELETE ALL EXISTING DATA in the PostgreSQL database.${NC}\n"
     printf "${RED}Only proceed if you understand that any current PostgreSQL data will be permanently lost.${NC}\n"
+    printf "${RED}This operation will stop all services and restart them after the migration is complete.${NC}\n"
     printf "\n"
 
     read -p "Continue with migration? [y/N]: " confirm
@@ -1727,6 +1745,9 @@ handle_migrate_db() {
         printf "${YELLOW}Migration cancelled.${NC}\n"
         exit 0
     fi
+
+    printf "${CYAN}> Stopping services to ensure database is not in use...${NC}\n"
+    docker compose stop api admin task-runner smtp
 
     if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 > /dev/null 2>&1; then
         printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
@@ -1774,6 +1795,138 @@ set_deployment_mode() {
         exit 1
     fi
     update_env_var "DEPLOYMENT_MODE" "$mode"
+}
+
+# Function to handle database export
+handle_db_export() {
+    # Print logo and headers to stderr
+    printf "${YELLOW}+++ Exporting Database +++${NC}\n" >&2
+    printf "\n" >&2
+
+    # Check if output redirection is present
+    if [ -t 1 ]; then
+        printf "${RED}Error: Output redirection is required.${NC}\n" >&2
+        printf "Usage: ./install.sh db-export > backup.sql.gz\n" >&2
+        printf "\n" >&2
+        printf "Example:\n" >&2
+        printf "  ./install.sh db-export > my_backup_$(date +%Y%m%d).sql.gz\n" >&2
+        exit 1
+    fi
+
+    # Check if containers are running
+    if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
+        printf "${RED}Error: AliasVault containers are not running. Start them first with: ./install.sh start${NC}\n" >&2
+        exit 1
+    fi
+
+    # Check if postgres container is healthy
+    if ! docker compose ps postgres | grep -q "healthy"; then
+        printf "${RED}Error: PostgreSQL container is not healthy. Please check the logs with: docker compose logs postgres${NC}\n" >&2
+        exit 1
+    fi
+
+    printf "${CYAN}> Exporting database...${NC}\n" >&2
+
+    # Only the actual pg_dump output goes to stdout, everything else to stderr
+    docker compose exec postgres pg_dump -U aliasvault aliasvault | gzip
+
+    if [ $? -eq 0 ]; then
+        printf "${GREEN}> Database exported successfully.${NC}\n" >&2
+    else
+        printf "${RED}> Failed to export database.${NC}\n" >&2
+        exit 1
+    fi
+}
+
+# Function to handle database import
+handle_db_import() {
+    printf "${YELLOW}+++ Importing Database +++${NC}\n"
+
+    # Check if containers are running
+    if ! docker compose ps postgres | grep -q "healthy"; then
+        printf "${RED}Error: PostgreSQL container is not healthy.${NC}\n"
+        exit 1
+    fi
+
+    # Check if we're getting input from a pipe
+    if [ -t 0 ]; then
+        printf "${RED}Error: No input file provided${NC}\n"
+        printf "Usage: ./install.sh db-import < backup.sql.gz\n"
+        exit 1
+    fi
+
+    # Save stdin to file descriptor 3
+    exec 3<&0
+
+    printf "${RED}Warning: This will DELETE ALL EXISTING DATA in the database.${NC}\n"
+    if [ "$FORCE_YES" != true ]; then
+        # Use /dev/tty to read from terminal even when stdin is redirected
+        if [ -t 1 ] && [ -t 2 ] && [ -e /dev/tty ]; then
+            # Temporarily switch stdin to tty for confirmation
+            exec < /dev/tty
+            read -p "Continue? [y/N]: " confirm
+            # Switch back to original stdin
+            exec 0<&3
+            if [[ ! $confirm =~ ^[Yy]$ ]]; then
+                exec 3<&-  # Close fd 3
+                exit 1
+            fi
+        else
+            printf "${RED}Error: Cannot read confirmation from terminal. Use -y flag to bypass confirmation.${NC}\n"
+            exec 3<&-  # Close fd 3
+            exit 1
+        fi
+    fi
+
+    printf "${CYAN}> Stopping dependent services...${NC}\n"
+    if [ "$VERBOSE" = true ]; then
+        docker compose stop api admin task-runner smtp
+    else
+        docker compose stop api admin task-runner smtp > /dev/null 2>&1
+    fi
+
+    printf "${CYAN}> Importing database...${NC}\n"
+
+    # Create a temporary file to verify the gzip input
+    temp_file=$(mktemp)
+    cat <&3 > "$temp_file"  # Read from fd 3 instead of stdin
+    exec 3<&-  # Close fd 3
+
+    if ! gzip -t "$temp_file" 2>/dev/null; then
+        printf "${RED}Error: Input is not a valid gzip file${NC}\n"
+        rm "$temp_file"
+        exit 1
+    fi
+
+    if [ "$VERBOSE" = true ]; then
+        # Proceed with import
+        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
+        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault
+    else
+        # Suppress all output except errors
+        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
+        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault > /dev/null 2>&1
+    fi
+
+    import_status=$?
+    rm "$temp_file"
+
+    if [ $import_status -eq 0 ]; then
+        printf "${GREEN}> Database imported successfully.${NC}\n"
+        printf "${CYAN}> Starting services...${NC}\n"
+        if [ "$VERBOSE" = true ]; then
+            docker compose restart api admin task-runner smtp reverse-proxy
+        else
+            docker compose restart api admin task-runner smtp reverse-proxy > /dev/null 2>&1
+        fi
+    else
+        printf "${RED}> Import failed. Please check that your backup file is valid.${NC}\n"
+        exit 1
+    fi
 }
 
 main "$@"

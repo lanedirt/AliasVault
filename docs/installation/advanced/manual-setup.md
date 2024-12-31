@@ -2,7 +2,7 @@
 layout: default
 title: Manual Setup
 parent: Advanced
-nav_order: 2
+nav_order: 3
 ---
 
 # Manual Setup
