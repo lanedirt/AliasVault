@@ -1855,35 +1855,62 @@ handle_db_import() {
         exit 1
     fi
 
+    # Save stdin to file descriptor 3
+    exec 3<&0
+
     printf "${RED}Warning: This will DELETE ALL EXISTING DATA in the database.${NC}\n"
     if [ "$FORCE_YES" != true ]; then
-        read -p "Continue? [y/N]: " confirm
-        if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        # Use /dev/tty to read from terminal even when stdin is redirected
+        if [ -t 1 ] && [ -t 2 ] && [ -e /dev/tty ]; then
+            # Temporarily switch stdin to tty for confirmation
+            exec < /dev/tty
+            read -p "Continue? [y/N]: " confirm
+            # Switch back to original stdin
+            exec 0<&3
+            if [[ ! $confirm =~ ^[Yy]$ ]]; then
+                exec 3<&-  # Close fd 3
+                exit 1
+            fi
+        else
+            printf "${RED}Error: Cannot read confirmation from terminal. Use -y flag to bypass confirmation.${NC}\n"
+            exec 3<&-  # Close fd 3
             exit 1
         fi
     fi
 
     printf "${CYAN}> Stopping dependent services...${NC}\n"
-    docker compose stop api admin task-runner smtp
+    if [ "$VERBOSE" = true ]; then
+        docker compose stop api admin task-runner smtp
+    else
+        docker compose stop api admin task-runner smtp > /dev/null 2>&1
+    fi
 
     printf "${CYAN}> Importing database...${NC}\n"
 
     # Create a temporary file to verify the gzip input
     temp_file=$(mktemp)
-    cat > "$temp_file"
+    cat <&3 > "$temp_file"  # Read from fd 3 instead of stdin
+    exec 3<&-  # Close fd 3
 
-    # Check if the file is actually gzipped
     if ! gzip -t "$temp_file" 2>/dev/null; then
         printf "${RED}Error: Input is not a valid gzip file${NC}\n"
         rm "$temp_file"
         exit 1
     fi
 
-    # Proceed with import
-    docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
-    docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
-    docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
-    gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault
+    if [ "$VERBOSE" = true ]; then
+        # Proceed with import
+        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
+        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault
+    else
+        # Suppress all output except errors
+        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
+        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
+        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault > /dev/null 2>&1
+    fi
 
     import_status=$?
     rm "$temp_file"
@@ -1891,7 +1918,11 @@ handle_db_import() {
     if [ $import_status -eq 0 ]; then
         printf "${GREEN}> Database imported successfully.${NC}\n"
         printf "${CYAN}> Starting services...${NC}\n"
-        docker compose start api admin task-runner smtp
+        if [ "$VERBOSE" = true ]; then
+            docker compose restart api admin task-runner smtp reverse-proxy
+        else
+            docker compose restart api admin task-runner smtp reverse-proxy > /dev/null 2>&1
+        fi
     else
         printf "${RED}> Import failed. Please check that your backup file is valid.${NC}\n"
         exit 1
