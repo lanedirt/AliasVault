@@ -128,9 +128,6 @@ else
 
     private async Task RefreshData()
     {
-        IsLoading = true;
-        StateHasChanged();
-
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var query = dbContext.AuthLogs.AsQueryable();
 
