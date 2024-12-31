@@ -52,8 +52,8 @@ public static class DataProtectionExtensions
         }
 
         services.AddDataProtection()
-            .ProtectKeysWithCertificate(cert)
             .PersistKeysToDbContext<AliasServerDbContext>()
+            .ProtectKeysWithCertificate(cert)
             .SetApplicationName(applicationName);
 
         return services;
