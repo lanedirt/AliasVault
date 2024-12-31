@@ -56,11 +56,15 @@ public static class LoggingConfiguration
                     rollingInterval: RollingInterval.Day,
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}"))
 
-            // Log all warning and above to database via EF core except for Microsoft.EntityFrameworkCore logs
-            // as this would create a loop.
+            // Log all warning and above to database via EF core except for:
+            // - Microsoft.EntityFrameworkCore logsas this would create a loop.
+            // - Microsoft.AspNetCore.Antiforgery logs
+            // - Microsoft.AspNetCore.DataProtection logs
             .WriteTo.Logger(lc => lc
                 .Filter.ByIncludingOnly(evt => evt.Level >= LogEventLevel.Warning)
                 .Filter.ByExcluding(Matching.FromSource("Microsoft.EntityFrameworkCore"))
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Antiforgery"))
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection"))
                 .WriteTo.Sink(new DatabaseSink(CultureInfo.InvariantCulture, () => services.BuildServiceProvider().GetRequiredService<IDbContextFactory<AliasServerDbContext>>(), applicationName)))
             .CreateLogger());
 
