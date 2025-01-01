@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Upgrade the AliasClientDb EF model
+title: Upgrade the AliasServerDb EF model
 parent: Development
 grand_parent: Miscellaneous
 nav_order: 3
