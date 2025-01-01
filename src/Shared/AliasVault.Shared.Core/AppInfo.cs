@@ -25,12 +25,12 @@ public static class AppInfo
     /// <summary>
     /// Gets the minor version number.
     /// </summary>
-    public const int VersionMinor = 9;
+    public const int VersionMinor = 10;
 
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 4;
+    public const int VersionPatch = 0;
 
     /// <summary>
     /// Gets the build number, typically used in CI/CD pipelines.
