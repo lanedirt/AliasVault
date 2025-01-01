@@ -30,7 +30,7 @@ public static class AppInfo
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 0;
+    public const int VersionPatch = 1;
 
     /// <summary>
     /// Gets the build number, typically used in CI/CD pipelines.
