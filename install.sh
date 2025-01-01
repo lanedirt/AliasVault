@@ -526,13 +526,13 @@ generate_admin_password() {
                 fi
             )
         fi
-        HASH=$(docker run --rm installcli "$PASSWORD")
+        HASH=$(docker run --rm installcli hash-password "$PASSWORD")
         if [ -z "$HASH" ]; then
             printf "${RED}> Error: Failed to generate password hash${NC}\n"
             exit 1
         fi
     else
-        HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}-installcli:latest "$PASSWORD")
+        HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}-installcli:latest hash-password "$PASSWORD")
         if [ -z "$HASH" ]; then
             printf "${RED}> Error: Failed to generate password hash${NC}\n"
             exit 1
