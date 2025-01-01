@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 1. Run GitHub Actions Locally
+title: Run GitHub Actions Locally
 parent: Development
 grand_parent: Miscellaneous
 nav_order: 9

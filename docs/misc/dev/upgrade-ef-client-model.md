@@ -19,4 +19,4 @@ To upgrade the AliasClientDb EF model, follow these steps:
 dotnet ef migrations add "1.0.0-<migration-name>"
 ```
 4. On the next login of a user, they will be prompted (required) to upgrade their database schema to the latest version.
-Make sure to manually test this.
+Make sure to manually test that the migration works as expected.

@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.9.4
+# @version 0.10.0
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
@@ -1783,6 +1783,10 @@ handle_migrate_db() {
             -v "${SQLITE_DB_DIR}:/sqlite" \
             ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 migrate-sqlite "/sqlite/${SQLITE_DB_NAME}" "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
      fi
+
+    # Starting services again
+    printf "${CYAN}> Starting services...${NC}\n"
+    docker compose start api admin task-runner smtp reverse-proxy
 
     printf "${GREEN}> Check migration output above for details.${NC}\n"
 }
