@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.9.4
+# @version 0.10.0
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
