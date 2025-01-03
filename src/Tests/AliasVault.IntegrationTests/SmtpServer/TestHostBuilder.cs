@@ -76,7 +76,7 @@ public class TestHostBuilder : AbstractTestHostBuilder
     /// Configures the SMTP services for the test host.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
-    private void ConfigureSmtpServices(IServiceCollection services)
+    private static void ConfigureSmtpServices(IServiceCollection services)
     {
         services.AddSingleton(new Config
         {

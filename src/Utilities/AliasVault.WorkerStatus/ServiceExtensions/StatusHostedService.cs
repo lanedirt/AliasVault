@@ -65,6 +65,31 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     }
 
     /// <summary>
+    /// Calls the ExecuteAsync method of the inner service.
+    /// </summary>
+    /// <param name="innerService">The inner service.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private static async Task CallExecuteAsync(T innerService, CancellationToken cancellationToken)
+    {
+        if (innerService is BackgroundService backgroundService)
+        {
+            var executeMethod = backgroundService.GetType().GetMethod("ExecuteAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var executionTask = (Task)executeMethod!.Invoke(backgroundService, new object[] { cancellationToken })!;
+
+            // Wait for the ExecuteAsync method to complete or throw.
+            await executionTask;
+        }
+        else
+        {
+            // For non-BackgroundService implementations, start the service as normal and wait indefinitely
+            await innerService.StartAsync(cancellationToken);
+
+            // For non-BackgroundService implementations, just wait indefinitely
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Start the inner while loop which adds a second cancellationToken that is controlled by the StatusWorker.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -102,7 +127,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             }
 
             // Wait for a second before checking the status again.
-            await Task.Delay(1000);
+            await Task.Delay(1000, workerCancellationTokenSource.Token);
         }
 
         // If we get here, cancel the worker task if it is still running.
@@ -123,22 +148,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
                 globalServiceStatus.SetWorkerStatus(typeof(T).Name, true);
 
                 // If the inner service is a BackgroundService, listen for the results via reflection.
-                if (innerService is BackgroundService backgroundService)
-                {
-                    var executeMethod = backgroundService.GetType().GetMethod("ExecuteAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    var executionTask = (Task)executeMethod!.Invoke(backgroundService, new object[] { cancellationToken })!;
-
-                    // Wait for the ExecuteAsync method to complete or throw.
-                    await executionTask;
-                }
-                else
-                {
-                    // For non-BackgroundService implementations, start the service as normal and wait indefinitely
-                    await innerService.StartAsync(cancellationToken);
-
-                    // For non-BackgroundService implementations, just wait indefinitely
-                    await Task.Delay(Timeout.Infinite, cancellationToken);
-                }
+                await CallExecuteAsync(innerService, cancellationToken);
             }
             catch (OperationCanceledException ex)
             {
