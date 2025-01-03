@@ -511,8 +511,9 @@ generate_admin_password() {
     printf "${CYAN}> Generating admin password...${NC}\n"
     PASSWORD=$(openssl rand -base64 12)
 
-    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
-        printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
+    # Build locally if in build mode or if pre-built image is not available
+    if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null || ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
+        printf "${CYAN}> Building InstallCli locally...${NC}"
         if [ "$VERBOSE" = true ]; then
             docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
         else
@@ -533,23 +534,18 @@ generate_admin_password() {
             )
         fi
         HASH=$(docker run --rm installcli hash-password "$PASSWORD")
-        if [ -z "$HASH" ]; then
-            printf "${RED}> Error: Failed to generate password hash${NC}\n"
-            exit 1
-        fi
     else
         HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}-installcli:latest hash-password "$PASSWORD")
-        if [ -z "$HASH" ]; then
-            printf "${RED}> Error: Failed to generate password hash${NC}\n"
-            exit 1
-        fi
     fi
 
-    if [ -n "$HASH" ]; then
-        update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
-        update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-        printf "  ==> New admin password: $PASSWORD\n"
+    if [ -z "$HASH" ]; then
+        printf "${RED}> Error: Failed to generate password hash${NC}\n"
+        exit 1
     fi
+
+    update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
+    update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    printf "  ==> New admin password: $PASSWORD\n"
 }
 
 # Function to set default ports
