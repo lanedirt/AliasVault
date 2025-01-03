@@ -7,8 +7,10 @@
 
 namespace AliasVault.IntegrationTests;
 
+using System.Reflection;
 using AliasServerDb;
 using AliasServerDb.Configuration;
+using AliasVault.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -145,6 +147,7 @@ public class AbstractTestHostBuilder : IAsyncDisposable
 
                 services.AddSingleton<IConfiguration>(configuration);
                 services.AddAliasVaultDatabaseConfiguration(configuration);
+                services.ConfigureLogging(configuration, Assembly.GetExecutingAssembly().GetName().Name!, "logs");
 
                 // Ensure the in-memory database is populated with tables
                 var serviceProvider = services.BuildServiceProvider();

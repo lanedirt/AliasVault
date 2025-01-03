@@ -55,13 +55,13 @@ public class StatusHostedServiceTests
     [Test]
     public async Task LogsExceptionFromWrappedService()
     {
-        // Start the service which will trigger the TestExceptionWorker to throw
+        // Start the service which will trigger the TestExceptionWorker to throw an exception.
         await _testHost.StartAsync();
 
-        // Give it a moment to process
-        await Task.Delay(5000);
+        // Give it a moment to process.
+        await Task.Delay(3000);
 
-        // Check the logs for the expected error
+        // Check the logs for the expected error.
         await using var dbContext = _testHostBuilder.GetDbContext();
         var errorLog = await dbContext.Logs
             .OrderByDescending(l => l.TimeStamp)

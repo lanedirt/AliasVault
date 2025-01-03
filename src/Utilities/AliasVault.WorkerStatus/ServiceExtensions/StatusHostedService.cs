@@ -27,7 +27,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     /// <summary>
     /// Maximum delay before restarting the worker.
     /// </summary>
-    private const int _restartMaxDelayInMs = 300000;
+    private const int _restartMaxDelayInMs = 3600000;
 
     /// <summary>
     /// Lock object to prevent multiple tasks from starting the worker at the same time.
@@ -120,9 +120,23 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             {
                 globalServiceStatus.SetWorkerStatus(typeof(T).Name, true);
 
-                await innerService.StartAsync(cancellationToken);
+                // If the inner service is a BackgroundService, listen for the results via reflection.
+                if (innerService is BackgroundService backgroundService)
+                {
+                    var executeMethod = backgroundService.GetType().GetMethod("ExecuteAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var executionTask = (Task)executeMethod!.Invoke(backgroundService, new object[] { cancellationToken })!;
 
-                await Task.Delay(Timeout.Infinite, cancellationToken);
+                    // Wait for the ExecuteAsync method to complete or throw.
+                    await executionTask;
+                }
+                else
+                {
+                    // For non-BackgroundService implementations, start the service as normal and wait indefinitely
+                    await innerService.StartAsync(cancellationToken);
+
+                    // For non-BackgroundService implementations, just wait indefinitely
+                    await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
             }
             catch (OperationCanceledException ex)
             {
@@ -132,6 +146,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred in StatusHostedService<{ServiceType}>", typeof(T).Name);
+                globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
             }
             finally
             {
@@ -139,7 +154,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
                 globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
             }
 
-            // If a fault occurred in the innerService but it was not canceled,
+            // If a fault occurred in the innerService, but it was not explicitly canceled,
             // wait for a second before attempting to auto-restart the worker.
             while (!cancellationToken.IsCancellationRequested)
             {

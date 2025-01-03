@@ -4,19 +4,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
-
 namespace AliasVault.IntegrationTests.StatusHostedService;
 
-using System.Data.Common;
 using System.Reflection;
 using AliasServerDb;
-using AliasServerDb.Configuration;
 using AliasVault.WorkerStatus.ServiceExtensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
 
 /// <summary>
 /// Builder class for creating a test host for the StatusHostedService wrapper in order to run integration tests
