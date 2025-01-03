@@ -17,7 +17,7 @@
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
           "ADMIN_PASSWORD_HASH": "AQAAAAIAAYagAAAAEKWfKfa2gh9Z72vjAlnNP1xlME7FsunRznzyrfqFte40FToufRwa3kX8wwDwnEXZag==",
-          "ADMIN_PASSWORD_GENERATED": "2024-01-01T00:00:00Z",
+          "ADMIN_PASSWORD_GENERATED": "2030-01-01T00:00:00Z",
           "DATA_PROTECTION_CERT_PASS": "Development"
         }
       },
