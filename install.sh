@@ -60,6 +60,7 @@ show_usage() {
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
     printf "  -y, --yes         Automatic yes to prompts\n"
+    printf "  --dev             Target development database for db import/export operations\n"
     printf "  --help            Show this help message\n"
     printf "\n"
 
@@ -71,6 +72,7 @@ parse_args() {
     VERBOSE=false
     FORCE_YES=false
     COMMAND_ARG=""
+    DEV_DB=false
 
     if [ $# -eq 0 ]; then
         show_usage
@@ -187,6 +189,10 @@ parse_args() {
                 ;;
             -y|--yes)
                 FORCE_YES=true
+                shift
+                ;;
+            --dev)
+                DEV_DB=true
                 shift
                 ;;
             *)
@@ -1810,29 +1816,47 @@ handle_db_export() {
     # Check if output redirection is present
     if [ -t 1 ]; then
         printf "${RED}Error: Output redirection is required.${NC}\n" >&2
-        printf "Usage: ./install.sh db-export > backup.sql.gz\n" >&2
+        printf "Usage: ./install.sh db-export [--dev] > backup.sql.gz\n" >&2
+        printf "\n" >&2
+        printf "Options:\n" >&2
+        printf "  --dev    Export from development database\n" >&2
         printf "\n" >&2
         printf "Example:\n" >&2
         printf "  ./install.sh db-export > my_backup_$(date +%Y%m%d).sql.gz\n" >&2
+        printf "  ./install.sh db-export --dev > my_dev_backup_$(date +%Y%m%d).sql.gz\n" >&2
         exit 1
     fi
 
-    # Check if containers are running
-    if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
-        printf "${RED}Error: AliasVault containers are not running. Start them first with: ./install.sh start${NC}\n" >&2
-        exit 1
+    if [ "$DEV_DB" = true ]; then
+        # Check if dev containers are running
+        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev --quiet 2>/dev/null | grep -q .; then
+            printf "${RED}Error: Development database container is not running. Start it first with: ./install.sh configure-dev-db${NC}\n" >&2
+            exit 1
+        fi
+
+        # Check if postgres-dev container is healthy
+        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
+            printf "${RED}Error: Development PostgreSQL container is not healthy. Please check the logs.${NC}\n" >&2
+            exit 1
+        fi
+
+        printf "${CYAN}> Exporting development database...${NC}\n" >&2
+        docker compose -f docker-compose.dev.yml -p aliasvault-dev exec postgres-dev pg_dump -U aliasvault aliasvault | gzip
+    else
+        # Production database export logic
+        if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
+            printf "${RED}Error: AliasVault containers are not running. Start them first with: ./install.sh start${NC}\n" >&2
+            exit 1
+        fi
+
+        if ! docker compose ps postgres | grep -q "healthy"; then
+            printf "${RED}Error: PostgreSQL container is not healthy. Please check the logs with: docker compose logs postgres${NC}\n" >&2
+            exit 1
+        fi
+
+        printf "${CYAN}> Exporting production database...${NC}\n" >&2
+        docker compose exec postgres pg_dump -U aliasvault aliasvault | gzip
     fi
-
-    # Check if postgres container is healthy
-    if ! docker compose ps postgres | grep -q "healthy"; then
-        printf "${RED}Error: PostgreSQL container is not healthy. Please check the logs with: docker compose logs postgres${NC}\n" >&2
-        exit 1
-    fi
-
-    printf "${CYAN}> Exporting database...${NC}\n" >&2
-
-    # Only the actual pg_dump output goes to stdout, everything else to stderr
-    docker compose exec postgres pg_dump -U aliasvault aliasvault | gzip
 
     if [ $? -eq 0 ]; then
         printf "${GREEN}> Database exported successfully.${NC}\n" >&2
@@ -1847,22 +1871,36 @@ handle_db_import() {
     printf "${YELLOW}+++ Importing Database +++${NC}\n"
 
     # Check if containers are running
-    if ! docker compose ps postgres | grep -q "healthy"; then
-        printf "${RED}Error: PostgreSQL container is not healthy.${NC}\n"
-        exit 1
+    if [ "$DEV_DB" = true ]; then
+        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
+            printf "${RED}Error: Development PostgreSQL container is not healthy.${NC}\n"
+            exit 1
+        fi
+    else
+        if ! docker compose ps postgres | grep -q "healthy"; then
+            printf "${RED}Error: PostgreSQL container is not healthy.${NC}\n"
+            exit 1
+        fi
     fi
 
     # Check if we're getting input from a pipe
     if [ -t 0 ]; then
         printf "${RED}Error: No input file provided${NC}\n"
-        printf "Usage: ./install.sh db-import < backup.sql.gz\n"
+        printf "Usage: ./install.sh db-import [--dev] < backup.sql.gz\n"
         exit 1
     fi
 
     # Save stdin to file descriptor 3
     exec 3<&0
 
-    printf "${RED}Warning: This will DELETE ALL EXISTING DATA in the database.${NC}\n"
+    printf "${RED}Warning: This will DELETE ALL EXISTING DATA in the "
+    if [ "$DEV_DB" = true ]; then
+        printf "development database"
+    else
+        printf "database"
+    fi
+    printf ".${NC}\n"
+
     if [ "$FORCE_YES" != true ]; then
         # Use /dev/tty to read from terminal even when stdin is redirected
         if [ -t 1 ] && [ -t 2 ] && [ -e /dev/tty ]; then
@@ -1882,14 +1920,20 @@ handle_db_import() {
         fi
     fi
 
-    printf "${CYAN}> Stopping dependent services...${NC}\n"
-    if [ "$VERBOSE" = true ]; then
-        docker compose stop api admin task-runner smtp
-    else
-        docker compose stop api admin task-runner smtp > /dev/null 2>&1
+    if [ "$DEV_DB" != true ]; then
+        printf "${CYAN}> Stopping dependent services...${NC}\n"
+        if [ "$VERBOSE" = true ]; then
+            docker compose stop api admin task-runner smtp
+        else
+            docker compose stop api admin task-runner smtp > /dev/null 2>&1
+        fi
     fi
 
-    printf "${CYAN}> Importing database...${NC}\n"
+    printf "${CYAN}> Importing "
+    if [ "$DEV_DB" = true ]; then
+        printf "development "
+    fi
+    printf "database...${NC}\n"
 
     # Create a temporary file to verify the gzip input
     temp_file=$(mktemp)
@@ -1902,18 +1946,30 @@ handle_db_import() {
         exit 1
     fi
 
-    if [ "$VERBOSE" = true ]; then
-        # Proceed with import
-        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
-        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
-        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
-        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault
+    if [ "$DEV_DB" = true ]; then
+        if [ "$VERBOSE" = true ]; then
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
+            gunzip -c "$temp_file" | docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault
+        else
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
+            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
+            gunzip -c "$temp_file" | docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault > /dev/null 2>&1
+        fi
     else
-        # Suppress all output except errors
-        docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
-        docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
-        docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
-        gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault > /dev/null 2>&1
+        if [ "$VERBOSE" = true ]; then
+            docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
+            docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
+            docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
+            gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault
+        else
+            docker compose exec -T postgres psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
+            docker compose exec -T postgres psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
+            docker compose exec -T postgres psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
+            gunzip -c "$temp_file" | docker compose exec -T postgres psql -U aliasvault aliasvault > /dev/null 2>&1
+        fi
     fi
 
     import_status=$?
@@ -1921,11 +1977,13 @@ handle_db_import() {
 
     if [ $import_status -eq 0 ]; then
         printf "${GREEN}> Database imported successfully.${NC}\n"
-        printf "${CYAN}> Starting services...${NC}\n"
-        if [ "$VERBOSE" = true ]; then
-            docker compose restart api admin task-runner smtp reverse-proxy
-        else
-            docker compose restart api admin task-runner smtp reverse-proxy > /dev/null 2>&1
+        if [ "$DEV_DB" != true ]; then
+            printf "${CYAN}> Starting services...${NC}\n"
+            if [ "$VERBOSE" = true ]; then
+                docker compose restart api admin task-runner smtp reverse-proxy
+            else
+                docker compose restart api admin task-runner smtp reverse-proxy > /dev/null 2>&1
+            fi
         fi
     else
         printf "${RED}> Import failed. Please check that your backup file is valid.${NC}\n"
