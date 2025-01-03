@@ -53,14 +53,8 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Add a second cancellationToken linked to the parent cancellation token.
-            // When the parent gets canceled this gets canceled as well. However, this one can also
-            // be canceled with a signal from the StatusWorker.
-            var workerCancellationTokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-
             // Start the inner while loop with the second cancellationToken.
-            await ExecuteInnerAsync(workerCancellationTokenSource);
+            await ExecuteInnerAsync(stoppingToken);
 
             if (!stoppingToken.IsCancellationRequested)
             {
@@ -73,10 +67,15 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
     /// <summary>
     /// Start the inner while loop which adds a second cancellationToken that is controlled by the StatusWorker.
     /// </summary>
-    /// <param name="workerCancellationTokenSource">Cancellation token.</param>
-    private async Task ExecuteInnerAsync(CancellationTokenSource workerCancellationTokenSource)
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private async Task ExecuteInnerAsync(CancellationToken cancellationToken)
     {
         Task? workerTask = null;
+
+        // Add a second cancellationToken linked to the parent cancellation token.
+        // When the parent gets canceled this gets canceled as well. However, this one can also
+        // be canceled with a signal from the StatusWorker.
+        using var workerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         while (!workerCancellationTokenSource.IsCancellationRequested)
         {
@@ -86,7 +85,6 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
                 {
                     if (workerTask == null)
                     {
-                        globalServiceStatus.SetWorkerStatus(typeof(T).Name, true);
                         workerTask = Task.Run(() => WorkerLogic(workerCancellationTokenSource.Token), workerCancellationTokenSource.Token);
                     }
                 }
@@ -100,11 +98,15 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             else if (globalServiceStatus.CurrentStatus.ToStatusEnum() == Status.Stopped)
             {
                 // Do nothing, the worker is stopped.
+                globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
             }
 
             // Wait for a second before checking the status again.
             await Task.Delay(1000);
         }
+
+        // If we get here, cancel the worker task if it is still running.
+        await workerCancellationTokenSource.CancelAsync();
     }
 
     /// <summary>
@@ -142,36 +144,46 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             {
                 // Expected so we only log information.
                 logger.LogInformation(ex, "StatusHostedService<{ServiceType}> is stopping due to a cancellation request.", typeof(T).Name);
+                break;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred in StatusHostedService<{ServiceType}>", typeof(T).Name);
-                globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
+
+                // If service is explicitly stopped, break out of the loop immediately.
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
             finally
             {
                 logger.LogWarning("StatusHostedService<{ServiceType}> stopped at: {Time}", typeof(T).Name, DateTimeOffset.Now);
-                globalServiceStatus.SetWorkerStatus(typeof(T).Name, false);
+
+                // Reset the delay when the service is explicitly stopped
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _restartDelayInMs = _restartMinDelayInMs;
+                }
             }
 
-            // If a fault occurred in the innerService, but it was not explicitly canceled,
-            // wait for a second before attempting to auto-restart the worker.
-            while (!cancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
-                try
-                {
-                    await Task.Delay(_restartDelayInMs, cancellationToken);
-                    break; // Exit the loop if delay is successful
-                }
-                catch (TaskCanceledException)
-                {
-                    // If the delay is canceled, exit the loop
-                    break;
-                }
+                return;
             }
 
-            // Exponential backoff with a maximum delay
-            _restartDelayInMs = Math.Min(_restartDelayInMs * 2, _restartMaxDelayInMs);
+            try
+            {
+                // If an exception occurred, delay with exponential backoff with a maximum before retrying.
+                await Task.Delay(_restartDelayInMs, cancellationToken);
+                _restartDelayInMs = Math.Min(_restartDelayInMs * 2, _restartMaxDelayInMs);
+            }
+            catch (OperationCanceledException)
+            {
+                // Reset delay on cancellation
+                _restartDelayInMs = _restartMinDelayInMs;
+                return;
+            }
         }
     }
 }

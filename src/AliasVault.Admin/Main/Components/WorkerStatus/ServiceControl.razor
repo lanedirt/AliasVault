@@ -5,10 +5,10 @@
 {
     <button @onclick="() => ServiceClick(service.Name)"
             class="@GetServiceButtonClasses(service) mx-3 inline-flex items-center justify-center rounded-xl px-8 py-2 text-white"
-            disabled="@(!IsHeartbeatValid(service.LastHeartbeat))"
-            title="@GetButtonTooltip(service.LastHeartbeat)">
+            disabled="@(!service.IsHeartBeatValid)"
+            title="@GetButtonTooltip(service)">
         <span>@service.DisplayName</span>
-        @if (service.IsPending)
+        @if (service.IsHeartBeatValid && service.CurrentStatus != service.DesiredStatus && !string.IsNullOrEmpty(service.DesiredStatus))
         {
             <svg class="animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -54,9 +54,9 @@
     {
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public bool Status { get; set; }
-        public bool IsPending { get; set; }
-        public DateTime LastHeartbeat { get; set; }
+        public string CurrentStatus { get; set; } = "";
+        public string DesiredStatus { get; set; } = "";
+        public bool IsHeartBeatValid { get; set; }
     }
 
     private List<ServiceState> Services { get; set; } = [];
@@ -112,15 +112,23 @@
     {
         string buttonClass = "cursor-pointer ";
 
-        if (!IsHeartbeatValid(service.LastHeartbeat))
+        if (!service.IsHeartBeatValid)
         {
             buttonClass += "bg-gray-600";
         }
-        else if (service.Status)
+        else if (service.CurrentStatus == "Started" && (service.DesiredStatus == string.Empty || service.DesiredStatus == "Started"))
         {
             buttonClass += "bg-green-600";
         }
-        else
+        else if (service.CurrentStatus == "Stopping" || (service.DesiredStatus == "Stopped" && service.CurrentStatus != service.DesiredStatus))
+        {
+            buttonClass += "bg-red-500";
+        }
+        else if (service.CurrentStatus == "Starting" || (service.DesiredStatus == "Started" && service.CurrentStatus != service.DesiredStatus))
+        {
+            buttonClass += "bg-emerald-500";
+        }
+        else if (service.DesiredStatus == "Stopped" && (service.DesiredStatus == string.Empty || service.DesiredStatus == "Stopped"))
         {
             buttonClass += "bg-red-600";
         }
@@ -131,9 +139,22 @@
     /// <summary>
     /// Gets the tooltip text for a service button based on its last heartbeat.
     /// </summary>
-    private static string GetButtonTooltip(DateTime lastHeartbeat)
+    private static string GetButtonTooltip(ServiceState service)
     {
-        return IsHeartbeatValid(lastHeartbeat) ? "" : "Heartbeat offline";
+        if (!service.IsHeartBeatValid)
+        {
+            return "Heartbeat offline";
+        }
+
+        var statusMessages = new Dictionary<string, string>
+        {
+            { "Started", "Service is running" },
+            { "Starting", "Service is starting..." },
+            { "Stopped", "Service is stopped" },
+            { "Stopping", "Service is stopping..." }
+        };
+
+        return statusMessages.GetValueOrDefault(service.CurrentStatus, string.Empty);
     }
 
     /// <summary>
@@ -143,18 +164,25 @@
     {
         var service = Services.First(s => s.Name == serviceName);
 
-        if (!IsHeartbeatValid(service.LastHeartbeat))
+        if (!service.IsHeartBeatValid)
         {
             return;
         }
 
-        service.IsPending = true;
+        // If service not started and not starting, clicking should start it. Otherwise, stop it.
+        if (service.CurrentStatus == "Started" || service.DesiredStatus == "Started")
+        {
+            service.DesiredStatus = "Stopped";
+        }
+        else
+        {
+            service.DesiredStatus = "Started";
+        }
         StateHasChanged();
 
-        service.Status = !service.Status;
-        await UpdateServiceStatus(serviceName, service.Status);
+        await UpdateServiceStatus(serviceName, service.DesiredStatus);
+        service.CurrentStatus = service.DesiredStatus;
 
-        service.IsPending = false;
         StateHasChanged();
     }
 
@@ -163,7 +191,7 @@
     /// </summary>
     private async Task InitPage()
     {
-        if (InitInProgress || Services.Any(s => s.IsPending))
+        if (InitInProgress)
         {
             return;
         }
@@ -179,8 +207,9 @@
                 var entry = ServiceStatus.Find(x => x.ServiceName == service.Name);
                 if (entry != null)
                 {
-                    service.LastHeartbeat = entry.Heartbeat;
-                    service.Status = IsHeartbeatValid(service.LastHeartbeat) && entry.CurrentStatus == "Started";
+                    service.IsHeartBeatValid = IsHeartbeatValid(entry.Heartbeat);
+                    service.CurrentStatus = entry.CurrentStatus;
+                    service.DesiredStatus = entry.DesiredStatus;
                 }
             }
 
@@ -195,14 +224,13 @@
     /// <summary>
     /// Updates the status of a service.
     /// </summary>
-    private async Task<bool> UpdateServiceStatus(string serviceName, bool newStatus)
+    private async Task<bool> UpdateServiceStatus(string serviceName, string desiredStatus)
     {
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var entry = await dbContext.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstOrDefaultAsync();
         if (entry != null)
         {
-            string newDesiredStatus = newStatus ? "Started" : "Stopped";
-            entry.DesiredStatus = newDesiredStatus;
+            entry.DesiredStatus = desiredStatus;
             await dbContext.SaveChangesAsync();
 
             var timeout = DateTime.UtcNow.AddSeconds(30);
@@ -215,7 +243,7 @@
 
                 await using var dbContextInner = await DbContextFactory.CreateDbContextAsync();
                 var check = await dbContextInner.WorkerServiceStatuses.Where(x => x.ServiceName == serviceName).FirstAsync();
-                if (check.CurrentStatus == newDesiredStatus)
+                if (check.CurrentStatus == entry.DesiredStatus)
                 {
                     return true;
                 }

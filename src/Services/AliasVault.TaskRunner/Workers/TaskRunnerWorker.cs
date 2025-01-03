@@ -101,23 +101,34 @@ public class TaskRunnerWorker(
         {
             foreach (var task in tasks)
             {
+                // Check cancellation before each task
+                stoppingToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     job.Status = TaskRunnerJobStatus.Running;
                     await dbContext.SaveChangesAsync(stoppingToken);
                     await task.ExecuteAsync(stoppingToken);
                 }
+                catch (OperationCanceledException)
+                {
+                    // Handle cancellation gracefully
+                    job.Status = TaskRunnerJobStatus.Canceled;
+                    job.ErrorMessage = "Task execution was canceled.";
+                    await dbContext.SaveChangesAsync(stoppingToken);
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error executing task {TaskName}", task.Name);
-                    job.ErrorMessage = $"Task {task.Name} failed: {ex.Message}";
                     job.Status = TaskRunnerJobStatus.Error;
+                    job.ErrorMessage = $"Task {task.Name} failed: {ex.Message}";
                     await dbContext.SaveChangesAsync(stoppingToken);
                     break;
                 }
             }
 
-            if (job.Status != TaskRunnerJobStatus.Error)
+            if (job.Status != TaskRunnerJobStatus.Error && job.Status != TaskRunnerJobStatus.Canceled)
             {
                 job.Status = TaskRunnerJobStatus.Finished;
             }

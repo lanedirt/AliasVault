@@ -28,6 +28,11 @@ public enum TaskRunnerJobStatus
     Finished = 2,
 
     /// <summary>
+    /// The job has been canceled because the task runner has been stopped.
+    /// </summary>
+    Canceled = 8,
+
+    /// <summary>
     /// The job has failed.
     /// </summary>
     Error = 9,
