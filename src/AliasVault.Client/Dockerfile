@@ -1,7 +1,8 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG TARGETARCH
 ARG BUILD_CONFIGURATION=Release
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV MSBUILDDEBUGPATH=/src/msbuild-logs
@@ -12,26 +13,26 @@ RUN mkdir -p /src/msbuild-logs
 
 # Install Python which is required by the WebAssembly tools
 RUN apt-get update && apt-get install -y python3 && apt-get clean
-# Create the debug directory and install Python which is required by the WebAssembly tools
-RUN mkdir -p /src/msbuild-logs && apt-get update && apt-get install -y python3 && apt-get clean
 
 # Install the WebAssembly tools
 RUN dotnet workload install wasm-tools
 
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.Client/AliasVault.Client.csproj", "src/AliasVault.Client/"]
-RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj"
+RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj" -a $TARGETARCH
 COPY . .
 
 # Build the Client project
 WORKDIR "/src/src/AliasVault.Client"
-RUN dotnet build "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
+RUN dotnet build "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/build -a $TARGETARCH
 
 # Publish the Client project
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
 RUN dotnet publish "AliasVault.Client.csproj" \
     -c "$BUILD_CONFIGURATION" \
+    -a $TARGETARCH \
     --no-restore \
     -o /app/publish \
     /p:UseAppHost=false \
