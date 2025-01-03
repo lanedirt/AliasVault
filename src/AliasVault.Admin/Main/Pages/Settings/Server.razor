@@ -162,7 +162,7 @@
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Failed to start maintenance tasks: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"Failed to start maintenance tasks: {ex}", true);
         }
     }
 

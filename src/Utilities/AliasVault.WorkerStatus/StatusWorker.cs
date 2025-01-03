@@ -13,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// StatusWorker class for monitoring and controlling the status of the worker services.
+/// StatusWorker class for monitoring and controlling the status of individual worker services through a database.
 /// </summary>
 public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbContext> createDbContext, GlobalServiceStatus globalServiceStatus) : BackgroundService
 {
@@ -33,27 +33,18 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
             try
             {
                 var statusEntry = await GetServiceStatus();
+
                 switch (statusEntry.CurrentStatus.ToStatusEnum())
                 {
                     case Status.Started:
                         // Ensure that all workers are running, if not, revert to "Starting" CurrentStatus.
-                        if (!globalServiceStatus.AreAllWorkersRunning())
-                        {
-                            await SetServiceStatus(statusEntry, Status.Starting.ToString());
-                            logger.LogInformation(
-                                "Status was set to Started but not all workers are running (yet). Reverting to Starting.");
-                        }
-
+                        await HandleStartedStatus(statusEntry);
                         break;
                     case Status.Starting:
-                        await WaitForAllWorkersToStart(stoppingToken);
-                        await SetServiceStatus(statusEntry, Status.Started.ToString());
-                        logger.LogInformation("All workers started.");
+                        await HandleStartingStatus(statusEntry);
                         break;
                     case Status.Stopping:
-                        await WaitForAllWorkersToStop(stoppingToken);
-                        await SetServiceStatus(statusEntry, Status.Stopped.ToString());
-                        logger.LogInformation("All workers stopped.");
+                        await HandleStoppingStatus(statusEntry);
                         break;
                     case Status.Stopped:
                         logger.LogInformation("Service is (soft) stopped.");
@@ -76,6 +67,56 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
         // Mark the service as stopped.
         _dbContext = createDbContext();
         await SetServiceStatus(await GetServiceStatus(), "Stopped");
+    }
+
+    /// <summary>
+    /// Handles the Started status.
+    /// </summary>
+    /// <param name="statusEntry">The WorkerServiceStatus entry.</param>
+    /// <returns>Task.</returns>
+    private async Task HandleStartedStatus(WorkerServiceStatus statusEntry)
+    {
+        if (!globalServiceStatus.AreAllWorkersRunning())
+        {
+            await SetServiceStatus(statusEntry, Status.Starting.ToString());
+            logger.LogInformation("Status was set to Started but not all workers are running (yet). Reverting to Starting.");
+        }
+    }
+
+    /// <summary>
+    /// Handles the Starting status.
+    /// </summary>
+    /// <param name="statusEntry">The WorkerServiceStatus entry.</param>
+    /// <returns>Task.</returns>
+    private async Task HandleStartingStatus(WorkerServiceStatus statusEntry)
+    {
+        if (globalServiceStatus.AreAllWorkersRunning())
+        {
+            await SetServiceStatus(statusEntry, Status.Started.ToString());
+            logger.LogInformation("All workers started.");
+        }
+        else
+        {
+            logger.LogInformation("Waiting for all workers to start.");
+        }
+    }
+
+    /// <summary>
+    /// Handles the Stopping status.
+    /// </summary>
+    /// <param name="statusEntry">The WorkerServiceStatus entry.</param>
+    /// <returns>Task.</returns>
+    private async Task HandleStoppingStatus(WorkerServiceStatus statusEntry)
+    {
+        if (globalServiceStatus.AreAllWorkersStopped())
+        {
+            await SetServiceStatus(statusEntry, Status.Stopped.ToString());
+            logger.LogInformation("All workers stopped.");
+        }
+        else
+        {
+            logger.LogInformation("Waiting for all workers to stop.");
+        }
     }
 
     /// <summary>
@@ -124,32 +165,6 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
 
         statusEntry.Heartbeat = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Waits for all workers to start.
-    /// </summary>
-    /// <param name="stoppingToken">CancellationToken.</param>
-    private async Task WaitForAllWorkersToStart(CancellationToken stoppingToken)
-    {
-        while (!globalServiceStatus.AreAllWorkersRunning())
-        {
-            logger.LogInformation("Waiting for all workers to start...");
-            await Task.Delay(1000, stoppingToken);
-        }
-    }
-
-    /// <summary>
-    /// Waits for all workers to stop.
-    /// </summary>
-    /// <param name="stoppingToken">CancellationToken.</param>
-    private async Task WaitForAllWorkersToStop(CancellationToken stoppingToken)
-    {
-        while (!globalServiceStatus.AreAllWorkersStopped())
-        {
-            logger.LogInformation("Waiting for all workers to stop...");
-            await Task.Delay(1000, stoppingToken);
-        }
     }
 
     /// <summary>

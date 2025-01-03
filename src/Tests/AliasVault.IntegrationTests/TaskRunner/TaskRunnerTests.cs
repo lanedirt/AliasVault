@@ -77,7 +77,7 @@ public class TaskRunnerTests
 
         // Assert
         await using var dbContext = await _testHostBuilder.GetDbContextAsync();
-        var generalLogs = await dbContext.Logs.ToListAsync();
+        var generalLogs = await dbContext.Logs.Where(x => x.Application == "TestApp").ToListAsync();
         Assert.That(generalLogs, Has.Count.EqualTo(50), "Only recent general logs should remain");
     }
 
