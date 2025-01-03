@@ -132,7 +132,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
     /// <param name="stoppingToken">CancellationToken.</param>
     private async Task WaitForAllWorkersToStart(CancellationToken stoppingToken)
     {
-        while (!globalServiceStatus.AreAllWorkersRunning())
+        while (!globalServiceStatus.AreAllWorkersRunning() && !stoppingToken.IsCancellationRequested)
         {
             logger.LogInformation("Waiting for all workers to start...");
             await Task.Delay(1000, stoppingToken);
@@ -145,7 +145,7 @@ public class StatusWorker(ILogger<StatusWorker> logger, Func<IWorkerStatusDbCont
     /// <param name="stoppingToken">CancellationToken.</param>
     private async Task WaitForAllWorkersToStop(CancellationToken stoppingToken)
     {
-        while (!globalServiceStatus.AreAllWorkersStopped())
+        while (!globalServiceStatus.AreAllWorkersStopped() && !stoppingToken.IsCancellationRequested)
         {
             logger.LogInformation("Waiting for all workers to stop...");
             await Task.Delay(1000, stoppingToken);
