@@ -53,13 +53,28 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Start the inner while loop with the second cancellationToken.
-            await ExecuteInnerAsync(stoppingToken);
-
-            if (!stoppingToken.IsCancellationRequested)
+            try
             {
-                // If the parent service was not stopped, wait for a second before attempting to restart the worker.
-                await Task.Delay(1000, stoppingToken);
+                // Start the inner while loop with the second cancellationToken.
+                await ExecuteInnerAsync(stoppingToken);
+            }
+            catch (OperationCanceledException ex)
+            {
+                // Expected so we only log information.
+                logger.LogInformation(ex, "StatusHostedService<{ServiceType}> is stopping due to a cancellation request.", typeof(T).Name);
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred in StatusHostedService<{ServiceType}>", typeof(T).Name);
+            }
+            finally
+            {
+                if (!stoppingToken.IsCancellationRequested)
+                {
+                    // If the parent service was not stopped, wait for a second before attempting to restart the worker.
+                    await Task.Delay(1000, stoppingToken);
+                }
             }
         }
     }
@@ -127,7 +142,7 @@ public class StatusHostedService<T>(ILogger<StatusHostedService<T>> logger, Glob
             }
 
             // Wait for a second before checking the status again.
-            await Task.Delay(1000, workerCancellationTokenSource.Token);
+            await Task.Delay(1000, cancellationToken);
         }
 
         // If we get here, cancel the worker task if it is still running.
