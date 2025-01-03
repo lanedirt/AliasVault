@@ -147,7 +147,7 @@ public static partial class Program
             await MigrateTable(sqliteContext.AliasVaultRoles, pgContext.AliasVaultRoles, pgContext, "AliasVaultRoles");
             await MigrateTable(sqliteContext.AliasVaultUsers, pgContext.AliasVaultUsers, pgContext, "AliasVaultUsers");
             await MigrateTable(sqliteContext.ServerSettings, pgContext.ServerSettings, pgContext, "ServerSettings");
-            await MigrateTable(sqliteContext.TaskRunnerJobs, pgContext.TaskRunnerJobs, pgContext, "TaskRunnerJobs");
+            await MigrateTable(sqliteContext.TaskRunnerJobs, pgContext.TaskRunnerJobs, pgContext, "TaskRunnerJobs", true);
             await MigrateTable(sqliteContext.DataProtectionKeys, pgContext.DataProtectionKeys, pgContext, "DataProtectionKeys", true);
             await MigrateTable(sqliteContext.Logs, pgContext.Logs, pgContext, "Logs", true);
             await MigrateTable(sqliteContext.AuthLogs, pgContext.AuthLogs, pgContext, "AuthLogs", true);
