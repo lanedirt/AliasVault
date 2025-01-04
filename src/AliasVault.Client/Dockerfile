@@ -19,12 +19,15 @@ RUN dotnet workload install wasm-tools
 
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.Client/AliasVault.Client.csproj", "src/AliasVault.Client/"]
-RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj" -a $TARGETARCH
+RUN dotnet restore "src/AliasVault.Client/AliasVault.Client.csproj" -a "$TARGETARCH"
 COPY . .
 
 # Build the Client project
 WORKDIR "/src/src/AliasVault.Client"
-RUN dotnet build "AliasVault.Client.csproj" -c "$BUILD_CONFIGURATION" -o /app/build -a $TARGETARCH
+RUN dotnet build "AliasVault.Client.csproj" \
+    -c "$BUILD_CONFIGURATION" \
+    -o /app/build \
+    -a "$TARGETARCH"
 
 # Publish the Client project
 FROM build AS publish
@@ -32,7 +35,7 @@ ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
 RUN dotnet publish "AliasVault.Client.csproj" \
     -c "$BUILD_CONFIGURATION" \
-    -a $TARGETARCH \
+    -a "$TARGETARCH" \
     --no-restore \
     -o /app/publish \
     /p:UseAppHost=false \

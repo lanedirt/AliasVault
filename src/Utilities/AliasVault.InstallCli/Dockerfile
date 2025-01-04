@@ -9,14 +9,17 @@ WORKDIR /src
 # Copy csproj files and restore as distinct layers
 COPY ["src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj", "src/Utilities/AliasVault.InstallCli/"]
 COPY ["src/Databases/AliasServerDb/AliasServerDb.csproj", "src/Databases/AliasServerDb/"]
-RUN dotnet restore "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj" -a $TARGETARCH
+RUN dotnet restore "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj" -a "$TARGETARCH"
 
 # Copy the entire source code
 COPY . .
 
 # Build and publish in one step
 RUN dotnet publish "src/Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj" \
-    -c "$BUILD_CONFIGURATION" -a $TARGETARCH -o /app/publish /p:UseAppHost=false
+    -c "$BUILD_CONFIGURATION" \
+    -a "$TARGETARCH" \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
