@@ -5,12 +5,15 @@ WORKDIR /src
 
 # Copy the project files and restore dependencies
 COPY ["src/AliasVault.Api/AliasVault.Api.csproj", "src/AliasVault.Api/"]
-RUN dotnet restore "src/AliasVault.Api/AliasVault.Api.csproj" -a $TARGETARCH
+RUN dotnet restore "src/AliasVault.Api/AliasVault.Api.csproj" -a "$TARGETARCH"
 COPY . .
 
 # Build and publish
 WORKDIR "/src/src/AliasVault.Api"
-RUN dotnet publish "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" -a $TARGETARCH -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AliasVault.Api.csproj" -c "$BUILD_CONFIGURATION" \
+    -a "$TARGETARCH" \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 # Final stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final

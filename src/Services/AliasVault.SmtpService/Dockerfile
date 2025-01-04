@@ -8,12 +8,15 @@ WORKDIR /src
 
 # Copy the project files and restore dependencies
 COPY ["src/Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj", "src/Services/AliasVault.SmtpService/"]
-RUN dotnet restore "./src/Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj" -a $TARGETARCH
+RUN dotnet restore "./src/Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj" -a "$TARGETARCH"
 COPY . .
 
 # Build and publish the application
 WORKDIR "/src/src/Services/AliasVault.SmtpService"
-RUN dotnet publish "./AliasVault.SmtpService.csproj" -c "$BUILD_CONFIGURATION" -a $TARGETARCH -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./AliasVault.SmtpService.csproj" -c "$BUILD_CONFIGURATION" \
+    -a "$TARGETARCH" \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

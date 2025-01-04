@@ -7,11 +7,14 @@ ARG TARGETARCH
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/AliasVault.Admin/AliasVault.Admin.csproj", "src/AliasVault.Admin/"]
-RUN dotnet restore "src/AliasVault.Admin/AliasVault.Admin.csproj" -a $TARGETARCH
+RUN dotnet restore "src/AliasVault.Admin/AliasVault.Admin.csproj" -a "$TARGETARCH"
 COPY . .
 
 WORKDIR "/src/src/AliasVault.Admin"
-RUN dotnet publish "AliasVault.Admin.csproj" -c "$BUILD_CONFIGURATION" -a $TARGETARCH -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AliasVault.Admin.csproj" -c "$BUILD_CONFIGURATION" \
+    -a "$TARGETARCH" \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
