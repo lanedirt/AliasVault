@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.10.1
+# @version 0.10.3
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
@@ -1751,7 +1751,7 @@ handle_migrate_db() {
     printf "${CYAN}> Stopping services to ensure database is not in use...${NC}\n"
     docker compose stop api admin task-runner smtp
 
-    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.0 > /dev/null 2>&1; then
+    if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.3 > /dev/null 2>&1; then
         printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
         if [ "$VERBOSE" = true ]; then
             docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
