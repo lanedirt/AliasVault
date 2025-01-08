@@ -44,13 +44,13 @@ public class UserEmailClaim
     public string Address { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the email adress local part.
+    /// Gets or sets the email address local part.
     /// </summary>
     [StringLength(255)]
     public string AddressLocal { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the email adress domain part.
+    /// Gets or sets the email address domain part.
     /// </summary>
     [StringLength(255)]
     public string AddressDomain { get; set; } = null!;
