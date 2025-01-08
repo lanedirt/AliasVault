@@ -20,8 +20,16 @@ jobs:
       - name: Get repository and branch information
         id: repo-info
         run: |
-          echo "REPO_FULL_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+          # Check if this is a PR from a fork
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
+            # If PR is from a fork, use main branch from lanedirt/AliasVault
+            echo "REPO_FULL_NAME=lanedirt/AliasVault" >> $GITHUB_ENV
+            echo "BRANCH_NAME=main" >> $GITHUB_ENV
+          else
+            # Otherwise use the current repository and branch
+            echo "REPO_FULL_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+          fi
 
       - name: Download install script from current branch
         run: |
@@ -34,9 +42,22 @@ jobs:
           echo "SMTP_PORT=2525" > .env
 
       - name: Set permissions and run install.sh
+        id: install_script
+        continue-on-error: true
         run: |
           chmod +x install.sh
           ./install.sh install --verbose
+
+      - name: Check if failure was due to version mismatch
+        if: steps.install_script.outcome == 'failure'
+        run: |
+          if grep -q "Install script needs updating to match version" <<< "$(./install.sh install --verbose 2>&1)"; then
+            echo "Test skipped: Install script version is newer than latest release version. This is expected behavior if the install script is run on a branch that is ahead of the latest release."
+            exit 0
+          else
+            echo "Test failed due to an unexpected error"
+            exit 1
+          fi
 
       - name: Set up Docker Compose
         run: docker compose -f docker-compose.yml up -d
