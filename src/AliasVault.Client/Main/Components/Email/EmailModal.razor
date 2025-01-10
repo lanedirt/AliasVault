@@ -203,10 +203,6 @@
         // Determine email body
         if (Email != null)
         {
-            // TODO: delete after testing
-            Email.Attachments.Add(Email.Attachments.First());
-            Email.Attachments.Add(Email.Attachments.First());
-
             // Check if there is HTML content, if not, then set default viewtype to plain
             if (Email.MessageHtml is not null && !string.IsNullOrWhiteSpace(Email.MessageHtml))
             {

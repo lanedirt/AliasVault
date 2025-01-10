@@ -113,6 +113,11 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         var attachmentReceived = await ApiDbContext.EmailAttachments.FirstOrDefaultAsync(x => x.EmailId == emailReceived.Id);
         Assert.That(attachmentReceived, Is.Not.Null, "Attachment not found in database. Check email attachment encryption logic.");
 
+        // Assert that the attachment content is encrypted
+        var attachmentContent = Encoding.UTF8.GetString(attachmentReceived!.Bytes);
+        Assert.That(attachmentContent, Does.Not.Contain("This is an attachment."), "Attachment content stored as plain text in database. Check attachment encryption logic.");
+        Assert.That(attachmentContent, Is.Not.Empty, "Attachment content is empty. Check attachment encryption logic.");
+
         // Assert that subject is not stored as plain text in the database.
         Assert.That(emailReceived.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
 

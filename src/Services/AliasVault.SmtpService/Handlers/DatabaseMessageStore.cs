@@ -334,7 +334,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
 
         var insertedId = await InsertEmailIntoDatabase(message, new MailAddress(toAddress.AsAddress()), userPublicKey);
         logger.LogInformation(
-            "Email for {ToAddress} successfully saved into database with ID {insertedId}.",
+            "Email for {ToAddress} successfully saved into database with ID {InsertedId}.",
             toAddress.User + "@" + toAddress.Host,
             insertedId);
         return true;
