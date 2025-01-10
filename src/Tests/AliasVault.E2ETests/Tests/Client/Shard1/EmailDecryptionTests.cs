@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Tests.Client.Shard1;
 
+using System.Text;
 using AliasVault.IntegrationTests.SmtpServer;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -92,12 +93,25 @@ public class EmailDecryptionTests : ClientPlaywrightTest
             TextBody = textBody,
             HtmlBody = htmlBody,
         };
+        var attachment = new MimePart("text", "plain")
+        {
+            Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes("This is an attachment."))),
+            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+            ContentTransferEncoding = ContentEncoding.Base64,
+            FileName = "attachment.txt",
+        };
+        bodyBuilder.Attachments.Add(attachment);
         message.Body = bodyBuilder.ToMessageBody();
+
         await SendMessageToSmtpServer(message);
 
         // Assert that email was received by the server.
         var emailReceived = await ApiDbContext.Emails.FirstOrDefaultAsync(x => x.To == email);
         Assert.That(emailReceived, Is.Not.Null, "Email not received by server. Check SMTP server and email encryption/decryption logic.");
+
+        // Assert that the attachment is stored in the database.
+        var attachmentReceived = await ApiDbContext.EmailAttachments.FirstOrDefaultAsync(x => x.EmailId == emailReceived.Id);
+        Assert.That(attachmentReceived, Is.Not.Null, "Attachment not found in database. Check email attachment encryption logic.");
 
         // Assert that subject is not stored as plain text in the database.
         Assert.That(emailReceived.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
@@ -117,6 +131,10 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         // Check if the email is visible on the page now.
         emailContent = await Page.TextContentAsync("body");
         Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
+
+        // Assert that the attachment indicator is visible on the page.
+        var attachmentIndicator = await Page.Locator(".attachment-indicator").First.GetAttributeAsync("class");
+        Assert.That(attachmentIndicator, Is.Not.Null, "Attachment indicator not visible on email page. Check email attachment decryption logic.");
 
         // Attempt to click on the email subject to open the modal.
         await Page.Locator("text=" + textSubject).First.ClickAsync();
