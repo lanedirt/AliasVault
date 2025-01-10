@@ -105,10 +105,10 @@ public class EmailBoxController(IAliasServerDbContextFactory dbContextFactory, U
     }
 
     /// <summary>
-    /// Returns a list of emails for the provided email address.
+    /// Returns a list of emails for the provided list of email addresses.
     /// </summary>
     /// <param name="model">The request model extracted from POST body.</param>
-    /// <returns>List of aliases in JSON format.</returns>
+    /// <returns>List of emails in JSON format.</returns>
     [HttpPost(template: "bulk", Name = "GetEmailBoxBulk")]
     public async Task<IActionResult> GetEmailBoxBulk([FromBody] MailboxBulkRequest model)
     {
@@ -154,6 +154,7 @@ public class EmailBoxController(IAliasServerDbContextFactory dbContextFactory, U
                 MessagePreview = x.MessagePreview ?? string.Empty,
                 EncryptedSymmetricKey = x.EncryptedSymmetricKey,
                 EncryptionKey = x.EncryptionKey.PublicKey,
+                HasAttachments = x.Attachments.Any(),
             })
             .OrderByDescending(x => x.DateSystem)
             .Skip((model.Page - 1) * model.PageSize)

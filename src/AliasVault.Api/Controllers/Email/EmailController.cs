@@ -25,7 +25,7 @@ using Microsoft.EntityFrameworkCore;
 public class EmailController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
-    /// Get the newest version of the vault for the current user.
+    /// Get the email with the specified ID.
     /// </summary>
     /// <param name="id">The email ID to open.</param>
     /// <returns>List of aliases in JSON format.</returns>
