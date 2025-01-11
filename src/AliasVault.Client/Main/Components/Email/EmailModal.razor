@@ -233,7 +233,7 @@
             if (IsSpamOk)
             {
                 var client = HttpClientFactory.CreateClient("EmailClient");
-                var response = await client.GetAsync($"https://api.spamok.com/v2/Email/{Email!.ToLocal}/{Email.Id}/attachments/{attachment.Id}");
+                var response = await client.GetAsync($"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
 
                 if (response.IsSuccessStatusCode)
                 {
