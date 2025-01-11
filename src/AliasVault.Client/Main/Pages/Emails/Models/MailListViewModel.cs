@@ -56,4 +56,9 @@ public class MailListViewModel
     /// Gets or sets the message preview.
     /// </summary>
     public string MessagePreview { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the email has attachments.
+    /// </summary>
+    public bool HasAttachments { get; set; }
 }

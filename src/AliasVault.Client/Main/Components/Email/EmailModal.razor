@@ -3,42 +3,72 @@
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
+@inject EmailService EmailService
 @inject HttpClient HttpClient
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
     <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
-        <div id="emailModal" class="relative p-8 bg-white w-3/4 flex-col flex rounded-lg shadow-xl">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-gray-900">
-                    @if (IsSpamOk)
-                    {
-                        <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a>
-                    }
-                    else
-                    {
-                        <span>@Email?.Subject</span>
-                    }
-                </h2>
-                <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="mt-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400">From: @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">To: @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email?.DateSystem</p>
-            </div>
-            <div class="mt-4 text-gray-700 dark:text-gray-300">
-                <div>
-                    <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@EmailBody">
-                    </iframe>
+        <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-4 border-b">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        @if (IsSpamOk)
+                        {
+                            <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a>
+                        }
+                        else
+                        {
+                            <span>@Email?.Subject</span>
+                        }
+                    </h2>
+                    <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">From: @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">To: @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Date: @Email?.DateSystem</p>
                 </div>
             </div>
-            <div class="mt-6 flex justify-end space-x-4">
-                <button id="delete-email" @onclick="DeleteEmail" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
-                <button id="close-email-modal" @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="text-gray-700 dark:text-gray-300">
+                    <div>
+                        <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@EmailBody">
+                        </iframe>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    @if (Email?.Attachments?.Any() == true)
+                    {
+                        <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Attachments:</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                @foreach (var attachment in Email.Attachments)
+                                {
+                                    <div class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                        </svg>
+                                        <button @onclick="() => DownloadAttachment(attachment)"
+                                                class="text-primary hover:underline text-sm truncate attachment-link">
+                                            (@(Math.Ceiling((double)attachment.Filesize / 1024)) KB) @attachment.Filename
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button id="delete-email" @onclick="DeleteEmail" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                    <button id="close-email-modal" @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -190,6 +220,58 @@
                 // No HTML and no plain text available
                 EmailBody = "[This email has no body.]";
             }
+        }
+    }
+
+    /// <summary>
+    /// Download an attachment.
+    /// </summary>
+    private async Task DownloadAttachment(AttachmentApiModel attachment)
+    {
+        try
+        {
+            if (IsSpamOk)
+            {
+                var client = HttpClientFactory.CreateClient("EmailClient");
+                var response = await client.GetAsync($"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+                    await JsInteropService.DownloadFileFromStream(attachment.Filename, bytes);
+                }
+                else
+                {
+                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                }
+            }
+            else
+            {
+                var response = await HttpClient.GetAsync($"v1/Email/{Email!.Id}/attachments/{attachment.Id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get attachment bytes from API.
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+
+                    // Decrypt the attachment locally with email's encryption key.
+                    var decryptedBytes = await EmailService.DecryptEmailAttachment(Email, bytes);
+
+                    // Offer the decrypted attachment as download to the user's browser.
+                    if (decryptedBytes != null)
+                    {
+                        await JsInteropService.DownloadFileFromStream(attachment.Filename, decryptedBytes);
+                    }
+                }
+                else
+                {
+                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error downloading attachment: {ex.Message}", true);
         }
     }
 }

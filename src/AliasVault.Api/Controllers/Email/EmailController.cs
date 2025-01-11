@@ -25,7 +25,7 @@ using Microsoft.EntityFrameworkCore;
 public class EmailController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
-    /// Get the newest version of the vault for the current user.
+    /// Get the email with the specified ID.
     /// </summary>
     /// <param name="id">The email ID to open.</param>
     /// <returns>List of aliases in JSON format.</returns>
@@ -103,6 +103,36 @@ public class EmailController(ILogger<VaultController> logger, IAliasServerDbCont
             logger.LogError(ex, "An error occurred while deleting email with ID {id}.", id);
             return StatusCode(500, $"An error occurred while deleting the email: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Get the attachment bytes for the specified email and attachment ID.
+    /// </summary>
+    /// <param name="id">The email ID.</param>
+    /// <param name="attachmentId">The attachment ID.</param>
+    /// <returns>Attachment bytes in encrypted form.</returns>
+    [HttpGet(template: "{id}/attachments/{attachmentId}", Name = "GetEmailAttachment")]
+    public async Task<IActionResult> GetEmailAttachment(int id, int attachmentId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var (email, errorResult) = await AuthenticateAndRetrieveEmailAsync(id, context);
+        if (errorResult != null)
+        {
+            return errorResult;
+        }
+
+        // Find the requested attachment
+        var attachment = await context.EmailAttachments
+            .FirstOrDefaultAsync(x => x.Id == attachmentId && x.EmailId == email!.Id);
+
+        if (attachment == null)
+        {
+            return NotFound("Attachment not found.");
+        }
+
+        // Return the encrypted bytes
+        return File(attachment.Bytes, attachment.MimeType, attachment.Filename);
     }
 
     /// <summary>

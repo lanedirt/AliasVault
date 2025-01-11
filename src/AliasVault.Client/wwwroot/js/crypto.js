@@ -1,6 +1,6 @@
 /**
  * AES (symmetric) encryption and decryption functions.
- * @type {{encrypt: (function(*, *): Promise<string>), decrypt: (function(*, *): Promise<string>)}}
+ * @type {{encrypt: (function(*, *): Promise<string>), decrypt: (function(*, *): Promise<string>), decryptBytes: (function(*, *): Promise<Uint8Array>)}}
  */
 window.cryptoInterop = {
     encrypt: async function (plaintext, base64Key) {
@@ -59,6 +59,30 @@ window.cryptoInterop = {
 
         const decoder = new TextDecoder();
         return decoder.decode(decrypted);
+    },
+    decryptBytes: async function (base64Ciphertext, base64Key) {
+        const key = await window.crypto.subtle.importKey(
+            "raw",
+            Uint8Array.from(atob(base64Key), c => c.charCodeAt(0)),
+            {
+                name: "AES-GCM",
+                length: 256,
+            },
+            false,
+            ["decrypt"]
+        );
+
+        const ivAndCiphertext = Uint8Array.from(atob(base64Ciphertext), c => c.charCodeAt(0));
+        const iv = ivAndCiphertext.slice(0, 12);
+        const ciphertext = ivAndCiphertext.slice(12);
+
+        const decrypted = await window.crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: iv },
+            key,
+            ciphertext
+        );
+
+        return new Uint8Array(decrypted);
     }
 };
 
