@@ -106,6 +106,36 @@ public class EmailController(ILogger<VaultController> logger, IAliasServerDbCont
     }
 
     /// <summary>
+    /// Get the attachment bytes for the specified email and attachment ID.
+    /// </summary>
+    /// <param name="id">The email ID.</param>
+    /// <param name="attachmentId">The attachment ID.</param>
+    /// <returns>Attachment bytes in encrypted form.</returns>
+    [HttpGet(template: "{id}/attachments/{attachmentId}", Name = "GetEmailAttachment")]
+    public async Task<IActionResult> GetEmailAttachment(int id, int attachmentId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var (email, errorResult) = await AuthenticateAndRetrieveEmailAsync(id, context);
+        if (errorResult != null)
+        {
+            return errorResult;
+        }
+
+        // Find the requested attachment
+        var attachment = await context.EmailAttachments
+            .FirstOrDefaultAsync(x => x.Id == attachmentId && x.EmailId == email!.Id);
+
+        if (attachment == null)
+        {
+            return NotFound("Attachment not found.");
+        }
+
+        // Return the encrypted bytes
+        return File(attachment.Bytes, attachment.MimeType, attachment.Filename);
+    }
+
+    /// <summary>
     /// Authenticates the user and retrieves the requested email.
     /// </summary>
     /// <param name="id">The email ID to retrieve.</param>

@@ -62,6 +62,31 @@ public sealed class EmailService(DbService dbService, JsInteropService jsInterop
     }
 
     /// <summary>
+    /// Decrypts an email attachment using the email's encryption key.
+    /// </summary>
+    /// <param name="email">The email containing the encryption information.</param>
+    /// <param name="encryptedBytes">The encrypted attachment bytes.</param>
+    /// <returns>Decrypted attachment bytes.</returns>
+    public async Task<byte[]> DecryptEmailAttachment(EmailApiModel email, byte[] encryptedBytes)
+    {
+        await EnsureEncryptionKeys();
+        var privateKey = _encryptionKeys.First(x => x.PublicKey == email.EncryptionKey);
+
+        try
+        {
+            var decryptedSymmetricKey = await jsInteropService.DecryptWithPrivateKey(email.EncryptedSymmetricKey, privateKey.PrivateKey);
+            var decryptedBase64 = await jsInteropService.SymmetricDecryptBytes(encryptedBytes, Convert.ToBase64String(decryptedSymmetricKey));
+            return decryptedBase64;
+        }
+        catch (Exception ex)
+        {
+            globalNotificationService.AddErrorMessage(ex.Message, true);
+            logger.LogError(ex, "Error decrypting email attachment.");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Decrypt the contents of a single email.
     /// </summary>
     /// <param name="email">The email object with encrypted fields.</param>

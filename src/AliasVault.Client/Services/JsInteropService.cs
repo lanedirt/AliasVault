@@ -249,6 +249,23 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("window.registerVisibilityCallback", objRef);
 
     /// <summary>
+    /// Symmetrically decrypts a byte array using the provided encryption key.
+    /// </summary>
+    /// <param name="cipherBytes">Cipher bytes to decrypt.</param>
+    /// <param name="encryptionKey">Encryption key to use.</param>
+    /// <returns>Decrypted bytes.</returns>
+    public async Task<byte[]> SymmetricDecryptBytes(byte[] cipherBytes, string encryptionKey)
+    {
+        if (cipherBytes == null || cipherBytes.Length == 0)
+        {
+            return [];
+        }
+
+        var base64Ciphertext = Convert.ToBase64String(cipherBytes);
+        return await jsRuntime.InvokeAsync<byte[]>("cryptoInterop.decryptBytes", base64Ciphertext, encryptionKey);
+    }
+
+    /// <summary>
     /// Represents the result of a WebAuthn get credential operation.
     /// </summary>
     private sealed class WebAuthnGetCredentialResult

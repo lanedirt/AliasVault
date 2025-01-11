@@ -3,6 +3,7 @@
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
+@inject EmailService EmailService
 @inject HttpClient HttpClient
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
@@ -250,8 +251,14 @@
 
                 if (response.IsSuccessStatusCode)
                 {
+                    // Get attachment bytes from API.
                     var bytes = await response.Content.ReadAsByteArrayAsync();
-                    await JsInteropService.DownloadFileFromStream(attachment.Filename, bytes);
+
+                    // Decrypt the attachment locally with email's encryption key.
+                    var decryptedBytes = await EmailService.DecryptEmailAttachment(Email, bytes);
+
+                    // Offer the decrypted attachment as download to the user's browser.
+                    await JsInteropService.DownloadFileFromStream(attachment.Filename, decryptedBytes);
                 }
                 else
                 {
