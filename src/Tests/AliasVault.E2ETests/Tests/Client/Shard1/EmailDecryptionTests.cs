@@ -47,13 +47,106 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if received email encrypted by server can be successfully decrypted by client
+    /// Test if received email without attachments encrypted by server can be successfully decrypted by client
     /// and then be deleted by client.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
     [Order(1)]
     public async Task EmailEncryptionDecryptionDeleteTest()
+    {
+        // Create credential which should automatically create claim on server during database sync.
+        const string serviceName = "Test Service";
+        const string email = "testclaim2@example.tld";
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName },
+            { "email", email },
+        });
+
+        // Assert that the claim was created on the server.
+        var claim = await ApiDbContext.UserEmailClaims.Where(x => x.Address == email).FirstOrDefaultAsync();
+        Assert.That(claim, Is.Not.Null, "Claim for email address not found in database. Check if credential creation and claim creation are working correctly.");
+
+        // Assert that the users public key was created on the server.
+        var publicKey = await ApiDbContext.UserEncryptionKeys.Where(x => x.UserId == claim.UserId).FirstOrDefaultAsync();
+        Assert.That(publicKey, Is.Not.Null, "Public key for user not found in database. Check if public key creation is working correctly.");
+        Assert.That(publicKey.PublicKey, Has.Length.GreaterThanOrEqualTo(100), "Public key exists but length does not match expected. Check if public key creation is working correctly.");
+
+        // Email the SMTP server which will save the email in encrypted form in the database.
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
+        message.To.Add(new MailboxAddress("Test Recipient", email));
+        const string textSubject = "Encrypted Email Subject";
+        const string textBody = "This is a test email plain.";
+        const string htmlBody = @"
+        <html>
+        <body>
+            <h1>Test Email</h1>
+            <p>This is a test email with HTML content.</p>
+            <p>Sample anchor tag: <a href=""https://example.com"">Example Link</a></p>
+        </body>
+        </html>";
+        message.Subject = textSubject;
+        var bodyBuilder = new BodyBuilder
+        {
+            TextBody = textBody,
+            HtmlBody = htmlBody,
+        };
+        message.Body = bodyBuilder.ToMessageBody();
+
+        await SendMessageToSmtpServer(message);
+
+        // Assert that email was received by the server.
+        var emailReceived = await ApiDbContext.Emails.FirstOrDefaultAsync(x => x.To == email);
+        Assert.That(emailReceived, Is.Not.Null, "Email not received by server. Check SMTP server and email encryption/decryption logic.");
+
+        // Assert that subject is not stored as plain text in the database.
+        Assert.That(emailReceived.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
+
+        // Attempt to click on email refresh button to get new emails.
+        await Page.Locator("id=recent-email-refresh").First.ClickAsync();
+        await WaitForUrlAsync("credentials/**", "Subject");
+
+        // Check if the email is visible on the page now.
+        var emailContent = await Page.TextContentAsync("body");
+        Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the credential page. Check email decryption logic.");
+
+        // Navigate to the email index page and ensure that the decrypted email is also readable there.
+        await NavigateUsingBlazorRouter("emails");
+        await WaitForUrlAsync("emails", "Inbox");
+
+        // Check if the email is visible on the page now.
+        emailContent = await Page.TextContentAsync("body");
+        Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
+
+        // Attempt to click on the email subject to open the modal.
+        await Page.Locator("text=" + textSubject).First.ClickAsync();
+        await WaitForUrlAsync("emails**", "Delete");
+
+        // Assert that the anchor tag in the email iframe has target="_blank" attribute.
+        var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
+        Assert.That(anchorTag, Does.Contain("target=\"_blank\""), "Anchor tag in email iframe does not have target=\"_blank\" attribute. Check email decryption logic.");
+
+        // Click the delete button to delete the email.
+        await Page.Locator("id=delete-email").First.ClickAsync();
+
+        // Wait for the email delete confirm message to show up.
+        await WaitForUrlAsync("emails**", "Email deleted successfully");
+
+        // Assert that the email is no longer visible on the page.
+        var body = await Page.TextContentAsync("body");
+        Assert.That(body, Does.Not.Contain(textSubject), "Email not deleted from page after deletion. Check email deletion logic.");
+    }
+
+    /// <summary>
+    /// Test if received email including attachment encrypted by server can be successfully decrypted by client
+    /// and then be deleted by client.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(2)]
+    public async Task EmailEncryptionDecryptionAttachmentDeleteTest()
     {
         // Create credential which should automatically create claim on server during database sync.
         const string serviceName = "Test Service";
@@ -71,7 +164,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         // Assert that the users public key was created on the server.
         var publicKey = await ApiDbContext.UserEncryptionKeys.Where(x => x.UserId == claim.UserId).FirstOrDefaultAsync();
         Assert.That(publicKey, Is.Not.Null, "Public key for user not found in database. Check if public key creation is working correctly.");
-        Assert.That(publicKey.PublicKey, Has.Length.GreaterThanOrEqualTo(100), "Public key exists but length does not match expected. Check if public key creation is working correctly.");
+        Assert.That(publicKey!.PublicKey, Has.Length.GreaterThanOrEqualTo(100), "Public key exists but length does not match expected. Check if public key creation is working correctly.");
 
         // Email the SMTP server which will save the email in encrypted form in the database..
         var message = new MimeMessage();
@@ -186,7 +279,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(2)]
+    [Order(3)]
     public async Task EmailUnknownDomainNoClaimTest()
     {
         // Create credential which should automatically create claim on server during database sync.
@@ -209,7 +302,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(3)]
+    [Order(4)]
     public async Task EmailDuplicateClaimTest()
     {
         // Create credential which should automatically create claim on server during database sync.
