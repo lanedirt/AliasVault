@@ -67,7 +67,7 @@ public sealed class EmailService(DbService dbService, JsInteropService jsInterop
     /// <param name="email">The email containing the encryption information.</param>
     /// <param name="encryptedBytes">The encrypted attachment bytes.</param>
     /// <returns>Decrypted attachment bytes.</returns>
-    public async Task<byte[]> DecryptEmailAttachment(EmailApiModel email, byte[] encryptedBytes)
+    public async Task<byte[]?> DecryptEmailAttachment(EmailApiModel email, byte[] encryptedBytes)
     {
         await EnsureEncryptionKeys();
         var privateKey = _encryptionKeys.First(x => x.PublicKey == email.EncryptionKey);
@@ -82,7 +82,7 @@ public sealed class EmailService(DbService dbService, JsInteropService jsInterop
         {
             globalNotificationService.AddErrorMessage(ex.Message, true);
             logger.LogError(ex, "Error decrypting email attachment.");
-            throw;
+            return null;
         }
     }
 

@@ -258,7 +258,10 @@
                     var decryptedBytes = await EmailService.DecryptEmailAttachment(Email, bytes);
 
                     // Offer the decrypted attachment as download to the user's browser.
-                    await JsInteropService.DownloadFileFromStream(attachment.Filename, decryptedBytes);
+                    if (decryptedBytes != null)
+                    {
+                        await JsInteropService.DownloadFileFromStream(attachment.Filename, decryptedBytes);
+                    }
                 }
                 else
                 {

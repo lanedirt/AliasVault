@@ -208,11 +208,14 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Assert that the attachment content is encrypted
         var attachmentContent = Encoding.UTF8.GetString(attachmentReceived!.Bytes);
-        Assert.That(attachmentContent, Does.Not.Contain("This is an attachment."), "Attachment content stored as plain text in database. Check attachment encryption logic.");
-        Assert.That(attachmentContent, Is.Not.Empty, "Attachment content is empty. Check attachment encryption logic.");
+        Assert.Multiple(() =>
+        {
+            Assert.That(attachmentContent, Does.Not.Contain("This is an attachment."), "Attachment content stored as plain text in database. Check attachment encryption logic.");
+            Assert.That(attachmentContent, Is.Not.Empty, "Attachment content is empty. Check attachment encryption logic.");
+        });
 
         // Assert that subject is not stored as plain text in the database.
-        Assert.That(emailReceived.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
+        Assert.That(emailReceived!.Subject, Does.Not.Contain(textSubject), "Email subject stored as plain text in database. Check email encryption logic.");
 
         // Attempt to click on email refresh button to get new emails.
         await Page.Locator("id=recent-email-refresh").First.ClickAsync();
