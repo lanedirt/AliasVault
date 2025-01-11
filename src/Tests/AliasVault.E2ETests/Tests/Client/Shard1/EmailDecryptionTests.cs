@@ -149,6 +149,27 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
         Assert.That(anchorTag, Does.Contain("target=\"_blank\""), "Anchor tag in email iframe does not have target=\"_blank\" attribute. Check email decryption logic.");
 
+        // Assert that email attachment metadata is visible in the modal.
+        var body = await Page.TextContentAsync("body");
+        Assert.That(body, Does.Contain("attachment.txt"), "Attachment metadata not visible in email modal. Check email attachment parse logic.");
+
+        // Assert that clicking on the attachment link downloads it.
+        await Page.Locator(".attachment-link").First.ClickAsync();
+        var download = await Page.WaitForDownloadAsync();
+
+        // Get the path of the downloaded file
+        var downloadedFilePath = await download.PathAsync();
+
+        // Read the content of the downloaded file
+        var downloadedContent = await File.ReadAllBytesAsync(downloadedFilePath);
+
+        // Compare with the original attachment content
+        var originalContent = Encoding.UTF8.GetBytes("This is an attachment.");
+        Assert.That(downloadedContent, Is.EqualTo(originalContent), "Downloaded attachment content does not match the original content.");
+
+        // Clean up: delete the downloaded file
+        File.Delete(downloadedFilePath);
+
         // Click the delete button to delete the email.
         await Page.Locator("id=delete-email").First.ClickAsync();
 
@@ -156,7 +177,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         await WaitForUrlAsync("emails**", "Email deleted successfully");
 
         // Assert that the email is no longer visible on the page.
-        var body = await Page.TextContentAsync("body");
+        body = await Page.TextContentAsync("body");
         Assert.That(body, Does.Not.Contain(textSubject), "Email not deleted from page after deletion. Check email deletion logic.");
     }
 
