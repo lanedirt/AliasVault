@@ -67,25 +67,55 @@ public class UsernameEmailGenerator
     {
         var parts = new List<string>();
 
-        // Use first initial + last name
-        if (_random.Next(2) == 0)
+        switch (_random.Next(4))
         {
-            parts.Add(identity.FirstName.Substring(0, 1).ToLower() + identity.LastName.ToLower());
-        }
-        else
-        {
-            // Use full name
-            parts.Add((identity.FirstName + identity.LastName).ToLower());
+            case 0:
+                // First initial + last name
+                parts.Add(identity.FirstName.Substring(0, 1).ToLower() + identity.LastName.ToLower());
+                break;
+            case 1:
+                // Full name
+                parts.Add((identity.FirstName + identity.LastName).ToLower());
+                break;
+            case 2:
+                // First name + last initial
+                parts.Add(identity.FirstName.ToLower() + identity.LastName.Substring(0, 1).ToLower());
+                break;
+            case 3:
+                // First 3 chars of first name + last name
+                parts.Add(identity.FirstName.Substring(0, Math.Min(3, identity.FirstName.Length)).ToLower() + identity.LastName.ToLower());
+                break;
         }
 
-        // Add birth year
-        if (_random.Next(2) == 0)
+        // Add birth year variations
+        if (_random.Next(3) != 0)
         {
-            parts.Add(identity.BirthDate.Year.ToString().Substring(2));
+            switch (_random.Next(2))
+            {
+                case 0:
+                    parts.Add(identity.BirthDate.Year.ToString().Substring(2));
+                    break;
+                case 1:
+                    parts.Add(identity.BirthDate.Year.ToString());
+                    break;
+            }
+        }
+        else if (_random.Next(2) == 0)
+        {
+            // Add random numbers for more uniqueness
+            parts.Add(_random.Next(10, 999).ToString());
         }
 
-        // Join parts and sanitize
+        // Join parts with random symbols, possibly multiple
         var emailPrefix = string.Join(GetRandomSymbol(), parts);
+
+        // Add extra random symbol at random position
+        if (_random.Next(2) == 0)
+        {
+            int position = _random.Next(emailPrefix.Length);
+            emailPrefix = emailPrefix.Insert(position, GetRandomSymbol());
+        }
+
         emailPrefix = SanitizeEmailPrefix(emailPrefix);
 
         // Adjust length
