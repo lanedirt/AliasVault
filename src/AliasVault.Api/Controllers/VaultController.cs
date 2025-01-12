@@ -386,7 +386,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         foreach (var email in newEmailAddresses)
         {
             // Sanitize email address.
-            var sanitizedEmail = email.Trim().ToLower();
+            var sanitizedEmail = EmailHelper.SanitizeEmail(email);
 
             // If email address is invalid according to the EmailAddressAttribute, skip it.
             if (!new EmailAddressAttribute().IsValid(sanitizedEmail))
