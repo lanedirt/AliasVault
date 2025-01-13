@@ -49,20 +49,43 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     /// <returns>Task.</returns>
     public async Task<Credential> GenerateRandomIdentity(Credential credential)
     {
-        // Generate a random identity using the IIdentityGenerator implementation.
-        var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(dbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
+        const int MaxAttempts = 5;
+        var attempts = 0;
+        bool isEmailTaken;
 
-        // Generate random values for the Identity properties
-        credential.Username = identity.NickName;
-        credential.Alias.FirstName = identity.FirstName;
-        credential.Alias.LastName = identity.LastName;
-        credential.Alias.NickName = identity.NickName;
-        credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
-        credential.Alias.BirthDate = identity.BirthDate;
+        do
+        {
+            // Generate a random identity using the IIdentityGenerator implementation
+            var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(dbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
 
-        // Set the email
-        var emailDomain = GetDefaultEmailDomain();
-        credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
+            // Generate random values for the Identity properties
+            credential.Username = identity.NickName;
+            credential.Alias.FirstName = identity.FirstName;
+            credential.Alias.LastName = identity.LastName;
+            credential.Alias.NickName = identity.NickName;
+            credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
+            credential.Alias.BirthDate = identity.BirthDate;
+
+            // Set the email
+            var emailDomain = GetDefaultEmailDomain();
+            credential.Alias.Email = $"{identity.EmailPrefix}@{emailDomain}";
+
+            // Check if email is already taken
+            try
+            {
+                var response = await httpClient.PostAsync($"v1/Identity/CheckEmail/{credential.Alias.Email}", null);
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, bool>>();
+                isEmailTaken = result?["isTaken"] ?? false;
+            }
+            catch
+            {
+                // If the API call fails, assume email is not taken to allow operation to continue
+                isEmailTaken = false;
+            }
+
+            attempts++;
+        }
+        while (isEmailTaken && attempts < MaxAttempts);
 
         // Generate password
         credential.Passwords.First().Value = GenerateRandomPassword();
