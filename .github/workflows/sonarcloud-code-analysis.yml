@@ -62,7 +62,7 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               shell: powershell
               run: |
-                  .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
+                  .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
                   dotnet build
                   dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover --filter 'FullyQualifiedName!~AliasVault.E2ETests'
                   .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
