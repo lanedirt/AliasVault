@@ -240,7 +240,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Update user email claims if email addresses have been supplied.
         if (model.EmailAddressList.Count > 0)
         {
-            await UpdateUserEmailClaims(context, user.Id, model.EmailAddressList);
+            await UpdateUserEmailClaims(context, user, model.EmailAddressList);
         }
 
         // Sync user public key if supplied.
@@ -371,14 +371,14 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     /// Updates the user's email claims based on the provided email address list.
     /// </summary>
     /// <param name="context">The database context.</param>
-    /// <param name="userId">The ID of the user.</param>
+    /// <param name="user">The user object.</param>
     /// <param name="newEmailAddresses">The list of new email addresses to claim.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task UpdateUserEmailClaims(AliasServerDbContext context, string userId, List<string> newEmailAddresses)
+    private async Task UpdateUserEmailClaims(AliasServerDbContext context, AliasVaultUser user, List<string> newEmailAddresses)
     {
         // Get all existing user email claims.
         var existingEmailClaims = await context.UserEmailClaims
-            .Where(x => x.UserId == userId)
+            .Where(x => x.UserId == user.Id)
             .Select(x => x.Address)
             .ToListAsync();
 
@@ -398,10 +398,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             var existingClaim = await context.UserEmailClaims
                 .FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
 
-            if (existingClaim != null && existingClaim.UserId != userId)
+            if (existingClaim != null && existingClaim.UserId != user.Id)
             {
                 // Email address is already claimed by another user. Log the error and continue.
-                logger.LogWarning("{User} tried to claim email address: {Email} but it is already claimed by another user.", userId, sanitizedEmail);
+                logger.LogWarning("{User} tried to claim email address: {Email} but it is already claimed by another user.", user.UserName, sanitizedEmail);
                 continue;
             }
 
@@ -411,7 +411,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 {
                     context.UserEmailClaims.Add(new UserEmailClaim
                     {
-                        UserId = userId,
+                        UserId = user.Id,
                         Address = sanitizedEmail,
                         AddressLocal = sanitizedEmail.Split('@')[0],
                         AddressDomain = sanitizedEmail.Split('@')[1],
@@ -422,7 +422,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 catch (DbUpdateException ex)
                 {
                     // Error while adding email claim. Log the error and continue.
-                    logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", sanitizedEmail, userId);
+                    logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", sanitizedEmail, user.UserName);
                 }
             }
         }
