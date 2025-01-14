@@ -8,6 +8,8 @@
 <a href="https://app.aliasvault.net">Live demo 🔥</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> • <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> • <a href="#installation">Installation ⚙️</a>
 </p>
 
+Test change to test GitHub actions when triggered from a fork PR.
+
 <p align="center">
 <strong>Open-source password and alias manager</strong>
 </p>
