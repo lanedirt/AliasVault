@@ -1,10 +1,13 @@
-# This workflow will perform a SonarCloud code analysis on every push to the main branch or when a pull request is opened, synchronized, or reopened.
+# This workflow will perform a SonarCloud code analysis on every push to the main branch or
+# when a pull request is opened, synchronized, or reopened. The "pull_request_target" event is
+# used to ensure that the analysis is done on the source branch of the pull request which has
+# access to the SonarCloud token secret.
 name: SonarCloud code analysis
 on:
     push:
         branches:
             - main
-    pull_request:
+    pull_request_target:
         types: [opened, synchronize, reopened]
 jobs:
     build:
@@ -23,11 +26,13 @@ jobs:
               uses: actions/setup-java@v3
               with:
                   java-version: 17
-                  distribution: 'zulu' # Alternative distribution options are available.
+                  distribution: 'zulu'
 
-            - uses: actions/checkout@v3
+            - name: Checkout code of PR branch
+              uses: actions/checkout@v3
               with:
-                  fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+                ref: ${{ github.event.pull_request.head.sha }}
+                fetch-depth: 0
 
             - name: Cache SonarCloud packages
               uses: actions/cache@v3
@@ -57,7 +62,7 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               shell: powershell
               run: |
-                  .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
+                  .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
                   dotnet build
                   dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover --filter 'FullyQualifiedName!~AliasVault.E2ETests'
-                  .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+                  .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
