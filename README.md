@@ -5,11 +5,11 @@
 <h1><img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="40" /> AliasVault</h1>
 
 <p align="center">
-<a href="https://app.aliasvault.net">Live demo 🔥</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> • <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> • <a href="#installation">Installation ⚙️</a>
+<a href="https://app.aliasvault.net">Try cloud version 🔥</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> • <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> • <a href="#self-host">Self-host instructions ⚙️</a>
 </p>
 
 <p align="center">
-<strong>Open-source password and alias manager</strong>
+<strong>Open-source password and (email) alias manager</strong>
 </p>
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
@@ -27,7 +27,7 @@
 
 </div>
 
-AliasVault is an end-to-end encrypted password and alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. The core of AliasVault is built with C# ASP.NET Blazor WASM technology. AliasVault can be self-hosted on your own server with Docker.
+AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. The core of AliasVault is built with C# ASP.NET Blazor WASM technology. AliasVault can be self-hosted on your own server with Docker.
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
@@ -37,20 +37,20 @@ AliasVault is an end-to-end encrypted password and alias manager that protects y
 
 > Note: AliasVault is currently in active development and some features may not yet have been (fully) implemented. If you run into any issues, please create an issue on GitHub.
 
-## Live demo
-A live demo of the app is available at the official website at [app.aliasvault.net](https://app.aliasvault.net) (up-to-date with `main` branch). You can create a free account to try it out yourself.
+## Official Cloud Version
+The official cloud version of AliasVault is freely available at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release. Create an account to protect your privacy today.
 
-<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">
+[<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
-## Installation
+## Self-host
 
-To install AliasVault, the easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
+To self-host and install AliasVault on your own server, the easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
 
-### 1. Install using install script
+### Install using install script
 
 This method uses pre-built Docker images and works on minimal hardware specifications:
 
-- Linux VM with root access (Ubuntu or RHEL based distros recommended)
+- Linux VM with root access (Ubuntu/AlmaLinux recommended) or Raspberry Pi
 - 1 vCPU
 - 1GB RAM
 - 16GB disk space
@@ -65,15 +65,13 @@ chmod +x install.sh
 ./install.sh install
 ```
 
-### 2. Post-Installation
-
 The install script will output the URL where the app is available. By default this is:
 - Client: https://localhost
 - Admin portal: https://localhost/admin
 
 > Note: If you want to change the default AliasVault ports you can do so in the `.env` file.
 
-## Detailed documentation
+## Documentation
 For more detailed information about the installation process and other topics, please see the official documentation website:
 - [Documentation website (docs.aliasvault.net) 📚](https://docs.aliasvault.net)
 
@@ -92,7 +90,23 @@ For detailed information about our encryption implementation and security archit
 - [SECURITY.md](SECURITY.md)
 - [Security Architecture Diagram](https://docs.aliasvault.net/architecture)
 
+## Roadmap
+AliasVault is under active development with new features being added regularly. We believe in transparency and want to share our vision for the future of the platform. Here's what we've accomplished and what we're working on next:
 
+- [x] Core password & alias management
+- [x] End-to-end encryption
+- [x] Built-in email server for aliases
+- [x] Single-command Docker-based installation
+- [ ] Add support for connecting custom user domains to cloud hosted version (premium)
+- [ ] Browser extensions (Chrome + others)
+- [ ] Import passwords from existing password managers
+
+### Future Plans
+- [ ] Mobile apps (iOS, Android)
+- [ ] Team / organization features (sharing passwords/aliases)
+- [ ] Disposable phone number service
+
+Want to suggest a feature? Join our [Discord](https://discord.gg/DsaXMTEtpF) or create an issue on GitHub.
 
 ## Tech stack / credits
 The following technologies, frameworks and libraries are used in this project:
