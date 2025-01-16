@@ -112,15 +112,18 @@ Want to suggest a feature? Join our [Discord](https://discord.gg/DsaXMTEtpF) or 
 The following technologies, frameworks and libraries are used in this project:
 
 - [C#](https://docs.microsoft.com/en-us/dotnet/csharp/) - A simple, modern, object-oriented, and type-safe programming language.
-- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern, cloud-based, internet-connected applications.
-- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - A lightweight, extensible, open-source and cross-platform version of the popular Entity Framework data access technology.
+- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern multi-platform web applications.
+- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - Object-relational mapping framework for .NET.
 - [Blazor WASM](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript. It's a single-page app framework that runs in the browser via WebAssembly.
-- [Playwright](https://playwright.dev/) - A Node.js library to automate Chromium, Firefox and WebKit with a single API. Used for end-to-end testing.
-- [Docker](https://www.docker.com/) - A platform for building, sharing, and running containerized applications.
-- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine.
+- [PostgreSQL](https://www.postgresql.org/) - An open-source object-relational database system used as the database for the server.
+- [Docker](https://www.docker.com/) - Used for containerizing the server and client apps.
+- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine. Used as database engine for the encrypted user's vault.
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
 - [Flowbite](https://flowbite.com/) - A free and open-source UI component library based on Tailwind CSS.
 - [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.
-- [SRP.net](https://github.com/secure-remote-password/srp.net) - SRP6a Secure Remote Password protocol for secure password authentication.
+- [SRP.net](https://github.com/secure-remote-password/srp.net) - SRP6a Secure Remote Password protocol for secure password authentication without sending plaintext passwords over the network.
+- [Playwright](https://playwright.dev/) - A Node.js library to automate Chromium, Firefox and WebKit with a single API. Used for end-to-end testing.
 - [SmtpServer](https://github.com/cosullivan/SmtpServer) - A SMTP server library for .NET that is used for the virtual email address feature.
 - [MimeKit](https://github.com/jstedfast/MimeKit) - A .NET MIME creation and parser library used for the virtual email address feature.
+- [StyleCop.Analyzers](https://github.com/DotNetAnalyzers/StyleCopAnalyzers) - Static code analysis tool that enforces style and consistency rules for C# code.
+- [SonarQube Cloud](https://www.sonarqube.org/) - A platform for continuous code quality management.
