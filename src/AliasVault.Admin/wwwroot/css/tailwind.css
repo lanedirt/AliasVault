@@ -602,6 +602,10 @@ video {
   top: 2.5rem;
 }
 
+.top-\[38px\] {
+  top: 38px;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -1089,6 +1093,11 @@ video {
 .rounded-r-lg {
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
+}
+
+.rounded-b-lg {
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
 }
 
 .border {
