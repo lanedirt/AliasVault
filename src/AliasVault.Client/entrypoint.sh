@@ -1,11 +1,9 @@
 #!/bin/sh
-# Set the default hostname for localhost debugging
-DEFAULT_HOSTNAME="localhost"
+# Set the default values
 DEFAULT_PRIVATE_EMAIL_DOMAINS="localmail.tld"
 DEFAULT_SUPPORT_EMAIL=""
 
-# Use the provided HOSTNAME environment variable if it exists, otherwise use the default
-HOSTNAME=${HOSTNAME:-$DEFAULT_HOSTNAME}
+# Use the provided environment variables if they exist, otherwise use defaults
 PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}
 SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}
 
@@ -25,8 +23,9 @@ if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
     chmod 600 /etc/nginx/ssl/nginx.key
 fi
 
-# Replace the default URL with the actual API URL constructed from hostname
-sed -i "s|http://localhost:5092|https://${HOSTNAME}/api|g" /usr/share/nginx/html/appsettings.json
+# Remove the default API URL as it's only used for local dev/debugging.
+# The app will use a relative URL instead (base url + "/api/" which is the default for the Docker setup).
+sed -i "s|\"ApiUrl\": \"http://localhost:5092\",||g" /usr/share/nginx/html/appsettings.json
 
 # Convert comma-separated list to JSON array
 json_array=$(echo $PRIVATE_EMAIL_DOMAINS | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
