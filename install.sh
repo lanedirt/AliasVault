@@ -41,6 +41,7 @@ show_usage() {
     printf "  uninstall                 Uninstall AliasVault\n"
     printf "  update                    Update AliasVault to the latest version\n"
     printf "  update-installer          Check and update install.sh script if newer version available\n"
+    printf "  configure-hostname        Configure the hostname where AliasVault can be accessed from\n"
     printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
     printf "  configure-email           Configure email domains for receiving emails\n"
     printf "  configure-registration    Configure new account registration (enable or disable)\n"
@@ -114,6 +115,10 @@ parse_args() {
             ;;
         reset-password|reset-admin-password|rp)
             COMMAND="reset-password"
+            shift
+            ;;
+        configure-hostname|hostname)
+            COMMAND="configure-hostname"
             shift
             ;;
         configure-ssl|ssl)
@@ -245,6 +250,9 @@ main() {
             ;;
         "configure-registration")
             handle_registration_configuration
+            ;;
+        "configure-hostname")
+            handle_hostname_configuration
             ;;
         "start")
             handle_start
@@ -406,13 +414,17 @@ create_env_file() {
     fi
 }
 
-# Environment setup functions
 populate_hostname() {
-    printf "${CYAN}> Checking HOSTNAME...${NC}\n"
     if ! grep -q "^HOSTNAME=" "$ENV_FILE" || [ -z "$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        DEFAULT_HOSTNAME="localhost"
-        read -p "Enter the hostname where AliasVault will be hosted (press Enter for default: $DEFAULT_HOSTNAME): " USER_HOSTNAME
-        HOSTNAME=${USER_HOSTNAME:-$DEFAULT_HOSTNAME}
+        while true; do
+            read -p "Enter the (public) hostname where this AliasVault instance can be accessed from (e.g. aliasvault.net): " USER_HOSTNAME
+            if [ -n "$USER_HOSTNAME" ]; then
+                HOSTNAME="$USER_HOSTNAME"
+                break
+            else
+                printf "${YELLOW}> Hostname cannot be empty. Please enter a valid hostname.${NC}\n"
+            fi
+        done
         update_env_var "HOSTNAME" "$HOSTNAME"
     else
         HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
@@ -420,6 +432,7 @@ populate_hostname() {
     fi
 }
 
+# Environment setup functions
 populate_jwt_key() {
     printf "${CYAN}> Checking JWT_KEY...${NC}\n"
     if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -613,13 +626,13 @@ print_success_message() {
     printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
     printf "\n"
     if [ -n "$PASSWORD" ]; then
-        printf "Admin Panel: https://${HOSTNAME}/admin\n"
+        printf "Admin Panel: https://localhost/admin\n"
         printf "Username: admin\n"
         printf "Password: $PASSWORD\n"
         printf "\n"
         printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
     else
-        printf "Admin Panel: https://${HOSTNAME}/admin\n"
+        printf "Admin Panel: https://localhost/admin\n"
         printf "Username: admin\n"
         printf "Password: (Previously set. Use ./install.sh reset-password to generate new one.)\n"
     fi
@@ -628,7 +641,7 @@ print_success_message() {
     printf "\n"
     printf "${CYAN}In order to start using AliasVault, log into the client website:${NC}\n"
     printf "\n"
-    printf "Client Website: https://${HOSTNAME}/\n"
+    printf "Client Website: https://localhost/\n"
     printf "\n"
     printf "${MAGENTA}=========================================================${NC}\n"
 }
@@ -808,7 +821,6 @@ handle_build() {
 
     # Initialize environment with proper error handling
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
-    populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
@@ -947,6 +959,8 @@ handle_ssl_configuration() {
         exit 1
     fi
 
+    populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
+
     # Get the current hostname and SSL config from .env
     CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
     LETSENCRYPT_ENABLED=$(grep "^LETSENCRYPT_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
@@ -970,7 +984,7 @@ handle_ssl_configuration() {
         printf "Currently using: ${YELLOW}Self-signed certificates${NC}\n"
     fi
 
-    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
+    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC} (To change this, run: ./install.sh configure-hostname)\n"
     printf "\n"
     printf "SSL Options:\n"
     printf "1) Activate and/or request new Let's Encrypt certificate (recommended for production)\n"
@@ -1526,7 +1540,6 @@ handle_install_version() {
 
     # Initialize environment
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
-    populate_hostname || { printf "${RED}> Failed to set hostname${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
@@ -1983,6 +1996,40 @@ handle_db_import() {
         fi
     else
         printf "${RED}> Import failed. Please check that your backup file is valid.${NC}\n"
+        exit 1
+    fi
+}
+
+# Function to handle hostname configuration
+handle_hostname_configuration() {
+    printf "${YELLOW}+++ Hostname Configuration +++${NC}\n"
+    printf "\n"
+
+    # Check if AliasVault is installed
+    if [ ! -f "docker-compose.yml" ]; then
+        printf "${RED}Error: AliasVault must be installed first.${NC}\n"
+        exit 1
+    fi
+
+    # Get current hostname
+    CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
+    printf "${CYAN}Removing current hostname ${CURRENT_HOSTNAME}${NC}...\n"
+    printf "\n"
+
+    # Force hostname to be empty so populate_hostname will ask for a new one
+    sed -i.bak "/^HOSTNAME=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+
+    # Reuse existing hostname population logic
+    populate_hostname
+
+    if [ $? -eq 0 ]; then
+        printf "New hostname: ${CYAN}${HOSTNAME}${NC}\n"
+        printf "\n"
+        printf "${MAGENTA}=========================================================${NC}\n"
+    else
+        printf "${RED}> Failed to update hostname. Please try again.${NC}\n"
+        printf "\n"
+        printf "${MAGENTA}=========================================================${NC}\n"
         exit 1
     fi
 }
