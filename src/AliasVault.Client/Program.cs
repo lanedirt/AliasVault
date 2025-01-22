@@ -19,10 +19,6 @@ builder.Configuration.AddJsonFile($"appsettings.{builder.HostEnvironment.Environ
 
 var config = new Config();
 builder.Configuration.Bind(config);
-if (string.IsNullOrEmpty(config.ApiUrl))
-{
-    throw new KeyNotFoundException("ApiUrl is not set in the configuration.");
-}
 
 if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
 {
@@ -56,8 +52,9 @@ builder.Services.AddScoped(sp =>
     var httpClient = httpClientFactory.CreateClient("AliasVault.Api");
     var apiConfig = sp.GetRequiredService<Config>();
 
-    // Ensure the API URL ends with a forward slash
-    var baseUrl = apiConfig.ApiUrl.TrimEnd('/') + "/";
+    // If API URL is not set, use the current base URL and append "/api" which is the default for the Docker setup.
+    // If API URL override is set (used e.g. in dev), then ensure the API URL ends with a forward slash.
+    var baseUrl = string.IsNullOrEmpty(apiConfig.ApiUrl) ? builder.HostEnvironment.BaseAddress + "api/" : apiConfig.ApiUrl.TrimEnd('/') + "/";
     httpClient.BaseAddress = new Uri(baseUrl);
     return httpClient;
 });
