@@ -37,7 +37,17 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    HOSTNAME=localhost
    ```
 
-4. **Generate and set JWT_KEY**
+4. **Set default ports**
+
+   Update the .env file with the ports you want to use for the AliasVault components. The values defined here are used by the docker-compose.yml file.
+   ```bash
+   HTTP_PORT=80
+   HTTPS_PORT=443
+   SMTP_PORT=25
+   SMTP_TLS_PORT=587
+   ```
+
+5. **Generate and set JWT_KEY**
 
    Generate a random 32-char string for JWT token generation:
    ```bash
@@ -49,7 +59,7 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    JWT_KEY=your_generated_key_here
    ```
 
-5. **Generate and set DATA_PROTECTION_CERT_PASS**
+6. **Generate and set DATA_PROTECTION_CERT_PASS**
 
    Generate a random password for the data protection certificate:
    ```bash
@@ -61,7 +71,7 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    DATA_PROTECTION_CERT_PASS=your_generated_password_here
    ```
 
-6. **Configure PostgreSQL Settings**
+7. **Configure PostgreSQL Settings**
 
    Set the following PostgreSQL-related variables in your .env file:
    ```bash
@@ -75,7 +85,7 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    POSTGRES_PASSWORD=$(openssl rand -base64 32)
    ```
 
-7. **Set PRIVATE_EMAIL_DOMAINS**
+8. **Set PRIVATE_EMAIL_DOMAINS**
 
    Update the .env file with allowed email domains. Use DISABLED.TLD to disable email support:
    ```bash
@@ -86,14 +96,14 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    PRIVATE_EMAIL_DOMAINS=DISABLED.TLD
    ```
 
-8. **Set SUPPORT_EMAIL (Optional)**
+9. **Set SUPPORT_EMAIL (Optional)**
 
    Add a support email address if desired:
    ```bash
    SUPPORT_EMAIL=support@yourdomain.com
    ```
 
-9. **Generate admin password**
+10. **Generate admin password**
 
    Build the Docker image for password hashing:
    ```bash
@@ -111,19 +121,25 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    ADMIN_PASSWORD_GENERATED=2024-01-01T00:00:00Z
    ```
 
-10. **Build and start Docker containers**
+11. **Optional configuration**
+   Enable or disable public registration of new users:
+   ```bash
+   PUBLIC_REGISTRATION_ENABLED=false
+   ```
+
+12. **Build and start Docker containers**
 
     Build the Docker Compose stack:
     ```bash
-    docker compose build
+    docker compose -f docker-compose.yml -f docker-compose.build.yml build
     ```
 
     Start the Docker Compose stack:
     ```bash
-    docker compose up -d
+    docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
     ```
 
-11. **Access AliasVault**
+13. **Access AliasVault**
 
     AliasVault should now be running. You can access it at:
 
