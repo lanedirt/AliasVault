@@ -503,7 +503,7 @@ set_smtp_tls_enabled() {
 set_support_email() {
     printf "${CYAN}> Checking SUPPORT_EMAIL...${NC}\n"
     if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
-        read -p "Enter support email address (optional, press Enter to skip): " SUPPORT_EMAIL
+        read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
         update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
     else
         printf "  ${GREEN}> SUPPORT_EMAIL already exists.${NC}\n"
