@@ -38,7 +38,7 @@ class SrpService {
         mem: settings.MemorySize,
         parallelism: settings.DegreeOfParallelism,
         hashLen: 32,
-        type: argon2.ArgonType.Argon2id,
+        type: 2, // 0 = Argon2d, 1 = Argon2i, 2 = Argon2id
       });
 
       return hash.hashHex.toUpperCase();
