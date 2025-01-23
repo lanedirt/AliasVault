@@ -3,6 +3,9 @@
     "description": "AliasVault Chrome Extension which allows you to generate and manage aliases directly in your browser on signup and login forms.",
     "version": "1.0",
     "manifest_version": 3,
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    },
     "action": {
       "default_popup": "src/popup.html"
     },
