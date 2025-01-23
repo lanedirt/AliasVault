@@ -41,26 +41,11 @@ class SrpService {
         type: argon2.ArgonType.Argon2id,
       });
 
-      return hash.hashHex;
+      return hash.hashHex.toUpperCase();
     } catch (error) {
       console.error('Argon2 hashing failed:', error);
       throw error;
     }
-  }
-
-  /**
-   * Generates a client ephemeral
-   *
-   * @returns
-   */
-  private static generateEphemeral(): srp.Ephemeral {
-    return srp.generateEphemeral()
-  }
-
-  private static derivePrivateKey(salt: string, username: string, passwordHash: string): string {
-    // SRP private key derivation
-    const hash = srp.derivePrivateKey(salt, username, passwordHash);
-    return hash;
   }
 
   public async initiateLogin(username: string): Promise<LoginInitiateResponse> {
@@ -98,17 +83,14 @@ class SrpService {
     console.log(passwordHashString);
 
     // 2. Generate client ephemeral
-    const clientEphemeral = SrpService.generateEphemeral();
+    const clientEphemeral = srp.generateEphemeral()
     console.log('step 2');
     console.log('--------------------------------');
     console.log(clientEphemeral);
 
     // 3. Derive private key
-    const privateKey = SrpService.derivePrivateKey(
-        loginResponse.salt,
-        username,
-        passwordHashString
-    );
+    console.log(loginResponse);
+    const privateKey = srp.derivePrivateKey(loginResponse.salt, username, passwordHashString);
 
     console.log('step 3');
     console.log('--------------------------------');
@@ -135,7 +117,29 @@ class SrpService {
         })
       });
 
-    console.log(response);
+    const responseJson = await response.json();
+
+    console.log('Auth response:')
+    console.log('--------------------------------');
+    console.log(responseJson);
+
+    // Store access and refresh token
+    localStorage.setItem('accessToken', responseJson.token.token);
+    localStorage.setItem('refreshToken', responseJson.token.refreshToken);
+
+    // Make another API call trying to get latest vault
+    const vaultResponse = await fetch('https://localhost:7223/v1/Vault', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+    });
+
+    const vaultResponseJson = await vaultResponse.json();
+
+    console.log('Vault response:')
+    console.log('--------------------------------');
+    console.log(vaultResponseJson);
+
 
     return true;
 

@@ -17,7 +17,7 @@
     "buffer": "^6.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "secure-remote-password": "^0.3.1"
+    "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0"
   },
   "devDependencies": {
     "@types/react": "^19.0.7",
