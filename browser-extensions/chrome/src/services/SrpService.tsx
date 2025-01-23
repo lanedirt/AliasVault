@@ -22,7 +22,7 @@ class SrpService {
     password: string,
     salt: string,
     encryptionType: string = 'Argon2id',
-    encryptionSettings: string = '{"iterations":2,"memory":67108864,"parallelism":4}'
+    encryptionSettings: string = '{"Iterations":1,"MemorySize":1024,"DegreeOfParallelism":4}'
   ): Promise<Uint8Array> {
     const settings = JSON.parse(encryptionSettings);
 
@@ -31,13 +31,22 @@ class SrpService {
             throw new Error('Unsupported encryption type');
         }
 
+        console.log('settings');
+        console.log('--------------------------------');
+        console.log(password);
+        console.log(salt);
+        console.log(settings.Iterations);
+        console.log(settings.MemorySize);
+        console.log(settings.DegreeOfParallelism);
+
       const hash = await argon2.hash({
         pass: password,
         salt: salt,
-        time: settings.iterations,
-        mem: settings.memory / 1024, // Convert bytes to KiB
-        parallelism: settings.parallelism,
-        hashLen: 32 // 32 bytes = 256 bits
+        time: settings.Iterations,
+        mem: settings.MemorySize,
+        parallelism: settings.DegreeOfParallelism,
+        hashLen: 32, // 32 bytes = 256 bits
+        type: argon2.ArgonType.Argon2id,
       });
 
       console.log(hash);
@@ -85,6 +94,10 @@ class SrpService {
     rememberMe: boolean,
     loginResponse: LoginInitiateResponse
   ): Promise<boolean> {
+
+    console.log('loginResponse');
+    console.log('--------------------------------');
+    console.log(loginResponse);
   // Promise<ValidateLoginResponse> {
     // 1. Derive key from password
     const passwordHash = await SrpService.deriveKeyFromPassword(
@@ -99,6 +112,7 @@ class SrpService {
 
     console.log('step 1');
     console.log('--------------------------------');
+    console.log(passwordHash);
     console.log(passwordHashString);
 
     // 2. Generate client ephemeral
