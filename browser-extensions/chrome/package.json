@@ -13,8 +13,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "argon2-browser": "^1.18.0",
+    "buffer": "^6.0.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "secure-remote-password": "^0.3.1"
   },
   "devDependencies": {
     "@types/react": "^19.0.7",
