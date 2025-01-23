@@ -18,6 +18,8 @@ const Login: React.FC = () => {
       // 1. Initiate login to get salt and server ephemeral
       const loginResponse = await srpService.initiateLogin(credentials.username);
 
+      console.log(credentials);
+
       // 2. Validate login with SRP protocol
       const validationResponse = await srpService.validateLogin(
         credentials.username,

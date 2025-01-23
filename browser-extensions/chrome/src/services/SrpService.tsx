@@ -1,6 +1,6 @@
 import srp from 'secure-remote-password/client'
 import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
-
+import { Buffer } from 'buffer';
 interface LoginInitiateResponse {
   salt: string;
   serverEphemeral: string;
@@ -57,17 +57,14 @@ class SrpService {
     return srp.generateEphemeral()
   }
 
-  /*private static derivePrivateKey(salt: string, username: string, passwordHash: string): string {
-    const hash = createHash('sha256')
-      .update(salt)
-      .update(username.toLowerCase())
-      .update(passwordHash)
-      .digest('hex');
+  private static derivePrivateKey(salt: string, username: string, passwordHash: string): string {
+    // SRP private key derivation
+    const hash = srp.derivePrivateKey(salt, username, passwordHash);
     return hash;
-  }*/
+  }
 
   public async initiateLogin(username: string): Promise<LoginInitiateResponse> {
-    const response = await fetch('http://localhost:5092/v1/Auth/login', {
+    const response = await fetch('https://localhost:7223/v1/Auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,23 +93,60 @@ class SrpService {
       loginResponse.encryptionType,
       loginResponse.encryptionSettings
     );
+    const passwordHashString = Array.from(passwordHash)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('').toUpperCase();
+
+    console.log('step 1');
+    console.log('--------------------------------');
+    console.log(passwordHashString);
+
+    // 2. Generate client ephemeral
+    const clientEphemeral = SrpService.generateEphemeral();
+    console.log('step 2');
+    console.log('--------------------------------');
+    console.log(clientEphemeral);
+
+    // 3. Derive private key
+    const privateKey = SrpService.derivePrivateKey(
+        loginResponse.salt,
+        username,
+        passwordHashString
+    );
+
+    console.log('step 3');
+    console.log('--------------------------------');
+    console.log(passwordHashString);
+    console.log(privateKey);
+
+    // 4. Derive session (simplified for example)
+    const sessionProof = srp.deriveSession(clientEphemeral.secret, loginResponse.serverEphemeral, loginResponse.salt, username, privateKey);
+
+    console.log('step 4');
+    console.log('--------------------------------');
+    console.log(sessionProof);
+
+    // 5. Send validation request
+    const response = await fetch('https://localhost:7223/v1/Auth/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.toLowerCase().trim(),
+          rememberMe,
+          clientPublicEphemeral: clientEphemeral.public,
+          clientSessionProof: sessionProof.proof,
+        })
+      });
+
+    console.log(response);
 
     return true;
 
     /*
     const passwordHashString = Buffer.from(passwordHash).toString('hex');
-
-    // 2. Generate client ephemeral
-
-
     const clientEphemeral = SrpService.generateEphemeral();
-
-    // 3. Derive private key
-    const privateKey = SrpService.derivePrivateKey(
-      loginResponse.salt,
-      username,
-      passwordHashString
-    );
 
     // 4. Derive session (simplified for example)
     const sessionProof = createHash('sha256')
