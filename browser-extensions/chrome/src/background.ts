@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import EncryptionUtility from './utilities/EncryptionUtility';
+import SqliteClient from './utilities/SqliteClient';
 
 console.log('Background script initialized');
 
@@ -27,8 +28,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       (async () => {
         try {
           const encryptedVault = await EncryptionUtility.symmetricEncrypt(
-            JSON.stringify(message.vault),
-            vaultState.sessionKey
+            message.vault,
+            vaultState.sessionKey!
           );
 
           console.log('Encrypted vault (after encryption):', encryptedVault);
@@ -89,6 +90,74 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       vaultState.sessionKey = null;
       chrome.storage.session.remove(['encryptedVault']);
       sendResponse({ success: true });
+      break;
+
+    case 'GET_CREDENTIALS_FOR_URL':
+      console.log('GET_CREDENTIALS_FOR_URL called');
+      if (!vaultState.sessionKey) {
+        sendResponse({ credentials: [] });
+        return;
+      }
+      console.log('sessionKey:', vaultState.sessionKey);
+
+      chrome.storage.session.get(['encryptedVault'], async (result) => {
+        try {
+          if (!result.encryptedVault) {
+            sendResponse({ credentials: [] });
+            return;
+          }
+          console.log('encryptedVault:', result.encryptedVault);
+
+          const decryptedVault = await EncryptionUtility.symmetricDecrypt(
+            result.encryptedVault,
+            vaultState.sessionKey!
+          );
+          console.log('decryptedVault:', decryptedVault);
+          const url = new URL(message.url);
+
+          // Initialize SQLite client
+          const sqliteClient = new SqliteClient();
+          await sqliteClient.initializeFromBase64(decryptedVault);
+
+          // Query credentials with their related service information
+          const credentials = sqliteClient.executeQuery(`
+            SELECT
+              c.Id,
+              c.Username,
+              c.ServiceId,
+              s.Name as ServiceName,
+              s.Url as ServiceUrl,
+              s.Logo as Logo,
+              MAX(p.Value) as Password
+            FROM Credentials c
+            JOIN Services s ON s.Id = c.ServiceId
+            LEFT JOIN Passwords p ON p.CredentialId = c.Id
+            WHERE c.IsDeleted = 0
+            GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
+          `);
+
+          console.log('credentials:', credentials);
+
+          // Filter credentials that match the current domain
+          const matchingCredentials = credentials.filter(cred => {
+            // TODO: Implement proper URL matching
+            return true;
+            /*try {
+              const credentialUrl = new URL(cred.ServiceUrl);
+              return credentialUrl.hostname === url.hostname;
+            } catch {
+              return false;
+            }*/
+          });
+
+          console.log('matchingCredentials:', matchingCredentials);
+
+          sendResponse({ credentials: matchingCredentials });
+        } catch (error) {
+          console.error('Error getting credentials:', error);
+          sendResponse({ credentials: [] });
+        }
+      });
       break;
   }
   return true;

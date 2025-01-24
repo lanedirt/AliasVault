@@ -4,9 +4,10 @@
   "main": "index.tsx",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run build:content-css",
     "preview": "vite preview",
-    "watch": "vite build --watch"
+    "watch": "vite build --watch",
+    "build:content-css": "tailwindcss -i ./src/styles/contentScript.css -o ./dist/contentScript.css --config tailwind.content.config.js"
   },
   "keywords": [],
   "author": "",
