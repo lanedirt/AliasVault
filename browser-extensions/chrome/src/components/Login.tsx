@@ -4,8 +4,10 @@ import { Buffer } from 'buffer';
 import { srpUtility } from '../utilities/SrpUtility';
 import EncryptionUtility from '../utilities/EncryptionUtility';
 import SqliteClient from '../utilities/SqliteClient';
+import { useAuth } from '../context/AuthContext';
 
 const Login: React.FC = () => {
+  const { login } = useAuth();
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -43,12 +45,10 @@ const Login: React.FC = () => {
         loginResponse
       );
 
-      // Store access and refresh token
+      // Store access and refresh token using the context
       if (validationResponse.token) {
-        localStorage.setItem('accessToken', validationResponse.token!.token);
-        localStorage.setItem('refreshToken', validationResponse.token!.refreshToken);
-      }
-      else {
+        login(credentials.username,validationResponse.token.token, validationResponse.token.refreshToken);
+      } else {
         throw new Error('Login failed -- no token returned');
       }
 
@@ -90,12 +90,6 @@ const Login: React.FC = () => {
         // TODO: Implement 2FA flow
         console.log('2FA required');
         return;
-      }
-
-      // 4. Store tokens
-      if (validationResponse.token) {
-        localStorage.setItem('accessToken', validationResponse.token.token);
-        localStorage.setItem('refreshToken', validationResponse.token.refreshToken);
       }
 
       // 5. Redirect to home page

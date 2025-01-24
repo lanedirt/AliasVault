@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../styles/tailwind.css';
 import Button from './Button';
 import Login from './Login';
+import { useAuth } from '../context/AuthContext';
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, username, logout } = useAuth();
 
-  const handleClick = () => {
-    alert('Button clicked!');
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -15,8 +16,9 @@ const App: React.FC = () => {
       <h1 className="text-white text-2xl mb-8">AliasVault</h1>
       {isLoggedIn ? (
         <div className="mt-4">
-          <Button onClick={handleClick}>
-            Click me!
+          <p className="text-white text-lg mb-4">Logged in as {username}</p>
+          <Button onClick={handleLogout}>
+            Logout
           </Button>
         </div>
       ) : (
