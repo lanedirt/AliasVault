@@ -9,7 +9,7 @@ class SqliteClient {
     public async initializeFromBase64(base64String: string): Promise<void> {
         try {
             // Convert base64 to Uint8Array
-            const binaryString = window.atob(base64String);
+            const binaryString = atob(base64String);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);

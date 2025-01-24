@@ -22,6 +22,17 @@
       "type": "module"
     },
     "permissions": [
-      "storage"
+      "storage",
+      "activeTab"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["contentScript.js"],
+        "css": ["contentScript.css"]
+      }
+    ],
+    "host_permissions": [
+      "<all_urls>"
     ]
   }

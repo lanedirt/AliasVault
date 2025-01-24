@@ -19,6 +19,22 @@
       "type": "module"
     },
     "permissions": [
-      "storage"
+      "storage",
+      "activeTab"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["src/contentScript.ts"],
+        "css": ["src/contentScript.css"]
+      }
+    ],
+    "web_accessible_resources": [{
+      "resources": ["images/*"],
+      "matches": ["<all_urls>"],
+      "use_dynamic_url": true
+    }],
+    "host_permissions": [
+      "<all_urls>"
     ]
   }

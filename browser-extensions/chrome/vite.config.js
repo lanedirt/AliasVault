@@ -20,6 +20,10 @@ export default defineConfig({
         {
             src: 'node_modules/argon2-browser/dist/argon2.wasm',
             dest: 'src'
+        },
+        {
+          src: 'src/styles/contentScript.css',
+          dest: '.'
         }
         ]
     }),
@@ -32,23 +36,35 @@ export default defineConfig({
       ],
     },
   },
-  resolve: {
-    alias: {
-      '@': '/src', // Optional alias for cleaner imports
-    },
-  },
   build: {
     rollupOptions: {
       input: {
         popup: './src/popup.html',
-        background: './src/background.ts'
+        background: './src/background.ts',
+        contentScript: './src/contentScript.ts',
+        contentStyles: './src/styles/contentScript.css'
       },
       output: {
         entryFileNames: '[name].js',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('contentScript.css')) {
+            return 'contentScript.css';
+          }
+          return '[name].[ext]';
+        },
         format: 'es'
       }
     },
+    watch: {
+      include: ['src/**'],
+      exclude: ['node_modules/**']
+    },
     outDir: 'dist',
+  },
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
   },
   server: {
     open: '/src/popup.html'
