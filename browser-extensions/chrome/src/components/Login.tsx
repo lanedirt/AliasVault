@@ -105,18 +105,18 @@ const Login: React.FC = () => {
 
   return (
     <div className="max-w-md">
-      <form onSubmit={handleSubmit} className="bg-white w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         {error && (
-          <div className="mb-4 text-red-500 text-sm">
+          <div className="mb-4 text-red-500 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+          <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="username">
             Username
           </label>
           <input
-            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
             id="username"
             type="text"
             name="username"
@@ -127,11 +127,11 @@ const Login: React.FC = () => {
           />
         </div>
         <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+          <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
             Password
           </label>
           <input
-            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
             name="password"
@@ -149,7 +149,7 @@ const Login: React.FC = () => {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm">Remember me</span>
+            <span className="text-sm text-gray-700 dark:text-gray-200">Remember me</span>
           </label>
           <Button type="submit">
             Login
