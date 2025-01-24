@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from './Button';
+import { Buffer } from 'buffer';
 import { srpUtility } from '../utilities/SrpUtility';
 import EncryptionUtility from '../utilities/EncryptionUtility';
 
@@ -20,12 +21,18 @@ const Login: React.FC = () => {
       const loginResponse = await srpUtility.initiateLogin(credentials.username);
 
       // 1. Derive key from password using Argon2id
-      const passwordHashString = await EncryptionUtility.deriveKeyFromPassword(
+      const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         credentials.password,
         loginResponse.salt,
         loginResponse.encryptionType,
         loginResponse.encryptionSettings
       );
+      // Convert uint8 array to uppercase hex string which is expected by the server.
+      const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
+
+      console.log('Password hash:');
+      console.log(passwordHash);
+      console.log(passwordHashString);
 
       // 2. Validate login with SRP protocol
       const validationResponse = await srpUtility.validateLogin(
@@ -58,6 +65,12 @@ const Login: React.FC = () => {
         console.log(vaultResponseJson);
         console.log('Encrypted blob:');
         console.log(vaultResponseJson.vault.blob);
+
+        // Attempt to decrypt the blob
+        const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
+        const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
+        console.log('Decrypted blob:');
+        console.log(decryptedBlob);
 
 
       // 3. Handle 2FA if required
