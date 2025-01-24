@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from './Button';
-import { srpService } from '../services/SrpService';
+import { srpUtility } from '../utilities/SrpUtility';
+import EncryptionUtility from '../utilities/EncryptionUtility';
 
 const Login: React.FC = () => {
   const [credentials, setCredentials] = useState({
@@ -16,19 +17,48 @@ const Login: React.FC = () => {
 
     try {
       // 1. Initiate login to get salt and server ephemeral
-      const loginResponse = await srpService.initiateLogin(credentials.username);
+      const loginResponse = await srpUtility.initiateLogin(credentials.username);
 
-      console.log(credentials);
+      // 1. Derive key from password using Argon2id
+      const passwordHashString = await EncryptionUtility.deriveKeyFromPassword(
+        credentials.password,
+        loginResponse.salt,
+        loginResponse.encryptionType,
+        loginResponse.encryptionSettings
+      );
 
       // 2. Validate login with SRP protocol
-      const validationResponse = await srpService.validateLogin(
+      const validationResponse = await srpUtility.validateLogin(
         credentials.username,
-        credentials.password,
+        passwordHashString,
         rememberMe,
         loginResponse
       );
 
-      console.log(validationResponse);
+      // Store access and refresh token
+      if (validationResponse.token) {
+        localStorage.setItem('accessToken', validationResponse.token!.token);
+        localStorage.setItem('refreshToken', validationResponse.token!.refreshToken);
+      }
+      else {
+        throw new Error('Login failed -- no token returned');
+      }
+
+        // Make another API call trying to get latest vault
+        const vaultResponse = await fetch('https://localhost:7223/v1/Vault', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
+        const vaultResponseJson = await vaultResponse.json();
+
+        console.log('Vault response:')
+        console.log('--------------------------------');
+        console.log(vaultResponseJson);
+        console.log('Encrypted blob:');
+        console.log(vaultResponseJson.vault.blob);
+
 
       // 3. Handle 2FA if required
       /*if (validationResponse.requiresTwoFactor) {
