@@ -3,6 +3,7 @@ import Button from './Button';
 import { Buffer } from 'buffer';
 import { srpUtility } from '../utilities/SrpUtility';
 import EncryptionUtility from '../utilities/EncryptionUtility';
+import SqliteClient from '../utilities/SqliteClient';
 
 const Login: React.FC = () => {
   const [credentials, setCredentials] = useState({
@@ -71,6 +72,17 @@ const Login: React.FC = () => {
         const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
         console.log('Decrypted blob:');
         console.log(decryptedBlob);
+
+        // Inside your handleSubmit function, after decrypting the blob:
+        const sqliteClient = new SqliteClient();
+        await sqliteClient.initializeFromBase64(decryptedBlob);
+
+        // Example query to test the connection
+        const vaultCredentials = sqliteClient.executeQuery('SELECT * FROM Credentials WHERE IsDeleted = 0');
+        console.log('Credentials:', vaultCredentials);
+
+        // Don't forget to close the connection when done
+        sqliteClient.close();
 
 
       // 3. Handle 2FA if required
