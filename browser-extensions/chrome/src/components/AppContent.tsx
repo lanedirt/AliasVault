@@ -9,7 +9,30 @@ interface Credential {
   Id: string;
   ServiceName: string;
   Username: string;
-  Logo?: string; // base64 encoded image data
+  Logo?: any; // Changed from string to any since it's raw buffer data
+}
+
+// Add base64Encode function
+// TODO: this is used in contentScript.ts too.
+function base64Encode(buffer: any): string | null {
+  if (!buffer || typeof buffer !== 'object') {
+    console.log('Empty or invalid buffer received');
+    return null;
+  }
+
+  try {
+    // Convert object to array of numbers
+    const byteArray = Object.values(buffer);
+
+    // Convert to binary string
+    const binary = String.fromCharCode.apply(null, byteArray as number[]);
+
+    // Use btoa to encode binary string to base64
+    return btoa(binary);
+  } catch (error) {
+    console.error('Error encoding to base64:', error);
+    return null;
+  }
 }
 
 const AppContent: React.FC = () => {
@@ -79,9 +102,13 @@ const AppContent: React.FC = () => {
                     {credentials.map(cred => (
                       <li key={cred.Id} className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800">
                         <img
-                          src={cred.Logo ? `data:image/png;base64,${cred.Logo}` : '/images/service-placeholder.webp'}
+                          src={cred.Logo ? `data:image/x-icon;base64,${base64Encode(cred.Logo)}` : '/images/service-placeholder.webp'}
                           alt={cred.ServiceName}
                           className="w-8 h-8 mr-2 flex-shrink-0"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images/service-placeholder.webp';
+                          }}
                         />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">{cred.ServiceName}</p>

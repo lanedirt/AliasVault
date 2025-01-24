@@ -73,8 +73,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           // Parse the decrypted vault and send response
           try {
-            const parsedVault = JSON.parse(decryptedVault);
-            sendResponse({ vault: parsedVault });
+            sendResponse({ vault: decryptedVault });
           } catch (parseError) {
             console.error('Failed to parse decrypted vault:', parseError);
             sendResponse({ vault: null, error: 'Failed to parse decrypted vault' });
