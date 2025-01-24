@@ -5,6 +5,7 @@ import { srpUtility } from '../utilities/SrpUtility';
 import EncryptionUtility from '../utilities/EncryptionUtility';
 import SqliteClient from '../utilities/SqliteClient';
 import { useAuth } from '../context/AuthContext';
+import { useDb } from '../context/DbContext';
 
 const Login: React.FC = () => {
   const { login } = useAuth();
@@ -14,6 +15,7 @@ const Login: React.FC = () => {
   });
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dbContext = useDb();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +49,8 @@ const Login: React.FC = () => {
 
       // Store access and refresh token using the context
       if (validationResponse.token) {
-        login(credentials.username,validationResponse.token.token, validationResponse.token.refreshToken);
+        // Store auth info
+        login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
       } else {
         throw new Error('Login failed -- no token returned');
       }
@@ -73,17 +76,8 @@ const Login: React.FC = () => {
         console.log('Decrypted blob:');
         console.log(decryptedBlob);
 
-        // Inside your handleSubmit function, after decrypting the blob:
-        const sqliteClient = new SqliteClient();
-        await sqliteClient.initializeFromBase64(decryptedBlob);
-
-        // Example query to test the connection
-        const vaultCredentials = sqliteClient.executeQuery('SELECT * FROM Credentials WHERE IsDeleted = 0');
-        console.log('Credentials:', vaultCredentials);
-
-        // Don't forget to close the connection when done
-        sqliteClient.close();
-
+        // Initialize the SQLite context with decrypted data
+        await dbContext.initializeDatabase(decryptedBlob);
 
       // 3. Handle 2FA if required
       /*if (validationResponse.requiresTwoFactor) {
