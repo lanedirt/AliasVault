@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import SqliteClient from '../utilities/SqliteClient';
 
 interface DbContextType {
   sqliteClient: SqliteClient | null;
-  initializeDatabase: (base64Data: string) => Promise<void>;
-  clearDatabase: () => void;
   isInitialized: boolean;
+  initializeDatabase: (blob: string) => Promise<void>;
+  clearDatabase: () => void;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -14,34 +14,63 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [sqliteClient, setSqliteClient] = useState<SqliteClient | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const initializeDatabase = async (base64Data: string) => {
+  const checkStoredVault = async () => {
+    console.log('Checking for stored vault');
     try {
-      const client = new SqliteClient();
-      await client.initializeFromBase64(base64Data);
-      setSqliteClient(client);
-      setIsInitialized(true);
+      const response = await chrome.runtime.sendMessage({ type: 'GET_VAULT' });
+      if (response && response.vault) {
+        console.log('Found stored vault');
+        await initializeDatabase(response.vault);
+      }
     } catch (error) {
-      console.error('Failed to initialize SQLite database:', error);
-      clearDatabase();
-      throw error;
+      console.log('No stored vault found');
+      console.error('Error retrieving vault from background:', error);
     }
+  };
+
+  useEffect(() => {
+    // Check if database is initialized and try to retrieve vault from background
+    console.log('Checking if database is initialized');
+    if (!isInitialized) {
+      checkStoredVault();
+    }
+  }, [isInitialized]);
+
+  // Add a listener for when the popup becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !isInitialized) {
+        checkStoredVault();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isInitialized]);
+
+  const initializeDatabase = async (blob: string) => {
+    const client = new SqliteClient();
+    await client.initializeFromBase64(blob);
+    setSqliteClient(client);
+    setIsInitialized(true);
+
+    // Store in background worker
+    chrome.runtime.sendMessage({
+      type: 'STORE_VAULT',
+      vault: blob
+    });
   };
 
   const clearDatabase = () => {
-    if (sqliteClient) {
-      sqliteClient.close();
-    }
     setSqliteClient(null);
     setIsInitialized(false);
+    chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
   };
 
   return (
-    <DbContext.Provider value={{
-      sqliteClient,
-      initializeDatabase,
-      clearDatabase,
-      isInitialized
-    }}>
+    <DbContext.Provider value={{ sqliteClient, isInitialized, initializeDatabase, clearDatabase }}>
       {children}
     </DbContext.Provider>
   );

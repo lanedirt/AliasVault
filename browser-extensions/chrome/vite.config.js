@@ -19,7 +19,7 @@ export default defineConfig({
         },
         {
             src: 'node_modules/argon2-browser/dist/argon2.wasm',
-            dest: 'src' // Copy to the root of the dist folder
+            dest: 'src'
         }
         ]
     }),
@@ -41,7 +41,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: './src/popup.html',
+        background: './src/background.ts'
       },
+      output: {
+        entryFileNames: '[name].js',
+        format: 'es'
+      }
     },
     outDir: 'dist',
   },

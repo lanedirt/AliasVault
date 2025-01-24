@@ -16,14 +16,21 @@ const AppContent: React.FC = () => {
   const { isLoggedIn, username, logout } = useAuth();
   const dbContext = useDb();
   const [credentials, setCredentials] = useState<Credential[]>([]);
-  const [needsUnlock, setNeedsUnlock] = useState(true);
+  const [needsUnlock, setNeedsUnlock] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn && dbContext?.isInitialized) {
-      setNeedsUnlock(false);
-      loadCredentials();
+    if (isLoggedIn) {
+      console.log('isLoggedIn is true');
+      if (!dbContext.isInitialized) {
+        console.log('Database is not initialized, setting needsUnlock to true');
+        setNeedsUnlock(true);
+      } else {
+        console.log('Database is initialized, setting needsUnlock to false');
+        setNeedsUnlock(false);
+        loadCredentials();
+      }
     }
-  }, [isLoggedIn, dbContext?.isInitialized]);
+  }, [isLoggedIn, dbContext.isInitialized]);
 
   const loadCredentials = () => {
     if (!dbContext?.sqliteClient) return;
@@ -54,31 +61,31 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-500 items-center justify-center p-4">
-      <h1 className="text-white text-2xl mb-8">AliasVault</h1>
+    <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-800 items-center justify-center p-4">
+      <h1 className="text-gray-900 dark:text-white text-2xl mb-8">AliasVault</h1>
       {isLoggedIn ? (
         <div className="mt-4">
-          <p className="text-white text-lg mb-4">Logged in as {username}</p>
+          <p className="text-gray-700 dark:text-gray-200 text-lg mb-4">Logged in as {username}</p>
           {needsUnlock ? (
             <Unlock />
           ) : (
             <div>
-              <div className="bg-white rounded-lg p-4 mb-4">
-                <h2 className="text-xl mb-4">Your Credentials</h2>
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 mb-4 shadow-lg">
+                <h2 className="text-gray-900 dark:text-white text-xl mb-4">Your Credentials</h2>
                 {credentials.length === 0 ? (
-                  <p className="text-gray-500">No credentials found</p>
+                  <p className="text-gray-500 dark:text-gray-400">No credentials found</p>
                 ) : (
                   <ul className="space-y-2">
                     {credentials.map(cred => (
-                      <li key={cred.Id} className="p-2 border rounded flex items-center">
+                      <li key={cred.Id} className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800">
                         <img
                           src={cred.Logo ? `data:image/png;base64,${cred.Logo}` : '/images/service-placeholder.webp'}
                           alt={cred.ServiceName}
                           className="w-8 h-8 mr-2 flex-shrink-0"
                         />
                         <div>
-                          <p className="font-medium">{cred.ServiceName}</p>
-                          <p className="text-sm text-gray-600">{cred.Username}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{cred.ServiceName}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{cred.Username}</p>
                         </div>
                       </li>
                     ))}
