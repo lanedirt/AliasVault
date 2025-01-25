@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import { Buffer } from 'buffer';
-import { srpUtility } from '../utilities/SrpUtility';
 import EncryptionUtility from '../utilities/EncryptionUtility';
-import SqliteClient from '../utilities/SqliteClient';
 import { useAuth } from '../context/AuthContext';
 import { useDb } from '../context/DbContext';
+import { useWebApi } from '../context/WebApiContext';
+import SrpUtility from '../utilities/SrpUtility';
 
 const Login: React.FC = () => {
   const { login } = useAuth();
@@ -16,14 +16,17 @@ const Login: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dbContext = useDb();
+  const webApi = useWebApi();
+  // Create SrpUtility instance with webApi
+  const srpUtil = new SrpUtility(webApi);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      // 1. Initiate login to get salt and server ephemeral
-      const loginResponse = await srpUtility.initiateLogin(credentials.username);
+      // Use the srpUtil instance instead of the imported singleton
+      const loginResponse = await srpUtil.initiateLogin(credentials.username);
 
       // 1. Derive key from password using Argon2id
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
@@ -40,7 +43,7 @@ const Login: React.FC = () => {
       console.log(passwordHashString);
 
       // 2. Validate login with SRP protocol
-      const validationResponse = await srpUtility.validateLogin(
+      const validationResponse = await srpUtil.validateLogin(
         credentials.username,
         passwordHashString,
         rememberMe,
@@ -50,19 +53,14 @@ const Login: React.FC = () => {
       // Store access and refresh token using the context
       if (validationResponse.token) {
         // Store auth info
-        login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+        await login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
       } else {
         throw new Error('Login failed -- no token returned');
       }
 
         // Make another API call trying to get latest vault
-        const vaultResponse = await fetch('https://localhost:7223/v1/Vault', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            }
-        });
-
-        const vaultResponseJson = await vaultResponse.json();
+        // TODO: can we make webapi response typed?
+        const vaultResponseJson = await webApi.get('Vault') as any;
 
         console.log('Vault response:')
         console.log('--------------------------------');

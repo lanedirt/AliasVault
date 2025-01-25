@@ -4,10 +4,14 @@ import { Buffer } from 'buffer';
 import EncryptionUtility from '../utilities/EncryptionUtility';
 import { useDb } from '../context/DbContext';
 import { useAuth } from '../context/AuthContext';
-import { srpUtility } from '../utilities/SrpUtility';
+import { useWebApi } from '../context/WebApiContext';
+import SrpUtility from '../utilities/SrpUtility';
 
 const Unlock: React.FC = () => {
   const { username, logout } = useAuth();
+  const webApi = useWebApi();
+  // Create SrpUtility instance with webApi
+  const srpUtil = new SrpUtility(webApi);
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +25,7 @@ const Unlock: React.FC = () => {
       // 1. Initiate login to get salt and server ephemeral
       // TODO: adding encryption settings to vault response would save a call to the server.
       // Check how WASM client does this? Should we store the settings in localstorage instead?
-      const loginResponse = await srpUtility.initiateLogin(username!);
+      const loginResponse = await srpUtil.initiateLogin(username!);
 
       // Derive key from password using user's encryption settings
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
@@ -32,12 +36,7 @@ const Unlock: React.FC = () => {
       );
 
       // Make API call to get latest vault
-      const vaultResponse = await fetch('https://localhost:7223/v1/Vault', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-      const vaultResponseJson = await vaultResponse.json();
+      const vaultResponseJson = await webApi.get('Vault') as any;
 
       // Attempt to decrypt the blob
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
