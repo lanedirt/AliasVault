@@ -114,7 +114,7 @@ const Login: React.FC = () => {
             Username
           </label>
           <input
-            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
             id="username"
             type="text"
             name="username"
@@ -129,7 +129,7 @@ const Login: React.FC = () => {
             Password
           </label>
           <input
-            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
             name="password"
@@ -139,7 +139,7 @@ const Login: React.FC = () => {
             required
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="mb-6">
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -149,6 +149,8 @@ const Login: React.FC = () => {
             />
             <span className="text-sm text-gray-700 dark:text-gray-200">Remember me</span>
           </label>
+        </div>
+        <div className="flex w-full">
           <Button type="submit">
             Login
           </Button>
