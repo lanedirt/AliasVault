@@ -71,7 +71,7 @@ const App: React.FC = () => {
               onClick={() => setShowSettings(false)}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              ← Backs
+              ← Back
             </button>
             <h1 className="text-gray-900 dark:text-white text-xl">Settings</h1>
             <div className="w-8"></div> {/* Spacer for alignment */}
@@ -88,14 +88,23 @@ const App: React.FC = () => {
         <div className="flex justify-between items-center px-4 py-3">
           <div className="flex items-center">
             <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
-            <h1 className="text-gray-900 dark:text-white text-xl">AliasVault</h1>
+            <h1 className="text-gray-900 dark:text-white text-xl font-bold">AliasVault</h1>
           </div>
-          <button
-            onClick={toggleSettings}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            Settings
-          </button>
+          {!isLoggedIn ? (
+            <button
+              onClick={toggleSettings}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              Settings
+            </button>
+          ) : (
+            <span
+              onClick={handleLogout}
+              className="cursor-pointer text-gray-500 dark:text-gray-400"
+            >
+              Logout
+            </span>
+          )}
         </div>
       </div>
 
@@ -108,7 +117,6 @@ const App: React.FC = () => {
             ) : (
               <div>
                 <CredentialsList base64Encode={base64Encode} />
-                <Button onClick={handleLogout}>Logout</Button>
               </div>
             )}
           </div>
