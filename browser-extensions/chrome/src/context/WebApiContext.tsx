@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { WebApiService } from '../services/WebApiService';
 import { useAuth } from './AuthContext';
 
@@ -6,15 +6,35 @@ const WebApiContext = createContext<WebApiService | null>(null);
 
 export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { getAccessToken, getRefreshToken, login, logout } = useAuth();
+  const [webApiService, setWebApiService] = useState<WebApiService | null>(null);
 
-  const webApiService = new WebApiService(
-    () => getAccessToken(),
-    () => getRefreshToken(),
-    (newAccessToken, newRefreshToken) => {
-      login(username!, newAccessToken, newRefreshToken);
-    },
-    logout
-  );
+  useEffect(() => {
+    const service = new WebApiService(
+      () => getAccessToken(),
+      () => getRefreshToken(),
+      (newAccessToken, newRefreshToken) => {
+        login(username!, newAccessToken, newRefreshToken);
+      },
+      logout
+    );
+    setWebApiService(service);
+
+    // Listen for changes to the API URL in storage
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes.apiUrl) {
+        service.initializeBaseUrl();
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  if (!webApiService) {
+    return null;
+  }
 
   return (
     <WebApiContext.Provider value={webApiService}>

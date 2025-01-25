@@ -6,14 +6,23 @@ interface TokenResponse {
 }
 
 export class WebApiService {
-  private baseUrl: string = 'https://localhost:7223/v1/'; // Should be configurable
+  private baseUrl: string = '';
 
   constructor(
     private getAccessToken: () => string | null,
     private getRefreshToken: () => string | null,
     private updateTokens: (accessToken: string, refreshToken: string) => void,
     private handleLogout: () => void
-  ) {}
+  ) {
+    // Load the API URL from storage when service is initialized
+    this.initializeBaseUrl();
+  }
+
+  private async initializeBaseUrl() {
+    const result = await chrome.storage.local.get(['apiUrl']);
+    // Trim trailing slash if present
+    this.baseUrl = (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
+  }
 
   public async fetch<T>(
     endpoint: string,
