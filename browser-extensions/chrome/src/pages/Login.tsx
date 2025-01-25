@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import Button from './Button';
+import Button from '../components/Button';
 import { Buffer } from 'buffer';
-import EncryptionUtility from '../utilities/EncryptionUtility';
+import EncryptionUtility from '../utils/EncryptionUtility';
 import { useAuth } from '../context/AuthContext';
 import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
-import SrpUtility from '../utilities/SrpUtility';
+import SrpUtility from '../utils/SrpUtility';
 
 const Login: React.FC = () => {
   const { login } = useAuth();

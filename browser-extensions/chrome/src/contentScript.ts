@@ -1,4 +1,4 @@
-import { detectForms } from './utilities/FormDetector';
+import { detectForms } from './utils/FormDetector';
 
 console.log('Content script loaded!'); // This will help verify the script is running
 
