@@ -14,8 +14,8 @@ export default defineConfig({
             dest: '.' // Copy to the root of the dist folder
         },
         {
-            src: 'src/images/*',
-            dest: 'images'
+            src: 'assets/*',
+            dest: 'assets'
         },
         {
             src: 'node_modules/argon2-browser/dist/argon2.wasm',

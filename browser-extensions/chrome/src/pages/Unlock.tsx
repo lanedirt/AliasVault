@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import Button from './Button';
+import Button from '../components/Button';
 import { Buffer } from 'buffer';
-import EncryptionUtility from '../utilities/EncryptionUtility';
+import EncryptionUtility from '../utils/EncryptionUtility';
 import { useDb } from '../context/DbContext';
 import { useAuth } from '../context/AuthContext';
 import { useWebApi } from '../context/WebApiContext';
-import SrpUtility from '../utilities/SrpUtility';
+import SrpUtility from '../utils/SrpUtility';
 
 const Unlock: React.FC = () => {
   const { username, logout } = useAuth();
@@ -61,7 +61,7 @@ const Unlock: React.FC = () => {
     <div className="max-w-md">
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="flex space-x-4 mb-6">
-          <img className="w-8 h-8 rounded-full" src="/images/avatar.webp" alt="User avatar" />
+          <img className="w-8 h-8 rounded-full" src="/assets/images/avatar.webp" alt="User avatar" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{username}</h2>
         </div>
 

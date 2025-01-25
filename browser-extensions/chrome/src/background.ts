@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
-import EncryptionUtility from './utilities/EncryptionUtility';
-import SqliteClient from './utilities/SqliteClient';
+import EncryptionUtility from './utils/EncryptionUtility';
+import SqliteClient from './utils/SqliteClient';
 
 console.log('Background script initialized');
 

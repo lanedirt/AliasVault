@@ -1,5 +1,5 @@
 import srp from 'secure-remote-password/client'
-import { WebApiService } from '../services/WebApiService';
+import { WebApiService } from './WebApiService';
 
 interface LoginInitiateResponse {
   salt: string;

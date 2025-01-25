@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Button from './Button';
-import { useAuth } from '../context/AuthContext';
-import { useDb } from '../context/DbContext';
-import Unlock from './Unlock';
-import Login from './Login';
-import Settings from './Settings';
-import CredentialsList from './CredentialsList';
+import './styles/app.css';
+import Button from './components/Button';
+import { useAuth } from './context/AuthContext';
+import { useDb } from './context/DbContext';
+import Unlock from './pages/Unlock';
+import Login from './pages/Login';
+import Settings from './pages/Settings';
+import CredentialsList from './pages/CredentialsList';
 
 interface Credential {
   Id: string;
@@ -37,7 +38,7 @@ function base64Encode(buffer: any): string | null {
   }
 }
 
-const AppContent: React.FC = () => {
+const App: React.FC = () => {
   const { isLoggedIn, username, logout } = useAuth();
   const dbContext = useDb();
   const [needsUnlock, setNeedsUnlock] = useState(false);
@@ -86,7 +87,7 @@ const AppContent: React.FC = () => {
       <div className="border-b border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center px-4 py-3">
           <div className="flex items-center">
-            <img src="/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
+            <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
             <h1 className="text-gray-900 dark:text-white text-xl">AliasVault</h1>
           </div>
           <button
@@ -119,4 +120,4 @@ const AppContent: React.FC = () => {
   );
 };
 
-export default AppContent;
+export default App;
