@@ -71,7 +71,7 @@ const App: React.FC = () => {
               onClick={() => setShowSettings(false)}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              ← Back
+              ← Backs
             </button>
             <h1 className="text-gray-900 dark:text-white text-xl">Settings</h1>
             <div className="w-8"></div> {/* Spacer for alignment */}

@@ -39,7 +39,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        popup: './src/popup.html',
+        app: './index.html',
         background: './src/background.ts',
         contentScript: './src/contentScript.ts',
         contentStyles: './src/styles/contentScript.css'
