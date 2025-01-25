@@ -1,13 +1,13 @@
 {
     "name": "AliasVault",
-    "description": "AliasVault Chrome Extension",
-    "version": "1.0",
+    "description": "AliasVault Browser AutoFill Extension. Keeping your personal information private.",
+    "version": "1.0.0",
     "manifest_version": 3,
     "content_security_policy": {
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
     },
     "action": {
-      "default_popup": "src/popup.html"
+      "default_popup": "index.html"
     },
     "icons": {
         "16": "assets/icons/icon-16.png",
