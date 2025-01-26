@@ -1,9 +1,12 @@
-interface LoginForm {
+type LoginForm = {
   form: HTMLFormElement | null;
   usernameField: HTMLInputElement | null;
   passwordField: HTMLInputElement | null;
 }
 
+/**
+ * Detect login forms on the page.
+ */
 export function detectForms(): LoginForm[] {
   const forms: LoginForm[] = [];
 
@@ -24,6 +27,9 @@ export function detectForms(): LoginForm[] {
   return forms;
 }
 
+/**
+ * Find the username field in the form containing the password field.
+ */
 function findUsernameField(passwordField: HTMLInputElement): HTMLInputElement | null {
   const form = passwordField.closest('form');
   const candidates = form ? form.querySelectorAll<HTMLInputElement>('input') : document.querySelectorAll<HTMLInputElement>('input');

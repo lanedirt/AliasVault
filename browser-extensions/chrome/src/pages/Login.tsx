@@ -8,6 +8,9 @@ import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../types/webapi/VaultResponse';
 
+/**
+ * Login page
+ */
 const Login: React.FC = () => {
   const { login } = useAuth();
   const [credentials, setCredentials] = useState({
@@ -21,7 +24,10 @@ const Login: React.FC = () => {
   // Create SrpUtility instance with webApi
   const srpUtil = new SrpUtility(webApi);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * Handle submit
+   */
+  const handleSubmit = async (e: React.FormEvent) : Promise<void> => {
     e.preventDefault();
     setError(null);
 
@@ -78,14 +84,18 @@ const Login: React.FC = () => {
         await dbContext.initializeDatabase(decryptedBlob);
 
       // 3. Handle 2FA if required
-      /*if (validationResponse.requiresTwoFactor) {
-        // TODO: Implement 2FA flow
-        console.log('2FA required');
-        return;
-      }
+      /*
+       * if (validationResponse.requiresTwoFactor) {
+       * // TODO: Implement 2FA flow
+       * console.log('2FA required');
+       * return;
+       * }
+       */
 
       // 5. Redirect to home page
-      window.location.href = '/';*/
+      /*
+       * window.location.href = '/';
+       */
 
     } catch (err) {
       setError('Login failed. Please check your credentials and try again.');
@@ -93,7 +103,10 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * Handle change
+   */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
     const { name, value } = e.target;
     setCredentials(prev => ({
       ...prev,

@@ -1,4 +1,4 @@
-export interface Vault {
+export type Vault = {
     blob: string;
     createdAt: string;
     credentialsCount: number;
@@ -10,7 +10,7 @@ export interface Vault {
     version: string;
   }
 
-  export interface VaultResponse {
+export type VaultResponse = {
     status: number;
     vault: Vault;
   }

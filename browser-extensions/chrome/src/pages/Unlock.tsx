@@ -8,6 +8,9 @@ import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../types/webapi/VaultResponse';
 
+/**
+ * Unlock page
+ */
 const Unlock: React.FC = () => {
   const { username, logout } = useAuth();
   const webApi = useWebApi();
@@ -18,14 +21,19 @@ const Unlock: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const dbContext = useDb();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * Handle submit
+   */
+  const handleSubmit = async (e: React.FormEvent) : Promise<void> => {
     e.preventDefault();
     setError(null);
 
     try {
       // 1. Initiate login to get salt and server ephemeral
-      // TODO: adding encryption settings to vault response would save a call to the server.
-      // Check how WASM client does this? Should we store the settings in localstorage instead?
+      /*
+       * TODO: adding encryption settings to vault response would save a call to the server.
+       * Check how WASM client does this? Should we store the settings in localstorage instead?
+       */
       const loginResponse = await srpUtil.initiateLogin(username!);
 
       // Derive key from password using user's encryption settings
@@ -54,7 +62,10 @@ const Unlock: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
+  /**
+   * Handle logout
+   */
+  const handleLogout = async () : Promise<void> => {
     logout();
   };
 

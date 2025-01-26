@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
-interface AuthContextType {
+type AuthContextType = {
   isLoggedIn: boolean;
   username: string | null;
   login: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
@@ -12,6 +12,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * AuthProvider
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -19,7 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [, setRefreshToken] = useState<string | null>(null);
   const accessTokenRef = useRef<string | null>(null);
   const refreshTokenRef = useRef<string | null>(null);
-  useEffect(() => {
+  useEffect(() : void => {
     // Check for tokens in localStorage on initial load
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
@@ -32,7 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (username: string, accessToken: string, refreshToken: string) => {
+  /**
+   * Login
+   */
+  const login = async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     accessTokenRef.current = accessToken; // Immediate update
     refreshTokenRef.current = refreshToken; // Immediate update
     await Promise.all([
@@ -47,7 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoggedIn(true);
   };
 
-  const updateTokens = async (accessToken: string, refreshToken: string) => {
+  /**
+   * Update tokens
+   */
+  const updateTokens = async (accessToken: string, refreshToken: string) : Promise<void> => {
     accessTokenRef.current = accessToken; // Immediate update
     refreshTokenRef.current = refreshToken; // Immediate update
     await Promise.all([
@@ -59,7 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRefreshToken(refreshToken);
   };
 
-  const logout = async () => {
+  /**
+   * Logout
+   */
+  const logout = async () : Promise<void> => {
     await Promise.all([
       localStorage.removeItem('username'),
       localStorage.removeItem('accessToken'),
@@ -74,10 +86,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ]);
   };
 
-  // Make sure to use the ref for accessToken and refreshToken to ensure
-  // that the latest values are used.
-  const getAccessToken = () => accessTokenRef.current || localStorage.getItem('accessToken');
-  const getRefreshToken = () => refreshTokenRef.current || localStorage.getItem('refreshToken');
+  /**
+   * Get access token
+   */
+  const getAccessToken = () : string | null => accessTokenRef.current || localStorage.getItem('accessToken');
+
+  /**
+   * Get refresh token
+   */
+  const getRefreshToken = () : string | null => refreshTokenRef.current || localStorage.getItem('refreshToken');
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, username, login, updateTokens, logout, getAccessToken, getRefreshToken }}>
@@ -86,7 +103,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = () => {
+/**
+ * Hook to use the AuthContext
+ */
+export const useAuth = () : AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');

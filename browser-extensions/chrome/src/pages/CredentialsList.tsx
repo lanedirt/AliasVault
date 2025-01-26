@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
 
-interface Credential {
+type Credential = {
   Id: string;
   ServiceName: string;
   Username: string;
   Logo?: Uint8Array;
 }
 
-interface CredentialsListProps {
+type CredentialsListProps = {
   base64Encode: (buffer: Uint8Array) => string | null;
 }
 
+/**
+ * Credentials list page
+ */
 const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
   const dbContext = useDb();
   const [credentials, setCredentials] = useState<Credential[]>([]);

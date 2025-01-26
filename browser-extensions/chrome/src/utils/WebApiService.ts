@@ -1,14 +1,28 @@
 type RequestInit = globalThis.RequestInit;
 
-interface TokenResponse {
+/**
+ * Interface for the token response from the API.
+ */
+interface ITokenResponse {
   token: string;
   refreshToken: string;
 }
 
+/**
+ * Service class for interacting with the web API.
+ */
 export class WebApiService {
   private baseUrl: string = '';
 
-  constructor(
+  /**
+   * Constructor for the WebApiService class.
+   *
+   * @param {Function} getAccessToken - Function to get the access token.
+   * @param {Function} getRefreshToken - Function to get the refresh token.
+   * @param {Function} updateTokens - Function to update the access and refresh tokens.
+   * @param {Function} handleLogout - Function to handle logout.
+   */
+  public constructor(
     private getAccessToken: () => string | null,
     private getRefreshToken: () => string | null,
     private updateTokens: (accessToken: string, refreshToken: string) => void,
@@ -18,12 +32,18 @@ export class WebApiService {
     this.initializeBaseUrl();
   }
 
-  private async initializeBaseUrl() {
+  /**
+   * Initialize the base URL for the API from settings.
+   */
+  private async initializeBaseUrl() : Promise<void> {
     const result = await chrome.storage.local.get(['apiUrl']);
     // Trim trailing slash if present
     this.baseUrl = (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
   }
 
+  /**
+   * Fetch data from the API
+   */
   public async fetch<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -76,6 +96,9 @@ export class WebApiService {
     }
   }
 
+  /**
+   * Refresh the access token
+   */
   private async refreshAccessToken(): Promise<string | null> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
@@ -99,7 +122,7 @@ export class WebApiService {
         throw new Error('Failed to refresh token');
       }
 
-      const tokenResponse: TokenResponse = await response.json();
+      const tokenResponse: ITokenResponse = await response.json();
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
     } catch {
@@ -108,11 +131,16 @@ export class WebApiService {
     }
   }
 
-  // Helper methods for common operations
+  /**
+   * Get a resource
+   */
   public async get<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'GET' });
   }
 
+  /**
+   * Create a resource
+   */
   public async post<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
     return this.fetch<TResponse>(endpoint, {
       method: 'POST',
@@ -123,6 +151,9 @@ export class WebApiService {
     });
   }
 
+  /**
+   * Update a resource
+   */
   public async put<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
     return this.fetch<TResponse>(endpoint, {
       method: 'PUT',
@@ -133,6 +164,9 @@ export class WebApiService {
     });
   }
 
+  /**
+   * Delete a resource
+   */
   public async delete<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'DELETE' });
   }

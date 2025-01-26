@@ -11,6 +11,9 @@ const DEFAULT_OPTIONS: ApiOption[] = [
   { label: 'Self-hosted', value: 'custom' }
 ];
 
+/**
+ * Settings page
+ */
 const Settings: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [customUrl, setCustomUrl] = useState<string>('');
@@ -31,7 +34,10 @@ const Settings: React.FC = () => {
     });
   }, []);
 
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  /**
+   * Handle option change
+   */
+  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) : void => {
     const value = e.target.value;
     setSelectedOption(value);
     if (value !== 'custom') {
@@ -39,7 +45,10 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * Handle custom URL change
+   */
+  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
     const value = e.target.value;
     setCustomUrl(value);
     if (selectedOption === 'custom') {

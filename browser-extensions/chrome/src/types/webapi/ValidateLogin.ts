@@ -1,11 +1,11 @@
-export interface ValidateLoginRequest {
+export type ValidateLoginRequest = {
     username: string;
     rememberMe: boolean;
     clientPublicEphemeral: string;
     clientSessionProof: string;
 }
 
-export interface ValidateLoginResponse {
+export type ValidateLoginResponse = {
     requiresTwoFactor: boolean;
     token?: {
       token: string;
