@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import SqliteClient from '../utils/SqliteClient';
 
-interface DbContextType {
+type DbContextType = {
   sqliteClient: SqliteClient | null;
   isInitialized: boolean;
   initializeDatabase: (blob: string) => Promise<void>;
@@ -10,6 +10,9 @@ interface DbContextType {
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
 
+/**
+ * DbProvider
+ */
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sqliteClient, setSqliteClient] = useState<SqliteClient | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -47,7 +50,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }, []);
 
-  useEffect(() => {
+  useEffect(() : void => {
     // Check if database is initialized and try to retrieve vault from background
     if (!isInitialized) {
       checkStoredVault();
@@ -55,20 +58,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [isInitialized, checkStoredVault]);
 
   // Add a listener for when the popup becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
+  useEffect(() : void => {
+    /**
+     * Handles visibility state changes of the document.
+     * Checks and retrieves stored vault data when document becomes visible and database is not initialized.
+     */
+    const handleVisibilityChange = () : void => {
       if (document.visibilityState === 'visible' && !isInitialized) {
         checkStoredVault();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
+    return () : void => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isInitialized, checkStoredVault]);
 
-  const clearDatabase = () => {
+  /**
+   * Clear database
+   */
+  const clearDatabase = () : void => {
     setSqliteClient(null);
     setIsInitialized(false);
     chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
@@ -81,7 +91,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   );
 };
 
-export const useDb = () => {
+/**
+ * Hook to use the DbContext
+ */
+export const useDb = () : DbContextType => {
   const context = useContext(DbContext);
   if (context === undefined) {
     throw new Error('useDb must be used within a DbProvider');

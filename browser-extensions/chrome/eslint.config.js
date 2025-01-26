@@ -4,6 +4,7 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import importPlugin from "eslint-plugin-import";
+import jsdocPlugin from "eslint-plugin-jsdoc";
 import globals from 'globals';
 
 export default [
@@ -29,6 +30,7 @@ export default [
             "react": reactPlugin,
             "react-hooks": reactHooksPlugin,
             "import": importPlugin,
+            "jsdoc": jsdocPlugin,
         },
         rules: {
             ...tsPlugin.configs.recommended.rules,
@@ -36,6 +38,33 @@ export default [
             ...reactHooksPlugin.configs.recommended.rules,
             "react/react-in-jsx-scope": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
+            "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
+            "jsdoc/require-jsdoc": ["error", {
+                "require": {
+                    "FunctionDeclaration": true,
+                    "MethodDefinition": true,
+                    "ClassDeclaration": true,
+                    "ArrowFunctionExpression": true,
+                    "FunctionExpression": true
+                }
+            }],
+            "spaced-comment": ["error", "always"],
+            "multiline-comment-style": ["error", "starred-block"],
+            "@typescript-eslint/explicit-member-accessibility": ["error"],
+            "@typescript-eslint/explicit-function-return-type": ["error"],
+            "@typescript-eslint/typedef": ["error"],
+            "@typescript-eslint/naming-convention": [
+                "error",
+                {
+                    "selector": "interface",
+                    "format": ["PascalCase"],
+                    "prefix": ["I"]
+                },
+                {
+                    "selector": "class",
+                    "format": ["PascalCase"]
+                }
+            ]
         },
         settings: {
             react: {

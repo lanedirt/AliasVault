@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       vaultState.sessionKey = Buffer.from(sessionKey).toString('base64');
 
       // Re-encrypt vault with session key
-      (async () => {
+      (async () : Promise<void> => {
         try {
           const encryptedVault = await EncryptionUtility.symmetricEncrypt(
             message.vault,
@@ -130,19 +130,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           console.log('credentials:', credentials);
 
           // Filter credentials that match the current domain
-          /*const matchingCredentials = credentials.filter(cred => {
-            // TODO: Implement proper URL matching
-            return true;
-            try {
-              const credentialUrl = new URL(cred.ServiceUrl);
-              return credentialUrl.hostname === url.hostname;
-            } catch {
-              return false;
-            }
-          });
-
-          console.log('matchingCredentials:', matchingCredentials);
-          */
+          /*
+           * const matchingCredentials = credentials.filter(cred => {
+           * // TODO: Implement proper URL matching
+           * return true;
+           * try {
+           *   const credentialUrl = new URL(cred.ServiceUrl);
+           *   return credentialUrl.hostname === url.hostname;
+           * } catch {
+           *   return false;
+           * }
+           * });
+           *
+           * console.log('matchingCredentials:', matchingCredentials);
+           */
 
           sendResponse({ credentials: credentials });
         } catch (error) {

@@ -1,11 +1,14 @@
 import React from 'react';
 
-interface ButtonProps {
+type ButtonProps = {
   onClick: () => void;
   children: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
-}
+};
 
+/**
+ * Button component
+ */
 const Button: React.FC<ButtonProps> = ({ onClick, children, type = 'button' }) => {
   return (
     <button

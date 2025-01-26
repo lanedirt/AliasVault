@@ -1,8 +1,8 @@
-export interface LoginRequest {
+export type LoginRequest = {
     username: string;
 }
 
-export interface LoginResponse {
+export type LoginResponse = {
     salt: string;
     serverEphemeral: string;
     encryptionType: string;

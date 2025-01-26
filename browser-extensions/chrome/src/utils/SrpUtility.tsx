@@ -3,7 +3,7 @@ import { WebApiService } from './WebApiService';
 import { LoginRequest, LoginResponse } from '../types/webapi/Login';
 import { ValidateLoginRequest } from '../types/webapi/ValidateLogin';
 
-interface ValidateLoginResponse {
+type ValidateLoginResponse = {
   requiresTwoFactor: boolean;
   token?: {
     token: string;
@@ -18,16 +18,27 @@ interface ValidateLoginResponse {
 class SrpUtility {
   private webApiService: WebApiService;
 
-  constructor(webApiService: WebApiService) {
+  /**
+   * Constructor for the SrpUtility class.
+   *
+   * @param {WebApiService} webApiService - The WebApiService instance.
+   */
+  public constructor(webApiService: WebApiService) {
     this.webApiService = webApiService;
   }
 
+  /**
+   * Initiate login with server.
+   */
   public async initiateLogin(username: string): Promise<LoginResponse> {
     return this.webApiService.post<LoginRequest, LoginResponse>('Auth/login', {
       username: username.toLowerCase().trim()
     });
   }
 
+  /**
+   * Validate login with server using locally generated ephemeral and session proof.
+   */
   public async validateLogin(
     username: string,
     passwordHashString: string,

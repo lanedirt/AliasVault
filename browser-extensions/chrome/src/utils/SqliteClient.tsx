@@ -1,5 +1,8 @@
 import initSqlJs, { Database } from 'sql.js';
 
+/**
+ * Client for interacting with the SQLite database.
+ */
 class SqliteClient {
     private db: Database | null = null;
 
@@ -15,9 +18,17 @@ class SqliteClient {
                 bytes[i] = binaryString.charCodeAt(i);
             }
 
-            // Initialize SQL.js
+            /**
+             * Initialize SQL.js
+             * TODO: is this needed, can we not load it from the local file system?
+             */
             const SQL = await initSqlJs({
-                locateFile: file => `https://sql.js.org/dist/${file}`
+                /**
+                 * Locates SQL.js files from the CDN
+                 * @param file - The name of the file to locate
+                 * @returns The complete URL path to the file
+                 */
+                locateFile: (file: string) => `https://sql.js.org/dist/${file}`
             });
 
             // Create database from the binary data

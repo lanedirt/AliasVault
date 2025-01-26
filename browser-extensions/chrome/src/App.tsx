@@ -1,4 +1,3 @@
-/// <reference lib="dom" />
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
@@ -8,8 +7,10 @@ import Settings from './pages/Settings';
 import CredentialsList from './pages/CredentialsList';
 import './styles/app.css';
 
-// Add base64Encode function
-// TODO: this is used in contentScript.ts too.
+/**
+ * Base64 encode
+ * TODO: check other usages and make it generic.
+ */
 function base64Encode(buffer: Uint8Array): string | null {
   if (!buffer || typeof buffer !== 'object') {
     console.log('Empty or invalid buffer received');
@@ -31,12 +32,18 @@ function base64Encode(buffer: Uint8Array): string | null {
   }
 }
 
+/**
+ * Main application component
+ */
 const App: React.FC = () => {
   const { isLoggedIn, username, logout } = useAuth();
   const dbContext = useDb();
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
+  /**
+   * Check if the user needs to unlock the vault
+   */
   useEffect(() => {
     if (isLoggedIn) {
       if (!dbContext.isInitialized) {
@@ -47,11 +54,17 @@ const App: React.FC = () => {
     }
   }, [isLoggedIn, dbContext.isInitialized]);
 
-  const handleLogout = () => {
+  /**
+   * Handle logout
+   */
+  const handleLogout = () : void => {
     logout();
   };
 
-  const toggleSettings = () => {
+  /**
+   * Toggle settings
+   */
+  const toggleSettings = () : void => {
     setShowSettings(!showSettings);
   };
 

@@ -13,8 +13,10 @@ document.addEventListener('focusin', (e) => {
   }
 });
 
-// Create and manage credential popup
-function showCredentialPopup(input: HTMLInputElement) {
+/**
+ * Show credential popup
+ */
+function showCredentialPopup(input: HTMLInputElement) : void {
   console.log('showCredentialPopup called');
   const forms = detectForms();
   if (!forms.length) return;
@@ -29,7 +31,10 @@ function showCredentialPopup(input: HTMLInputElement) {
   });
 }
 
-function createPopup(input: HTMLInputElement, credentials: Credential[]) {
+/**
+ * Create auto-fill popup
+ */
+function createPopup(input: HTMLInputElement, credentials: Credential[]) : void {
   // Remove existing popup if any
   removeExistingPopup();
 
@@ -101,14 +106,20 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) {
   document.body.appendChild(popup);
 }
 
-function removeExistingPopup() {
+/**
+ * Remove existing popup
+ */
+function removeExistingPopup() : void {
   const existing = document.getElementById('aliasvault-credential-popup');
   if (existing) {
     existing.remove();
   }
 }
 
-function fillCredential(credential: Credential) {
+/**
+ * Fill credential
+ */
+function fillCredential(credential: Credential) : void {
   const forms = detectForms();
   if (!forms.length) return;
 
@@ -123,12 +134,18 @@ function fillCredential(credential: Credential) {
   }
 }
 
-function triggerInputEvents(element: HTMLInputElement) {
+/**
+ * Trigger input events
+ */
+function triggerInputEvents(element: HTMLInputElement) : void {
   element.dispatchEvent(new Event('input', { bubbles: true }));
   element.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-// Remove the Buffer import and replace with a base64 encoding function
+/**
+ * Base64 encode
+ * TODO: make this a generic function if still needed? Check all other usages.
+ */
 function base64Encode(buffer: Uint8Array): string | null {
     if (!buffer || typeof buffer !== 'object') {
         console.log('Empty or invalid buffer received');

@@ -19,7 +19,9 @@
   "dependencies": {
     "argon2-browser": "^1.18.0",
     "buffer": "^6.0.3",
+    "eslint-plugin-jsdoc": "^50.6.3",
     "globals": "^15.14.0",
+    "jsdoc": "^4.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
