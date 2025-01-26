@@ -8,16 +8,9 @@ import Settings from './pages/Settings';
 import CredentialsList from './pages/CredentialsList';
 import './styles/app.css';
 
-interface Credential {
-  Id: string;
-  ServiceName: string;
-  Username: string;
-  Logo?: any; // Changed from string to any since it's raw buffer data
-}
-
 // Add base64Encode function
 // TODO: this is used in contentScript.ts too.
-function base64Encode(buffer: any): string | null {
+function base64Encode(buffer: Uint8Array): string | null {
   if (!buffer || typeof buffer !== 'object') {
     console.log('Empty or invalid buffer received');
     return null;

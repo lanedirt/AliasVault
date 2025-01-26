@@ -5,11 +5,11 @@ interface Credential {
   Id: string;
   ServiceName: string;
   Username: string;
-  Logo?: any;
+  Logo?: Uint8Array;
 }
 
 interface CredentialsListProps {
-  base64Encode: (buffer: any) => string | null;
+  base64Encode: (buffer: Uint8Array) => string | null;
 }
 
 const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
@@ -17,10 +17,6 @@ const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
   const [credentials, setCredentials] = useState<Credential[]>([]);
 
   useEffect(() => {
-    loadCredentials();
-  }, [dbContext.sqliteClient]);
-
-  const loadCredentials = () => {
     if (!dbContext?.sqliteClient) return;
 
     try {
@@ -38,7 +34,7 @@ const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
     } catch (err) {
       console.error('Error loading credentials:', err);
     }
-  };
+  }, [dbContext.sqliteClient]);
 
   return (
     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 mb-4 shadow-lg">

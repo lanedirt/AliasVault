@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+type RequestInit = globalThis.RequestInit;
 
 interface TokenResponse {
   token: string;
@@ -102,7 +102,7 @@ export class WebApiService {
       const tokenResponse: TokenResponse = await response.json();
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
-    } catch (error) {
+    } catch {
       this.handleLogout();
       return null;
     }
@@ -113,8 +113,8 @@ export class WebApiService {
     return this.fetch<T>(endpoint, { method: 'GET' });
   }
 
-  public async post<T>(endpoint: string, data: any): Promise<T> {
-    return this.fetch<T>(endpoint, {
+  public async post<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
+    return this.fetch<TResponse>(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -123,8 +123,8 @@ export class WebApiService {
     });
   }
 
-  public async put<T>(endpoint: string, data: any): Promise<T> {
-    return this.fetch<T>(endpoint, {
+  public async put<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
+    return this.fetch<TResponse>(endpoint, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

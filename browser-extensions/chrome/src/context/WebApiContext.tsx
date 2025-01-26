@@ -30,7 +30,7 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
-  }, []);
+  }, [getAccessToken, getRefreshToken, updateTokens, logout]);
 
   if (!webApiService) {
     return null;

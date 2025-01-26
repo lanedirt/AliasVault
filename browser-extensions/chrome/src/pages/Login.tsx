@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 import Button from '../components/Button';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
+import { VaultResponse } from '../types/webapi/VaultResponse';
 
 const Login: React.FC = () => {
   const { login } = useAuth();
@@ -59,8 +60,7 @@ const Login: React.FC = () => {
       }
 
         // Make another API call trying to get latest vault
-        // TODO: can we make webapi response typed?
-        const vaultResponseJson = await webApi.get('Vault') as any;
+        const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
         console.log('Vault response:')
         console.log('--------------------------------');
