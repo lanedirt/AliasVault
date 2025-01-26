@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
