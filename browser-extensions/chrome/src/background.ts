@@ -3,8 +3,6 @@ import EncryptionUtility from './utils/EncryptionUtility';
 import SqliteClient from './utils/SqliteClient';
 import { Credential } from './types/Credential';
 
-console.log('Background script initialized');
-
 let vaultState: {
   sessionKey: string | null;
 } = {
@@ -13,7 +11,6 @@ let vaultState: {
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Received message:', message.type);
   switch (message.type) {
     case 'STORE_VAULT': {
       // Generate random session key
@@ -46,7 +43,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     case 'GET_VAULT': {
       if (!vaultState.sessionKey) {
-        console.log('No session key available');
+        console.error('No session key available');
         sendResponse({ vault: null });
         return;
       }
@@ -87,12 +84,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case 'GET_CREDENTIALS_FOR_URL': {
-      console.log('GET_CREDENTIALS_FOR_URL called');
       if (!vaultState.sessionKey) {
         sendResponse({ credentials: [] });
         return;
       }
-      console.log('sessionKey:', vaultState.sessionKey);
 
       chrome.storage.session.get(['encryptedVault'], async (result) => {
         try {
@@ -126,8 +121,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             WHERE c.IsDeleted = 0
             GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
           `);
-
-          console.log('credentials:', credentials);
 
           // Filter credentials that match the current domain
           /*
