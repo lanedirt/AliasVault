@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import Button from '../components/Button';
-import { Buffer } from 'buffer';
-import EncryptionUtility from '../utils/EncryptionUtility';
 import { useDb } from '../context/DbContext';
 import { useAuth } from '../context/AuthContext';
 import { useWebApi } from '../context/WebApiContext';
+import { Buffer } from 'buffer';
+import Button from '../components/Button';
+import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 
 const Unlock: React.FC = () => {

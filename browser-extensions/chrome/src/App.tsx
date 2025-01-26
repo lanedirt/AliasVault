@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './styles/app.css';
-import Button from './components/Button';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
 import Unlock from './pages/Unlock';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
 import CredentialsList from './pages/CredentialsList';
+import './styles/app.css';
 
 interface Credential {
   Id: string;
