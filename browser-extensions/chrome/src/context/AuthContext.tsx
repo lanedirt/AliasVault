@@ -4,6 +4,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   username: string | null;
   login: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
+  updateTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
@@ -45,6 +46,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoggedIn(true);
   };
 
+  const updateTokens = async (accessToken: string, refreshToken: string) => {
+    accessTokenRef.current = accessToken; // Immediate update
+    await Promise.all([
+      localStorage.setItem('accessToken', accessToken),
+      localStorage.setItem('refreshToken', refreshToken),
+    ]);
+
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
+  };
+
   const logout = async () => {
     await Promise.all([
       localStorage.removeItem('username'),
@@ -66,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getRefreshToken = () => localStorage.getItem('refreshToken');
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, login, logout, getAccessToken, getRefreshToken }}>
+    <AuthContext.Provider value={{ isLoggedIn, username, login, updateTokens, logout, getAccessToken, getRefreshToken }}>
       {children}
     </AuthContext.Provider>
   );

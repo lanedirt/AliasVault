@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 const WebApiContext = createContext<WebApiService | null>(null);
 
 export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { getAccessToken, getRefreshToken, login, logout } = useAuth();
+  const { getAccessToken, getRefreshToken, updateTokens, logout } = useAuth();
   const [webApiService, setWebApiService] = useState<WebApiService | null>(null);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       () => getAccessToken(),
       () => getRefreshToken(),
       (newAccessToken, newRefreshToken) => {
-        login(username!, newAccessToken, newRefreshToken);
+        updateTokens(newAccessToken, newRefreshToken);
       },
       logout
     );
