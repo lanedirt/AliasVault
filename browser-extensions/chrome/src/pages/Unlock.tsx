@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 import Button from '../components/Button';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
+import { VaultResponse } from '../types/webapi/VaultResponse';
 
 const Unlock: React.FC = () => {
   const { username, logout } = useAuth();
@@ -36,7 +37,7 @@ const Unlock: React.FC = () => {
       );
 
       // Make API call to get latest vault
-      const vaultResponseJson = await webApi.get('Vault') as any;
+      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
       // Attempt to decrypt the blob
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');

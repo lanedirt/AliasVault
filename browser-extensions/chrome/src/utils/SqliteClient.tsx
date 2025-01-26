@@ -1,7 +1,7 @@
-import initSqlJs from 'sql.js';
+import initSqlJs, { Database } from 'sql.js';
 
 class SqliteClient {
-    private db: any = null;
+    private db: Database | null = null;
 
     /**
      * Initialize the SQLite database from a base64 string
@@ -31,7 +31,7 @@ class SqliteClient {
     /**
      * Execute a SELECT query
      */
-    public executeQuery<T>(query: string, params: any[] = []): T[] {
+    public executeQuery<T>(query: string, params: (string | number | null | Uint8Array)[] = []): T[] {
         if (!this.db) {
             throw new Error('Database not initialized');
         }
@@ -56,7 +56,7 @@ class SqliteClient {
     /**
      * Execute an INSERT, UPDATE, or DELETE query
      */
-    public executeUpdate(query: string, params: any[] = []): number {
+    public executeUpdate(query: string, params: (string | number | null | Uint8Array)[] = []): number {
         if (!this.db) {
             throw new Error('Database not initialized');
         }

@@ -1,12 +1,7 @@
 import srp from 'secure-remote-password/client'
 import { WebApiService } from './WebApiService';
-
-interface LoginInitiateResponse {
-  salt: string;
-  serverEphemeral: string;
-  encryptionType: string;
-  encryptionSettings: string;
-}
+import { LoginRequest, LoginResponse } from '../types/webapi/Login';
+import { ValidateLoginRequest } from '../types/webapi/ValidateLogin';
 
 interface ValidateLoginResponse {
   requiresTwoFactor: boolean;
@@ -27,8 +22,8 @@ class SrpUtility {
     this.webApiService = webApiService;
   }
 
-  public async initiateLogin(username: string): Promise<LoginInitiateResponse> {
-    return this.webApiService.post('Auth/login', {
+  public async initiateLogin(username: string): Promise<LoginResponse> {
+    return this.webApiService.post<LoginRequest, LoginResponse>('Auth/login', {
       username: username.toLowerCase().trim()
     });
   }
@@ -37,7 +32,7 @@ class SrpUtility {
     username: string,
     passwordHashString: string,
     rememberMe: boolean,
-    loginResponse: LoginInitiateResponse
+    loginResponse: LoginResponse
   ): Promise<ValidateLoginResponse> {
     // Generate client ephemeral
     const clientEphemeral = srp.generateEphemeral()
@@ -54,7 +49,7 @@ class SrpUtility {
       privateKey
     );
 
-    return this.webApiService.post('Auth/validate', {
+    return this.webApiService.post<ValidateLoginRequest, ValidateLoginResponse>('Auth/validate', {
       username: username.toLowerCase().trim(),
       rememberMe: rememberMe,
       clientPublicEphemeral: clientEphemeral.public,
