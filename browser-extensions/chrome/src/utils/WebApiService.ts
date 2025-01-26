@@ -33,7 +33,6 @@ export class WebApiService {
 
     // Add authorization header if we have an access token
     const accessToken = this.getAccessToken();
-    console.log('accessToken in webapi:', accessToken);
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
@@ -104,7 +103,6 @@ export class WebApiService {
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
     } catch (error) {
-      console.error('Token refresh failed:', error);
       this.handleLogout();
       return null;
     }
