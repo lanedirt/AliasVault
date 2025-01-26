@@ -39,6 +39,7 @@ export default [
             "react/react-in-jsx-scope": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
             "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
+            "no-console": ["error", { allow: ["warn", "error", "info", "debug"] }],
             "jsdoc/require-jsdoc": ["error", {
                 "require": {
                     "FunctionDeclaration": true,

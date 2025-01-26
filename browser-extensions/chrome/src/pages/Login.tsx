@@ -45,10 +45,6 @@ const Login: React.FC = () => {
       // Convert uint8 array to uppercase hex string which is expected by the server.
       const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
 
-      console.log('Password hash:');
-      console.log(passwordHash);
-      console.log(passwordHashString);
-
       // 2. Validate login with SRP protocol
       const validationResponse = await srpUtil.validateLogin(
         credentials.username,
@@ -68,17 +64,9 @@ const Login: React.FC = () => {
         // Make another API call trying to get latest vault
         const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
-        console.log('Vault response:')
-        console.log('--------------------------------');
-        console.log(vaultResponseJson);
-        console.log('Encrypted blob:');
-        console.log(vaultResponseJson.vault.blob);
-
         // Attempt to decrypt the blob
         const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
         const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
-        console.log('Decrypted blob:');
-        console.log(decryptedBlob);
 
         // Initialize the SQLite context with decrypted data
         await dbContext.initializeDatabase(decryptedBlob);

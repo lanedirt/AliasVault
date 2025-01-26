@@ -13,7 +13,7 @@ import './styles/app.css';
  */
 function base64Encode(buffer: Uint8Array): string | null {
   if (!buffer || typeof buffer !== 'object') {
-    console.log('Empty or invalid buffer received');
+    console.error('Empty or invalid buffer received');
     return null;
   }
 
