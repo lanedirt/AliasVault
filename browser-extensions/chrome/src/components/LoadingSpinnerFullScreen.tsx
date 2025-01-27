@@ -1,10 +1,15 @@
 import React from 'react';
+import { useLoading } from '../context/LoadingContext';
 
 /**
- * Loading spinner component used throughout the app for showing a loading spinner
- * inline in the page.
+ * Loading spinner full screen component used throughout the app for showing a loading spinner
+ * that covers the entire screen.
  */
-const LoadingSpinner: React.FC = () => {
+const LoadingSpinnerFullScreen: React.FC = () => {
+  const { isLoading } = useLoading();
+
+  if (!isLoading) return null;
+
   const spinnerStyle: React.CSSProperties = {
     width: '40px',
     height: '40px',
@@ -30,10 +35,12 @@ const LoadingSpinner: React.FC = () => {
   );
 
   return (
-    <div className="inline-flex items-center">
-      {spinner}
+    <div className="fixed inset-0 w-full h-full z-50 bg-gray-200 dark:bg-gray-500 bg-opacity-90 flex items-center justify-center">
+      <div className="relative">
+        {spinner}
+      </div>
     </div>
   );
 };
 
-export default LoadingSpinner;
+export default LoadingSpinnerFullScreen;

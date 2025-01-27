@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../types/webapi/VaultResponse';
+import { useLoading } from '../context/LoadingContext';
 
 /**
  * Login page
@@ -17,6 +18,7 @@ const Login: React.FC = () => {
     username: '',
     password: '',
   });
+  const { showLoading, hideLoading } = useLoading();
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dbContext = useDb();
@@ -32,6 +34,8 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
+      showLoading();
+
       // Use the srpUtil instance instead of the imported singleton
       const loginResponse = await srpUtil.initiateLogin(credentials.username);
 
@@ -85,9 +89,11 @@ const Login: React.FC = () => {
        * window.location.href = '/';
        */
 
+      hideLoading();
     } catch (err) {
       setError('Login failed. Please check your credentials and try again.');
       console.error('Login error:', err);
+      hideLoading();
     }
   };
 
