@@ -36,7 +36,10 @@ public class AdminPlaywrightTest : PlaywrightTest
     {
         await Page.CloseAsync();
         await Context.CloseAsync();
-        await Browser.CloseAsync();
+        if (Browser != null)
+        {
+            await Browser.CloseAsync();
+        }
 
         await _webAppFactory.DisposeAsync();
     }
