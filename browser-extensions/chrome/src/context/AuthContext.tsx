@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 
 type AuthContextType = {
   isLoggedIn: boolean;
+  isInitialized: boolean;
   username: string | null;
   login: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
   updateTokens: (accessToken: string, refreshToken: string) => Promise<void>;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [, setAccessToken] = useState<string | null>(null);
   const [, setRefreshToken] = useState<string | null>(null);
@@ -33,6 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsername(storedUsername);
       setIsLoggedIn(true);
     }
+
+    setIsInitialized(true);
   }, []);
 
   /**
@@ -97,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getRefreshToken = () : string | null => refreshTokenRef.current || localStorage.getItem('refreshToken');
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, login, updateTokens, logout, getAccessToken, getRefreshToken }}>
+    <AuthContext.Provider value={{ isLoggedIn, isInitialized, username, login, updateTokens, logout, getAccessToken, getRefreshToken }}>
       {children}
     </AuthContext.Provider>
   );

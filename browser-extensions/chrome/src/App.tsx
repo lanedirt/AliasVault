@@ -5,29 +5,36 @@ import Unlock from './pages/Unlock';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
 import CredentialsList from './pages/CredentialsList';
+import { useMinDurationLoading } from './hooks/useMinDurationLoading';
+import LoadingSpinner from './components/LoadingSpinner';
 import './styles/app.css';
 
 /**
  * Main application component
  */
 const App: React.FC = () => {
-  const { isLoggedIn, username, logout } = useAuth();
+  const { isLoggedIn, isInitialized, username, logout } = useAuth();
   const dbContext = useDb();
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
 
   /**
    * Check if the user needs to unlock the vault
    */
   useEffect(() => {
-    if (isLoggedIn) {
-      if (!dbContext.isInitialized) {
-        setNeedsUnlock(true);
-      } else {
-        setNeedsUnlock(false);
-      }
+    if (isLoggedIn && isInitialized && dbContext.dbAvailable && dbContext.dbInitialized) {
+      setNeedsUnlock(false);
+    } else {
+      setNeedsUnlock(true);
     }
-  }, [isLoggedIn, dbContext.isInitialized]);
+  }, [isLoggedIn, dbContext.dbInitialized, dbContext.dbAvailable, isInitialized]);
+
+  useEffect(() => {
+    if (isInitialized && dbContext.dbInitialized) {
+      setIsLoading(false);
+    }
+  }, [isInitialized, dbContext.dbInitialized, setIsLoading]);
 
   /**
    * Handle logout
@@ -42,6 +49,24 @@ const App: React.FC = () => {
   const toggleSettings = () : void => {
     setShowSettings(!showSettings);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-800">
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center px-4 py-3">
+            <div className="flex items-center">
+              <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
+              <h1 className="text-gray-900 dark:text-white text-xl font-bold">AliasVault</h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
 
   if (showSettings) {
     return (
