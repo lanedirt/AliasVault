@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer';
 import EncryptionUtility from './utils/EncryptionUtility';
 import SqliteClient from './utils/SqliteClient';
-import { Credential } from './types/Credential';
 
 let vaultState: {
   sessionKey: string | null;
@@ -106,21 +105,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           await sqliteClient.initializeFromBase64(decryptedVault);
 
           // Query credentials with their related service information
-          const credentials: Credential[] = sqliteClient.executeQuery(`
-            SELECT
-              c.Id,
-              c.Username,
-              c.ServiceId,
-              s.Name as ServiceName,
-              s.Url as ServiceUrl,
-              s.Logo as Logo,
-              MAX(p.Value) as Password
-            FROM Credentials c
-            JOIN Services s ON s.Id = c.ServiceId
-            LEFT JOIN Passwords p ON p.CredentialId = c.Id
-            WHERE c.IsDeleted = 0
-            GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
-          `);
+          const credentials = sqliteClient.getAllCredentials();
 
           // Filter credentials that match the current domain
           /*

@@ -30,10 +30,6 @@ const Unlock: React.FC = () => {
 
     try {
       // 1. Initiate login to get salt and server ephemeral
-      /*
-       * TODO: adding encryption settings to vault response would save a call to the server.
-       * Check how WASM client does this? Should we store the settings in localstorage instead?
-       */
       const loginResponse = await srpUtil.initiateLogin(username!);
 
       // Derive key from password using user's encryption settings

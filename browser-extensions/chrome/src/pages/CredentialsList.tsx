@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
+import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
-
-type Credential = {
-  Id: string;
-  ServiceName: string;
-  Username: string;
-  Logo?: Uint8Array;
-}
 
 type CredentialsListProps = {
   base64Encode: (buffer: Uint8Array) => string | null;
@@ -16,7 +10,7 @@ type CredentialsListProps = {
 /**
  * Credentials list page
  */
-const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
+const CredentialsList: React.FC<CredentialsListProps> = () => {
   const dbContext = useDb();
   const [credentials, setCredentials] = useState<Credential[]>([]);
 
@@ -24,16 +18,7 @@ const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
     if (!dbContext?.sqliteClient) return;
 
     try {
-      const results = dbContext.sqliteClient.executeQuery<Credential>(
-        `SELECT
-          c.Id,
-          c.Username as Username,
-          s.Name as ServiceName,
-          s.Logo as Logo
-        FROM Credentials c
-        JOIN Services s ON s.Id = c.ServiceId
-        WHERE c.IsDeleted = 0`
-      );
+      const results = dbContext.sqliteClient.getAllCredentials();
       setCredentials(results);
     } catch (err) {
       console.error('Error loading credentials:', err);
