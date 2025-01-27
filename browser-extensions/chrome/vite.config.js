@@ -17,8 +17,14 @@ export default defineConfig({
             src: 'assets/*',
             dest: 'assets'
         },
+        // Copy Argon2 WASM file loaded separately by the Argon2 library.
         {
             src: 'node_modules/argon2-browser/dist/argon2.wasm',
+            dest: 'src'
+        },
+        // Copy SQL.js WASM file loaded separately by the SqliteClient.
+        {
+            src: 'node_modules/sql.js/dist/sql-wasm.wasm',
             dest: 'src'
         },
         {
