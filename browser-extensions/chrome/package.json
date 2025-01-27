@@ -9,7 +9,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "build": "npm run lint && vite build && npm run build:content-css",
-    "watch": "concurrently \"npm run lint -- --watch\" \"vite\"",
+    "watch": "vite build --watch",
     "build:content-css": "tailwindcss -i ./src/styles/contentScript.css -o ./dist/contentScript.css --config tailwind.content.config.js"
   },
   "keywords": [],

@@ -55,10 +55,6 @@ export default defineConfig({
         format: 'es'
       }
     },
-    watch: {
-      include: ['src/**'],
-      exclude: ['node_modules/**']
-    },
     outDir: 'dist',
   },
   resolve: {

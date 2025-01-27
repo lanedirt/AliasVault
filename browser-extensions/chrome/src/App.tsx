@@ -74,6 +74,7 @@ const App: React.FC = () => {
         <div className="border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center px-4 py-3">
             <button
+              id="back"
               onClick={() => setShowSettings(false)}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
@@ -98,6 +99,7 @@ const App: React.FC = () => {
           </div>
           {!isLoggedIn ? (
             <button
+              id="settings"
               onClick={toggleSettings}
               className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
@@ -105,6 +107,7 @@ const App: React.FC = () => {
             </button>
           ) : (
             <span
+              id="logout"
               onClick={handleLogout}
               className="cursor-pointer text-gray-500 dark:text-gray-400"
             >
