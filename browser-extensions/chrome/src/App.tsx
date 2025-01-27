@@ -39,8 +39,13 @@ const App: React.FC = () => {
   /**
    * Handle logout
    */
-  const handleLogout = () : void => {
-    logout();
+  const handleLogout = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await logout();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**

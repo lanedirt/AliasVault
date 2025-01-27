@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Hook that ensures a loading state persists for a minimum duration before being set to false.
@@ -11,28 +11,49 @@ import { useState, useEffect } from 'react';
 export const useMinDurationLoading = (
   initialState: boolean = false,
   minDuration: number = 300
-): [boolean, (loading: boolean) => void] => {
+): [boolean, (value: boolean) => void] => {
   const [isLoading, setIsLoading] = useState(initialState);
-  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
-  const [internalLoading, setInternalLoading] = useState(initialState);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const startTimeRef = useRef<number>();
 
-  useEffect(() => {
-    if (internalLoading) {
+  const setLoadingState = useCallback((value: boolean) => {
+    if (value) {
+      // Starting to load
       setIsLoading(true);
-      setLoadingStartTime(Date.now());
-    } else if (loadingStartTime) {
-      const elapsedTime = Date.now() - loadingStartTime;
+      startTimeRef.current = Date.now();
+    } else {
+      // Finishing loading - ensure minimum duration
+      const elapsedTime = startTimeRef.current ? Date.now() - startTimeRef.current : 0;
       const remainingTime = Math.max(0, minDuration - elapsedTime);
 
       if (remainingTime === 0) {
         setIsLoading(false);
       } else {
-        setTimeout(() => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
           setIsLoading(false);
         }, remainingTime);
       }
     }
-  }, [internalLoading, loadingStartTime, minDuration]);
+  }, [minDuration]);
 
-  return [isLoading, setInternalLoading];
+  // Handle initial loading state only once
+  useEffect(() => {
+    if (initialState) {
+      setIsLoading(true);
+      startTimeRef.current = Date.now();
+    }
+  }, []); // Empty dependency array ensures this only runs once
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return [isLoading, setLoadingState];
 };
