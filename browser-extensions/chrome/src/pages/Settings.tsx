@@ -81,6 +81,7 @@ const Settings: React.FC = () => {
             Custom API URL
           </label>
           <input
+            id="custom-api-url"
             type="text"
             value={customUrl}
             onChange={handleCustomUrlChange}

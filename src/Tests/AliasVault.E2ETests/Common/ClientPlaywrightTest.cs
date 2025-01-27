@@ -61,11 +61,14 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [OneTimeTearDown]
-    public async Task OneTimeTearDown()
+    public virtual async Task OneTimeTearDown()
     {
         await Page.CloseAsync();
         await Context.CloseAsync();
-        await Browser.CloseAsync();
+        if (Browser != null)
+        {
+            await Browser.CloseAsync();
+        }
 
         await _apiFactory.DisposeAsync();
         await _clientFactory.DisposeAsync();

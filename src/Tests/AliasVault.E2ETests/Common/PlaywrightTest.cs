@@ -39,7 +39,7 @@ public abstract class PlaywrightTest
     /// <summary>
     /// Gets or sets the Playwright browser instance.
     /// </summary>
-    protected IBrowser Browser { get; set; } = null!;
+    protected IBrowser? Browser { get; set; }
 
     /// <summary>
     /// Gets or sets the Playwright browser context.
@@ -83,6 +83,10 @@ public abstract class PlaywrightTest
                 throw;
             }
             catch (AggregateException)
+            {
+                throw;
+            }
+            catch (ArgumentException)
             {
                 throw;
             }
@@ -179,7 +183,7 @@ public abstract class PlaywrightTest
     /// Setup the Playwright browser and context based on settings defined in appsettings.json.
     /// </summary>
     /// <returns>Task.</returns>
-    protected async Task SetupPlaywrightBrowserAndContext()
+    protected virtual async Task SetupPlaywrightBrowserAndContext()
     {
         // Set Playwright headless mode based on appsettings.json value.
         var configuration = new ConfigurationBuilder()
