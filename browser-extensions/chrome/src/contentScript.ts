@@ -68,10 +68,11 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
 
     // Handle base64 image data
     if (cred.Logo) {
-        const base64Logo = base64Encode(cred.Logo);
-        if (base64Logo) {
+        try {
+            const base64Logo = Buffer.from(cred.Logo).toString('base64');
             imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
-        } else {
+        } catch (error) {
+            console.error('Error encoding logo:', error);
             imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
         }
     } else {
@@ -134,29 +135,4 @@ function fillCredential(credential: Credential) : void {
 function triggerInputEvents(element: HTMLInputElement) : void {
   element.dispatchEvent(new Event('input', { bubbles: true }));
   element.dispatchEvent(new Event('change', { bubbles: true }));
-}
-
-/**
- * Base64 encode
- * TODO: make this a generic function if still needed? Check all other usages.
- */
-function base64Encode(buffer: Uint8Array): string | null {
-    if (!buffer || typeof buffer !== 'object') {
-        console.error('Empty or invalid buffer received');
-        return null;
-    }
-
-    try {
-        // Convert object to array of numbers
-        const byteArray = Object.values(buffer);
-
-        // Convert to binary string
-        const binary = String.fromCharCode.apply(null, byteArray as number[]);
-
-        // Use btoa to encode binary string to base64
-        return btoa(binary);
-    } catch (error) {
-        console.error('Error encoding to base64:', error);
-        return null;
-    }
 }

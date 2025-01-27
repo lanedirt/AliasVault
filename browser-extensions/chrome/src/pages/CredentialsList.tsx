@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
+import { Buffer } from 'buffer';
 
 type Credential = {
   Id: string;
@@ -49,7 +50,7 @@ const CredentialsList: React.FC<CredentialsListProps> = ({ base64Encode }) => {
           {credentials.map(cred => (
             <li key={cred.Id} className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800">
               <img
-                src={cred.Logo ? `data:image/x-icon;base64,${base64Encode(cred.Logo)}` : '/assets/images/service-placeholder.webp'}
+                src={cred.Logo ? `data:image/x-icon;base64,${Buffer.from(cred.Logo).toString('base64')}` : '/assets/images/service-placeholder.webp'}
                 alt={cred.ServiceName}
                 className="w-8 h-8 mr-2 flex-shrink-0"
                 onError={(e) => {
