@@ -3,7 +3,8 @@ import SqliteClient from '../utils/SqliteClient';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
-  isInitialized: boolean;
+  dbInitialized: boolean;
+  dbAvailable: boolean;
   initializeDatabase: (blob: string) => Promise<void>;
   clearDatabase: () => void;
 }
@@ -15,13 +16,22 @@ const DbContext = createContext<DbContextType | undefined>(undefined);
  */
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sqliteClient, setSqliteClient] = useState<SqliteClient | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+
+  /**
+   * Database initialization state. If true, the database has been initialized and the dbAvailable state is correct.
+   */
+  const [dbInitialized, setDbInitialized] = useState(false);
+  /**
+   * Database availability state. If true, the database is available. If false, the database is not available and needs to be unlocked or retrieved again from the API.
+   */
+  const [dbAvailable, setDbAvailable] = useState(false);
 
   const initializeDatabase = useCallback(async (blob: string) => {
     const client = new SqliteClient();
     await client.initializeFromBase64(blob);
     setSqliteClient(client);
-    setIsInitialized(true);
+    setDbInitialized(true);
+    setDbAvailable(true);
 
     // Store in background worker
     chrome.runtime.sendMessage({
@@ -37,7 +47,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const client = new SqliteClient();
         await client.initializeFromBase64(response.vault);
         setSqliteClient(client);
-        setIsInitialized(true);
+        setDbInitialized(true);
+        setDbAvailable(true);
 
         // Store in background worker
         chrome.runtime.sendMessage({
@@ -45,17 +56,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           vault: response.vault
         });
       }
+      else {
+        setDbInitialized(true);
+        setDbAvailable(false);
+      }
     } catch (error) {
       console.error('Error retrieving vault from background:', error);
+      setDbInitialized(true);
+      setDbAvailable(false);
     }
   }, []);
 
   useEffect(() : void => {
     // Check if database is initialized and try to retrieve vault from background
-    if (!isInitialized) {
+    if (!dbInitialized) {
       checkStoredVault();
     }
-  }, [isInitialized, checkStoredVault]);
+  }, [dbInitialized, checkStoredVault]);
 
   // Add a listener for when the popup becomes visible
   useEffect(() : void => {
@@ -64,7 +81,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
      * Checks and retrieves stored vault data when document becomes visible and database is not initialized.
      */
     const handleVisibilityChange = () : void => {
-      if (document.visibilityState === 'visible' && !isInitialized) {
+      if (document.visibilityState === 'visible' && !dbInitialized) {
         checkStoredVault();
       }
     };
@@ -73,19 +90,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return () : void => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isInitialized, checkStoredVault]);
+  }, [dbInitialized, checkStoredVault]);
 
   /**
    * Clear database
    */
   const clearDatabase = () : void => {
     setSqliteClient(null);
-    setIsInitialized(false);
+    setDbInitialized(false);
     chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
   };
 
   return (
-    <DbContext.Provider value={{ sqliteClient, isInitialized, initializeDatabase, clearDatabase }}>
+    <DbContext.Provider value={{ sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase }}>
       {children}
     </DbContext.Provider>
   );
