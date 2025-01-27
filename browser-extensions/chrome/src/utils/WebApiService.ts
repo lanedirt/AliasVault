@@ -1,9 +1,9 @@
 type RequestInit = globalThis.RequestInit;
 
 /**
- * Interface for the token response from the API.
+ * Type for the token response from the API.
  */
-interface ITokenResponse {
+type TokenResponse = {
   token: string;
   refreshToken: string;
 }
@@ -122,7 +122,7 @@ export class WebApiService {
         throw new Error('Failed to refresh token');
       }
 
-      const tokenResponse: ITokenResponse = await response.json();
+      const tokenResponse: TokenResponse = await response.json();
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
     } catch {
