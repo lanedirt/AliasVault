@@ -8,31 +8,6 @@ import CredentialsList from './pages/CredentialsList';
 import './styles/app.css';
 
 /**
- * Base64 encode
- * TODO: check other usages and make it generic.
- */
-function base64Encode(buffer: Uint8Array): string | null {
-  if (!buffer || typeof buffer !== 'object') {
-    console.error('Empty or invalid buffer received');
-    return null;
-  }
-
-  try {
-    // Convert object to array of numbers
-    const byteArray = Object.values(buffer);
-
-    // Convert to binary string
-    const binary = String.fromCharCode.apply(null, byteArray as number[]);
-
-    // Use btoa to encode binary string to base64
-    return btoa(binary);
-  } catch (error) {
-    console.error('Error encoding to base64:', error);
-    return null;
-  }
-}
-
-/**
  * Main application component
  */
 const App: React.FC = () => {
@@ -125,7 +100,7 @@ const App: React.FC = () => {
               <Unlock />
             ) : (
               <div>
-                <CredentialsList base64Encode={base64Encode} />
+                <CredentialsList />
               </div>
             )}
           </div>
