@@ -5,12 +5,15 @@ import { useAuth } from './AuthContext';
 const WebApiContext = createContext<WebApiService | null>(null);
 
 /**
- * WebApiProvider
+ * WebApiProvider to provide the WebApiService to the app that components can use.
  */
 export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { getAccessToken, getRefreshToken, updateTokens, logout } = useAuth();
   const [webApiService, setWebApiService] = useState<WebApiService | null>(null);
 
+  /**
+   * Initialize WebApiService
+   */
   useEffect(() : void => {
     const service = new WebApiService(
       () => getAccessToken(),

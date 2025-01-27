@@ -3,14 +3,10 @@ import { useDb } from '../context/DbContext';
 import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
 
-type CredentialsListProps = {
-  base64Encode: (buffer: Uint8Array) => string | null;
-}
-
 /**
  * Credentials list page
  */
-const CredentialsList: React.FC<CredentialsListProps> = () => {
+const CredentialsList: React.FC = () => {
   const dbContext = useDb();
   const [credentials, setCredentials] = useState<Credential[]>([]);
 
@@ -26,8 +22,8 @@ const CredentialsList: React.FC<CredentialsListProps> = () => {
   }, [dbContext.sqliteClient]);
 
   return (
-    <div className="bg-white dark:bg-gray-700 rounded-lg p-4 mb-4 shadow-lg">
-      <h2 className="text-gray-900 dark:text-white text-xl mb-4">Your Credentials</h2>
+    <div>
+      <h2 className="text-gray-900 dark:text-white text-xl mb-4">Credentials</h2>
       {credentials.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">No credentials found</p>
       ) : (

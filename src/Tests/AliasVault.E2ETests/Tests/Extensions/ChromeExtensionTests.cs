@@ -130,7 +130,7 @@ public class ChromeExtensionTests : ClientPlaywrightTest
             }
 
             serviceWorkers = serviceWorkersEnumerable.ToList();
-            if (!serviceWorkers.Any())
+            if (serviceWorkers.Count == 0)
             {
                 throw new InvalidOperationException("No extension service workers found");
             }

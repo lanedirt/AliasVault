@@ -11,10 +11,13 @@ type AuthContextType = {
   getRefreshToken: () => string | null;
 }
 
+/**
+ * Auth context.
+ */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
- * AuthProvider
+ * AuthProvider to provide the authentication state to the app that components can use.
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,8 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [, setRefreshToken] = useState<string | null>(null);
   const accessTokenRef = useRef<string | null>(null);
   const refreshTokenRef = useRef<string | null>(null);
+
+  /**
+   * Check for tokens in localStorage on initial load
+   */
   useEffect(() : void => {
-    // Check for tokens in localStorage on initial load
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
     const storedUsername = localStorage.getItem('username');

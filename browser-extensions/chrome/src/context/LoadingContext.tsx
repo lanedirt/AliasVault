@@ -7,6 +7,9 @@ type LoadingContextType = {
   hideLoading: () => void;
 }
 
+/**
+ * Loading context.
+ */
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 /**
@@ -15,8 +18,15 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const showLoading = () => setIsLoading(true);
-  const hideLoading = () => setIsLoading(false);
+  /**
+   * Show loading spinner
+   */
+  const showLoading = (): void => setIsLoading(true);
+
+  /**
+   * Hide loading spinner
+   */
+  const hideLoading = (): void => setIsLoading(false);
 
   return (
     <LoadingContext.Provider value={{ isLoading, showLoading, hideLoading }}>
@@ -26,7 +36,10 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-export const useLoading = () => {
+/**
+ * Hook to use loading state
+ */
+export const useLoading = (): LoadingContextType => {
   const context = useContext(LoadingContext);
   if (context === undefined) {
     throw new Error('useLoading must be used within a LoadingProvider');

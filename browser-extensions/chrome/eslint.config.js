@@ -76,6 +76,7 @@ export default [
     {
         languageOptions: {
             globals: {
+                NodeJS: true,
                 ...globals.node,
                 ...globals.browser,
                 chrome: 'readonly',
