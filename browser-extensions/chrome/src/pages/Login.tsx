@@ -13,7 +13,8 @@ import { useLoading } from '../context/LoadingContext';
  * Login page
  */
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const authContext = useAuth();
+  const dbContext = useDb();
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -21,9 +22,7 @@ const Login: React.FC = () => {
   const { showLoading, hideLoading } = useLoading();
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const dbContext = useDb();
   const webApi = useWebApi();
-  // Create SrpUtility instance with webApi
   const srpUtil = new SrpUtility(webApi);
 
   /**
@@ -60,7 +59,7 @@ const Login: React.FC = () => {
       // Store access and refresh token using the context
       if (validationResponse.token) {
         // Store auth info
-        await login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+        await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
       } else {
         throw new Error('Login failed -- no token returned');
       }

@@ -7,30 +7,31 @@ import Button from '../components/Button';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../types/webapi/VaultResponse';
+import { useLoading } from '../context/LoadingContext';
 
 /**
  * Unlock page
  */
 const Unlock: React.FC = () => {
-  const { username, logout } = useAuth();
+  const authContext = useAuth();
+  const dbContext = useDb();
+
   const webApi = useWebApi();
-  // Create SrpUtility instance with webApi
   const srpUtil = new SrpUtility(webApi);
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const dbContext = useDb();
-
+  const { showLoading, hideLoading } = useLoading();
   /**
    * Handle submit
    */
   const handleSubmit = async (e: React.FormEvent) : Promise<void> => {
     e.preventDefault();
     setError(null);
-
+    showLoading();
     try {
       // 1. Initiate login to get salt and server ephemeral
-      const loginResponse = await srpUtil.initiateLogin(username!);
+      const loginResponse = await srpUtil.initiateLogin(authContext.username!);
 
       // Derive key from password using user's encryption settings
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
@@ -55,6 +56,8 @@ const Unlock: React.FC = () => {
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);
+    } finally {
+      hideLoading();
     }
   };
 
@@ -62,7 +65,12 @@ const Unlock: React.FC = () => {
    * Handle logout
    */
   const handleLogout = async () : Promise<void> => {
-    logout();
+    showLoading();
+    try {
+      await authContext.logout();
+    } finally {
+      hideLoading();
+    }
   };
 
   return (
@@ -70,7 +78,7 @@ const Unlock: React.FC = () => {
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="flex space-x-4 mb-6">
           <img className="w-8 h-8 rounded-full" src="/assets/images/avatar.webp" alt="User avatar" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{username}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{authContext.username}</h2>
         </div>
 
         <p className="text-base text-gray-500 dark:text-gray-200 mb-6">

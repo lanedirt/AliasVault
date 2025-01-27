@@ -13,28 +13,35 @@ import './styles/app.css';
  * Main application component
  */
 const App: React.FC = () => {
-  const { isLoggedIn, isInitialized, username, logout } = useAuth();
+  const authContext = useAuth();
   const dbContext = useDb();
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
+  /**
+   * Loading state with minimum duration, shown when opening the extension popup.
+   */
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
 
   /**
-   * Check if the user needs to unlock the vault
+   * Check if the user needs to unlock the vault.
    */
   useEffect(() => {
-    if (isLoggedIn && isInitialized && dbContext.dbAvailable && dbContext.dbInitialized) {
+    if (authContext.isLoggedIn && authContext.isInitialized && dbContext.dbAvailable && dbContext.dbInitialized) {
       setNeedsUnlock(false);
     } else {
       setNeedsUnlock(true);
     }
-  }, [isLoggedIn, dbContext.dbInitialized, dbContext.dbAvailable, isInitialized]);
+  }, [authContext.isLoggedIn, dbContext.dbInitialized, dbContext.dbAvailable, authContext.isInitialized]);
 
+  /**
+   * Set loading state to false when auth and db are initialized.
+   */
   useEffect(() => {
-    if (isInitialized && dbContext.dbInitialized) {
+    if (authContext.isInitialized && dbContext.dbInitialized) {
       setIsLoading(false);
     }
-  }, [isInitialized, dbContext.dbInitialized, setIsLoading]);
+  }, [authContext.isInitialized, dbContext.dbInitialized, setIsLoading]);
 
   /**
    * Handle logout
@@ -42,7 +49,7 @@ const App: React.FC = () => {
   const handleLogout = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await logout();
+      await authContext.logout();
     } finally {
       setIsLoading(false);
     }
@@ -95,14 +102,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-800">
-      <div className="border-b border-gray-200 dark:border-gray-700">
+    <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900">
+      <div className="border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex justify-between items-center px-4 py-3">
           <div className="flex items-center">
             <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
             <h1 className="text-gray-900 dark:text-white text-xl font-bold">AliasVault</h1>
           </div>
-          {!isLoggedIn ? (
+          {!authContext.isLoggedIn ? (
             <button
               id="settings"
               onClick={toggleSettings}
@@ -122,10 +129,10 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-4">
-        {isLoggedIn ? (
+      <div className="p-4 dark:bg-gray-900">
+        {authContext.isLoggedIn ? (
           <div className="mt-4">
-            <p className="text-gray-700 dark:text-gray-200 text-lg mb-4">Logged in as {username}</p>
+            <p className="text-gray-700 dark:text-gray-200 text-lg mb-4">Logged in as {authContext.username}</p>
             {needsUnlock ? (
               <Unlock />
             ) : (

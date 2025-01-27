@@ -13,8 +13,8 @@ export const useMinDurationLoading = (
   minDuration: number = 300
 ): [boolean, (value: boolean) => void] => {
   const [isLoading, setIsLoading] = useState(initialState);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const startTimeRef = useRef<number>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   const setLoadingState = useCallback((value: boolean) => {
     if (value) {
@@ -45,10 +45,10 @@ export const useMinDurationLoading = (
       setIsLoading(true);
       startTimeRef.current = Date.now();
     }
-  }, []); // Empty dependency array ensures this only runs once
+  }, [initialState, setIsLoading]);
 
   useEffect(() => {
-    return () => {
+    return (): void => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }

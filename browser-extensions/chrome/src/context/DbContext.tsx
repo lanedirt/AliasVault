@@ -12,15 +12,19 @@ type DbContextType = {
 const DbContext = createContext<DbContextType | undefined>(undefined);
 
 /**
- * DbProvider
+ * DbProvider to provide the SQLite client to the app that components can use to make database queries.
  */
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  /**
+   * SQLite client.
+   */
   const [sqliteClient, setSqliteClient] = useState<SqliteClient | null>(null);
 
   /**
    * Database initialization state. If true, the database has been initialized and the dbAvailable state is correct.
    */
   const [dbInitialized, setDbInitialized] = useState(false);
+
   /**
    * Database availability state. If true, the database is available. If false, the database is not available and needs to be unlocked or retrieved again from the API.
    */
@@ -67,14 +71,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }, []);
 
+  /**
+   * Check if database is initialized and try to retrieve vault from background
+   */
   useEffect(() : void => {
-    // Check if database is initialized and try to retrieve vault from background
     if (!dbInitialized) {
       checkStoredVault();
     }
   }, [dbInitialized, checkStoredVault]);
 
-  // Add a listener for when the popup becomes visible
+  /**
+   * Add a listener for when the popup becomes visible
+   */
   useEffect(() : void => {
     /**
      * Handles visibility state changes of the document.
@@ -93,7 +101,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [dbInitialized, checkStoredVault]);
 
   /**
-   * Clear database
+   * Clear database and remove from background worker, called when logging out.
    */
   const clearDatabase = () : void => {
     setSqliteClient(null);
