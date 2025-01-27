@@ -1,4 +1,5 @@
 import initSqlJs, { Database } from 'sql.js';
+import { Credential } from '../types/Credential';
 
 /**
  * Client for interacting with the SQLite database.
@@ -93,6 +94,28 @@ class SqliteClient {
             this.db.close();
             this.db = null;
         }
+    }
+
+    /**
+     * Fetch all credentials with their associated service information
+     * @returns Array of Credential objects with service details
+     */
+    public getAllCredentials(): Credential[] {
+        return this.executeQuery<Credential>(`
+            SELECT
+                c.Id,
+                c.Username,
+                c.ServiceId,
+                s.Name as ServiceName,
+                s.Url as ServiceUrl,
+                s.Logo as Logo,
+                MAX(p.Value) as Password
+            FROM Credentials c
+            JOIN Services s ON s.Id = c.ServiceId
+            LEFT JOIN Passwords p ON p.CredentialId = c.Id
+            WHERE c.IsDeleted = 0
+            GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
+        `);
     }
 }
 
