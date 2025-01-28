@@ -52,7 +52,7 @@ const Unlock: React.FC = () => {
       );
 
       // Initialize the SQLite context with decrypted data
-      await dbContext.initializeDatabase(decryptedBlob);
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob);
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);

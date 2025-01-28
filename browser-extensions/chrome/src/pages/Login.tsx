@@ -72,7 +72,7 @@ const Login: React.FC = () => {
         const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
 
         // Initialize the SQLite context with decrypted data
-        await dbContext.initializeDatabase(decryptedBlob);
+        await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob);
 
       // 3. Handle 2FA if required
       /*

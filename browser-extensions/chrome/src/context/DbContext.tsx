@@ -5,7 +5,7 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (blob: string) => Promise<void>;
+  initializeDatabase: (derivedKey: string, vault: string) => Promise<void>;
   clearDatabase: () => void;
 }
 
@@ -30,9 +30,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [dbAvailable, setDbAvailable] = useState(false);
 
-  const initializeDatabase = useCallback(async (blob: string) => {
+  const initializeDatabase = useCallback(async (derivedKey: string, vault: string) => {
     const client = new SqliteClient();
-    await client.initializeFromBase64(blob);
+    await client.initializeFromBase64(vault);
     setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
@@ -40,7 +40,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // Store in background worker
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
-      vault: blob
+      derivedKey: derivedKey,
+      vault: vault,
     });
   }, []);
 
@@ -53,12 +54,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSqliteClient(client);
         setDbInitialized(true);
         setDbAvailable(true);
-
-        // Store in background worker
-        chrome.runtime.sendMessage({
-          type: 'STORE_VAULT',
-          vault: response.vault
-        });
       }
       else {
         setDbInitialized(true);

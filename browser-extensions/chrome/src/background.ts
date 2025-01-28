@@ -1,27 +1,25 @@
-import { Buffer } from 'buffer';
 import EncryptionUtility from './utils/EncryptionUtility';
 import SqliteClient from './utils/SqliteClient';
 
 let vaultState: {
-  sessionKey: string | null;
+  derivedKey: string | null;
 } = {
-  sessionKey: null
+  derivedKey: null
 };
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case 'STORE_VAULT': {
-      // Generate random session key
-      const sessionKey = crypto.getRandomValues(new Uint8Array(32));
-      vaultState.sessionKey = Buffer.from(sessionKey).toString('base64');
+      // Store derived key in memory for future vault syncs
+      vaultState.derivedKey = message.derivedKey;
 
       // Re-encrypt vault with session key
       (async () : Promise<void> => {
         try {
           const encryptedVault = await EncryptionUtility.symmetricEncrypt(
             message.vault,
-            vaultState.sessionKey!
+            vaultState.derivedKey!
           );
 
           // Store in chrome.storage.session and wait for completion
@@ -41,8 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     }
     case 'GET_VAULT': {
-      if (!vaultState.sessionKey) {
-        console.error('No session key available');
+      if (!vaultState.derivedKey) {
         sendResponse({ vault: null });
         return;
       }
@@ -55,10 +52,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
           }
 
-          // Decrypt vault with session key
+          // Decrypt vault with derived key
           const decryptedVault = await EncryptionUtility.symmetricDecrypt(
             result.encryptedVault,
-            vaultState.sessionKey!
+            vaultState.derivedKey!
           );
 
           // Parse the decrypted vault and send response
@@ -76,14 +73,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     }
     case 'CLEAR_VAULT': {
-      vaultState.sessionKey = null;
+      vaultState.derivedKey = null;
       chrome.storage.session.remove(['encryptedVault']);
       sendResponse({ success: true });
       break;
     }
 
     case 'GET_CREDENTIALS_FOR_URL': {
-      if (!vaultState.sessionKey) {
+      if (!vaultState.derivedKey) {
         sendResponse({ credentials: [] });
         return;
       }
@@ -97,7 +94,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           const decryptedVault = await EncryptionUtility.symmetricDecrypt(
             result.encryptedVault,
-            vaultState.sessionKey!
+            vaultState.derivedKey!
           );
 
           // Initialize SQLite client
@@ -129,6 +126,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ credentials: [] });
         }
       });
+      break;
+    }
+
+    case 'GET_DERIVED_KEY': {
+      sendResponse(vaultState.derivedKey ? vaultState.derivedKey : null);
       break;
     }
   }
