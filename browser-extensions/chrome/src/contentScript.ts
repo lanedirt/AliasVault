@@ -46,6 +46,19 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     padding: 8px 0;
   `;
 
+  // Change to mousedown event instead of click
+  const handleClickOutside = (event: MouseEvent) => {
+    if (!popup.contains(event.target as Node)) {
+      removeExistingPopup();
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+  };
+
+  // Use setTimeout to prevent immediate trigger of the mousedown event
+  setTimeout(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+  }, 100);
+
   // Position popup below input
   const rect = input.getBoundingClientRect();
   popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
