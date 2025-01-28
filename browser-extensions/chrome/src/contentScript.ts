@@ -35,6 +35,13 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
 
   const popup = document.createElement('div');
   popup.id = 'aliasvault-credential-popup';
+
+  // Get input width
+  const inputWidth = input.offsetWidth;
+
+  // Set popup width to match input width, with min/max constraints
+  const popupWidth = Math.max(250, Math.min(960, inputWidth));
+
   popup.style.cssText = `
     position: absolute;
     z-index: 999999;
@@ -42,8 +49,8 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    max-width: 300px;
     padding: 8px 0;
+    width: ${popupWidth}px;
   `;
 
   /**
