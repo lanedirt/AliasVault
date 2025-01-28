@@ -46,15 +46,20 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     padding: 8px 0;
   `;
 
-  // Change to mousedown event instead of click
-  const handleClickOutside = (event: MouseEvent) => {
+  /**
+   * Close autofill popup when clicking outside.
+   */
+  const handleClickOutside = (event: MouseEvent) : void => {
     if (!popup.contains(event.target as Node)) {
       removeExistingPopup();
       document.removeEventListener('mousedown', handleClickOutside);
     }
   };
 
-  // Use setTimeout to prevent immediate trigger of the mousedown event
+  /**
+   * Add event listener to document to close popup when clicking outside
+   * after a short delay to prevent immediate trigger of the mousedown event.
+   */
   setTimeout(() => {
     document.addEventListener('mousedown', handleClickOutside);
   }, 100);

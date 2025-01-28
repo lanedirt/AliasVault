@@ -11,7 +11,6 @@ import './styles/app.css';
 import EncryptionUtility from './utils/EncryptionUtility';
 import { VaultResponse } from './types/webapi/VaultResponse';
 import { useWebApi } from './context/WebApiContext';
-import SrpUtility from './utils/SrpUtility';
 
 /**
  * Main application component
@@ -76,11 +75,12 @@ const App: React.FC = () => {
    */
   const handleLogout = async (): Promise<void> => {
     setIsLoading(true);
+    setIsUserMenuOpen(false);
     try {
+      await webApi.logout();
       await authContext.logout();
     } finally {
       setIsLoading(false);
-      setIsUserMenuOpen(false);
     }
   };
 

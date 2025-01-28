@@ -42,11 +42,12 @@ export class WebApiService {
   }
 
   /**
-   * Fetch data from the API
+   * Fetch data from the API.
    */
   public async fetch<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    parseJson: boolean = true
   ): Promise<T> {
     const url = this.baseUrl + endpoint;
     const headers = new Headers(options.headers || {});
@@ -78,7 +79,7 @@ export class WebApiService {
             throw new Error('Request failed after token refresh');
           }
 
-          return retryResponse.json();
+          return parseJson ? retryResponse.json() : retryResponse.text() as T;
         } else {
           this.handleLogout();
           throw new Error('Session expired');
@@ -89,7 +90,7 @@ export class WebApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return response.json();
+      return parseJson ? response.json() : response.text() as T;
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
@@ -97,7 +98,7 @@ export class WebApiService {
   }
 
   /**
-   * Refresh the access token
+   * Refresh the access token.
    */
   private async refreshAccessToken(): Promise<string | null> {
     const refreshToken = this.getRefreshToken();
@@ -132,27 +133,31 @@ export class WebApiService {
   }
 
   /**
-   * Get a resource
+   * Issue GET request to the API.
    */
   public async get<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'GET' });
   }
 
   /**
-   * Create a resource
+   * Issue POST request to the API.
    */
-  public async post<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
+  public async post<TRequest, TResponse>(
+    endpoint: string,
+    data: TRequest,
+    parseJson: boolean = true
+  ): Promise<TResponse> {
     return this.fetch<TResponse>(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
-    });
+    }, parseJson);
   }
 
   /**
-   * Update a resource
+   * Issue PUT request to the API.
    */
   public async put<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
     return this.fetch<TResponse>(endpoint, {
@@ -165,9 +170,24 @@ export class WebApiService {
   }
 
   /**
-   * Delete a resource
+   * Issue DELETE request to the API.
    */
   public async delete<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'DELETE' });
+  }
+
+  /**
+   * Logout and revoke tokens via WebApi.
+   */
+  public async logout(): Promise<void> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return;
+    }
+
+    await this.post('Auth/revoke', {
+      token: this.getAccessToken(),
+      refreshToken: refreshToken,
+    }, false);
   }
 }

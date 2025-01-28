@@ -67,6 +67,7 @@ const Unlock: React.FC = () => {
   const handleLogout = async () : Promise<void> => {
     showLoading();
     try {
+      await webApi.logout();
       await authContext.logout();
     } finally {
       hideLoading();
