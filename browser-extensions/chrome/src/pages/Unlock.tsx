@@ -83,7 +83,7 @@ const Unlock: React.FC = () => {
         </div>
 
         <p className="text-base text-gray-500 dark:text-gray-200 mb-6">
-          Enter your master password to unlock your database.
+          Enter your master password to unlock your vault.
         </p>
 
         {error && (

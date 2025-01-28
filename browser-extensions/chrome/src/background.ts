@@ -81,14 +81,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'GET_CREDENTIALS_FOR_URL': {
       if (!vaultState.derivedKey) {
-        sendResponse({ credentials: [] });
+        sendResponse({ credentials: [], status: 'LOCKED' });
         return;
       }
 
       chrome.storage.session.get(['encryptedVault'], async (result) => {
         try {
           if (!result.encryptedVault) {
-            sendResponse({ credentials: [] });
+            sendResponse({ credentials: [], status: 'LOCKED' });
             return;
           }
 
@@ -97,11 +97,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             vaultState.derivedKey!
           );
 
-          // Initialize SQLite client
+          // Initialize SQLite client and get credentials.
           const sqliteClient = new SqliteClient();
           await sqliteClient.initializeFromBase64(decryptedVault);
-
-          // Query credentials with their related service information
           const credentials = sqliteClient.getAllCredentials();
 
           // Filter credentials that match the current domain
@@ -123,7 +121,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ credentials: credentials });
         } catch (error) {
           console.error('Error getting credentials:', error);
-          sendResponse({ credentials: [] });
+          sendResponse({ credentials: [], status: 'LOCKED', error: 'Failed to get credentials' });
         }
       });
       break;

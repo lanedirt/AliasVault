@@ -82,6 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Logout
    */
   const logout = async () : Promise<void> => {
+    // Clear vault in background worker.
+    await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
+
     await Promise.all([
       localStorage.removeItem('username'),
       localStorage.removeItem('accessToken'),
