@@ -100,23 +100,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           // Initialize SQLite client and get credentials.
           const sqliteClient = new SqliteClient();
           await sqliteClient.initializeFromBase64(decryptedVault);
-          const credentials = sqliteClient.getAllCredentials();
 
-          // Filter credentials that match the current domain
-          /*
-           * const matchingCredentials = credentials.filter(cred => {
-           * // TODO: Implement proper URL matching
-           * return true;
-           * try {
-           *   const credentialUrl = new URL(cred.ServiceUrl);
-           *   return credentialUrl.hostname === url.hostname;
-           * } catch {
-           *   return false;
-           * }
-           * });
-           *
-           * console.log('matchingCredentials:', matchingCredentials);
-           */
+          // Return all credentials, filtering will happpen in contentScript.
+          const credentials = sqliteClient.getAllCredentials();
 
           sendResponse({ credentials: credentials, status: 'OK' });
         } catch (error) {

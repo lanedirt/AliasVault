@@ -49,6 +49,61 @@ function showCredentialPopup(input: HTMLInputElement) : void {
 }
 
 /**
+ * Filter credentials based on current URL and page context
+ */
+function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
+  // If less than 5 entries, return all
+  if (credentials.length <= 5) {
+    return credentials;
+  }
+
+  const urlObject = new URL(currentUrl);
+  const baseUrl = `${urlObject.protocol}//${urlObject.hostname}`;
+
+  // 1. Exact URL match
+  let filtered = credentials.filter(cred =>
+    cred.ServiceUrl?.toLowerCase() === currentUrl.toLowerCase()
+  );
+
+  // 2. Base URL match with fuzzy domain comparison if no exact matches
+  if (filtered.length === 0) {
+    filtered = credentials.filter(cred => {
+        if (!cred.ServiceUrl) return false;
+        try {
+            const credUrlObject = new URL(cred.ServiceUrl);
+            const currentUrlObject = new URL(baseUrl);
+
+            // Extract root domains by splitting on dots and taking last two parts
+            const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
+            const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
+
+            // Get root domain (last two parts, e.g., 'dumpert.nl')
+            const credRootDomain = credDomainParts.slice(-2).join('.');
+            const currentRootDomain = currentDomainParts.slice(-2).join('.');
+
+            // Compare protocols and root domains
+            return credUrlObject.protocol === currentUrlObject.protocol &&
+                  credRootDomain === currentRootDomain;
+        } catch {
+            return false;
+        }
+    });
+  }
+
+  // 3. Page title word match if still no matches
+  if (filtered.length === 0) {
+    const titleWords = pageTitle.toLowerCase().split(/\s+/);
+    filtered = credentials.filter(cred =>
+      titleWords.some(word =>
+        cred.ServiceName.toLowerCase().includes(word)
+      )
+    );
+  }
+
+  return filtered;
+}
+
+/**
  * Create auto-fill popup
  */
 function createPopup(input: HTMLInputElement, credentials: Credential[]) : void {
@@ -76,8 +131,139 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
   `;
 
+  // Filter credentials based on current page context
+  const filteredCredentials = filterCredentials(
+    credentials,
+    window.location.href,
+    document.title
+  );
+
+  // Add credentials to popup if any matches found
+  if (filteredCredentials.length > 0) {
+    filteredCredentials.forEach(cred => {
+      const item = document.createElement('div');
+      item.style.cssText = `
+        padding: 8px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `;
+
+      const imgElement = document.createElement('img');
+      imgElement.style.width = '16px';
+      imgElement.style.height = '16px';
+
+      // Handle base64 image data
+      if (cred.Logo) {
+        try {
+          const base64Logo = base64Encode(cred.Logo);
+          imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
+        } catch (error) {
+          console.error('Error setting logo:', error);
+          imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
+        }
+      } else {
+        imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
+      }
+
+      item.appendChild(imgElement);
+      item.appendChild(document.createTextNode(cred.Username));
+
+      item.addEventListener('mouseenter', () => {
+        item.style.backgroundColor = isDarkMode() ? '#374151' : '#f0f0f0';
+      });
+
+      item.addEventListener('mouseleave', () => {
+        item.style.backgroundColor = 'transparent';
+      });
+
+      item.addEventListener('click', () => {
+        fillCredential(cred);
+        removeExistingPopup();
+      });
+
+      popup.appendChild(item);
+    });
+  } else {
+    // Show "no matches found" message
+    const noMatches = document.createElement('div');
+    noMatches.style.cssText = `
+      padding: 8px 16px;
+      color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
+      font-style: italic;
+    `;
+    noMatches.textContent = 'No matches found';
+    popup.appendChild(noMatches);
+  }
+
+  // Add divider
+  const divider = document.createElement('div');
+  divider.style.cssText = `
+    height: 1px;
+    background: ${isDarkMode() ? '#374151' : '#e5e7eb'};
+    margin: 8px 0;
+  `;
+  popup.appendChild(divider);
+
+  // Add action buttons container
+  const actionContainer = document.createElement('div');
+  actionContainer.style.cssText = `
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+  `;
+
+  // Create New button
+  const createButton = document.createElement('button');
+  createButton.style.cssText = `
+    flex: 1;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
+    color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  `;
+  createButton.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Create New
+  `;
+  createButton.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'OPEN_NEW_CREDENTIAL' });
+    removeExistingPopup();
+  });
+
+  // Search button
+  const searchButton = document.createElement('button');
+  searchButton.style.cssText = createButton.style.cssText;
+  searchButton.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    Search
+  `;
+  searchButton.addEventListener('click', () => {
+    // Placeholder for future search functionality
+    removeExistingPopup();
+  });
+
+  actionContainer.appendChild(createButton);
+  actionContainer.appendChild(searchButton);
+  popup.appendChild(actionContainer);
+
   /**
-   * Close autofill popup when clicking outside.
+   * Add click outside handler
+   * @param event
    */
   const handleClickOutside = (event: MouseEvent) : void => {
     if (!popup.contains(event.target as Node)) {
@@ -86,10 +272,6 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     }
   };
 
-  /**
-   * Add event listener to document to close popup when clicking outside
-   * after a short delay to prevent immediate trigger of the mousedown event.
-   */
   setTimeout(() => {
     document.addEventListener('mousedown', handleClickOutside);
   }, 100);
@@ -98,53 +280,6 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   const rect = input.getBoundingClientRect();
   popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
   popup.style.left = `${rect.left + window.scrollX}px`;
-
-  // Add credentials to popup
-  credentials.forEach(cred => {
-    const item = document.createElement('div');
-    item.style.cssText = `
-      padding: 8px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-
-    const imgElement = document.createElement('img');
-    imgElement.style.width = '16px';
-    imgElement.style.height = '16px';
-
-    // Handle base64 image data
-    if (cred.Logo) {
-        try {
-            const base64Logo = base64Encode(cred.Logo);
-            imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
-        } catch (error) {
-            console.error('Error setting logo:', error);
-            imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
-        }
-    } else {
-        imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
-    }
-
-    item.appendChild(imgElement);
-    item.appendChild(document.createTextNode(cred.Username));
-
-    item.addEventListener('click', () => {
-      fillCredential(cred);
-      removeExistingPopup();
-    });
-
-    item.addEventListener('mouseenter', () => {
-      item.style.backgroundColor = isDarkMode() ? '#374151' : '#f0f0f0';
-    });
-
-    item.addEventListener('mouseleave', () => {
-      item.style.backgroundColor = 'transparent';
-    });
-
-    popup.appendChild(item);
-  });
 
   document.body.appendChild(popup);
 }
@@ -175,7 +310,18 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     padding: 12px 16px;
     width: ${popupWidth}px;
     color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+    cursor: pointer;
+    transition: background-color 0.2s;
   `;
+
+  // Add hover effect to the entire popup
+  popup.addEventListener('mouseenter', () => {
+    popup.style.backgroundColor = isDarkMode() ? '#374151' : '#f0f0f0';
+  });
+
+  popup.addEventListener('mouseleave', () => {
+    popup.style.backgroundColor = isDarkMode() ? '#1f2937' : 'white';
+  });
 
   // Create container for message and button
   const container = document.createElement('div');
@@ -218,15 +364,8 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     </svg>
   `;
 
-  button.addEventListener('mouseenter', () => {
-    button.style.backgroundColor = isDarkMode() ? '#374151' : '#f0f0f0';
-  });
-
-  button.addEventListener('mouseleave', () => {
-    button.style.backgroundColor = 'transparent';
-  });
-
-  button.addEventListener('click', () => {
+  // Make the whole container clickable to open the popup.
+  container.addEventListener('click', () => {
     chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
     removeExistingPopup();
   });

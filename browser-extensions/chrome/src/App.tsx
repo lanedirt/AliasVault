@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
 import Unlock from './pages/Unlock';
@@ -152,7 +152,7 @@ const App: React.FC = () => {
   /**
    * Unlock success component.
    */
-  const UnlockSuccess = (
+  const UnlockSuccess = () : ReactElement => (
     <div className="flex flex-col items-center justify-center p-6 text-center">
       <div className="mb-4 text-green-600 dark:text-green-400">
         <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
