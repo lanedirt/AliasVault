@@ -134,7 +134,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'OPEN_POPUP': {
       chrome.windows.create({
-        url: chrome.runtime.getURL('index.html'),
+        url: chrome.runtime.getURL('index.html?mode=inline_unlock'),
         type: 'popup',
         width: 400,
         height: 600,
