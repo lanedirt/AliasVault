@@ -106,10 +106,12 @@ class SqliteClient {
                 s.Name as ServiceName,
                 s.Url as ServiceUrl,
                 s.Logo as Logo,
-                MAX(p.Value) as Password
+                MAX(p.Value) as Password,
+                a.Email as Email
             FROM Credentials c
             JOIN Services s ON s.Id = c.ServiceId
             LEFT JOIN Passwords p ON p.CredentialId = c.Id
+            LEFT JOIN Aliases a ON a.Id = c.AliasId AND a.IsDeleted = 0
             WHERE c.IsDeleted = 0
             GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
         `);
