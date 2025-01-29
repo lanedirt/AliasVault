@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MailboxBulkResponse, MailboxEmailApiModel } from '../models/email';
+import { MailboxBulkRequest, MailboxBulkResponse } from '../types/webapi/MailboxBulk';
+import { MailboxEmail } from '../types/webapi/MailboxEmail';
 import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
-import { MailboxBulkRequest } from '../types/webapi/MailboxBulk';
 import LoadingSpinner from '../components/LoadingSpinner';
-import React from 'react';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
-
+import EncryptionUtility from '../utils/EncryptionUtility';
+import { Buffer } from 'buffer';
 /**
  * Emails list page.
  */
@@ -14,7 +14,7 @@ const EmailsList: React.FC = () => {
   const dbContext = useDb();
   const webApi = useWebApi();
   const [error, setError] = useState<string | null>(null);
-  const [emails, setEmails] = useState<MailboxEmailApiModel[]>([]);
+  const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -48,9 +48,31 @@ const EmailsList: React.FC = () => {
           addresses: emailAddresses,
           page: currentPage,
           pageSize: pageSize,
-        });
+        }) as MailboxBulkResponse;
 
-        setEmails(data.mails);
+        // Decrypt emails locally using private key associated with the email address.
+        const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();
+
+        const decryptedEmails = await Promise.all(data.mails.map(async email => {
+          const encrytionKey = encryptionKeys.find(key => key.PublicKey === email.encryptionKey);
+          if (!encrytionKey) {
+            throw new Error(`Encryption key not found for email: ${email.fromDisplay}`);
+          }
+
+          // Decrypt symmetric key with assymetric private key.
+          const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(email.encryptedSymmetricKey, encrytionKey.PrivateKey);
+          const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
+
+          // Decrypt email with decrypted symmetric key.
+          email.subject = await EncryptionUtility.symmetricDecrypt(email.subject, symmetricKeyBase64);
+          email.fromDisplay = await EncryptionUtility.symmetricDecrypt(email.fromDisplay, symmetricKeyBase64);
+          email.fromDomain = await EncryptionUtility.symmetricDecrypt(email.fromDomain, symmetricKeyBase64);
+          email.fromLocal = await EncryptionUtility.symmetricDecrypt(email.fromLocal, symmetricKeyBase64);
+          email.messagePreview = await EncryptionUtility.symmetricDecrypt(email.messagePreview, symmetricKeyBase64);
+          return email;
+        }));
+
+        setEmails(decryptedEmails);
         setTotalRecords(data.totalRecords);
       } catch (error) {
         console.error(error);
@@ -61,11 +83,41 @@ const EmailsList: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, dbContext?.sqliteClient, pageSize, webApi]);
+  }, [currentPage, dbContext?.sqliteClient, pageSize, webApi, setIsLoading]);
 
   useEffect(() => {
     loadEmails();
   }, [loadEmails]);
+
+  /**
+   * Formats the date display for emails
+   */
+  const formatEmailDate = (dateSystem: string): string => {
+    const now = new Date();
+    const emailDate = new Date(dateSystem);
+    const secondsAgo = Math.floor((now.getTime() - emailDate.getTime()) / 1000);
+
+    if (secondsAgo < 60) {
+      return 'just now';
+    } else if (secondsAgo < 3600) {
+      // Less than 1 hour ago
+      const minutes = Math.floor(secondsAgo / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (secondsAgo < 86400) {
+      // Less than 24 hours ago
+      const hours = Math.floor(secondsAgo / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (secondsAgo < 172800) {
+      // Less than 48 hours ago
+      return 'yesterday';
+    } else {
+      // Older than 48 hours
+      return emailDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit'
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -91,37 +143,28 @@ const EmailsList: React.FC = () => {
   return (
     <div>
       <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Subject
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                From
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800">
-            {emails.map((email) => (
-              <tr key={email.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
-                  {email.subject}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                  {email.fromDisplay}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                  {new Date(email.dateSystem).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="space-y-4">
+        {emails.map((email) => (
+          <div
+            key={email.id}
+            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400 font-bold">
+                {email.fromDisplay}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {formatEmailDate(email.dateSystem)}
+              </div>
+            </div>
+            <div className="font-medium text-gray-900 dark:text-white mb-1">
+              {email.subject}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+              {email.messagePreview}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

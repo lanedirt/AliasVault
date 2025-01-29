@@ -1,5 +1,6 @@
 import initSqlJs, { Database } from 'sql.js';
 import { Credential } from '../types/Credential';
+import { EncryptionKey } from '../types/EncryptionKey';
 
 /**
  * Client for interacting with the SQLite database.
@@ -115,6 +116,17 @@ class SqliteClient {
             WHERE c.IsDeleted = 0
             GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
         `);
+    }
+
+    /**
+     * Fetch all encryption keys.
+     */
+    public getAllEncryptionKeys(): EncryptionKey[] {
+        return this.executeQuery<EncryptionKey>(`SELECT
+                x.PublicKey,
+                x.PrivateKey,
+                x.IsPrimary
+            FROM EncryptionKeys x`);
     }
 }
 

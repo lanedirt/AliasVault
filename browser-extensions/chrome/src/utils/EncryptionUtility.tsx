@@ -178,7 +178,6 @@ class EncryptionUtility {
             );
 
             const cipherBuffer = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
-
             const plaintextBuffer = await crypto.subtle.decrypt(
                 {
                     name: "RSA-OAEP",
