@@ -118,7 +118,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
            * console.log('matchingCredentials:', matchingCredentials);
            */
 
-          sendResponse({ credentials: credentials });
+          sendResponse({ credentials: credentials, status: 'OK' });
         } catch (error) {
           console.error('Error getting credentials:', error);
           sendResponse({ credentials: [], status: 'LOCKED', error: 'Failed to get credentials' });
@@ -129,6 +129,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'GET_DERIVED_KEY': {
       sendResponse(vaultState.derivedKey ? vaultState.derivedKey : null);
+      break;
+    }
+
+    case 'OPEN_POPUP': {
+      chrome.windows.create({
+        url: chrome.runtime.getURL('index.html'),
+        type: 'popup',
+        width: 400,
+        height: 600,
+        focused: true
+      });
+      sendResponse({ success: true });
       break;
     }
   }
