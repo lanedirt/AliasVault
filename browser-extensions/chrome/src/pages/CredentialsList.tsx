@@ -4,7 +4,7 @@ import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
 
 /**
- * Credentials list page
+ * Credentials list page.
  */
 const CredentialsList: React.FC = () => {
   const dbContext = useDb();
