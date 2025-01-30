@@ -33,7 +33,7 @@ const CredentialDetails: React.FC = () => {
   }
 
   return (
-    <div className="px-4 pt-6">
+    <div className="">
       <div className="space-y-6">
         <div className="flex items-center mb-6">
           <img
@@ -46,6 +46,16 @@ const CredentialDetails: React.FC = () => {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-4">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+              <input
+                type="email"
+                readOnly
+                value={credential.Email || ''}
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
+
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
               <input

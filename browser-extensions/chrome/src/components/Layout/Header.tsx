@@ -71,6 +71,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex-grow" />
 
         <div className="flex items-center">
+            {!currentRoute?.showBackButton ? (
           <button
             onClick={() => window.open(clientUrl, '_blank')}
             className="p-2"
@@ -80,6 +81,7 @@ const Header: React.FC<HeaderProps> = ({
               <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
             </svg>
           </button>
+            ) : (<></>)}
         </div>
         {!authContext.isLoggedIn ? (
           <button
