@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Credentials list page.
@@ -9,10 +10,14 @@ import { Buffer } from 'buffer';
 const CredentialsList: React.FC = () => {
   const dbContext = useDb();
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('loading credentials1');
+    console.log(dbContext);
     if (!dbContext?.sqliteClient) return;
 
+    console.log('loading credentials2');
     try {
       const results = dbContext.sqliteClient.getAllCredentials();
       setCredentials(results);
@@ -29,7 +34,9 @@ const CredentialsList: React.FC = () => {
       ) : (
         <ul className="space-y-2">
           {credentials.map(cred => (
-            <li key={cred.Id} className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800">
+            <li key={cred.Id}
+                onClick={() => navigate(`/credentials/${cred.Id}`)}
+                className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
               <img
                 src={cred.Logo ? `data:image/x-icon;base64,${Buffer.from(cred.Logo).toString('base64')}` : '/assets/images/service-placeholder.webp'}
                 alt={cred.ServiceName}

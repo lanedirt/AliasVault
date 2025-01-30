@@ -24,6 +24,7 @@
     "jsdoc": "^4.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.4",
     "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
     "sql.js": "^1.12.0"
   },
