@@ -143,21 +143,21 @@ const EmailsList: React.FC = () => {
   return (
     <div>
       <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
-      <div className="space-y-4">
+      <div className="space-y-2">
         {emails.map((email) => (
           <div
             key={email.id}
             className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
           >
             <div className="flex justify-between items-start mb-2">
-              <div className="text-sm text-gray-600 dark:text-gray-400 font-bold">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {email.fromDisplay}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
                 {formatEmailDate(email.dateSystem)}
               </div>
             </div>
-            <div className="font-medium text-gray-900 dark:text-white mb-1">
+            <div className="text-sm text-gray-900 dark:text-white mb-1 font-bold">
               {email.subject}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
