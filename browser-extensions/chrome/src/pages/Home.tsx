@@ -12,7 +12,7 @@ const Home: React.FC = () => {
   const dbContext = useDb();
   const navigate = useNavigate();
   const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
-  const needsUnlock = !authContext.isLoggedIn || !authContext.isInitialized || !dbContext.dbAvailable || !dbContext.dbInitialized;
+  const needsUnlock = (!authContext.isLoggedIn && authContext.isInitialized) || (!dbContext.dbAvailable && dbContext.dbInitialized);
 
   useEffect(() => {
     if (isLoggedIn && !needsUnlock && !isInlineUnlockMode) {
@@ -23,12 +23,10 @@ const Home: React.FC = () => {
 
 
   if (!isLoggedIn) {
-    console.log('not logged in');
     return <Login />;
   }
 
   if (needsUnlock) {
-    console.log('needs unlock');
     return <Unlock />;
   }
 

@@ -20,7 +20,7 @@ const Login: React.FC = () => {
     password: '',
   });
   const { showLoading, hideLoading } = useLoading();
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);

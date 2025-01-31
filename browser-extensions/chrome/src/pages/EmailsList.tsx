@@ -8,6 +8,7 @@ import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import { Buffer } from 'buffer';
 import ReloadButton from '../components/ReloadButton';
+import { Link } from 'react-router-dom';
 /**
  * Emails list page.
  */
@@ -149,9 +150,10 @@ const EmailsList: React.FC = () => {
       </div>
       <div className="space-y-2">
         {emails.map((email) => (
-          <div
+          <Link
             key={email.id}
-            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
+            to={`/emails/${email.id}`}
+            className="block p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <div className="flex justify-between items-start mb-2">
               <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -167,7 +169,7 @@ const EmailsList: React.FC = () => {
             <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
               {email.messagePreview}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

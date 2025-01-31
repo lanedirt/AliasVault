@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
+import { useDb } from '../../context/DbContext';
 interface BottomNavProps {
   currentTab: 'credentials' | 'emails';
   setCurrentTab: (tab: 'credentials' | 'emails') => void;
@@ -9,6 +9,7 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab }) => {
   const authContext = useAuth();
+  const dbContext = useDb();
   const navigate = useNavigate();
 
   const handleTabChange = (tab: 'credentials' | 'emails') => {
@@ -16,7 +17,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab }) => {
     navigate(`/${tab}`);
   };
 
-  if (!authContext.isLoggedIn) {
+  if (!authContext.isLoggedIn || !dbContext.dbAvailable) {
     return null;
   }
 

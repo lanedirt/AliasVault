@@ -87,7 +87,7 @@ const CredentialDetails: React.FC = () => {
           </div>
           <button
             onClick={openInNewPopup}
-            className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             title="Open in new window"
           >
             <svg

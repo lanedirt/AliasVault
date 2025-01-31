@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
-import { useWebApi } from './context/WebApiContext';
 import { useMinDurationLoading } from './hooks/useMinDurationLoading';
 import Header from './components/Layout/Header';
 import BottomNav from './components/Layout/BottomNav';
@@ -13,6 +12,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import Home from './pages/Home';
 import './styles/app.css';
 import CredentialDetails from './pages/CredentialDetails';
+import EmailDetails from './pages/EmailDetails';
 // Add this type definition at the top level
 type RouteConfig = {
   path: string;
@@ -24,7 +24,6 @@ type RouteConfig = {
 const App: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
-  const webApi = useWebApi();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [clientUrl, setClientUrl] = useState('https://app.aliasvault.net');
   const [currentTab, setCurrentTab] = useState<'credentials' | 'emails'>('credentials');
@@ -35,8 +34,9 @@ const App: React.FC = () => {
     { path: '/', element: <Home />, showBackButton: false },
     { path: '/settings', element: <Settings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
-    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential Details' },
+    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential details' },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
+    { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
   ];
 
   /**

@@ -173,7 +173,7 @@ export class WebApiService {
    * Issue DELETE request to the API.
    */
   public async delete<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'DELETE' });
+    return this.fetch<T>(endpoint, { method: 'DELETE' }, false);
   }
 
   /**
