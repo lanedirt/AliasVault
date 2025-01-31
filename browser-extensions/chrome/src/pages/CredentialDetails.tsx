@@ -59,18 +59,17 @@ const CredentialDetails: React.FC = () => {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Login credentials</h2>
             <FormInputCopyToClipboard
               id="email"
               label="Email"
               value={credential.Email || ''}
             />
-
             <FormInputCopyToClipboard
               id="username"
               label="Username"
               value={credential.Username}
             />
-
             <FormInputCopyToClipboard
               id="password"
               label="Password"
@@ -78,7 +77,49 @@ const CredentialDetails: React.FC = () => {
               type="password"
             />
           </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Alias</h2>
+            <FormInputCopyToClipboard
+              id="fullName"
+              label="Full Name"
+              value={`${credential.Alias.FirstName} ${credential.Alias.LastName}`}
+            />
+            <FormInputCopyToClipboard
+              id="firstName"
+              label="First Name"
+              value={credential.Alias.FirstName}
+            />
+            <FormInputCopyToClipboard
+              id="lastName"
+              label="Last Name"
+              value={credential.Alias.LastName}
+            />
+            <FormInputCopyToClipboard
+              id="birthDate"
+              label="Birth Date"
+              value={credential.Alias.BirthDate ? new Date(credential.Alias.BirthDate).toISOString().split('T')[0] : ''}
+            />
+            {credential.Alias.NickName && (
+              <FormInputCopyToClipboard
+                id="nickName"
+                label="Nickname"
+                value={credential.Alias.NickName}
+              />
+            )}
+          </div>
         </div>
+
+        {credential.Notes && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notes</h2>
+            <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
+              <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                {credential.Notes}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,18 @@
 export type Credential = {
     Id: string;
     Username: string;
-    ServiceId: string;
-    ServiceName: string;
-    Email: string;
-    ServiceUrl: string;
-    Logo: Uint8Array;
     Password: string;
+    Email: string;
+    ServiceName: string;
+    ServiceUrl?: string;
+    Logo?: Uint8Array;
+    Notes?: string;
+    Alias: {
+        FirstName: string;
+        LastName: string;
+        NickName?: string;
+        BirthDate: string;
+        Gender?: string;
+        Email?: string;
+    };
 }

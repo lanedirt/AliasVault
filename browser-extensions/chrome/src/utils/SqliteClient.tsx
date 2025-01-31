@@ -99,23 +99,48 @@ class SqliteClient {
      * @returns Array of Credential objects with service details
      */
     public getAllCredentials(): Credential[] {
-        return this.executeQuery<Credential>(`
-            SELECT
+        const query = `
+            SELECT DISTINCT
                 c.Id,
                 c.Username,
+                c.Notes,
                 c.ServiceId,
                 s.Name as ServiceName,
                 s.Url as ServiceUrl,
                 s.Logo as Logo,
-                MAX(p.Value) as Password,
-                a.Email as Email
+                a.FirstName,
+                a.LastName,
+                a.NickName,
+                a.BirthDate,
+                a.Gender,
+                a.Email,
+                p.Value as Password
             FROM Credentials c
-            JOIN Services s ON s.Id = c.ServiceId
+            LEFT JOIN Services s ON c.ServiceId = s.Id
+            LEFT JOIN Aliases a ON c.AliasId = a.Id
             LEFT JOIN Passwords p ON p.CredentialId = c.Id
-            LEFT JOIN Aliases a ON a.Id = c.AliasId AND a.IsDeleted = 0
-            WHERE c.IsDeleted = 0
-            GROUP BY c.Id, c.Username, c.ServiceId, s.Name, s.Url, s.Logo
-        `);
+            WHERE c.IsDeleted = 0`;
+
+        const results = this.executeQuery(query);
+
+        return results.map((row: any) => ({
+            Id: row.Id,
+            Username: row.Username,
+            Password: row.Password,
+            Email: row.Email,
+            ServiceName: row.ServiceName,
+            ServiceUrl: row.ServiceUrl,
+            Logo: row.Logo,
+            Notes: row.Notes,
+            Alias: {
+                FirstName: row.FirstName,
+                LastName: row.LastName,
+                NickName: row.NickName,
+                BirthDate: row.BirthDate,
+                Gender: row.Gender,
+                Email: row.Email
+            }
+        }));
     }
 
     /**
