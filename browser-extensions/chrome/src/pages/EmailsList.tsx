@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import { Buffer } from 'buffer';
+import ReloadButton from '../components/ReloadButton';
 /**
  * Emails list page.
  */
@@ -142,7 +143,10 @@ const EmailsList: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+        <ReloadButton onClick={loadEmails} />
+      </div>
       <div className="space-y-2">
         {emails.map((email) => (
           <div

@@ -20,8 +20,6 @@ const Header: React.FC<HeaderProps> = ({
   authContext,
   clientUrl,
   handleRefresh,
-  toggleUserMenu,
-  isUserMenuOpen,
   routes = []
 }) => {
   const navigate = useNavigate();
@@ -96,9 +94,7 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         ) : (
           <UserMenu
-            handleRefresh={handleRefresh}
-            toggleUserMenu={toggleUserMenu}
-            isUserMenuOpen={isUserMenuOpen}
+            onRefresh={handleRefresh}
             username={authContext.username}
           />
         )}

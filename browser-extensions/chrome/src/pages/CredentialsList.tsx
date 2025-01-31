@@ -3,21 +3,24 @@ import { useDb } from '../context/DbContext';
 import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
 import { useNavigate } from 'react-router-dom';
-
+import { useLoading } from '../context/LoadingContext';
+import { useWebApi } from '../context/WebApiContext';
+import EncryptionUtility from '../utils/EncryptionUtility';
+import { VaultResponse } from '../types/webapi/VaultResponse';
+import ReloadButton from '../components/ReloadButton';
 /**
  * Credentials list page.
  */
 const CredentialsList: React.FC = () => {
   const dbContext = useDb();
+  const webApi = useWebApi();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const navigate = useNavigate();
+  const { showLoading, hideLoading } = useLoading();
 
   useEffect(() => {
-    console.log('loading credentials1');
-    console.log(dbContext);
     if (!dbContext?.sqliteClient) return;
 
-    console.log('loading credentials2');
     try {
       const results = dbContext.sqliteClient.getAllCredentials();
       setCredentials(results);
@@ -26,9 +29,39 @@ const CredentialsList: React.FC = () => {
     }
   }, [dbContext.sqliteClient]);
 
+  /**
+   * Retrieve latest vault and refresh the page.
+   */
+  const onRefresh = async () => {
+    showLoading();
+    try {
+      // Make API call to get latest vault
+      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+
+      // Get derived key from background worker
+      const passwordHashBase64 = await chrome.runtime.sendMessage({ type: 'GET_DERIVED_KEY' });
+
+      // Attempt to decrypt the blob
+      const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
+        vaultResponseJson.vault.blob,
+        passwordHashBase64
+      );
+
+      // Initialize the SQLite context again with the newly retrieved decrypted blob
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob);
+    } catch (err) {
+      console.error('Refresh error:', err);
+    } finally {
+      hideLoading();
+    }
+  };
+
   return (
     <div>
-      <h2 className="text-gray-900 dark:text-white text-xl mb-4">Credentials</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Credentials</h2>
+        <ReloadButton onClick={onRefresh} />
+      </div>
       {credentials.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">No credentials found</p>
       ) : (
