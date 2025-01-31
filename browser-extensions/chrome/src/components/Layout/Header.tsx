@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 
 interface HeaderProps {
   authContext: any;
-  clientUrl: string;
   handleRefresh: () => Promise<void>;
   toggleUserMenu: () => void;
   isUserMenuOpen: boolean;
@@ -18,12 +17,16 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   authContext,
-  clientUrl,
   handleRefresh,
   routes = []
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const openClientTab = async () => {
+    const setting = await chrome.storage.local.get(['clientUrl']);
+    window.open(setting.clientUrl, '_blank');
+  };
 
   // Updated route matching logic to handle URL parameters
   const currentRoute = routes?.find(route => {
@@ -71,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center">
             {!currentRoute?.showBackButton ? (
           <button
-            onClick={() => window.open(clientUrl, '_blank')}
+            onClick={openClientTab}
             className="p-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
