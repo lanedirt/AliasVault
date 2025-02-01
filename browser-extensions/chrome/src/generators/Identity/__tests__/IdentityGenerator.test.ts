@@ -1,7 +1,7 @@
-import { IdentityGeneratorEn } from '../IdentityGeneratorEn';
-import { IdentityGeneratorNl } from '../IdentityGeneratorNl';
+import { IdentityGeneratorEn } from '../implementations/IdentityGeneratorEn';
+import { IdentityGeneratorNl } from '../implementations/IdentityGeneratorNl';
 import { describe, it, expect } from 'vitest';
-import { IIdentityGenerator } from '../../types/IIdentityGenerator';
+import { IIdentityGenerator } from '../interfaces/IIdentityGenerator';
 
 // Test factory function to run tests for each language implementation
 const testIdentityGenerator = (

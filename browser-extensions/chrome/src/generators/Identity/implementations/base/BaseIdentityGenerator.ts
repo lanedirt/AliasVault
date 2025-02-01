@@ -1,6 +1,6 @@
 import { UsernameEmailGenerator } from '../../UsernameEmailGenerator';
 import { Gender } from '../../types/Gender';
-import { IIdentityGenerator } from '../../types/IIdentityGenerator';
+import { IIdentityGenerator } from '../../interfaces/IIdentityGenerator';
 import { Identity } from '../../types/Identity';
 import * as fs from 'fs';
 
