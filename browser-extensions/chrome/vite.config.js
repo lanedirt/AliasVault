@@ -3,10 +3,12 @@ import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import dictionaryLoader from './vite-plugins/dictionary-loader';
 
 export default defineConfig({
   plugins: [
     react(),
+    dictionaryLoader(),
     viteStaticCopy({
         targets: [
         {

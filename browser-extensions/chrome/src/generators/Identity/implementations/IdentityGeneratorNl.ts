@@ -1,16 +1,15 @@
 import { BaseIdentityGenerator } from "./base/BaseIdentityGenerator";
-import * as path from 'path';
 
 export class IdentityGeneratorNl extends BaseIdentityGenerator {
-  protected getFirstNamesMaleFilePath(): string {
-    return path.join(__dirname, 'dictionaries/nl/firstnames_male');
+  protected getFirstNamesMaleJson(): string[] {
+    return '__FIRSTNAMES_MALE_NL__';  // This will be replaced by dictionary-loader
   }
 
-  protected getFirstNamesFemaleFilePath(): string {
-    return path.join(__dirname, 'dictionaries/nl/firstnames_female');
+  protected getFirstNamesFemaleJson(): string[]  {
+    return '__FIRSTNAMES_FEMALE_NL__';  // This will be replaced by dictionary-loader
   }
 
-  protected getLastNamesFilePath(): string {
-    return path.join(__dirname, 'dictionaries/nl/lastnames');
+  protected getLastNamesJson(): string[] {
+    return '__LASTNAMES_NL__';  // This will be replaced by dictionary-loader
   }
 }

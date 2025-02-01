@@ -2,52 +2,23 @@ import { UsernameEmailGenerator } from '../../UsernameEmailGenerator';
 import { Gender } from '../../types/Gender';
 import { IIdentityGenerator } from '../../interfaces/IIdentityGenerator';
 import { Identity } from '../../types/Identity';
-import * as fs from 'fs';
 
 export abstract class BaseIdentityGenerator implements IIdentityGenerator {
-  private firstNamesMale: string[] = [];
-  private firstNamesFemale: string[] = [];
-  private lastNames: string[] = [];
+  protected firstNamesMale: string[] = [];
+  protected firstNamesFemale: string[] = [];
+  protected lastNames: string[] = [];
   private random = Math.random;
 
   constructor() {
-    this.loadNameLists();
+    // Each implementing class should provide these as static JSON strings
+    this.firstNamesMale = this.getFirstNamesMaleJson();
+    this.firstNamesFemale = this.getFirstNamesFemaleJson();
+    this.lastNames = this.getLastNamesJson();
   }
 
-  // Methods to be overridden by implementations to specify file paths
-  protected abstract getFirstNamesMaleFilePath(): string;
-  protected abstract getFirstNamesFemaleFilePath(): string;
-  protected abstract getLastNamesFilePath(): string;
-
-  private loadNameLists(): void {
-    try {
-      // Load male first names
-      const maleNamesPath = this.getFirstNamesMaleFilePath();
-      const maleNamesContent = fs.readFileSync(maleNamesPath, 'utf8');
-      this.firstNamesMale = maleNamesContent
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
-      // Load female first names
-      const femaleNamesPath = this.getFirstNamesFemaleFilePath();
-      const femaleNamesContent = fs.readFileSync(femaleNamesPath, 'utf8');
-      this.firstNamesFemale = femaleNamesContent
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
-      // Load last names
-      const lastNamesPath = this.getLastNamesFilePath();
-      const lastNamesContent = fs.readFileSync(lastNamesPath, 'utf8');
-      this.lastNames = lastNamesContent
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    } catch (error) {
-      throw new Error(`Failed to load name lists: ${error.message}`);
-    }
-  }
+  protected abstract getFirstNamesMaleJson(): string[];
+  protected abstract getFirstNamesFemaleJson(): string[];
+  protected abstract getLastNamesJson(): string[];
 
   protected generateRandomDateOfBirth(): Date {
     const today = new Date();

@@ -1,5 +1,7 @@
 import { detectForms } from './utils/FormDetector';
 import { Credential } from './types/Credential';
+import { IdentityGeneratorEn } from './generators/Identity/implementations/IdentityGeneratorEn';
+import { PasswordGenerator } from './generators/Password/PasswordGenerator';
 
 type CredentialResponse = {
   status: 'OK' | 'LOCKED';
@@ -267,9 +269,26 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     </svg>
     New Alias
   `;
-  createButton.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'OPEN_NEW_CREDENTIAL' });
-    removeExistingPopup();
+  createButton.addEventListener('click', async () => {
+    // TODO: Implement new credential popup if necessary? otherwise remove if simple implementation is sufficient for now.
+    // chrome.runtime.sendMessage({ type: 'OPEN_NEW_CREDENTIAL' });
+    // removeExistingPopup();
+
+    // Generate new identity locally
+    const identityGenerator = new IdentityGeneratorEn();
+    const identity = await identityGenerator.generateRandomIdentity();
+
+    const passwordGenerator = new PasswordGenerator();
+    const password = passwordGenerator.generateRandomPassword();
+
+    // create alert with all identity details
+    alert(`
+      First name: ${identity.firstName}
+      Last name: ${identity.lastName}
+      Gender: ${identity.gender}
+      Email: ${identity.emailPrefix}
+      Password: ${password}
+    `);
   });
 
   // Search button
