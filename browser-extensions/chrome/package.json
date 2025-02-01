@@ -4,6 +4,7 @@
   "main": "index.tsx",
   "type": "module",
   "scripts": {
+    "test": "vitest",
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint src",
@@ -26,7 +27,8 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.4",
     "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
-    "sql.js": "^1.12.0"
+    "sql.js": "^1.12.0",
+    "vitest": "^3.0.4"
   },
   "devDependencies": {
     "@types/react": "^19.0.7",

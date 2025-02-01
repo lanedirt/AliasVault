@@ -1,8 +1,8 @@
+import { UsernameEmailGenerator } from '../../UsernameEmailGenerator';
 import { Gender } from '../../types/Gender';
 import { IIdentityGenerator } from '../../types/IIdentityGenerator';
 import { Identity } from '../../types/Identity';
 import * as fs from 'fs';
-import * as path from 'path';
 
 export abstract class BaseIdentityGenerator implements IIdentityGenerator {
   private firstNamesMale: string[] = [];
