@@ -18,7 +18,9 @@ export default function dictionaryLoader() {
       // instead of hardcoding the languages here.
       if (id.includes('IdentityGeneratorEn.ts') || id.includes('IdentityGeneratorNl.ts')) {
         const lang = id.includes('IdentityGeneratorEn.ts') ? 'en' : 'nl';
-        const dictionaryPath = path.resolve(__dirname, `../src/generators/Identity/implementations/dictionaries/${lang}`);
+        // Load dictionaries from the repository root 'dictionaries' folder. These dictionaries
+        // are used by both .NET and JavaScript code.
+        const dictionaryPath = path.resolve(__dirname, `../../../dictionaries/${lang}`);
 
         try {
           // Read dictionary files and clean up entries
@@ -37,13 +39,6 @@ export default function dictionaryLoader() {
             .filter(name => name.trim())
             .map(name => name.trim());
 
-          console.log('Raw code:', code);
-          console.log('Searching for placeholders:', {
-            male: `__FIRSTNAMES_MALE_${lang.toUpperCase()}__`,
-            female: `__FIRSTNAMES_FEMALE_${lang.toUpperCase()}__`,
-            last: `__LASTNAMES_${lang.toUpperCase()}__`
-          });
-
           // Replace the placeholder strings with stringified arrays
           code = code.replace(
             new RegExp(`['"\`]__FIRSTNAMES_MALE_${lang.toUpperCase()}__['"\`]`, 'g'),
@@ -59,8 +54,6 @@ export default function dictionaryLoader() {
             new RegExp(`['"\`]__LASTNAMES_${lang.toUpperCase()}__['"\`]`, 'g'),
             `[${lastNames.map(name => `"${name}"`).join(',')}]`
           );
-
-          console.log('Transformed code:', code);
 
           return {
             code,

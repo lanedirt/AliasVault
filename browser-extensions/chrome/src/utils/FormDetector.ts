@@ -49,7 +49,7 @@ function findUsernameField(passwordField: HTMLInputElement): HTMLInputElement | 
         input.placeholder
       ].map(attr => attr?.toLowerCase() || '');
 
-      const patterns = ['user', 'email', 'login', 'identifier'];
+      const patterns = ['user', 'username', 'mail', 'email', 'login', 'identifier'];
       if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
         return input;
       }

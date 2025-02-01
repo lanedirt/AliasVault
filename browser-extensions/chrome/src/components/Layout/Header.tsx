@@ -47,6 +47,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center h-16 px-4">
         {currentRoute?.showBackButton ? (
         <button
+        id="back"
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 pr-2 pt-1.5 pb-1.5 rounded-lg group"
         >

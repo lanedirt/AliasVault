@@ -35,6 +35,10 @@ const testIdentityGenerator = (
           expect(value).not.toBeNull();
           expect(value).not.toBeUndefined();
         });
+
+        // Add length checks for first and last names
+        expect(identity.firstName.length).toBeGreaterThan(1);
+        expect(identity.lastName.length).toBeGreaterThan(1);
       });
     });
   });

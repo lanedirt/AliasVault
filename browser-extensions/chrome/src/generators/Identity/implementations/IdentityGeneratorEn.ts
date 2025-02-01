@@ -2,14 +2,20 @@ import { BaseIdentityGenerator } from "./base/BaseIdentityGenerator";
 
 export class IdentityGeneratorEn extends BaseIdentityGenerator {
   protected getFirstNamesMaleJson(): string[] {
-    return '__FIRSTNAMES_MALE_EN__';  // This will be replaced by dictionary-loader
+    // This is a placeholder for the dictionary-loader to replace with the actual data.
+    // See vite-plugins/dictionary-loader.ts for more information.
+    return '__FIRSTNAMES_MALE_EN__';
   }
 
   protected getFirstNamesFemaleJson(): string[] {
-    return '__FIRSTNAMES_FEMALE_EN__';  // This will be replaced by dictionary-loader
+    // This is a placeholder for the dictionary-loader to replace with the actual data.
+    // See vite-plugins/dictionary-loader.ts for more information.
+    return '__FIRSTNAMES_FEMALE_EN__';
   }
 
   protected getLastNamesJson(): string[] {
-    return '__LASTNAMES_EN__';  // This will be replaced by dictionary-loader
+    // This is a placeholder for the dictionary-loader to replace with the actual data.
+    // See vite-plugins/dictionary-loader.ts for more information.
+    return '__LASTNAMES_EN__';
   }
 }
