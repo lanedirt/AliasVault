@@ -1,0 +1,39 @@
+name: Browser Extension Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  chrome-extension:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: browser-extensions/chrome
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: browser-extensions/chrome/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Run tests and linting
+        run: npm run test
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension-dist
+          path: browser-extensions/chrome/dist/
