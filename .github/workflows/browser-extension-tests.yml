@@ -29,8 +29,11 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Run tests and linting
+      - name: Run tests
         run: npm run test
+
+      - name: Run linting
+        run: npm run lint
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
