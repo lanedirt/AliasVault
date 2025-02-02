@@ -31,6 +31,9 @@ var config = new Config();
 var publicRegistrationEnabled = Environment.GetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED") ?? "false";
 config.PublicRegistrationEnabled = bool.Parse(publicRegistrationEnabled);
 
+var privateEmailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")?.Split(",").Select(d => d.Trim());
+config.PrivateEmailDomains = privateEmailDomains?.ToList() ?? new List<string>();
+
 builder.Services.AddSingleton(config);
 
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");

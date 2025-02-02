@@ -35,8 +35,9 @@ using Microsoft.Extensions.Caching.Memory;
 /// <param name="timeProvider">ITimeProvider instance.</param>
 /// <param name="authLoggingService">AuthLoggingService instance.</param>
 /// <param name="cache">IMemoryCache instance.</param>
+/// <param name="config">Config instance.</param>
 [ApiVersion("1")]
-public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache) : AuthenticatedRequestController(userManager)
+public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache, Config config) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Error message for providing an invalid current password (during password change).
@@ -95,7 +96,9 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                     CurrentRevisionNumber = 0,
                     EncryptionPublicKey = string.Empty,
                     CredentialsCount = 0,
-                    EmailAddressList = new List<string>(),
+                    EmailAddressList = [],
+                    PrivateEmailDomainList = [],
+                    PublicEmailDomainList = [],
                     CreatedAt = DateTime.MinValue,
                     UpdatedAt = DateTime.MinValue,
                 },
@@ -117,6 +120,13 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             });
         }
 
+        // Get dynamic list of private email domains from config.
+        var privateEmailDomainList = config.PrivateEmailDomains;
+
+        // Hardcoded list of public (SpamOK) email domains that are available to the client.
+        var publicEmailDomainList = new List<string>(["spamok.com", "solarflarecorp.com", "spamok.nl", "3060.nl",
+            "landmail.nl", "asdasd.nl", "spamok.de", "spamok.com.ua", "spamok.es", "spamok.fr"]);
+
         return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
         {
             Status = VaultStatus.Ok,
@@ -129,6 +139,8 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 EncryptionPublicKey = string.Empty,
                 CredentialsCount = 0,
                 EmailAddressList = [],
+                PrivateEmailDomainList = privateEmailDomainList,
+                PublicEmailDomainList = publicEmailDomainList,
                 CreatedAt = vault.CreatedAt,
                 UpdatedAt = vault.UpdatedAt,
             },
@@ -168,6 +180,8 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 EncryptionPublicKey = string.Empty,
                 CredentialsCount = 0,
                 EmailAddressList = [],
+                PrivateEmailDomainList = [],
+                PublicEmailDomainList = [],
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
             }).ToList(),
