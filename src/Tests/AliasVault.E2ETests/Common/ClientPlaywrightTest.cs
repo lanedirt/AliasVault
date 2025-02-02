@@ -93,6 +93,10 @@ public class ClientPlaywrightTest : PlaywrightTest
         AppBaseUrl = "http://localhost:" + appPort + "/";
         ApiBaseUrl = "http://localhost:" + apiPort + "/";
 
+        // Set environment variables for the API.
+        string[] privateEmailDomains = ["example.tld", "example2.tld"];
+        Environment.SetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS", string.Join(",", privateEmailDomains));
+
         // Start WebAPI in-memory.
         _apiFactory.Port = apiPort;
         _apiFactory.CreateDefaultClient();
@@ -104,7 +108,6 @@ public class ClientPlaywrightTest : PlaywrightTest
         await SetupPlaywrightBrowserAndContext();
 
         // Intercept Blazor WASM app requests to override appsettings.json
-        string[] privateEmailDomains = ["example.tld", "example2.tld"];
         var appSettings = new
         {
             ApiUrl = ApiBaseUrl.TrimEnd('/'),

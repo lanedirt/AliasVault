@@ -390,6 +390,8 @@ public sealed class DbService : IDisposable
             EncryptionPublicKey = encryptionKey.PublicKey,
             CredentialsCount = credentialsCount,
             EmailAddressList = emailAddresses,
+            PrivateEmailDomainList = [],
+            PublicEmailDomainList = [],
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
