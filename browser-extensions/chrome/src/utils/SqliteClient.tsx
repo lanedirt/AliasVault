@@ -39,6 +39,31 @@ class SqliteClient {
     }
 
     /**
+     * Export the SQLite database to a base64 string
+     * @returns Base64 encoded string of the database
+     */
+    public exportToBase64(): string {
+        if (!this.db) {
+            throw new Error('Database not initialized');
+        }
+
+        try {
+            // Export database to Uint8Array
+            const binaryArray = this.db.export();
+
+            // Convert Uint8Array to base64 string
+            let binaryString = '';
+            for (let i = 0; i < binaryArray.length; i++) {
+                binaryString += String.fromCharCode(binaryArray[i]);
+            }
+            return btoa(binaryString);
+        } catch (error) {
+            console.error('Error exporting SQLite database:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Execute a SELECT query
      */
     public executeQuery<T>(query: string, params: (string | number | null | Uint8Array)[] = []): T[] {
@@ -152,6 +177,89 @@ class SqliteClient {
                 x.PrivateKey,
                 x.IsPrimary
             FROM EncryptionKeys x`);
+    }
+
+    /**
+     * Create a new credential with associated entities
+     * @param credential The credential object to insert
+     * @returns The number of rows modified
+     */
+    public createCredential(credential: Credential): number {
+        if (!this.db) {
+            throw new Error('Database not initialized');
+        }
+
+        try {
+            this.db.run('BEGIN TRANSACTION');
+
+            // 1. Insert Service
+            const serviceQuery = `
+                INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt)
+                VALUES (?, ?, ?, ?, ?, ?)`;
+            const serviceResult = this.executeUpdate(serviceQuery, [
+                crypto.randomUUID(),
+                credential.ServiceName,
+                credential.ServiceUrl ?? null,
+                credential.Logo ?? null,
+                new Date().toISOString(),
+                new Date().toISOString()
+            ]);
+            const serviceId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
+
+            // 2. Insert Alias
+            const aliasQuery = `
+                INSERT INTO Aliases (Id, FirstName, LastName, NickName, BirthDate, Gender, Email, CreatedAt, UpdatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            const aliasResult = this.executeUpdate(aliasQuery, [
+                crypto.randomUUID(),
+                credential.Alias.FirstName ?? null,
+                credential.Alias.LastName ?? null,
+                credential.Alias.NickName ?? null,
+                credential.Alias.BirthDate ?? null,
+                credential.Alias.Gender ?? null,
+                credential.Alias.Email ?? null,
+                new Date().toISOString(),
+                new Date().toISOString()
+            ]);
+            const aliasId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
+
+            // 3. Insert Credential
+            const credentialQuery = `
+                INSERT INTO Credentials (Id, Username, Notes, ServiceId, AliasId, CreatedAt, UpdatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const credentialResult = this.executeUpdate(credentialQuery, [
+                crypto.randomUUID(),
+                credential.Username,
+                credential.Notes ?? null,
+                serviceId,
+                aliasId,
+                new Date().toISOString(),
+                new Date().toISOString()
+            ]);
+            const credentialId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
+
+            // 4. Insert Password
+            if (credential.Password) {
+                const passwordQuery = `
+                    INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt)
+                    VALUES (?, ?, ?, ?, ?)`;
+                this.executeUpdate(passwordQuery, [
+                    crypto.randomUUID(),
+                    credential.Password,
+                    credentialId,
+                    new Date().toISOString(),
+                    new Date().toISOString()
+                ]);
+            }
+
+            this.db.run('COMMIT');
+            return 1;
+
+        } catch (error) {
+            this.db.run('ROLLBACK');
+            console.error('Error creating credential:', error);
+            throw error;
+        }
     }
 }
 

@@ -190,6 +190,55 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       break;
     }
+
+    case 'CREATE_IDENTITY': {
+      if (!vaultState.derivedKey) {
+        sendResponse({ success: false, error: 'Vault is locked' });
+        return;
+      }
+
+      chrome.storage.session.get(['encryptedVault'], async (result) => {
+        try {
+          if (!result.encryptedVault) {
+            sendResponse({ success: false, error: 'No vault found' });
+            return;
+          }
+
+          const decryptedVault = await EncryptionUtility.symmetricDecrypt(
+            result.encryptedVault,
+            vaultState.derivedKey!
+          );
+
+          // Initialize SQLite client
+          const sqliteClient = new SqliteClient();
+          await sqliteClient.initializeFromBase64(decryptedVault);
+
+          // Create new credential with random identity
+          const credential = message.credential;
+          await sqliteClient.createCredential(credential);
+
+          // Instead of sending a message, directly encrypt and store the updated vault
+          const updatedVaultData = sqliteClient.exportToBase64();
+          const encryptedVault = await EncryptionUtility.symmetricEncrypt(
+            updatedVaultData,
+            vaultState.derivedKey!
+          );
+
+          // Store in chrome.storage.session
+          await chrome.storage.session.set({
+            encryptedVault,
+            publicEmailDomains: vaultState.publicEmailDomains,
+            privateEmailDomains: vaultState.privateEmailDomains
+          });
+
+          sendResponse({ success: true });
+        } catch (error) {
+          console.error('Failed to create identity:', error);
+          sendResponse({ success: false, error: 'Failed to create identity' });
+        }
+      });
+      break;
+    }
   }
   return true;
 });

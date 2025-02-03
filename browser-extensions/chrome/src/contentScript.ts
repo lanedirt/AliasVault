@@ -288,14 +288,39 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     const passwordGenerator = new PasswordGenerator();
     const password = passwordGenerator.generateRandomPassword();
 
-    // create alert with all identity details
+    // Submit new identity to backend to persist in db
+    const credential: Credential = {
+      Id: '',
+      ServiceName: 'AliasVault1',
+      ServiceUrl: 'https://aliasvault.com',
+      Email: `${identity.emailPrefix}@${domain}`,
+      Username: identity.nickName,
+      Password: password,
+      Notes: '',
+      Alias: {
+        FirstName: identity.firstName,
+        LastName: identity.lastName,
+        NickName: identity.nickName,
+        BirthDate: identity.birthDate.toISOString(),
+        Gender: identity.gender,
+        Email: `${identity.emailPrefix}@${domain}`
+      }
+    };
+
+    chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential });
+
+    // create alert with confirmation message
     alert(`
+      New identity created successfully!
       First name: ${identity.firstName}
       Last name: ${identity.lastName}
       Gender: ${identity.gender}
       Email: ${identity.emailPrefix}@${domain}
       Password: ${password}
     `);
+
+    // Refresh the popup to show new identity
+    showCredentialPopup(input);
   });
 
   // Search button
