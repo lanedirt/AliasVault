@@ -214,21 +214,25 @@ class SqliteClient {
             const serviceQuery = `
                 INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?)`;
-            const serviceId = crypto.randomUUID();
+            const serviceId = crypto.randomUUID().toUpperCase();
+            const currentDateTime = new Date().toISOString()
+                .replace('T', ' ')
+                .replace('Z', '')
+                .substring(0, 23);
             const serviceResult = this.executeUpdate(serviceQuery, [
                 serviceId,
                 credential.ServiceName,
                 credential.ServiceUrl ?? null,
                 logoData,
-                new Date().toISOString(),
-                new Date().toISOString()
+                currentDateTime,
+                currentDateTime
             ]);
 
             // 2. Insert Alias
             const aliasQuery = `
                 INSERT INTO Aliases (Id, FirstName, LastName, NickName, BirthDate, Gender, Email, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-            const aliasId = crypto.randomUUID();
+            const aliasId = crypto.randomUUID().toUpperCase();
             const aliasResult = this.executeUpdate(aliasQuery, [
                 aliasId,
                 credential.Alias.FirstName ?? null,
@@ -237,23 +241,23 @@ class SqliteClient {
                 credential.Alias.BirthDate ?? null,
                 credential.Alias.Gender ?? null,
                 credential.Alias.Email ?? null,
-                new Date().toISOString(),
-                new Date().toISOString()
+                currentDateTime,
+                currentDateTime
             ]);
 
             // 3. Insert Credential
             const credentialQuery = `
                 INSERT INTO Credentials (Id, Username, Notes, ServiceId, AliasId, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-            const credentialId = crypto.randomUUID();
+            const credentialId = crypto.randomUUID().toUpperCase();
             const credentialResult = this.executeUpdate(credentialQuery, [
                 credentialId,
                 credential.Username,
                 credential.Notes ?? null,
                 serviceId,
                 aliasId,
-                new Date().toISOString(),
-                new Date().toISOString()
+                currentDateTime,
+                currentDateTime
             ]);
 
             // 4. Insert Password
@@ -261,13 +265,13 @@ class SqliteClient {
                 const passwordQuery = `
                     INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt)
                     VALUES (?, ?, ?, ?, ?)`;
-                const passwordId = crypto.randomUUID();
+                const passwordId = crypto.randomUUID().toUpperCase();
                 this.executeUpdate(passwordQuery, [
                     passwordId,
                     credential.Password,
                     credentialId,
-                    new Date().toISOString(),
-                    new Date().toISOString()
+                    currentDateTime,
+                    currentDateTime
                 ]);
             }
 

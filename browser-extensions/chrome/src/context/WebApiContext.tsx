@@ -8,7 +8,7 @@ const WebApiContext = createContext<WebApiService | null>(null);
  * WebApiProvider to provide the WebApiService to the app that components can use.
  */
 export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { getAccessToken, getRefreshToken, updateTokens, logout } = useAuth();
+  const { logout } = useAuth();
   const [webApiService, setWebApiService] = useState<WebApiService | null>(null);
 
   /**
@@ -16,11 +16,6 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
    */
   useEffect(() : void => {
     const service = new WebApiService(
-      () => getAccessToken(),
-      () => getRefreshToken(),
-      (newAccessToken, newRefreshToken) => {
-        updateTokens(newAccessToken, newRefreshToken);
-      },
       logout
     );
     setWebApiService(service);
@@ -40,7 +35,7 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () : void => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
-  }, [getAccessToken, getRefreshToken, updateTokens, logout]);
+  }, [logout]);
 
   if (!webApiService) {
     return null;

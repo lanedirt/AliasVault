@@ -48,7 +48,7 @@ const CredentialsList: React.FC = () => {
       );
 
       // Initialize the SQLite context again with the newly retrieved decrypted blob
-      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob);
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
     } catch (err) {
       console.error('Refresh error:', err);
     } finally {

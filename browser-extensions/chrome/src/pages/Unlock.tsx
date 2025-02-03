@@ -53,7 +53,7 @@ const Unlock: React.FC = () => {
       );
 
       // Initialize the SQLite context with decrypted data
-      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList);
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);
@@ -69,10 +69,20 @@ const Unlock: React.FC = () => {
     showLoading();
     try {
       await webApi.logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+
+    try {
       await authContext.logout();
-    } finally {
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    finally {
       hideLoading();
     }
+
+
   };
 
   return (

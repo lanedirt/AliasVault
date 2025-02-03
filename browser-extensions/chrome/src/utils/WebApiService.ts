@@ -17,15 +17,9 @@ export class WebApiService {
   /**
    * Constructor for the WebApiService class.
    *
-   * @param {Function} getAccessToken - Function to get the access token.
-   * @param {Function} getRefreshToken - Function to get the refresh token.
-   * @param {Function} updateTokens - Function to update the access and refresh tokens.
    * @param {Function} handleLogout - Function to handle logout.
    */
   public constructor(
-    private getAccessToken: () => string | null,
-    private getRefreshToken: () => string | null,
-    private updateTokens: (accessToken: string, refreshToken: string) => void,
     private handleLogout: () => void
   ) {
     // Load the API URL from storage when service is initialized
@@ -35,7 +29,7 @@ export class WebApiService {
   /**
    * Initialize the base URL for the API from settings.
    */
-  private async initializeBaseUrl() : Promise<void> {
+  public async initializeBaseUrl() : Promise<void> {
     const result = await chrome.storage.local.get(['apiUrl']);
     // Trim trailing slash if present
     this.baseUrl = (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
@@ -53,7 +47,7 @@ export class WebApiService {
     const headers = new Headers(options.headers || {});
 
     // Add authorization header if we have an access token
-    const accessToken = this.getAccessToken();
+    const accessToken = await this.getAccessToken();
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
@@ -101,7 +95,7 @@ export class WebApiService {
    * Refresh the access token.
    */
   private async refreshAccessToken(): Promise<string | null> {
-    const refreshToken = this.getRefreshToken();
+    const refreshToken = await this.getRefreshToken();
     if (!refreshToken) {
       return null;
     }
@@ -114,7 +108,7 @@ export class WebApiService {
           'X-Ignore-Failure': 'true',
         },
         body: JSON.stringify({
-          token: this.getAccessToken(),
+          token: await this.getAccessToken(),
           refreshToken: refreshToken,
         }),
       });
@@ -180,14 +174,42 @@ export class WebApiService {
    * Logout and revoke tokens via WebApi.
    */
   public async logout(): Promise<void> {
-    const refreshToken = this.getRefreshToken();
+    const refreshToken = await this.getRefreshToken();
     if (!refreshToken) {
       return;
     }
 
     await this.post('Auth/revoke', {
-      token: this.getAccessToken(),
+      token: await this.getAccessToken(),
       refreshToken: refreshToken,
     }, false);
+  }
+
+  /**
+   * Get the current access token from storage.
+   */
+  private async getAccessToken(): Promise<string | null> {
+    const token = await chrome.storage.local.get('accessToken');
+    console.log('accessToken get', token);
+    return token.accessToken || null;
+  }
+
+  /**
+   * Get the current refresh token from storage.
+   */
+  private async getRefreshToken(): Promise<string | null> {
+    const token = await chrome.storage.local.get('refreshToken');
+    console.log('refreshToken get', token);
+    return token.refreshToken || null;
+  }
+
+  /**
+   * Update both access and refresh tokens in storage.
+   */
+  private async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
+    await chrome.storage.local.set({
+      accessToken,
+      refreshToken
+    });
   }
 }

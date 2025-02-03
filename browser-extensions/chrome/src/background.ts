@@ -1,14 +1,18 @@
+import { Vault } from './types/webapi/Vault';
 import EncryptionUtility from './utils/EncryptionUtility';
 import SqliteClient from './utils/SqliteClient';
+import { WebApiService } from './utils/WebApiService';
 
 let vaultState: {
   derivedKey: string | null;
   publicEmailDomains: string[];
   privateEmailDomains: string[];
+  vaultRevisionNumber: number;
 } = {
   derivedKey: null,
   publicEmailDomains: [],
-  privateEmailDomains: []
+  privateEmailDomains: [],
+  vaultRevisionNumber: 0,
 };
 
 // Listen for messages from popup
@@ -19,6 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       vaultState.derivedKey = message.derivedKey;
       vaultState.publicEmailDomains = message.publicEmailDomains || [];
       vaultState.privateEmailDomains = message.privateEmailDomains || [];
+      vaultState.vaultRevisionNumber = message.vaultRevisionNumber || 0;
 
       // Re-encrypt vault with session key
       (async () : Promise<void> => {
@@ -32,7 +37,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           chrome.storage.session.set({
             encryptedVault,
             publicEmailDomains: vaultState.publicEmailDomains,
-            privateEmailDomains: vaultState.privateEmailDomains
+            privateEmailDomains: vaultState.privateEmailDomains,
+            vaultRevisionNumber: vaultState.vaultRevisionNumber
           }, () => {
             if (chrome.runtime.lastError) {
               console.error('Failed to store vault:', chrome.runtime.lastError);
@@ -54,7 +60,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      chrome.storage.session.get(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains'], async (result) => {
+      chrome.storage.session.get(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains', 'vaultRevisionNumber'], async (result) => {
         try {
           if (!result.encryptedVault) {
             console.error('No encrypted vault found in storage');
@@ -73,7 +79,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse({
               vault: decryptedVault,
               publicEmailDomains: result.publicEmailDomains || [],
-              privateEmailDomains: result.privateEmailDomains || []
+              privateEmailDomains: result.privateEmailDomains || [],
+              vaultRevisionNumber: result.vaultRevisionNumber || 0
             });
           } catch (parseError) {
             console.error('Failed to parse decrypted vault:', parseError);
@@ -90,7 +97,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       vaultState.derivedKey = null;
       vaultState.publicEmailDomains = [];
       vaultState.privateEmailDomains = [];
-      chrome.storage.session.remove(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains']);
+      vaultState.vaultRevisionNumber = 0;
+      chrome.storage.session.remove(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains', 'vaultRevisionNumber']);
       sendResponse({ success: true });
       break;
     }
@@ -231,6 +239,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             privateEmailDomains: vaultState.privateEmailDomains
           });
 
+          // Upload new vault to server
+          // TODO: extract all required fields by quering the vault db.
+          const username = await chrome.storage.local.get('username');
+          const newVault: Vault = {
+            blob: encryptedVault,
+            createdAt: new Date().toISOString(),
+            credentialsCount: 0, // TODO
+            currentRevisionNumber: vaultState.vaultRevisionNumber,
+            emailAddressList: await getEmailAddressesForVault(sqliteClient),
+            privateEmailDomainList: [], // TODO
+            publicEmailDomainList: [], // TODO
+            encryptionPublicKey: '', // TODO
+            updatedAt: new Date().toISOString(),
+            username: username.username, // TODO
+            version: '1.0.0' // TODO
+          }
+
+          console.log('New vault to upload:', newVault);
+
+          const webApi = new WebApiService(
+            () => {}
+          );
+          await webApi.initializeBaseUrl();
+          await webApi.post('Vault', newVault);
+
+          console.log('Vault uploaded successfully');
+
           sendResponse({ success: true });
         } catch (error) {
           console.error('Failed to create identity:', error);
@@ -242,3 +277,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   return true;
 });
+
+/**
+ * Get all active email addresses from aliases
+ * @param sqliteClient The SQLite client
+ * @returns The list of email addresses
+ */
+async function getEmailAddressesForVault(sqliteClient: SqliteClient): Promise<string[]> {
+  const credentials = sqliteClient.getAllCredentials();
+
+  // Extract unique email addresses from credentials
+  const emailAddresses = credentials
+    .filter(cred => cred.Email != null)
+    .map(cred => cred.Email!)
+    .filter((email, index, self) => self.indexOf(email) === index); // Get unique values
+
+  // Filter to only include domains from the private domains list
+  const filteredEmailAddresses = emailAddresses.filter(email => {
+    const domain = email.split('@')[1];
+    return vaultState.privateEmailDomains.includes(domain);
+  });
+
+  return filteredEmailAddresses;
+}

@@ -5,7 +5,7 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[]) => Promise<void>;
+  initializeDatabase: (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[], vaultRevisionNumber: number) => Promise<void>;
   clearDatabase: () => void;
 }
 
@@ -40,7 +40,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
 
-  const initializeDatabase = useCallback(async (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[]) => {
+  const initializeDatabase = useCallback(async (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[], vaultRevisionNumber: number) => {
     const client = new SqliteClient();
     await client.initializeFromBase64(vault);
     setSqliteClient(client);
@@ -49,13 +49,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setPublicEmailDomains(publicEmailDomains);
     setPrivateEmailDomains(privateEmailDomains);
 
-    // Store in background worker
+    // Store in background worker.
+    // TODO: perhaps we can simply pass the full vaultresponse object instead of the individual fields
+    // in case we need to access more fields in the future.
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
       derivedKey: derivedKey,
       vault: vault,
       publicEmailDomains: publicEmailDomains,
-      privateEmailDomains: privateEmailDomains
+      privateEmailDomains: privateEmailDomains,
+      vaultRevisionNumber: vaultRevisionNumber
     });
   }, []);
 
