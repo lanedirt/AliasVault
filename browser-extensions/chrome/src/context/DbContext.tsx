@@ -5,7 +5,7 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (derivedKey: string, vault: string) => Promise<void>;
+  initializeDatabase: (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[]) => Promise<void>;
   clearDatabase: () => void;
 }
 
@@ -30,18 +30,32 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [dbAvailable, setDbAvailable] = useState(false);
 
-  const initializeDatabase = useCallback(async (derivedKey: string, vault: string) => {
+  /**
+   * Public email domains.
+   */
+  const [publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
+
+  /**
+   * Private email domains.
+   */
+  const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
+
+  const initializeDatabase = useCallback(async (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[]) => {
     const client = new SqliteClient();
     await client.initializeFromBase64(vault);
     setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
+    setPublicEmailDomains(publicEmailDomains);
+    setPrivateEmailDomains(privateEmailDomains);
 
     // Store in background worker
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
       derivedKey: derivedKey,
       vault: vault,
+      publicEmailDomains: publicEmailDomains,
+      privateEmailDomains: privateEmailDomains
     });
   }, []);
 
@@ -54,6 +68,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSqliteClient(client);
         setDbInitialized(true);
         setDbAvailable(true);
+        setPublicEmailDomains(response.publicEmailDomains);
+        setPrivateEmailDomains(response.privateEmailDomains);
       }
       else {
         setDbInitialized(true);

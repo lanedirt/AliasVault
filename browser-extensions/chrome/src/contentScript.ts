@@ -274,6 +274,13 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     // chrome.runtime.sendMessage({ type: 'OPEN_NEW_CREDENTIAL' });
     // removeExistingPopup();
 
+    // Retrieve default email domain from background
+    const response = await new Promise<{ domain: string }>((resolve) => {
+      chrome.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }, resolve);
+    });
+
+    const domain = response.domain;
+
     // Generate new identity locally
     const identityGenerator = new IdentityGeneratorEn();
     const identity = await identityGenerator.generateRandomIdentity();
@@ -286,7 +293,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       First name: ${identity.firstName}
       Last name: ${identity.lastName}
       Gender: ${identity.gender}
-      Email: ${identity.emailPrefix}
+      Email: ${identity.emailPrefix}@${domain}
       Password: ${password}
     `);
   });

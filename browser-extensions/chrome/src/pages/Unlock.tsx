@@ -22,6 +22,7 @@ const Unlock: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { showLoading, hideLoading } = useLoading();
+
   /**
    * Handle submit
    */
@@ -52,7 +53,7 @@ const Unlock: React.FC = () => {
       );
 
       // Initialize the SQLite context with decrypted data
-      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob);
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList);
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);

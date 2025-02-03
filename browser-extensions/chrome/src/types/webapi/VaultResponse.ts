@@ -4,6 +4,8 @@ export type Vault = {
     credentialsCount: number;
     currentRevisionNumber: number;
     emailAddressList: string[];
+    privateEmailDomainList: string[];
+    publicEmailDomainList: string[];
     encryptionPublicKey: string;
     updatedAt: string;
     username: string;

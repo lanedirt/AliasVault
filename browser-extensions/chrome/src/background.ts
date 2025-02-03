@@ -3,16 +3,22 @@ import SqliteClient from './utils/SqliteClient';
 
 let vaultState: {
   derivedKey: string | null;
+  publicEmailDomains: string[];
+  privateEmailDomains: string[];
 } = {
-  derivedKey: null
+  derivedKey: null,
+  publicEmailDomains: [],
+  privateEmailDomains: []
 };
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case 'STORE_VAULT': {
-      // Store derived key in memory for future vault syncs
+      // Store derived key and domain lists in memory for future vault syncs
       vaultState.derivedKey = message.derivedKey;
+      vaultState.publicEmailDomains = message.publicEmailDomains || [];
+      vaultState.privateEmailDomains = message.privateEmailDomains || [];
 
       // Re-encrypt vault with session key
       (async () : Promise<void> => {
@@ -23,12 +29,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           );
 
           // Store in chrome.storage.session and wait for completion
-          chrome.storage.session.set({ encryptedVault }, () => {
+          chrome.storage.session.set({
+            encryptedVault,
+            publicEmailDomains: vaultState.publicEmailDomains,
+            privateEmailDomains: vaultState.privateEmailDomains
+          }, () => {
             if (chrome.runtime.lastError) {
               console.error('Failed to store vault:', chrome.runtime.lastError);
               sendResponse({ success: false, error: 'Failed to store vault' });
             } else {
-                sendResponse({ success: true });
+              sendResponse({ success: true });
             }
           });
         } catch (error) {
@@ -44,7 +54,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      chrome.storage.session.get(['encryptedVault'], async (result) => {
+      chrome.storage.session.get(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains'], async (result) => {
         try {
           if (!result.encryptedVault) {
             console.error('No encrypted vault found in storage');
@@ -58,9 +68,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             vaultState.derivedKey!
           );
 
-          // Parse the decrypted vault and send response
+          // Parse the decrypted vault and send response with domain lists
           try {
-            sendResponse({ vault: decryptedVault });
+            sendResponse({
+              vault: decryptedVault,
+              publicEmailDomains: result.publicEmailDomains || [],
+              privateEmailDomains: result.privateEmailDomains || []
+            });
           } catch (parseError) {
             console.error('Failed to parse decrypted vault:', parseError);
             sendResponse({ vault: null, error: 'Failed to parse decrypted vault' });
@@ -74,7 +88,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     case 'CLEAR_VAULT': {
       vaultState.derivedKey = null;
-      chrome.storage.session.remove(['encryptedVault']);
+      vaultState.publicEmailDomains = [];
+      vaultState.privateEmailDomains = [];
+      chrome.storage.session.remove(['encryptedVault', 'publicEmailDomains', 'privateEmailDomains']);
       sendResponse({ success: true });
       break;
     }
@@ -127,6 +143,51 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         focused: true
       });
       sendResponse({ success: true });
+      break;
+    }
+
+    case 'GET_DEFAULT_EMAIL_DOMAIN': {
+      if (!vaultState.derivedKey) {
+        sendResponse({ domain: null });
+        return;
+      }
+
+      // TODO: usage between chrome storage session and vaultState is
+      // now mixed. Determine where to store the domain lists and avoid
+      // storing it in multiple places when it's not needed.
+      chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], (result) => {
+        const privateEmailDomains = result.privateEmailDomains || [];
+        const publicEmailDomains = result.publicEmailDomains || [];
+
+        // TODO: add vault preference settings to determine which domain to use
+        // taking into account vault settings.
+
+        // Function to check if a domain is valid
+        const isValidDomain = (domain: string) => {
+          return domain &&
+                 domain !== 'DISABLED.TLD' &&
+                 (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain));
+        };
+
+        // Get first valid private domain
+        const firstPrivate = privateEmailDomains.find(isValidDomain);
+
+        if (firstPrivate) {
+          sendResponse({ domain: firstPrivate });
+          return;
+        }
+
+        // Return first valid public domain
+        const firstPublic = publicEmailDomains.find(isValidDomain);
+
+        if (firstPublic) {
+          sendResponse({ domain: firstPublic });
+          return;
+        }
+
+        // Return null if no valid domains are found
+        sendResponse({ domain: null });
+      });
       break;
     }
   }
