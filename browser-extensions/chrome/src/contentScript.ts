@@ -37,6 +37,25 @@ const ICON_HTML = `
 </div>
 `;
 
+const getLoadingHtml = (message: string): string => `
+<div style="
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 8px;
+">
+  <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+    <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke-opacity="1"/>
+  </svg>
+  <span>${message}</span>
+</div>
+`;
+
+// Declare handleClickOutside at module scope
+let handleClickOutside: (event: MouseEvent) => void;
+
 /**
  * Check if the current theme is dark.
  */
@@ -139,7 +158,7 @@ function filterCredentials(credentials: Credential[], currentUrl: string, pageTi
  * Create auto-fill popup
  */
 function createPopup(input: HTMLInputElement, credentials: Credential[]) : void {
-  // Remove existing popup if any
+  // Remove existing popup and its event listeners
   removeExistingPopup();
 
   const popup = document.createElement('div');
@@ -270,71 +289,73 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     New Alias
   `;
   createButton.addEventListener('click', async () => {
-    // TODO: Implement new credential popup if necessary? otherwise remove if simple implementation is sufficient for now.
-    // chrome.runtime.sendMessage({ type: 'OPEN_NEW_CREDENTIAL' });
-    // removeExistingPopup();
+    // Show loading state
+    popup.innerHTML = getLoadingHtml('Creating new identity...');
 
-    // Retrieve default email domain from background
-    const response = await new Promise<{ domain: string }>((resolve) => {
-      chrome.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }, resolve);
-    });
+    try {
+      // Retrieve default email domain from background
+      const response = await new Promise<{ domain: string }>((resolve) => {
+        chrome.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }, resolve);
+      });
 
-    const domain = response.domain;
+      const domain = response.domain;
 
-    // Generate new identity locally
-    const identityGenerator = new IdentityGeneratorEn();
-    const identity = await identityGenerator.generateRandomIdentity();
+      // Generate new identity locally
+      const identityGenerator = new IdentityGeneratorEn();
+      const identity = await identityGenerator.generateRandomIdentity();
 
-    const passwordGenerator = new PasswordGenerator();
-    const password = passwordGenerator.generateRandomPassword();
+      const passwordGenerator = new PasswordGenerator();
+      const password = passwordGenerator.generateRandomPassword();
 
-    // Extract favicon from page and get the bytes
-    const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
-    let faviconBytes: ArrayBuffer | null = null;
+      // Extract favicon from page and get the bytes
+      const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
+      let faviconBytes: ArrayBuffer | null = null;
 
-    if (favicon?.href) {
-      try {
-        const response = await fetch(favicon.href);
-        faviconBytes = await response.arrayBuffer();
-      } catch (error) {
-        console.error('Error fetching favicon:', error);
+      if (favicon?.href) {
+        try {
+          const response = await fetch(favicon.href);
+          faviconBytes = await response.arrayBuffer();
+        } catch (error) {
+          console.error('Error fetching favicon:', error);
+        }
       }
+
+      // Submit new identity to backend to persist in db
+      const credential: Credential = {
+        Id: '',
+        ServiceName: document.title,
+        ServiceUrl: window.location.href,
+        Email: `${identity.emailPrefix}@${domain}`,
+        Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
+        Username: identity.nickName,
+        Password: password,
+        Notes: '',
+        Alias: {
+          FirstName: identity.firstName,
+          LastName: identity.lastName,
+          NickName: identity.nickName,
+          BirthDate: identity.birthDate.toISOString(),
+          Gender: identity.gender,
+          Email: `${identity.emailPrefix}@${domain}`
+        }
+      };
+
+      chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential }, () => {
+        // Refresh the popup to show new identity
+        showCredentialPopup(input);
+      });
+    } catch (error) {
+      console.error('Error creating identity:', error);
+      // Show error state in popup
+      popup.innerHTML = `
+        <div style="padding: 16px; color: #ef4444;">
+          Failed to create identity. Please try again.
+        </div>
+      `;
+      setTimeout(() => {
+        removeExistingPopup();
+      }, 2000);
     }
-
-    // Submit new identity to backend to persist in db
-    const credential: Credential = {
-      Id: '',
-      ServiceName: document.title,
-      ServiceUrl: window.location.href,
-      Email: `${identity.emailPrefix}@${domain}`,
-      Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
-      Username: identity.nickName,
-      Password: password,
-      Notes: '',
-      Alias: {
-        FirstName: identity.firstName,
-        LastName: identity.lastName,
-        NickName: identity.nickName,
-        BirthDate: identity.birthDate.toISOString(),
-        Gender: identity.gender,
-        Email: `${identity.emailPrefix}@${domain}`
-      }
-    };
-
-    chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential });
-
-    // create alert with confirmation message
-    alert(`
-      New identity created successfully!
-      First name: ${identity.firstName}
-      Last name: ${identity.lastName}
-      Gender: ${identity.gender}
-      Email: ${identity.emailPrefix}@${domain}
-      Password: ${password}
-    `);
-
-    // Refresh the popup to show new identity
-    showCredentialPopup(input);
   });
 
   // Search button
@@ -383,20 +404,35 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   });
   popup.appendChild(closeButton);
 
-  /**
-   * Add click outside handler
-   * @param event
-   */
-  const handleClickOutside = (event: MouseEvent) : void => {
-    if (!popup.contains(event.target as Node)) {
-      removeExistingPopup();
+  // Define handleClickOutside
+  handleClickOutside = (event: MouseEvent) : void => {
+    const popup = document.getElementById('aliasvault-credential-popup');
+    const target = event.target as Node;
+
+    // If popup doesn't exist, remove the listener
+    if (!popup) {
       document.removeEventListener('mousedown', handleClickOutside);
+      return;
     }
+
+    // Ignore clicks on the popup and its children
+    if (popup.contains(target)) {
+      return;
+    }
+
+    // Check if click target is an input field
+    const inputFields = document.querySelectorAll('input');
+    for (const input of inputFields) {
+      if (input.contains(target)) {
+        return;
+      }
+    }
+
+    removeExistingPopup();
   };
 
-  setTimeout(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-  }, 100);
+  // Add the event listener for clicking outside
+  document.addEventListener('mousedown', handleClickOutside);
 
   // Position popup below input
   const rect = input.getBoundingClientRect();
@@ -523,6 +559,8 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
 function removeExistingPopup() : void {
   const existing = document.getElementById('aliasvault-credential-popup');
   if (existing) {
+    // Remove the mousedown event listener before removing the popup
+    document.removeEventListener('mousedown', handleClickOutside);
     existing.remove();
   }
 }
