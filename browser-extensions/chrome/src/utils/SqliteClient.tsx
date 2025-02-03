@@ -144,7 +144,8 @@ class SqliteClient {
             LEFT JOIN Services s ON c.ServiceId = s.Id
             LEFT JOIN Aliases a ON c.AliasId = a.Id
             LEFT JOIN Passwords p ON p.CredentialId = c.Id
-            WHERE c.IsDeleted = 0`;
+            WHERE c.IsDeleted = 0
+            ORDER BY c.CreatedAt DESC`;
 
         const results = this.executeQuery(query);
 
