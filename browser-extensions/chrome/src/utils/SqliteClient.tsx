@@ -193,25 +193,44 @@ class SqliteClient {
             this.db.run('BEGIN TRANSACTION');
 
             // 1. Insert Service
+            let logoData = null;
+            try {
+                if (credential.Logo) {
+                    // Handle object-like array conversion
+                    if (typeof credential.Logo === 'object' && !ArrayBuffer.isView(credential.Logo)) {
+                        const values = Object.values(credential.Logo);
+                        logoData = new Uint8Array(values);
+                    }
+                    // Handle existing array types
+                    else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
+                        logoData = new Uint8Array(credential.Logo);
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to convert logo to Uint8Array:', error);
+                logoData = null;
+            }
+
             const serviceQuery = `
                 INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?)`;
+            const serviceId = crypto.randomUUID();
             const serviceResult = this.executeUpdate(serviceQuery, [
-                crypto.randomUUID(),
+                serviceId,
                 credential.ServiceName,
                 credential.ServiceUrl ?? null,
-                credential.Logo ?? null,
+                logoData,
                 new Date().toISOString(),
                 new Date().toISOString()
             ]);
-            const serviceId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
 
             // 2. Insert Alias
             const aliasQuery = `
                 INSERT INTO Aliases (Id, FirstName, LastName, NickName, BirthDate, Gender, Email, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            const aliasId = crypto.randomUUID();
             const aliasResult = this.executeUpdate(aliasQuery, [
-                crypto.randomUUID(),
+                aliasId,
                 credential.Alias.FirstName ?? null,
                 credential.Alias.LastName ?? null,
                 credential.Alias.NickName ?? null,
@@ -221,14 +240,14 @@ class SqliteClient {
                 new Date().toISOString(),
                 new Date().toISOString()
             ]);
-            const aliasId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
 
             // 3. Insert Credential
             const credentialQuery = `
                 INSERT INTO Credentials (Id, Username, Notes, ServiceId, AliasId, CreatedAt, UpdatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const credentialId = crypto.randomUUID();
             const credentialResult = this.executeUpdate(credentialQuery, [
-                crypto.randomUUID(),
+                credentialId,
                 credential.Username,
                 credential.Notes ?? null,
                 serviceId,
@@ -236,15 +255,15 @@ class SqliteClient {
                 new Date().toISOString(),
                 new Date().toISOString()
             ]);
-            const credentialId = this.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
 
             // 4. Insert Password
             if (credential.Password) {
                 const passwordQuery = `
                     INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt)
                     VALUES (?, ?, ?, ?, ?)`;
+                const passwordId = crypto.randomUUID();
                 this.executeUpdate(passwordQuery, [
-                    crypto.randomUUID(),
+                    passwordId,
                     credential.Password,
                     credentialId,
                     new Date().toISOString(),

@@ -5,7 +5,7 @@ export type Credential = {
     Email: string;
     ServiceName: string;
     ServiceUrl?: string;
-    Logo?: Uint8Array;
+    Logo?: Uint8Array | number[] | undefined;
     Notes?: string;
     Alias: {
         FirstName: string;

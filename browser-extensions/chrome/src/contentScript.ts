@@ -288,12 +288,26 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     const passwordGenerator = new PasswordGenerator();
     const password = passwordGenerator.generateRandomPassword();
 
+    // Extract favicon from page and get the bytes
+    const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
+    let faviconBytes: ArrayBuffer | null = null;
+
+    if (favicon?.href) {
+      try {
+        const response = await fetch(favicon.href);
+        faviconBytes = await response.arrayBuffer();
+      } catch (error) {
+        console.error('Error fetching favicon:', error);
+      }
+    }
+
     // Submit new identity to backend to persist in db
     const credential: Credential = {
       Id: '',
-      ServiceName: 'AliasVault1',
-      ServiceUrl: 'https://aliasvault.com',
+      ServiceName: document.title,
+      ServiceUrl: window.location.href,
       Email: `${identity.emailPrefix}@${domain}`,
+      Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
       Username: identity.nickName,
       Password: password,
       Notes: '',
@@ -589,28 +603,31 @@ async function disableAutoPopup(): Promise<void> {
 function injectIcons(): void {
   const forms = detectForms();
   forms.forEach(form => {
-    if (form.usernameField && !form.usernameField.parentElement?.querySelector('.aliasvault-input-icon')) {
+    // Determine which field to attach the icon to
+    const targetField = form.usernameField || form.passwordField;
+
+    if (targetField && !targetField.parentElement?.querySelector('.aliasvault-input-icon')) {
       const wrapper = document.createElement('div');
       wrapper.style.cssText = 'position: relative; display: inline-block; width: 100%;';
 
       // Preserve original input styles
-      const computedStyle = window.getComputedStyle(form.usernameField);
+      const computedStyle = window.getComputedStyle(targetField);
       const originalWidth = computedStyle.width;
       const originalDisplay = computedStyle.display;
 
-      form.usernameField.parentNode?.insertBefore(wrapper, form.usernameField);
-      wrapper.appendChild(form.usernameField);
+      targetField.parentNode?.insertBefore(wrapper, targetField);
+      wrapper.appendChild(targetField);
 
       // Restore original input styles
-      form.usernameField.style.width = originalWidth;
-      form.usernameField.style.display = originalDisplay;
+      targetField.style.width = originalWidth;
+      targetField.style.display = originalDisplay;
 
       const iconDiv = document.createElement('div');
       iconDiv.innerHTML = ICON_HTML;
       const icon = iconDiv.firstElementChild as HTMLElement;
 
       icon.addEventListener('click', () => {
-        showCredentialPopup(form.usernameField as HTMLInputElement);
+        showCredentialPopup(targetField as HTMLInputElement);
       });
 
       wrapper.appendChild(icon);

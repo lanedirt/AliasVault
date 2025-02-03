@@ -214,7 +214,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           await sqliteClient.initializeFromBase64(decryptedVault);
 
           // Create new credential with random identity
-          const credential = message.credential;
+          const credential = message.credential as import('./types/Credential').Credential;
           await sqliteClient.createCredential(credential);
 
           // Instead of sending a message, directly encrypt and store the updated vault
