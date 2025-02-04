@@ -377,13 +377,29 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     // Request credentials from background script
     chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
       if (response.status === 'OK' && response.credentials) {
-        // Filter credentials based on search term
-        const filteredCredentials = response.credentials.filter(cred =>
-          cred.ServiceName.toLowerCase().includes(searchTerm) ||
-          cred.Username.toLowerCase().includes(searchTerm) ||
-          cred.Email.toLowerCase().includes(searchTerm) ||
-          cred.ServiceUrl?.toLowerCase().includes(searchTerm)
-        );
+        let filteredCredentials;
+
+        if (searchTerm === '') {
+          // If search is empty, use original URL-based filtering
+          filteredCredentials = filterCredentials(
+            response.credentials,
+            window.location.href,
+            document.title
+          );
+        } else {
+          // Otherwise filter based on search term
+          filteredCredentials = response.credentials.filter(cred =>
+            cred.ServiceName.toLowerCase().includes(searchTerm) ||
+            cred.Username.toLowerCase().includes(searchTerm) ||
+            cred.Email.toLowerCase().includes(searchTerm) ||
+            cred.ServiceUrl?.toLowerCase().includes(searchTerm)
+          );
+
+          // Show max 3 results for search
+          if (filteredCredentials.length > 3) {
+            filteredCredentials = filteredCredentials.slice(0, 3);
+          }
+        }
 
         // Update popup content with filtered results
         updatePopupContent(popup, filteredCredentials, input);
