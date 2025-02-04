@@ -202,128 +202,9 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     document.title
   );
 
-  // Add credentials to popup if any matches found
-  if (filteredCredentials.length > 0) {
-    filteredCredentials.forEach(cred => {
-      const item = document.createElement('div');
-      item.style.cssText = `
-        padding: 8px 16px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-        transition: background-color 0.2s ease;
-        border-radius: 4px;
-        margin: 0 4px;
-      `;
-
-      // Create container for credential info (logo + username)
-      const credentialInfo = document.createElement('div');
-      credentialInfo.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-grow: 1;
-        padding: 4px;
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-      `;
-
-      const imgElement = document.createElement('img');
-      imgElement.style.width = '16px';
-      imgElement.style.height = '16px';
-
-      // Handle base64 image data
-      if (cred.Logo) {
-        try {
-          const base64Logo = base64Encode(cred.Logo);
-          imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
-        } catch (error) {
-          console.error('Error setting logo:', error);
-          imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
-        }
-      } else {
-        imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
-      }
-
-      credentialInfo.appendChild(imgElement);
-      credentialInfo.appendChild(document.createTextNode(cred.Username));
-
-      // Add popout icon
-      const popoutIcon = document.createElement('div');
-      popoutIcon.style.cssText = `
-        display: flex;
-        align-items: center;
-        padding: 4px;
-        opacity: 0.6;
-        border-radius: 4px;
-      `;
-      popoutIcon.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-          <polyline points="15 3 21 3 21 9"></polyline>
-          <line x1="10" y1="14" x2="21" y2="3"></line>
-        </svg>
-      `;
-
-      // Add hover effects
-      popoutIcon.addEventListener('mouseenter', () => {
-        popoutIcon.style.opacity = '1';
-        popoutIcon.style.backgroundColor = isDarkMode() ? '#ffffff' : '#000000';
-        popoutIcon.style.color = isDarkMode() ? '#000000' : '#ffffff';
-      });
-
-      popoutIcon.addEventListener('mouseleave', () => {
-        popoutIcon.style.opacity = '0.6';
-        popoutIcon.style.backgroundColor = 'transparent';
-        popoutIcon.style.color = isDarkMode() ? '#ffffff' : '#000000';
-      });
-
-      // Handle popout click
-      popoutIcon.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent credential fill
-        chrome.runtime.sendMessage({
-          type: 'OPEN_POPUP_WITH_CREDENTIAL',
-          credentialId: cred.Id
-        });
-        removeExistingPopup();
-      });
-
-      item.appendChild(credentialInfo);
-      item.appendChild(popoutIcon);
-
-      // Update hover effect for the entire item
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = isDarkMode() ? '#2d3748' : '#f3f4f6';
-        popoutIcon.style.opacity = '1';
-      });
-
-      item.addEventListener('mouseleave', () => {
-        item.style.backgroundColor = 'transparent';
-        popoutIcon.style.opacity = '0.6';
-      });
-
-      // Update click handler to only trigger on credentialInfo
-      credentialInfo.addEventListener('click', () => {
-        fillCredential(cred);
-        removeExistingPopup();
-      });
-
-      popup.appendChild(item);
-    });
-  } else {
-    // Show "no matches found" message
-    const noMatches = document.createElement('div');
-    noMatches.style.cssText = `
-      padding: 8px 16px;
-      color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
-      font-style: italic;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    `;
-    noMatches.textContent = 'No matches found';
-    popup.appendChild(noMatches);
-  }
+  // Add credentials to popup using the shared function
+  const credentialElements = createCredentialList(filteredCredentials, input);
+  credentialElements.forEach(element => popup.appendChild(element));
 
   // Add divider
   const divider = document.createElement('div');
@@ -363,7 +244,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
-    New Alias
+    New
   `;
   createButton.addEventListener('click', async () => {
     const serviceName = await createEditNamePopup(document.title);
@@ -437,20 +318,58 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       `;
       setTimeout(() => {
         removeExistingPopup();
-      }, 2000);
+      }, 200);
     }
   });
 
-  // Search button
-  const searchButton = document.createElement('button');
-  searchButton.style.cssText = createButton.style.cssText;
-  searchButton.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-    Search
+  // Create search input instead of button
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search vault...';
+  searchInput.style.cssText = `
+    flex: 2;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
+    color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
+    font-size: 14px;
+    border: 1px solid ${isDarkMode() ? '#4b5563' : '#e5e7eb'};
+    outline: none;
   `;
+
+  // Add focus styles
+  searchInput.addEventListener('focus', () => {
+    searchInput.style.borderColor = '#2563eb';
+    searchInput.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.2)';
+  });
+
+  searchInput.addEventListener('blur', () => {
+    searchInput.style.borderColor = isDarkMode() ? '#4b5563' : '#e5e7eb';
+    searchInput.style.boxShadow = 'none';
+  });
+
+  // Handle search input
+  let searchTimeout: NodeJS.Timeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    // Request credentials from background script
+    chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
+      if (response.status === 'OK' && response.credentials) {
+        // Filter credentials based on search term
+        const filteredCredentials = response.credentials.filter(cred =>
+          cred.ServiceName.toLowerCase().includes(searchTerm) ||
+          cred.Username.toLowerCase().includes(searchTerm) ||
+          cred.Email.toLowerCase().includes(searchTerm) ||
+          cred.ServiceUrl?.toLowerCase().includes(searchTerm)
+        );
+
+        // Update popup content with filtered results
+        updatePopupContent(popup, filteredCredentials, input);
+      }
+    });
+  });
 
   // Close button
   const closeButton = document.createElement('button');
@@ -477,8 +396,8 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     removeExistingPopup();
   });
 
+  actionContainer.appendChild(searchInput);
   actionContainer.appendChild(createButton);
-  actionContainer.appendChild(searchButton);
   actionContainer.appendChild(closeButton);
   popup.appendChild(actionContainer);
 
@@ -1109,3 +1028,200 @@ urlObserver.observe(document.body, {
 window.addEventListener('popstate', () => {
   removeExistingPopup();
 });
+
+/**
+ * Create credential list content for popup
+ */
+function createCredentialList(credentials: Credential[], input: HTMLInputElement): HTMLElement[] {
+  const elements: HTMLElement[] = [];
+
+  if (credentials.length > 0) {
+    credentials.forEach(cred => {
+      const item = document.createElement('div');
+      item.style.cssText = `
+        padding: 8px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        transition: background-color 0.2s ease;
+        border-radius: 4px;
+        margin: 0 4px;
+      `;
+
+      // Create container for credential info (logo + username)
+      const credentialInfo = document.createElement('div');
+      credentialInfo.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-grow: 1;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      `;
+
+      const imgElement = document.createElement('img');
+      imgElement.style.width = '20px';
+      imgElement.style.height = '20px';
+
+      // Handle base64 image data
+      if (cred.Logo) {
+        try {
+          const base64Logo = base64Encode(cred.Logo);
+          imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
+        } catch (error) {
+          console.error('Error setting logo:', error);
+          imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
+        }
+      } else {
+        imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
+      }
+
+      credentialInfo.appendChild(imgElement);
+      const credTextContainer = document.createElement('div');
+      credTextContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-width: 0; /* Enable text truncation in flex container */
+      `;
+
+      // Service name (primary text)
+      const serviceName = document.createElement('div');
+      serviceName.style.cssText = `
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        font-size: 14px;
+        text-overflow: ellipsis;
+        color: ${isDarkMode() ? '#f3f4f6' : '#111827'};
+      `;
+      serviceName.textContent = cred.ServiceName;
+
+      // Details container (secondary text)
+      const detailsContainer = document.createElement('div');
+      detailsContainer.style.cssText = `
+        font-size: 0.85em;
+        white-space: nowrap;
+        overflow: hidden;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
+      `;
+
+      // Combine full name (if available) and username
+      const details = [];
+      if (cred.Alias?.FirstName && cred.Alias?.LastName) {
+        details.push(`${cred.Alias.FirstName} ${cred.Alias.LastName}`);
+      }
+      details.push(cred.Username);
+      detailsContainer.textContent = details.join(' · ');
+
+      credTextContainer.appendChild(serviceName);
+      credTextContainer.appendChild(detailsContainer);
+      credentialInfo.appendChild(credTextContainer);
+
+      // Add popout icon
+      const popoutIcon = document.createElement('div');
+      popoutIcon.style.cssText = `
+        display: flex;
+        align-items: center;
+        padding: 4px;
+        opacity: 0.6;
+        border-radius: 4px;
+      `;
+      popoutIcon.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      `;
+
+      // Add hover effects
+      popoutIcon.addEventListener('mouseenter', () => {
+        popoutIcon.style.opacity = '1';
+        popoutIcon.style.backgroundColor = isDarkMode() ? '#ffffff' : '#000000';
+        popoutIcon.style.color = isDarkMode() ? '#000000' : '#ffffff';
+      });
+
+      popoutIcon.addEventListener('mouseleave', () => {
+        popoutIcon.style.opacity = '0.6';
+        popoutIcon.style.backgroundColor = 'transparent';
+        popoutIcon.style.color = isDarkMode() ? '#ffffff' : '#000000';
+      });
+
+      // Handle popout click
+      popoutIcon.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent credential fill
+        chrome.runtime.sendMessage({
+          type: 'OPEN_POPUP_WITH_CREDENTIAL',
+          credentialId: cred.Id
+        });
+        removeExistingPopup();
+      });
+
+      item.appendChild(credentialInfo);
+      item.appendChild(popoutIcon);
+
+      // Update hover effect for the entire item
+      item.addEventListener('mouseenter', () => {
+        item.style.backgroundColor = isDarkMode() ? '#2d3748' : '#f3f4f6';
+        popoutIcon.style.opacity = '1';
+      });
+
+      item.addEventListener('mouseleave', () => {
+        item.style.backgroundColor = 'transparent';
+        popoutIcon.style.opacity = '0.6';
+      });
+
+      // Update click handler to only trigger on credentialInfo
+      credentialInfo.addEventListener('click', () => {
+        fillCredential(cred);
+        removeExistingPopup();
+      });
+
+      elements.push(item);
+    });
+  } else {
+    const noMatches = document.createElement('div');
+    noMatches.style.cssText = `
+      padding: 8px 16px;
+      color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
+      font-style: italic;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    `;
+    noMatches.textContent = 'No matches found';
+    elements.push(noMatches);
+  }
+
+  return elements;
+}
+
+// Update updatePopupContent to use the new function
+function updatePopupContent(popup: HTMLElement, credentials: Credential[], input: HTMLInputElement) {
+  // Store the action container
+  const actionContainer = popup.lastElementChild;
+
+  // Clear all content except the action container
+  while (popup.firstChild && popup.firstChild !== actionContainer) {
+    popup.removeChild(popup.firstChild);
+  }
+
+  // Add credentials using the shared function
+  const credentialElements = createCredentialList(credentials, input);
+  credentialElements.forEach(element => {
+    popup.insertBefore(element, actionContainer);
+  });
+
+  // Add divider before action container
+  const divider = document.createElement('div');
+  divider.style.cssText = `
+    height: 1px;
+    background: ${isDarkMode() ? '#374151' : '#e5e7eb'};
+    margin: 8px 0;
+  `;
+  popup.insertBefore(divider, actionContainer);
+}
