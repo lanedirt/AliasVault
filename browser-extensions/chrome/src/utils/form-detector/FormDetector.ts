@@ -13,6 +13,7 @@ type LoginForm = {
   // Birthdate fields can be either a single field or multiple fields
   birthdateField: {
     single: HTMLInputElement | null;
+    format: string; // 'yyyy-mm-dd' | 'dd-mm-yyyy' | 'mm-dd-yyyy'
     day: HTMLInputElement | null;
     month: HTMLInputElement | null;
     year: HTMLInputElement | null;
@@ -289,9 +290,51 @@ export class FormDetector {
     // First try to find a single date input
     const singleDateField = this.findInputField(form, ['birthdate', 'birth-date', 'dob', 'geboortedatum'], ['date', 'text']);
 
+    // Detect date format by searching all text content in the form
+    let format = 'yyyy-mm-dd'; // default format
+    if (form && singleDateField) {
+      // Get the parent container
+      const container = singleDateField.closest('div');
+      if (container) {
+        // Collect text from all relevant elements
+        const elements = [
+          ...Array.from(container.getElementsByTagName('label')),
+          ...Array.from(container.getElementsByTagName('span')),
+          container
+        ];
+
+        const allText = elements
+          .map(el => el.textContent?.toLowerCase() || '')
+          .join(' ')
+          // Normalize different types of spaces and separators
+          .replace(/[\s\u00A0]/g, '')
+          .replace(/[\/\-]/g, '');
+
+        // Check for date format patterns
+        if (/dd.*mm.*jj/i.test(allText) || /dd.*mm.*yyyy/i.test(allText)) {
+          format = 'dd-mm-yyyy';
+        } else if (/mm.*dd.*yyyy/i.test(allText)) {
+          format = 'mm-dd-yyyy';
+        } else if (/yyyy.*mm.*dd/i.test(allText)) {
+          format = 'yyyy-mm-dd';
+        }
+
+        // Check placeholder as fallback
+        if (format === 'yyyy-mm-dd' && singleDateField.placeholder) {
+          const placeholder = singleDateField.placeholder.toLowerCase().replace(/[\s\u00A0\-\/]/g, '');
+          if (/ddmm/.test(placeholder)) {
+            format = 'dd-mm-yyyy';
+          } else if (/mmdd/.test(placeholder)) {
+            format = 'mm-dd-yyyy';
+          }
+        }
+      }
+    }
+
     if (singleDateField) {
       return {
         single: singleDateField,
+        format,
         day: null,
         month: null,
         year: null
@@ -305,6 +348,7 @@ export class FormDetector {
 
     return {
       single: null,
+      format: 'yyyy-mm-dd', // Default format for separate fields
       day: dayField,
       month: monthField,
       year: yearField

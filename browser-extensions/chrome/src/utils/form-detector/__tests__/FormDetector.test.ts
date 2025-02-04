@@ -32,6 +32,7 @@ enum FormField {
   Password = 'password',
   PasswordConfirm = 'passwordConfirm',
   BirthDate = 'birthdate',
+  BirthDateFormat = 'birthdateFormat',
   BirthDay = 'birthdateDay',
   BirthMonth = 'birthdateMonth',
   BirthYear = 'birthdateYear',
@@ -81,6 +82,14 @@ const testField = (fieldName: FormField, elementId: string, htmlFile: string) =>
   });
 };
 
+// New helper function to test birthdate format property
+const testBirthdateFormat = (expectedFormat: string, htmlFile: string) => {
+  it('should detect correct birthdate format', () => {
+    const { result } = setupFormTest(htmlFile);
+    expect(result.birthdateField.format).toBe(expectedFormat);
+  });
+};
+
 describe('FormDetector', () => {
   describe('Dutch registration form detection', () => {
     const htmlFile = 'nl-registration-form1.html';
@@ -115,7 +124,7 @@ describe('FormDetector', () => {
     testField(FormField.Password, 'password', htmlFile);
 
     testField(FormField.BirthDate, 'date', htmlFile);
-
+    testBirthdateFormat('dd-mm-yyyy', htmlFile);
     testField(FormField.GenderMale, 'gender1', htmlFile);
     testField(FormField.GenderFemale, 'gender2', htmlFile);
     testField(FormField.GenderOther, 'gender3', htmlFile);

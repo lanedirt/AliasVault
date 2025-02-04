@@ -629,11 +629,29 @@ function fillCredential(credential: Credential) : void {
 
   // Handle birthdate with input events
   if (form.birthdateField.single) {
-    // TODO: let formdetector also detect proper birthdate format
-    // that input field is likely expecting, as this differs per region/country.
-    // E.g. dd/mm/yyyy, mm/dd/yyyy, yyyy/mm/dd, etc.
-    form.birthdateField.single.value = credential.Alias.BirthDate;
-    triggerInputEvents(form.birthdateField.single);
+    if (credential.Alias.BirthDate) {
+      const birthDate = new Date(credential.Alias.BirthDate);
+      const day = birthDate.getDate().toString().padStart(2, '0');
+      const month = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+      const year = birthDate.getFullYear().toString();
+
+      let formattedDate = '';
+      switch (form.birthdateField.format) {
+        case 'dd-mm-yyyy':
+          formattedDate = `${day}-${month}-${year}`;
+          break;
+        case 'mm-dd-yyyy':
+          formattedDate = `${month}-${day}-${year}`;
+          break;
+        case 'yyyy-mm-dd':
+        default:
+          formattedDate = `${year}-${month}-${day}`;
+          break;
+      }
+
+      form.birthdateField.single.value = formattedDate;
+      triggerInputEvents(form.birthdateField.single);
+    }
   } else {
     if (credential.Alias.BirthDate) {
       const birthDate = new Date(credential.Alias.BirthDate);
