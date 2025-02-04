@@ -111,4 +111,10 @@ describe('FormDetector', () => {
     testField(FormField.Email, 'login', htmlFile);
     testField(FormField.Password, 'password', htmlFile);
   });
+
+  describe('English email form 1 detection', () => {
+    const htmlFile = 'en-email-form1.html';
+
+    testField(FormField.Email, 'P0-0', htmlFile);
+  });
 });

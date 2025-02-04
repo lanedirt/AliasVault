@@ -41,17 +41,28 @@ export class FormDetector {
    */
   public detectForms(): LoginForm[] {
     const forms: LoginForm[] = [];
+
+    // Find all input fields that could be part of a login form
     const passwordFields = this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
+    const emailFields = this.document.querySelectorAll<HTMLInputElement>('input[type="email"], input[type="text"]');
+    const textFields = this.document.querySelectorAll<HTMLInputElement>('input[type="text"]');
 
-    passwordFields.forEach(passwordField => {
-      const form = passwordField.closest('form');
+    // Create a Set to track processed forms to avoid duplicates
+    const processedForms = new Set<HTMLFormElement | null>();
 
-      // Find all the required fields
-      const emailField = this.findEmailField(passwordField);
-      const usernameField = this.findUsernameField(passwordField);
-      const passwordConfirmField = this.findPasswordConfirmField(passwordField);
+    // Helper to create a form entry
+    const createFormEntry = (
+      form: HTMLFormElement | null,
+      emailField: HTMLInputElement | null,
+      usernameField: HTMLInputElement | null,
+      passwordField: HTMLInputElement | null
+    ) => {
+      // Skip if we've already processed this form
+      if (form && processedForms.has(form)) return;
+      processedForms.add(form);
 
-      // Find identity fields
+      // Find additional fields
+      const passwordConfirmField = passwordField ? this.findPasswordConfirmField(passwordField) : null;
       const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam'], ['text']);
       const lastNameField = this.findInputField(form, ['lastname', 'last-name', 'lname', 'achternaam'], ['text']);
       const birthdateField = this.findBirthdateFields(form);
@@ -68,6 +79,40 @@ export class FormDetector {
         birthdateField,
         genderField
       });
+    };
+
+    // Process password fields first
+    passwordFields.forEach(passwordField => {
+      const form = passwordField.closest('form');
+      const emailField = this.findEmailField(passwordField);
+      const usernameField = this.findUsernameField(passwordField);
+      createFormEntry(form, emailField, usernameField, passwordField);
+    });
+
+    // Process email fields that aren't already part of a processed form
+    emailFields.forEach(field => {
+      const form = field.closest('form');
+      if (form && processedForms.has(form)) return;
+
+      if (this.isLikelyEmailField(field)) {
+        const passwordField = form ?
+          form.querySelector<HTMLInputElement>('input[type="password"]') : null;
+        const usernameField = this.findUsernameField(field);
+        createFormEntry(form, field, usernameField, passwordField);
+      }
+    });
+
+    // Process potential username fields that aren't already part of a processed form
+    textFields.forEach(field => {
+      const form = field.closest('form');
+      if (form && processedForms.has(form)) return;
+
+      if (this.isLikelyUsernameField(field)) {
+        const passwordField = form ?
+          form.querySelector<HTMLInputElement>('input[type="password"]') : null;
+        const emailField = this.findEmailField(field);
+        createFormEntry(form, emailField, field, passwordField);
+      }
     });
 
     return forms;
@@ -295,5 +340,37 @@ export class FormDetector {
       type: 'text',
       field: textField
     };
+  }
+
+  /**
+   * Check if a field is likely an email field based on its attributes
+   */
+  private isLikelyEmailField(input: HTMLInputElement): boolean {
+    const attributes = [
+      input.type,
+      input.id,
+      input.name,
+      input.className,
+      input.placeholder
+    ].map(attr => attr?.toLowerCase() || '');
+
+    const patterns = ['email', 'e-mail', 'mail', 'address', '@'];
+    return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
+  }
+
+  /**
+   * Check if a field is likely a username field based on its attributes
+   */
+  private isLikelyUsernameField(input: HTMLInputElement): boolean {
+    const attributes = [
+      input.type,
+      input.id,
+      input.name,
+      input.className,
+      input.placeholder
+    ].map(attr => attr?.toLowerCase() || '');
+
+    const patterns = ['user', 'username', 'login', 'identifier'];
+    return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
   }
 }

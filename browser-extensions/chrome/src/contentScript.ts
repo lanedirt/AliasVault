@@ -180,7 +180,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   const inputWidth = input.offsetWidth;
 
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(250, Math.min(960, inputWidth));
+  const popupWidth = Math.max(250, Math.min(640, inputWidth));
 
   popup.style.cssText = `
     position: absolute;
@@ -192,6 +192,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     padding: 8px 0;
     width: ${popupWidth}px;
     color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   `;
 
   // Filter credentials based on current page context
@@ -211,6 +212,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
         display: flex;
         align-items: center;
         gap: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       `;
 
       const imgElement = document.createElement('img');
@@ -255,6 +257,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       padding: 8px 16px;
       color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
       font-style: italic;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     `;
     noMatches.textContent = 'No matches found';
     popup.appendChild(noMatches);
@@ -474,7 +477,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
   const inputWidth = input.offsetWidth;
 
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(250, Math.min(960, inputWidth));
+  const popupWidth = Math.max(250, Math.min(640, inputWidth));
 
   popup.style.cssText = `
     position: absolute;
@@ -488,6 +491,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
     cursor: pointer;
     transition: background-color 0.2s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   `;
 
   // Add hover effect to the entire popup
@@ -513,6 +517,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     color: ${isDarkMode() ? '#d1d5db' : '#666'};
     font-size: 14px;
     padding-right: 32px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   `;
   messageElement.textContent = message;
   container.appendChild(messageElement);
@@ -836,6 +841,7 @@ const createEditNamePopup = (defaultName: string): Promise<string | null> => {
       transform: scale(0.95);
       opacity: 0;
       transition: transform 0.2s ease, opacity 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     `;
 
     popup.innerHTML = `
