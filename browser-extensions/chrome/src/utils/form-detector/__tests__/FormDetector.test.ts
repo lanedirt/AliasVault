@@ -12,7 +12,11 @@ const loadTestHtml = (filename: string): string => {
 // Helper function to setup form detection test
 const setupFormTest = (htmlFile: string) => {
   const html = loadTestHtml(htmlFile);
-  const dom = new JSDOM(html);
+  const dom = new JSDOM(html, {
+    url: 'http://localhost',
+    runScripts: 'dangerously',
+    resources: 'usable'
+  });
   const document = dom.window.document;
   const formDetector = new FormDetector(document);
   const result = formDetector.detectForms()[0];
@@ -20,6 +24,7 @@ const setupFormTest = (htmlFile: string) => {
 };
 
 enum FormField {
+  Username = 'username',
   LastName = 'lastName',
   Email = 'email',
   Password = 'password',
@@ -32,8 +37,14 @@ const testField = (fieldName: FormField, elementId: string, htmlFile: string) =>
     const { document, result } = setupFormTest(htmlFile);
     const fieldKey = `${fieldName}Field` as keyof typeof result;
 
+    // First verify the test element exists
+    const expectedElement = document.getElementById(elementId);
+    if (!expectedElement) {
+      throw new Error(`Test setup failed: Element with id "${elementId}" not found in test HTML`);
+    }
+
     expect(result[fieldKey]).toBeDefined();
-    expect(result[fieldKey]).toBe(document.getElementById(elementId));
+    expect(result[fieldKey]).toBe(expectedElement);
   });
 };
 
@@ -45,5 +56,13 @@ describe('FormDetector', () => {
     testField(FormField.Email, 'cpContent_txtEmail', htmlFile);
     testField(FormField.Password, 'cpContent_txtWachtwoord', htmlFile);
     testField(FormField.PasswordConfirm, 'cpContent_txtWachtwoord2', htmlFile);
+  });
+
+  describe('Dutch registration form 2 detection', () => {
+    const htmlFile = 'nl-registration-form2.html';
+
+    testField(FormField.Username, 'register-username', htmlFile);
+    testField(FormField.Email, 'register-email', htmlFile);
+    testField(FormField.Password, 'register-password', htmlFile);
   });
 });
