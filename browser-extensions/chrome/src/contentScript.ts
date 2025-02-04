@@ -1,4 +1,4 @@
-import { detectForms } from './utils/FormDetector';
+import { FormDetector } from './utils/form-detector/FormDetector';
 import { Credential } from './types/Credential';
 import { IdentityGeneratorEn } from './generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from './generators/Password/PasswordGenerator';
@@ -80,7 +80,9 @@ document.addEventListener('focusin', async (e) => {
  * Show credential popup
  */
 function showCredentialPopup(input: HTMLInputElement) : void {
-  const forms = detectForms();
+  const formDetector = new FormDetector(document);
+  const forms = formDetector.detectForms();
+
   if (!forms.length) return;
 
   // Add keydown event listener for Enter key
@@ -585,7 +587,9 @@ function removeExistingPopup() : void {
  * Fill credential
  */
 function fillCredential(credential: Credential) : void {
-  const forms = detectForms();
+  const formDetector = new FormDetector(document);
+  const forms = formDetector.detectForms();
+
   if (!forms.length) return;
 
   const form = forms[0];
@@ -597,6 +601,30 @@ function fillCredential(credential: Credential) : void {
     form.passwordField.value = credential.Password;
     triggerInputEvents(form.passwordField);
   }
+  if (form.passwordConfirmField) {
+    form.passwordConfirmField.value = credential.Password;
+    triggerInputEvents(form.passwordConfirmField);
+  }
+  if (form.emailField) {
+    form.emailField.value = credential.Email;
+    triggerInputEvents(form.emailField);
+  }
+  if (form.firstNameField) {
+    form.firstNameField.value = credential.Alias.FirstName;
+    triggerInputEvents(form.firstNameField);
+  }
+  if (form.lastNameField) {
+    form.lastNameField.value = credential.Alias.LastName;
+    triggerInputEvents(form.lastNameField);
+  }
+  if (form.birthdateField) {
+    form.birthdateField.value = credential.Alias.BirthDate;
+    triggerInputEvents(form.birthdateField);
+  }
+  /*if (form.genderField) {
+    form.genderField.value = credential.Alias.Gender;
+    triggerInputEvents(form.genderField);
+  }*/
 }
 
 /**
@@ -655,7 +683,9 @@ async function disableAutoPopup(): Promise<void> {
  * Inject icons into forms
  */
 function injectIcons(): void {
-  const forms = detectForms();
+  const formDetector = new FormDetector(document);
+  const forms = formDetector.detectForms();
+
   forms.forEach(form => {
     // Determine which field to attach the icon to
     const targetField = form.usernameField || form.passwordField;
