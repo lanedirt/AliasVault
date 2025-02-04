@@ -617,10 +617,52 @@ function fillCredential(credential: Credential) : void {
     form.lastNameField.value = credential.Alias.LastName;
     triggerInputEvents(form.lastNameField);
   }
-  if (form.birthdateField) {
-    form.birthdateField.value = credential.Alias.BirthDate;
-    triggerInputEvents(form.birthdateField);
+
+  // Handle birthdate
+  if (form.birthdateField.single) {
+    // TODO: handle birthdate format detection for single field
+    // by formdetector as this differs per region/country.
+    form.birthdateField.single.value = credential.Alias.BirthDate;
+  } else {
+    if (credential.Alias.BirthDate) {
+      const birthDate = new Date(credential.Alias.BirthDate);
+      if (form.birthdateField.day) form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
+      if (form.birthdateField.month) form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+      if (form.birthdateField.year) form.birthdateField.year.value = birthDate.getFullYear().toString();
+    }
   }
+
+  // Handle gender
+  switch (form.genderField.type) {
+    case 'select':
+      switch (credential.Alias.Gender) {
+        case 'Male':
+          (form.genderField.field as HTMLSelectElement).value = 'M';
+          break;
+        case 'Female':
+          (form.genderField.field as HTMLSelectElement).value = 'F';
+          break;
+      }
+      break;
+    case 'radio':
+      const radioButtons = form.genderField.radioButtons;
+      if (!radioButtons) break;
+
+      if (credential.Alias.Gender === 'Male') {
+        if (radioButtons.male) radioButtons.male.checked = true;
+      } else if (credential.Alias.Gender === 'Female') {
+        if (radioButtons.female) radioButtons.female.checked = true;
+      } else if (credential.Alias.Gender === 'Other') {
+        if (radioButtons.other) radioButtons.other.checked = true;
+      }
+      break;
+    case 'text':
+      break;
+    case 'text':
+      (form.genderField.field as HTMLInputElement).value = 'Male';
+      break;
+  }
+
   /*if (form.genderField) {
     form.genderField.value = credential.Alias.Gender;
     triggerInputEvents(form.genderField);

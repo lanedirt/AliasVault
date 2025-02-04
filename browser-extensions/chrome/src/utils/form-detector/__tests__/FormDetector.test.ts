@@ -28,23 +28,54 @@ enum FormField {
   LastName = 'lastName',
   Email = 'email',
   Password = 'password',
-  PasswordConfirm = 'passwordConfirm'
+  PasswordConfirm = 'passwordConfirm',
+  BirthDate = 'birthdate',
+  BirthDay = 'birthdateDay',
+  BirthMonth = 'birthdateMonth',
+  BirthYear = 'birthdateYear',
+  Gender = 'gender',
+  GenderMale = 'genderMale',
+  GenderFemale = 'genderFemale',
+  GenderOther = 'genderOther'
 }
 
 // Helper function to test field detection
 const testField = (fieldName: FormField, elementId: string, htmlFile: string) => {
   it(`should detect ${fieldName} field`, () => {
     const { document, result } = setupFormTest(htmlFile);
-    const fieldKey = `${fieldName}Field` as keyof typeof result;
 
     // First verify the test element exists
     const expectedElement = document.getElementById(elementId);
     if (!expectedElement) {
-      throw new Error(`Test setup failed: Element with id "${elementId}" not found in test HTML`);
+      throw new Error(`Test setup failed: Element with id "${elementId}" not found in test HTML. Check if the element is present in the test HTML file: ${htmlFile}`);
     }
 
-    expect(result[fieldKey]).toBeDefined();
-    expect(result[fieldKey]).toBe(expectedElement);
+    // Handle birthdate fields differently
+    if (fieldName === FormField.BirthDate) {
+      expect(result.birthdateField.single).toBe(expectedElement);
+    } else if (fieldName === FormField.BirthDay) {
+      expect(result.birthdateField.day).toBe(expectedElement);
+    } else if (fieldName === FormField.BirthMonth) {
+      expect(result.birthdateField.month).toBe(expectedElement);
+    } else if (fieldName === FormField.BirthYear) {
+      expect(result.birthdateField.year).toBe(expectedElement);
+    }
+    // Handle gender field differently
+    else if (fieldName === FormField.Gender) {
+      expect(result.genderField.field).toBe(expectedElement);
+    } else if (fieldName === FormField.GenderMale) {
+      expect(result.genderField.radioButtons?.male).toBe(expectedElement);
+    } else if (fieldName === FormField.GenderFemale) {
+      expect(result.genderField.radioButtons?.female).toBe(expectedElement);
+    } else if (fieldName === FormField.GenderOther) {
+      expect(result.genderField.radioButtons?.other).toBe(expectedElement);
+    }
+    // Handle default fields
+    else {
+      const fieldKey = `${fieldName}Field` as keyof typeof result;
+      expect(result[fieldKey]).toBeDefined();
+      expect(result[fieldKey]).toBe(expectedElement);
+    }
   });
 };
 
@@ -64,5 +95,13 @@ describe('FormDetector', () => {
     testField(FormField.Username, 'register-username', htmlFile);
     testField(FormField.Email, 'register-email', htmlFile);
     testField(FormField.Password, 'register-password', htmlFile);
+
+    testField(FormField.BirthDay, 'register-day', htmlFile);
+    testField(FormField.BirthMonth, 'register-month', htmlFile);
+    testField(FormField.BirthYear, 'register-year', htmlFile);
+
+    testField(FormField.GenderMale, 'man', htmlFile);
+    testField(FormField.GenderFemale, 'vrouw', htmlFile);
+    testField(FormField.GenderOther, 'iets', htmlFile);
   });
 });
