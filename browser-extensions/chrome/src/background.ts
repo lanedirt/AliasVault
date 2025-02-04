@@ -154,6 +154,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     }
 
+    case 'OPEN_POPUP_WITH_CREDENTIAL': {
+      chrome.windows.create({
+        url: chrome.runtime.getURL(`index.html#credentials/${message.credentialId}`),
+        type: 'popup',
+        width: 400,
+        height: 600,
+        focused: true
+      });
+      sendResponse({ success: true });
+      break;
+    }
+
     case 'GET_DEFAULT_EMAIL_DOMAIN': {
       if (!vaultState.derivedKey) {
         sendResponse({ domain: null });

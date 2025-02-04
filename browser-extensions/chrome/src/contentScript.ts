@@ -213,6 +213,21 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
         align-items: center;
         gap: 8px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        transition: background-color 0.2s ease;
+        border-radius: 4px;
+        margin: 0 4px;
+      `;
+
+      // Create container for credential info (logo + username)
+      const credentialInfo = document.createElement('div');
+      credentialInfo.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
       `;
 
       const imgElement = document.createElement('img');
@@ -232,18 +247,65 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
         imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
       }
 
-      item.appendChild(imgElement);
-      item.appendChild(document.createTextNode(cred.Username));
+      credentialInfo.appendChild(imgElement);
+      credentialInfo.appendChild(document.createTextNode(cred.Username));
 
+      // Add popout icon
+      const popoutIcon = document.createElement('div');
+      popoutIcon.style.cssText = `
+        display: flex;
+        align-items: center;
+        padding: 4px;
+        opacity: 0.6;
+        border-radius: 4px;
+      `;
+      popoutIcon.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      `;
+
+      // Add hover effects
+      popoutIcon.addEventListener('mouseenter', () => {
+        popoutIcon.style.opacity = '1';
+        popoutIcon.style.backgroundColor = isDarkMode() ? '#ffffff' : '#000000';
+        popoutIcon.style.color = isDarkMode() ? '#000000' : '#ffffff';
+      });
+
+      popoutIcon.addEventListener('mouseleave', () => {
+        popoutIcon.style.opacity = '0.6';
+        popoutIcon.style.backgroundColor = 'transparent';
+        popoutIcon.style.color = isDarkMode() ? '#ffffff' : '#000000';
+      });
+
+      // Handle popout click
+      popoutIcon.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent credential fill
+        chrome.runtime.sendMessage({
+          type: 'OPEN_POPUP_WITH_CREDENTIAL',
+          credentialId: cred.Id
+        });
+        removeExistingPopup();
+      });
+
+      item.appendChild(credentialInfo);
+      item.appendChild(popoutIcon);
+
+      // Update hover effect for the entire item
       item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = isDarkMode() ? '#374151' : '#f0f0f0';
+        item.style.backgroundColor = isDarkMode() ? '#2d3748' : '#f3f4f6';
+        popoutIcon.style.opacity = '1';
       });
 
       item.addEventListener('mouseleave', () => {
         item.style.backgroundColor = 'transparent';
+        popoutIcon.style.opacity = '0.6';
       });
 
-      item.addEventListener('click', () => {
+      // Update click handler to only trigger on credentialInfo
+      credentialInfo.addEventListener('click', () => {
         fillCredential(cred);
         removeExistingPopup();
       });
@@ -389,26 +451,17 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     </svg>
     Search
   `;
-  searchButton.addEventListener('click', () => {
-    // Placeholder for future search functionality
-    removeExistingPopup();
-  });
 
-  actionContainer.appendChild(createButton);
-  actionContainer.appendChild(searchButton);
-  popup.appendChild(actionContainer);
-
-  // Add close button to top-right
+  // Close button
   const closeButton = document.createElement('button');
   closeButton.style.cssText = `
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 4px;
-    background: none;
-    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
+    color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
+    font-size: 14px;
     cursor: pointer;
-    color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -423,7 +476,11 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     await disableAutoPopup();
     removeExistingPopup();
   });
-  popup.appendChild(closeButton);
+
+  actionContainer.appendChild(createButton);
+  actionContainer.appendChild(searchButton);
+  actionContainer.appendChild(closeButton);
+  popup.appendChild(actionContainer);
 
   // Define handleClickOutside
   handleClickOutside = (event: MouseEvent) : void => {
@@ -880,7 +937,7 @@ const createEditNamePopup = (defaultName: string): Promise<string | null> => {
 
     popup.innerHTML = `
       <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: ${isDarkMode() ? '#f8f9fa' : '#000000'}">
-        Enter Alias Name
+        New alias name
       </h3>
       <input
         type="text"
