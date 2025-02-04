@@ -766,8 +766,20 @@ function injectIcons(): void {
   const forms = formDetector.detectForms();
 
   forms.forEach(form => {
-    // Determine which field to attach the icon to
-    const targetField = form.emailField || form.usernameField || form.passwordField;
+    // Find the first occurring field by comparing their positions in the DOM
+    const fields = [
+      { type: 'email', element: form.emailField },
+      { type: 'username', element: form.usernameField },
+      { type: 'password', element: form.passwordField }
+    ].filter(f => f.element);
+
+    // Sort fields based on their DOM position
+    fields.sort((a, b) => {
+      if (!a.element || !b.element) return 0;
+      return a.element.compareDocumentPosition(b.element) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
+    const targetField = fields[0]?.element;
 
     if (targetField && !targetField.parentElement?.querySelector('.aliasvault-input-icon')) {
       const wrapper = document.createElement('div');

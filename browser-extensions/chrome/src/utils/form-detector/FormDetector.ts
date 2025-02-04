@@ -331,11 +331,11 @@ export class FormDetector {
 
     if (radioButtons && radioButtons.length > 0) {
       // Map specific gender radio buttons
-      const malePatterns = ['male', 'man', 'm', 'masculin', 'man'];
-      const femalePatterns = ['female', 'woman', 'f', 'feminin', 'vrouw'];
-      const otherPatterns = ['other', 'diverse', 'custom', 'prefer not', 'anders', 'iets'];
+      const malePatterns = ['male', 'man', 'm', 'man', 'gender1'];
+      const femalePatterns = ['female', 'woman', 'f', 'vrouw', 'gender2'];
+      const otherPatterns = ['other', 'diverse', 'custom', 'prefer not', 'anders', 'iets', 'unknown', 'gender3'];
 
-      const findRadioByPatterns = (patterns: string[]) => {
+      const findRadioByPatterns = (patterns: string[], isOther: boolean = false) => {
         return Array.from(radioButtons).find(radio => {
           const attributes = [
             radio.value,
@@ -343,6 +343,14 @@ export class FormDetector {
             radio.name,
             radio.labels?.[0]?.textContent || ''
           ].map(attr => attr?.toLowerCase() || '');
+
+          // For "other" patterns, skip if it matches male or female patterns
+          if (isOther && (
+            malePatterns.some(pattern => attributes.some(attr => attr.includes(pattern))) ||
+            femalePatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))
+          )) {
+            return false;
+          }
 
           return patterns.some(pattern =>
             attributes.some(attr => attr.includes(pattern))

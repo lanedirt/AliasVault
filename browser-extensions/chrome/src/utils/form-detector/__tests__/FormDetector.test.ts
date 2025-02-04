@@ -25,6 +25,7 @@ const setupFormTest = (htmlFile: string) => {
 
 enum FormField {
   Username = 'username',
+  FirstName = 'firstName',
   LastName = 'lastName',
   Email = 'email',
   EmailConfirm = 'emailConfirm',
@@ -104,6 +105,20 @@ describe('FormDetector', () => {
     testField(FormField.GenderMale, 'man', htmlFile);
     testField(FormField.GenderFemale, 'vrouw', htmlFile);
     testField(FormField.GenderOther, 'iets', htmlFile);
+  });
+
+  describe('Dutch registration form 3 detection', () => {
+    const htmlFile = 'nl-registration-form3.html';
+
+    testField(FormField.FirstName, 'firstName', htmlFile);
+    testField(FormField.LastName, 'lastName', htmlFile);
+    testField(FormField.Password, 'password', htmlFile);
+
+    testField(FormField.BirthDate, 'date', htmlFile);
+
+    testField(FormField.GenderMale, 'gender1', htmlFile);
+    testField(FormField.GenderFemale, 'gender2', htmlFile);
+    testField(FormField.GenderOther, 'gender3', htmlFile);
   });
 
   describe('English registration form 1 detection', () => {
