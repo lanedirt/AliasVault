@@ -614,6 +614,10 @@ function fillCredential(credential: Credential) : void {
     form.emailField.value = credential.Email;
     triggerInputEvents(form.emailField);
   }
+  if (form.emailConfirmField) {
+    form.emailConfirmField.value = credential.Email;
+    triggerInputEvents(form.emailConfirmField);
+  }
   if (form.firstNameField) {
     form.firstNameField.value = credential.Alias.FirstName;
     triggerInputEvents(form.firstNameField);
@@ -934,6 +938,22 @@ const createEditNamePopup = (defaultName: string): Promise<string | null> => {
     // Select input text
     input.select();
 
+    // Add variable to track if text is being selected
+    let isSelecting = false;
+
+    // Add mousedown handler to input
+    input.addEventListener('mousedown', () => {
+      isSelecting = true;
+    });
+
+    // Add mouseup handler to document
+    document.addEventListener('mouseup', () => {
+      // Use setTimeout to ensure click handler runs after mouseup
+      setTimeout(() => {
+        isSelecting = false;
+      }, 0);
+    });
+
     const closePopup = (value: string | null) => {
       popup.style.transform = 'scale(0.95)';
       popup.style.opacity = '0';
@@ -969,7 +989,13 @@ const createEditNamePopup = (defaultName: string): Promise<string | null> => {
     // Handle click outside
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
-        closePopup(null);
+        // Check if there's any text selected in the input
+        const selectedText = input.value.substring(input.selectionStart || 0, input.selectionEnd || 0);
+
+        // Only close if no text is selected
+        if (!selectedText) {
+          closePopup(null);
+        }
       }
     });
   });

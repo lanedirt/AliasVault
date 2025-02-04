@@ -1,6 +1,7 @@
 type LoginForm = {
   form: HTMLFormElement | null;
   emailField: HTMLInputElement | null;
+  emailConfirmField: HTMLInputElement | null;
   usernameField: HTMLInputElement | null;
   passwordField: HTMLInputElement | null;
   passwordConfirmField: HTMLInputElement | null;
@@ -61,6 +62,9 @@ export class FormDetector {
       if (form && processedForms.has(form)) return;
       processedForms.add(form);
 
+      // Find email fields
+      const emailFields = this.findEmailField(form);
+
       // Find additional fields
       const passwordConfirmField = passwordField ? this.findPasswordConfirmField(passwordField) : null;
       const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam'], ['text']);
@@ -70,7 +74,8 @@ export class FormDetector {
 
       forms.push({
         form,
-        emailField,
+        emailField: emailFields.primary,
+        emailConfirmField: emailFields.confirm,
         usernameField,
         passwordField,
         passwordConfirmField,
@@ -84,7 +89,7 @@ export class FormDetector {
     // Process password fields first
     passwordFields.forEach(passwordField => {
       const form = passwordField.closest('form');
-      const emailField = this.findEmailField(passwordField);
+      const emailField = this.findEmailField(passwordField).primary;
       const usernameField = this.findUsernameField(passwordField);
       createFormEntry(form, emailField, usernameField, passwordField);
     });
@@ -110,7 +115,7 @@ export class FormDetector {
       if (this.isLikelyUsernameField(field)) {
         const passwordField = form ?
           form.querySelector<HTMLInputElement>('input[type="password"]') : null;
-        const emailField = this.findEmailField(field);
+        const emailField = this.findEmailField(field).primary;
         createFormEntry(form, emailField, field, passwordField);
       }
     });
@@ -200,7 +205,7 @@ export class FormDetector {
           input.placeholder
         ].map(attr => attr?.toLowerCase() || '');
 
-        const patterns = ['user', 'username', 'login', 'identifier'];
+        const patterns = ['user', 'username', 'name', 'login', 'identifier'];
         if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
           return input;
         }
@@ -213,18 +218,21 @@ export class FormDetector {
   /**
    * Find the email field in the form containing the password field.
    */
-  private findEmailField(passwordField: HTMLInputElement): HTMLInputElement | null {
-    const form = passwordField.closest('form');
+  private findEmailField(form: HTMLFormElement | null): {
+    primary: HTMLInputElement | null,
+    confirm: HTMLInputElement | null
+  } {
     const candidates = form
       ? form.querySelectorAll<HTMLInputElement>('input')
       : this.document.querySelectorAll<HTMLInputElement>('input');
 
-    for (const input of Array.from(candidates)) {
-      if (input === passwordField) continue;
+    let primaryEmail: HTMLInputElement | null = null;
+    let confirmEmail: HTMLInputElement | null = null;
 
+    // Helper function to check if an input is an email field
+    const isEmailField = (input: HTMLInputElement, confirmPatterns: string[] = []): boolean => {
       const type = input.type.toLowerCase();
       if (type === 'text' || type === 'email') {
-        // Check input attributes
         const attributes = [
           input.type,
           input.id,
@@ -232,8 +240,6 @@ export class FormDetector {
           input.className,
           input.placeholder
         ].map(attr => attr?.toLowerCase() || '');
-
-        const patterns = ['email', 'e-mail', 'mail', 'address', '@'];
 
         // Check parent div for email-related text
         const parentDiv = input.closest('div');
@@ -248,13 +254,35 @@ export class FormDetector {
           }
         }
 
-        if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-          return input;
+        const patterns = [...confirmPatterns, 'email', 'e-mail', 'mail', 'address', '@'];
+        return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
+      }
+      return false;
+    };
+
+    // First pass: find primary email
+    for (const input of Array.from(candidates)) {
+      if (!primaryEmail && isEmailField(input)) {
+        primaryEmail = input;
+        break;
+      }
+    }
+
+    // Second pass: find confirmation email
+    if (primaryEmail) {
+      for (const input of Array.from(candidates)) {
+        if (input !== primaryEmail &&
+            isEmailField(input, ['confirm', 'verification', 'repeat', 'retype', 'verify'])) {
+          confirmEmail = input;
+          break;
         }
       }
     }
 
-    return null;
+    return {
+      primary: primaryEmail,
+      confirm: confirmEmail
+    };
   }
 
   private findBirthdateFields(form: HTMLFormElement | null): LoginForm['birthdateField'] {

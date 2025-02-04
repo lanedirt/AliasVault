@@ -27,6 +27,7 @@ enum FormField {
   Username = 'username',
   LastName = 'lastName',
   Email = 'email',
+  EmailConfirm = 'emailConfirm',
   Password = 'password',
   PasswordConfirm = 'passwordConfirm',
   BirthDate = 'birthdate',
@@ -110,6 +111,20 @@ describe('FormDetector', () => {
 
     testField(FormField.Email, 'login', htmlFile);
     testField(FormField.Password, 'password', htmlFile);
+  });
+
+  describe('English registration form 2 detection', () => {
+    const htmlFile = 'en-registration-form2.html';
+
+    testField(FormField.Email, 'signup-email-input', htmlFile);
+    testField(FormField.Username, 'signup-name-input', htmlFile);
+  });
+
+  describe('English registration form 3 detection', () => {
+    const htmlFile = 'en-registration-form3.html';
+
+    testField(FormField.Email, 'email', htmlFile);
+    testField(FormField.EmailConfirm, 'reenter_email', htmlFile);
   });
 
   describe('English email form 1 detection', () => {
