@@ -618,63 +618,91 @@ function fillCredential(credential: Credential) : void {
     triggerInputEvents(form.lastNameField);
   }
 
-  // Handle birthdate
+  // Handle birthdate with input events
   if (form.birthdateField.single) {
-    // TODO: handle birthdate format detection for single field
-    // by formdetector as this differs per region/country.
+    // TODO: let formdetector also detect proper birthdate format
+    // that input field is likely expecting, as this differs per region/country.
+    // E.g. dd/mm/yyyy, mm/dd/yyyy, yyyy/mm/dd, etc.
     form.birthdateField.single.value = credential.Alias.BirthDate;
+    triggerInputEvents(form.birthdateField.single);
   } else {
     if (credential.Alias.BirthDate) {
       const birthDate = new Date(credential.Alias.BirthDate);
-      if (form.birthdateField.day) form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
-      if (form.birthdateField.month) form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
-      if (form.birthdateField.year) form.birthdateField.year.value = birthDate.getFullYear().toString();
+      if (form.birthdateField.day) {
+        form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
+        triggerInputEvents(form.birthdateField.day);
+      }
+      if (form.birthdateField.month) {
+        form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+        triggerInputEvents(form.birthdateField.month);
+      }
+      if (form.birthdateField.year) {
+        form.birthdateField.year.value = birthDate.getFullYear().toString();
+        triggerInputEvents(form.birthdateField.year);
+      }
     }
   }
 
-  // Handle gender
+  // Handle gender with input events
   switch (form.genderField.type) {
     case 'select':
-      switch (credential.Alias.Gender) {
-        case 'Male':
-          (form.genderField.field as HTMLSelectElement).value = 'M';
-          break;
-        case 'Female':
-          (form.genderField.field as HTMLSelectElement).value = 'F';
-          break;
+      if (form.genderField.field) {
+        switch (credential.Alias.Gender) {
+          case 'Male':
+            (form.genderField.field as HTMLSelectElement).value = 'M';
+            break;
+          case 'Female':
+            (form.genderField.field as HTMLSelectElement).value = 'F';
+            break;
+        }
       }
       break;
     case 'radio':
       const radioButtons = form.genderField.radioButtons;
       if (!radioButtons) break;
 
-      if (credential.Alias.Gender === 'Male') {
-        if (radioButtons.male) radioButtons.male.checked = true;
-      } else if (credential.Alias.Gender === 'Female') {
-        if (radioButtons.female) radioButtons.female.checked = true;
-      } else if (credential.Alias.Gender === 'Other') {
-        if (radioButtons.other) radioButtons.other.checked = true;
+      let selectedRadio: HTMLInputElement | null = null;
+      if (credential.Alias.Gender === 'Male' && radioButtons.male) {
+        radioButtons.male.checked = true;
+        selectedRadio = radioButtons.male;
+      } else if (credential.Alias.Gender === 'Female' && radioButtons.female) {
+        radioButtons.female.checked = true;
+        selectedRadio = radioButtons.female;
+      } else if (credential.Alias.Gender === 'Other' && radioButtons.other) {
+        radioButtons.other.checked = true;
+        selectedRadio = radioButtons.other;
+      }
+
+      if (selectedRadio) {
+        triggerInputEvents(selectedRadio);
       }
       break;
     case 'text':
-      break;
-    case 'text':
-      (form.genderField.field as HTMLInputElement).value = 'Male';
+      if (form.genderField.field && credential.Alias.Gender) {
+        (form.genderField.field as HTMLInputElement).value = credential.Alias.Gender;
+        triggerInputEvents(form.genderField.field as HTMLInputElement);
+      }
       break;
   }
-
-  /*if (form.genderField) {
-    form.genderField.value = credential.Alias.Gender;
-    triggerInputEvents(form.genderField);
-  }*/
 }
 
 /**
- * Trigger input events
+ * Trigger input events for an element to trigger form validation
+ * which some websites require before the "continue" button is enabled.
  */
 function triggerInputEvents(element: HTMLInputElement) : void {
+  // Basic events
   element.dispatchEvent(new Event('input', { bubbles: true }));
   element.dispatchEvent(new Event('change', { bubbles: true }));
+
+  // For radio buttons, we need additional events in order for form validation
+  // to be triggered correctly.
+  if (element.type === 'radio') {
+    // Click events
+    element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  }
 }
 
 /**
