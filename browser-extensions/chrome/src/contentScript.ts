@@ -115,11 +115,6 @@ function showCredentialPopup(input: HTMLInputElement) : void {
  * Filter credentials based on current URL and page context
  */
 function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
-  // If less than 5 entries, return all
-  if (credentials.length <= 5) {
-    return credentials;
-  }
-
   const urlObject = new URL(currentUrl);
   const baseUrl = `${urlObject.protocol}//${urlObject.hostname}`;
 
@@ -250,11 +245,37 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     const serviceName = await createEditNamePopup(document.title);
     if (!serviceName) return; // User cancelled
 
-    // Show popup again as it was hidden by the createEditNamePopup.
-    showCredentialPopup(input);
+    // Create a new popup for loading state
+    const loadingPopup = document.createElement('div');
+    loadingPopup.id = 'aliasvault-credential-popup';
 
-    // Show loading state.
-    popup.innerHTML = getLoadingHtml('Creating new identity...');
+    // Get input width
+    const inputWidth = input.offsetWidth;
+    const popupWidth = Math.max(250, Math.min(640, inputWidth));
+
+    loadingPopup.style.cssText = `
+      position: absolute;
+      z-index: 999999;
+      background: ${isDarkMode() ? '#1f2937' : 'white'};
+      border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
+      border-radius: 4px;
+      box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
+      width: ${popupWidth}px;
+      color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    `;
+
+    // Position popup below input
+    const rect = input.getBoundingClientRect();
+    loadingPopup.style.top = `${rect.bottom + window.scrollY + 2}px`;
+    loadingPopup.style.left = `${rect.left + window.scrollX}px`;
+
+    // Add loading content
+    loadingPopup.innerHTML = getLoadingHtml('Creating new identity...');
+
+    // Remove existing popup and show loading popup
+    removeExistingPopup();
+    document.body.appendChild(loadingPopup);
 
     try {
       // Retrieve default email domain from background
@@ -310,15 +331,14 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       });
     } catch (error) {
       console.error('Error creating identity:', error);
-      // Show error state in popup
-      popup.innerHTML = `
+      loadingPopup.innerHTML = `
         <div style="padding: 16px; color: #ef4444;">
           Failed to create identity. Please try again.
         </div>
       `;
       setTimeout(() => {
         removeExistingPopup();
-      }, 200);
+      }, 2000);
     }
   });
 
