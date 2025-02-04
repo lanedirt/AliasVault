@@ -758,7 +758,7 @@ function injectIcons(): void {
 
   forms.forEach(form => {
     // Determine which field to attach the icon to
-    const targetField = form.usernameField || form.passwordField;
+    const targetField = form.emailField || form.usernameField || form.passwordField;
 
     if (targetField && !targetField.parentElement?.querySelector('.aliasvault-input-icon')) {
       const wrapper = document.createElement('div');

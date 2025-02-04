@@ -104,4 +104,11 @@ describe('FormDetector', () => {
     testField(FormField.GenderFemale, 'vrouw', htmlFile);
     testField(FormField.GenderOther, 'iets', htmlFile);
   });
+
+  describe('English registration form 1 detection', () => {
+    const htmlFile = 'en-registration-form1.html';
+
+    testField(FormField.Email, 'login', htmlFile);
+    testField(FormField.Password, 'password', htmlFile);
+  });
 });

@@ -47,7 +47,7 @@ export class FormDetector {
       const form = passwordField.closest('form');
 
       // Find all the required fields
-      const emailField = this.findInputField(form, ['email'], ['email']);
+      const emailField = this.findEmailField(passwordField);
       const usernameField = this.findUsernameField(passwordField);
       const passwordConfirmField = this.findPasswordConfirmField(passwordField);
 
@@ -146,7 +146,7 @@ export class FormDetector {
       if (input === passwordField) continue;
 
       const type = input.type.toLowerCase();
-      if (type === 'text' || type === 'email') {
+      if (type === 'text') {
         const attributes = [
           input.type,
           input.id,
@@ -155,7 +155,54 @@ export class FormDetector {
           input.placeholder
         ].map(attr => attr?.toLowerCase() || '');
 
-        const patterns = ['user', 'username', 'mail', 'email', 'login', 'identifier'];
+        const patterns = ['user', 'username', 'login', 'identifier'];
+        if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
+          return input;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find the email field in the form containing the password field.
+   */
+  private findEmailField(passwordField: HTMLInputElement): HTMLInputElement | null {
+    const form = passwordField.closest('form');
+    const candidates = form
+      ? form.querySelectorAll<HTMLInputElement>('input')
+      : this.document.querySelectorAll<HTMLInputElement>('input');
+
+    for (const input of Array.from(candidates)) {
+      if (input === passwordField) continue;
+
+      const type = input.type.toLowerCase();
+      if (type === 'text' || type === 'email') {
+        // Check input attributes
+        const attributes = [
+          input.type,
+          input.id,
+          input.name,
+          input.className,
+          input.placeholder
+        ].map(attr => attr?.toLowerCase() || '');
+
+        const patterns = ['email', 'e-mail', 'mail', 'address', '@'];
+
+        // Check parent div for email-related text
+        const parentDiv = input.closest('div');
+        if (parentDiv) {
+          const parentText = parentDiv.textContent?.toLowerCase() || '';
+          attributes.push(parentText);
+
+          // Check for label elements within the parent div
+          const labels = parentDiv.getElementsByTagName('label');
+          for (const label of Array.from(labels)) {
+            attributes.push(label.textContent?.toLowerCase() || '');
+          }
+        }
+
         if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
           return input;
         }
