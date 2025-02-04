@@ -68,7 +68,7 @@ function isDarkMode(): boolean {
  */
 document.addEventListener('focusin', async (e) => {
   const target = e.target as HTMLInputElement;
-  if (target.tagName === 'INPUT') {
+  if (target.tagName === 'INPUT' && !target.dataset.aliasvaultIgnore) {
     const isDisabled = await isAutoPopupDisabled();
     if (!isDisabled) {
       showCredentialPopup(target);
@@ -82,6 +82,16 @@ document.addEventListener('focusin', async (e) => {
 function showCredentialPopup(input: HTMLInputElement) : void {
   const forms = detectForms();
   if (!forms.length) return;
+
+  // Add keydown event listener for Enter key
+  const handleEnterKey = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      removeExistingPopup();
+      // Remove the event listener to clean up
+      document.removeEventListener('keydown', handleEnterKey);
+    }
+  };
+  document.addEventListener('keydown', handleEnterKey);
 
   // Request credentials from background script
   chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
@@ -289,7 +299,13 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     New Alias
   `;
   createButton.addEventListener('click', async () => {
-    // Show loading state
+    const serviceName = await createEditNamePopup(document.title);
+    if (!serviceName) return; // User cancelled
+
+    // Show popup again as it was hidden by the createEditNamePopup.
+    showCredentialPopup(input);
+
+    // Show loading state.
     popup.innerHTML = getLoadingHtml('Creating new identity...');
 
     try {
@@ -323,7 +339,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
       // Submit new identity to backend to persist in db
       const credential: Credential = {
         Id: '',
-        ServiceName: document.title,
+        ServiceName: serviceName,
         ServiceUrl: window.location.href,
         Email: `${identity.emailPrefix}@${domain}`,
         Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
@@ -682,4 +698,195 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, {
   childList: true,
   subtree: true
+});
+
+const createEditNamePopup = (defaultName: string): Promise<string | null> => {
+  // Close existing popup
+  removeExistingPopup();
+
+  return new Promise((resolve) => {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+      position: relative;
+      z-index: 1000000;
+      background: ${isDarkMode() ? '#1f2937' : 'white'};
+      border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                  0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                  0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      width: 400px;
+      max-width: 90vw;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    `;
+
+    popup.innerHTML = `
+      <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: ${isDarkMode() ? '#f8f9fa' : '#000000'}">
+        Enter Alias Name
+      </h3>
+      <input
+        type="text"
+        id="service-name-input"
+        data-aliasvault-ignore="true"
+        value="${defaultName}"
+        style="
+          width: 100%;
+          padding: 8px 12px;
+          margin-bottom: 24px;
+          border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
+          border-radius: 6px;
+          background: ${isDarkMode() ? '#374151' : 'white'};
+          color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+          font-size: 14px;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        "
+      >
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button id="cancel-btn" style="
+          padding: 8px 16px;
+          border-radius: 6px;
+          border: 1px solid ${isDarkMode() ? '#374151' : '#e5e7eb'};
+          background: transparent;
+          color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        ">Cancel</button>
+        <button id="save-btn" style="
+          padding: 8px 16px;
+          border-radius: 6px;
+          border: none;
+          background: #2563eb;
+          color: white;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        ">Save</button>
+      </div>
+    `;
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    // Add hover and focus styles
+    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
+    const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
+    const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
+
+    input.addEventListener('focus', () => {
+      input.style.borderColor = '#2563eb';
+      input.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+    });
+
+    input.addEventListener('blur', () => {
+      input.style.borderColor = isDarkMode() ? '#374151' : '#ccc';
+      input.style.boxShadow = 'none';
+    });
+
+    saveBtn.addEventListener('mouseenter', () => {
+      saveBtn.style.background = '#1d4ed8';
+      saveBtn.style.transform = 'translateY(-1px)';
+    });
+
+    saveBtn.addEventListener('mouseleave', () => {
+      saveBtn.style.background = '#2563eb';
+      saveBtn.style.transform = 'translateY(0)';
+    });
+
+    cancelBtn.addEventListener('mouseenter', () => {
+      cancelBtn.style.background = isDarkMode() ? '#374151' : '#f3f4f6';
+    });
+
+    cancelBtn.addEventListener('mouseleave', () => {
+      cancelBtn.style.background = 'transparent';
+    });
+
+    // Animate in
+    requestAnimationFrame(() => {
+      popup.style.transform = 'scale(1)';
+      popup.style.opacity = '1';
+    });
+
+    // Select input text
+    input.select();
+
+    const closePopup = (value: string | null) => {
+      popup.style.transform = 'scale(0.95)';
+      popup.style.opacity = '0';
+      setTimeout(() => {
+        overlay.remove();
+        resolve(value);
+      }, 200);
+    };
+
+    // Handle save
+    saveBtn.addEventListener('click', () => {
+      const value = input.value.trim();
+      if (value) {
+        closePopup(value);
+      }
+    });
+
+    // Handle cancel
+    cancelBtn.addEventListener('click', () => {
+      closePopup(null);
+    });
+
+    // Handle Enter key
+    input.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        const value = input.value.trim();
+        if (value) {
+          closePopup(value);
+        }
+      }
+    });
+
+    // Handle click outside
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closePopup(null);
+      }
+    });
+  });
+};
+
+// Add URL change detection using the History API
+let lastUrl = window.location.href;
+
+// Create observer to watch for URL changes
+const urlObserver = new MutationObserver(() => {
+  if (window.location.href !== lastUrl) {
+    lastUrl = window.location.href;
+    removeExistingPopup();
+  }
+});
+
+// Start observing
+urlObserver.observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
+// Also listen for popstate events (back/forward navigation)
+window.addEventListener('popstate', () => {
+  removeExistingPopup();
 });
