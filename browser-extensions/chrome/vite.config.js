@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     dictionaryLoader(),
     webExtension({
-      manifest: 'src/manifest.json',
+      manifest: 'manifest.json',
     }),
     viteStaticCopy({
       targets: [
@@ -25,7 +25,7 @@ export default defineConfig({
         },
         {
           src: 'node_modules/sql.js/dist/sql-wasm.wasm',
-          dest: 'src/src'
+          dest: 'src'
         }
       ]
     })

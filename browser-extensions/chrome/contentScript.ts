@@ -1,7 +1,7 @@
-import { FormDetector } from './utils/form-detector/FormDetector';
-import { Credential } from './types/Credential';
-import { IdentityGeneratorEn } from './generators/Identity/implementations/IdentityGeneratorEn';
-import { PasswordGenerator } from './generators/Password/PasswordGenerator';
+import { FormDetector } from './src/utils/form-detector/FormDetector';
+import { Credential } from './src/types/Credential';
+import { IdentityGeneratorEn } from './src/generators/Identity/implementations/IdentityGeneratorEn';
+import { PasswordGenerator } from './src/generators/Password/PasswordGenerator';
 
 type CredentialResponse = {
   status: 'OK' | 'LOCKED';

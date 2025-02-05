@@ -1,8 +1,8 @@
-import { Vault } from './types/webapi/Vault';
-import EncryptionUtility from './utils/EncryptionUtility';
-import SqliteClient from './utils/SqliteClient';
-import { WebApiService } from './utils/WebApiService';
-import { PasswordGenerator } from './generators/Password/PasswordGenerator';
+import { Vault } from './src/types/webapi/Vault';
+import EncryptionUtility from './src/utils/EncryptionUtility';
+import SqliteClient from './src/utils/SqliteClient';
+import { WebApiService } from './src/utils/WebApiService';
+import { PasswordGenerator } from './src/generators/Password/PasswordGenerator';
 
 let vaultState: {
   derivedKey: string | null;
