@@ -2,6 +2,7 @@
 export default {
   content: [
     "./contentScript.ts",
+    "./src/contentscript/**",
   ],
   theme: {
     extend: {},
