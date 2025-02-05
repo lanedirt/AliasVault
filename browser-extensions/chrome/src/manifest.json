@@ -19,19 +19,20 @@
         "512": "assets/icons/icon-512.png"
     },
     "background": {
-      "service_worker": "background.js",
+      "service_worker": "src/background.ts",
       "type": "module"
     },
     "permissions": [
       "storage",
       "activeTab",
-      "contextMenus"
+      "contextMenus",
+      "scripting"
     ],
     "content_scripts": [
       {
         "matches": ["<all_urls>"],
-        "js": ["contentScript.js"],
-        "css": ["contentScript.css"]
+        "js": ["src/contentScript.ts"],
+        "css": ["src/styles/contentScript.css"]
       }
     ],
     "host_permissions": [

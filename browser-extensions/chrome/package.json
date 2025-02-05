@@ -49,6 +49,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
     "vite": "^6.0.11",
-    "vite-plugin-static-copy": "^2.2.0"
+    "vite-plugin-static-copy": "^2.2.0",
+    "vite-plugin-web-extension": "^4.4.3"
   }
 }
