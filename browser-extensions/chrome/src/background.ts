@@ -2,6 +2,7 @@ import { Vault } from './types/webapi/Vault';
 import EncryptionUtility from './utils/EncryptionUtility';
 import SqliteClient from './utils/SqliteClient';
 import { WebApiService } from './utils/WebApiService';
+import { PasswordGenerator } from './generators/Password/PasswordGenerator';
 
 let vaultState: {
   derivedKey: string | null;
@@ -14,6 +15,58 @@ let vaultState: {
   privateEmailDomains: [],
   vaultRevisionNumber: 0,
 };
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "aliasvault-root",
+    title: "AliasVault",
+    contexts: ["all"]
+  });
+
+  chrome.contextMenus.create({
+    id: "aliasvault-generate-password",
+    parentId: "aliasvault-root",
+    title: "Generate Password (copy to clipboard)",
+    contexts: ["all"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "aliasvault-generate-password") {
+    // Initialize password generator
+    const passwordGenerator = new PasswordGenerator();
+    const password = passwordGenerator.generateRandomPassword();
+
+    // Use chrome.scripting to write to clipboard from active tab
+    if (tab?.id) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (generatedPassword) => {
+          // Write to clipboard
+          navigator.clipboard.writeText(generatedPassword).then(() => {
+            // Show notification
+            const notification = document.createElement('div');
+            notification.textContent = 'Password copied to clipboard';
+            notification.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              padding: 16px;
+              background: #4CAF50;
+              color: white;
+              border-radius: 4px;
+              z-index: 9999;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+          });
+        },
+        args: [password]
+      });
+    }
+  }
+});
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

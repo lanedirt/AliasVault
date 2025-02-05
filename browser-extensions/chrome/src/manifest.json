@@ -7,7 +7,8 @@
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
     },
     "action": {
-      "default_popup": "index.html"
+      "default_popup": "index.html",
+      "default_title": "AliasVault"
     },
     "icons": {
         "16": "assets/icons/icon-16.png",
@@ -23,7 +24,8 @@
     },
     "permissions": [
       "storage",
-      "activeTab"
+      "activeTab",
+      "contextMenus"
     ],
     "content_scripts": [
       {
