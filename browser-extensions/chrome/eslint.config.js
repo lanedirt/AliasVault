@@ -38,6 +38,20 @@ export default [
             ...reactHooksPlugin.configs.recommended.rules,
             "react/react-in-jsx-scope": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
+            "indent": ["error", 2, {
+                "SwitchCase": 1,
+                "VariableDeclarator": 1,
+                "outerIIFEBody": 1,
+                "MemberExpression": 1,
+                "FunctionDeclaration": { "parameters": 1, "body": 1 },
+                "FunctionExpression": { "parameters": 1, "body": 1 },
+                "CallExpression": { "arguments": 1 },
+                "ArrayExpression": 1,
+                "ObjectExpression": 1,
+                "ImportDeclaration": 1,
+                "flatTernaryExpressions": false,
+                "ignoreComments": false
+            }],
             "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
             "no-console": ["error", { allow: ["warn", "error", "info", "debug"] }],
             "jsdoc/require-jsdoc": ["error", {

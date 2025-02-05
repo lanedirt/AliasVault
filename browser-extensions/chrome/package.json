@@ -8,6 +8,7 @@
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint src",
+    "lint:custom": "eslint",
     "lint:fix": "eslint src --fix",
     "build": "vite build && npm run build:content-css",
     "watch": "vite build --watch",

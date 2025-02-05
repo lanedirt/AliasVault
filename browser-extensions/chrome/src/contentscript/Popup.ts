@@ -12,22 +12,30 @@ import { FormDetector } from '../utils/form-detector/FormDetector';
 const placeholderBase64 = 'UklGRjoEAABXRUJQVlA4IC4EAAAwFwCdASqAAIAAPpFCm0olo6Ihp5IraLASCWUA0eb/0s56RrLtCnYfLPiBshdXWMx8j1Ez65f169iA4xUDBTEV6ylMQeCIj2b7RngGi7gKZ9WjKdSoy9R8JcgOmjCMlDmLG20KhNo/i/Dc/Ah5GAvGfm8kfniV3AkR6fxN6eKwjDc6xrDgSfS48G5uGV6WzQt24YAVlLSK9BMwndzfHnePK1KFchFrL7O3ulB8cGNCeomu4o+l0SrS/JKblJ4WTzj0DAD++lCUEouSfgRKdiV2TiYCD+H+l3tANKSPQFPQuzi7rbvxqGeRmXB9kDwURaoSTTpYjA9REMUi9uA6aV7PWtBNXgUzMLowYMZeos6Xvyhb34GmufswMHA5ZyYpxzjTphOak4ZjNOiz8aScO5ygiTx99SqwX/uL+HSeVOSraHw8IymrMwm+jLxqN8BS8dGcItLlm/ioulqH2j4V8glDgSut+ExkxiD7m8TGPrrjCQNJbRDzpOFsyCyfBZupvp8QjGKW2KGziSZeIWes4aTB9tRmeEBhnUrmTDZQuXcc67Fg82KHrSfaeeOEq6jjuUjQ8wUnzM4Zz3dhrwSyslVz/WvnKqYkr4V/TTXPFF5EjF4rM1bHZ8bK63EfTnK41+n3n4gEFoYP4mXkNH0hntnYcdTqiE7Gn+q0BpRRxnkpBSZlA6Wa70jpW0FGqkw5e591A5/H+OV+60WAo+4Mi+NlsKrvLZ9EiVaPnoEFZlJQx1fA777AJ2MjXJ4KSsrWDWJi1lE8yPs8V6XvcC0chDTYt8456sKXAagCZyY+fzQriFMaddXyKQdG8qBqcdYjAsiIcjzaRFBBoOK9sU+sFY7N6B6+xtrlu3c37rQKkI3O2EoiJOris54EjJ5OFuumA0M6riNUuBf/MEPFBVx1JRcUEs+upEBsCnwYski7FT3TTqHrx7v5AjgFN97xhPTkmVpu6sxRnWBi1fxIRp8eWZeFM6mUcGgVk1WeVb1yhdV9hoMo2TsNEPE0tHo/wvuSJSzbZo7wibeXM9v/rRfKcx7X93rfiXVnyQ9f/5CaAQ4lxedPp/6uzLtOS4FyL0bCNeZ6L5w+AiuyWCTDFIYaUzhwfG+/YTQpWyeZCdQIKzhV+3GeXI2cxoP0ER/DlOKymf1gm+zRU3sqf1lBVQ0y+mK/Awl9bS3uaaQmI0FUyUwHUKP7PKuXnO+LcwDv4OfPT6hph8smc1EtMe5ib/apar/qZ9dyaEaElALJ1KKxnHziuvVl8atk1fINSQh7OtXDyqbPw9o/nGIpTnv5iFmwmWJLis2oyEgPkJqyx0vYI8rjkVEzKc8eQavAJBYSpjMwM193Swt+yJyjvaGYWPnqExxKiNarpB2WSO7soCAZXhS1uEYHryrK47BH6W1dRiruqT0xpLih3MXiwU3VDwAAAA==';
 
 /**
+ * Response from the background script.
+ */
+type CredentialResponse = {
+    status: 'OK' | 'LOCKED';
+    credentials?: Credential[];
+}
+
+/**
  * Create basic popup with default style.
  */
 export function createBasePopup(input: HTMLInputElement) : HTMLElement {
-    // Remove existing popup and its event listeners
-    removeExistingPopup();
+  // Remove existing popup and its event listeners
+  removeExistingPopup();
 
-    const popup = document.createElement('div');
-    popup.id = 'aliasvault-credential-popup';
+  const popup = document.createElement('div');
+  popup.id = 'aliasvault-credential-popup';
 
-    // Get input width
-    const inputWidth = input.offsetWidth;
+  // Get input width
+  const inputWidth = input.offsetWidth;
 
-    // Set popup width to match input width, with min/max constraints
-    const popupWidth = Math.max(360, Math.min(640, inputWidth));
+  // Set popup width to match input width, with min/max constraints
+  const popupWidth = Math.max(360, Math.min(640, inputWidth));
 
-    popup.style.cssText = `
+  popup.style.cssText = `
         position: absolute;
         z-index: 999999;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
@@ -40,19 +48,22 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     `;
 
-    // Position popup below input
-    const rect = input.getBoundingClientRect();
-    popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
-    popup.style.left = `${rect.left + window.scrollX}px`;
+  // Position popup below input
+  const rect = input.getBoundingClientRect();
+  popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
+  popup.style.left = `${rect.left + window.scrollX}px`;
 
-    return popup;
+  return popup;
 }
 
 /**
  * Create a loading popup.
  */
 export function createLoadingPopup(input: HTMLInputElement, message: string) : HTMLElement {
-    const getLoadingHtml = (message: string): string => `
+  /**
+   *
+   */
+  const getLoadingHtml = (message: string): string => `
 <div style="
   display: flex;
   align-items: center;
@@ -68,43 +79,45 @@ export function createLoadingPopup(input: HTMLInputElement, message: string) : H
 </div>
 `;
 
-    const popup = createBasePopup(input);
-    popup.innerHTML = getLoadingHtml(message);
+  const popup = createBasePopup(input);
+  popup.innerHTML = getLoadingHtml(message);
 
-    document.body.appendChild(popup);
-    return popup;
+  document.body.appendChild(popup);
+  return popup;
 }
 
 /**
  * Update the credential list content in the popup.
  */
 export function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null) : void {
-    if (!credentialList) {
-      credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
-    }
+  if (!credentialList) {
+    credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
+  }
 
-    if (!credentialList) return;
+  if (!credentialList) return;
 
-    // Clear existing content
-    credentialList.innerHTML = '';
+  // Clear existing content
+  credentialList.innerHTML = '';
 
-    // Add credentials using the shared function
-    const credentialElements = createCredentialList(credentials);
-    credentialElements.forEach(element => credentialList.appendChild(element));
+  // Add credentials using the shared function
+  const credentialElements = createCredentialList(credentials);
+  credentialElements.forEach(element => credentialList.appendChild(element));
 }
 
 /**
  * Remove existing popup (if any exists).
  */
 export function removeExistingPopup() : void {
-    const existing = document.getElementById('aliasvault-credential-popup');
-    if (existing) {
-      // Remove the mousedown event listener before removing the popup
-      // TODO: remove if not needed
-      //document.removeEventListener('mousedown', handleClickOutside);
-      existing.remove();
-    }
+  const existing = document.getElementById('aliasvault-credential-popup');
+  if (existing) {
+    /*
+     *  Remove the mousedown event listener before removing the popup
+     *  TODO: remove if not needed
+     * document.removeEventListener('mousedown', handleClickOutside);
+     */
+    existing.remove();
   }
+}
 
 /**
  * Create auto-fill popup
@@ -270,11 +283,6 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     clearTimeout(searchTimeout);
     const searchTerm = searchInput.value.toLowerCase();
 
-    type CredentialResponse = {
-        status: 'OK' | 'LOCKED';
-        credentials?: Credential[];
-      }
-
     // Request credentials from background script
     chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
       if (response.status === 'OK' && response.credentials) {
@@ -339,6 +347,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   popup.appendChild(actionContainer);
 
   // Define handleClickOutside
+  /**
+   *
+   */
   const handleClickOutside = (event: MouseEvent) : void => {
     const popup = document.getElementById('aliasvault-credential-popup');
     const target = event.target as Node;
@@ -458,16 +469,16 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
   document.body.appendChild(popup);
 }
 
-  /**
+/**
  * Create credential list content for popup
  */
 function createCredentialList(credentials: Credential[]): HTMLElement[] {
-    const elements: HTMLElement[] = [];
+  const elements: HTMLElement[] = [];
 
-    if (credentials.length > 0) {
-      credentials.forEach(cred => {
-        const item = document.createElement('div');
-        item.style.cssText = `
+  if (credentials.length > 0) {
+    credentials.forEach(cred => {
+      const item = document.createElement('div');
+      item.style.cssText = `
           padding: 8px 16px;
           cursor: pointer;
           display: flex;
@@ -479,9 +490,9 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           margin: 0 4px;
         `;
 
-        // Create container for credential info (logo + username)
-        const credentialInfo = document.createElement('div');
-        credentialInfo.style.cssText = `
+      // Create container for credential info (logo + username)
+      const credentialInfo = document.createElement('div');
+      credentialInfo.style.cssText = `
           display: flex;
           align-items: center;
           gap: 16px;
@@ -491,35 +502,35 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           transition: background-color 0.2s ease;
         `;
 
-        const imgElement = document.createElement('img');
-        imgElement.style.width = '20px';
-        imgElement.style.height = '20px';
+      const imgElement = document.createElement('img');
+      imgElement.style.width = '20px';
+      imgElement.style.height = '20px';
 
-        // Handle base64 image data
-        if (cred.Logo) {
-          try {
-            const base64Logo = base64Encode(cred.Logo);
-            imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
-          } catch (error) {
-            console.error('Error setting logo:', error);
-            imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
-          }
-        } else {
+      // Handle base64 image data
+      if (cred.Logo) {
+        try {
+          const base64Logo = base64Encode(cred.Logo);
+          imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
+        } catch (error) {
+          console.error('Error setting logo:', error);
           imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
         }
+      } else {
+        imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
+      }
 
-        credentialInfo.appendChild(imgElement);
-        const credTextContainer = document.createElement('div');
-        credTextContainer.style.cssText = `
+      credentialInfo.appendChild(imgElement);
+      const credTextContainer = document.createElement('div');
+      credTextContainer.style.cssText = `
           display: flex;
           flex-direction: column;
           flex-grow: 1;
           min-width: 0; /* Enable text truncation in flex container */
         `;
 
-        // Service name (primary text)
-        const serviceName = document.createElement('div');
-        serviceName.style.cssText = `
+      // Service name (primary text)
+      const serviceName = document.createElement('div');
+      serviceName.style.cssText = `
           font-weight: 500;
           white-space: nowrap;
           overflow: hidden;
@@ -527,11 +538,11 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           text-overflow: ellipsis;
           color: ${isDarkMode() ? '#f3f4f6' : '#111827'};
         `;
-        serviceName.textContent = cred.ServiceName;
+      serviceName.textContent = cred.ServiceName;
 
-        // Details container (secondary text)
-        const detailsContainer = document.createElement('div');
-        detailsContainer.style.cssText = `
+      // Details container (secondary text)
+      const detailsContainer = document.createElement('div');
+      detailsContainer.style.cssText = `
           font-size: 0.85em;
           white-space: nowrap;
           overflow: hidden;
@@ -540,28 +551,28 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
         `;
 
-        // Combine full name (if available) and username
-        const details = [];
-        if (cred.Alias?.FirstName && cred.Alias?.LastName) {
-          details.push(`${cred.Alias.FirstName} ${cred.Alias.LastName}`);
-        }
-        details.push(cred.Username);
-        detailsContainer.textContent = details.join(' · ');
+      // Combine full name (if available) and username
+      const details = [];
+      if (cred.Alias?.FirstName && cred.Alias?.LastName) {
+        details.push(`${cred.Alias.FirstName} ${cred.Alias.LastName}`);
+      }
+      details.push(cred.Username);
+      detailsContainer.textContent = details.join(' · ');
 
-        credTextContainer.appendChild(serviceName);
-        credTextContainer.appendChild(detailsContainer);
-        credentialInfo.appendChild(credTextContainer);
+      credTextContainer.appendChild(serviceName);
+      credTextContainer.appendChild(detailsContainer);
+      credentialInfo.appendChild(credTextContainer);
 
-        // Add popout icon
-        const popoutIcon = document.createElement('div');
-        popoutIcon.style.cssText = `
+      // Add popout icon
+      const popoutIcon = document.createElement('div');
+      popoutIcon.style.cssText = `
           display: flex;
           align-items: center;
           padding: 4px;
           opacity: 0.6;
           border-radius: 4px;
         `;
-        popoutIcon.innerHTML = `
+      popoutIcon.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
@@ -569,101 +580,100 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           </svg>
         `;
 
-        // Add hover effects
-        popoutIcon.addEventListener('mouseenter', () => {
-          popoutIcon.style.opacity = '1';
-          popoutIcon.style.backgroundColor = isDarkMode() ? '#ffffff' : '#000000';
-          popoutIcon.style.color = isDarkMode() ? '#000000' : '#ffffff';
-        });
-
-        popoutIcon.addEventListener('mouseleave', () => {
-          popoutIcon.style.opacity = '0.6';
-          popoutIcon.style.backgroundColor = 'transparent';
-          popoutIcon.style.color = isDarkMode() ? '#ffffff' : '#000000';
-        });
-
-        // Handle popout click
-        popoutIcon.addEventListener('click', (e) => {
-          e.stopPropagation(); // Prevent credential fill
-          chrome.runtime.sendMessage({
-            type: 'OPEN_POPUP_WITH_CREDENTIAL',
-            credentialId: cred.Id
-          });
-          removeExistingPopup();
-        });
-
-        item.appendChild(credentialInfo);
-        item.appendChild(popoutIcon);
-
-        // Update hover effect for the entire item
-        item.addEventListener('mouseenter', () => {
-          item.style.backgroundColor = isDarkMode() ? '#2d3748' : '#f3f4f6';
-          popoutIcon.style.opacity = '1';
-        });
-
-        item.addEventListener('mouseleave', () => {
-          item.style.backgroundColor = 'transparent';
-          popoutIcon.style.opacity = '0.6';
-        });
-
-        // Update click handler to only trigger on credentialInfo
-        credentialInfo.addEventListener('click', () => {
-          fillCredential(cred);
-          removeExistingPopup();
-        });
-
-        elements.push(item);
+      // Add hover effects
+      popoutIcon.addEventListener('mouseenter', () => {
+        popoutIcon.style.opacity = '1';
+        popoutIcon.style.backgroundColor = isDarkMode() ? '#ffffff' : '#000000';
+        popoutIcon.style.color = isDarkMode() ? '#000000' : '#ffffff';
       });
-    } else {
-      const noMatches = document.createElement('div');
-      noMatches.style.cssText = `
+
+      popoutIcon.addEventListener('mouseleave', () => {
+        popoutIcon.style.opacity = '0.6';
+        popoutIcon.style.backgroundColor = 'transparent';
+        popoutIcon.style.color = isDarkMode() ? '#ffffff' : '#000000';
+      });
+
+      // Handle popout click
+      popoutIcon.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent credential fill
+        chrome.runtime.sendMessage({
+          type: 'OPEN_POPUP_WITH_CREDENTIAL',
+          credentialId: cred.Id
+        });
+        removeExistingPopup();
+      });
+
+      item.appendChild(credentialInfo);
+      item.appendChild(popoutIcon);
+
+      // Update hover effect for the entire item
+      item.addEventListener('mouseenter', () => {
+        item.style.backgroundColor = isDarkMode() ? '#2d3748' : '#f3f4f6';
+        popoutIcon.style.opacity = '1';
+      });
+
+      item.addEventListener('mouseleave', () => {
+        item.style.backgroundColor = 'transparent';
+        popoutIcon.style.opacity = '0.6';
+      });
+
+      // Update click handler to only trigger on credentialInfo
+      credentialInfo.addEventListener('click', () => {
+        fillCredential(cred);
+        removeExistingPopup();
+      });
+
+      elements.push(item);
+    });
+  } else {
+    const noMatches = document.createElement('div');
+    noMatches.style.cssText = `
         padding: 8px 16px;
         color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
         font-style: italic;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       `;
-      noMatches.textContent = 'No matches found';
-      elements.push(noMatches);
-    }
-
-    return elements;
+    noMatches.textContent = 'No matches found';
+    elements.push(noMatches);
   }
 
-  const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
+  return elements;
+}
 
+const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
 
-  /**
+/**
  * Check if auto-popup is disabled for current site
  */
 export async function isAutoShowPopupDisabled(): Promise<boolean> {
-    const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
-    const disabledSites = result[DISABLED_SITES_KEY] || [];
-    return disabledSites.includes(window.location.hostname);
-  }
+  const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
+  const disabledSites = result[DISABLED_SITES_KEY] || [];
+  return disabledSites.includes(window.location.hostname);
+}
 
-  /**
-   * Disable auto-popup for current site
-   */
-  export async function disableAutoShowPopup(): Promise<void> {
-    const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
-    const disabledSites = result[DISABLED_SITES_KEY] || [];
-    if (!disabledSites.includes(window.location.hostname)) {
-      disabledSites.push(window.location.hostname);
-      await chrome.storage.local.set({ [DISABLED_SITES_KEY]: disabledSites });
-    }
+/**
+ * Disable auto-popup for current site
+ */
+export async function disableAutoShowPopup(): Promise<void> {
+  const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
+  const disabledSites = result[DISABLED_SITES_KEY] || [];
+  if (!disabledSites.includes(window.location.hostname)) {
+    disabledSites.push(window.location.hostname);
+    await chrome.storage.local.set({ [DISABLED_SITES_KEY]: disabledSites });
   }
+}
 
-    /**
+/**
  * Create edit name popup. Part of the "create new alias" flow.
  */
 export async function createEditNamePopup(defaultName: string): Promise<string | null> {
-    // Close existing popup
-    removeExistingPopup();
+  // Close existing popup
+  removeExistingPopup();
 
-    return new Promise((resolve) => {
-      // Create modal overlay
-      const overlay = document.createElement('div');
-      overlay.style.cssText = `
+  return new Promise((resolve) => {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
         position: fixed;
         top: 0;
         left: 0;
@@ -676,8 +686,8 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
         justify-content: center;
       `;
 
-      const popup = document.createElement('div');
-      popup.style.cssText = `
+    const popup = document.createElement('div');
+    popup.style.cssText = `
         position: relative;
         z-index: 1000000;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
@@ -695,7 +705,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       `;
 
-      popup.innerHTML = `
+    popup.innerHTML = `
         <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: ${isDarkMode() ? '#f8f9fa' : '#000000'}">
           New alias name
         </h3>
@@ -740,168 +750,158 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
         </div>
       `;
 
-      overlay.appendChild(popup);
-      document.body.appendChild(overlay);
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
 
-      // Add hover and focus styles
-      const input = popup.querySelector('#service-name-input') as HTMLInputElement;
-      const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
-      const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
+    // Add hover and focus styles
+    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
+    const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
+    const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
 
-      input.addEventListener('focus', () => {
-        input.style.borderColor = '#2563eb';
-        input.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
-      });
+    input.addEventListener('focus', () => {
+      input.style.borderColor = '#2563eb';
+      input.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+    });
 
-      input.addEventListener('blur', () => {
-        input.style.borderColor = isDarkMode() ? '#374151' : '#ccc';
-        input.style.boxShadow = 'none';
-      });
+    input.addEventListener('blur', () => {
+      input.style.borderColor = isDarkMode() ? '#374151' : '#ccc';
+      input.style.boxShadow = 'none';
+    });
 
-      saveBtn.addEventListener('mouseenter', () => {
-        saveBtn.style.background = '#1d4ed8';
-        saveBtn.style.transform = 'translateY(-1px)';
-      });
+    saveBtn.addEventListener('mouseenter', () => {
+      saveBtn.style.background = '#1d4ed8';
+      saveBtn.style.transform = 'translateY(-1px)';
+    });
 
-      saveBtn.addEventListener('mouseleave', () => {
-        saveBtn.style.background = '#2563eb';
-        saveBtn.style.transform = 'translateY(0)';
-      });
+    saveBtn.addEventListener('mouseleave', () => {
+      saveBtn.style.background = '#2563eb';
+      saveBtn.style.transform = 'translateY(0)';
+    });
 
-      cancelBtn.addEventListener('mouseenter', () => {
-        cancelBtn.style.background = isDarkMode() ? '#374151' : '#f3f4f6';
-      });
+    cancelBtn.addEventListener('mouseenter', () => {
+      cancelBtn.style.background = isDarkMode() ? '#374151' : '#f3f4f6';
+    });
 
-      cancelBtn.addEventListener('mouseleave', () => {
-        cancelBtn.style.background = 'transparent';
-      });
+    cancelBtn.addEventListener('mouseleave', () => {
+      cancelBtn.style.background = 'transparent';
+    });
 
-      // Animate in
-      requestAnimationFrame(() => {
-        popup.style.transform = 'scale(1)';
-        popup.style.opacity = '1';
-      });
+    // Animate in
+    requestAnimationFrame(() => {
+      popup.style.transform = 'scale(1)';
+      popup.style.opacity = '1';
+    });
 
-      // Select input text
-      input.select();
+    // Select input text
+    input.select();
 
-      // Add variable to track if text is being selected
-      let isSelecting = false;
+    /**
+     *
+     */
+    const closePopup = (value: string | null) : void => {
+      popup.style.transform = 'scale(0.95)';
+      popup.style.opacity = '0';
+      setTimeout(() => {
+        overlay.remove();
+        resolve(value);
+      }, 200);
+    };
 
-      // Add mousedown handler to input
-      input.addEventListener('mousedown', () => {
-        isSelecting = true;
-      });
+    // Handle save
+    saveBtn.addEventListener('click', () => {
+      const value = input.value.trim();
+      if (value) {
+        closePopup(value);
+      }
+    });
 
-      // Add mouseup handler to document
-      document.addEventListener('mouseup', () => {
-        // Use setTimeout to ensure click handler runs after mouseup
-        setTimeout(() => {
-          isSelecting = false;
-        }, 0);
-      });
+    // Handle cancel
+    cancelBtn.addEventListener('click', () => {
+      closePopup(null);
+    });
 
-      const closePopup = (value: string | null) => {
-        popup.style.transform = 'scale(0.95)';
-        popup.style.opacity = '0';
-        setTimeout(() => {
-          overlay.remove();
-          resolve(value);
-        }, 200);
-      };
-
-      // Handle save
-      saveBtn.addEventListener('click', () => {
+    // Handle Enter key
+    input.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
         const value = input.value.trim();
         if (value) {
           closePopup(value);
         }
-      });
-
-      // Handle cancel
-      cancelBtn.addEventListener('click', () => {
-        closePopup(null);
-      });
-
-      // Handle Enter key
-      input.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-          const value = input.value.trim();
-          if (value) {
-            closePopup(value);
-          }
-        }
-      });
-
-      // Handle click outside
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          // Check if there's any text selected in the input
-          const selectedText = input.value.substring(input.selectionStart || 0, input.selectionEnd || 0);
-
-          // Only close if no text is selected
-          if (!selectedText) {
-            closePopup(null);
-          }
-        }
-      });
+      }
     });
-  };
 
-  /**
+    // Handle click outside
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        // Check if there's any text selected in the input
+        const selectedText = input.value.substring(input.selectionStart || 0, input.selectionEnd || 0);
+
+        // Only close if no text is selected
+        if (!selectedText) {
+          closePopup(null);
+        }
+      }
+    });
+  });
+};
+
+/**
  * Open (or refresh) the autofill popup including check if vault is locked.
  */
 export function openAutofillPopup(input: HTMLInputElement) : void {
-    const formDetector = new FormDetector(document);
-    const forms = formDetector.detectForms();
+  const formDetector = new FormDetector(document);
+  const forms = formDetector.detectForms();
 
-    if (!forms.length) return;
+  if (!forms.length) return;
 
-    // Add keydown event listener for Enter key
-    const handleEnterKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        removeExistingPopup();
-        // Remove the event listener to clean up
-        document.removeEventListener('keydown', handleEnterKey);
-      }
-    };
-    document.addEventListener('keydown', handleEnterKey);
+  // Add keydown event listener for Enter key
+  /**
+   *
+   */
+  const handleEnterKey = (e: KeyboardEvent) : void => {
+    if (e.key === 'Enter') {
+      removeExistingPopup();
+      // Remove the event listener to clean up
+      document.removeEventListener('keydown', handleEnterKey);
+    }
+  };
+  document.addEventListener('keydown', handleEnterKey);
 
-    // Request credentials from background script
-    chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
-      switch (response.status) {
-        case 'OK':
-          if (response.credentials?.length) {
-            createAutofillPopup(input, response.credentials);
-          }
-          break;
+  // Request credentials from background script
+  chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
+    switch (response.status) {
+      case 'OK':
+        if (response.credentials?.length) {
+          createAutofillPopup(input, response.credentials);
+        }
+        break;
 
-        case 'LOCKED':
-          createVaultLockedPopup(input);
-          break;
-      }
-    });
-  }
+      case 'LOCKED':
+        createVaultLockedPopup(input);
+        break;
+    }
+  });
+}
 
 /**
  * Base64 encode binary data.
  */
 function base64Encode(buffer: Uint8Array): string | null {
-    if (!buffer || typeof buffer !== 'object') {
-        return null;
-    }
-
-    try {
-        // Convert object to array of numbers
-        const byteArray = Object.values(buffer);
-
-        // Convert to binary string
-        const binary = String.fromCharCode.apply(null, byteArray as number[]);
-
-        // Use btoa to encode binary string to base64
-        return btoa(binary);
-    } catch (error) {
-        console.error('Error encoding to base64:', error);
-        return null;
-    }
+  if (!buffer || typeof buffer !== 'object') {
+    return null;
   }
+
+  try {
+    // Convert object to array of numbers
+    const byteArray = Object.values(buffer);
+
+    // Convert to binary string
+    const binary = String.fromCharCode.apply(null, byteArray as number[]);
+
+    // Use btoa to encode binary string to base64
+    return btoa(binary);
+  } catch (error) {
+    console.error('Error encoding to base64:', error);
+    return null;
+  }
+}
