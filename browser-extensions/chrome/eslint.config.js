@@ -63,6 +63,15 @@ export default [
                     "FunctionExpression": true
                 }
             }],
+            "jsdoc/require-description": ["error", {
+                "contexts": [
+                    "FunctionDeclaration",
+                    "MethodDefinition",
+                    "ClassDeclaration",
+                    "ArrowFunctionExpression",
+                    "FunctionExpression"
+                ]
+            }],
             "spaced-comment": ["error", "always"],
             "multiline-comment-style": ["error", "starred-block"],
             "@typescript-eslint/explicit-member-accessibility": ["error"],
