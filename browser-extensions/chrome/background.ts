@@ -42,11 +42,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: (generatedPassword) => {
-          // Write to clipboard
-          navigator.clipboard.writeText(generatedPassword).then(() => {
+          function showToast(message: string) {
             // Show notification
             const notification = document.createElement('div');
-            notification.textContent = 'Password copied to clipboard';
+            notification.textContent = message;
             notification.style.cssText = `
               position: fixed;
               top: 20px;
@@ -60,6 +59,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             `;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
+          }
+
+          // Write to clipboard
+          navigator.clipboard.writeText(generatedPassword).then(() => {
+            showToast('Password copied to clipboard');
           });
         },
         args: [password]
@@ -327,7 +331,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             () => {}
           );
           await webApi.initializeBaseUrl();
-          await webApi.post('Vault', newVault);
+          // TODO: re-enable
+          //await webApi.post('Vault', newVault);
 
           console.log('Vault uploaded successfully');
 

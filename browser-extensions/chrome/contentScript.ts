@@ -790,66 +790,85 @@ async function disableAutoPopup(): Promise<void> {
 }
 
 /**
- * Inject icons into forms
+ * Inject icon for a focused input element
  */
-function injectIcons(): void {
-  const formDetector = new FormDetector(document);
-  const forms = formDetector.detectForms();
+function injectIcon(input: HTMLInputElement): void {
+  // Don't inject if already exists
+  if (document.querySelector(`[data-icon-for="${input.id}"]`)) {
+    return;
+  }
 
-  forms.forEach(form => {
-    // Find the first occurring field by comparing their positions in the DOM
-    const fields = [
-      { type: 'email', element: form.emailField },
-      { type: 'username', element: form.usernameField },
-      { type: 'password', element: form.passwordField }
-    ].filter(f => f.element);
+  const iconDiv = document.createElement('div');
+  iconDiv.innerHTML = ICON_HTML;
+  const icon = iconDiv.firstElementChild as HTMLElement;
 
-    // Sort fields based on their DOM position
-    fields.sort((a, b) => {
-      if (!a.element || !b.element) return 0;
-      return a.element.compareDocumentPosition(b.element) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
-    });
+  // Get input's position and dimensions
+  const inputRect = input.getBoundingClientRect();
 
-    const targetField = fields[0]?.element;
+  // Position icon absolutely relative to viewport
+  icon.style.cssText = `
+    position: fixed;
+    z-index: 9999;
+    cursor: pointer;
+    top: ${inputRect.top + window.scrollY + (inputRect.height - 24) / 2}px;
+    right: ${window.innerWidth - (inputRect.right + window.scrollX) + 8}px;
+    width: 24px;
+    height: 24px;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  `;
 
-    if (targetField && !targetField.parentElement?.querySelector('.aliasvault-input-icon')) {
-      const wrapper = document.createElement('div');
-      wrapper.style.cssText = 'position: relative; display: inline-block; width: 100%;';
+  icon.setAttribute('data-icon-for', input.id);
 
-      // Preserve original input styles
-      const computedStyle = window.getComputedStyle(targetField);
-      const originalWidth = computedStyle.width;
-      const originalDisplay = computedStyle.display;
-
-      targetField.parentNode?.insertBefore(wrapper, targetField);
-      wrapper.appendChild(targetField);
-
-      // Restore original input styles
-      targetField.style.width = originalWidth;
-      targetField.style.display = originalDisplay;
-
-      const iconDiv = document.createElement('div');
-      iconDiv.innerHTML = ICON_HTML;
-      const icon = iconDiv.firstElementChild as HTMLElement;
-
-      icon.addEventListener('click', () => {
-        showCredentialPopup(targetField as HTMLInputElement);
-      });
-
-      wrapper.appendChild(icon);
-    }
+  icon.addEventListener('click', () => {
+    showCredentialPopup(input);
   });
+
+  // Add to body
+  document.body.appendChild(icon);
+
+  // Fade in the icon
+  requestAnimationFrame(() => {
+    icon.style.opacity = '1';
+  });
+
+  // Remove icon when input loses focus, except when clicking the icon
+  const handleBlur = (e: FocusEvent) => {
+    // Don't remove if clicking the icon itself
+    if (e.relatedTarget === icon) {
+      return;
+    }
+
+    // Fade out and remove icon
+    icon.style.opacity = '0';
+    setTimeout(() => {
+      icon.remove();
+      input.removeEventListener('blur', handleBlur);
+    }, 200); // Match transition duration
+  };
+
+  input.addEventListener('blur', handleBlur);
 }
 
-// Call injectIcons on page load and DOM mutations
-injectIcons();
-const observer = new MutationObserver(() => {
-  injectIcons();
-});
+/**
+ * Listen for input field focus
+ */
+document.addEventListener('focusin', async (e) => {
+  const target = e.target as HTMLInputElement;
+  if (target.tagName === 'INPUT' && !target.dataset.aliasvaultIgnore) {
+    const formDetector = new FormDetector(document);
+    const forms = formDetector.detectForms();
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true
+    if (!forms.length) return;
+
+    injectIcon(target);
+
+    const isDisabled = await isAutoPopupDisabled();
+    if (!isDisabled) {
+      showCredentialPopup(target);
+    }
+  }
 });
 
 const createEditNamePopup = (defaultName: string): Promise<string | null> => {
@@ -1065,7 +1084,6 @@ urlObserver.observe(document.body, {
 window.addEventListener('popstate', () => {
   removeExistingPopup();
 });
-
 /**
  * Create credential list content for popup
  */
