@@ -149,7 +149,7 @@ function filterCredentials(credentials: Credential[], currentUrl: string, pageTi
   }
 
   // 3. Page title word match if still no matches
-  if (filtered.length === 0) {
+  if (filtered.length === 0 && pageTitle.length > 0) {
     const titleWords = pageTitle.toLowerCase().split(/\s+/);
     filtered = credentials.filter(cred =>
       titleWords.some(word =>
@@ -158,7 +158,8 @@ function filterCredentials(credentials: Credential[], currentUrl: string, pageTi
     );
   }
 
-  return filtered;
+  // Show max 3 results
+  return filtered.slice(0, 3);
 }
 
 /**
@@ -175,7 +176,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   const inputWidth = input.offsetWidth;
 
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(250, Math.min(640, inputWidth));
+  const popupWidth = Math.max(360, Math.min(640, inputWidth));
 
   popup.style.cssText = `
     position: absolute;
@@ -251,7 +252,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
 
     // Get input width
     const inputWidth = input.offsetWidth;
-    const popupWidth = Math.max(250, Math.min(640, inputWidth));
+    const popupWidth = Math.max(360, Math.min(640, inputWidth));
 
     loadingPopup.style.cssText = `
       position: absolute;
@@ -489,7 +490,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
   const inputWidth = input.offsetWidth;
 
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(250, Math.min(640, inputWidth));
+  const popupWidth = Math.max(240, Math.min(640, inputWidth));
 
   popup.style.cssText = `
     position: absolute;
