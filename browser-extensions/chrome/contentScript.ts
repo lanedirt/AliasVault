@@ -69,17 +69,17 @@ function isDarkMode(): boolean {
 document.addEventListener('focusin', async (e) => {
   const target = e.target as HTMLInputElement;
   if (target.tagName === 'INPUT' && !target.dataset.aliasvaultIgnore) {
-    const isDisabled = await isAutoPopupDisabled();
+    const isDisabled = await isAutoShowPopupDisabled();
     if (!isDisabled) {
-      showCredentialPopup(target);
+      openAutofillPopup(target);
     }
   }
 });
 
 /**
- * Show credential popup
+ * Open (or refresh) the autofill popup including check if vault is locked.
  */
-function showCredentialPopup(input: HTMLInputElement) : void {
+function openAutofillPopup(input: HTMLInputElement) : void {
   const formDetector = new FormDetector(document);
   const forms = formDetector.detectForms();
 
@@ -100,19 +100,20 @@ function showCredentialPopup(input: HTMLInputElement) : void {
     switch (response.status) {
       case 'OK':
         if (response.credentials?.length) {
-          createPopup(input, response.credentials);
+          createAutofillPopup(input, response.credentials);
         }
         break;
 
       case 'LOCKED':
-        createStatusPopup(input, 'AliasVault is locked.');
+        createVaultLockedPopup(input);
         break;
     }
   });
 }
 
 /**
- * Filter credentials based on current URL and page context
+ * Filter credentials based on current URL and page context to determine which credentials to show
+ * in the autofill popup.
  */
 function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
   const urlObject = new URL(currentUrl);
@@ -128,20 +129,20 @@ function filterCredentials(credentials: Credential[], currentUrl: string, pageTi
     filtered = credentials.filter(cred => {
         if (!cred.ServiceUrl) return false;
         try {
-            const credUrlObject = new URL(cred.ServiceUrl);
-            const currentUrlObject = new URL(baseUrl);
+          const credUrlObject = new URL(cred.ServiceUrl);
+          const currentUrlObject = new URL(baseUrl);
 
-            // Extract root domains by splitting on dots and taking last two parts
-            const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
-            const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
+          // Extract root domains by splitting on dots and taking last two parts
+          const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
+          const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
 
-            // Get root domain (last two parts, e.g., 'dumpert.nl')
-            const credRootDomain = credDomainParts.slice(-2).join('.');
-            const currentRootDomain = currentDomainParts.slice(-2).join('.');
+          // Get root domain (last two parts, e.g., 'dumpert.nl')
+          const credRootDomain = credDomainParts.slice(-2).join('.');
+          const currentRootDomain = currentDomainParts.slice(-2).join('.');
 
-            // Compare protocols and root domains
-            return credUrlObject.protocol === currentUrlObject.protocol &&
-                  credRootDomain === currentRootDomain;
+          // Compare protocols and root domains
+          return credUrlObject.protocol === currentUrlObject.protocol &&
+                credRootDomain === currentRootDomain;
         } catch {
             return false;
         }
@@ -165,42 +166,21 @@ function filterCredentials(credentials: Credential[], currentUrl: string, pageTi
 /**
  * Create auto-fill popup
  */
-function createPopup(input: HTMLInputElement, credentials: Credential[]) : void {
-  // Remove existing popup and its event listeners
-  removeExistingPopup();
+function createAutofillPopup(input: HTMLInputElement, credentials: Credential[]) : void {
+  const popup = createBasePopup(input);
 
-  const popup = document.createElement('div');
-  popup.id = 'aliasvault-credential-popup';
+  // Create credential list container with ID
+  const credentialList = document.createElement('div');
+  credentialList.id = 'aliasvault-credential-list';
+  popup.appendChild(credentialList);
 
-  // Get input width
-  const inputWidth = input.offsetWidth;
-
-  // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(360, Math.min(640, inputWidth));
-
-  popup.style.cssText = `
-    position: absolute;
-    z-index: 999999;
-    background: ${isDarkMode() ? '#1f2937' : 'white'};
-    border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
-    border-radius: 4px;
-    box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
-    padding: 8px 0;
-    width: ${popupWidth}px;
-    color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  `;
-
-  // Filter credentials based on current page context
+  // Add initial credentials
   const filteredCredentials = filterCredentials(
     credentials,
     window.location.href,
     document.title
   );
-
-  // Add credentials to popup using the shared function
-  const credentialElements = createCredentialList(filteredCredentials, input);
-  credentialElements.forEach(element => popup.appendChild(element));
+  updatePopupContent(filteredCredentials, credentialList);
 
   // Add divider
   const divider = document.createElement('div');
@@ -242,41 +222,12 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     </svg>
     New
   `;
+
   createButton.addEventListener('click', async () => {
     const serviceName = await createEditNamePopup(document.title);
     if (!serviceName) return; // User cancelled
 
-    // Create a new popup for loading state
-    const loadingPopup = document.createElement('div');
-    loadingPopup.id = 'aliasvault-credential-popup';
-
-    // Get input width
-    const inputWidth = input.offsetWidth;
-    const popupWidth = Math.max(360, Math.min(640, inputWidth));
-
-    loadingPopup.style.cssText = `
-      position: absolute;
-      z-index: 999999;
-      background: ${isDarkMode() ? '#1f2937' : 'white'};
-      border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
-      border-radius: 4px;
-      box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
-      width: ${popupWidth}px;
-      color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    `;
-
-    // Position popup below input
-    const rect = input.getBoundingClientRect();
-    loadingPopup.style.top = `${rect.bottom + window.scrollY + 2}px`;
-    loadingPopup.style.left = `${rect.left + window.scrollX}px`;
-
-    // Add loading content
-    loadingPopup.innerHTML = getLoadingHtml('Creating new identity...');
-
-    // Remove existing popup and show loading popup
-    removeExistingPopup();
-    document.body.appendChild(loadingPopup);
+    const loadingPopup = createLoadingPopup(input, 'Creating new identity...');
 
     try {
       // Retrieve default email domain from background
@@ -328,7 +279,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
 
       chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential }, () => {
         // Refresh the popup to show new identity
-        showCredentialPopup(input);
+        openAutofillPopup(input);
       });
     } catch (error) {
       console.error('Error creating identity:', error);
@@ -346,6 +297,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   // Create search input instead of button
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
+  searchInput.dataset.aliasvaultIgnore = 'true';
   searchInput.placeholder = 'Search vault...';
   searchInput.style.cssText = `
     flex: 2;
@@ -403,7 +355,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
         }
 
         // Update popup content with filtered results
-        updatePopupContent(popup, filteredCredentials, input);
+        updatePopupContent(filteredCredentials);
       }
     });
   });
@@ -429,7 +381,7 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
     </svg>
   `;
   closeButton.addEventListener('click', async () => {
-    await disableAutoPopup();
+    await disableAutoShowPopup();
     removeExistingPopup();
   });
 
@@ -468,44 +420,18 @@ function createPopup(input: HTMLInputElement, credentials: Credential[]) : void 
   // Add the event listener for clicking outside
   document.addEventListener('mousedown', handleClickOutside);
 
-  // Position popup below input
-  const rect = input.getBoundingClientRect();
-  popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
-
   document.body.appendChild(popup);
 }
 
 /**
- * Create status popup. TODO: refactor to use same popup basic structure for all popup types.
+ * Create vault locked popup.
  */
-function createStatusPopup(input: HTMLInputElement, message: string): void {
-  // Remove existing popup if any
-  removeExistingPopup();
+function createVaultLockedPopup(input: HTMLInputElement): void {
+  const popup = createBasePopup(input);
 
-  const popup = document.createElement('div');
-  popup.id = 'aliasvault-credential-popup';
-
-  // Get input width
-  const inputWidth = input.offsetWidth;
-
-  // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(240, Math.min(640, inputWidth));
-
-  popup.style.cssText = `
-    position: absolute;
-    z-index: 999999;
-    background: ${isDarkMode() ? '#1f2937' : 'white'};
-    border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
-    border-radius: 4px;
-    box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
-    padding: 12px 16px;
-    width: ${popupWidth}px;
-    color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  `;
+  // Adjust popup css
+  popup.style.padding = '12px 16px';
+  popup.style.cursor = 'pointer';
 
   // Add hover effect to the entire popup
   popup.addEventListener('mouseenter', () => {
@@ -514,6 +440,12 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
 
   popup.addEventListener('mouseleave', () => {
     popup.style.backgroundColor = isDarkMode() ? '#1f2937' : 'white';
+  });
+
+  // Make the whole popup clickable to open the main extension login popup.
+  popup.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
+    removeExistingPopup();
   });
 
   // Create container for message and button
@@ -532,7 +464,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     padding-right: 32px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   `;
-  messageElement.textContent = message;
+  messageElement.textContent = 'AliasVault is locked.';
   container.appendChild(messageElement);
 
   // Add unlock button with SVG icon
@@ -558,19 +490,8 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
     </svg>
   `;
 
-  // Make the whole container clickable to open the popup.
-  container.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
-    removeExistingPopup();
-  });
-
   container.appendChild(button);
   popup.appendChild(container);
-
-  // Position popup below input
-  const rect = input.getBoundingClientRect();
-  popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
 
   /**
    * Add event listener to document to close popup when clicking outside.
@@ -590,7 +511,7 @@ function createStatusPopup(input: HTMLInputElement, message: string): void {
 }
 
 /**
- * Remove existing popup
+ * Remove existing popup (if any exists).
  */
 function removeExistingPopup() : void {
   const existing = document.getElementById('aliasvault-credential-popup');
@@ -602,7 +523,7 @@ function removeExistingPopup() : void {
 }
 
 /**
- * Fill credential
+ * Fill credential into current form.
  */
 function fillCredential(credential: Credential) : void {
   const formDetector = new FormDetector(document);
@@ -771,7 +692,7 @@ function base64Encode(buffer: Uint8Array): string | null {
 /**
  * Check if auto-popup is disabled for current site
  */
-async function isAutoPopupDisabled(): Promise<boolean> {
+async function isAutoShowPopupDisabled(): Promise<boolean> {
   const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
   const disabledSites = result[DISABLED_SITES_KEY] || [];
   return disabledSites.includes(window.location.hostname);
@@ -780,7 +701,7 @@ async function isAutoPopupDisabled(): Promise<boolean> {
 /**
  * Disable auto-popup for current site
  */
-async function disableAutoPopup(): Promise<void> {
+async function disableAutoShowPopup(): Promise<void> {
   const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
   const disabledSites = result[DISABLED_SITES_KEY] || [];
   if (!disabledSites.includes(window.location.hostname)) {
@@ -793,6 +714,11 @@ async function disableAutoPopup(): Promise<void> {
  * Inject icon for a focused input element
  */
 function injectIcon(input: HTMLInputElement): void {
+  // Generate unique ID if input doesn't have one
+  if (!input.id) {
+    input.id = `aliasvault-input-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   // Don't inject if already exists
   if (document.querySelector(`[data-icon-for="${input.id}"]`)) {
     return;
@@ -822,7 +748,7 @@ function injectIcon(input: HTMLInputElement): void {
   icon.setAttribute('data-icon-for', input.id);
 
   icon.addEventListener('click', () => {
-    showCredentialPopup(input);
+    openAutofillPopup(input);
   });
 
   // Add to body
@@ -864,13 +790,16 @@ document.addEventListener('focusin', async (e) => {
 
     injectIcon(target);
 
-    const isDisabled = await isAutoPopupDisabled();
+    const isDisabled = await isAutoShowPopupDisabled();
     if (!isDisabled) {
-      showCredentialPopup(target);
+      openAutofillPopup(target);
     }
   }
 });
 
+/**
+ * Create edit name popup. Part of the "create new alias" flow.
+ */
 const createEditNamePopup = (defaultName: string): Promise<string | null> => {
   // Close existing popup
   removeExistingPopup();
@@ -1063,31 +992,15 @@ const createEditNamePopup = (defaultName: string): Promise<string | null> => {
   });
 };
 
-// Add URL change detection using the History API
-let lastUrl = window.location.href;
-
-// Create observer to watch for URL changes
-const urlObserver = new MutationObserver(() => {
-  if (window.location.href !== lastUrl) {
-    lastUrl = window.location.href;
-    removeExistingPopup();
-  }
-});
-
-// Start observing
-urlObserver.observe(document.body, {
-  childList: true,
-  subtree: true
-});
-
 // Also listen for popstate events (back/forward navigation)
 window.addEventListener('popstate', () => {
   removeExistingPopup();
 });
+
 /**
  * Create credential list content for popup
  */
-function createCredentialList(credentials: Credential[], input: HTMLInputElement): HTMLElement[] {
+function createCredentialList(credentials: Credential[]): HTMLElement[] {
   const elements: HTMLElement[] = [];
 
   if (credentials.length > 0) {
@@ -1255,28 +1168,69 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
   return elements;
 }
 
-// Update updatePopupContent to use the new function
-function updatePopupContent(popup: HTMLElement, credentials: Credential[], input: HTMLInputElement) {
-  // Store the action container
-  const actionContainer = popup.lastElementChild;
-
-  // Clear all content except the action container
-  while (popup.firstChild && popup.firstChild !== actionContainer) {
-    popup.removeChild(popup.firstChild);
+/**
+ * Update the credential list content in the popup.
+ */
+function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null) : void {
+  if (!credentialList) {
+    credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
   }
 
-  // Add credentials using the shared function
-  const credentialElements = createCredentialList(credentials, input);
-  credentialElements.forEach(element => {
-    popup.insertBefore(element, actionContainer);
-  });
+  if (!credentialList) return;
 
-  // Add divider before action container
-  const divider = document.createElement('div');
-  divider.style.cssText = `
-    height: 1px;
-    background: ${isDarkMode() ? '#374151' : '#e5e7eb'};
-    margin: 8px 0;
+  // Clear existing content
+  credentialList.innerHTML = '';
+
+  // Add credentials using the shared function
+  const credentialElements = createCredentialList(credentials);
+  credentialElements.forEach(element => credentialList.appendChild(element));
+}
+
+// --------
+/**
+ * Create basic popup with default style.
+ */
+function createBasePopup(input: HTMLInputElement) : HTMLElement {
+  // Remove existing popup and its event listeners
+  removeExistingPopup();
+
+  const popup = document.createElement('div');
+  popup.id = 'aliasvault-credential-popup';
+
+  // Get input width
+  const inputWidth = input.offsetWidth;
+
+  // Set popup width to match input width, with min/max constraints
+  const popupWidth = Math.max(360, Math.min(640, inputWidth));
+
+  popup.style.cssText = `
+    position: absolute;
+    z-index: 999999;
+    background: ${isDarkMode() ? '#1f2937' : 'white'};
+    border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
+    border-radius: 4px;
+    box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
+    padding: 8px 0;
+    width: ${popupWidth}px;
+    color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   `;
-  popup.insertBefore(divider, actionContainer);
+
+  // Position popup below input
+  const rect = input.getBoundingClientRect();
+  popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
+  popup.style.left = `${rect.left + window.scrollX}px`;
+
+  return popup;
+}
+
+/**
+ * Create a loading popup.
+ */
+function createLoadingPopup(input: HTMLInputElement, message: string) : HTMLElement {
+  const popup = createBasePopup(input);
+  popup.innerHTML = getLoadingHtml(message);
+
+  document.body.appendChild(popup);
+  return popup;
 }
