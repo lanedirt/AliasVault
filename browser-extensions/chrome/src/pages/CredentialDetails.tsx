@@ -5,18 +5,27 @@ import { Credential } from '../types/Credential';
 import { Buffer } from 'buffer';
 import { FormInputCopyToClipboard } from '../components/FormInputCopyToClipboard';
 
+/**
+ * Credential details page.
+ */
 const CredentialDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
   const [credential, setCredential] = useState<Credential | null>(null);
 
-  const isPopup = () => {
+  /**
+   * Check if the current page is a popup.
+   */
+  const isPopup = () : boolean => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('popup') === 'true';
   };
 
-  const openInNewPopup = () => {
+  /**
+   * Open the credential details in a new popup.
+   */
+  const openInNewPopup = () : void => {
     const width = 380;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -36,7 +45,6 @@ const CredentialDetails: React.FC = () => {
     // For popup windows, ensure we have proper history state for navigation
     if (isPopup()) {
       // Clear existing history and create fresh entries
-      console.log(window.location.href);
       window.history.replaceState({}, '', `index.html#/credentials`);
       window.history.pushState({}, '', `index.html#/credentials/${id}`);
     }
@@ -55,7 +63,7 @@ const CredentialDetails: React.FC = () => {
     } catch (err) {
       console.error('Error loading credential:', err);
     }
-  }, [dbContext.sqliteClient, id]);
+  }, [dbContext.sqliteClient, id, navigate]);
 
   if (!credential) {
     return <div>Loading...</div>;

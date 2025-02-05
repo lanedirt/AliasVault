@@ -82,7 +82,6 @@ const Unlock: React.FC = () => {
       hideLoading();
     }
 
-
   };
 
   return (

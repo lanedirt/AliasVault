@@ -3,14 +3,18 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../../context/LoadingContext';
 
-interface UserMenuProps {
+/**
+ * User menu props.
+ */
+type UserMenuProps = {
   username: string;
-  onRefresh?: () => void;
 }
 
+/**
+ * User menu component.
+ */
 export const UserMenu: React.FC<UserMenuProps> = ({
-  username,
-  onRefresh,
+  username
 }) => {
   const authContext = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -20,7 +24,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   const { showLoading, hideLoading } = useLoading();
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    /**
+     * Handle clicking outside the user menu.
+     */
+    const handleClickOutside = (event: MouseEvent) : void => {
       if (
         menuRef.current &&
         buttonRef.current &&
@@ -32,18 +39,24 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () : void => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  const toggleUserMenu = () => {
+  /**
+   * Toggle the user menu.
+   */
+  const toggleUserMenu = () : void => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
-  const onLogout = async () => {
+  /**
+   * Handle logging out.
+   */
+  const onLogout = async () : Promise<void> => {
     showLoading();
-    console.log('logging out');
     await authContext.logout();
-    console.log('redirecting to home');
     navigate('/', { replace: true });
     // Delay for 100ms for improved UX
     await new Promise(resolve => setTimeout(resolve, 100));

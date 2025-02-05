@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -25,7 +25,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Check for tokens in chrome storage on initial load
    */
   useEffect(() => {
-    const initializeAuth = async () => {
+    /**
+     * Initialize the authentication state.
+     */
+    const initializeAuth = async () : Promise<void> => {
       const stored = await chrome.storage.local.get(['accessToken', 'refreshToken', 'username']);
       if (stored.accessToken && stored.refreshToken && stored.username) {
         setUsername(stored.username);
@@ -40,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Login
    */
-  const login = async (username: string, accessToken: string, refreshToken: string) => {
+  const login = async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await chrome.storage.local.set({
       username,
       accessToken,
@@ -54,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Logout
    */
-  const logout = async () => {
+  const logout = async () : Promise<void> => {
     await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
     await chrome.storage.local.remove(['username', 'accessToken', 'refreshToken']);
     setUsername(null);

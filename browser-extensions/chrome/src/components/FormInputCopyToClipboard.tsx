@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ClipboardCopyService } from '../utils/ClipboardCopyService';
 
-interface FormInputCopyToClipboardProps {
+/**
+ * Form input copy to clipboard props.
+ */
+type FormInputCopyToClipboardProps = {
   id: string;
   label: string;
   value: string;
@@ -10,6 +13,9 @@ interface FormInputCopyToClipboardProps {
 
 const clipboardService = new ClipboardCopyService();
 
+/**
+ * Form input copy to clipboard component.
+ */
 export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   id,
   label,
@@ -20,13 +26,18 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = clipboardService.subscribe((copiedId) => {
+    const unsubscribe = clipboardService.subscribe((copiedId) : void => {
       setCopied(copiedId === id);
     });
-    return () => unsubscribe();
+    return () : void => {
+      unsubscribe();
+    };
   }, [id]);
 
-  const copyToClipboard = async () => {
+  /**
+   * Copy to clipboard.
+   */
+  const copyToClipboard = async () : Promise<void> => {
     try {
       await navigator.clipboard.writeText(value);
       clipboardService.setCopied(id);

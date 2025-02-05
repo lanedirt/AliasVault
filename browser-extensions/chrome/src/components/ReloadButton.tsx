@@ -1,9 +1,15 @@
 import React from 'react';
 
-interface ReloadButtonProps {
+/**
+ * Reload button props.
+ */
+type ReloadButtonProps = {
   onClick: () => void;
-}
+};
 
+/**
+ * Reload button component.
+ */
 const ReloadButton: React.FC<ReloadButtonProps> = ({ onClick }) => {
   return (
     <div

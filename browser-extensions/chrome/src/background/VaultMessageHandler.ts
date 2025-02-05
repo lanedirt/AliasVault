@@ -234,3 +234,72 @@ export function getEmailAddressesForVault(
     return vaultState.privateEmailDomains.includes(domain);
   });
 }
+
+/**
+ * Get default email domain for a vault.
+ */
+export function handleGetDefaultEmailDomain(
+  vaultState: VaultState,
+  sendResponse: (response: any) => void
+) : void {
+  if (!vaultState.derivedKey) {
+    sendResponse({ domain: null });
+    return;
+  }
+
+  /*
+   * TODO: usage between chrome storage session and vaultState is
+   * now mixed. Determine where to store the domain lists and avoid
+   * storing it in multiple places when it's not needed.
+   */
+  chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], (result) => {
+    const privateEmailDomains = result.privateEmailDomains || [];
+    const publicEmailDomains = result.publicEmailDomains || [];
+
+    /*
+     * TODO: add vault preference settings to determine which domain to use
+     * taking into account vault settings.
+     */
+
+    // Function to check if a domain is valid
+    /**
+     *
+     */
+    const isValidDomain = (domain: string) : boolean => {
+      return domain &&
+                 domain !== 'DISABLED.TLD' &&
+                 (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain));
+    };
+
+    // Get first valid private domain
+    const firstPrivate = privateEmailDomains.find(isValidDomain);
+
+    if (firstPrivate) {
+      sendResponse({ domain: firstPrivate });
+      return;
+    }
+
+    // Return first valid public domain
+    const firstPublic = publicEmailDomains.find(isValidDomain);
+
+    if (firstPublic) {
+      sendResponse({ domain: firstPublic });
+      return;
+    }
+
+    // Return null if no valid domains are found
+    sendResponse({ domain: null });
+
+    return;
+  });
+}
+
+/**
+ * Get the derived key for a vault which is stored in local memory only.
+ */
+export function handleGetDerivedKey(
+  vaultState: VaultState,
+  sendResponse: (response: any) => void
+) : void {
+  sendResponse(vaultState.derivedKey ? vaultState.derivedKey : null);
+}

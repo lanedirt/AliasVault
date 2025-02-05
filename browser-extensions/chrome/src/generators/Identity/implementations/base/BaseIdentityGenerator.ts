@@ -3,13 +3,19 @@ import { Gender } from '../../types/Gender';
 import { IIdentityGenerator } from '../../interfaces/IIdentityGenerator';
 import { Identity } from '../../types/Identity';
 
+/**
+ * Base identity generator.
+ */
 export abstract class BaseIdentityGenerator implements IIdentityGenerator {
   protected firstNamesMale: string[] = [];
   protected firstNamesFemale: string[] = [];
   protected lastNames: string[] = [];
   private random = Math.random;
 
-  constructor() {
+  /**
+   * Constructor.
+   */
+  public constructor() {
     // Each implementing class should provide these as static JSON strings
     this.firstNamesMale = this.getFirstNamesMaleJson();
     this.firstNamesFemale = this.getFirstNamesFemaleJson();
@@ -20,6 +26,9 @@ export abstract class BaseIdentityGenerator implements IIdentityGenerator {
   protected abstract getFirstNamesFemaleJson(): string[];
   protected abstract getLastNamesJson(): string[];
 
+  /**
+   * Generate a random date of birth.
+   */
   protected generateRandomDateOfBirth(): Date {
     const today = new Date();
     const minAge = 21;
@@ -32,7 +41,10 @@ export abstract class BaseIdentityGenerator implements IIdentityGenerator {
     return new Date(timestamp);
   }
 
-  async generateRandomIdentity(): Promise<Identity> {
+  /**
+   * Generate a random identity.
+   */
+  public async generateRandomIdentity(): Promise<Identity> {
     const identity: Identity = {
       firstName: '',
       lastName: '',

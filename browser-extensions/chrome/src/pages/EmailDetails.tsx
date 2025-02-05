@@ -8,6 +8,9 @@ import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../utils/EncryptionUtility';
 import { Buffer } from 'buffer';
 
+/**
+ * Email details page.
+ */
 const EmailDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -18,7 +21,10 @@ const EmailDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
 
   useEffect(() => {
-    const loadEmail = async () => {
+    /**
+     * Load the email.
+     */
+    const loadEmail = async () : Promise<void> => {
       try {
         setIsLoading(true);
         setError(null);
@@ -66,9 +72,12 @@ const EmailDetails: React.FC = () => {
     };
 
     loadEmail();
-  }, [id, dbContext?.sqliteClient, webApi]);
+  }, [id, dbContext?.sqliteClient, webApi, setIsLoading]);
 
-  const handleDelete = async () => {
+  /**
+   * Handle deleting an email.
+   */
+  const handleDelete = async () : Promise<void> => {
     try {
       await webApi.delete(`Email/${id}`);
       navigate('/emails');

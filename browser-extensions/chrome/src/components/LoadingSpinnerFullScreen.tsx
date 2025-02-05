@@ -19,19 +19,19 @@ const LoadingSpinnerFullScreen: React.FC = () => {
 
   const spinner = (
     <>
-    <style>
-      {`
+      <style>
+        {`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
       `}
-    </style>
-    <div
-      className="border-[4px] border-solid border-current/10 dark:border-white/10 border-t-current dark:border-t-white"
-      style={spinnerStyle}
-    />
-  </>
+      </style>
+      <div
+        className="border-[4px] border-solid border-current/10 dark:border-white/10 border-t-current dark:border-t-white"
+        style={spinnerStyle}
+      />
+    </>
   );
 
   return (

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { useDb } from './context/DbContext';
 import { useMinDurationLoading } from './hooks/useMinDurationLoading';
@@ -21,11 +21,13 @@ type RouteConfig = {
   title?: string;
 };
 
+/**
+ * App component.
+ */
 const App: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [clientUrl, setClientUrl] = useState('https://app.aliasvault.net');
   const [currentTab, setCurrentTab] = useState<'credentials' | 'emails'>('credentials');
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
 
@@ -48,10 +50,6 @@ const App: React.FC = () => {
     }
   }, [authContext.isInitialized, dbContext.dbInitialized, setIsLoading]);
 
-  console.log('authContext.isLoggedIn', authContext.isInitialized);
-  console.log('dbContext.dbInitialized', dbContext.dbInitialized);
-  console.log('isLoading', isLoading);
-
   if (isLoading) {
     return (
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
@@ -69,8 +67,6 @@ const App: React.FC = () => {
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
         <Header
           authContext={authContext}
-          clientUrl={clientUrl}
-          handleRefresh={async () => {}}
           toggleUserMenu={() => setIsUserMenuOpen(!isUserMenuOpen)}
           isUserMenuOpen={isUserMenuOpen}
           routes={routes}

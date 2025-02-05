@@ -2,17 +2,27 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDb } from '../../context/DbContext';
-interface BottomNavProps {
+
+/**
+ * Bottom nav props.
+ */
+type BottomNavProps = {
   currentTab: 'credentials' | 'emails';
   setCurrentTab: (tab: 'credentials' | 'emails') => void;
 }
 
+/**
+ * Bottom nav component.
+ */
 const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab }) => {
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
 
-  const handleTabChange = (tab: 'credentials' | 'emails') => {
+  /**
+   * Handle tab change.
+   */
+  const handleTabChange = (tab: 'credentials' | 'emails') : void => {
     setCurrentTab(tab);
     navigate(`/${tab}`);
   };

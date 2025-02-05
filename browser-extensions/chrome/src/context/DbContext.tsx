@@ -49,9 +49,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setPublicEmailDomains(publicEmailDomains);
     setPrivateEmailDomains(privateEmailDomains);
 
-    // Store in background worker.
-    // TODO: perhaps we can simply pass the full vaultresponse object instead of the individual fields
-    // in case we need to access more fields in the future.
+    /*
+     * Store in background worker.
+     * TODO: perhaps we can simply pass the full vaultresponse object instead of the individual fields
+     * in case we need to access more fields in the future.
+     */
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
       derivedKey: derivedKey,

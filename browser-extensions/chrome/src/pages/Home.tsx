@@ -6,6 +6,9 @@ import UnlockSuccess from './UnlockSuccess';
 import { useNavigate } from 'react-router-dom';
 import { useDb } from '../context/DbContext';
 
+/**
+ * Home page that shows the correct page based on the user's authentication state.
+ */
 const Home: React.FC = () => {
   const { isLoggedIn } = useAuth();
   const authContext = useAuth();
@@ -16,11 +19,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (isLoggedIn && !needsUnlock && !isInlineUnlockMode) {
-      console.log('navigating to credentials');
       navigate('/credentials', { replace: true });
     }
   }, [isLoggedIn, needsUnlock, isInlineUnlockMode, navigate]);
-
 
   if (!isLoggedIn) {
     return <Login />;
@@ -31,7 +32,6 @@ const Home: React.FC = () => {
   }
 
   if (isInlineUnlockMode) {
-    console.log('isInlineUnlockMode');
     return <UnlockSuccess onClose={() => setIsInlineUnlockMode(false)} />;
   }
 

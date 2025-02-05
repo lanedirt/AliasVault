@@ -1,6 +1,6 @@
 import { VaultState, initialVaultState } from './src/background/VaultState';
 import { setupContextMenus, handleContextMenuClick } from './src/background/ContextMenu';
-import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetVault, handleStoreVault } from './src/background/VaultMessageHandler';
+import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault } from './src/background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './src/background/PopupMessageHandler';
 
 let vaultState: VaultState = { ...initialVaultState };
@@ -31,6 +31,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'CREATE_IDENTITY':
       handleCreateIdentity(message, vaultState, sendResponse);
+      break;
+
+    case 'GET_DEFAULT_EMAIL_DOMAIN':
+      handleGetDefaultEmailDomain(vaultState, sendResponse);
+      break;
+
+    case 'GET_DERIVED_KEY':
+      handleGetDerivedKey(vaultState, sendResponse);
       break;
 
     // Popup-related messages

@@ -190,7 +190,6 @@ export class WebApiService {
    */
   private async getAccessToken(): Promise<string | null> {
     const token = await chrome.storage.local.get('accessToken');
-    console.log('accessToken get', token);
     return token.accessToken || null;
   }
 
@@ -199,7 +198,6 @@ export class WebApiService {
    */
   private async getRefreshToken(): Promise<string | null> {
     const token = await chrome.storage.local.get('refreshToken');
-    console.log('refreshToken get', token);
     return token.refreshToken || null;
   }
 

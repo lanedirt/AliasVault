@@ -3,11 +3,13 @@ import { IdentityGeneratorNl } from '../implementations/IdentityGeneratorNl';
 import { describe, it, expect } from 'vitest';
 import { IIdentityGenerator } from '../interfaces/IIdentityGenerator';
 
-// Test factory function to run tests for each language implementation
+/**
+ * Test the identity generator.
+ */
 const testIdentityGenerator = (
   language: string,
   generator: IIdentityGenerator
-) => {
+) : void => {
   describe(`IdentityGenerator${language}`, () => {
     describe('generateRandomIdentity', () => {
       it('should generate a random gender identity when no gender is specified', async () => {
@@ -29,7 +31,7 @@ const testIdentityGenerator = (
       it('should generate an identity with all non-empty fields', async () => {
         const identity = await generator.generateRandomIdentity();
 
-        Object.entries(identity).forEach(([key, value]) => {
+        Object.entries(identity).forEach(([, value]) => {
           expect(value).toBeTruthy();
           expect(value).not.toBe('');
           expect(value).not.toBeNull();

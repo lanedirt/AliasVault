@@ -64,15 +64,15 @@ const Login: React.FC = () => {
         throw new Error('Login failed -- no token returned');
       }
 
-        // Make another API call trying to get latest vault
-        const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+      // Make another API call trying to get latest vault
+      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
-        // Attempt to decrypt the blob
-        const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
-        const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
+      // Attempt to decrypt the blob
+      const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
+      const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
 
-        // Initialize the SQLite context with decrypted data
-        await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
+      // Initialize the SQLite context with decrypted data
+      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
 
       // 3. Handle 2FA if required
       /*

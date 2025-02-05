@@ -1,40 +1,15 @@
-type LoginForm = {
-  form: HTMLFormElement | null;
-  emailField: HTMLInputElement | null;
-  emailConfirmField: HTMLInputElement | null;
-  usernameField: HTMLInputElement | null;
-  passwordField: HTMLInputElement | null;
-  passwordConfirmField: HTMLInputElement | null;
+import { LoginForm } from "./types/LoginForm";
 
-  // Identity fields
-  firstNameField: HTMLInputElement | null;
-  lastNameField: HTMLInputElement | null;
-
-  // Birthdate fields can be either a single field or multiple fields
-  birthdateField: {
-    single: HTMLInputElement | null;
-    format: string; // 'yyyy-mm-dd' | 'dd-mm-yyyy' | 'mm-dd-yyyy'
-    day: HTMLInputElement | null;
-    month: HTMLInputElement | null;
-    year: HTMLInputElement | null;
-  };
-
-  // Gender field can be either select, radio or text input
-  genderField: {
-    type: 'select' | 'radio' | 'text';
-    field: HTMLInputElement | HTMLSelectElement | null;
-    radioButtons?: {
-      male: HTMLInputElement | null;
-      female: HTMLInputElement | null;
-      other: HTMLInputElement | null;
-    };
-  };
-}
-
+/**
+ * Form detector.
+ */
 export class FormDetector {
   private document: Document;
 
-  constructor(document: Document) {
+  /**
+   * Constructor.
+   */
+  public constructor(document: Document) {
     this.document = document;
   }
 
@@ -52,13 +27,14 @@ export class FormDetector {
     // Create a Set to track processed forms to avoid duplicates
     const processedForms = new Set<HTMLFormElement | null>();
 
-    // Helper to create a form entry
+    /**
+     * Helper to create a form entry
+     */
     const createFormEntry = (
       form: HTMLFormElement | null,
-      emailField: HTMLInputElement | null,
       usernameField: HTMLInputElement | null,
       passwordField: HTMLInputElement | null
-    ) => {
+    ) : void => {
       // Skip if we've already processed this form
       if (form && processedForms.has(form)) return;
       processedForms.add(form);
@@ -90,9 +66,8 @@ export class FormDetector {
     // Process password fields first
     passwordFields.forEach(passwordField => {
       const form = passwordField.closest('form');
-      const emailField = this.findEmailField(passwordField).primary;
       const usernameField = this.findUsernameField(passwordField);
-      createFormEntry(form, emailField, usernameField, passwordField);
+      createFormEntry(form, usernameField, passwordField);
     });
 
     // Process email fields that aren't already part of a processed form
@@ -104,7 +79,7 @@ export class FormDetector {
         const passwordField = form ?
           form.querySelector<HTMLInputElement>('input[type="password"]') : null;
         const usernameField = this.findUsernameField(field);
-        createFormEntry(form, field, usernameField, passwordField);
+        createFormEntry(form, usernameField, passwordField);
       }
     });
 
@@ -116,8 +91,7 @@ export class FormDetector {
       if (this.isLikelyUsernameField(field)) {
         const passwordField = form ?
           form.querySelector<HTMLInputElement>('input[type="password"]') : null;
-        const emailField = this.findEmailField(field).primary;
-        createFormEntry(form, emailField, field, passwordField);
+        createFormEntry(form, field, passwordField);
       }
     });
 
@@ -231,6 +205,9 @@ export class FormDetector {
     let confirmEmail: HTMLInputElement | null = null;
 
     // Helper function to check if an input is an email field
+    /**
+     *
+     */
     const isEmailField = (input: HTMLInputElement, confirmPatterns: string[] = []): boolean => {
       const type = input.type.toLowerCase();
       if (type === 'text' || type === 'email') {
@@ -286,6 +263,9 @@ export class FormDetector {
     };
   }
 
+  /**
+   *
+   */
   private findBirthdateFields(form: HTMLFormElement | null): LoginForm['birthdateField'] {
     // First try to find a single date input
     const singleDateField = this.findInputField(form, ['birthdate', 'birth-date', 'dob', 'geboortedatum'], ['date', 'text']);
@@ -355,6 +335,9 @@ export class FormDetector {
     };
   }
 
+  /**
+   *
+   */
   private findGenderField(form: HTMLFormElement | null): LoginForm['genderField'] {
     // Try to find select element first
     const selectField = form
@@ -379,7 +362,10 @@ export class FormDetector {
       const femalePatterns = ['female', 'woman', 'f', 'vrouw', 'gender2'];
       const otherPatterns = ['other', 'diverse', 'custom', 'prefer not', 'anders', 'iets', 'unknown', 'gender3'];
 
-      const findRadioByPatterns = (patterns: string[], isOther: boolean = false) => {
+      /**
+       *
+       */
+      const findRadioByPatterns = (patterns: string[], isOther: boolean = false) : HTMLInputElement | null => {
         return Array.from(radioButtons).find(radio => {
           const attributes = [
             radio.value,

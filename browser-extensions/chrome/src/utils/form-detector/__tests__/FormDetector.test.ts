@@ -1,16 +1,23 @@
 import { FormDetector } from '../FormDetector';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
+import { LoginForm } from '../types/LoginForm';
 
 // Helper function to load HTML test files
+/**
+ *
+ */
 const loadTestHtml = (filename: string): string => {
   return readFileSync(join(__dirname, 'test-forms', filename), 'utf-8');
 };
 
 // Helper function to setup form detection test
-const setupFormTest = (htmlFile: string) => {
+/**
+ *
+ */
+const setupFormTest = (htmlFile: string) : { document: Document, result: LoginForm } => {
   const html = loadTestHtml(htmlFile);
   const dom = new JSDOM(html, {
     url: 'http://localhost',
@@ -42,8 +49,10 @@ enum FormField {
   GenderOther = 'genderOther'
 }
 
-// Helper function to test field detection
-const testField = (fieldName: FormField, elementId: string, htmlFile: string) => {
+/**
+ * Helper function to test field detection
+ */
+const testField = (fieldName: FormField, elementId: string, htmlFile: string) : void => {
   it(`should detect ${fieldName} field`, () => {
     const { document, result } = setupFormTest(htmlFile);
 
@@ -83,7 +92,10 @@ const testField = (fieldName: FormField, elementId: string, htmlFile: string) =>
 };
 
 // New helper function to test birthdate format property
-const testBirthdateFormat = (expectedFormat: string, htmlFile: string) => {
+/**
+ *
+ */
+const testBirthdateFormat = (expectedFormat: string, htmlFile: string) : void => {
   it('should detect correct birthdate format', () => {
     const { result } = setupFormTest(htmlFile);
     expect(result.birthdateField.format).toBe(expectedFormat);

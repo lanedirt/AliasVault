@@ -32,7 +32,7 @@ const CredentialsList: React.FC = () => {
   /**
    * Retrieve latest vault and refresh the page.
    */
-  const onRefresh = async () => {
+  const onRefresh = async () : Promise<void> => {
     showLoading();
     try {
       // Make API call to get latest vault
@@ -68,8 +68,8 @@ const CredentialsList: React.FC = () => {
         <ul className="space-y-2">
           {credentials.map(cred => (
             <li key={cred.Id}
-                onClick={() => navigate(`/credentials/${cred.Id}`)}
-                className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+              onClick={() => navigate(`/credentials/${cred.Id}`)}
+              className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
               <img
                 src={cred.Logo ? `data:image/x-icon;base64,${Buffer.from(cred.Logo).toString('base64')}` : '/assets/images/service-placeholder.webp'}
                 alt={cred.ServiceName}
