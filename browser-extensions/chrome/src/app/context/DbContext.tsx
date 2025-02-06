@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import SqliteClient from '../../shared/SqliteClient';
-
+import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
+import EncryptionUtility from '../../shared/EncryptionUtility';
 type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[], vaultRevisionNumber: number) => Promise<void>;
+  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
   clearDatabase: () => void;
 }
 
@@ -40,27 +41,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [, setPrivateEmailDomains] = useState<string[]>([]);
 
-  const initializeDatabase = useCallback(async (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[], vaultRevisionNumber: number) => {
+  const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
+    // Attempt to decrypt the blob.
+    const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
+      vaultResponse.vault.blob,
+      derivedKey
+    );
+
+    // Initialize the SQLite client.
     const client = new SqliteClient();
-    await client.initializeFromBase64(vault);
+    await client.initializeFromBase64(decryptedBlob);
     setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
-    setPublicEmailDomains(publicEmailDomains);
-    setPrivateEmailDomains(privateEmailDomains);
+
+    setPublicEmailDomains(vaultResponse.vault.publicEmailDomainList);
+    setPrivateEmailDomains(vaultResponse.vault.privateEmailDomainList);
 
     /*
-     * Store in background worker.
-     * TODO: perhaps we can simply pass the full vaultresponse object instead of the individual fields
-     * in case we need to access more fields in the future.
+     * Store encrypted vault in background worker.
      */
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
       derivedKey: derivedKey,
-      vault: vault,
-      publicEmailDomains: publicEmailDomains,
-      privateEmailDomains: privateEmailDomains,
-      vaultRevisionNumber: vaultRevisionNumber
+      vaultResponse: vaultResponse
     });
   }, []);
 

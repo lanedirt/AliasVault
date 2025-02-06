@@ -5,6 +5,7 @@ import SqliteClient from '../shared/SqliteClient';
 import { WebApiService } from '../shared/WebApiService';
 import { Vault } from '../shared/types/webapi/Vault';
 import { Credential } from '../shared/types/Credential';
+import { VaultResponse } from '../shared/types/webapi/VaultResponse';
 
 /**
  * Store the vault in browser storage.
@@ -15,21 +16,18 @@ export async function handleStoreVault(
   sendResponse: (response: any) => void
 ) : Promise<void> {
   try {
-    // Store state
+    const vaultResponse = message.vaultResponse as VaultResponse;
+    const encryptedVaultBlob = vaultResponse.vault.blob;
+
+    // Store derived key in local memory
     vaultState.derivedKey = message.derivedKey;
-    vaultState.publicEmailDomains = message.publicEmailDomains || [];
-    vaultState.privateEmailDomains = message.privateEmailDomains || [];
-    vaultState.vaultRevisionNumber = message.vaultRevisionNumber || 0;
+    vaultState.publicEmailDomains = vaultResponse.vault.publicEmailDomainList || [];
+    vaultState.privateEmailDomains = vaultResponse.vault.privateEmailDomainList || [];
+    vaultState.vaultRevisionNumber = vaultResponse.vault.currentRevisionNumber || 0;
 
-    // Encrypt vault
-    const encryptedVault = await EncryptionUtility.symmetricEncrypt(
-      message.vault,
-      vaultState.derivedKey!
-    );
-
-    // Store in chrome.storage.session
+    // Store encrypted vault in chrome.storage.session
     await chrome.storage.session.set({
-      encryptedVault,
+      encryptedVault: encryptedVaultBlob,
       publicEmailDomains: vaultState.publicEmailDomains,
       privateEmailDomains: vaultState.privateEmailDomains,
       vaultRevisionNumber: vaultState.vaultRevisionNumber
@@ -155,6 +153,7 @@ export async function handleCreateIdentity(
   }
 
   try {
+    // Get the encrypted vault from chrome.storage.session.
     const result = await chrome.storage.session.get(['encryptedVault']);
 
     if (!result.encryptedVault) {
@@ -162,48 +161,21 @@ export async function handleCreateIdentity(
       return;
     }
 
+    // Decrypt the vault.
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
       result.encryptedVault,
       vaultState.derivedKey
     );
 
+    // Initialize the SQLite client with the decrypted vault.
     const sqliteClient = new SqliteClient();
     await sqliteClient.initializeFromBase64(decryptedVault);
+
+    // Add the new credential to the vault/database.
     await sqliteClient.createCredential(message.credential);
 
-    const updatedVaultData = sqliteClient.exportToBase64();
-    const encryptedVault = await EncryptionUtility.symmetricEncrypt(
-      updatedVaultData,
-      vaultState.derivedKey
-    );
-
-    await chrome.storage.session.set({
-      encryptedVault,
-      publicEmailDomains: vaultState.publicEmailDomains,
-      privateEmailDomains: vaultState.privateEmailDomains
-    });
-
-    // Upload new vault to server
-    const username = await chrome.storage.local.get('username');
-    const emailAddresses = await getEmailAddressesForVault(sqliteClient, vaultState);
-
-    const newVault: Vault = {
-      blob: encryptedVault,
-      createdAt: new Date().toISOString(),
-      credentialsCount: 0, // TODO
-      currentRevisionNumber: vaultState.vaultRevisionNumber,
-      emailAddressList: emailAddresses,
-      privateEmailDomainList: [], // TODO
-      publicEmailDomainList: [], // TODO
-      encryptionPublicKey: '', // TODO
-      updatedAt: new Date().toISOString(),
-      username: username.username,
-      version: '1.0.0'
-    };
-
-    const webApi = new WebApiService(() => {});
-    await webApi.initializeBaseUrl();
-    await webApi.post('Vault', newVault);
+    // Upload the new vault to the server.
+    await uploadNewVaultToServer(sqliteClient, vaultState);
 
     sendResponse({ success: true });
   } catch (error) {
@@ -298,4 +270,44 @@ export function handleGetDerivedKey(
   sendResponse: (response: any) => void
 ) : void {
   sendResponse(vaultState.derivedKey ? vaultState.derivedKey : null);
+}
+
+/**
+ * Upload a new version of the vault to the server using the provided sqlite client.
+ */
+async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: VaultState) : Promise<void> {
+  const updatedVaultData = sqliteClient.exportToBase64();
+  const encryptedVault = await EncryptionUtility.symmetricEncrypt(
+    updatedVaultData,
+    vaultState.derivedKey!
+  );
+
+  // Store updated encrypted vault in chrome.storage.session.
+  await chrome.storage.session.set({
+    encryptedVault,
+    publicEmailDomains: vaultState.publicEmailDomains,
+    privateEmailDomains: vaultState.privateEmailDomains
+  });
+
+  // Upload new encrypted vault to server.
+  const username = await chrome.storage.local.get('username');
+  const emailAddresses = await getEmailAddressesForVault(sqliteClient, vaultState);
+
+  const newVault: Vault = {
+    blob: encryptedVault,
+    createdAt: new Date().toISOString(),
+    credentialsCount: 0, // TODO
+    currentRevisionNumber: vaultState.vaultRevisionNumber,
+    emailAddressList: emailAddresses,
+    privateEmailDomainList: [], // TODO
+    publicEmailDomainList: [], // TODO
+    encryptionPublicKey: '', // TODO
+    updatedAt: new Date().toISOString(),
+    username: username.username,
+    version: '1.0.0'
+  };
+
+  const webApi = new WebApiService(() => {});
+  await webApi.initializeBaseUrl();
+  await webApi.post('Vault', newVault);
 }

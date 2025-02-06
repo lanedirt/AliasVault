@@ -67,12 +67,11 @@ const Login: React.FC = () => {
       // Make another API call trying to get latest vault
       const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
-      // Attempt to decrypt the blob
+      // Get the derived key as base64 string required for decryption.
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
-      const decryptedBlob = await EncryptionUtility.symmetricDecrypt(vaultResponseJson.vault.blob, passwordHashBase64);
 
-      // Initialize the SQLite context with decrypted data
-      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
+      // Initialize the SQLite context with the new vault data.
+      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
       // 3. Handle 2FA if required
       /*

@@ -5,7 +5,6 @@ import { Buffer } from 'buffer';
 import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
-import EncryptionUtility from '../../shared/EncryptionUtility';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 /**
@@ -41,14 +40,8 @@ const CredentialsList: React.FC = () => {
       // Get derived key from background worker
       const passwordHashBase64 = await chrome.runtime.sendMessage({ type: 'GET_DERIVED_KEY' });
 
-      // Attempt to decrypt the blob
-      const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
-        vaultResponseJson.vault.blob,
-        passwordHashBase64
-      );
-
       // Initialize the SQLite context again with the newly retrieved decrypted blob
-      await dbContext.initializeDatabase(passwordHashBase64, decryptedBlob, vaultResponseJson.vault.publicEmailDomainList, vaultResponseJson.vault.privateEmailDomainList, vaultResponseJson.vault.currentRevisionNumber);
+      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
     } catch (err) {
       console.error('Refresh error:', err);
     } finally {
