@@ -13,7 +13,7 @@ using AliasVault.Shared.Utilities;
 /// <summary>
 /// Tests for the AliasVault.CsvImportExport class.
 /// </summary>
-public partial class ConversionUtilityTest
+public class ConversionUtilityTest
 {
     /// <summary>
     /// Tests the conversion of a simple anchor tag to open in a new tab.

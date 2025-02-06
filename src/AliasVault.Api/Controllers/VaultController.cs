@@ -214,7 +214,13 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
-        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
+        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber, x.Version }).First();
+
+        // Reject vaults with a version that is lower than the last vault version.
+        if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
+        {
+            return BadRequest("The uploaded vault version is lower than the last vault version. Please update and/or refresh your client.");
+        }
 
         // Calculate the new revision number for the vault.
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
