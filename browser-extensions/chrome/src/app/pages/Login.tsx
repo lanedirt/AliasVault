@@ -73,20 +73,11 @@ const Login: React.FC = () => {
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
-      // 3. Handle 2FA if required
-      /*
-       * if (validationResponse.requiresTwoFactor) {
-       * // TODO: Implement 2FA flow
-       * console.log('2FA required');
-       * return;
-       * }
-       */
+      // 3. TODO: Handle 2FA if required
 
-      // 5. Redirect to home page
-      /*
-       * window.location.href = '/';
-       */
+      // 4. TODO: handle recovery code if required (or link to main client instead)
 
+      // Show app.
       hideLoading();
     } catch (err) {
       setError('Login failed. Please check your credentials and try again.');

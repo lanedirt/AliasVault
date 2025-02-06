@@ -52,12 +52,11 @@ const CredentialDetails: React.FC = () => {
     if (!dbContext?.sqliteClient || !id) return;
 
     try {
-      const result = dbContext.sqliteClient.getAllCredentials();
-      // TODO: create a SQLite function to get a credential by id.
-      const credential = result.find(cred => cred.Id === id);
-      if (credential) {
-        setCredential(credential);
+      const result = dbContext.sqliteClient.getCredentialById(id);
+      if (result) {
+        setCredential(result);
       } else {
+        console.error('Credential not found');
         navigate('/credentials');
       }
     } catch (err) {

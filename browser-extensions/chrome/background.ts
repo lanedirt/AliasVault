@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       handleClearVault(vaultState, sendResponse);
       break;
 
-    case 'GET_CREDENTIALS_FOR_URL':
+    case 'GET_CREDENTIALS':
       handleGetCredentials(vaultState, sendResponse);
       break;
 

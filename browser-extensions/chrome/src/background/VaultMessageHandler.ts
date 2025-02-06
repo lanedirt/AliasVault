@@ -104,7 +104,7 @@ export function handleClearVault(
 }
 
 /**
- * Get the credentials for a URL.
+ * Get all credentials.
  */
 export async function handleGetCredentials(
   vaultState: VaultState,
@@ -191,6 +191,7 @@ export function getEmailAddressesForVault(
   sqliteClient: SqliteClient,
   vaultState: VaultState
 ): string[] {
+  // TODO: create separate query to only get email addresses to avoid loading all credentials.
   const credentials = sqliteClient.getAllCredentials();
 
   const emailAddresses = credentials

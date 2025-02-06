@@ -280,7 +280,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     const searchTerm = searchInput.value.toLowerCase();
 
     // Request credentials from background script
-    chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
+    chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
       if (response.status === 'OK' && response.credentials) {
         let filteredCredentials;
 
@@ -862,7 +862,7 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
   document.addEventListener('keydown', handleEnterKey);
 
   // Request credentials from background script
-  chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS_FOR_URL', url: window.location.href }, (response: CredentialResponse) => {
+  chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
     switch (response.status) {
       case 'OK':
         if (response.credentials?.length) {

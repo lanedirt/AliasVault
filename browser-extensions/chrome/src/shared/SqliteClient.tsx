@@ -77,7 +77,8 @@ class SqliteClient {
 
       const results: T[] = [];
       while (stmt.step()) {
-        results.push(stmt.getAsObject());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        results.push(stmt.getAsObject() as any);
       }
       stmt.free();
 
@@ -110,7 +111,7 @@ class SqliteClient {
   }
 
   /**
-   * Close the database connection and free resources
+   * Close the database connection and free resources.
    */
   public close(): void {
     if (this.db) {
@@ -120,8 +121,66 @@ class SqliteClient {
   }
 
   /**
-   * Fetch all credentials with their associated service information
-   * @returns Array of Credential objects with service details
+   * Fetch a single credential with its associated service information.
+   * @param credentialId - The ID of the credential to fetch.
+   * @returns Credential object with service details or null if not found.
+   */
+  public getCredentialById(credentialId: string): Credential | null {
+    const query = `
+        SELECT DISTINCT
+            c.Id,
+            c.Username,
+            c.Notes,
+            c.ServiceId,
+            s.Name as ServiceName,
+            s.Url as ServiceUrl,
+            s.Logo as Logo,
+            a.FirstName,
+            a.LastName,
+            a.NickName,
+            a.BirthDate,
+            a.Gender,
+            a.Email,
+            p.Value as Password
+        FROM Credentials c
+        LEFT JOIN Services s ON c.ServiceId = s.Id
+        LEFT JOIN Aliases a ON c.AliasId = a.Id
+        LEFT JOIN Passwords p ON p.CredentialId = c.Id
+        WHERE c.IsDeleted = 0
+        AND c.Id = ?`;
+
+    const results = this.executeQuery(query, [credentialId]);
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    // Convert the first row to a Credential object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row = results[0] as any;
+    return {
+      Id: row.Id,
+      Username: row.Username,
+      Password: row.Password,
+      Email: row.Email,
+      ServiceName: row.ServiceName,
+      ServiceUrl: row.ServiceUrl,
+      Logo: row.Logo,
+      Notes: row.Notes,
+      Alias: {
+        FirstName: row.FirstName,
+        LastName: row.LastName,
+        NickName: row.NickName,
+        BirthDate: row.BirthDate,
+        Gender: row.Gender,
+        Email: row.Email
+      }
+    };
+  }
+
+  /**
+   * Fetch all credentials with their associated service information.
+   * @returns Array of Credential objects with service details.
    */
   public getAllCredentials(): Credential[] {
     const query = `

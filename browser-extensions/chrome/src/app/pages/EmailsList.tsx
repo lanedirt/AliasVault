@@ -38,6 +38,7 @@ const EmailsList: React.FC = () => {
         return;
       }
 
+      // TODO: create separate query to only get email addresses to avoid loading all credentials.
       const credentials = dbContext.sqliteClient.getAllCredentials();
 
       // Get unique email addresses from all credentials.
