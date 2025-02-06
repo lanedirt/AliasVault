@@ -4,6 +4,7 @@ import { useDb } from '../context/DbContext';
 import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
 import { FormInputCopyToClipboard } from '../components/FormInputCopyToClipboard';
+import { EmailPreview } from '../components/EmailPreview';
 
 /**
  * Credential details page.
@@ -108,26 +109,34 @@ const CredentialDetails: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Login credentials</h2>
-            <FormInputCopyToClipboard
-              id="email"
-              label="Email"
-              value={credential.Email || ''}
-            />
-            <FormInputCopyToClipboard
-              id="username"
-              label="Username"
-              value={credential.Username}
-            />
-            <FormInputCopyToClipboard
-              id="password"
-              label="Password"
-              value={credential.Password}
-              type="password"
+        {credential.Email && (
+          <div className="mt-6">
+            <EmailPreview
+              email={credential.Email}
             />
           </div>
+        )}
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Login credentials</h2>
+          <FormInputCopyToClipboard
+            id="email"
+            label="Email"
+            value={credential.Email || ''}
+          />
+          <FormInputCopyToClipboard
+            id="username"
+            label="Username"
+            value={credential.Username}
+          />
+          <FormInputCopyToClipboard
+            id="password"
+            label="Password"
+            value={credential.Password}
+            type="password"
+          />
 
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Alias</h2>
