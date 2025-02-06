@@ -112,20 +112,8 @@ export async function handleGetCredentials(
   }
 
   try {
-    const result = await chrome.storage.session.get(['encryptedVault']);
+    const sqliteClient = await createVaultSqliteClient(vaultState);
 
-    if (!result.encryptedVault) {
-      sendResponse({ credentials: [], status: 'LOCKED' });
-      return;
-    }
-
-    const decryptedVault = await EncryptionUtility.symmetricDecrypt(
-      result.encryptedVault,
-      vaultState.derivedKey
-    );
-
-    const sqliteClient = new SqliteClient();
-    await sqliteClient.initializeFromBase64(decryptedVault);
     const credentials = sqliteClient.getAllCredentials();
 
     sendResponse({ credentials: credentials, status: 'OK' });
@@ -149,23 +137,7 @@ export async function handleCreateIdentity(
   }
 
   try {
-    // Get the encrypted vault from chrome.storage.session.
-    const result = await chrome.storage.session.get(['encryptedVault']);
-
-    if (!result.encryptedVault) {
-      sendResponse({ success: false, error: 'No vault found' });
-      return;
-    }
-
-    // Decrypt the vault.
-    const decryptedVault = await EncryptionUtility.symmetricDecrypt(
-      result.encryptedVault,
-      vaultState.derivedKey
-    );
-
-    // Initialize the SQLite client with the decrypted vault.
-    const sqliteClient = new SqliteClient();
-    await sqliteClient.initializeFromBase64(decryptedVault);
+    const sqliteClient = await createVaultSqliteClient(vaultState);
 
     // Add the new credential to the vault/database.
     await sqliteClient.createCredential(message.credential);
@@ -215,14 +187,14 @@ export function handleGetDefaultEmailDomain(
     return;
   }
 
-  chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], (result) => {
+  chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], async (result) => {
     const privateEmailDomains = result.privateEmailDomains || [];
     const publicEmailDomains = result.publicEmailDomains || [];
 
-    /*
-     * TODO: add vault preference settings to determine which domain to use
-     * taking into account vault settings.
-     */
+    const sqliteClient = await createVaultSqliteClient(vaultState);
+    const defaultEmailDomain = sqliteClient.getDefaultEmailDomain();
+
+    console.log('defaultEmailDomain', defaultEmailDomain);
 
     /**
      * Check if a domain is valid.
@@ -233,15 +205,27 @@ export function handleGetDefaultEmailDomain(
                  (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain));
     };
 
-    // Get first valid private domain
+    console.log('isValidDomain', isValidDomain(defaultEmailDomain));
+    console.log('privateEmailDomains', privateEmailDomains);
+    console.log('publicEmailDomains', publicEmailDomains);
+
+    // First check if the default domain that is configured in the vault is still valid.
+    if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
+      sendResponse({ domain: defaultEmailDomain });
+      return;
+    }
+
+    // If default domain is not valid, fall back to first available private domain.
     const firstPrivate = privateEmailDomains.find(isValidDomain);
+
+    console.log('firstPrivate', firstPrivate);
 
     if (firstPrivate) {
       sendResponse({ domain: firstPrivate });
       return;
     }
 
-    // Return first valid public domain
+    // Return first valid public domain if no private domains are available.
     const firstPublic = publicEmailDomains.find(isValidDomain);
 
     if (firstPublic) {
@@ -251,8 +235,6 @@ export function handleGetDefaultEmailDomain(
 
     // Return null if no valid domains are found
     sendResponse({ domain: null });
-
-    return;
   });
 }
 
@@ -305,4 +287,28 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
   const webApi = new WebApiService(() => {});
   await webApi.initializeBaseUrl();
   await webApi.post('Vault', newVault);
+}
+
+/**
+ * Create a new sqlite client for the stored vault.
+ */
+async function createVaultSqliteClient(vaultState: VaultState) : Promise<SqliteClient> {
+  // Get the encrypted vault from chrome.storage.session.
+  const result = await chrome.storage.session.get(['encryptedVault']);
+
+  if (!result.encryptedVault) {
+    throw new Error('No vault found');
+  }
+
+    // Decrypt the vault.
+    const decryptedVault = await EncryptionUtility.symmetricDecrypt(
+      result.encryptedVault,
+      vaultState.derivedKey!
+    );
+
+  // Initialize the SQLite client with the decrypted vault.
+  const sqliteClient = new SqliteClient();
+  await sqliteClient.initializeFromBase64(decryptedVault);
+
+  return sqliteClient;
 }

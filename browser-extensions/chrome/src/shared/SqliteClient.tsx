@@ -241,6 +241,26 @@ class SqliteClient {
   }
 
   /**
+   * Get setting from database for a given key.
+   * Returns empty string if setting is not found.
+   */
+  public getSetting(key: string): string {
+    const results = this.executeQuery<{ Value: string }>(`SELECT
+                s.Value
+            FROM Settings s
+            WHERE s.Key = ?`, [key]);
+
+    return results.length > 0 ? results[0].Value : '';
+  }
+
+  /**
+   * Get the default email domain from the database.
+   */
+    public getDefaultEmailDomain(): string {
+      return this.getSetting('DefaultEmailDomain');
+    }
+
+  /**
    * Create a new credential with associated entities
    * @param credential The credential object to insert
    * @returns The number of rows modified
