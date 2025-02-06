@@ -256,9 +256,9 @@ class SqliteClient {
   /**
    * Get the default email domain from the database.
    */
-    public getDefaultEmailDomain(): string {
-      return this.getSetting('DefaultEmailDomain');
-    }
+  public getDefaultEmailDomain(): string {
+    return this.getSetting('DefaultEmailDomain');
+  }
 
   /**
    * Create a new credential with associated entities
@@ -362,6 +362,43 @@ class SqliteClient {
     } catch (error) {
       this.db.run('ROLLBACK');
       console.error('Error creating credential:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the current database version from the migrations history.
+   * Returns the semantic version (e.g., "1.4.1") from the latest migration.
+   * Returns null if no migrations are found.
+   */
+  public getDatabaseVersion(): string | null {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      // Query the migrations history table for the latest migration
+      const results = this.executeQuery<{ MigrationId: string }>(`
+        SELECT MigrationId
+        FROM __EFMigrationsHistory
+        ORDER BY MigrationId DESC
+        LIMIT 1`);
+
+      if (results.length === 0) {
+        return null;
+      }
+
+      const migrationId = results[0].MigrationId;
+      // Extract version using regex - matches patterns like "20240917191243_1.4.1-RenameAttachmentsPlural"
+      const versionMatch = migrationId.match(/_(\d+\.\d+\.\d+)-/);
+
+      if (versionMatch && versionMatch[1]) {
+        return versionMatch[1];
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting database version:', error);
       throw error;
     }
   }

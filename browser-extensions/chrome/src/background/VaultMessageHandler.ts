@@ -22,8 +22,6 @@ export async function handleStoreVault(
     // Store derived key in local memory
     vaultState.derivedKey = message.derivedKey;
 
-    console.log('vaultResponse', vaultResponse);
-
     // Store encrypted vault in chrome.storage.session
     await chrome.storage.session.set({
       encryptedVault: encryptedVaultBlob,
@@ -194,8 +192,6 @@ export function handleGetDefaultEmailDomain(
     const sqliteClient = await createVaultSqliteClient(vaultState);
     const defaultEmailDomain = sqliteClient.getDefaultEmailDomain();
 
-    console.log('defaultEmailDomain', defaultEmailDomain);
-
     /**
      * Check if a domain is valid.
      */
@@ -205,10 +201,6 @@ export function handleGetDefaultEmailDomain(
                  (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain));
     };
 
-    console.log('isValidDomain', isValidDomain(defaultEmailDomain));
-    console.log('privateEmailDomains', privateEmailDomains);
-    console.log('publicEmailDomains', publicEmailDomains);
-
     // First check if the default domain that is configured in the vault is still valid.
     if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
       sendResponse({ domain: defaultEmailDomain });
@@ -217,8 +209,6 @@ export function handleGetDefaultEmailDomain(
 
     // If default domain is not valid, fall back to first available private domain.
     const firstPrivate = privateEmailDomains.find(isValidDomain);
-
-    console.log('firstPrivate', firstPrivate);
 
     if (firstPrivate) {
       sendResponse({ domain: firstPrivate });
@@ -273,20 +263,31 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
   const newVault: Vault = {
     blob: encryptedVault,
     createdAt: new Date().toISOString(),
-    credentialsCount: 0, // TODO
+    credentialsCount: sqliteClient.getAllCredentials().length,
     currentRevisionNumber: storageResult.vaultRevisionNumber,
     emailAddressList: emailAddresses,
-    privateEmailDomainList: [], // TODO
-    publicEmailDomainList: [], // TODO
-    encryptionPublicKey: '', // TODO
+    privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates.
+    publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates.
+    encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated.
     updatedAt: new Date().toISOString(),
     username: username.username,
-    version: '1.0.0'
+    version: sqliteClient.getDatabaseVersion() ?? '0.0.0'
   };
 
   const webApi = new WebApiService(() => {});
   await webApi.initializeBaseUrl();
-  await webApi.post('Vault', newVault);
+  const response = await webApi.post('Vault', newVault) as { status: number, newRevisionNumber: number };
+
+  // Check if response is successful (.status === 0)
+  if (response.status === 0) {
+    // Update the vault revision number in chrome.storage.session.
+    await chrome.storage.session.set({
+      vaultRevisionNumber: response.newRevisionNumber
+    });
+  }
+  else {
+    throw new Error('Failed to upload new vault to server');
+  }
 }
 
 /**
@@ -300,11 +301,11 @@ async function createVaultSqliteClient(vaultState: VaultState) : Promise<SqliteC
     throw new Error('No vault found');
   }
 
-    // Decrypt the vault.
-    const decryptedVault = await EncryptionUtility.symmetricDecrypt(
-      result.encryptedVault,
+  // Decrypt the vault.
+  const decryptedVault = await EncryptionUtility.symmetricDecrypt(
+    result.encryptedVault,
       vaultState.derivedKey!
-    );
+  );
 
   // Initialize the SQLite client with the decrypted vault.
   const sqliteClient = new SqliteClient();
