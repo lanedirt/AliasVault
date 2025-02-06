@@ -390,6 +390,8 @@ public sealed class DbService : IDisposable
             EncryptionPublicKey = encryptionKey.PublicKey,
             CredentialsCount = credentialsCount,
             EmailAddressList = emailAddresses,
+            PrivateEmailDomainList = [],
+            PublicEmailDomainList = [],
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
@@ -438,7 +440,7 @@ public sealed class DbService : IDisposable
             .Select(email => email!)
             .ToListAsync();
 
-        // Filter the list of email addresses to only include those that are in the allowed domains.
+        // Filter the list of email addresses to only include those that are in the supported private email domains.
         emailAddresses = emailAddresses
             .Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain)))
             .ToList();
