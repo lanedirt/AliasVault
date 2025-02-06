@@ -61,7 +61,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
  */
 export function createLoadingPopup(input: HTMLInputElement, message: string) : HTMLElement {
   /**
-   *
+   * Get the loading wrapper HTML.
    */
   const getLoadingHtml = (message: string): string => `
 <div style="
@@ -347,9 +347,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   actionContainer.appendChild(closeButton);
   popup.appendChild(actionContainer);
 
-  // Define handleClickOutside
   /**
-   *
+   * Handle clicking outside the popup.
    */
   const handleClickOutside = (event: MouseEvent) : void => {
     const popup = document.getElementById('aliasvault-credential-popup');
@@ -797,7 +796,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
     input.select();
 
     /**
-     *
+     * Close the popup.
      */
     const closePopup = (value: string | null) : void => {
       popup.style.transform = 'scale(0.95)';
@@ -855,9 +854,8 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
 
   if (!forms.length) return;
 
-  // Add keydown event listener for Enter key
   /**
-   *
+   * Handle the Enter key.
    */
   const handleEnterKey = (e: KeyboardEvent) : void => {
     if (e.key === 'Enter') {

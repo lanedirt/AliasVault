@@ -203,10 +203,7 @@ export async function handleCreateIdentity(
 
     const webApi = new WebApiService(() => {});
     await webApi.initializeBaseUrl();
-    /*
-     *  TODO: re-enable
-     * await webApi.post('Vault', newVault);
-     */
+    await webApi.post('Vault', newVault);
 
     sendResponse({ success: true });
   } catch (error) {
@@ -261,9 +258,8 @@ export function handleGetDefaultEmailDomain(
      * taking into account vault settings.
      */
 
-    // Function to check if a domain is valid
     /**
-     *
+     * Check if a domain is valid.
      */
     const isValidDomain = (domain: string) : boolean => {
       return domain &&

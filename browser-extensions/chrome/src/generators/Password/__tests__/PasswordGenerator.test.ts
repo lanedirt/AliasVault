@@ -18,7 +18,7 @@ describe('PasswordGenerator', () => {
     expect(password).toMatch(/[a-z]/);  // lowercase
     expect(password).toMatch(/[A-Z]/);  // uppercase
     expect(password).toMatch(/[0-9]/);  // numbers
-    expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/); // special
+    expect(password).toMatch(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/); // special
   });
 
   it('respects custom length setting', () => {
@@ -44,7 +44,7 @@ describe('PasswordGenerator', () => {
 
   it('respects special characters setting', () => {
     const password = generator.useSpecialCharacters(false).generateRandomPassword();
-    expect(password).not.toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/);
+    expect(password).not.toMatch(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/);
   });
 
   it('generates different passwords on subsequent calls', () => {
@@ -62,7 +62,7 @@ describe('PasswordGenerator', () => {
       expect(password).toMatch(/[a-z]/);
       expect(password).toMatch(/[A-Z]/);
       expect(password).toMatch(/[0-9]/);
-      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/);
+      expect(password).toMatch(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/);
     }
   });
 

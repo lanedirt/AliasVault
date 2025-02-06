@@ -66,7 +66,6 @@ const App: React.FC = () => {
     <Router>
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
         <Header
-          authContext={authContext}
           toggleUserMenu={() => setIsUserMenuOpen(!isUserMenuOpen)}
           isUserMenuOpen={isUserMenuOpen}
           routes={routes}

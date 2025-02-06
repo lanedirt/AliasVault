@@ -1,7 +1,7 @@
 import { Identity } from "./types/Identity";
 
 /**
- *
+ * Generate a username or email prefix.
  */
 export class UsernameEmailGenerator {
   private static readonly MIN_LENGTH = 6;
@@ -9,7 +9,7 @@ export class UsernameEmailGenerator {
   private readonly symbols: string[] = ['.', '-'];
 
   /**
-   *
+   * Generate a username based on an identity.
    */
   public generateUsername(identity: Identity): string {
     // Generate username based on email prefix but strip all non-alphanumeric characters
@@ -27,7 +27,7 @@ export class UsernameEmailGenerator {
   }
 
   /**
-   *
+   * Generate an email prefix based on an identity.
    */
   public generateEmailPrefix(identity: Identity): string {
     const parts: string[] = [];
@@ -88,7 +88,7 @@ export class UsernameEmailGenerator {
   }
 
   /**
-   *
+   * Sanitize an email prefix.
    */
   private sanitizeEmailPrefix(input: string): string {
     // Remove any character that's not a letter, number, dot, underscore, or hyphen including special characters
@@ -104,14 +104,14 @@ export class UsernameEmailGenerator {
   }
 
   /**
-   *
+   * Get a random symbol.
    */
   private getRandomSymbol(): string {
     return Math.floor(Math.random() * 3) === 0 ? this.symbols[Math.floor(Math.random() * this.symbols.length)] : '';
   }
 
   /**
-   *
+   * Generate a random string.
    */
   private generateRandomString(length: number): string {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';

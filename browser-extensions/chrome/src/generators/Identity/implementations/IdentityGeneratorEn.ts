@@ -1,11 +1,11 @@
 import { BaseIdentityGenerator } from "./base/BaseIdentityGenerator";
 
 /**
- *
+ * Identity generator for English language using English word dictionaries.
  */
 export class IdentityGeneratorEn extends BaseIdentityGenerator {
   /**
-   *
+   * Get the male first names.
    */
   protected getFirstNamesMaleJson(): string[] {
     /*
@@ -16,7 +16,7 @@ export class IdentityGeneratorEn extends BaseIdentityGenerator {
   }
 
   /**
-   *
+   * Get the female first names.
    */
   protected getFirstNamesFemaleJson(): string[] {
     /*
@@ -27,7 +27,7 @@ export class IdentityGeneratorEn extends BaseIdentityGenerator {
   }
 
   /**
-   *
+   * Get the last names.
    */
   protected getLastNamesJson(): string[] {
     /*

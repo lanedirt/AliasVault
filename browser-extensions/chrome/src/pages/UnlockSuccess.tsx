@@ -1,7 +1,8 @@
 import React from 'react';
 
 /**
- *
+ * Unlock success component shown when the vault is successfully unlocked in a separate popup
+ * asking the user if they want to close the popup.
  */
 const UnlockSuccess: React.FC<{
     onClose: () => void;

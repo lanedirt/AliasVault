@@ -1,21 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../../context/LoadingContext';
 
 /**
- * User menu props.
- */
-type UserMenuProps = {
-  username: string;
-}
-
-/**
  * User menu component.
  */
-export const UserMenu: React.FC<UserMenuProps> = ({
-  username
-}) => {
+export const UserMenu: React.FC = () => {
   const authContext = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -84,7 +75,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           >
             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
               <span className="block text-sm font-semibold text-gray-900 dark:text-white">
-                {username}
+                {authContext.username}
               </span>
             </div>
             <button

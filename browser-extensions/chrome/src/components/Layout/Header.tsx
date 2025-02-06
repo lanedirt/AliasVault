@@ -1,12 +1,12 @@
 import React from 'react';
 import { UserMenu } from './UserMenu';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Header props.
  */
 type HeaderProps = {
-  authContext: any;
   toggleUserMenu: () => void;
   isUserMenuOpen: boolean;
   routes?: {
@@ -20,9 +20,9 @@ type HeaderProps = {
  * Header component.
  */
 const Header: React.FC<HeaderProps> = ({
-  authContext,
   routes = []
 }) => {
+  const authContext = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -104,9 +104,7 @@ const Header: React.FC<HeaderProps> = ({
             </svg>
           </button>
         ) : (
-          <UserMenu
-            username={authContext.username}
-          />
+          <UserMenu />
         )}
       </div>
     </header>

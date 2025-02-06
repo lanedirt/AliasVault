@@ -204,9 +204,8 @@ export class FormDetector {
     let primaryEmail: HTMLInputElement | null = null;
     let confirmEmail: HTMLInputElement | null = null;
 
-    // Helper function to check if an input is an email field
     /**
-     *
+     * Check if an input is an email field.
      */
     const isEmailField = (input: HTMLInputElement, confirmPatterns: string[] = []): boolean => {
       const type = input.type.toLowerCase();
@@ -264,7 +263,7 @@ export class FormDetector {
   }
 
   /**
-   *
+   * Find the birthdate fields in the form.
    */
   private findBirthdateFields(form: HTMLFormElement | null): LoginForm['birthdateField'] {
     // First try to find a single date input
@@ -288,7 +287,7 @@ export class FormDetector {
           .join(' ')
           // Normalize different types of spaces and separators
           .replace(/[\s\u00A0]/g, '')
-          .replace(/[\/\-]/g, '');
+          .replace(/[/-]/g, '');
 
         // Check for date format patterns
         if (/dd.*mm.*jj/i.test(allText) || /dd.*mm.*yyyy/i.test(allText)) {
@@ -301,7 +300,7 @@ export class FormDetector {
 
         // Check placeholder as fallback
         if (format === 'yyyy-mm-dd' && singleDateField.placeholder) {
-          const placeholder = singleDateField.placeholder.toLowerCase().replace(/[\s\u00A0\-\/]/g, '');
+          const placeholder = singleDateField.placeholder.toLowerCase().replace(/[\s\u00A0\-/]/g, '');
           if (/ddmm/.test(placeholder)) {
             format = 'dd-mm-yyyy';
           } else if (/mmdd/.test(placeholder)) {
@@ -336,7 +335,7 @@ export class FormDetector {
   }
 
   /**
-   *
+   * Find the gender field in the form.
    */
   private findGenderField(form: HTMLFormElement | null): LoginForm['genderField'] {
     // Try to find select element first
@@ -363,7 +362,7 @@ export class FormDetector {
       const otherPatterns = ['other', 'diverse', 'custom', 'prefer not', 'anders', 'iets', 'unknown', 'gender3'];
 
       /**
-       *
+       * Find a radio button by patterns.
        */
       const findRadioByPatterns = (patterns: string[], isOther: boolean = false) : HTMLInputElement | null => {
         return Array.from(radioButtons).find(radio => {

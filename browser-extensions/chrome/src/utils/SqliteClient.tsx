@@ -149,6 +149,7 @@ class SqliteClient {
 
     const results = this.executeQuery(query);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return results.map((row: any) => ({
       Id: row.Id,
       Username: row.Username,

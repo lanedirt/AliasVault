@@ -204,9 +204,8 @@ export function injectIcon(input: HTMLInputElement): void {
     icon.style.opacity = '1';
   });
 
-  // Remove icon when input loses focus, except when clicking the icon
   /**
-   *
+   * Remove icon when input loses focus, except when clicking the icon
    */
   const handleBlur = (e: FocusEvent) : void => {
     // Don't remove if clicking the icon itself

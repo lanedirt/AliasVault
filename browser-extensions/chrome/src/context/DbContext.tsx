@@ -33,12 +33,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Public email domains.
    */
-  const [publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
+  const [, setPublicEmailDomains] = useState<string[]>([]);
 
   /**
    * Private email domains.
    */
-  const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
+  const [, setPrivateEmailDomains] = useState<string[]>([]);
 
   const initializeDatabase = useCallback(async (derivedKey: string, vault: string, publicEmailDomains: string[], privateEmailDomains: string[], vaultRevisionNumber: number) => {
     const client = new SqliteClient();

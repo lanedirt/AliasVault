@@ -1,5 +1,5 @@
 /**
- *
+ * Generate a random password.
  */
 export class PasswordGenerator {
   private readonly lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
@@ -14,7 +14,7 @@ export class PasswordGenerator {
   private useSpecial: boolean = true;
 
   /**
-   *
+   * Set the length of the password.
    */
   public setLength(length: number): PasswordGenerator {
     this.length = length;
@@ -22,7 +22,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Set if lowercase letters should be used.
    */
   public useLowercaseLetters(use: boolean): PasswordGenerator {
     this.useLowercase = use;
@@ -30,7 +30,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Set if uppercase letters should be used.
    */
   public useUppercaseLetters(use: boolean): PasswordGenerator {
     this.useUppercase = use;
@@ -38,7 +38,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Set if numeric characters should be used.
    */
   public useNumericCharacters(use: boolean): PasswordGenerator {
     this.useNumbers = use;
@@ -46,7 +46,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Set if special characters should be used.
    */
   public useSpecialCharacters(use: boolean): PasswordGenerator {
     this.useSpecial = use;
@@ -54,7 +54,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Get a random index from the crypto module.
    */
   private getUnbiasedRandomIndex(max: number): number {
     // Calculate the largest multiple of max that fits within Uint32
@@ -73,7 +73,7 @@ export class PasswordGenerator {
   }
 
   /**
-   *
+   * Generate a random password.
    */
   public generateRandomPassword(): string {
     let chars = '';
@@ -114,7 +114,7 @@ export class PasswordGenerator {
                       this.numberChars[this.getUnbiasedRandomIndex(this.numberChars.length)] +
                       password.substring(pos + 1);
     }
-    if (this.useSpecial && !password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/)) {
+    if (this.useSpecial && !password.match(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.specialChars[this.getUnbiasedRandomIndex(this.specialChars.length)] +
