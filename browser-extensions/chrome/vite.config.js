@@ -43,17 +43,4 @@ export default defineConfig({
       '@': '/src'
     }
   },
-  build: {
-    outDir: 'dist',
-    watch: {
-      include: ['src/**', 'manifest.json'],
-    }
-  },
-  server: {
-    watch: {
-      usePolling: true,
-      interval: 100,
-      ignored: ['!**/node_modules/**', '**/dist/**'],
-    }
-  }
 });
