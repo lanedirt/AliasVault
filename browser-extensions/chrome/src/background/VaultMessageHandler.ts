@@ -21,16 +21,15 @@ export async function handleStoreVault(
 
     // Store derived key in local memory
     vaultState.derivedKey = message.derivedKey;
-    vaultState.publicEmailDomains = vaultResponse.vault.publicEmailDomainList || [];
-    vaultState.privateEmailDomains = vaultResponse.vault.privateEmailDomainList || [];
-    vaultState.vaultRevisionNumber = vaultResponse.vault.currentRevisionNumber || 0;
+
+    console.log('vaultResponse', vaultResponse);
 
     // Store encrypted vault in chrome.storage.session
     await chrome.storage.session.set({
       encryptedVault: encryptedVaultBlob,
-      publicEmailDomains: vaultState.publicEmailDomains,
-      privateEmailDomains: vaultState.privateEmailDomains,
-      vaultRevisionNumber: vaultState.vaultRevisionNumber
+      publicEmailDomains: vaultResponse.vault.publicEmailDomainList,
+      privateEmailDomains: vaultResponse.vault.privateEmailDomainList,
+      vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber
     });
 
     sendResponse({ success: true });
@@ -91,9 +90,6 @@ export function handleClearVault(
   sendResponse: (response: any) => void
 ) : void {
   vaultState.derivedKey = null;
-  vaultState.publicEmailDomains = [];
-  vaultState.privateEmailDomains = [];
-  vaultState.vaultRevisionNumber = 0;
   chrome.storage.session.remove([
     'encryptedVault',
     'publicEmailDomains',
@@ -187,12 +183,14 @@ export async function handleCreateIdentity(
 /**
  * Get the email addresses for a vault.
  */
-export function getEmailAddressesForVault(
-  sqliteClient: SqliteClient,
-  vaultState: VaultState
-): string[] {
+export async function getEmailAddressesForVault(
+  sqliteClient: SqliteClient
+): Promise<string[]> {
   // TODO: create separate query to only get email addresses to avoid loading all credentials.
   const credentials = sqliteClient.getAllCredentials();
+
+  // Get metadata from storage
+  const storageResult = await chrome.storage.session.get(['privateEmailDomains']);
 
   const emailAddresses = credentials
     .filter(cred => cred.Email != null)
@@ -201,7 +199,7 @@ export function getEmailAddressesForVault(
 
   return emailAddresses.filter(email => {
     const domain = email.split('@')[1];
-    return vaultState.privateEmailDomains.includes(domain);
+    return storageResult.privateEmailDomains.includes(domain);
   });
 }
 
@@ -217,11 +215,6 @@ export function handleGetDefaultEmailDomain(
     return;
   }
 
-  /*
-   * TODO: usage between chrome storage session and vaultState is
-   * now mixed. Determine where to store the domain lists and avoid
-   * storing it in multiple places when it's not needed.
-   */
   chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], (result) => {
     const privateEmailDomains = result.privateEmailDomains || [];
     const publicEmailDomains = result.publicEmailDomains || [];
@@ -285,20 +278,21 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
 
   // Store updated encrypted vault in chrome.storage.session.
   await chrome.storage.session.set({
-    encryptedVault,
-    publicEmailDomains: vaultState.publicEmailDomains,
-    privateEmailDomains: vaultState.privateEmailDomains
+    encryptedVault
   });
+
+  // Get metadata from storage
+  const storageResult = await chrome.storage.session.get(['vaultRevisionNumber']);
 
   // Upload new encrypted vault to server.
   const username = await chrome.storage.local.get('username');
-  const emailAddresses = await getEmailAddressesForVault(sqliteClient, vaultState);
+  const emailAddresses = await getEmailAddressesForVault(sqliteClient);
 
   const newVault: Vault = {
     blob: encryptedVault,
     createdAt: new Date().toISOString(),
     credentialsCount: 0, // TODO
-    currentRevisionNumber: vaultState.vaultRevisionNumber,
+    currentRevisionNumber: storageResult.vaultRevisionNumber,
     emailAddressList: emailAddresses,
     privateEmailDomainList: [], // TODO
     publicEmailDomainList: [], // TODO
