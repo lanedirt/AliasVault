@@ -13,13 +13,14 @@ export default function dictionaryLoader() {
   return {
     name: 'dictionary-loader',
     transform(code: string, id: string) {
-      // Only transform identity generator files
-      // TODO: refactor to dynamically load all dictionaries for all languages
-      // instead of hardcoding the languages here.
-      if (id.includes('IdentityGeneratorEn.ts') || id.includes('IdentityGeneratorNl.ts')) {
-        const lang = id.includes('IdentityGeneratorEn.ts') ? 'en' : 'nl';
-        // Load dictionaries from the repository root 'dictionaries' folder. These dictionaries
-        // are used by both .NET and JavaScript code.
+      // Check if file matches the expected IdentityGenerator filename pattern.
+      // This checks for filenames like IdentityGeneratorEn.ts or IdentityGeneratorNl.ts.
+      // To add support for other languages, add a new file with the language code that matches the dictionary file langauge code.
+      // E.g. for French, add IdentityGeneratorFr.ts and ensure the dictionary files are present in the '/dictionaries/fr' folder.
+      const match = id.match(/IdentityGenerator([A-Za-z]{2})\.ts$/);
+      if (match) {
+        const lang = match[1].toLowerCase(); // Extract language code and convert to lowercase
+        // Load dictionaries from the repository root 'dictionaries' folder
         const dictionaryPath = path.resolve(__dirname, `../../../dictionaries/${lang}`);
 
         try {
@@ -39,7 +40,7 @@ export default function dictionaryLoader() {
             .filter(name => name.trim())
             .map(name => name.trim());
 
-          // Replace the placeholder strings with stringified arrays
+          // Update placeholder replacements to use dynamic language code
           code = code.replace(
             new RegExp(`['"\`]__FIRSTNAMES_MALE_${lang.toUpperCase()}__['"\`]`, 'g'),
             `[${firstNamesMale.map(name => `"${name}"`).join(',')}]`

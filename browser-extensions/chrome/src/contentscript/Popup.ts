@@ -110,11 +110,6 @@ export function updatePopupContent(credentials: Credential[], credentialList: HT
 export function removeExistingPopup() : void {
   const existing = document.getElementById('aliasvault-credential-popup');
   if (existing) {
-    /*
-     *  Remove the mousedown event listener before removing the popup
-     *  TODO: remove if not needed
-     * document.removeEventListener('mousedown', handleClickOutside);
-     */
     existing.remove();
   }
 }

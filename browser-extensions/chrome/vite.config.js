@@ -43,10 +43,17 @@ export default defineConfig({
       '@': '/src'
     }
   },
-  server: {
-    open: '/src/popup.html'
-  },
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    watch: {
+      include: ['src/**', 'manifest.json'],
+    }
+  },
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 100,
+      ignored: ['!**/node_modules/**', '**/dist/**'],
+    }
   }
 });

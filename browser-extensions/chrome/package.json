@@ -5,14 +5,13 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "dev": "vite",
+    "dev": "vite dev",
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:custom": "eslint",
     "lint:fix": "eslint src --fix",
     "build": "vite build",
-    "watch": "vite build --watch",
-    "build:content-css": "tailwindcss -i ./src/contentScript/style.css -o ./dist/contentScript.css --config tailwind.content.config.js"
+    "watch": "vite build --watch --mode development"
   },
   "keywords": [],
   "author": "",
