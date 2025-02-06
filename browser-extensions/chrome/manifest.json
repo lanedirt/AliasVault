@@ -31,8 +31,7 @@
     "content_scripts": [
       {
         "matches": ["<all_urls>"],
-        "js": ["contentScript.ts"],
-        "css": ["src/styles/contentScript.css"]
+        "js": ["contentScript.ts"]
       }
     ],
     "host_permissions": [

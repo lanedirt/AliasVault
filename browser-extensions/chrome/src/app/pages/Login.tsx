@@ -4,9 +4,9 @@ import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
 import { Buffer } from 'buffer';
 import Button from '../components/Button';
-import EncryptionUtility from '../utils/EncryptionUtility';
+import EncryptionUtility from '../../shared/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
-import { VaultResponse } from '../types/webapi/VaultResponse';
+import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import { useLoading } from '../context/LoadingContext';
 
 /**

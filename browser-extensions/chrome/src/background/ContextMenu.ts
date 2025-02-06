@@ -1,4 +1,4 @@
-import { PasswordGenerator } from '../generators/Password/PasswordGenerator';
+import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerator';
 
 /**
  * Setup the context menus.

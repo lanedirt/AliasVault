@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import { useDb } from './context/DbContext';
-import { useMinDurationLoading } from './hooks/useMinDurationLoading';
-import Header from './components/Layout/Header';
-import BottomNav from './components/Layout/BottomNav';
-import Settings from './pages/Settings';
-import CredentialsList from './pages/CredentialsList';
-import EmailsList from './pages/EmailsList';
-import LoadingSpinner from './components/LoadingSpinner';
-import Home from './pages/Home';
-import './styles/app.css';
-import CredentialDetails from './pages/CredentialDetails';
-import EmailDetails from './pages/EmailDetails';
-// Add this type definition at the top level
+import { useAuth } from './app/context/AuthContext';
+import { useDb } from './app/context/DbContext';
+import { useMinDurationLoading } from './app/hooks/useMinDurationLoading';
+import Header from './app/components/Layout/Header';
+import BottomNav from './app/components/Layout/BottomNav';
+import Settings from './app/pages/Settings';
+import CredentialsList from './app/pages/CredentialsList';
+import EmailsList from './app/pages/EmailsList';
+import LoadingSpinner from './app/components/LoadingSpinner';
+import Home from './app/pages/Home';
+import './app/style.css';
+import CredentialDetails from './app/pages/CredentialDetails';
+import EmailDetails from './app/pages/EmailDetails';
+
+/**
+ * Route configuration.
+ */
 type RouteConfig = {
   path: string;
   element: React.ReactNode;

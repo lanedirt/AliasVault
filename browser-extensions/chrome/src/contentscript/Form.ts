@@ -1,5 +1,5 @@
-import { FormDetector } from "../utils/form-detector/FormDetector";
-import { Credential } from "../types/Credential";
+import { FormDetector } from "../shared/formDetector/FormDetector";
+import { Credential } from "../shared/types/Credential";
 import { openAutofillPopup } from "./Popup";
 
 /**

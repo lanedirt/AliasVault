@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
-import { Credential } from '../types/Credential';
+import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
 import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
-import EncryptionUtility from '../utils/EncryptionUtility';
-import { VaultResponse } from '../types/webapi/VaultResponse';
+import EncryptionUtility from '../../shared/EncryptionUtility';
+import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 /**
  * Credentials list page.

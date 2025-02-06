@@ -10,9 +10,9 @@
     "lint": "eslint src",
     "lint:custom": "eslint",
     "lint:fix": "eslint src --fix",
-    "build": "vite build && npm run build:content-css",
+    "build": "vite build",
     "watch": "vite build --watch",
-    "build:content-css": "tailwindcss -i ./src/styles/contentScript.css -o ./dist/contentScript.css --config tailwind.content.config.js"
+    "build:content-css": "tailwindcss -i ./src/contentScript/style.css -o ./dist/contentScript.css --config tailwind.content.config.js"
   },
   "keywords": [],
   "author": "",

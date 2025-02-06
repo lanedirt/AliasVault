@@ -1,10 +1,10 @@
 import { isDarkMode } from './Shared';
-import { Credential } from '../types/Credential';
+import { Credential } from '../shared/types/Credential';
 import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
-import { IdentityGeneratorEn } from '../generators/Identity/implementations/IdentityGeneratorEn';
-import { PasswordGenerator } from '../generators/Password/PasswordGenerator';
-import { FormDetector } from '../utils/form-detector/FormDetector';
+import { IdentityGeneratorEn } from '../shared/generators/Identity/implementations/IdentityGeneratorEn';
+import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerator';
+import { FormDetector } from '../shared/formDetector/FormDetector';
 
 /**
  * Placeholder base64 image for credentials without a logo.

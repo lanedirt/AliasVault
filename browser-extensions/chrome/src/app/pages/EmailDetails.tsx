@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Email } from '../types/webapi/Email';
+import { Email } from '../../shared/types/webapi/Email';
 import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
-import EncryptionUtility from '../utils/EncryptionUtility';
+import EncryptionUtility from '../../shared/EncryptionUtility';
 import { Buffer } from 'buffer';
 
 /**

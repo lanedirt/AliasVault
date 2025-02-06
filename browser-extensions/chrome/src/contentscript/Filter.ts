@@ -1,4 +1,4 @@
-import { Credential } from "../types/Credential";
+import { Credential } from "../shared/types/Credential";
 
 /**
  * Filter credentials based on current URL and page context to determine which credentials to show

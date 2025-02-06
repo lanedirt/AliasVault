@@ -1,6 +1,6 @@
-import { FormDetector } from './src/utils/form-detector/FormDetector';
-import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './src/contentscript/Popup';
-import { injectIcon } from './src/contentscript/Form';
+import { FormDetector } from './src/shared/formDetector/FormDetector';
+import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './src/contentScript/Popup';
+import { injectIcon } from './src/contentScript/Form';
 
 /**
  * Listen for input field focus

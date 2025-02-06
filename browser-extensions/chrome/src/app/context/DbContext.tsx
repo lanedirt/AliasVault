@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import SqliteClient from '../utils/SqliteClient';
+import SqliteClient from '../../shared/SqliteClient';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;

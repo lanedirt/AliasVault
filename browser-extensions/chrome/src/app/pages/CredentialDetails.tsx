@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDb } from '../context/DbContext';
-import { Credential } from '../types/Credential';
+import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
 import { FormInputCopyToClipboard } from '../components/FormInputCopyToClipboard';
 

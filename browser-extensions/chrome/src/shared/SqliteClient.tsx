@@ -1,6 +1,6 @@
 import initSqlJs, { Database } from 'sql.js';
-import { Credential } from '../types/Credential';
-import { EncryptionKey } from '../types/EncryptionKey';
+import { Credential } from './types/Credential';
+import { EncryptionKey } from './types/EncryptionKey';
 
 /**
  * Client for interacting with the SQLite database.

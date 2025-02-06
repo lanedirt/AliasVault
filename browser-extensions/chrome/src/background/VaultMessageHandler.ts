@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { VaultState } from './VaultState';
-import EncryptionUtility from '../utils/EncryptionUtility';
-import SqliteClient from '../utils/SqliteClient';
-import { WebApiService } from '../utils/WebApiService';
-import { Vault } from '../types/webapi/Vault';
-import { Credential } from '../types/Credential';
+import EncryptionUtility from '../shared/EncryptionUtility';
+import SqliteClient from '../shared/SqliteClient';
+import { WebApiService } from '../shared/WebApiService';
+import { Vault } from '../shared/types/webapi/Vault';
+import { Credential } from '../shared/types/Credential';
 
 /**
  * Store the vault in browser storage.

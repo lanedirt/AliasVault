@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MailboxBulkRequest, MailboxBulkResponse } from '../types/webapi/MailboxBulk';
-import { MailboxEmail } from '../types/webapi/MailboxEmail';
+import { MailboxBulkRequest, MailboxBulkResponse } from '../../shared/types/webapi/MailboxBulk';
+import { MailboxEmail } from '../../shared/types/webapi/MailboxEmail';
 import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
-import EncryptionUtility from '../utils/EncryptionUtility';
+import EncryptionUtility from '../../shared/EncryptionUtility';
 import { Buffer } from 'buffer';
 import ReloadButton from '../components/ReloadButton';
 import { Link } from 'react-router-dom';
