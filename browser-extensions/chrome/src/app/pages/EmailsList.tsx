@@ -17,9 +17,6 @@ const EmailsList: React.FC = () => {
   const webApi = useWebApi();
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(50);
-  const [totalRecords, setTotalRecords] = useState(0);
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -47,10 +44,11 @@ const EmailsList: React.FC = () => {
         .filter((email, index, self) => self.indexOf(email) === index);
 
       try {
+        // For now we only show the latest 50 emails. No pagination.
         const data = await webApi.post<MailboxBulkRequest, MailboxBulkResponse>('EmailBox/bulk', {
           addresses: emailAddresses,
-          page: currentPage,
-          pageSize: pageSize,
+          page: 1,
+          pageSize: 50,
         }) as MailboxBulkResponse;
 
         // Decrypt emails locally using private key associated with the email address.
@@ -76,7 +74,6 @@ const EmailsList: React.FC = () => {
         }));
 
         setEmails(decryptedEmails);
-        setTotalRecords(data.totalRecords);
       } catch (error) {
         console.error(error);
         throw new Error('Failed to load emails');
@@ -86,7 +83,7 @@ const EmailsList: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, dbContext?.sqliteClient, pageSize, webApi, setIsLoading]);
+  }, [dbContext?.sqliteClient, webApi, setIsLoading]);
 
   useEffect(() => {
     loadEmails();
@@ -137,7 +134,10 @@ const EmailsList: React.FC = () => {
   if (emails.length === 0) {
     return (
       <div>
-        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+          <ReloadButton onClick={loadEmails} />
+        </div>
         <p className="text-gray-500 dark:text-gray-400">No emails found</p>
       </div>
     );
