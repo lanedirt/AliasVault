@@ -43,4 +43,9 @@ export default defineConfig({
       '@': '/src'
     }
   },
+  build: {
+    watch: process.env.NODE_ENV === 'development' ? {
+      include: ['src/**', 'manifest.json'],
+    } : null
+  }
 });

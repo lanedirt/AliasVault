@@ -10,8 +10,7 @@
     "lint": "eslint src",
     "lint:custom": "eslint",
     "lint:fix": "eslint src --fix",
-    "build": "vite build",
-    "watch": "vite build --watch --mode development"
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",

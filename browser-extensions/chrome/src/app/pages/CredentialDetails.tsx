@@ -99,13 +99,19 @@ const CredentialDetails: React.FC = () => {
             title="Open in new window"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm13 0a1 1 0 00-1-1h-4a1 1 0 100 2h1.586l-2.293 2.293a1 1 0 001.414 1.414L14 6.414V8a1 1 0 102 0V4zM3 16a1 1 0 001 1h4a1 1 0 100-2H6.414l2.293-2.293a1 1 0 00-1.414-1.414L5 13.586V12a1 1 0 10-2 0v4zm13 0a1 1 0 01-1 1h-4a1 1 0 110-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L14 13.586V12a1 1 0 112 0v4z" />
-            </svg>
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                />
+              </svg>
           </button>
         </div>
 
@@ -118,8 +124,8 @@ const CredentialDetails: React.FC = () => {
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-4">
+      <div className="grid gap-6">
+        <div className="space-y-4 lg:col-span-2 xl:col-span-1">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Login credentials</h2>
           <FormInputCopyToClipboard
             id="email"
@@ -171,7 +177,7 @@ const CredentialDetails: React.FC = () => {
         </div>
 
         {credential.Notes && (
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-2 xl:col-span-1">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notes</h2>
             <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
               <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">

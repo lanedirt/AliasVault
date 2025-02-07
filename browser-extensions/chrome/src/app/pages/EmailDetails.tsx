@@ -21,6 +21,13 @@ const EmailDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
 
   useEffect(() => {
+    // For popup windows, ensure we have proper history state for navigation
+    if (isPopup()) {
+      // Clear existing history and create fresh entries
+      window.history.replaceState({}, '', `index.html#/emails`);
+      window.history.pushState({}, '', `index.html#/emails/${id}`);
+    }
+
     /**
      * Load the email.
      */
@@ -86,6 +93,33 @@ const EmailDetails: React.FC = () => {
     }
   };
 
+  /**
+   * Check if the current page is a popup.
+   */
+  const isPopup = () : boolean => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('popup') === 'true';
+  };
+
+  /**
+   * Open the credential details in a new popup.
+   */
+  const openInNewPopup = () : void => {
+    const width = 800;
+    const height = 1000;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    window.open(
+      `index.html?popup=true#/emails/${id}`,
+      'EmailDetails',
+      `width=${width},height=${height},left=${left},top=${top},popup=true`
+    );
+
+    // Close the current tab
+    window.close();
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -110,6 +144,26 @@ const EmailDetails: React.FC = () => {
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{email.subject}</h1>
             <div className="flex space-x-2">
+              <button
+                onClick={openInNewPopup}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                title="Open in new window"
+              >
+                <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                    />
+                  </svg>
+              </button>
               <button
                 onClick={handleDelete}
                 className="p-2 text-red-500 hover:text-red-600 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20"
