@@ -121,7 +121,11 @@ const EmailsList: React.FC = () => {
           <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
           <ReloadButton onClick={loadEmails} />
         </div>
-        <p className="text-gray-500 dark:text-gray-400">No emails found</p>
+        <div className="text-gray-500 dark:text-gray-400 space-y-2">
+          <p className="text-sm">
+            You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.
+          </p>
+        </div>
       </div>
     );
   }

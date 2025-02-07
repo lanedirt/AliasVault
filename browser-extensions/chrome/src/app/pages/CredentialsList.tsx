@@ -56,7 +56,17 @@ const CredentialsList: React.FC = () => {
         <ReloadButton onClick={onRefresh} />
       </div>
       {credentials.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">No credentials found</p>
+        <div className="text-gray-500 dark:text-gray-400 space-y-2">
+          <p className="text-sm">
+            Welcome to AliasVault!
+          </p>
+          <p className="text-sm">
+            To use the AliasVault browser extension: navigate to a website and use the AliasVault autofill popup to create a new credential.
+          </p>
+          <p className="text-sm">
+            If you want to create manual identities, open the full AliasVault app via the popout icon in the top right corner.
+          </p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {credentials.map(cred => (
