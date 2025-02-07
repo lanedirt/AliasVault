@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DISABLED_SITES_KEY } from '../../contentScript/Popup';
 
-interface PopupSettings {
+/**
+ * Popup settings type.
+ */
+type PopupSettings = {
   disabledUrls: string[];
   currentUrl: string;
   isEnabled: boolean;
 }
 
+/**
+ * Settings page component.
+ */
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
@@ -14,17 +20,19 @@ const Settings: React.FC = () => {
     isEnabled: true
   });
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const getCurrentTab = async () => {
+  /**
+   * Get current tab in browser.
+   */
+  const getCurrentTab = async () : Promise<chrome.tabs.Tab> => {
     const queryOptions = { active: true, currentWindow: true };
     const [tab] = await chrome.tabs.query(queryOptions);
     return tab;
   };
 
-  const loadSettings = async () => {
+  /**
+   * Load settings.
+   */
+  const loadSettings = useCallback(async () : Promise<void> => {
     const tab = await getCurrentTab();
     const currentUrl = new URL(tab.url || '').hostname;
 
@@ -37,9 +45,16 @@ const Settings: React.FC = () => {
         isEnabled: !disabledUrls.includes(currentUrl)
       });
     });
-  };
+  }, []); // No dependencies needed since it only uses external APIs
 
-  const toggleCurrentSite = async () => {
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  /**
+   * Toggle current site.
+   */
+  const toggleCurrentSite = async () : Promise<void> => {
     const { currentUrl, disabledUrls, isEnabled } = settings;
     let newDisabledUrls = [...disabledUrls];
 
@@ -59,8 +74,10 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const resetSettings = async () => {
-    // Fix: Use DISABLED_SITES_KEY as the key name here too
+  /**
+   * Reset settings.
+   */
+  const resetSettings = async () : Promise<void> => {
     const storageData = { [DISABLED_SITES_KEY]: [] };
     await chrome.storage.local.set(storageData);
 
@@ -79,11 +96,11 @@ const Settings: React.FC = () => {
 
       <div className="space-y-4">
         <div>
-        <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-4">
-          <p className="text-sm">
+          <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-4">
+            <p className="text-sm">
             You can enable or disable the autofill popup per site.
-          </p>
-        </div>
+            </p>
+          </div>
           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">{settings.currentUrl}</p>

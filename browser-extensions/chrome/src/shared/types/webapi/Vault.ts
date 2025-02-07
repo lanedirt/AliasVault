@@ -1,3 +1,6 @@
+/**
+ * Vault type.
+ */
 export type Vault = {
   blob: string;
   createdAt: string;

@@ -1,3 +1,6 @@
+/**
+ * Credential SQLite database type.
+ */
 export type Credential = {
     Id: string;
     Username: string;

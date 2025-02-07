@@ -1,3 +1,6 @@
+/**
+ * Validate login request type.
+ */
 export type ValidateLoginRequest = {
     username: string;
     rememberMe: boolean;
@@ -5,6 +8,9 @@ export type ValidateLoginRequest = {
     clientSessionProof: string;
 }
 
+/**
+ * Validate login request type for 2FA.
+ */
 export type ValidateLoginRequest2Fa = {
     username: string;
     code2Fa: number;
@@ -13,6 +19,9 @@ export type ValidateLoginRequest2Fa = {
     clientSessionProof: string;
 }
 
+/**
+ * Validate login response type.
+ */
 export type ValidateLoginResponse = {
     requiresTwoFactor: boolean;
     token?: {

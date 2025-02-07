@@ -233,8 +233,10 @@ function triggerInputEvents(element: HTMLInputElement) : void {
   // Create an overlay div that will show the highlight effect
   const overlay = document.createElement('div');
 
-  // Initial positioning
-  const updatePosition = () => {
+  /**
+   * Update position of the overlay.
+   */
+  const updatePosition = () : void => {
     const rect = element.getBoundingClientRect();
     overlay.style.cssText = `
       position: fixed;
