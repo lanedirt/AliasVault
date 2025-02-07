@@ -31,6 +31,15 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab }) => {
     return null;
   }
 
+  // Detect if the user is coming from the unlock page with mode=inline_unlock.
+  const urlParams = new URLSearchParams(window.location.search);
+  const isInlineUnlockMode = urlParams.get('mode') === 'inline_unlock';
+
+  if (isInlineUnlockMode) {
+    // Do not show the bottom nav for inline unlock mode.
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
       <div className="flex justify-around items-center h-14">

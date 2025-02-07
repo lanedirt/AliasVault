@@ -18,6 +18,11 @@ const Home: React.FC = () => {
   const needsUnlock = (!authContext.isLoggedIn && authContext.isInitialized) || (!dbContext.dbAvailable && dbContext.dbInitialized);
 
   useEffect(() => {
+    // Detect if the user is coming from the unlock page with mode=inline_unlock
+    const urlParams = new URLSearchParams(window.location.search);
+    const isInlineUnlockMode = urlParams.get('mode') === 'inline_unlock';
+    setIsInlineUnlockMode(isInlineUnlockMode);
+
     if (isLoggedIn && !needsUnlock && !isInlineUnlockMode) {
       navigate('/credentials', { replace: true });
     }

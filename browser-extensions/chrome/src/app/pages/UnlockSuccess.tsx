@@ -27,7 +27,13 @@ const UnlockSuccess: React.FC<{
         Close this popup
       </button>
       <button
-        onClick={() => onClose()}
+        onClick={() => {
+          // Remove mode=inline from URL before closing
+          const url = new URL(window.location.href);
+          url.searchParams.delete('mode');
+          window.history.replaceState({}, '', url);
+          onClose();
+        }}
         className="w-full px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
       >
         Browse vault contents
