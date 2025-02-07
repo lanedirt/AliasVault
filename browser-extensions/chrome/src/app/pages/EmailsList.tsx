@@ -6,7 +6,6 @@ import { useWebApi } from '../context/WebApiContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../../shared/EncryptionUtility';
-import { Buffer } from 'buffer';
 import ReloadButton from '../components/ReloadButton';
 import { Link } from 'react-router-dom';
 /**
@@ -54,24 +53,8 @@ const EmailsList: React.FC = () => {
         // Decrypt emails locally using private key associated with the email address.
         const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();
 
-        const decryptedEmails = await Promise.all(data.mails.map(async email => {
-          const encrytionKey = encryptionKeys.find(key => key.PublicKey === email.encryptionKey);
-          if (!encrytionKey) {
-            throw new Error(`Encryption key not found for email: ${email.fromDisplay}`);
-          }
-
-          // Decrypt symmetric key with assymetric private key.
-          const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(email.encryptedSymmetricKey, encrytionKey.PrivateKey);
-          const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
-
-          // Decrypt email with decrypted symmetric key.
-          email.subject = await EncryptionUtility.symmetricDecrypt(email.subject, symmetricKeyBase64);
-          email.fromDisplay = await EncryptionUtility.symmetricDecrypt(email.fromDisplay, symmetricKeyBase64);
-          email.fromDomain = await EncryptionUtility.symmetricDecrypt(email.fromDomain, symmetricKeyBase64);
-          email.fromLocal = await EncryptionUtility.symmetricDecrypt(email.fromLocal, symmetricKeyBase64);
-          email.messagePreview = await EncryptionUtility.symmetricDecrypt(email.messagePreview, symmetricKeyBase64);
-          return email;
-        }));
+        // Decrypt emails locally using public/private key pairs.
+        const decryptedEmails = await EncryptionUtility.decryptEmailList(data.mails, encryptionKeys);
 
         setEmails(decryptedEmails);
       } catch (error) {

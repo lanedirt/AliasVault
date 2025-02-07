@@ -6,7 +6,6 @@ import { useWebApi } from '../context/WebApiContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../../shared/EncryptionUtility';
-import { Buffer } from 'buffer';
 
 /**
  * Email details page.
@@ -42,35 +41,10 @@ const EmailDetails: React.FC = () => {
 
         const response = await webApi.get<Email>(`Email/${id}`);
 
-        // Decrypt email locally using private key
+        // Decrypt email locally using public/private key pairs
         const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();
-        const encrytionKey = encryptionKeys.find(key => key.PublicKey === response.encryptionKey);
-
-        if (!encrytionKey) {
-          throw new Error('Encryption key not found');
-        }
-
-        // Decrypt symmetric key with assymetric private key
-        const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
-          response.encryptedSymmetricKey,
-          encrytionKey.PrivateKey
-        );
-        const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
-
-        // Decrypt all email fields
-        response.subject = await EncryptionUtility.symmetricDecrypt(response.subject, symmetricKeyBase64);
-        response.fromDisplay = await EncryptionUtility.symmetricDecrypt(response.fromDisplay, symmetricKeyBase64);
-        response.fromDomain = await EncryptionUtility.symmetricDecrypt(response.fromDomain, symmetricKeyBase64);
-        response.fromLocal = await EncryptionUtility.symmetricDecrypt(response.fromLocal, symmetricKeyBase64);
-
-        if (response.messageHtml) {
-          response.messageHtml = await EncryptionUtility.symmetricDecrypt(response.messageHtml, symmetricKeyBase64);
-        }
-        if (response.messagePlain) {
-          response.messagePlain = await EncryptionUtility.symmetricDecrypt(response.messagePlain, symmetricKeyBase64);
-        }
-
-        setEmail(response);
+        const decryptedEmail = await EncryptionUtility.decryptEmail(response, encryptionKeys);
+        setEmail(decryptedEmail);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -150,19 +124,19 @@ const EmailDetails: React.FC = () => {
                 title="Open in new window"
               >
                 <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
-                    />
-                  </svg>
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                  />
+                </svg>
               </button>
               <button
                 onClick={handleDelete}

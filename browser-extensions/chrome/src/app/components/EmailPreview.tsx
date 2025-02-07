@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useWebApi } from '../context/WebApiContext';
 import { useDb } from '../context/DbContext';
 import EncryptionUtility from '../../shared/EncryptionUtility';
-import { Buffer } from 'buffer';
 import { MailboxEmail } from '../../shared/types/webapi/MailboxEmail';
 import { Link } from 'react-router-dom';
 
@@ -21,6 +20,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   const webApi = useWebApi();
   const dbContext = useDb();
 
+  /**
+   * Checks if the email is a public domain.
+   */
   const isPublicDomain = async (emailAddress: string): Promise<boolean> => {
     // Get metadata from storage
     const storageResult = await chrome.storage.session.get(['publicEmailDomains']);
@@ -65,57 +67,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
 
           if (latestMails) {
             // Loop through all emails and decrypt them locally
-            const decryptedEmails: MailboxEmail[] = await Promise.all(
-              latestMails.map(async (mail: MailboxEmail) => {
-                try {
-                  // Decrypt email locally using private key
-                  const encryptionKeys = dbContext.sqliteClient!.getAllEncryptionKeys();
-                  const encryptionKey = encryptionKeys.find(
-                    key => key.PublicKey === mail.encryptionKey
-                  );
-
-                  if (!encryptionKey) {
-                    throw new Error('Encryption key not found');
-                  }
-
-                  // Decrypt symmetric key with asymmetric private key
-                  const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
-                    mail.encryptedSymmetricKey,
-                    encryptionKey.PrivateKey
-                  );
-                  const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
-
-                  // Create a new object to avoid mutating the original
-                  const decryptedMail = { ...mail };
-
-                  // Decrypt all email fields
-                  decryptedMail.subject = await EncryptionUtility.symmetricDecrypt(
-                    mail.subject,
-                    symmetricKeyBase64
-                  );
-                  decryptedMail.fromDisplay = await EncryptionUtility.symmetricDecrypt(
-                    mail.fromDisplay,
-                    symmetricKeyBase64
-                  );
-                  decryptedMail.fromDomain = await EncryptionUtility.symmetricDecrypt(
-                    mail.fromDomain,
-                    symmetricKeyBase64
-                  );
-                  decryptedMail.fromLocal = await EncryptionUtility.symmetricDecrypt(
-                    mail.fromLocal,
-                    symmetricKeyBase64
-                  );
-                  decryptedMail.messagePreview = await EncryptionUtility.symmetricDecrypt(
-                    mail.messagePreview,
-                    symmetricKeyBase64
-                  );
-
-                  return decryptedMail;
-                } catch (error) {
-                  console.error('Error decrypting email:', error);
-                  return mail; // Return original mail if decryption fails
-                }
-              })
+            const decryptedEmails: MailboxEmail[] = await EncryptionUtility.decryptEmailList(
+              latestMails,
+              dbContext.sqliteClient!.getAllEncryptionKeys()
             );
 
             if (loading && decryptedEmails.length > 0) {

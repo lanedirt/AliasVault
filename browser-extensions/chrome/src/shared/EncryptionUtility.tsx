@@ -1,4 +1,8 @@
 import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
+import { Email } from './types/webapi/Email';
+import { EncryptionKey } from './types/EncryptionKey';
+import { MailboxEmail } from './types/webapi/MailboxEmail';
+import { Buffer } from 'buffer';
 
 /**
  * Utility class for encryption operations including:
@@ -158,7 +162,7 @@ class EncryptionUtility {
       encodedPlaintext
     );
 
-    return btoa(String.fromCharCode.apply(null, new Uint8Array(cipherBuffer)));
+    return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(cipherBuffer))));
   }
 
   /**
@@ -192,6 +196,91 @@ class EncryptionUtility {
       console.error('RSA decryption failed:', error);
       throw new Error(`Failed to decrypt: ${error.message}`);
     }
+  }
+
+  /**
+   * Decrypts an individual email based on the provided public/private key pairs.
+   */
+  public static async decryptEmail(
+    email: Email,
+    encryptionKeys: EncryptionKey[]
+  ): Promise<Email> {
+    try {
+      const encryptionKey = encryptionKeys.find(key => key.PublicKey === email.encryptionKey);
+
+      if (!encryptionKey) {
+        throw new Error('Encryption key not found');
+      }
+
+      // Decrypt symmetric key with asymmetric private key
+      const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
+        email.encryptedSymmetricKey,
+        encryptionKey.PrivateKey
+      );
+      const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
+
+      // Create a new object to avoid mutating the original
+      const decryptedEmail = { ...email };
+
+      // Decrypt all email fields
+      decryptedEmail.subject = await EncryptionUtility.symmetricDecrypt(email.subject, symmetricKeyBase64);
+      decryptedEmail.fromDisplay = await EncryptionUtility.symmetricDecrypt(email.fromDisplay, symmetricKeyBase64);
+      decryptedEmail.fromDomain = await EncryptionUtility.symmetricDecrypt(email.fromDomain, symmetricKeyBase64);
+      decryptedEmail.fromLocal = await EncryptionUtility.symmetricDecrypt(email.fromLocal, symmetricKeyBase64);
+
+      if (email.messageHtml) {
+        decryptedEmail.messageHtml = await EncryptionUtility.symmetricDecrypt(email.messageHtml, symmetricKeyBase64);
+      }
+      if (email.messagePlain) {
+        decryptedEmail.messagePlain = await EncryptionUtility.symmetricDecrypt(email.messagePlain, symmetricKeyBase64);
+      }
+
+      return decryptedEmail;
+    } catch (err) {
+      throw new Error(err instanceof Error ? err.message : 'Failed to decrypt email');
+    }
+  }
+
+  /**
+   * Decrypts a list of emails based on the provided public/private key pairs.
+   */
+  public static async decryptEmailList(
+    emails: MailboxEmail[],
+    encryptionKeys: EncryptionKey[]
+  ): Promise<MailboxEmail[]> {
+    return Promise.all(emails.map(async email => {
+      try {
+        const encryptionKey = encryptionKeys.find(key => key.PublicKey === email.encryptionKey);
+
+        if (!encryptionKey) {
+          throw new Error('Encryption key not found');
+        }
+
+        // Decrypt symmetric key with asymmetric private key
+        const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
+          email.encryptedSymmetricKey,
+          encryptionKey.PrivateKey
+        );
+        const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
+
+        // Create a new object to avoid mutating the original
+        const decryptedEmail = { ...email };
+
+        // Decrypt all email fields
+        decryptedEmail.subject = await EncryptionUtility.symmetricDecrypt(email.subject, symmetricKeyBase64);
+        decryptedEmail.fromDisplay = await EncryptionUtility.symmetricDecrypt(email.fromDisplay, symmetricKeyBase64);
+        decryptedEmail.fromDomain = await EncryptionUtility.symmetricDecrypt(email.fromDomain, symmetricKeyBase64);
+        decryptedEmail.fromLocal = await EncryptionUtility.symmetricDecrypt(email.fromLocal, symmetricKeyBase64);
+
+        if (email.messagePreview) {
+          decryptedEmail.messagePreview = await EncryptionUtility.symmetricDecrypt(email.messagePreview, symmetricKeyBase64);
+        }
+
+        return decryptedEmail;
+      } catch (err) {
+        throw new Error(err instanceof Error ? err.message : 'Failed to decrypt email');
+      }
+    }));
   }
 }
 
