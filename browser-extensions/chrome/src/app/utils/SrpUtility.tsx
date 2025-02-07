@@ -1,16 +1,7 @@
 import srp from 'secure-remote-password/client'
-import { WebApiService } from './WebApiService';
-import { LoginRequest, LoginResponse } from '../types/webapi/Login';
-import { ValidateLoginRequest } from '../types/webapi/ValidateLogin';
-
-type ValidateLoginResponse = {
-  requiresTwoFactor: boolean;
-  token?: {
-    token: string;
-    refreshToken: string;
-  };
-  serverSessionProof: string;
-}
+import { WebApiService } from '../../shared/WebApiService';
+import { LoginRequest, LoginResponse } from '../../shared/types/webapi/Login';
+import { ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse } from '../../shared/types/webapi/ValidateLogin';
 
 /**
  * Utility class for SRP authentication operations.
@@ -65,6 +56,40 @@ class SrpUtility {
       rememberMe: rememberMe,
       clientPublicEphemeral: clientEphemeral.public,
       clientSessionProof: sessionProof.proof,
+    });
+  }
+
+  /**
+   * Validate login with 2FA with server using locally generated ephemeral and session proof.
+   */
+  public async validateLogin2Fa(
+    username: string,
+    passwordHashString: string,
+    rememberMe: boolean,
+    loginResponse: LoginResponse,
+    code2Fa: number
+  ): Promise<ValidateLoginResponse> {
+    // Generate client ephemeral
+    const clientEphemeral = srp.generateEphemeral()
+
+    // Derive private key
+    const privateKey = srp.derivePrivateKey(loginResponse.salt, username, passwordHashString);
+
+    // Derive session
+    const sessionProof = srp.deriveSession(
+      clientEphemeral.secret,
+      loginResponse.serverEphemeral,
+      loginResponse.salt,
+      username,
+      privateKey
+    );
+
+    return this.webApiService.post<ValidateLoginRequest2Fa, ValidateLoginResponse>('Auth/validate-2fa', {
+      username: username.toLowerCase().trim(),
+      rememberMe: rememberMe,
+      clientPublicEphemeral: clientEphemeral.public,
+      clientSessionProof: sessionProof.proof,
+      code2Fa: code2Fa,
     });
   }
 }
