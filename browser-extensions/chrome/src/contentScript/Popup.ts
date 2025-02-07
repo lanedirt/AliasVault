@@ -1,6 +1,6 @@
 import { isDarkMode } from './Shared';
 import { Credential } from '../shared/types/Credential';
-import { fillCredential } from './Form';
+import { fillCredential, injectIcon } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../shared/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerator';
@@ -380,8 +380,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
   // Add the event listener for clicking outside
   document.addEventListener('mousedown', handleClickOutside);
-
   document.body.appendChild(popup);
+
+  // When creating the popup, also (re)create the icon so it stays visible.
+  injectIcon(input);
 }
 
 /**
@@ -469,6 +471,9 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
   }, 100);
 
   document.body.appendChild(popup);
+
+  // When creating the popup, also (re)create the icon so it stays visible.
+  injectIcon(input);
 }
 
 /**
@@ -869,9 +874,7 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
   document.addEventListener('keydown', handleEnterKey);
 
   // Request credentials from background script
-  console.log('requesting credentials');
   chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
-    console.log('got response', response);
     switch (response.status) {
       case 'OK':
         createAutofillPopup(input, response.credentials);

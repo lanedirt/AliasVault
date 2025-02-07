@@ -164,9 +164,10 @@ export function injectIcon(input: HTMLInputElement): void {
     input.id = `aliasvault-input-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Don't inject if already exists
-  if (document.querySelector(`[data-icon-for="${input.id}"]`)) {
-    return;
+  // Remove existing icon if one already exists
+  const existingIcon = document.querySelector(`[data-icon-for="${input.id}"]`);
+  if (existingIcon) {
+    existingIcon.remove();
   }
 
   const iconDiv = document.createElement('div');
