@@ -117,7 +117,10 @@ export function removeExistingPopup() : void {
 /**
  * Create auto-fill popup
  */
-export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[]) : void {
+export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined) : void {
+  // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
+  input.setAttribute('autocomplete', 'false');
+
   const popup = createBasePopup(input);
 
   // Create credential list container with ID
@@ -126,6 +129,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   popup.appendChild(credentialList);
 
   // Add initial credentials
+  if (!credentials) {
+    credentials = [];
+  }
+
   const filteredCredentials = filterCredentials(
     credentials,
     window.location.href,
@@ -862,12 +869,12 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
   document.addEventListener('keydown', handleEnterKey);
 
   // Request credentials from background script
+  console.log('requesting credentials');
   chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
+    console.log('got response', response);
     switch (response.status) {
       case 'OK':
-        if (response.credentials?.length) {
-          createAutofillPopup(input, response.credentials);
-        }
+        createAutofillPopup(input, response.credentials);
         break;
 
       case 'LOCKED':

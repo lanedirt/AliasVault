@@ -229,16 +229,54 @@ export function injectIcon(input: HTMLInputElement): void {
  * which some websites require before the "continue" button is enabled.
  */
 function triggerInputEvents(element: HTMLInputElement) : void {
-  // Basic events
+  // Create an overlay div that will show the highlight effect
+  const overlay = document.createElement('div');
+
+  // Initial positioning
+  const updatePosition = () => {
+    const rect = element.getBoundingClientRect();
+    overlay.style.cssText = `
+      position: fixed;
+      z-index: 999999;
+      pointer-events: none;
+      top: ${rect.top}px;
+      left: ${rect.left}px;
+      width: ${rect.width}px;
+      height: ${rect.height}px;
+      background-color: rgba(244, 149, 65, 0.3);
+      border-radius: ${getComputedStyle(element).borderRadius};
+      animation: fadeOut 1.4s ease-out forwards;
+    `;
+  };
+
+  updatePosition();
+
+  // Add scroll event listener
+  window.addEventListener('scroll', updatePosition);
+
+  // Add keyframe animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(overlay);
+
+  // Remove overlay and cleanup after animation
+  setTimeout(() => {
+    window.removeEventListener('scroll', updatePosition);
+    overlay.remove();
+    style.remove();
+  }, 1400);
+
+  // Trigger events
   element.dispatchEvent(new Event('input', { bubbles: true }));
   element.dispatchEvent(new Event('change', { bubbles: true }));
 
-  /*
-   * For radio buttons, we need additional events in order for form validation
-   * to be triggered correctly.
-   */
   if (element.type === 'radio') {
-    // Click events
     element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));

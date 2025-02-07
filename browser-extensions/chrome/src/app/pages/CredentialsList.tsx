@@ -56,7 +56,7 @@ const CredentialsList: React.FC = () => {
         <ReloadButton onClick={onRefresh} />
       </div>
       {credentials.length === 0 ? (
-        <div className="text-gray-500 dark:text-gray-400 space-y-2">
+        <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-10">
           <p className="text-sm">
             Welcome to AliasVault!
           </p>

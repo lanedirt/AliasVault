@@ -45,7 +45,7 @@ export default defineConfig({
   },
   build: {
     watch: process.env.NODE_ENV === 'development' ? {
-      include: ['src/**', 'manifest.json'],
+      include: ['src/**', 'manifest.json', 'contentScript.ts', 'background.ts'],
     } : null
   }
 });
