@@ -647,7 +647,7 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
   return elements;
 }
 
-const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
+export const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
 
 /**
  * Check if auto-popup is disabled for current site

@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
    * Handle settings.
    */
   const handleSettings = () : void => {
-    navigate('/settings');
+    navigate('/auth-settings');
   };
 
   return (

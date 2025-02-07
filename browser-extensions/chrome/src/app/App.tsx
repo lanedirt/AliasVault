@@ -5,7 +5,7 @@ import { useDb } from './context/DbContext';
 import { useMinDurationLoading } from './hooks/useMinDurationLoading';
 import Header from './components/Layout/Header';
 import BottomNav from './components/Layout/BottomNav';
-import Settings from './pages/Settings';
+import AuthSettings from './pages/AuthSettings';
 import CredentialsList from './pages/CredentialsList';
 import EmailsList from './pages/EmailsList';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -13,6 +13,7 @@ import Home from './pages/Home';
 import './style.css';
 import CredentialDetails from './pages/CredentialDetails';
 import EmailDetails from './pages/EmailDetails';
+import Settings from './pages/Settings';
 
 /**
  * Route configuration.
@@ -31,17 +32,17 @@ const App: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [currentTab, setCurrentTab] = useState<'credentials' | 'emails'>('credentials');
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
 
   // Add these route configurations
   const routes: RouteConfig[] = [
     { path: '/', element: <Home />, showBackButton: false },
-    { path: '/settings', element: <Settings />, showBackButton: true, title: 'Settings' },
+    { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
     { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential details' },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
+    { path: '/settings', element: <Settings />, showBackButton: true, title: 'Settings' },
   ];
 
   /**
@@ -94,10 +95,7 @@ const App: React.FC = () => {
           </div>
         </main>
 
-        <BottomNav
-          currentTab={currentTab}
-          setCurrentTab={setCurrentTab}
-        />
+        <BottomNav />
       </div>
     </Router>
   );

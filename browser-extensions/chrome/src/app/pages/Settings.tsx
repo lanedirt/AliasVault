@@ -1,123 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { DISABLED_SITES_KEY } from '../../contentScript/Popup';
 
-type ApiOption = {
-  label: string;
-  value: string;
-};
+interface PopupSettings {
+  disabledUrls: string[];
+  currentUrl: string;
+  isEnabled: boolean;
+}
 
-const DEFAULT_OPTIONS: ApiOption[] = [
-  { label: 'Aliasvault.net', value: 'https://app.aliasvault.net/api' },
-  { label: 'Self-hosted', value: 'custom' }
-];
-
-/**
- * Settings page
- */
 const Settings: React.FC = () => {
-  const [selectedOption, setSelectedOption] = useState<string>('');
-  const [customUrl, setCustomUrl] = useState<string>('');
-  const [customClientUrl, setCustomClientUrl] = useState<string>('');
+  const [settings, setSettings] = useState<PopupSettings>({
+    disabledUrls: [],
+    currentUrl: '',
+    isEnabled: true
+  });
 
   useEffect(() => {
-    // Load saved URLs from storage
-    chrome.storage.local.get(['apiUrl', 'clientUrl'], (result) => {
-      const savedUrl = result.apiUrl;
-      const savedClientUrl = result.clientUrl;
-      const matchingOption = DEFAULT_OPTIONS.find(opt => opt.value === savedUrl);
-      if (matchingOption) {
-        setSelectedOption(matchingOption.value);
-      } else if (savedUrl) {
-        setSelectedOption('custom');
-        setCustomUrl(savedUrl);
-        setCustomClientUrl(savedClientUrl || '');
-      } else {
-        setSelectedOption(DEFAULT_OPTIONS[0].value);
-      }
-    });
+    loadSettings();
   }, []);
 
-  /**
-   * Handle option change
-   */
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) : void => {
-    const value = e.target.value;
-    setSelectedOption(value);
-    if (value !== 'custom') {
-      chrome.storage.local.set({
-        apiUrl: '',
-        clientUrl: '',
+  const getCurrentTab = async () => {
+    const queryOptions = { active: true, currentWindow: true };
+    const [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+  };
+
+  const loadSettings = async () => {
+    const tab = await getCurrentTab();
+    const currentUrl = new URL(tab.url || '').hostname;
+
+    // Load disabled URLs from chrome.storage.local
+    chrome.storage.local.get([DISABLED_SITES_KEY], (result) => {
+      const disabledUrls = result[DISABLED_SITES_KEY] || [];
+      setSettings({
+        disabledUrls,
+        currentUrl,
+        isEnabled: !disabledUrls.includes(currentUrl)
       });
+    });
+  };
+
+  const toggleCurrentSite = async () => {
+    const { currentUrl, disabledUrls, isEnabled } = settings;
+    let newDisabledUrls = [...disabledUrls];
+
+    if (isEnabled) {
+      newDisabledUrls.push(currentUrl);
+    } else {
+      newDisabledUrls = newDisabledUrls.filter(url => url !== currentUrl);
     }
+
+    const storageData = { [DISABLED_SITES_KEY]: newDisabledUrls };
+    await chrome.storage.local.set(storageData);
+
+    setSettings(prev => ({
+      ...prev,
+      disabledUrls: newDisabledUrls,
+      isEnabled: !isEnabled
+    }));
   };
 
-  /**
-   * Handle custom API URL change
-   */
-  const handleCustomUrlChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
-    const value = e.target.value;
-    setCustomUrl(value);
-    chrome.storage.local.set({ apiUrl: value });
-  };
+  const resetSettings = async () => {
+    // Fix: Use DISABLED_SITES_KEY as the key name here too
+    const storageData = { [DISABLED_SITES_KEY]: [] };
+    await chrome.storage.local.set(storageData);
 
-  /**
-   * Handle custom client URL change
-   * @param e
-   */
-  const handleCustomClientUrlChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
-    const value = e.target.value;
-    setCustomClientUrl(value);
-    chrome.storage.local.set({ clientUrl: value });
+    setSettings(prev => ({
+      ...prev,
+      disabledUrls: [],
+      isEnabled: true
+    }));
   };
 
   return (
-    <div className="p-4">
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          API Connection
-        </label>
-        <select
-          value={selectedOption}
-          onChange={handleOptionChange}
-          className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-        >
-          {DEFAULT_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+    <div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Popup Settings</h2>
       </div>
 
-      {selectedOption === 'custom' && (
-        <>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Custom client URL
-            </label>
-            <input
-              id="custom-client-url"
-              type="text"
-              value={customClientUrl}
-              onChange={handleCustomClientUrlChange}
-              placeholder="https://my-aliasvault-instance.com"
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-            />
+      <div className="space-y-4">
+        <div>
+        <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-4">
+          <p className="text-sm">
+            You can enable or disable the autofill popup per site.
+          </p>
+        </div>
+          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{settings.currentUrl}</p>
+              <p className={`text-sm ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+                Popup is {settings.isEnabled ? 'enabled' : 'disabled'} for this site
+              </p>
+            </div>
+            <button
+              onClick={toggleCurrentSite}
+              className={`px-4 py-2 rounded-md ${
+                settings.isEnabled
+                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                  : 'bg-green-500 hover:bg-green-600 text-white'
+              }`}
+            >
+              {settings.isEnabled ? 'Disable' : 'Enable'}
+            </button>
           </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Custom API URL
-            </label>
-            <input
-              id="custom-api-url"
-              type="text"
-              value={customUrl}
-              onChange={handleCustomUrlChange}
-              placeholder="https://my-aliasvault-instance.com/api"
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-            />
-          </div>
-        </>
-      )}
+        </div>
+        <button
+          onClick={resetSettings}
+          className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-900 dark:text-white"
+        >
+          (Re)enable popup for all sites
+        </button>
+      </div>
     </div>
   );
 };
