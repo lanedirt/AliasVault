@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useDb } from '../context/DbContext';
 import { useWebApi } from '../context/WebApiContext';
@@ -27,9 +27,21 @@ const Login: React.FC = () => {
   const [passwordHashBase64, setPasswordHashBase64] = useState<string | null>(null);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [clientUrl, setClientUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
+
+  useEffect(() => {
+    /**
+     * Load the client URL from the storage.
+     */
+    const loadClientUrl = async () : Promise<void> => {
+      const setting = await chrome.storage.local.get(['clientUrl']);
+      setClientUrl(setting.clientUrl);
+    };
+    loadClientUrl();
+  }, []);
 
   /**
    * Handle submit
@@ -193,9 +205,28 @@ const Login: React.FC = () => {
               required
             />
           </div>
-          <div className="flex w-full">
+          <div className="flex flex-col w-full space-y-2">
             <Button type="submit">
               Verify
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                // Reset the form.
+                setCredentials({
+                  username: '',
+                  password: ''
+                });
+                setTwoFactorRequired(false);
+                setTwoFactorCode('');
+                setPasswordHashString(null);
+                setPasswordHashBase64(null);
+                setLoginResponse(null);
+                setError(null);
+              }}
+              variant="secondary"
+            >
+              Cancel
             </Button>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
@@ -214,22 +245,23 @@ const Login: React.FC = () => {
             {error}
           </div>
         )}
+        <h2 className="text-xl font-bold mb-4 dark:text-gray-200">Login to AliasVault</h2>
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="username">
-            Username
+            Username or email
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
             id="username"
             type="text"
             name="username"
-            placeholder="Enter your username"
+            placeholder="name / name@company.com"
             value={credentials.username}
             onChange={handleChange}
             required
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
             Password
           </label>
@@ -261,6 +293,17 @@ const Login: React.FC = () => {
           </Button>
         </div>
       </form>
+      <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+        No account yet?{' '}
+        <a
+          href={clientUrl ?? ''}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500"
+        >
+          Create new vault
+        </a>
+      </div>
     </div>
   );
 };
