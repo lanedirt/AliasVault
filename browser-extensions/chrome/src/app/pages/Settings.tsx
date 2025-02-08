@@ -98,7 +98,7 @@ const Settings: React.FC = () => {
         <div>
           <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-4">
             <p className="text-sm">
-            You can enable or disable the autofill popup per site.
+            You can disable the autofill popup by either dismissing the popup or enabling/disabling via the button below.
             </p>
           </div>
           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
