@@ -9,6 +9,7 @@ import SrpUtility from '../utils/SrpUtility';
 import { useLoading } from '../context/LoadingContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import { LoginResponse } from '../../shared/types/webapi/Login';
+import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Login page
@@ -109,6 +110,13 @@ const Login: React.FC = () => {
         return;
       }
 
+      // Check if vault version is supported.
+      if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
+        setError('Your vault is outdated. Please login via the web client to update your vault.');
+        hideLoading();
+        return;
+      }
+
       // All is good. Store auth info which makes the user logged in.
       await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
@@ -164,6 +172,12 @@ const Login: React.FC = () => {
         return;
       }
 
+      // Check if vault version is supported.
+      if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
+        setError('Your vault is outdated. Please login via the web client to update your vault.');
+        hideLoading();
+        return;
+      }
       // All is good. Store auth info which makes the user logged in.
       await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
