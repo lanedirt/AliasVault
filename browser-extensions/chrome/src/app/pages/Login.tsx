@@ -45,6 +45,29 @@ const Login: React.FC = () => {
   }, []);
 
   /**
+   * Validates the vault response and returns an error message if validation fails
+   */
+  const validateVaultResponse = (vaultResponseJson: VaultResponse): string | null => {
+    /**
+     * Status 0 = OK, vault is ready.
+     * Status 1 = Merge required, which only the web client supports.
+     */
+    if (vaultResponseJson.status !== 0) {
+      return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
+    }
+
+    if (!vaultResponseJson.vault?.blob) {
+      return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
+    }
+
+    if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
+      return 'Your vault is outdated. Please login via the web client to update your vault.';
+    }
+
+    return null;
+  };
+
+  /**
    * Handle submit
    */
   const handleSubmit = async (e: React.FormEvent) : Promise<void> => {
@@ -103,16 +126,9 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      // Return error if vault blob does not exist yet.
-      if (!vaultResponseJson.vault?.blob) {
-        setError('Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.');
-        hideLoading();
-        return;
-      }
-
-      // Check if vault version is supported.
-      if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
-        setError('Your vault is outdated. Please login via the web client to update your vault.');
+      const vaultError = validateVaultResponse(vaultResponseJson);
+      if (vaultError) {
+        setError(vaultError);
         hideLoading();
         return;
       }
@@ -165,19 +181,13 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      // Check if vault blob exists
-      if (!vaultResponseJson.vault?.blob) {
-        setError('Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.');
+      const vaultError = validateVaultResponse(vaultResponseJson);
+      if (vaultError) {
+        setError(vaultError);
         hideLoading();
         return;
       }
 
-      // Check if vault version is supported.
-      if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
-        setError('Your vault is outdated. Please login via the web client to update your vault.');
-        hideLoading();
-        return;
-      }
       // All is good. Store auth info which makes the user logged in.
       await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
