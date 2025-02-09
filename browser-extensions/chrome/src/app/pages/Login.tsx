@@ -92,18 +92,25 @@ const Login: React.FC = () => {
         return;
       }
 
-      // 4. TODO: handle recovery code if required (or link to main client instead)
-
-      // Store access and refresh token using the context
-      if (validationResponse.token) {
-        // Store auth info
-        await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
-      } else {
+      // Check if token was returned.
+      if (!validationResponse.token) {
         throw new Error('Login failed -- no token returned');
       }
 
-      // Make another API call trying to get latest vault
-      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+      // Try to get latest vault manually providing auth token.
+      const vaultResponseJson = await webApi.fetch<VaultResponse>('Vault', { method: 'GET', headers: {
+        'Authorization': `Bearer ${validationResponse.token.token}`
+      } });
+
+      // Return error if vault blob does not exist yet.
+      if (!vaultResponseJson.vault?.blob) {
+        setError('Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.');
+        hideLoading();
+        return;
+      }
+
+      // All is good. Store auth info which makes the user logged in.
+      await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
@@ -140,16 +147,25 @@ const Login: React.FC = () => {
         parseInt(twoFactorCode)
       );
 
-      // Store access and refresh token using the context
-      if (validationResponse.token) {
-        // Store auth info
-        await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
-      } else {
+      // Check if token was returned.
+      if (!validationResponse.token) {
         throw new Error('Login failed -- no token returned');
       }
 
-      // Make another API call trying to get latest vault
-      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+      // Try to get latest vault manually providing auth token.
+      const vaultResponseJson = await webApi.fetch<VaultResponse>('Vault', { method: 'GET', headers: {
+        'Authorization': `Bearer ${validationResponse.token.token}`
+      } });
+
+      // Check if vault blob exists
+      if (!vaultResponseJson.vault?.blob) {
+        setError('Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.');
+        hideLoading();
+        return;
+      }
+
+      // All is good. Store auth info which makes the user logged in.
+      await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
