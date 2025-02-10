@@ -33,6 +33,16 @@ public static class AppInfo
     public const int VersionPatch = 1;
 
     /// <summary>
+    /// List of minimum supported client versions. If client version is lower than the minimum supported version,
+    /// the client will be shown a message to update to the minimum supported version.
+    /// </summary>
+    public static readonly Dictionary<string, string> MinimumClientVersions = new()
+    {
+        { "chrome", "0.12.0" },
+        { "web", "0.12.0" },
+    };
+
+    /// <summary>
     /// Gets the build number, typically used in CI/CD pipelines.
     /// Can be overridden at build time.
     /// </summary>

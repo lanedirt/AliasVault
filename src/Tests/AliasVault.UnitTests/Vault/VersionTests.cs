@@ -46,4 +46,26 @@ public class VersionTests
         var version2 = "1.0.1";
         Assert.Throws<ArgumentException>(() => VersionHelper.IsVersionOlder(version1, version2));
     }
+
+    /// <summary>
+    /// Test the version comparison throws an exception for illegal version strings.
+    /// </summary>
+    [Test]
+    public void VersionEqualOrNewerComparisonExceptionTest()
+    {
+        var version1 = "1.2.0.5.1";
+        var version2 = "1.0.1";
+        Assert.Throws<ArgumentException>(() => VersionHelper.IsVersionOlder(version1, version2));
+    }
+
+    /// <summary>
+    /// Test the version comparison returns true for equal versions.
+    /// </summary>
+    [Test]
+    public void VersionEqualComparisonTest()
+    {
+        var version1 = "1.2.0";
+        var version2 = "1.1.0";
+        Assert.That(VersionHelper.IsVersionEqualOrNewer(version1, version2), Is.True);
+    }
 }

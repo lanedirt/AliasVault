@@ -15,6 +15,7 @@ using AliasServerDb;
 using AliasVault.Api.Helpers;
 using AliasVault.Auth;
 using AliasVault.Cryptography.Client;
+using AliasVault.Shared.Core;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi;
 using AliasVault.Shared.Models.WebApi.Auth;
@@ -78,14 +79,60 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
     /// <summary>
-    /// Status endpoint called by client to check if user is still authenticated.
+    /// Status endpoint called by client to check if user is still authenticated and get sync status.
     /// </summary>
-    /// <returns>Returns OK if valid authentication is provided, otherwise it will return 401 unauthorized.</returns>
+    /// <param name="clientHeader">Client header.</param>
+    /// <returns>Returns status response if valid authentication is provided, otherwise it will return 401 unauthorized.</returns>
     [Authorize]
     [HttpGet("status")]
-    public IActionResult Status()
+    public async Task<IActionResult> Status([FromHeader(Name = "X-AliasVault-Client")] string? clientHeader)
     {
-        return Ok();
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Get latest vault revision number
+        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).FirstOrDefault();
+        var latestRevision = latestVault?.RevisionNumber ?? 0;
+
+        // Check client version compatibility if header is provided
+        var isSupported = false;
+        if (!string.IsNullOrEmpty(clientHeader))
+        {
+            // Client header format should be "{platform}-{version}" e.g. "chrome-1.4.0"
+            var parts = clientHeader.Split('-');
+            if (parts.Length == 2)
+            {
+                var platform = parts[0].ToLowerInvariant();
+                var clientVersion = parts[1];
+
+                if (AppInfo.MinimumClientVersions.TryGetValue(platform, out var minimumVersion))
+                {
+                    if (VersionHelper.IsVersionEqualOrNewer(clientVersion, minimumVersion))
+                    {
+                        isSupported = true;
+                    }
+                }
+                else
+                {
+                    // Unknown platform
+                    isSupported = false;
+                }
+            }
+            else
+            {
+                // Invalid header format
+                isSupported = false;
+            }
+        }
+
+        return Ok(new StatusResponse
+        {
+            Supported = isSupported,
+            VaultRevision = latestRevision,
+        });
     }
 
     /// <summary>
