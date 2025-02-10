@@ -13,4 +13,5 @@ export type Vault = {
   updatedAt: string;
   username: string;
   version: string;
+  client: string;
 }

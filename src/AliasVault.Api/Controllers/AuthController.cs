@@ -383,6 +383,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             Verifier = model.Verifier,
             EncryptionType = model.EncryptionType,
             EncryptionSettings = model.EncryptionSettings,
+            FileSize = 0,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         });

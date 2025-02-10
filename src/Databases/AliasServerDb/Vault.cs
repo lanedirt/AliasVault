@@ -99,6 +99,12 @@ public class Vault
     public required string EncryptionSettings { get; set; }
 
     /// <summary>
+    /// Gets or sets the client that created the vault.
+    /// </summary>
+    [StringLength(255)]
+    public string? Client { get; set; }
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

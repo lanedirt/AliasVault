@@ -9,7 +9,6 @@
 @inject DbService DbService
 @inject Config Config
 @inject EmailService EmailService
-@using System.Timers
 @using AliasVault.Shared.Core
 @inject ILogger<RecentEmails> Logger
 @implements IAsyncDisposable
@@ -246,6 +245,7 @@
     {
         IsLoading = true;
         StateHasChanged();
+        CloseEmailModal();
         await LoadRecentEmailsAsync();
         IsLoading = false;
         StateHasChanged();

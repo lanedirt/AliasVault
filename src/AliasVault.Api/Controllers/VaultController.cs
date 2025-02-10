@@ -192,9 +192,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     /// Save a new vault to the database for the current user.
     /// </summary>
     /// <param name="model">Vault model.</param>
+    /// <param name="clientHeader">Client header.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("")]
-    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model)
+    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model, [FromHeader(Name = "X-AliasVault-Client")] string? clientHeader)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -246,6 +247,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             Verifier = latestVault.Verifier,
             EncryptionType = latestVault.EncryptionType,
             EncryptionSettings = latestVault.EncryptionSettings,
+            Client = clientHeader,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -276,9 +278,12 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     /// Save a new vault to the database based on a new encryption password for the current user.
     /// </summary>
     /// <param name="model">Vault model.</param>
+    /// <param name="clientHeader">Client header.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("change-password")]
-    public async Task<IActionResult> UpdateChangePassword([FromBody] VaultPasswordChangeRequest model)
+    public async Task<IActionResult> UpdateChangePassword(
+        [FromBody] VaultPasswordChangeRequest model,
+        [FromHeader(Name = "X-AliasVault-Client")] string? clientHeader)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -328,6 +333,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             Verifier = model.NewPasswordVerifier,
             EncryptionType = Defaults.EncryptionType,
             EncryptionSettings = Defaults.EncryptionSettings,
+            Client = clientHeader,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -376,6 +382,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 Verifier = x.Verifier,
                 EncryptionType = x.EncryptionType,
                 EncryptionSettings = x.EncryptionSettings,
+                Client = x.Client,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
             })
