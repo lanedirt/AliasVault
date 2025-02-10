@@ -45,6 +45,13 @@ const Unlock: React.FC = () => {
       // Make API call to get latest vault
       const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
 
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
+      if (vaultError) {
+        setError(vaultError);
+        hideLoading();
+        return;
+      }
+
       // Get the derived key as base64 string required for decryption.
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 

@@ -1,3 +1,6 @@
+import { AppInfo } from "./AppInfo";
+import { VaultResponse } from "./types/webapi/VaultResponse";
+
 type RequestInit = globalThis.RequestInit;
 
 /**
@@ -183,6 +186,29 @@ export class WebApiService {
       token: await this.getAccessToken(),
       refreshToken: refreshToken,
     }, false);
+  }
+
+  /**
+   * Validates the vault response and returns an error message if validation fails
+   */
+  public validateVaultResponse(vaultResponseJson: VaultResponse): string | null {
+    /**
+     * Status 0 = OK, vault is ready.
+     * Status 1 = Merge required, which only the web client supports.
+     */
+    if (vaultResponseJson.status !== 0) {
+      return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
+    }
+
+    if (!vaultResponseJson.vault?.blob) {
+      return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
+    }
+
+    if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
+      return 'Your vault is outdated. Please login via the web client to update your vault.';
+    }
+
+    return null;
   }
 
   /**

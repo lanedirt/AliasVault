@@ -5,7 +5,9 @@ type AuthContextType = {
   isInitialized: boolean;
   username: string | null;
   login: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (errorMessage?: string) => Promise<void>;
+  globalMessage: string | null;
+  clearGlobalMessage: () => void;
 }
 
 /**
@@ -20,9 +22,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [globalMessage, setGlobalMessage] = useState<string | null>(null);
 
   /**
-   * Check for tokens in chrome storage on initial load
+   * Check for tokens in chrome storage on initial load.
    */
   useEffect(() => {
     /**
@@ -41,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Login
+   * Login.
    */
   const login = async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await chrome.storage.local.set({
@@ -55,17 +58,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   /**
-   * Logout
+   * Logout.
    */
-  const logout = async () : Promise<void> => {
+  const logout = async (errorMessage?: string) : Promise<void> => {
     await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
     await chrome.storage.local.remove(['username', 'accessToken', 'refreshToken']);
+
+    // Set local storage global message that will be shown on the login page.
+    if (errorMessage) {
+      setGlobalMessage(errorMessage);
+    }
+
     setUsername(null);
     setIsLoggedIn(false);
   };
 
+  /**
+   * Clear global message (called after displaying the message).
+   */
+  const clearGlobalMessage = () : void => {
+    setGlobalMessage(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isInitialized, username, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, isInitialized, username, login, logout, globalMessage, clearGlobalMessage }}>
       {children}
     </AuthContext.Provider>
   );

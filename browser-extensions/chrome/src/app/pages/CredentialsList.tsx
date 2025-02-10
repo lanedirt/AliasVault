@@ -7,6 +7,7 @@ import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
+import { useAuth } from '../context/AuthContext';
 /**
  * Credentials list page.
  */
@@ -16,6 +17,7 @@ const CredentialsList: React.FC = () => {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const navigate = useNavigate();
   const { showLoading, hideLoading } = useLoading();
+  const authContext = useAuth();
 
   useEffect(() => {
     if (!dbContext?.sqliteClient) return;
@@ -36,6 +38,13 @@ const CredentialsList: React.FC = () => {
     try {
       // Make API call to get latest vault
       const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
+      if (vaultError) {
+        authContext.logout(vaultError);
+        hideLoading();
+        return;
+      }
 
       // Get derived key from background worker
       const passwordHashBase64 = await chrome.runtime.sendMessage({ type: 'GET_DERIVED_KEY' });

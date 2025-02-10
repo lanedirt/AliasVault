@@ -14,6 +14,7 @@ import './style.css';
 import CredentialDetails from './pages/CredentialDetails';
 import EmailDetails from './pages/EmailDetails';
 import Settings from './pages/Settings';
+import GlobalStateChangeHandler from './components/GlobalStateChangeHandler';
 
 /**
  * Route configuration.
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   const dbContext = useDb();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const [message, setMessage] = useState<string | null>(null);
 
   // Add these route configurations
   const routes: RouteConfig[] = [
@@ -54,6 +56,16 @@ const App: React.FC = () => {
     }
   }, [authContext.isInitialized, dbContext.dbInitialized, setIsLoading]);
 
+  /**
+   * Print global message if it exists.
+   */
+  useEffect(() => {
+    if (authContext.globalMessage) {
+      setMessage(authContext.globalMessage);
+      authContext.clearGlobalMessage();
+    }
+  }, [authContext, authContext.globalMessage]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
@@ -69,6 +81,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
+        <GlobalStateChangeHandler />
         <Header
           toggleUserMenu={() => setIsUserMenuOpen(!isUserMenuOpen)}
           isUserMenuOpen={isUserMenuOpen}
@@ -83,6 +96,9 @@ const App: React.FC = () => {
           }}
         >
           <div className="p-4 dark:bg-gray-900 mb-16">
+            {message && (
+              <p className="text-red-500 mb-4">{message}</p>
+            )}
             <Routes>
               {routes.map((route) => (
                 <Route

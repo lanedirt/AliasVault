@@ -9,7 +9,6 @@ import SrpUtility from '../utils/SrpUtility';
 import { useLoading } from '../context/LoadingContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import { LoginResponse } from '../../shared/types/webapi/Login';
-import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Login page
@@ -43,29 +42,6 @@ const Login: React.FC = () => {
     };
     loadClientUrl();
   }, []);
-
-  /**
-   * Validates the vault response and returns an error message if validation fails
-   */
-  const validateVaultResponse = (vaultResponseJson: VaultResponse): string | null => {
-    /**
-     * Status 0 = OK, vault is ready.
-     * Status 1 = Merge required, which only the web client supports.
-     */
-    if (vaultResponseJson.status !== 0) {
-      return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
-    }
-
-    if (!vaultResponseJson.vault?.blob) {
-      return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
-    }
-
-    if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
-      return 'Your vault is outdated. Please login via the web client to update your vault.';
-    }
-
-    return null;
-  };
 
   /**
    * Handle submit
@@ -126,7 +102,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = validateVaultResponse(vaultResponseJson);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
@@ -181,7 +157,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = validateVaultResponse(vaultResponseJson);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
