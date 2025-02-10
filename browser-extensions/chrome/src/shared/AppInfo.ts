@@ -8,8 +8,10 @@ export class AppInfo {
   // Minimum supported AliasVault client vault version.
   public static readonly MIN_VAULT_VERSION = '1.4.1';
 
-  // The client name to use in the X-AliasVault-Client header.
-  // TODO: make this configurable when adding other browser support (e.g. Firefox).
+  /*
+   * The client name to use in the X-AliasVault-Client header.
+   * TODO: make this configurable when adding other browser support (e.g. Firefox).
+   */
   public static readonly CLIENT_NAME = 'chrome';
 
   /**

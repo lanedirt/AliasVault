@@ -59,7 +59,7 @@ builder.Services.AddScoped(sp =>
     httpClient.BaseAddress = new Uri(baseUrl);
 
     // Add client header.
-    httpClient.DefaultRequestHeaders.Add("X-AliasVault-Client", "client-" + AppInfo.GetFullVersion());
+    httpClient.DefaultRequestHeaders.Add("X-AliasVault-Client", "web-" + AppInfo.GetFullVersion());
 
     return httpClient;
 });

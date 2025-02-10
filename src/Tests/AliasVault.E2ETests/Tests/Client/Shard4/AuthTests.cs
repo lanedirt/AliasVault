@@ -236,7 +236,7 @@ public class AuthTests : ClientPlaywrightTest
         Assert.Multiple(() =>
         {
             Assert.That(authLogEntry.Client, Is.Not.Null, "Auth log client header is null.");
-            Assert.That(authLogEntry.Client, Does.Contain("client-" + currentVersion), "Auth log client header does not contain expected value.");
+            Assert.That(authLogEntry.Client, Does.Contain("web-" + currentVersion), "Auth log client header does not contain expected value.");
         });
     }
 }
