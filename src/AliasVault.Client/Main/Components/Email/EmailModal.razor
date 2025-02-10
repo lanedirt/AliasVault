@@ -148,7 +148,7 @@
         {
             var client = HttpClientFactory.CreateClient("EmailClient");
             var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
-            request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+            request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
             request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
             var response = await client.SendAsync(request);
@@ -238,7 +238,7 @@
             {
                 var client = HttpClientFactory.CreateClient("EmailClient");
                 var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
-                request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+                request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
                 request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
                 var response = await client.SendAsync(request);

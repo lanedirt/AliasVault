@@ -309,14 +309,18 @@
         // the Authorization header. We don't want to send the Authorization header to the external email API.
         var client = HttpClientFactory.CreateClient("EmailClient");
         var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
-        request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+        request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
         request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             var mailbox = await response.Content.ReadFromJsonAsync<MailboxApiModel>();
-            await UpdateMailboxEmails(mailbox);
+            if (mailbox != null)
+            {
+                // Show maximum of 10 recent emails.
+                MailboxEmails = mailbox.Mails.Take(10).ToList();
+            }
         }
     }
 
@@ -327,7 +331,7 @@
     {
         var client = HttpClientFactory.CreateClient("EmailClient");
         var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
-        request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+        request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
         request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
         var response = await client.SendAsync(request);
