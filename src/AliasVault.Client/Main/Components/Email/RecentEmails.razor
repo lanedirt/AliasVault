@@ -10,6 +10,7 @@
 @inject Config Config
 @inject EmailService EmailService
 @using System.Timers
+@using AliasVault.Shared.Core
 @inject ILogger<RecentEmails> Logger
 @implements IAsyncDisposable
 
@@ -316,12 +317,6 @@
         {
             var mailbox = await response.Content.ReadFromJsonAsync<MailboxApiModel>();
             await UpdateMailboxEmails(mailbox);
-        }
-
-        if (mailbox?.Mails != null)
-        {
-            // Show maximum of 10 recent emails.
-            MailboxEmails = mailbox.Mails.Take(10).ToList();
         }
     }
 

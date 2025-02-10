@@ -6,6 +6,7 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject EmailService EmailService
 @inject HttpClient HttpClient
+
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
     <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
         <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh]">
@@ -186,19 +187,16 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-    using AliasVault.Shared.Core;
-
-#line default
-#line hidden
-#nullable disable
-#nullable restore
-#line 2 "/Users/user/Projects/AliasVault2/src/AliasVault.Client/_Imports.razor"
-                    GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+                GlobalNotificationService.AddSuccessMessage($"Email deleted successfully.");
+            }
+            else
+            {
+                GlobalNotificationService.AddErrorMessage($"Failed to delete email.", true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"Failed to delete email: {ex.Message}", true);
         }
     }
 
