@@ -157,4 +157,10 @@ public class AuthLog
     /// Gets or sets a value indicating whether the authentication event is flagged as suspicious activity.
     /// </summary>
     public bool IsSuspiciousActivity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the client application name and version.
+    /// </summary>
+    [MaxLength(100)]
+    public string? Client { get; set; }
 }

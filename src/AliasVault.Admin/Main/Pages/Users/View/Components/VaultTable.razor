@@ -9,6 +9,7 @@
             <SortableTableColumn>@entry.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
             <SortableTableColumn>@Math.Round((double)entry.FileSize / 1024, 1) MB</SortableTableColumn>
             <SortableTableColumn>@entry.Version</SortableTableColumn>
+            <SortableTableColumn>@entry.Client</SortableTableColumn>
             <SortableTableColumn>@entry.RevisionNumber</SortableTableColumn>
             <SortableTableColumn>@entry.CredentialsCount</SortableTableColumn>
             <SortableTableColumn>@entry.EmailClaimsCount</SortableTableColumn>
@@ -56,6 +57,7 @@
         new TableColumn { Title = "Updated", PropertyName = "UpdatedAt" },
         new TableColumn { Title = "Filesize", PropertyName = "FileSize" },
         new TableColumn { Title = "DB version", PropertyName = "Version" },
+        new TableColumn { Title = "Client", PropertyName = "Client" },
         new TableColumn { Title = "Revision", PropertyName = "RevisionNumber" },
         new TableColumn { Title = "Credentials", PropertyName = "CredentialsCount" },
         new TableColumn { Title = "Email Claims", PropertyName = "EmailClaimsCount" },
@@ -83,6 +85,7 @@
             "UpdatedAt" => SortableTable.SortListByProperty(vaults, v => v.UpdatedAt, sortDirection),
             "FileSize" => SortableTable.SortListByProperty(vaults, v => v.FileSize, sortDirection),
             "Version" => SortableTable.SortListByProperty(vaults, v => v.Version, sortDirection),
+            "Client" => SortableTable.SortListByProperty(vaults, v => v.Client, sortDirection),
             "RevisionNumber" => SortableTable.SortListByProperty(vaults, v => v.RevisionNumber, sortDirection),
             "CredentialsCount" => SortableTable.SortListByProperty(vaults, v => v.CredentialsCount, sortDirection),
             "EmailClaimsCount" => SortableTable.SortListByProperty(vaults, v => v.EmailClaimsCount, sortDirection),

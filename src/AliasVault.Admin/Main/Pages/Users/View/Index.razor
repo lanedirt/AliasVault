@@ -178,6 +178,7 @@ else
                 EncryptionSettings = x.EncryptionSettings,
                 CredentialsCount = x.CredentialsCount,
                 EmailClaimsCount = x.EmailClaimsCount,
+                Client = x.Client,
             })
             .OrderBy(x => x.UpdatedAt)
             .ToListAsync();

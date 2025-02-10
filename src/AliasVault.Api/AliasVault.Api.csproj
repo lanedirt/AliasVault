@@ -35,6 +35,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasServerDb\AliasServerDb.csproj" />
       <ProjectReference Include="..\Generators\AliasVault.Generators.Identity\AliasVault.Generators.Identity.csproj" />
+      <ProjectReference Include="..\Shared\AliasVault.Shared.Core\AliasVault.Shared.Core.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared.Server\AliasVault.Shared.Server.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.Auth\AliasVault.Auth.csproj" />

@@ -45,6 +45,11 @@ public class AuthLogModel
     public string UserAgent { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the client application name and version.
+    /// </summary>
+    public string Client { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets a value indicating whether the authentication attempt was successful.
     /// </summary>
     public bool IsSuccess { get; set; }
