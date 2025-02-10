@@ -241,6 +241,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("Client")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Country")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");

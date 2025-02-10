@@ -48,6 +48,7 @@ else
                     <SortableTableColumn IsPrimary="true">@log.Id</SortableTableColumn>
                     <SortableTableColumn>@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
                     <SortableTableColumn>@log.Username</SortableTableColumn>
+                    <SortableTableColumn>@log.Client</SortableTableColumn>
                     <SortableTableColumn>@log.EventType</SortableTableColumn>
                     <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="@log.FailureReason.ToString()" /></SortableTableColumn>
                     <SortableTableColumn>@log.IpAddress</SortableTableColumn>
@@ -62,6 +63,7 @@ else
         new TableColumn { Title = "ID", PropertyName = "Id" },
         new TableColumn { Title = "Time", PropertyName = "Timestamp" },
         new TableColumn { Title = "Username", PropertyName = "Username" },
+        new TableColumn { Title = "Client", PropertyName = "Client" },
         new TableColumn { Title = "Event", PropertyName = "EventType" },
         new TableColumn { Title = "Success", PropertyName = "IsSuccess" },
         new TableColumn { Title = "IP", PropertyName = "IpAddress" },
@@ -174,6 +176,11 @@ else
                 query = SortDirection == SortDirection.Ascending
                     ? query.OrderBy(x => x.Username)
                     : query.OrderByDescending(x => x.Username);
+                break;
+            case "Client":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Client)
+                    : query.OrderByDescending(x => x.Client);
                 break;
             case "EventType":
                 query = SortDirection == SortDirection.Ascending

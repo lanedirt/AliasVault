@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Tests.Client.Shard4;
 
+using AliasVault.Shared.Core;
 using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -226,9 +227,16 @@ public class AuthTests : ClientPlaywrightTest
         var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain(WelcomeMessage), "No index content after logging in.");
 
-        // Check if login has created an auth log entry.
-        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x =>
-            x.EventType == AuthEventType.Login);
+        // Check if login has created an auth log entry and it contains the expected client header value.
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.EventType == AuthEventType.Login);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after login.");
+
+        // Get current app version from settings
+        var currentVersion = AppInfo.GetFullVersion();
+        Assert.Multiple(() =>
+        {
+            Assert.That(authLogEntry.Client, Is.Not.Null, "Auth log client header is null.");
+            Assert.That(authLogEntry.Client, Does.Contain("client-" + currentVersion), "Auth log client header does not contain expected value.");
+        });
     }
 }

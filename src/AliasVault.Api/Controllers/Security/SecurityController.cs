@@ -113,6 +113,7 @@ public class SecurityController(IAliasServerDbContextFactory dbContextFactory, U
                 Username = x.Username,
                 IpAddress = x.IpAddress ?? string.Empty,
                 UserAgent = x.UserAgent ?? string.Empty,
+                Client = x.Client ?? string.Empty,
                 IsSuccess = x.IsSuccess,
             })
             .ToListAsync();
