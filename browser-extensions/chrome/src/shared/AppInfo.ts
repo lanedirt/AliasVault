@@ -2,11 +2,15 @@
  * AppInfo class which contains information about the application version.
  */
 export class AppInfo {
-  // Current extension version - should be updated with each release
-  public static readonly VERSION = '0.10.0';
+  // Current extension version - should be updated with each release.
+  public static readonly VERSION = '0.12.0';
 
-  // Minimum supported AliasVault client vault version
+  // Minimum supported AliasVault client vault version.
   public static readonly MIN_VAULT_VERSION = '1.4.1';
+
+  // The client name to use in the X-AliasVault-Client header.
+  // TODO: make this configurable when adding other browser support (e.g. Firefox).
+  public static readonly CLIENT_NAME = 'chrome';
 
   /**
    * Prevent instantiation of this utility class

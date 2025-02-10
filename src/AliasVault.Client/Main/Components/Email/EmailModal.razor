@@ -1,11 +1,11 @@
 ﻿@using AliasVault.Shared.Models.Spamok
 @using AliasVault.Shared.Utilities
+@using AliasVault.Shared.Core;
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
 @inject EmailService EmailService
 @inject HttpClient HttpClient
-
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
     <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
         <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh]">
@@ -146,7 +146,12 @@
         try
         {
             var client = HttpClientFactory.CreateClient("EmailClient");
-            var response = await client.DeleteAsync($"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
+            request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+            request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
+
+            var response = await client.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
@@ -181,13 +186,14 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
-                await Close();
-            }
-            else
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+    using AliasVault.Shared.Core;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 2 "/Users/user/Projects/AliasVault2/src/AliasVault.Client/_Imports.razor"
+                    GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
             }
         }
         catch (Exception ex)
@@ -233,8 +239,11 @@
             if (IsSpamOk)
             {
                 var client = HttpClientFactory.CreateClient("EmailClient");
-                var response = await client.GetAsync($"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
+                var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
+                request.Headers.Add("X-Asdasd-Platform-Id", "av-client");
+                request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
+                var response = await client.SendAsync(request);
                 if (response.IsSuccessStatusCode)
                 {
                     var bytes = await response.Content.ReadAsByteArrayAsync();

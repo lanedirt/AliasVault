@@ -55,6 +55,9 @@ export class WebApiService {
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
+    // Add client version header
+    headers.set('X-AliasVault-Client', `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`);
+
     const requestOptions: RequestInit = {
       ...options,
       headers,

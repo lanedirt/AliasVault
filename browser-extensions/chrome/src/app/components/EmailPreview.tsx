@@ -4,6 +4,7 @@ import { useDb } from '../context/DbContext';
 import EncryptionUtility from '../../shared/EncryptionUtility';
 import { MailboxEmail } from '../../shared/types/webapi/MailboxEmail';
 import { Link } from 'react-router-dom';
+import { AppInfo } from '../../shared/AppInfo';
 
 type EmailPreviewProps = {
   email: string;
@@ -39,9 +40,14 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
         setIsSpamOk(isPublic);
 
         if (isPublic) {
-          // For public domains (SpamOK), use their API directly
+          // For public domains (SpamOK), use the SpamOK API directly
           const emailPrefix = email.split('@')[0];
-          const response = await fetch(`https://api.spamok.com/v2/EmailBox/${emailPrefix}`);
+          const response = await fetch(`https://api.spamok.com/v2/EmailBox/${emailPrefix}`, {
+            headers: {
+              'X-Asdasd-Platform-Id': 'av-chrome',
+              'X-Asdasd-Platform-Version': AppInfo.VERSION,
+            }
+          });
           const data = await response.json();
 
           // Only show the latest 2 emails to save space in UI
