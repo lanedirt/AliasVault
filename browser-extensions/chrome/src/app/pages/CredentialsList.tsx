@@ -8,6 +8,8 @@ import { useWebApi } from '../context/WebApiContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 import { useAuth } from '../context/AuthContext';
+import { StatusResponse } from '../../shared/types/webapi/StatusResponse';
+
 /**
  * Credentials list page.
  */
@@ -20,21 +22,40 @@ const CredentialsList: React.FC = () => {
   const authContext = useAuth();
 
   useEffect(() => {
-    if (!dbContext?.sqliteClient) return;
+    /**
+     * Check if the extension is (still) supported by the API and if the local vault is up to date.
+     */
+    const checkStatus = async (): Promise<void> => {
+      if (!dbContext?.sqliteClient) return;
 
-    try {
-      const results = dbContext.sqliteClient.getAllCredentials();
-      setCredentials(results);
-    } catch (err) {
-      console.error('Error loading credentials:', err);
-    }
-  }, [dbContext.sqliteClient]);
+      const statusResponse = await webApi.get('Auth/status') as StatusResponse;
+      if (!statusResponse.supported) {
+        authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
+        return;
+      }
+
+      if (statusResponse.vaultRevision > dbContext.vaultRevision) {
+        await onRefresh();
+      }
+
+      // Load credentials
+      try {
+        const results = dbContext.sqliteClient.getAllCredentials();
+        setCredentials(results);
+      } catch (err) {
+        console.error('Error loading credentials:', err);
+      }
+    };
+
+    checkStatus();
+  });
 
   /**
    * Retrieve latest vault and refresh the page.
    */
   const onRefresh = async () : Promise<void> => {
-    showLoading();
+    if (!dbContext?.sqliteClient) return;
+
     try {
       // Make API call to get latest vault
       const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
@@ -51,18 +72,30 @@ const CredentialsList: React.FC = () => {
 
       // Initialize the SQLite context again with the newly retrieved decrypted blob
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+
+      // Load credentials
+      try {
+        const results = dbContext.sqliteClient.getAllCredentials();
+        setCredentials(results);
+      } catch (err) {
+        console.error('Error loading credentials:', err);
+      }
     } catch (err) {
       console.error('Refresh error:', err);
-    } finally {
-      hideLoading();
     }
+  };
+
+  const onManualRefresh = async (): Promise<void> => {
+    showLoading();
+    await onRefresh();
+    hideLoading();
   };
 
   return (
     <div>
       <div className="flex justify-between items-center">
         <h2 className="text-gray-900 dark:text-white text-xl mb-4">Credentials</h2>
-        <ReloadButton onClick={onRefresh} />
+        <ReloadButton onClick={onManualRefresh} />
       </div>
       {credentials.length === 0 ? (
         <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-10">

@@ -8,6 +8,7 @@ type DbContextType = {
   dbAvailable: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
   clearDatabase: () => void;
+  vaultRevision: number;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -37,6 +38,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [, setPublicEmailDomains] = useState<string[]>([]);
 
   /**
+   * Vault revision.
+   */
+  const [vaultRevision, setVaultRevision] = useState(0);
+
+  /**
    * Private email domains.
    */
   const [, setPrivateEmailDomains] = useState<string[]>([]);
@@ -54,9 +60,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
-
     setPublicEmailDomains(vaultResponse.vault.publicEmailDomainList);
     setPrivateEmailDomains(vaultResponse.vault.privateEmailDomainList);
+    setVaultRevision(vaultResponse.vault.currentRevisionNumber);
 
     /*
      * Store encrypted vault in background worker.
@@ -64,7 +70,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     chrome.runtime.sendMessage({
       type: 'STORE_VAULT',
       derivedKey: derivedKey,
-      vaultResponse: vaultResponse
+      vaultResponse: vaultResponse,
     });
   }, []);
 
@@ -79,6 +85,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setDbAvailable(true);
         setPublicEmailDomains(response.publicEmailDomains);
         setPrivateEmailDomains(response.privateEmailDomains);
+        setVaultRevision(response.vaultRevisionNumber);
       }
       else {
         setDbInitialized(true);
@@ -130,7 +137,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   return (
-    <DbContext.Provider value={{ sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase }}>
+    <DbContext.Provider value={{ sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision }}>
       {children}
     </DbContext.Provider>
   );
