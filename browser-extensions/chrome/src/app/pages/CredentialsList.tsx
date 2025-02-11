@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
@@ -9,6 +9,8 @@ import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 import { useAuth } from '../context/AuthContext';
 import { StatusResponse } from '../../shared/types/webapi/StatusResponse';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 
 /**
  * Credentials list page.
@@ -18,42 +20,18 @@ const CredentialsList: React.FC = () => {
   const webApi = useWebApi();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const navigate = useNavigate();
-  const { showLoading, hideLoading } = useLoading();
+  const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
   const authContext = useAuth();
 
-  useEffect(() => {
-    /**
-     * Check if the extension is (still) supported by the API and if the local vault is up to date.
-     */
-    const checkStatus = async (): Promise<void> => {
-      if (!dbContext?.sqliteClient) return;
-
-      const statusResponse = await webApi.get('Auth/status') as StatusResponse;
-      if (!statusResponse.supported) {
-        authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
-        return;
-      }
-
-      if (statusResponse.vaultRevision > dbContext.vaultRevision) {
-        await onRefresh();
-      }
-
-      // Load credentials
-      try {
-        const results = dbContext.sqliteClient.getAllCredentials();
-        setCredentials(results);
-      } catch (err) {
-        console.error('Error loading credentials:', err);
-      }
-    };
-
-    checkStatus();
-  });
+  /**
+   * Loading state with minimum duration for more fluid UX.
+   */
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
 
   /**
    * Retrieve latest vault and refresh the page.
    */
-  const onRefresh = async () : Promise<void> => {
+  const onRefresh = useCallback(async () : Promise<void> => {
     if (!dbContext?.sqliteClient) return;
 
     try {
@@ -77,19 +55,63 @@ const CredentialsList: React.FC = () => {
       try {
         const results = dbContext.sqliteClient.getAllCredentials();
         setCredentials(results);
+        setIsLoading(false);
+        setIsInitialLoading(false);
       } catch (err) {
         console.error('Error loading credentials:', err);
       }
     } catch (err) {
       console.error('Refresh error:', err);
     }
-  };
+  }, [dbContext, webApi, authContext, hideLoading, setIsInitialLoading, setIsLoading]);
 
+  useEffect(() => {
+    /**
+     * Check if the extension is (still) supported by the API and if the local vault is up to date.
+     */
+    const checkStatus = async (): Promise<void> => {
+      if (!dbContext?.sqliteClient) return;
+
+      const statusResponse = await webApi.get('Auth/status') as StatusResponse;
+      if (!statusResponse.supported) {
+        authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
+        return;
+      }
+
+      if (statusResponse.vaultRevision > dbContext.vaultRevision) {
+        await onRefresh();
+      }
+
+      // Load credentials
+      try {
+        const results = dbContext.sqliteClient.getAllCredentials();
+        setCredentials(results);
+        setIsLoading(false);
+        setIsInitialLoading(false);
+      } catch (err) {
+        console.error('Error loading credentials:', err);
+      }
+    };
+
+    checkStatus();
+  }, [authContext, dbContext?.sqliteClient, dbContext?.vaultRevision, onRefresh, webApi, setIsInitialLoading, setIsLoading]);
+
+  /**
+   * Manually refresh the credentials list.
+   */
   const onManualRefresh = async (): Promise<void> => {
     showLoading();
     await onRefresh();
     hideLoading();
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -5,6 +5,7 @@ import Login from './Login';
 import UnlockSuccess from './UnlockSuccess';
 import { useNavigate } from 'react-router-dom';
 import { useDb } from '../context/DbContext';
+import { useLoading } from '../context/LoadingContext';
 
 /**
  * Home page that shows the correct page based on the user's authentication state.
@@ -14,6 +15,7 @@ const Home: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
+  const { setIsInitialLoading } = useLoading();
   const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
   const needsUnlock = (!authContext.isLoggedIn && authContext.isInitialized) || (!dbContext.dbAvailable && dbContext.dbInitialized);
 
@@ -27,6 +29,9 @@ const Home: React.FC = () => {
       navigate('/credentials', { replace: true });
     }
   }, [isLoggedIn, needsUnlock, isInlineUnlockMode, navigate]);
+
+  // Set initial loading state to false once the page is loaded until here.
+  setIsInitialLoading(false);
 
   if (!isLoggedIn) {
     return <Login />;

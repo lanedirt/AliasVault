@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import { useDb } from './context/DbContext';
 import { useMinDurationLoading } from './hooks/useMinDurationLoading';
 import Header from './components/Layout/Header';
 import BottomNav from './components/Layout/BottomNav';
@@ -15,6 +14,7 @@ import CredentialDetails from './pages/CredentialDetails';
 import EmailDetails from './pages/EmailDetails';
 import Settings from './pages/Settings';
 import GlobalStateChangeHandler from './components/GlobalStateChangeHandler';
+import { useLoading } from './context/LoadingContext';
 
 /**
  * Route configuration.
@@ -31,9 +31,9 @@ type RouteConfig = {
  */
 const App: React.FC = () => {
   const authContext = useAuth();
-  const dbContext = useDb();
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { isInitialLoading } = useLoading();
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   // Add these route configurations
@@ -47,14 +47,11 @@ const App: React.FC = () => {
     { path: '/settings', element: <Settings />, showBackButton: true, title: 'Settings' },
   ];
 
-  /**
-   * Set loading state to false when auth and db are initialized.
-   */
   useEffect(() => {
-    if (authContext.isInitialized && dbContext.dbInitialized) {
+    if (!isInitialLoading) {
       setIsLoading(false);
     }
-  }, [authContext.isInitialized, dbContext.dbInitialized, setIsLoading]);
+  }, [isInitialLoading, setIsLoading]);
 
   /**
    * Print global message if it exists.
@@ -66,21 +63,15 @@ const App: React.FC = () => {
     }
   }, [authContext, authContext.globalMessage]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
-        <div className="flex-1 overflow-y-auto" style={{ paddingTop: '64px' }}>
-          <div className="p-4 mt-20 dark:bg-gray-900 h-full flex items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Router>
       <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
+        {isLoading && (
+          <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        )}
+
         <GlobalStateChangeHandler />
         <Header
           toggleUserMenu={() => setIsUserMenuOpen(!isUserMenuOpen)}
