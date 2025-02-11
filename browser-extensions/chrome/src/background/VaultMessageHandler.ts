@@ -6,6 +6,7 @@ import { WebApiService } from '../shared/WebApiService';
 import { Vault } from '../shared/types/webapi/Vault';
 import { Credential } from '../shared/types/Credential';
 import { VaultResponse } from '../shared/types/webapi/VaultResponse';
+import { StatusResponse } from '../shared/types/webapi/StatusResponse';
 
 /**
  * Store the vault in browser storage.
@@ -35,6 +36,42 @@ export async function handleStoreVault(
     console.error('Failed to store vault:', error);
     sendResponse({ success: false, error: 'Failed to store vault' });
   }
+}
+
+/**
+ * Sync the vault with the server to check if a newer vault is available. If so, the vault will be updated.
+ */
+export async function handleSyncVault(
+  vaultState: VaultState,
+  sendResponse: (response: any) => void
+) : Promise<void> {
+  const webApi = new WebApiService(() => {});
+  await webApi.initializeBaseUrl();
+  const response = await webApi.get('Auth/status') as StatusResponse;
+
+  if (!response.supported) {
+    sendResponse({ success: false, error: 'Browser extension is not supported. Please update to the latest version.' });
+    return;
+  }
+
+  const result = await chrome.storage.session.get([
+    'vaultRevisionNumber'
+  ]);
+
+  if (response.vaultRevision > result.vaultRevisionNumber) {
+    // Retrieve the latest vault from the server.
+    const vaultResponse = await webApi.get('Vault') as VaultResponse;
+
+    // Store encrypted vault in chrome.storage.session
+    await chrome.storage.session.set({
+      encryptedVault: vaultResponse.vault.blob,
+      publicEmailDomains: vaultResponse.vault.publicEmailDomainList,
+      privateEmailDomains: vaultResponse.vault.privateEmailDomainList,
+      vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber
+    });
+  }
+
+  sendResponse({ success: true });
 }
 
 /**

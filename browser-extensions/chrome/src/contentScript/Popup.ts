@@ -189,6 +189,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     const loadingPopup = createLoadingPopup(input, 'Creating new identity...');
 
     try {
+      // Sync with api to ensure we have the latest vault.
+      await chrome.runtime.sendMessage({ type: 'SYNC_VAULT' });
+
       // Retrieve default email domain from background
       const response = await new Promise<{ domain: string }>((resolve) => {
         chrome.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }, resolve);

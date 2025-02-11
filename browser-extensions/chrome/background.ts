@@ -1,6 +1,6 @@
 import { VaultState, initialVaultState } from './src/background/VaultState';
 import { setupContextMenus, handleContextMenuClick } from './src/background/ContextMenu';
-import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault } from './src/background/VaultMessageHandler';
+import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './src/background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './src/background/PopupMessageHandler';
 
 let vaultState: VaultState = { ...initialVaultState };
@@ -15,6 +15,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Vault-related messages
     case 'STORE_VAULT':
       handleStoreVault(message, vaultState, sendResponse);
+      break;
+
+    case 'SYNC_VAULT':
+      handleSyncVault(vaultState, sendResponse);
       break;
 
     case 'GET_VAULT':
