@@ -11,11 +11,11 @@ const GlobalStateChangeHandler: React.FC = () => {
   const navigate = useNavigate();
 
   /**
-   * Listen for auth logged in changes and redirect to home page if logged in.
+   * Listen for auth logged in changes and redirect to home page if logged in state changes to handle logins and logouts.
    */
   useEffect(() => {
     navigate('/');
-  }, [navigate, authContext.isLoggedIn]);
+  }, [authContext.isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 };
