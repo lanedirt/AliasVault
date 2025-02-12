@@ -72,7 +72,7 @@ const CredentialsList: React.FC = () => {
     const checkStatus = async (): Promise<void> => {
       if (!dbContext?.sqliteClient) return;
 
-      const statusResponse = await webApi.get('Auth/status') as StatusResponse;
+      const statusResponse = await webApi.getStatus();
       if (!statusResponse.supported) {
         authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
         return;

@@ -6,18 +6,20 @@ import UnlockSuccess from './UnlockSuccess';
 import { useNavigate } from 'react-router-dom';
 import { useDb } from '../context/DbContext';
 import { useLoading } from '../context/LoadingContext';
+import { useWebApi } from '../context/WebApiContext';
 
 /**
  * Home page that shows the correct page based on the user's authentication state.
  */
 const Home: React.FC = () => {
-  const { isLoggedIn } = useAuth();
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
+  const webApi = useWebApi();
   const { setIsInitialLoading } = useLoading();
   const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
-  const needsUnlock = (!authContext.isLoggedIn && authContext.isInitialized) || (!dbContext.dbAvailable && dbContext.dbInitialized);
+  const initialized = authContext.isInitialized && dbContext.dbInitialized;
+  const needsUnlock = initialized && (!authContext.isLoggedIn || !dbContext.dbAvailable);
 
   useEffect(() => {
     // Detect if the user is coming from the unlock page with mode=inline_unlock
@@ -25,15 +27,23 @@ const Home: React.FC = () => {
     const isInlineUnlockMode = urlParams.get('mode') === 'inline_unlock';
     setIsInlineUnlockMode(isInlineUnlockMode);
 
-    if (isLoggedIn && !needsUnlock && !isInlineUnlockMode) {
+    // Do a status check to see if the auth tokens are still valid, if not, redirect to the login page.
+    const checkStatus = async () => {
+      const status = await webApi.get('Status');
+      if (status.status !== 0) {
+        authContext.logout();
+      }
+    };
+
+    if (initialized && !needsUnlock) {
       navigate('/credentials', { replace: true });
     }
-  }, [isLoggedIn, needsUnlock, isInlineUnlockMode, navigate]);
+  }, [initialized,needsUnlock, isInlineUnlockMode, navigate]);
 
   // Set initial loading state to false once the page is loaded until here.
   setIsInitialLoading(false);
 
-  if (!isLoggedIn) {
+  if (!authContext.isLoggedIn) {
     return <Login />;
   }
 

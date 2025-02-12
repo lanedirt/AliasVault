@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDb } from '../context/DbContext';
 import { useAuth } from '../context/AuthContext';
 import { useWebApi } from '../context/WebApiContext';
@@ -23,6 +23,17 @@ const Unlock: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { showLoading, hideLoading } = useLoading();
 
+  useEffect(() => {
+    const checkStatus = async () => {
+      const status = await webApi.getStatus();
+      if (!status.supported) {
+        authContext.logout('The browser extension is outdated. Please update to the latest version.');
+      }
+    };
+
+    checkStatus();
+  }, [webApi, authContext]);
+
   /**
    * Handle submit
    */
@@ -30,6 +41,7 @@ const Unlock: React.FC = () => {
     e.preventDefault();
     setError(null);
     showLoading();
+
     try {
       // 1. Initiate login to get salt and server ephemeral
       const loginResponse = await srpUtil.initiateLogin(authContext.username!);
@@ -84,7 +96,6 @@ const Unlock: React.FC = () => {
     finally {
       hideLoading();
     }
-
   };
 
   return (

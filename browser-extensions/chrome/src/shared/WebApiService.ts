@@ -1,4 +1,5 @@
 import { AppInfo } from "./AppInfo";
+import { StatusResponse } from "./types/webapi/StatusResponse";
 import { VaultResponse } from "./types/webapi/VaultResponse";
 
 type RequestInit = globalThis.RequestInit;
@@ -15,8 +16,6 @@ type TokenResponse = {
  * Service class for interacting with the web API.
  */
 export class WebApiService {
-  private baseUrl: string = '';
-
   /**
    * Constructor for the WebApiService class.
    *
@@ -25,17 +24,15 @@ export class WebApiService {
   public constructor(
     private handleLogout: () => void
   ) {
-    // Load the API URL from storage when service is initialized
-    this.initializeBaseUrl();
+    // Remove initialization of baseUrl
   }
 
   /**
-   * Initialize the base URL for the API from settings.
+   * Get the base URL for the API from settings.
    */
-  public async initializeBaseUrl() : Promise<void> {
+  private async getBaseUrl(): Promise<string> {
     const result = await chrome.storage.local.get(['apiUrl']);
-    // Trim trailing slash if present
-    this.baseUrl = (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
+    return (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
   }
 
   /**
@@ -46,7 +43,8 @@ export class WebApiService {
     options: RequestInit = {},
     parseJson: boolean = true
   ): Promise<T> {
-    const url = this.baseUrl + endpoint;
+    const baseUrl = await this.getBaseUrl();
+    const url = baseUrl + endpoint;
     const headers = new Headers(options.headers || {});
 
     // Add authorization header if we have an access token
@@ -107,7 +105,8 @@ export class WebApiService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}Auth/refresh`, {
+      const baseUrl = await this.getBaseUrl();
+      const response = await fetch(`${baseUrl}Auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,6 +188,13 @@ export class WebApiService {
       token: await this.getAccessToken(),
       refreshToken: refreshToken,
     }, false);
+  }
+
+  /**
+   * Calls the status endpoint to check if the auth tokens are still valid, app is supported and the vault is up to date.
+   */
+  public async getStatus(): Promise<StatusResponse> {
+    return await this.get('Auth/status') as StatusResponse;
   }
 
   /**

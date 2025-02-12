@@ -47,10 +47,10 @@ export async function handleSyncVault(
 ) : Promise<void> {
   const webApi = new WebApiService(() => {});
   await webApi.initializeBaseUrl();
-  const response = await webApi.get('Auth/status') as StatusResponse;
+  const response = await webApi.getStatus();
 
   if (!response.supported) {
-    sendResponse({ success: false, error: 'Browser extension is not supported. Please update to the latest version.' });
+    sendResponse({ success: false, error: 'The browser extension is outdated. Please update to the latest version.' });
     return;
   }
 
