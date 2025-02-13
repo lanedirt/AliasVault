@@ -24,7 +24,10 @@ const Unlock: React.FC = () => {
   const { showLoading, hideLoading } = useLoading();
 
   useEffect(() => {
-    const checkStatus = async () => {
+    /**
+     * Make status call to API which acts as health check.
+     */
+    const checkStatus = async () : Promise<void> => {
       const status = await webApi.getStatus();
       if (!status.supported) {
         authContext.logout('The browser extension is outdated. Please update to the latest version.');

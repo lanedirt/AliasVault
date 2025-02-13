@@ -6,7 +6,6 @@ import UnlockSuccess from './UnlockSuccess';
 import { useNavigate } from 'react-router-dom';
 import { useDb } from '../context/DbContext';
 import { useLoading } from '../context/LoadingContext';
-import { useWebApi } from '../context/WebApiContext';
 
 /**
  * Home page that shows the correct page based on the user's authentication state.

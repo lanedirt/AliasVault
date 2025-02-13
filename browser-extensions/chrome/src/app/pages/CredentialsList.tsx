@@ -8,7 +8,6 @@ import { useWebApi } from '../context/WebApiContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 import { useAuth } from '../context/AuthContext';
-import { StatusResponse } from '../../shared/types/webapi/StatusResponse';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 
@@ -62,7 +61,7 @@ const CredentialsList: React.FC = () => {
     } catch (err) {
       console.error('Refresh error:', err);
     }
-  }, [dbContext, webApi, authContext, hideLoading, setIsInitialLoading, setIsLoading]);
+  }, [dbContext, webApi, authContext, hideLoading, setIsLoading]);
 
   useEffect(() => {
     /**

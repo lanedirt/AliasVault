@@ -19,22 +19,6 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       logout
     );
     setWebApiService(service);
-
-    /**
-     * Handles changes to the API URL in storage.
-     * Initializes the base URL when the API URL changes.
-     */
-    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) : void => {
-      if (changes.apiUrl) {
-        service.initializeBaseUrl();
-      }
-    };
-
-    chrome.storage.onChanged.addListener(handleStorageChange);
-
-    return () : void => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-    };
   }, [logout]);
 
   if (!webApiService) {

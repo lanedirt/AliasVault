@@ -29,11 +29,8 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
   const popup = document.createElement('div');
   popup.id = 'aliasvault-credential-popup';
 
-  // Get input width
-  const inputWidth = input.offsetWidth;
-
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = Math.max(360, Math.min(640, inputWidth));
+  const popupWidth = 400;
 
   popup.style.cssText = `
         position: absolute;
@@ -41,8 +38,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
         background: ${isDarkMode() ? '#1f2937' : 'white'};
         border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
         border-radius: 4px;
-        box-shadow: 0 2px 4px ${isDarkMode() ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)'};
-        padding: 8px 0;
+        box-shadow: 0 2px 10px ${isDarkMode() ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)'};
         width: ${popupWidth}px;
         color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
@@ -50,8 +46,8 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
 
   // Position popup below input
   const rect = input.getBoundingClientRect();
-  popup.style.top = `${rect.bottom + window.scrollY + 2}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
+  popup.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  popup.style.left = `${rect.left + window.scrollX + 2}px`;
 
   return popup;
 }
@@ -153,8 +149,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   const actionContainer = document.createElement('div');
   actionContainer.style.cssText = `
     display: flex;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
     gap: 8px;
-    padding: 8px 16px;
   `;
 
   // Create New button
@@ -172,6 +170,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     align-items: center;
     justify-content: center;
     gap: 4px;
+    transition: background-color 0.2s ease;
   `;
 
   createButton.innerHTML = `
@@ -181,6 +180,15 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     </svg>
     New
   `;
+
+  // Add hover event listeners
+  createButton.addEventListener('mouseenter', () => {
+    createButton.style.backgroundColor = isDarkMode() ? '#d68338' : '#f49541'; // primary-600 : primary-500
+  });
+
+  createButton.addEventListener('mouseleave', () => {
+    createButton.style.backgroundColor = isDarkMode() ? '#374151' : '#f3f4f6';
+  });
 
   createButton.addEventListener('click', async () => {
     const serviceName = await createEditNamePopup(document.title);
@@ -335,13 +343,27 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
   `;
+
   closeButton.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  `;
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+`;
+
+  // Add hover event listeners
+  closeButton.addEventListener('mouseenter', () => {
+    closeButton.style.backgroundColor = isDarkMode() ? '#dc2626' : '#ef4444'; // red-600 : red-500
+    closeButton.style.color = '#ffffff'; // White text on hover
+  });
+
+  closeButton.addEventListener('mouseleave', () => {
+    closeButton.style.backgroundColor = isDarkMode() ? '#374151' : '#f3f4f6';
+    closeButton.style.color = isDarkMode() ? '#e5e7eb' : '#374151';
+  });
+
   closeButton.addEventListener('click', async () => {
     await disableAutoShowPopup();
     removeExistingPopup();
@@ -497,7 +519,8 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
           transition: background-color 0.2s ease;
           border-radius: 4px;
-          margin: 0 4px;
+          width: 100%;
+          box-sizing: border-box;
         `;
 
       // Create container for credential info (logo + username)
@@ -510,6 +533,7 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           padding: 4px;
           border-radius: 4px;
           transition: background-color 0.2s ease;
+          min-width: 0; /* Enable text truncation */
         `;
 
       const imgElement = document.createElement('img');
@@ -535,7 +559,8 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           display: flex;
           flex-direction: column;
           flex-grow: 1;
-          min-width: 0; /* Enable text truncation in flex container */
+          min-width: 0; /* Enable text truncation */
+          margin-right: 8px; /* Add space between text and popout icon */
         `;
 
       // Service name (primary text)
@@ -581,6 +606,7 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
           padding: 4px;
           opacity: 0.6;
           border-radius: 4px;
+          flex-shrink: 0; /* Prevent icon from shrinking */
         `;
       popoutIcon.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

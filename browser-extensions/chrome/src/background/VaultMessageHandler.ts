@@ -6,7 +6,6 @@ import { WebApiService } from '../shared/WebApiService';
 import { Vault } from '../shared/types/webapi/Vault';
 import { Credential } from '../shared/types/Credential';
 import { VaultResponse } from '../shared/types/webapi/VaultResponse';
-import { StatusResponse } from '../shared/types/webapi/StatusResponse';
 
 /**
  * Store the vault in browser storage.
@@ -46,7 +45,6 @@ export async function handleSyncVault(
   sendResponse: (response: any) => void
 ) : Promise<void> {
   const webApi = new WebApiService(() => {});
-  await webApi.initializeBaseUrl();
   const response = await webApi.getStatus();
 
   if (!response.supported) {
@@ -312,7 +310,6 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
   };
 
   const webApi = new WebApiService(() => {});
-  await webApi.initializeBaseUrl();
   const response = await webApi.post('Vault', newVault) as { status: number, newRevisionNumber: number };
 
   // Check if response is successful (.status === 0)
