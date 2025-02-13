@@ -15,39 +15,40 @@ const Home: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
-  const webApi = useWebApi();
   const { setIsInitialLoading } = useLoading();
   const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
-  const initialized = authContext.isInitialized && dbContext.dbInitialized;
-  const needsUnlock = initialized && (!authContext.isLoggedIn || !dbContext.dbAvailable);
+
+  // Initialization state.
+  const isFullyInitialized = authContext.isInitialized && dbContext.dbInitialized;
+  const isAuthenticated = authContext.isLoggedIn;
+  const isDatabaseAvailable = dbContext.dbAvailable;
+  const requireLoginOrUnlock = isFullyInitialized && (!isAuthenticated || !isDatabaseAvailable);
 
   useEffect(() => {
-    // Detect if the user is coming from the unlock page with mode=inline_unlock
+    // Detect if the user is coming from the unlock page with mode=inline_unlock.
     const urlParams = new URLSearchParams(window.location.search);
     const isInlineUnlockMode = urlParams.get('mode') === 'inline_unlock';
     setIsInlineUnlockMode(isInlineUnlockMode);
 
-    // Do a status check to see if the auth tokens are still valid, if not, redirect to the login page.
-    const checkStatus = async () => {
-      const status = await webApi.get('Status');
-      if (status.status !== 0) {
-        authContext.logout();
-      }
-    };
-
-    if (initialized && !needsUnlock) {
+    // Redirect to credentials if fully initialized and doesn't need unlock.
+    if (isFullyInitialized && !requireLoginOrUnlock) {
       navigate('/credentials', { replace: true });
     }
-  }, [initialized,needsUnlock, isInlineUnlockMode, navigate]);
+  }, [isFullyInitialized, requireLoginOrUnlock, isInlineUnlockMode, navigate]);
 
-  // Set initial loading state to false once the page is loaded until here.
+  // Show loading state if not fully initialized or when about to redirect to credentials.
+  if (!isFullyInitialized || (isFullyInitialized && !requireLoginOrUnlock)) {
+    // Global loading spinner will be shown by the parent component.
+    return null;
+  }
+
   setIsInitialLoading(false);
 
-  if (!authContext.isLoggedIn) {
+  if (!isAuthenticated) {
     return <Login />;
   }
 
-  if (needsUnlock) {
+  if (requireLoginOrUnlock) {
     return <Unlock />;
   }
 

@@ -20,7 +20,7 @@ const EmailsList: React.FC = () => {
   /**
    * Loading state with minimum duration for more fluid UX.
    */
-  const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
 
   /**
    * Loads emails from the web API.

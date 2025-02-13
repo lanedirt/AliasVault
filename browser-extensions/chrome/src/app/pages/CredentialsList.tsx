@@ -26,7 +26,7 @@ const CredentialsList: React.FC = () => {
   /**
    * Loading state with minimum duration for more fluid UX.
    */
-  const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
 
   /**
    * Retrieve latest vault and refresh the page.
@@ -56,7 +56,6 @@ const CredentialsList: React.FC = () => {
         const results = dbContext.sqliteClient.getAllCredentials();
         setCredentials(results);
         setIsLoading(false);
-        setIsInitialLoading(false);
       } catch (err) {
         console.error('Error loading credentials:', err);
       }
@@ -87,7 +86,6 @@ const CredentialsList: React.FC = () => {
         const results = dbContext.sqliteClient.getAllCredentials();
         setCredentials(results);
         setIsLoading(false);
-        setIsInitialLoading(false);
       } catch (err) {
         console.error('Error loading credentials:', err);
       }
@@ -95,6 +93,15 @@ const CredentialsList: React.FC = () => {
 
     checkStatus();
   }, [authContext, dbContext?.sqliteClient, dbContext?.vaultRevision, onRefresh, webApi, setIsInitialLoading, setIsLoading]);
+
+  /**
+   * Make sure the initial loading state is set to false when this component is loaded itself.
+   */
+  useEffect(() => {
+    if (!isLoading) {
+      setIsInitialLoading(false);
+    }
+  }, [setIsInitialLoading, isLoading]);
 
   /**
    * Manually refresh the credentials list.
