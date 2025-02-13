@@ -20,7 +20,7 @@ export function handleOpenPopup(message: any, vaultState: VaultState, sendRespon
  */
 export function handlePopupWithCredential(message: any, vaultState: VaultState, sendResponse: (response: any) => void) : void {
   chrome.windows.create({
-    url: chrome.runtime.getURL(`index.html#credentials/${message.credentialId}`),
+    url: chrome.runtime.getURL(`index.html?popup=true#/credentials/${message.credentialId}`),
     type: 'popup',
     width: 400,
     height: 600,

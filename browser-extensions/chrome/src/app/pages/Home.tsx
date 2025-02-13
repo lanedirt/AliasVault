@@ -21,7 +21,7 @@ const Home: React.FC = () => {
   const isFullyInitialized = authContext.isInitialized && dbContext.dbInitialized;
   const isAuthenticated = authContext.isLoggedIn;
   const isDatabaseAvailable = dbContext.dbAvailable;
-  const requireLoginOrUnlock = isFullyInitialized && (!isAuthenticated || !isDatabaseAvailable);
+  const requireLoginOrUnlock = isFullyInitialized && (!isAuthenticated || !isDatabaseAvailable || isInlineUnlockMode);
 
   useEffect(() => {
     // Detect if the user is coming from the unlock page with mode=inline_unlock.
@@ -47,7 +47,7 @@ const Home: React.FC = () => {
     return <Login />;
   }
 
-  if (requireLoginOrUnlock) {
+  if (!isDatabaseAvailable) {
     return <Unlock />;
   }
 

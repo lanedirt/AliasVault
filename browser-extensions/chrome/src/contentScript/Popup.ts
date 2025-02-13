@@ -1,6 +1,6 @@
 import { isDarkMode } from './Shared';
 import { Credential } from '../shared/types/Credential';
-import { fillCredential, injectIcon } from './Form';
+import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../shared/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerator';
@@ -490,7 +490,7 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0066cc;
+    color: ${isDarkMode() ? '#d68338' : '#f49541'};
     border-radius: 4px;
   `;
   button.innerHTML = `

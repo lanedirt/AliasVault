@@ -5,6 +5,7 @@ import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
 import { FormInputCopyToClipboard } from '../components/FormInputCopyToClipboard';
 import { EmailPreview } from '../components/EmailPreview';
+import { useLoading } from '../context/LoadingContext';
 
 /**
  * Credential details page.
@@ -14,6 +15,7 @@ const CredentialDetails: React.FC = () => {
   const navigate = useNavigate();
   const dbContext = useDb();
   const [credential, setCredential] = useState<Credential | null>(null);
+  const { setIsInitialLoading } = useLoading();
 
   /**
    * Check if the current page is a popup.
@@ -56,6 +58,7 @@ const CredentialDetails: React.FC = () => {
       const result = dbContext.sqliteClient.getCredentialById(id);
       if (result) {
         setCredential(result);
+        setIsInitialLoading(false);
       } else {
         console.error('Credential not found');
         navigate('/credentials');
@@ -63,7 +66,7 @@ const CredentialDetails: React.FC = () => {
     } catch (err) {
       console.error('Error loading credential:', err);
     }
-  }, [dbContext.sqliteClient, id, navigate]);
+  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading]);
 
   if (!credential) {
     return <div>Loading...</div>;

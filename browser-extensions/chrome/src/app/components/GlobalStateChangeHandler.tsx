@@ -14,7 +14,10 @@ const GlobalStateChangeHandler: React.FC = () => {
    * Listen for auth logged in changes and redirect to home page if logged in state changes to handle logins and logouts.
    */
   useEffect(() => {
-    navigate('/');
+    // Only navigate when auth state changes and we're not already on home page
+    if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
+      navigate('/');
+    }
   }, [authContext.isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
