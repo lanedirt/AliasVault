@@ -7,13 +7,13 @@ import { LoadingProvider } from './context/LoadingContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <AuthProvider>
-    <DbProvider>
+  <DbProvider>
+    <AuthProvider>
       <WebApiProvider>
         <LoadingProvider>
           <App />
         </LoadingProvider>
       </WebApiProvider>
-    </DbProvider>
-  </AuthProvider>
+    </AuthProvider>
+  </DbProvider>
 );

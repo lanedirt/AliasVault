@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useDb } from './DbContext';
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -23,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
+  const dbContext = useDb();
 
   /**
    * Check for tokens in chrome storage on initial load.
@@ -63,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (errorMessage?: string) : Promise<void> => {
     await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
     await chrome.storage.local.remove(['username', 'accessToken', 'refreshToken']);
+    await dbContext?.clearDatabase();
 
     // Set local storage global message that will be shown on the login page.
     if (errorMessage) {

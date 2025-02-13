@@ -685,6 +685,8 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
     noMatches.style.cssText = `
         padding-left: 10px;
         padding-top: 8px;
+        padding-bottom: 8px;
+        font-size: 14px;
         color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
         font-style: italic;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
