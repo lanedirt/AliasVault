@@ -16,4 +16,9 @@ public class Config
     /// Gets or sets a value indicating whether public registration is enabled.
     /// </summary>
     public bool PublicRegistrationEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of private email domains that are available.
+    /// </summary>
+    public List<string> PrivateEmailDomains { get; set; } = [];
 }

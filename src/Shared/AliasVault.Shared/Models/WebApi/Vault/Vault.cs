@@ -51,6 +51,16 @@ public class Vault
     public required List<string> EmailAddressList { get; set; }
 
     /// <summary>
+    /// Gets or sets the list of private email domains that are available.
+    /// </summary>
+    public required List<string> PrivateEmailDomainList { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of public email domains that are available.
+    /// </summary>
+    public required List<string> PublicEmailDomainList { get; set; }
+
+    /// <summary>
     /// Gets or sets the date and time of creation.
     /// </summary>
     public required DateTime CreatedAt { get; set; }

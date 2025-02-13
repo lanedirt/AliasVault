@@ -30,6 +30,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
         var dbContext = scope.ServiceProvider.GetRequiredService<AliasServerDbContext>();
 
         var httpContext = httpContextAccessor.HttpContext;
+        var clientHeader = httpContext?.Request.Headers["X-AliasVault-Client"].FirstOrDefault();
 
         var authAttempt = new AuthLog
         {
@@ -40,6 +41,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             FailureReason = null,
             IpAddress = IpAddressUtility.GetIpFromContext(httpContext),
             UserAgent = httpContext?.Request.Headers.UserAgent,
+            Client = clientHeader,
             RequestPath = httpContext?.Request.Path,
             DeviceType = DetermineDeviceType(httpContext),
             OperatingSystem = DetermineOperatingSystem(httpContext),
@@ -64,6 +66,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
         var dbContext = scope.ServiceProvider.GetRequiredService<AliasServerDbContext>();
 
         var httpContext = httpContextAccessor.HttpContext;
+        var clientHeader = httpContext?.Request.Headers["X-AliasVault-Client"].FirstOrDefault();
 
         var authAttempt = new AuthLog
         {
@@ -74,6 +77,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             FailureReason = failureReason,
             IpAddress = IpAddressUtility.GetIpFromContext(httpContext),
             UserAgent = httpContext?.Request.Headers.UserAgent,
+            Client = clientHeader,
             RequestPath = httpContext?.Request.Path,
             DeviceType = DetermineDeviceType(httpContext),
             OperatingSystem = DetermineOperatingSystem(httpContext),
