@@ -431,9 +431,6 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   // Add the event listener for clicking outside
   document.addEventListener('mousedown', handleClickOutside);
   document.body.appendChild(popup);
-
-  // When creating the popup, also (re)create the icon so it stays visible.
-  injectIcon(input);
 }
 
 /**
@@ -521,9 +518,6 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
   }, 100);
 
   document.body.appendChild(popup);
-
-  // When creating the popup, also (re)create the icon so it stays visible.
-  injectIcon(input);
 }
 
 /**

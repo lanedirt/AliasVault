@@ -193,7 +193,11 @@ export function injectIcon(input: HTMLInputElement): void {
 
   icon.setAttribute('data-icon-for', input.id);
 
-  icon.addEventListener('click', () => {
+  icon.addEventListener('click', (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Prevent the input from losing focus when clicking the icon
+    setTimeout(() => input.focus(), 0);
     openAutofillPopup(input);
   });
 
@@ -208,12 +212,7 @@ export function injectIcon(input: HTMLInputElement): void {
   /**
    * Remove icon when input loses focus, except when clicking the icon
    */
-  const handleBlur = (e: FocusEvent) : void => {
-    // Don't remove if clicking the icon itself
-    if (e.relatedTarget === icon) {
-      return;
-    }
-
+  const handleBlur = () : void => {
     // Fade out and remove icon
     icon.style.opacity = '0';
     setTimeout(() => {
