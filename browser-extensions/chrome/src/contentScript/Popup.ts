@@ -136,6 +136,12 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   // Create credential list container with ID
   const credentialList = document.createElement('div');
   credentialList.id = 'aliasvault-credential-list';
+  credentialList.style.cssText = `
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: ${isDarkMode() ? '#4b5563 #1f2937' : '#d1d5db #ffffff'};
+  `;
   popup.appendChild(credentialList);
 
   // Add initial credentials
@@ -148,6 +154,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     window.location.href,
     document.title
   );
+
   updatePopupContent(filteredCredentials, credentialList);
 
   // Add divider
@@ -297,6 +304,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
   // Handle search input
   let searchTimeout: NodeJS.Timeout;
+
   searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     const searchTerm = searchInput.value.toLowerCase();
@@ -312,7 +320,16 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             response.credentials,
             window.location.href,
             document.title
-          );
+          ).sort((a, b) => {
+            // First compare by service name
+            const serviceNameComparison = (a.ServiceName || '').localeCompare(b.ServiceName || '');
+            if (serviceNameComparison !== 0) {
+              return serviceNameComparison;
+            }
+
+            // If service names are equal, compare by username/nickname
+            return (a.Username || '').localeCompare(b.Username || '');
+          });
         } else {
           // Otherwise filter based on search term
           filteredCredentials = response.credentials.filter(cred =>
@@ -320,12 +337,16 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             cred.Username.toLowerCase().includes(searchTerm) ||
             cred.Email.toLowerCase().includes(searchTerm) ||
             cred.ServiceUrl?.toLowerCase().includes(searchTerm)
-          );
+          ).sort((a, b) => {
+            // First compare by service name
+            const serviceNameComparison = (a.ServiceName || '').localeCompare(b.ServiceName || '');
+            if (serviceNameComparison !== 0) {
+              return serviceNameComparison;
+            }
 
-          // Show max 3 results for search
-          if (filteredCredentials.length > 3) {
-            filteredCredentials = filteredCredentials.slice(0, 3);
-          }
+            // If service names are equal, compare by username/nickname
+            return (a.Username || '').localeCompare(b.Username || '');
+          });
         }
 
         // Update popup content with filtered results
