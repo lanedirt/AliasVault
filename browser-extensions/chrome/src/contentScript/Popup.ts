@@ -60,19 +60,33 @@ export function createLoadingPopup(input: HTMLInputElement, message: string) : H
    * Get the loading wrapper HTML.
    */
   const getLoadingHtml = (message: string): string => `
-<div style="
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  gap: 8px;
-">
-  <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-    <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke-opacity="1"/>
-  </svg>
-  <span>${message}</span>
-</div>
+  <div style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 8px;
+  ">
+    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"
+        fill="none"
+        stroke="${isDarkMode() ? '#e5e7eb' : '#374151'}"
+        stroke-width="2"
+        stroke-dasharray="30 60"
+        stroke-linecap="round">
+        <animateTransform
+          attributeName="transform"
+          attributeType="XML"
+          type="rotate"
+          from="0 12 12"
+          to="360 12 12"
+          dur="1s"
+          repeatCount="indefinite"
+        />
+      </circle>
+    </svg>
+    <span>${message}</span>
+  </div>
 `;
 
   const popup = createBasePopup(input);
@@ -141,7 +155,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   divider.style.cssText = `
     height: 1px;
     background: ${isDarkMode() ? '#374151' : '#e5e7eb'};
-    margin: 8px 0;
+    margin-bottom: 8px;
   `;
   popup.appendChild(divider);
 
@@ -215,17 +229,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       const password = passwordGenerator.generateRandomPassword();
 
       // Extract favicon from page and get the bytes
-      const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
-      let faviconBytes: ArrayBuffer | null = null;
-
-      if (favicon?.href) {
-        try {
-          const response = await fetch(favicon.href);
-          faviconBytes = await response.arrayBuffer();
-        } catch (error) {
-          console.error('Error fetching favicon:', error);
-        }
-      }
+      const faviconBytes = await getFaviconBytes(document);
 
       // Submit new identity to backend to persist in db
       const credential: Credential = {
@@ -511,7 +515,7 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
     credentials.forEach(cred => {
       const item = document.createElement('div');
       item.style.cssText = `
-          padding: 8px 16px;
+          padding: 6px 16px;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -664,7 +668,8 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
   } else {
     const noMatches = document.createElement('div');
     noMatches.style.cssText = `
-        padding: 8px 16px;
+        padding-left: 10px;
+        padding-top: 8px;
         color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
         font-style: italic;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
@@ -777,7 +782,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
             padding: 8px 16px;
             border-radius: 6px;
             border: none;
-            background: #2563eb;
+            background: ${isDarkMode() ? '#d68338' : '#f49541'};
             color: white;
             cursor: pointer;
             font-size: 14px;
@@ -795,7 +800,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
     const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
 
     input.addEventListener('focus', () => {
-      input.style.borderColor = '#2563eb';
+      input.style.borderColor = '#';
       input.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
     });
 
@@ -805,12 +810,12 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
     });
 
     saveBtn.addEventListener('mouseenter', () => {
-      saveBtn.style.background = '#1d4ed8';
+      saveBtn.style.background = isDarkMode() ? '#c97731' : '#e88a3c';
       saveBtn.style.transform = 'translateY(-1px)';
     });
 
     saveBtn.addEventListener('mouseleave', () => {
-      saveBtn.style.background = '#2563eb';
+      saveBtn.style.background = isDarkMode() ? '#d68338' : '#f49541';
       saveBtn.style.transform = 'translateY(0)';
     });
 
@@ -935,6 +940,23 @@ function base64Encode(buffer: Uint8Array): string | null {
     return btoa(binary);
   } catch (error) {
     console.error('Error encoding to base64:', error);
+    return null;
+  }
+}
+
+/**
+ * Get favicon bytes from page.
+ */
+async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
+  const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
+  if (!favicon) return null;
+
+  try {
+    const response = await fetch(favicon.href);
+    const arrayBuffer = await response.arrayBuffer();
+    return new Uint8Array(arrayBuffer);
+  } catch (error) {
+    console.error('Error fetching favicon:', error);
     return null;
   }
 }
