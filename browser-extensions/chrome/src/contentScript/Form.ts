@@ -54,6 +54,12 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
 
       let formattedDate = '';
       switch (form.birthdateField.format) {
+        case 'dd/mm/yyyy':
+          formattedDate = `${day}/${month}/${year}`;
+          break;
+        case 'mm/dd/yyyy':
+          formattedDate = `${month}/${day}/${year}`;
+          break;
         case 'dd-mm-yyyy':
           formattedDate = `${day}-${month}-${year}`;
           break;

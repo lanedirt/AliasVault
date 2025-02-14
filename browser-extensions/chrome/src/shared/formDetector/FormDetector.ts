@@ -119,6 +119,7 @@ export class FormDetector {
       const type = input.type.toLowerCase();
       if (!types.includes(type)) continue;
 
+      // Collect all text attributes to check
       const attributes = [
         input.type,
         input.id,
@@ -127,34 +128,32 @@ export class FormDetector {
         input.placeholder
       ].map(attr => attr?.toLowerCase() || '');
 
-      if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-        return input;
+      // Check for associated labels if input has an ID
+      if (input.id) {
+        // Find label with matching 'for' attribute
+        const label = this.document.querySelector(`label[for="${input.id}"]`);
+        if (label) {
+          attributes.push(label.textContent?.toLowerCase() || '');
+        }
       }
-    }
 
-    return null;
-  }
+      // Check for parent label (in case input has a label sibling somewhere up to 3 levels up)
+      let currentElement = input;
+      for (let i = 0; i < 3; i++) {
+        const parentLabel = currentElement.closest('label');
+        if (parentLabel) {
+          attributes.push(parentLabel.textContent?.toLowerCase() || '');
+          break;
+        }
 
-  /**
-   * Find the password confirmation field that matches the password field.
-   */
-  private findPasswordConfirmField(passwordField: HTMLInputElement): HTMLInputElement | null {
-    const form = passwordField.closest('form');
-    const candidates = form
-      ? form.querySelectorAll<HTMLInputElement>('input[type="password"]')
-      : this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
+        // Move up to the parent element
+        if (currentElement.parentElement) {
+          currentElement = currentElement.parentElement as HTMLInputElement;
+        } else {
+          break;
+        }
+      }
 
-    for (const input of Array.from(candidates)) {
-      if (input === passwordField) continue;
-
-      const attributes = [
-        input.id,
-        input.name,
-        input.className,
-        input.placeholder
-      ].map(attr => attr?.toLowerCase() || '');
-
-      const patterns = ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'];
       if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
         return input;
       }
@@ -289,24 +288,26 @@ export class FormDetector {
           .join(' ')
           // Normalize different types of spaces and separators
           .replace(/[\s\u00A0]/g, '')
-          .replace(/[/-]/g, '');
+          // Don't replace separators yet to detect the preferred one
+          .toLowerCase();
 
-        // Check for date format patterns
-        if (/dd.*mm.*jj/i.test(allText) || /dd.*mm.*yyyy/i.test(allText)) {
-          format = 'dd-mm-yyyy';
-        } else if (/mm.*dd.*yyyy/i.test(allText)) {
-          format = 'mm-dd-yyyy';
-        } else if (/yyyy.*mm.*dd/i.test(allText)) {
-          format = 'yyyy-mm-dd';
+        // Check for date format patterns with either slash or dash
+        if (/dd[-/]mm[-/]jj/i.test(allText) || /dd[-/]mm[-/]yyyy/i.test(allText)) {
+          // Determine separator style from the matched pattern
+          format = allText.includes('/') ? 'dd/mm/yyyy' : 'dd-mm-yyyy';
+        } else if (/mm[-/]dd[-/]yyyy/i.test(allText)) {
+          format = allText.includes('/') ? 'mm/dd/yyyy' : 'mm-dd-yyyy';
+        } else if (/yyyy[-/]mm[-/]dd/i.test(allText)) {
+          format = allText.includes('/') ? 'yyyy/mm/dd' : 'yyyy-mm-dd';
         }
 
         // Check placeholder as fallback
         if (format === 'yyyy-mm-dd' && singleDateField.placeholder) {
-          const placeholder = singleDateField.placeholder.toLowerCase().replace(/[\s\u00A0\-/]/g, '');
-          if (/ddmm/.test(placeholder)) {
-            format = 'dd-mm-yyyy';
-          } else if (/mmdd/.test(placeholder)) {
-            format = 'mm-dd-yyyy';
+          const placeholder = singleDateField.placeholder.toLowerCase();
+          if (/dd[-/]mm/i.test(placeholder)) {
+            format = placeholder.includes('/') ? 'dd/mm/yyyy' : 'dd-mm-yyyy';
+          } else if (/mm[-/]dd/i.test(placeholder)) {
+            format = placeholder.includes('/') ? 'mm/dd/yyyy' : 'mm-dd-yyyy';
           }
         }
       }
@@ -340,15 +341,17 @@ export class FormDetector {
    * Find the gender field in the form.
    */
   private findGenderField(form: HTMLFormElement | null): LoginForm['genderField'] {
-    // Try to find select element first
-    const selectField = form
-      ? form.querySelector<HTMLSelectElement>('select[name*="gender"], select[name*="sex"], select[id*="gender"], select[id*="sex"]')
-      : null;
+    // Try to find select or input element using the shared method
+    const genderField = this.findInputField(
+      form,
+      ['gender', 'sex', 'geslacht', 'aanhef'],
+      ['select']
+    );
 
-    if (selectField) {
+    if (genderField?.tagName.toLowerCase() === 'select') {
       return {
         type: 'select',
-        field: selectField
+        field: genderField
       };
     }
 
@@ -401,7 +404,7 @@ export class FormDetector {
     }
 
     // Fall back to regular text input
-    const textField = this.findInputField(form, ['gender', 'sex', 'geslacht'], ['text']);
+    const textField = this.findInputField(form, ['gender', 'sex', 'geslacht', 'aanhef'], ['text']);
 
     return {
       type: 'text',

@@ -162,6 +162,17 @@ describe('FormDetector', () => {
     testField(FormField.Email, 'EmailAddress', htmlFile);
   });
 
+  describe('Dutch registration form 5 detection', () => {
+    const htmlFile = 'nl-registration-form5.html';
+
+    testField(FormField.Email, 'input_25_5', htmlFile);
+    testField(FormField.Gender, 'input_25_13', htmlFile);
+    testField(FormField.FirstName, 'input_25_14', htmlFile);
+    testField(FormField.LastName, 'input_25_15', htmlFile);
+    testField(FormField.BirthDate, 'input_25_10', htmlFile);
+    testBirthdateFormat('dd/mm/yyyy', htmlFile);
+  });
+
   describe('English registration form 1 detection', () => {
     const htmlFile = 'en-registration-form1.html';
 
