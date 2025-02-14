@@ -201,7 +201,7 @@ export class FormDetector {
     // Find primary email field
     const primaryEmail = this.findInputField(
       form,
-      ['email', 'e-mail', 'mail', 'address', '@'],
+      ['email', 'e-mail', 'mail', '@', 'emailaddress'],
       ['text', 'email']
     );
 
@@ -404,9 +404,6 @@ export class FormDetector {
   /**
    * Find the password field in a form.
    */
-  /**
-   * Find the password field in a form.
-   */
   private findPasswordField(form: HTMLFormElement | null): {
     primary: HTMLInputElement | null,
     confirm: HTMLInputElement | null
@@ -423,7 +420,6 @@ export class FormDetector {
       const attributes = [
         input.id,
         input.name,
-        input.className,
         input.placeholder
       ].map(attr => attr?.toLowerCase() || '');
 
@@ -432,6 +428,11 @@ export class FormDetector {
         primaryPassword = input;
         break;
       }
+    }
+
+    // If no clear primary password field is found, use the first password field as primary
+    if (!primaryPassword && candidates.length > 0) {
+      primaryPassword = candidates[0];
     }
 
     // If we found a primary password, look for a confirmation field
@@ -452,11 +453,6 @@ export class FormDetector {
           break;
         }
       }
-    }
-
-    // If no clear primary password field is found, use the first password field as primary
-    if (!primaryPassword && candidates.length > 0) {
-      primaryPassword = candidates[0];
     }
 
     return {

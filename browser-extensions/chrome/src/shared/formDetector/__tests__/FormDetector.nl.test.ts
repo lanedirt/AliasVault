@@ -64,6 +64,13 @@ describe('FormDetector', () => {
       testField(FormField.Email, 'field18478', htmlFile);
       testField(FormField.FirstName, 'field18479', htmlFile);
       testField(FormField.LastName, 'field18486', htmlFile);
+    });
 
+    describe('Dutch registration form 7 detection', () => {
+      const htmlFile = 'nl-registration-form7.html';
+
+      testField(FormField.Email, 'Form_EmailAddress', htmlFile);
+      testField(FormField.Password, 'Form_Password', htmlFile);
+      testField(FormField.PasswordConfirm, 'Form_RepeatPassword', htmlFile);
     });
 });
