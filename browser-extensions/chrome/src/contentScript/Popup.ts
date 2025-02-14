@@ -30,7 +30,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
   popup.id = 'aliasvault-credential-popup';
 
   // Set popup width to match input width, with min/max constraints
-  const popupWidth = 400;
+  const popupWidth = 320;
 
   popup.style.cssText = `
         position: absolute;
@@ -137,7 +137,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   const credentialList = document.createElement('div');
   credentialList.id = 'aliasvault-credential-list';
   credentialList.style.cssText = `
-    max-height: 300px;
+    max-height: 180px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: ${isDarkMode() ? '#4b5563 #1f2937' : '#d1d5db #ffffff'};
