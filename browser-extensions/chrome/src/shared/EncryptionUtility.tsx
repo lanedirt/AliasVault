@@ -282,6 +282,31 @@ class EncryptionUtility {
       }
     }));
   }
+
+  /**
+   * Decrypts an attachment based on the provided public/private key pairs and returns the decrypted bytes as a base64 string.
+   */
+  public static async decryptAttachment(base64EncryptedAttachment: string, email: Email, encryptionKeys: EncryptionKey[]): Promise<string> {
+    try {
+      const encryptionKey = encryptionKeys.find(key => key.PublicKey === email.encryptionKey);
+
+      if (!encryptionKey) {
+        throw new Error('Encryption key not found');
+      }
+
+      // Decrypt symmetric key with asymmetric private key
+      const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
+        email.encryptedSymmetricKey,
+        encryptionKey.PrivateKey
+      );
+      const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
+
+      const encryptedBytesString = await EncryptionUtility.symmetricDecrypt(base64EncryptedAttachment, symmetricKeyBase64);
+      return encryptedBytesString;
+    } catch (err) {
+      throw new Error(err instanceof Error ? err.message : 'Failed to decrypt attachment');
+    }
+  }
 }
 
 export default EncryptionUtility;

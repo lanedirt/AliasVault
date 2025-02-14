@@ -6,7 +6,7 @@ import { useWebApi } from '../context/WebApiContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../../shared/EncryptionUtility';
-
+import { Attachment } from '../../shared/types/webapi/Attachment';
 /**
  * Email details page.
  */
@@ -92,6 +92,50 @@ const EmailDetails: React.FC = () => {
 
     // Close the current tab
     window.close();
+  };
+
+  /**
+   * Handle downloading an attachment.
+   */
+  const handleDownloadAttachment = async (attachment: Attachment): Promise<void> => {
+    try {
+      // Get the encrypted attachment bytes from the API
+      const base64EncryptedAttachment = await webApi.downloadBlobAndConvertToBase64(`Email/${id}/attachments/${attachment.id}`);
+
+      if (!dbContext?.sqliteClient) {
+        setError('Database context not available');
+        return;
+      }
+
+      // Get encryption keys for decryption
+      const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();
+
+      // Decrypt the attachment using ArrayBuffer
+      const decryptedBytes = await EncryptionUtility.decryptAttachment(base64EncryptedAttachment, email!, encryptionKeys);
+
+      if (!decryptedBytes) {
+        setError('Failed to decrypt attachment');
+        return;
+      }
+
+      // Create blob from decrypted bytes with proper MIME type
+      const blob = new Blob([decryptedBytes], { type: attachment.contentType || 'application/octet-stream' });
+
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = attachment.filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('handleDownloadAttachment error', err);
+      setError(err instanceof Error ? err.message : 'Failed to download attachment');
+    }
   };
 
   if (isLoading) {
@@ -192,7 +236,8 @@ const EmailDetails: React.FC = () => {
               {email.attachments.map((attachment) => (
                 <div
                   key={attachment.id}
-                  className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
+                  onClick={() => handleDownloadAttachment(attachment)}
+                  className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400"
                 >
                   <svg
                     className="w-4 h-4"

@@ -77,7 +77,7 @@ export class WebApiService {
             throw new Error('Request failed after token refresh');
           }
 
-          return parseJson ? retryResponse.json() : retryResponse.text() as T;
+          return parseJson ? retryResponse.json() : retryResponse as unknown as T;
         } else {
           this.handleLogout();
           throw new Error('Session expired');
@@ -88,7 +88,7 @@ export class WebApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return parseJson ? response.json() : response.text() as T;
+      return parseJson ? response.json() : response as unknown as T;
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
@@ -136,6 +136,27 @@ export class WebApiService {
    */
   public async get<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'GET' });
+  }
+
+  /**
+   * Issue GET request to the API expecting a file download and return it as a Base64 string.
+   */
+  public async downloadBlobAndConvertToBase64(endpoint: string): Promise<string> {
+    try {
+      const response = await this.fetch<Response>(endpoint, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/octet-stream'
+        }
+      }, false);
+
+      // Ensure we get the response as a blob
+      const blob = await response.blob();
+      return await this.blobToBase64(blob);
+    } catch (error) {
+      console.error('Error fetching and converting to Base64:', error);
+      throw error;
+    }
   }
 
   /**
@@ -243,6 +264,33 @@ export class WebApiService {
     await chrome.storage.local.set({
       accessToken,
       refreshToken
+    });
+  }
+
+  /**
+   * Convert a Blob to a Base64 string.
+   */
+  private async blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      /**
+       * When the reader has finished loading, convert the result to a Base64 string.
+       */
+      reader.onloadend = () : void => {
+        const result = reader.result;
+        if (typeof result === 'string') {
+          resolve(result.split(',')[1]); // Remove the data URL prefix
+        } else {
+          reject(new Error('Failed to convert Blob to Base64.'));
+        }
+      };
+
+      /**
+       * If the reader encounters an error, reject the promise.
+       */
+      reader.onerror = (error) : void => reject(error);
+      reader.readAsDataURL(blob);
     });
   }
 }
