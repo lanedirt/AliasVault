@@ -40,13 +40,14 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
         border-radius: 4px;
         box-shadow: 0 2px 10px ${isDarkMode() ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)'};
         width: ${popupWidth}px;
+        letter-spacing: 0 !important;
         color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     `;
 
   // Position popup below input
   const rect = input.getBoundingClientRect();
-  popup.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  popup.style.top = `${rect.bottom + window.scrollY + 4}px`;
   popup.style.left = `${rect.left + window.scrollX + 2}px`;
 
   return popup;
@@ -145,6 +146,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: ${isDarkMode() ? '#4b5563 #1f2937' : '#d1d5db #ffffff'};
+    line-height: 1.3;
   `;
   popup.appendChild(credentialList);
 
@@ -189,6 +191,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
     color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
     font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     cursor: pointer;
     border: none;
     display: flex;
@@ -196,6 +199,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     justify-content: center;
     gap: 4px;
     transition: background-color 0.2s ease;
+    line-height: 1;
   `;
 
   createButton.innerHTML = `
@@ -294,8 +298,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
     color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
     font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     border: 1px solid ${isDarkMode() ? '#4b5563' : '#e5e7eb'};
     outline: none;
+    line-height: 1;
   `;
 
   // Add focus styles
@@ -357,7 +363,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         }
 
         // Update popup content with filtered results
-        updatePopupContent(filteredCredentials, credentialList);
+        updatePopupContent(filteredCredentials, credentialList, input);
       }
     });
   });
@@ -370,6 +376,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
     color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
     font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     cursor: pointer;
     border: none;
     display: flex;
@@ -601,6 +608,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
           font-size: 14px;
           text-overflow: ellipsis;
           color: ${isDarkMode() ? '#f3f4f6' : '#111827'};
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
         `;
       serviceName.textContent = cred.ServiceName;
 
@@ -613,6 +621,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
           font-size: 12px;
           text-overflow: ellipsis;
           color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
         `;
 
       // Combine full name (if available) and username
