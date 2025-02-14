@@ -57,4 +57,13 @@ describe('FormDetector', () => {
       testField(FormField.BirthDate, 'input_25_10', htmlFile);
       testBirthdateFormat('dd/mm/yyyy', htmlFile);
     });
+
+    describe('Dutch registration form 6 detection', () => {
+      const htmlFile = 'nl-registration-form6.html';
+
+      testField(FormField.Email, 'field18478', htmlFile);
+      testField(FormField.FirstName, 'field18479', htmlFile);
+      testField(FormField.LastName, 'field18486', htmlFile);
+
+    });
 });

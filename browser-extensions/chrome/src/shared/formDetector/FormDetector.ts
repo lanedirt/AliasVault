@@ -198,64 +198,21 @@ export class FormDetector {
     primary: HTMLInputElement | null,
     confirm: HTMLInputElement | null
   } {
-    const candidates = form
-      ? form.querySelectorAll<HTMLInputElement>('input')
-      : this.document.querySelectorAll<HTMLInputElement>('input');
+    // Find primary email field
+    const primaryEmail = this.findInputField(
+      form,
+      ['email', 'e-mail', 'mail', 'address', '@'],
+      ['text', 'email']
+    );
 
-    let primaryEmail: HTMLInputElement | null = null;
-    let confirmEmail: HTMLInputElement | null = null;
-
-    /**
-     * Check if an input is an email field.
-     */
-    const isEmailField = (input: HTMLInputElement, confirmPatterns: string[] = []): boolean => {
-      const type = input.type.toLowerCase();
-      if (type === 'text' || type === 'email') {
-        const attributes = [
-          input.type,
-          input.id,
-          input.name,
-          input.className,
-          input.placeholder
-        ].map(attr => attr?.toLowerCase() || '');
-
-        // Check parent div for email-related text
-        const parentDiv = input.closest('div');
-        if (parentDiv) {
-          const parentText = parentDiv.textContent?.toLowerCase() || '';
-          attributes.push(parentText);
-
-          // Check for label elements within the parent div
-          const labels = parentDiv.getElementsByTagName('label');
-          for (const label of Array.from(labels)) {
-            attributes.push(label.textContent?.toLowerCase() || '');
-          }
-        }
-
-        const patterns = [...confirmPatterns, 'email', 'e-mail', 'mail', 'address', '@'];
-        return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
-      }
-      return false;
-    };
-
-    // First pass: find primary email
-    for (const input of Array.from(candidates)) {
-      if (!primaryEmail && isEmailField(input)) {
-        primaryEmail = input;
-        break;
-      }
-    }
-
-    // Second pass: find confirmation email
-    if (primaryEmail) {
-      for (const input of Array.from(candidates)) {
-        if (input !== primaryEmail &&
-            isEmailField(input, ['confirm', 'verification', 'repeat', 'retype', 'verify'])) {
-          confirmEmail = input;
-          break;
-        }
-      }
-    }
+    // Find confirmation email field if primary exists
+    const confirmEmail = primaryEmail
+      ? this.findInputField(
+          form,
+          ['confirm', 'verification', 'repeat', 'retype', 'verify'],
+          ['text', 'email']
+        )
+      : null;
 
     return {
       primary: primaryEmail,
