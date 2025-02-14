@@ -98,8 +98,12 @@ export function createLoadingPopup(input: HTMLInputElement, message: string) : H
 
 /**
  * Update the credential list content in the popup.
+ *
+ * @param credentials - The credentials to display.
+ * @param credentialList - The credential list element.
+ * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-export function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null) : void {
+export function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null, input: HTMLInputElement) : void {
   if (!credentialList) {
     credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
   }
@@ -110,7 +114,7 @@ export function updatePopupContent(credentials: Credential[], credentialList: HT
   credentialList.innerHTML = '';
 
   // Add credentials using the shared function
-  const credentialElements = createCredentialList(credentials);
+  const credentialElements = createCredentialList(credentials, input);
   credentialElements.forEach(element => credentialList.appendChild(element));
 }
 
@@ -155,7 +159,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     document.title
   );
 
-  updatePopupContent(filteredCredentials, credentialList);
+  updatePopupContent(filteredCredentials, credentialList, input);
 
   // Add divider
   const divider = document.createElement('div');
@@ -525,8 +529,11 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
 
 /**
  * Create credential list content for popup
+ *
+ * @param credentials - The credentials to display.
+ * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-function createCredentialList(credentials: Credential[]): HTMLElement[] {
+function createCredentialList(credentials: Credential[], input: HTMLInputElement): HTMLElement[] {
   const elements: HTMLElement[] = [];
 
   if (credentials.length > 0) {
@@ -677,7 +684,7 @@ function createCredentialList(credentials: Credential[]): HTMLElement[] {
 
       // Update click handler to only trigger on credentialInfo
       credentialInfo.addEventListener('click', () => {
-        fillCredential(cred);
+        fillCredential(cred, input);
         removeExistingPopup();
       });
 
@@ -910,7 +917,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
  * Open (or refresh) the autofill popup including check if vault is locked.
  */
 export function openAutofillPopup(input: HTMLInputElement) : void {
-  const formDetector = new FormDetector(document);
+  const formDetector = new FormDetector(document, input);
   const forms = formDetector.detectForms();
 
   if (!forms.length) return;

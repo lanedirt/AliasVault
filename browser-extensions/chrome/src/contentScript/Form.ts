@@ -4,9 +4,12 @@ import { openAutofillPopup } from "./Popup";
 
 /**
  * Fill credential into current form.
+ *
+ * @param credential - The credential to fill.
+ * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-export function fillCredential(credential: Credential) : void {
-  const formDetector = new FormDetector(document);
+export function fillCredential(credential: Credential, input: HTMLInputElement) : void {
+  const formDetector = new FormDetector(document, input);
   const forms = formDetector.detectForms();
 
   if (!forms.length) return;

@@ -15,7 +15,7 @@ const loadTestHtml = (filename: string): string => {
 /**
  * Setup a form detection test.
  */
-const setupFormTest = (htmlFile: string) : { document: Document, result: LoginForm } => {
+const setupFormTest = (htmlFile: string, focusedElementId?: string) : { document: Document, result: LoginForm } => {
   const html = loadTestHtml(htmlFile);
   const dom = new JSDOM(html, {
     url: 'http://localhost',
@@ -23,6 +23,23 @@ const setupFormTest = (htmlFile: string) : { document: Document, result: LoginFo
     resources: 'usable'
   });
   const document = dom.window.document;
+
+  // Set focus on specified element if provided
+  let focusedElement: HTMLElement | null = null;
+  if (focusedElementId) {
+    focusedElement = document.getElementById(focusedElementId);
+    if (!focusedElement) {
+      throw new Error(`Focus element with id "${focusedElementId}" not found in test HTML`);
+    }
+    focusedElement.focus();
+
+    // Create a new form detector with the focused element.
+    const formDetector = new FormDetector(document, focusedElement);
+    const result = formDetector.detectForms()[0];
+    return { document, result };
+  }
+
+  // No focused element, so just detect the first form.
   const formDetector = new FormDetector(document);
   const result = formDetector.detectForms()[0];
   return { document, result };
@@ -52,7 +69,7 @@ enum FormField {
  */
 const testField = (fieldName: FormField, elementId: string, htmlFile: string) : void => {
   it(`should detect ${fieldName} field`, () => {
-    const { document, result } = setupFormTest(htmlFile);
+    const { document, result } = setupFormTest(htmlFile, elementId);
 
     // First verify the test element exists
     const expectedElement = document.getElementById(elementId);
@@ -137,6 +154,12 @@ describe('FormDetector', () => {
     testField(FormField.GenderMale, 'gender1', htmlFile);
     testField(FormField.GenderFemale, 'gender2', htmlFile);
     testField(FormField.GenderOther, 'gender3', htmlFile);
+  });
+
+  describe('Dutch registration form 4 detection', () => {
+    const htmlFile = 'nl-registration-form4.html';
+
+    testField(FormField.Email, 'EmailAddress', htmlFile);
   });
 
   describe('English registration form 1 detection', () => {
