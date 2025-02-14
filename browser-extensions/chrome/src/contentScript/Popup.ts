@@ -238,11 +238,14 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       // Extract favicon from page and get the bytes
       const faviconBytes = await getFaviconBytes(document);
 
+      // Take URL from current page but without querystring params
+      const serviceUrl = new URL(window.location.href).origin + new URL(window.location.href).pathname;
+
       // Submit new identity to backend to persist in db
       const credential: Credential = {
         Id: '',
         ServiceName: serviceName,
-        ServiceUrl: window.location.href,
+        ServiceUrl: serviceUrl,
         Email: `${identity.emailPrefix}@${domain}`,
         Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
         Username: identity.nickName,
