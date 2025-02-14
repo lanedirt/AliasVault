@@ -116,12 +116,12 @@ export class FormDetector {
       : this.document.querySelectorAll<HTMLInputElement>('input, select');
 
     for (const input of Array.from(candidates)) {
-      const type = input.type.toLowerCase();
+      // Handle both input and select elements
+      const type = input.tagName.toLowerCase() === 'select' ? 'select' : input.type.toLowerCase();
       if (!types.includes(type)) continue;
 
       // Collect all text attributes to check
       const attributes = [
-        input.type,
         input.id,
         input.name,
         input.className,

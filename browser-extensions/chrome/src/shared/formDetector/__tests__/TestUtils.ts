@@ -1,7 +1,7 @@
 import { FormDetector } from '../FormDetector';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { LoginForm } from '../types/LoginForm';
 
@@ -45,7 +45,7 @@ const setupFormTest = (htmlFile: string, focusedElementId?: string) : { document
   return { document, result };
 };
 
-enum FormField {
+export enum FormField {
   Username = 'username',
   FirstName = 'firstName',
   LastName = 'lastName',
@@ -67,7 +67,7 @@ enum FormField {
 /**
  * Helper function to test field detection
  */
-const testField = (fieldName: FormField, elementId: string, htmlFile: string) : void => {
+export const testField = (fieldName: FormField, elementId: string, htmlFile: string) : void => {
   it(`should detect ${fieldName} field`, () => {
     const { document, result } = setupFormTest(htmlFile, elementId);
 
@@ -109,94 +109,9 @@ const testField = (fieldName: FormField, elementId: string, htmlFile: string) : 
 /**
  * Test the birthdate format.
  */
-const testBirthdateFormat = (expectedFormat: string, htmlFile: string) : void => {
+export const testBirthdateFormat = (expectedFormat: string, htmlFile: string) : void => {
   it('should detect correct birthdate format', () => {
     const { result } = setupFormTest(htmlFile);
     expect(result.birthdateField.format).toBe(expectedFormat);
   });
 };
-
-describe('FormDetector', () => {
-  describe('Dutch registration form detection', () => {
-    const htmlFile = 'nl-registration-form1.html';
-
-    testField(FormField.LastName, 'cpContent_txtAchternaam', htmlFile);
-    testField(FormField.Email, 'cpContent_txtEmail', htmlFile);
-    testField(FormField.Password, 'cpContent_txtWachtwoord', htmlFile);
-    testField(FormField.PasswordConfirm, 'cpContent_txtWachtwoord2', htmlFile);
-  });
-
-  describe('Dutch registration form 2 detection', () => {
-    const htmlFile = 'nl-registration-form2.html';
-
-    testField(FormField.Username, 'register-username', htmlFile);
-    testField(FormField.Email, 'register-email', htmlFile);
-    testField(FormField.Password, 'register-password', htmlFile);
-
-    testField(FormField.BirthDay, 'register-day', htmlFile);
-    testField(FormField.BirthMonth, 'register-month', htmlFile);
-    testField(FormField.BirthYear, 'register-year', htmlFile);
-
-    testField(FormField.GenderMale, 'man', htmlFile);
-    testField(FormField.GenderFemale, 'vrouw', htmlFile);
-    testField(FormField.GenderOther, 'iets', htmlFile);
-  });
-
-  describe('Dutch registration form 3 detection', () => {
-    const htmlFile = 'nl-registration-form3.html';
-
-    testField(FormField.FirstName, 'firstName', htmlFile);
-    testField(FormField.LastName, 'lastName', htmlFile);
-    testField(FormField.Password, 'password', htmlFile);
-
-    testField(FormField.BirthDate, 'date', htmlFile);
-    testBirthdateFormat('dd-mm-yyyy', htmlFile);
-    testField(FormField.GenderMale, 'gender1', htmlFile);
-    testField(FormField.GenderFemale, 'gender2', htmlFile);
-    testField(FormField.GenderOther, 'gender3', htmlFile);
-  });
-
-  describe('Dutch registration form 4 detection', () => {
-    const htmlFile = 'nl-registration-form4.html';
-
-    testField(FormField.Email, 'EmailAddress', htmlFile);
-  });
-
-  describe('Dutch registration form 5 detection', () => {
-    const htmlFile = 'nl-registration-form5.html';
-
-    testField(FormField.Email, 'input_25_5', htmlFile);
-    testField(FormField.Gender, 'input_25_13', htmlFile);
-    testField(FormField.FirstName, 'input_25_14', htmlFile);
-    testField(FormField.LastName, 'input_25_15', htmlFile);
-    testField(FormField.BirthDate, 'input_25_10', htmlFile);
-    testBirthdateFormat('dd/mm/yyyy', htmlFile);
-  });
-
-  describe('English registration form 1 detection', () => {
-    const htmlFile = 'en-registration-form1.html';
-
-    testField(FormField.Email, 'login', htmlFile);
-    testField(FormField.Password, 'password', htmlFile);
-  });
-
-  describe('English registration form 2 detection', () => {
-    const htmlFile = 'en-registration-form2.html';
-
-    testField(FormField.Email, 'signup-email-input', htmlFile);
-    testField(FormField.Username, 'signup-name-input', htmlFile);
-  });
-
-  describe('English registration form 3 detection', () => {
-    const htmlFile = 'en-registration-form3.html';
-
-    testField(FormField.Email, 'email', htmlFile);
-    testField(FormField.EmailConfirm, 'reenter_email', htmlFile);
-  });
-
-  describe('English email form 1 detection', () => {
-    const htmlFile = 'en-email-form1.html';
-
-    testField(FormField.Email, 'P0-0', htmlFile);
-  });
-});

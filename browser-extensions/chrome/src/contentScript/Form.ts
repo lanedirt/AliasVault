@@ -97,14 +97,31 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
   switch (form.genderField.type) {
     case 'select':
       if (form.genderField.field) {
-        switch (credential.Alias.Gender) {
-          case 'Male':
-            (form.genderField.field as HTMLSelectElement).value = 'M';
-            break;
-          case 'Female':
-            (form.genderField.field as HTMLSelectElement).value = 'F';
-            break;
+        const maleValues = ['m', 'male', 'heer', 'mr', 'mr.', 'man'];
+        const femaleValues = ['f', 'female', 'mevrouw', 'mrs', 'mrs.', 'ms', 'ms.', 'vrouw'];
+
+        const selectElement = form.genderField.field as HTMLSelectElement;
+        const options = Array.from(selectElement.options);
+
+        if (credential.Alias.Gender === 'Male') {
+          const maleOption = options.find(opt =>
+            maleValues.includes(opt.value.toLowerCase()) ||
+            maleValues.includes(opt.text.toLowerCase())
+          );
+          if (maleOption) {
+            selectElement.value = maleOption.value;
+          }
+        } else if (credential.Alias.Gender === 'Female') {
+          const femaleOption = options.find(opt =>
+            femaleValues.includes(opt.value.toLowerCase()) ||
+            femaleValues.includes(opt.text.toLowerCase())
+          );
+          if (femaleOption) {
+            selectElement.value = femaleOption.value;
+          }
         }
+
+        triggerInputEvents(selectElement);
       }
       break;
     case 'radio': {
@@ -237,7 +254,7 @@ export function injectIcon(input: HTMLInputElement): void {
  * Trigger input events for an element to trigger form validation
  * which some websites require before the "continue" button is enabled.
  */
-function triggerInputEvents(element: HTMLInputElement) : void {
+function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : void {
   // Create an overlay div that will show the highlight effect
   const overlay = document.createElement('div');
 
