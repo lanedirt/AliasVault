@@ -36,7 +36,7 @@ export class FormDetector {
       const emailFields = this.findEmailField(form);
       const usernameField = this.findUsernameField(form);
       const passwordFields = this.findPasswordField(form);
-      const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam'], ['text']);
+      const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text']);
       const lastNameField = this.findInputField(form, ['lastname', 'last-name', 'lname', 'achternaam'], ['text']);
       const birthdateField = this.findBirthdateFields(form);
       const genderField = this.findGenderField(form);
@@ -115,6 +115,10 @@ export class FormDetector {
       ? form.querySelectorAll<HTMLInputElement>('input, select')
       : this.document.querySelectorAll<HTMLInputElement>('input, select');
 
+    // Track best match and its pattern index
+    let bestMatch: HTMLInputElement | null = null;
+    let bestMatchIndex = patterns.length;
+
     for (const input of Array.from(candidates)) {
       // Handle both input and select elements
       const type = input.tagName.toLowerCase() === 'select' ? 'select' : input.type.toLowerCase();
@@ -124,20 +128,18 @@ export class FormDetector {
       const attributes = [
         input.id,
         input.name,
-        input.className,
         input.placeholder
       ].map(attr => attr?.toLowerCase() || '');
 
-      // Check for associated labels if input has an ID
-      if (input.id) {
-        // Find label with matching 'for' attribute
-        const label = this.document.querySelector(`label[for="${input.id}"]`);
+      // Check for associated labels if input has an ID or name
+      if (input.id || input.name) {
+        const label = this.document.querySelector(`label[for="${input.id || input.name}"]`);
         if (label) {
           attributes.push(label.textContent?.toLowerCase() || '');
         }
       }
 
-      // Check for parent label (in case input has a label sibling somewhere up to 3 levels up)
+      // Check for parent label
       let currentElement = input;
       for (let i = 0; i < 3; i++) {
         const parentLabel = currentElement.closest('label');
@@ -146,7 +148,6 @@ export class FormDetector {
           break;
         }
 
-        // Move up to the parent element
         if (currentElement.parentElement) {
           currentElement = currentElement.parentElement as HTMLInputElement;
         } else {
@@ -154,12 +155,18 @@ export class FormDetector {
         }
       }
 
-      if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-        return input;
+      // Find the earliest matching pattern
+      for (let i = 0; i < patterns.length; i++) {
+        if (i >= bestMatchIndex) break; // Skip if we already have a better match
+        if (attributes.some(attr => attr.includes(patterns[i]))) {
+          bestMatch = input;
+          bestMatchIndex = i;
+          break; // Found the best possible match for this input
+        }
       }
     }
 
-    return null;
+    return bestMatch;
   }
 
   /**
@@ -181,7 +188,7 @@ export class FormDetector {
           input.placeholder
         ].map(attr => attr?.toLowerCase() || '');
 
-        const patterns = ['user', 'username', 'name', 'login', 'identifier'];
+        const patterns = ['user', 'username', 'login', 'identifier'];
         if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
           return input;
         }
@@ -201,17 +208,17 @@ export class FormDetector {
     // Find primary email field
     const primaryEmail = this.findInputField(
       form,
-      ['email', 'e-mail', 'mail', '@', 'emailaddress'],
+      ['e-mailadres', 'e-mail', 'email', 'mail', '@', 'emailaddress'],
       ['text', 'email']
     );
 
     // Find confirmation email field if primary exists
     const confirmEmail = primaryEmail
       ? this.findInputField(
-          form,
-          ['confirm', 'verification', 'repeat', 'retype', 'verify'],
-          ['text', 'email']
-        )
+        form,
+        ['confirm', 'verification', 'repeat', 'retype', 'verify'],
+        ['text', 'email']
+      )
       : null;
 
     return {

@@ -13,7 +13,7 @@ describe('FormDetector', () => {
     const htmlFile = 'en-registration-form2.html';
 
     testField(FormField.Email, 'signup-email-input', htmlFile);
-    testField(FormField.Username, 'signup-name-input', htmlFile);
+    testField(FormField.FirstName, 'signup-name-input', htmlFile);
   });
 
   describe('English registration form 3 detection', () => {

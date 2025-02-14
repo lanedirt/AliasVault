@@ -99,7 +99,7 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
         if (form.birthdateField.month instanceof HTMLSelectElement) {
           const monthValue = (birthDate.getMonth() + 1).toString().padStart(2, '0');
           const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
+            'July', 'August', 'September', 'October', 'November', 'December'];
           const monthOption = Array.from(form.birthdateField.month.options).find(opt =>
             opt.value === monthValue ||
             opt.value === (birthDate.getMonth() + 1).toString() ||
