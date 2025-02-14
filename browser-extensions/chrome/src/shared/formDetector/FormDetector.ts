@@ -6,6 +6,8 @@ import { LoginForm } from "./types/LoginForm";
 export class FormDetector {
   private document: Document;
   private clickedElement: HTMLElement | null;
+  private processedForms = new Set<HTMLFormElement | null>();
+  private forms: LoginForm[] = [];
 
   /**
    * Constructor.
@@ -19,52 +21,16 @@ export class FormDetector {
    * Detect login forms on the page, prioritizing the form containing the clicked element.
    */
   public detectForms(): LoginForm[] {
-    const forms: LoginForm[] = [];
-
-    // Create a Set to track processed forms to avoid duplicates
-    const processedForms = new Set<HTMLFormElement | null>();
-
-    /**
-     * Helper to create a form entry
-     */
-    const createFormEntry = (form: HTMLFormElement | null): void => {
-      // Skip if we've already processed this form
-      if (form && processedForms.has(form)) return;
-      processedForms.add(form);
-
-      // Find all relevant fields
-      const emailFields = this.findEmailField(form);
-      const usernameField = this.findUsernameField(form);
-      const passwordFields = this.findPasswordField(form);
-      const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text']);
-      const lastNameField = this.findInputField(form, ['lastname', 'last-name', 'lname', 'achternaam'], ['text']);
-      const birthdateField = this.findBirthdateFields(form);
-      const genderField = this.findGenderField(form);
-
-      forms.push({
-        form,
-        emailField: emailFields.primary,
-        emailConfirmField: emailFields.confirm,
-        usernameField,
-        passwordField: passwordFields.primary,
-        passwordConfirmField: passwordFields.confirm,
-        firstNameField,
-        lastNameField,
-        birthdateField,
-        genderField
-      });
-    };
-
     // If we have a clicked element, try to find its form first
     if (this.clickedElement) {
       const formWrapper = this.clickedElement.closest('form');
 
       if (formWrapper) {
-        createFormEntry(formWrapper);
+        this.createFormEntry(formWrapper);
 
         // If we found a valid form, return early
-        if (forms.length > 0) {
-          return forms;
+        if (this.forms.length > 0) {
+          return this.forms;
         }
       }
     }
@@ -77,30 +43,30 @@ export class FormDetector {
     // Process password fields first
     passwordFields.forEach(passwordField => {
       const form = passwordField.closest('form');
-      createFormEntry(form);
+      this.createFormEntry(form);
     });
 
     // Process email fields that aren't already part of a processed form
     emailFields.forEach(field => {
       const form = field.closest('form');
-      if (form && processedForms.has(form)) return;
+      if (form && this.processedForms.has(form)) return;
 
       if (this.isLikelyEmailField(field)) {
-        createFormEntry(form);
+        this.createFormEntry(form);
       }
     });
 
     // Process potential username fields that aren't already part of a processed form
     textFields.forEach(field => {
       const form = field.closest('form');
-      if (form && processedForms.has(form)) return;
+      if (form && this.processedForms.has(form)) return;
 
       if (this.isLikelyUsernameField(field)) {
-        createFormEntry(form);
+        this.createFormEntry(form);
       }
     });
 
-    return forms;
+    return this.forms;
   }
 
   /**
@@ -109,7 +75,8 @@ export class FormDetector {
   private findInputField(
     form: HTMLFormElement | null,
     patterns: string[],
-    types: string[]
+    types: string[],
+    excludeElements: HTMLInputElement[] = []
   ): HTMLInputElement | null {
     const candidates = form
       ? form.querySelectorAll<HTMLInputElement>('input, select')
@@ -120,6 +87,9 @@ export class FormDetector {
     let bestMatchIndex = patterns.length;
 
     for (const input of Array.from(candidates)) {
+      // Skip if this element is already used
+      if (excludeElements.includes(input)) continue;
+
       // Handle both input and select elements
       const type = input.tagName.toLowerCase() === 'select' ? 'select' : input.type.toLowerCase();
       if (!types.includes(type)) continue;
@@ -170,36 +140,7 @@ export class FormDetector {
   }
 
   /**
-   * Find the username field in the form containing the password field.
-   */
-  private findUsernameField(form: HTMLFormElement | null): HTMLInputElement | null {
-    const candidates = form
-      ? form.querySelectorAll<HTMLInputElement>('input')
-      : this.document.querySelectorAll<HTMLInputElement>('input');
-
-    for (const input of Array.from(candidates)) {
-      const type = input.type.toLowerCase();
-      if (type === 'text') {
-        const attributes = [
-          input.type,
-          input.id,
-          input.name,
-          input.className,
-          input.placeholder
-        ].map(attr => attr?.toLowerCase() || '');
-
-        const patterns = ['user', 'username', 'login', 'identifier'];
-        if (patterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-          return input;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Find the email field in the form containing the password field.
+   * Find the email field in the form.
    */
   private findEmailField(form: HTMLFormElement | null): {
     primary: HTMLInputElement | null,
@@ -230,9 +171,9 @@ export class FormDetector {
   /**
    * Find the birthdate fields in the form.
    */
-  private findBirthdateFields(form: HTMLFormElement | null): LoginForm['birthdateField'] {
+  private findBirthdateFields(form: HTMLFormElement | null, excludeElements: HTMLInputElement[] = []): LoginForm['birthdateField'] {
     // First try to find a single date input
-    const singleDateField = this.findInputField(form, ['birthdate', 'birth-date', 'dob', 'geboortedatum'], ['date', 'text']);
+    const singleDateField = this.findInputField(form, ['birthdate', 'birth-date', 'dob', 'geboortedatum'], ['date', 'text'], excludeElements);
 
     // Detect date format by searching all text content in the form
     let format = 'yyyy-mm-dd'; // default format
@@ -288,9 +229,9 @@ export class FormDetector {
     }
 
     // Look for separate day/month/year fields
-    const dayField = this.findInputField(form, ['birth-day', 'birthday', 'day', 'dag', 'birthdate_d'], ['text', 'number', 'select']);
-    const monthField = this.findInputField(form, ['birth-month', 'birthmonth', 'month', 'maand', 'birthdate_m'], ['text', 'number', 'select']);
-    const yearField = this.findInputField(form, ['birth-year', 'birthyear', 'year', 'jaar', 'birthdate_y'], ['text', 'number', 'select']);
+    const dayField = this.findInputField(form, ['birth-day', 'birthday', 'day', 'dag', 'birthdate_d'], ['text', 'number', 'select'], excludeElements);
+    const monthField = this.findInputField(form, ['birth-month', 'birthmonth', 'month', 'maand', 'birthdate_m'], ['text', 'number', 'select'], excludeElements);
+    const yearField = this.findInputField(form, ['birth-year', 'birthyear', 'year', 'jaar', 'birthdate_y'], ['text', 'number', 'select'], excludeElements);
 
     return {
       single: null,
@@ -304,12 +245,13 @@ export class FormDetector {
   /**
    * Find the gender field in the form.
    */
-  private findGenderField(form: HTMLFormElement | null): LoginForm['genderField'] {
+  private findGenderField(form: HTMLFormElement | null, excludeElements: HTMLInputElement[] = []): LoginForm['genderField'] {
     // Try to find select or input element using the shared method
     const genderField = this.findInputField(
       form,
       ['gender', 'sex', 'geslacht', 'aanhef'],
-      ['select']
+      ['select'],
+      excludeElements
     );
 
     if (genderField?.tagName.toLowerCase() === 'select') {
@@ -368,7 +310,7 @@ export class FormDetector {
     }
 
     // Fall back to regular text input
-    const textField = this.findInputField(form, ['gender', 'sex', 'geslacht', 'aanhef'], ['text']);
+    const textField = this.findInputField(form, ['gender', 'sex', 'geslacht', 'aanhef'], ['text'], excludeElements);
 
     return {
       type: 'text',
@@ -466,5 +408,57 @@ export class FormDetector {
       primary: primaryPassword,
       confirm: confirmPassword
     };
+  }
+
+  /**
+   * Create a form entry.
+   */
+  private createFormEntry(form: HTMLFormElement | null): void {
+    // Skip if we've already processed this form
+    if (form && this.processedForms.has(form)) return;
+    this.processedForms.add(form);
+
+    // Keep track of detected fields to prevent overlap
+    const detectedFields: HTMLInputElement[] = [];
+
+    // Find fields in priority order (most specific to least specific).
+    const emailFields = this.findEmailField(form);
+    if (emailFields.primary) detectedFields.push(emailFields.primary);
+    if (emailFields.confirm) detectedFields.push(emailFields.confirm);
+
+    const passwordFields = this.findPasswordField(form);
+    if (passwordFields.primary) detectedFields.push(passwordFields.primary);
+    if (passwordFields.confirm) detectedFields.push(passwordFields.confirm);
+
+    const usernameField = this.findInputField(form, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'],['text'], detectedFields);
+    if (usernameField) detectedFields.push(usernameField);
+
+    const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text'], detectedFields);
+    if (firstNameField) detectedFields.push(firstNameField);
+
+    const lastNameField = this.findInputField(form, ['lastname', 'last-name', 'lname', 'achternaam'], ['text'], detectedFields);
+    if (lastNameField) detectedFields.push(lastNameField);
+
+    const birthdateField = this.findBirthdateFields(form, detectedFields);
+    if (birthdateField.single) detectedFields.push(birthdateField.single);
+    if (birthdateField.day) detectedFields.push(birthdateField.day);
+    if (birthdateField.month) detectedFields.push(birthdateField.month);
+    if (birthdateField.year) detectedFields.push(birthdateField.year);
+
+    const genderField = this.findGenderField(form, detectedFields);
+    if (genderField.field) detectedFields.push(genderField.field as HTMLInputElement);
+
+    this.forms.push({
+      form,
+      emailField: emailFields.primary,
+      emailConfirmField: emailFields.confirm,
+      usernameField,
+      passwordField: passwordFields.primary,
+      passwordConfirmField: passwordFields.confirm,
+      firstNameField,
+      lastNameField,
+      birthdateField,
+      genderField
+    });
   }
 }

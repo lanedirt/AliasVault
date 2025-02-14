@@ -86,4 +86,13 @@ describe('FormDetector', () => {
     testField(FormField.Email, 'aliasvault-input-email', htmlFile);
     testField(FormField.LastName, 'aliasvault-input-lastname', htmlFile);
   });
+
+  describe('Dutch registration form 9 detection', () => {
+    const htmlFile = 'nl-registration-form9.html';
+
+    testField(FormField.Username, 'user_username', htmlFile);
+    testField(FormField.Email, 'user_email_address', htmlFile);
+    testField(FormField.Password, 'user_password', htmlFile);
+    testField(FormField.PasswordConfirm, 'user_password_confirmation', htmlFile);
+  });
 });
