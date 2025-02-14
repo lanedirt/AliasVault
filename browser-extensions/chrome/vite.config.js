@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     dictionaryLoader(),
     webExtension({
-      manifest: 'manifest.json',
+      manifest: './manifest.json',
     }),
     viteStaticCopy({
       targets: [

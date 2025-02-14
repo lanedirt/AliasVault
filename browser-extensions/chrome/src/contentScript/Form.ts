@@ -79,15 +79,56 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
     if (credential.Alias.BirthDate) {
       const birthDate = new Date(credential.Alias.BirthDate);
       if (form.birthdateField.day) {
-        form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
+        if (form.birthdateField.day instanceof HTMLSelectElement) {
+          const dayValue = birthDate.getDate().toString().padStart(2, '0');
+          const dayOption = Array.from(form.birthdateField.day.options).find(opt =>
+            opt.value === dayValue ||
+            opt.value === birthDate.getDate().toString() ||
+            opt.text === dayValue ||
+            opt.text === birthDate.getDate().toString()
+          );
+          if (dayOption) {
+            form.birthdateField.day.value = dayOption.value;
+          }
+        } else {
+          form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
+        }
         triggerInputEvents(form.birthdateField.day);
       }
       if (form.birthdateField.month) {
-        form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+        if (form.birthdateField.month instanceof HTMLSelectElement) {
+          const monthValue = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+          const monthOption = Array.from(form.birthdateField.month.options).find(opt =>
+            opt.value === monthValue ||
+            opt.value === (birthDate.getMonth() + 1).toString() ||
+            opt.text === monthValue ||
+            opt.text === (birthDate.getMonth() + 1).toString() ||
+            opt.text.toLowerCase() === monthNames[birthDate.getMonth()].toLowerCase() ||
+            opt.text.toLowerCase() === monthNames[birthDate.getMonth()].substring(0, 3).toLowerCase()
+          );
+          if (monthOption) {
+            form.birthdateField.month.value = monthOption.value;
+          }
+        } else {
+          form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+        }
         triggerInputEvents(form.birthdateField.month);
       }
       if (form.birthdateField.year) {
-        form.birthdateField.year.value = birthDate.getFullYear().toString();
+        if (form.birthdateField.year instanceof HTMLSelectElement) {
+          const yearValue = birthDate.getFullYear().toString();
+          const yearOption = Array.from(form.birthdateField.year.options).find(opt =>
+            opt.value === yearValue ||
+            opt.text === yearValue
+          );
+          if (yearOption) {
+            form.birthdateField.year.value = yearOption.value;
+          }
+        } else {
+          form.birthdateField.year.value = birthDate.getFullYear().toString();
+        }
         triggerInputEvents(form.birthdateField.year);
       }
     }

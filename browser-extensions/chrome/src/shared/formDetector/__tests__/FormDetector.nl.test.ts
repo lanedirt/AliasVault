@@ -72,5 +72,8 @@ describe('FormDetector', () => {
       testField(FormField.Email, 'Form_EmailAddress', htmlFile);
       testField(FormField.Password, 'Form_Password', htmlFile);
       testField(FormField.PasswordConfirm, 'Form_RepeatPassword', htmlFile);
+      testField(FormField.BirthDay, 'Form.Birthdate_d', htmlFile);
+      testField(FormField.BirthMonth, 'Form.Birthdate_m', htmlFile);
+      testField(FormField.BirthYear, 'Form.Birthdate_y', htmlFile);
     });
 });

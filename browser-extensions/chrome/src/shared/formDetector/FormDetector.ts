@@ -281,9 +281,9 @@ export class FormDetector {
     }
 
     // Look for separate day/month/year fields
-    const dayField = this.findInputField(form, ['birth-day', 'birthday', 'day', 'dag'], ['text', 'number']);
-    const monthField = this.findInputField(form, ['birth-month', 'birthmonth', 'month', 'maand'], ['text', 'number']);
-    const yearField = this.findInputField(form, ['birth-year', 'birthyear', 'year', 'jaar'], ['text', 'number']);
+    const dayField = this.findInputField(form, ['birth-day', 'birthday', 'day', 'dag', 'birthdate_d'], ['text', 'number', 'select']);
+    const monthField = this.findInputField(form, ['birth-month', 'birthmonth', 'month', 'maand', 'birthdate_m'], ['text', 'number', 'select']);
+    const yearField = this.findInputField(form, ['birth-year', 'birthyear', 'year', 'jaar', 'birthdate_y'], ['text', 'number', 'select']);
 
     return {
       single: null,
