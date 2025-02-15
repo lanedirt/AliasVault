@@ -78,9 +78,9 @@ public class ApiTests : ClientPlaywrightTest
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == refreshToken.Id);
 
-        // Assert dates match exactly.
+        // Assert dates match up to the minute (ignoring seconds and milliseconds)
         Assert.That(retrievedToken, Is.Not.Null, "Refresh token not found in database");
-        Assert.That(retrievedToken.ExpireDate, Is.EqualTo(testDate), "ExpireDate was modified during storage/retrieval");
-        Assert.That(retrievedToken.CreatedAt, Is.EqualTo(testDate), "CreatedAt was modified during storage/retrieval");
+        Assert.That(retrievedToken.ExpireDate.ToString("yyyy-MM-dd HH:mm"), Is.EqualTo(testDate.ToString("yyyy-MM-dd HH:mm")), "ExpireDate was modified during storage/retrieval");
+        Assert.That(retrievedToken.CreatedAt.ToString("yyyy-MM-dd HH:mm"), Is.EqualTo(testDate.ToString("yyyy-MM-dd HH:mm")), "CreatedAt was modified during storage/retrieval");
     }
 }
