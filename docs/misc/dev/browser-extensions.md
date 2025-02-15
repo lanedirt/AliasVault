@@ -33,4 +33,23 @@ npm run build
 4. The extension should now be loaded and ready to use.
 
 ### Auto-build on changes
-When developing the extension, you can use the `npm run watch` command. This will automatically build the extension when you make changes to the code which will then automatically reload the extension in Chrome. This means you can make changes and see the results immediately.
+When developing the extension, you can use the `npm run dev` command. This will automatically build the extension when you make changes to the code which will then automatically reload the extension in Chrome. This means you can make changes and see the results immediately.
+
+## Automatic tests
+The extension has a suite of automatic tests that are run on every pull request. These tests are located in the `__tests__` directories scattered throughout the browser extension codebase.
+
+### Run the tests
+To run the tests locally, you can use the `npm run test` command. This will run all tests.
+
+```bash
+npm run test
+```
+
+## Manual tests
+In order to test for client side issues, here is a list of public websites that have caused issues in the past and can be used to test whether the extension is (still) working correctly.
+
+### Websites that have caused issues
+| Website | Reason |
+| --- | --- |
+| https://www.paprika-shopping.nl/nieuwsbrief/newsletter-register-landing.html | Popup CSS style conflicts |
+| https://bloshing.com/inschrijven-nieuwsbrief | Popup CSS style conflicts |

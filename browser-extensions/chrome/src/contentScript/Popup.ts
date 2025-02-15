@@ -200,6 +200,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     gap: 4px;
     transition: background-color 0.2s ease;
     line-height: 1;
+    text-transform: none;
+    font-weight: 500;
+    margin: 0;
   `;
 
   createButton.innerHTML = `
@@ -302,6 +305,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     border: 1px solid ${isDarkMode() ? '#4b5563' : '#e5e7eb'};
     outline: none;
     line-height: 1;
+    box-shadow: none;
+    margin: 0;
+    height: auto;
   `;
 
   // Add focus styles
@@ -383,6 +389,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    text-transform: none;
+    font-weight: 500;
+    margin: 0;
   `;
 
   closeButton.innerHTML = `
@@ -813,6 +822,10 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            line-height: 1;
+            text-transform: none;
+            font-weight: 500;
+            margin: 0;
           ">Cancel</button>
           <button id="save-btn" style="
             padding: 8px 16px;
@@ -823,6 +836,10 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            line-height: 1;
+            text-transform: none;
+            font-weight: 500;
+            margin: 0;
           ">Save</button>
         </div>
       `;
