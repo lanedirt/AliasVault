@@ -33,6 +33,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
   const popupWidth = 320;
 
   popup.style.cssText = `
+        all: unset;
         position: absolute;
         z-index: 999999;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
@@ -68,7 +69,7 @@ export function createLoadingPopup(input: HTMLInputElement, message: string) : H
     padding: 20px;
     gap: 8px;
   ">
-    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
+    <svg style="all:unset; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10"
         fill="none"
         stroke="${isDarkMode() ? '#e5e7eb' : '#374151'}"
@@ -86,7 +87,7 @@ export function createLoadingPopup(input: HTMLInputElement, message: string) : H
         />
       </circle>
     </svg>
-    <span>${message}</span>
+    <span style="font-size: 14px; font-weight: 500; line-height: normal;">${message}</span>
   </div>
 `;
 
@@ -206,7 +207,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   `;
 
   createButton.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg style="all:unset; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
@@ -295,6 +296,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   searchInput.dataset.aliasvaultIgnore = 'true';
   searchInput.placeholder = 'Search vault...';
   searchInput.style.cssText = `
+    all: unset;
     flex: 2;
     padding: 6px 12px;
     border-radius: 4px;
@@ -395,7 +397,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   `;
 
   closeButton.innerHTML = `
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <svg style="all:unset; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
@@ -517,7 +519,7 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
     border-radius: 4px;
   `;
   button.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg style="all:unset; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;" viewBox="0 0 24 24">
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
     </svg>
@@ -656,7 +658,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
           flex-shrink: 0; /* Prevent icon from shrinking */
         `;
       popoutIcon.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg style="all:unset; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
             <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -792,7 +794,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
       `;
 
     popup.innerHTML = `
-        <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: ${isDarkMode() ? '#f8f9fa' : '#000000'}">
+        <h3 style="margin: 0 0 16px 0; font-size: 18px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 600; color: ${isDarkMode() ? '#f8f9fa' : '#000000'}">
           New alias name
         </h3>
         <input
@@ -810,6 +812,9 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
             color: ${isDarkMode() ? '#f8f9fa' : '#000000'};
             font-size: 14px;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            height: auto;
+            font-weight: 500;
+            line-height: normal;
           "
         >
         <div style="display: flex; justify-content: flex-end; gap: 12px;">
