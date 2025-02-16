@@ -1006,15 +1006,49 @@ function base64Encode(buffer: Uint8Array): string | null {
  * Get favicon bytes from page.
  */
 async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
-  const favicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement;
-  if (!favicon) return null;
+  // Get all possible favicon links, ordered by preference
+  const faviconLinks = [
+    // Explicit SVG icons
+    ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')),
+    // High-res icons
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="192x192"], link[rel="icon"][sizes="128x128"]')),
+    // Apple touch icons (usually high quality)
+    ...Array.from(document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="apple-touch-icon-precomposed"]')),
+    // Standard favicons
+    ...Array.from(document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')),
+    // Fallback to root favicon.ico
+    { href: `${window.location.origin}/favicon.ico` }
+  ] as HTMLLinkElement[];
 
-  try {
-    const response = await fetch(favicon.href);
-    const arrayBuffer = await response.arrayBuffer();
-    return new Uint8Array(arrayBuffer);
-  } catch (error) {
-    console.error('Error fetching favicon:', error);
-    return null;
+  // Remove duplicates based on href
+  const uniqueLinks = Array.from(new Map(faviconLinks.map(link => [link.href, link])).values());
+
+  // Try each favicon URL until we find one that works
+  for (const link of uniqueLinks) {
+    try {
+      const response = await fetch(link.href);
+      if (!response.ok) {
+        continue; // Try next link if this one fails
+      }
+
+      const contentType = response.headers.get('content-type');
+      // Skip if content type indicates it's not an image
+      if (contentType && !contentType.startsWith('image/')) {
+        continue;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      // Skip if the file is too large (> 100KB) or empty
+      if (arrayBuffer.byteLength === 0 || arrayBuffer.byteLength > 102400) {
+        continue;
+      }
+
+      return new Uint8Array(arrayBuffer);
+    } catch (error) {
+      console.debug('Error fetching favicon:', link.href, error);
+      continue; // Try next link if this one fails
+    }
   }
+
+  return null; // Return null if no favicon could be downloaded
 }

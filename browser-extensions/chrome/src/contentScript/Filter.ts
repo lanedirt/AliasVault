@@ -14,29 +14,27 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
   );
 
   // 2. Base URL match with fuzzy domain comparison if no exact matches
-  if (filtered.length === 0) {
-    filtered = credentials.filter(cred => {
-      if (!cred.ServiceUrl) return false;
-      try {
-        const credUrlObject = new URL(cred.ServiceUrl);
-        const currentUrlObject = new URL(baseUrl);
+  filtered = credentials.filter(cred => {
+    if (!cred.ServiceUrl) return false;
+    try {
+      const credUrlObject = new URL(cred.ServiceUrl);
+      const currentUrlObject = new URL(baseUrl);
 
-        // Extract root domains by splitting on dots and taking last two parts
-        const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
-        const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
+      // Extract root domains by splitting on dots and taking last two parts
+      const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
+      const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
 
-        // Get root domain (last two parts, e.g., 'aliasvaul.net')
-        const credRootDomain = credDomainParts.slice(-2).join('.');
-        const currentRootDomain = currentDomainParts.slice(-2).join('.');
+      // Get root domain (last two parts, e.g., 'aliasvaul.net')
+      const credRootDomain = credDomainParts.slice(-2).join('.');
+      const currentRootDomain = currentDomainParts.slice(-2).join('.');
 
-        // Compare protocols and root domains
-        return credUrlObject.protocol === currentUrlObject.protocol &&
-                  credRootDomain === currentRootDomain;
-      } catch {
-        return false;
-      }
-    });
-  }
+      // Compare protocols and root domains
+      return credUrlObject.protocol === currentUrlObject.protocol &&
+                credRootDomain === currentRootDomain;
+    } catch {
+      return false;
+    }
+  });
 
   // 3. Page title word match if still no matches
   if (filtered.length === 0 && pageTitle.length > 0) {
