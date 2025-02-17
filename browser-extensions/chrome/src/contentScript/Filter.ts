@@ -45,7 +45,8 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
       'page', 'site', 'secure', 'password', 'access', 'member',
       'user', 'profile', 'auth', 'session', 'inloggen',
       'registreren', 'registratie', 'free', 'gratis', 'create',
-      'new', 'aanmelden', 'inschrijven', 'nieuwsbrief', 'schrijf'
+      'new', 'aanmelden', 'inschrijven', 'nieuwsbrief', 'schrijf',
+      'your', 'jouw'
     ]);
 
     const titleWords = pageTitle.toLowerCase()

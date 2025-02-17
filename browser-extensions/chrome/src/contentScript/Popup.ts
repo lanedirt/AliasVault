@@ -35,7 +35,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
   popup.style.cssText = `
         all: unset;
         position: absolute;
-        z-index: 999999;
+        z-index: 999999999;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
         border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
         border-radius: 4px;
@@ -204,6 +204,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     text-transform: none;
     font-weight: 500;
     margin: 0;
+    min-width: auto;
+    max-width: auto;
+    min-height: auto;
+    max-height: auto;
   `;
 
   createButton.innerHTML = `
@@ -246,7 +250,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     const serviceName = await createEditNamePopup(suggestedName);
     if (!serviceName) return; // User cancelled
 
-    const loadingPopup = createLoadingPopup(input, 'Creating new identity...');
+    const loadingPopup = createLoadingPopup(input, 'Creating new alias...');
 
     try {
       // Sync with api to ensure we have the latest vault.
@@ -269,8 +273,35 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       // Extract favicon from page and get the bytes
       const faviconBytes = await getFaviconBytes(document);
 
-      // Take URL from current page but without querystring params
-      const serviceUrl = new URL(window.location.href).origin + new URL(window.location.href).pathname;
+      // Take URL from current page but without querystring params, validating the URL
+      const getValidServiceUrl = (): string | null => {
+        try {
+          // Check if we're in an iframe with invalid/null source
+          if (window !== window.top && (!window.location.href || window.location.href === 'about:srcdoc')) {
+            return null;
+          }
+
+          const url = new URL(window.location.href);
+
+          // Validate the domain/origin
+          if (!url.origin || url.origin === 'null' || !url.hostname) {
+            return null;
+          }
+
+          // Check for valid protocol (only http/https)
+          if (!url.protocol.match(/^https?:$/)) {
+            return null;
+          }
+
+          return url.origin + url.pathname;
+        } catch (error) {
+          console.debug('Error validating service URL:', error);
+          return null;
+        }
+      };
+
+      // Get valid service URL, defaults to empty string if invalid
+      const serviceUrl = getValidServiceUrl() || '';
 
       // Submit new identity to backend to persist in db
       const credential: Credential = {
@@ -329,6 +360,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     box-shadow: none;
     margin: 0;
     height: auto;
+    text-align: left;
   `;
 
   // Add focus styles
@@ -413,6 +445,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     text-transform: none;
     font-weight: 500;
     margin: 0;
+    min-width: auto;
+    max-width: auto;
+    min-height: auto;
+    max-height: auto;
   `;
 
   closeButton.innerHTML = `
@@ -587,6 +623,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
           border-radius: 4px;
           width: 100%;
           box-sizing: border-box;
+          text-align: left;
         `;
 
       // Create container for credential info (logo + username)
@@ -739,6 +776,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
         color: ${isDarkMode() ? '#9ca3af' : '#6b7280'};
         font-style: italic;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        text-align: left;
       `;
     noMatches.textContent = 'No matches found';
     elements.push(noMatches);
@@ -787,7 +825,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 999999;
+        z-index: 999999999;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -796,7 +834,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
     const popup = document.createElement('div');
     popup.style.cssText = `
         position: relative;
-        z-index: 1000000;
+        z-index: 1000000000;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
         border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
         border-radius: 8px;

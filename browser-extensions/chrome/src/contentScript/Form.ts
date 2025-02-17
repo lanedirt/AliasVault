@@ -319,7 +319,7 @@ function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : voi
     const rect = element.getBoundingClientRect();
     overlay.style.cssText = `
       position: fixed;
-      z-index: 999999;
+      z-index: 999999999;
       pointer-events: none;
       top: ${rect.top}px;
       left: ${rect.left}px;
