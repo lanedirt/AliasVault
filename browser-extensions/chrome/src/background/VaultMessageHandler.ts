@@ -146,9 +146,7 @@ export async function handleGetCredentials(
 
   try {
     const sqliteClient = await createVaultSqliteClient(vaultState);
-
     const credentials = sqliteClient.getAllCredentials();
-
     sendResponse({ credentials: credentials, status: 'OK' });
   } catch (error) {
     console.error('Error getting credentials:', error);

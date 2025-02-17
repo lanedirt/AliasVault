@@ -44,7 +44,7 @@ const App: React.FC = () => {
     { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential details' },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
-    { path: '/settings', element: <Settings />, showBackButton: true, title: 'Settings' },
+    { path: '/settings', element: <Settings />, showBackButton: false },
   ];
 
   useEffect(() => {

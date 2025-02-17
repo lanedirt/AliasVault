@@ -786,14 +786,18 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
 }
 
 export const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
+export const GLOBAL_POPUP_ENABLED_KEY = 'aliasvault_global_popup_enabled';
 
 /**
  * Check if auto-popup is disabled for current site
  */
 export async function isAutoShowPopupDisabled(): Promise<boolean> {
-  const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
-  const disabledSites = result[DISABLED_SITES_KEY] || [];
-  return disabledSites.includes(window.location.hostname);
+  const settings = await chrome.storage.local.get([DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY]);
+  const disabledUrls = settings[DISABLED_SITES_KEY] || [];
+  const isGloballyEnabled = settings[GLOBAL_POPUP_ENABLED_KEY] !== false;
+  const currentHostname = window.location.hostname;
+
+  return !isGloballyEnabled || disabledUrls.includes(currentHostname);
 }
 
 /**

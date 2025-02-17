@@ -49,6 +49,8 @@ npm run test
 In order to test for client side issues, here is a list of public websites that have caused issues in the past and can be used to test whether the extension is (still) working correctly.
 
 ### Websites that have caused issues
+The following websites have been known to cause issues in the past (but should be fixed now).
+
 | Website | Reason |
 | --- | --- |
 | https://www.paprika-shopping.nl/nieuwsbrief/newsletter-register-landing.html | Popup CSS style conflicts |

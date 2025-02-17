@@ -117,8 +117,8 @@ const EmailsList: React.FC = () => {
   if (emails.length === 0) {
     return (
       <div>
-        <div className="flex justify-between items-center">
-          <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-gray-900 dark:text-white text-xl">Emails</h2>
           <ReloadButton onClick={loadEmails} />
         </div>
         <div className="text-gray-500 dark:text-gray-400 space-y-2">
@@ -132,8 +132,8 @@ const EmailsList: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center">
-        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Emails</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-gray-900 dark:text-white text-xl">Emails</h2>
         <ReloadButton onClick={loadEmails} />
       </div>
       <div className="space-y-2">
