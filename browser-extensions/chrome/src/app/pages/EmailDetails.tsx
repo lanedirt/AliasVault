@@ -7,6 +7,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../../shared/EncryptionUtility';
 import { Attachment } from '../../shared/types/webapi/Attachment';
+import { useLoading } from '../context/LoadingContext';
+
 /**
  * Email details page.
  */
@@ -18,6 +20,16 @@ const EmailDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<Email | null>(null);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const { setIsInitialLoading } = useLoading();
+
+  /**
+   * Make sure the initial loading state is set to false when this component is loaded itself.
+   */
+    useEffect(() => {
+      if (!isLoading) {
+        setIsInitialLoading(false);
+      }
+    }, [setIsInitialLoading, isLoading]);
 
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation
