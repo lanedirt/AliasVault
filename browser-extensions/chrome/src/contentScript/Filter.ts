@@ -45,13 +45,13 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
       'page', 'site', 'secure', 'password', 'access', 'member',
       'user', 'profile', 'auth', 'session', 'inloggen',
       'registreren', 'registratie', 'free', 'gratis', 'create',
-      'new'
+      'new', 'aanmelden', 'inschrijven', 'nieuwsbrief', 'schrijf'
     ]);
 
     const titleWords = pageTitle.toLowerCase()
       .split(/\s+/)
       .filter(word =>
-        word.length > 2 && // Filter out words shorter than 3 characters
+        word.length > 3 && // Filter out words shorter than 4 characters
         !badWords.has(word.toLowerCase()) // Filter out generic words
       );
 

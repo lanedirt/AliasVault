@@ -224,7 +224,26 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   });
 
   createButton.addEventListener('click', async () => {
-    const serviceName = await createEditNamePopup(document.title);
+    // Determine service name based on conditions
+    let suggestedName = document.title;
+
+    // First try to extract the last part after common divider characters
+    const dividerMatch = document.title.match(/[\s]*[|\-–—/\\]+[\s]*([^|\-–—/\\]+)$/);
+    if (dividerMatch && dividerMatch[1].trim().split(/\s+/).length === 1) {
+      // If we found a match and it's a single word, use it
+      suggestedName = dividerMatch[1].trim();
+    } else {
+      // Fall back to previous logic for long titles
+      const wordCount = document.title.trim().split(/\s+/).length;
+      if (wordCount > 3) {
+        // Extract main domain + extension by taking last 2 parts of hostname
+        const domainParts = window.location.hostname.replace(/^www\./, '').split('.');
+        const mainDomain = domainParts.slice(-2).join('.');
+        suggestedName = mainDomain;
+      }
+    }
+
+    const serviceName = await createEditNamePopup(suggestedName);
     if (!serviceName) return; // User cancelled
 
     const loadingPopup = createLoadingPopup(input, 'Creating new identity...');
