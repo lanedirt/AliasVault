@@ -214,13 +214,12 @@ export function injectIcon(input: HTMLInputElement): void {
   align-items: center;
   justify-content: center;
   position: absolute;
-  right: 8px;
-  top: 8px;
-  margin: auto;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  z-index: 999999;
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 ">
   <img src="data:image/svg+xml;base64,${btoa(aliasvaultIconSvg)}" style="width: 100%; height: 100%;" />
 </div>
@@ -231,61 +230,75 @@ export function injectIcon(input: HTMLInputElement): void {
     input.id = `aliasvault-input-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Remove existing icon if one already exists
-  const existingIcon = document.querySelector(`[data-icon-for="${input.id}"]`);
-  if (existingIcon) {
-    existingIcon.remove();
+  // Create an overlay container at document level if it doesn't exist
+  let overlayContainer = document.getElementById('aliasvault-overlay-container');
+  if (!overlayContainer) {
+    overlayContainer = document.createElement('div');
+    overlayContainer.id = 'aliasvault-overlay-container';
+    overlayContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2147483647;
+    `;
+    document.body.appendChild(overlayContainer);
   }
 
-  const iconDiv = document.createElement('div');
-  iconDiv.innerHTML = ICON_HTML;
-  const icon = iconDiv.firstElementChild as HTMLElement;
-
-  // Get input's position and dimensions
-  const inputRect = input.getBoundingClientRect();
-
-  // Position icon absolutely relative to viewport
-  icon.style.cssText = `
-      position: fixed;
-      z-index: 9999;
-      cursor: pointer;
-      top: ${inputRect.top + window.scrollY + (inputRect.height - 24) / 2}px;
-      right: ${window.innerWidth - (inputRect.right + window.scrollX) + 8}px;
-      width: 24px;
-      height: 24px;
-      pointer-events: auto;
-      opacity: 0;
-      transition: opacity 0.2s ease-in-out;
-    `;
-
+  // Create the icon element from the HTML template
+  const iconContainer = document.createElement('div');
+  iconContainer.innerHTML = ICON_HTML;
+  const icon = iconContainer.firstElementChild as HTMLElement;
   icon.setAttribute('data-icon-for', input.id);
 
+  // Enable pointer events just for the icon
+  icon.style.pointerEvents = 'auto';
+
+  // Function to update icon position
+  const updateIconPosition = () => {
+    const rect = input.getBoundingClientRect();
+    icon.style.position = 'fixed';
+    icon.style.top = `${rect.top + (rect.height - 24) / 2}px`;
+    icon.style.left = `${rect.right - 32}px`;
+  };
+
+  // Update position initially and on relevant events
+  updateIconPosition();
+  window.addEventListener('scroll', updateIconPosition, true);
+  window.addEventListener('resize', updateIconPosition);
+
+  // Add click event to trigger the autofill popup and refocus the input
   icon.addEventListener('click', (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Prevent the input from losing focus when clicking the icon
     setTimeout(() => input.focus(), 0);
     openAutofillPopup(input);
   });
 
-  // Add to body
-  document.body.appendChild(icon);
+  // Append the icon to the overlay container
+  overlayContainer.appendChild(icon);
 
   // Fade in the icon
   requestAnimationFrame(() => {
     icon.style.opacity = '1';
   });
 
-  /**
-   * Remove icon when input loses focus, except when clicking the icon
-   */
-  const handleBlur = () : void => {
-    // Fade out and remove icon
+  // Remove the icon when the input loses focus
+  const handleBlur = (): void => {
     icon.style.opacity = '0';
     setTimeout(() => {
       icon.remove();
       input.removeEventListener('blur', handleBlur);
-    }, 200); // Match transition duration
+      window.removeEventListener('scroll', updateIconPosition, true);
+      window.removeEventListener('resize', updateIconPosition);
+
+      // Remove overlay container if it's empty
+      if (!overlayContainer.children.length) {
+        overlayContainer.remove();
+      }
+    }, 200);
   };
 
   input.addEventListener('blur', handleBlur);

@@ -38,7 +38,23 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
 
   // 3. Page title word match if still no matches
   if (filtered.length === 0 && pageTitle.length > 0) {
-    const titleWords = pageTitle.toLowerCase().split(/\s+/);
+    // TODO: make bad words list configurable per language.
+    const badWords = new Set([
+      'login', 'signin', 'sign', 'register', 'signup', 'account',
+      'portal', 'dashboard', 'home', 'welcome', 'authentication',
+      'page', 'site', 'secure', 'password', 'access', 'member',
+      'user', 'profile', 'auth', 'session', 'inloggen',
+      'registreren', 'registratie', 'free', 'gratis', 'create',
+      'new'
+    ]);
+
+    const titleWords = pageTitle.toLowerCase()
+      .split(/\s+/)
+      .filter(word =>
+        word.length > 2 && // Filter out words shorter than 3 characters
+        !badWords.has(word.toLowerCase()) // Filter out generic words
+      );
+
     filtered = credentials.filter(cred =>
       titleWords.some(word =>
         cred.ServiceName.toLowerCase().includes(word)

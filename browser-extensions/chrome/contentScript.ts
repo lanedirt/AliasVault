@@ -7,7 +7,11 @@ import { injectIcon } from './src/contentScript/Form';
  */
 document.addEventListener('focusin', async (e) => {
   const target = e.target as HTMLInputElement;
-  if (target.tagName === 'INPUT' && !target.dataset.aliasvaultIgnore) {
+  const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
+
+  if (target.tagName === 'INPUT' &&
+      textInputTypes.includes(target.type) &&
+      !target.dataset.aliasvaultIgnore) {
     const formDetector = new FormDetector(document, target);
     const forms = formDetector.detectForms();
 
