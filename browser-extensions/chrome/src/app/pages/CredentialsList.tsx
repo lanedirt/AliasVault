@@ -18,6 +18,7 @@ const CredentialsList: React.FC = () => {
   const dbContext = useDb();
   const webApi = useWebApi();
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
   const authContext = useAuth();
@@ -111,6 +112,16 @@ const CredentialsList: React.FC = () => {
     hideLoading();
   };
 
+  // Add this function to filter credentials
+  const filteredCredentials = credentials.filter(cred => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      cred.ServiceName.toLowerCase().includes(searchLower) ||
+      cred.Username.toLowerCase().includes(searchLower) ||
+      (cred.Email?.toLowerCase().includes(searchLower))
+    );
+  });
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -121,10 +132,24 @@ const CredentialsList: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center">
-        <h2 className="text-gray-900 dark:text-white text-xl mb-4">Credentials</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-gray-900 dark:text-white text-xl">Credentials</h2>
         <ReloadButton onClick={onManualRefresh} />
       </div>
+
+      {credentials.length > 0 ? (
+      <input
+          type="text"
+          placeholder="Search credentials..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          autoFocus
+          className="w-full p-2 mb-4 border dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+        />
+      ) : (
+        <></>
+      )}
+
       {credentials.length === 0 ? (
         <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-10">
           <p className="text-sm">
@@ -139,7 +164,7 @@ const CredentialsList: React.FC = () => {
         </div>
       ) : (
         <ul className="space-y-2">
-          {credentials.map(cred => (
+          {filteredCredentials.map(cred => (
             <li key={cred.Id}
               onClick={() => navigate(`/credentials/${cred.Id}`)}
               className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
