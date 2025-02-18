@@ -388,6 +388,9 @@ public class ClientPlaywrightTest : PlaywrightTest
         await passwordField.FillAsync(password ?? TestUserPassword);
         await password2Field.FillAsync(password ?? TestUserPassword);
 
+        // Click somewhere on the page to hide the browser extension automatic popup, otherwise checkbox below cannot be checked.
+        await Page.ClickAsync("body");
+
         // Check the terms of service checkbox
         var termsCheckbox = await WaitForAndGetElement("input[id='terms']");
         await termsCheckbox.CheckAsync();

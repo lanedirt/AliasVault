@@ -41,7 +41,7 @@ public class ChromeExtensionTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Setup the Playwright browser and context based on settings defined in appsettings.json.
+    /// Set up the Playwright browser and context based on settings defined in appsettings.json.
     /// </summary>
     /// <returns>Task.</returns>
     protected override async Task SetupPlaywrightBrowserAndContext()
