@@ -48,7 +48,7 @@ const EmailsList: React.FC = () => {
           addresses: emailAddresses,
           page: 1,
           pageSize: 50,
-        }) as MailboxBulkResponse;
+        });
 
         // Decrypt emails locally using private key associated with the email address.
         const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();

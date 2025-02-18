@@ -392,7 +392,7 @@ class SqliteClient {
       // Extract version using regex - matches patterns like "20240917191243_1.4.1-RenameAttachmentsPlural"
       const versionMatch = migrationId.match(/_(\d+\.\d+\.\d+)-/);
 
-      if (versionMatch && versionMatch[1]) {
+      if (versionMatch?.[1]) {
         return versionMatch[1];
       }
 

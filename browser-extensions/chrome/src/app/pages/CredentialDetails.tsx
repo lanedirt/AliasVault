@@ -133,7 +133,7 @@ const CredentialDetails: React.FC = () => {
           <FormInputCopyToClipboard
             id="email"
             label="Email"
-            value={credential.Email || ''}
+            value={credential.Email ?? ''}
           />
           <FormInputCopyToClipboard
             id="username"

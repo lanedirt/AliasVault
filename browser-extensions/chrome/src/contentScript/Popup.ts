@@ -303,7 +303,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       };
 
       // Get valid service URL, defaults to empty string if invalid
-      const serviceUrl = getValidServiceUrl() || '';
+      const serviceUrl = getValidServiceUrl() ?? '';
 
       // Submit new identity to backend to persist in db
       const credential: Credential = {
@@ -383,7 +383,6 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     clearTimeout(searchTimeout);
     const searchTerm = searchInput.value.toLowerCase();
 
-    // Request credentials from background script
     chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
       if (response.status === 'OK' && response.credentials) {
         let filteredCredentials;
@@ -396,13 +395,13 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             document.title
           ).sort((a, b) => {
             // First compare by service name
-            const serviceNameComparison = (a.ServiceName || '').localeCompare(b.ServiceName || '');
+            const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
             if (serviceNameComparison !== 0) {
               return serviceNameComparison;
             }
 
             // If service names are equal, compare by username/nickname
-            return (a.Username || '').localeCompare(b.Username || '');
+            return (a.Username ?? '').localeCompare(b.Username ?? '');
           });
         } else {
           // Otherwise filter based on search term
@@ -413,13 +412,13 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             cred.ServiceUrl?.toLowerCase().includes(searchTerm)
           ).sort((a, b) => {
             // First compare by service name
-            const serviceNameComparison = (a.ServiceName || '').localeCompare(b.ServiceName || '');
+            const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
             if (serviceNameComparison !== 0) {
               return serviceNameComparison;
             }
 
             // If service names are equal, compare by username/nickname
-            return (a.Username || '').localeCompare(b.Username || '');
+            return (a.Username ?? '').localeCompare(b.Username ?? '');
           });
         }
 
@@ -795,7 +794,7 @@ export const GLOBAL_POPUP_ENABLED_KEY = 'aliasvault_global_popup_enabled';
  */
 export async function isAutoShowPopupDisabled(): Promise<boolean> {
   const settings = await chrome.storage.local.get([DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY]);
-  const disabledUrls = settings[DISABLED_SITES_KEY] || [];
+  const disabledUrls = settings[DISABLED_SITES_KEY] ?? [];
   const isGloballyEnabled = settings[GLOBAL_POPUP_ENABLED_KEY] !== false;
   const currentHostname = window.location.hostname;
 
@@ -807,7 +806,7 @@ export async function isAutoShowPopupDisabled(): Promise<boolean> {
  */
 export async function disableAutoShowPopup(): Promise<void> {
   const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
-  const disabledSites = result[DISABLED_SITES_KEY] || [];
+  const disabledSites = result[DISABLED_SITES_KEY] ?? [];
   if (!disabledSites.includes(window.location.hostname)) {
     disabledSites.push(window.location.hostname);
     await chrome.storage.local.set({ [DISABLED_SITES_KEY]: disabledSites });
@@ -996,7 +995,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         // Check if there's any text selected in the input
-        const selectedText = input.value.substring(input.selectionStart || 0, input.selectionEnd || 0);
+        const selectedText = input.value.substring(input.selectionStart ?? 0, input.selectionEnd ?? 0);
 
         // Only close if no text is selected
         if (!selectedText) {
@@ -1028,7 +1027,6 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
   };
   document.addEventListener('keydown', handleEnterKey);
 
-  // Request credentials from background script
   chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
     switch (response.status) {
       case 'OK':
@@ -1083,10 +1081,9 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
     { href: `${window.location.origin}/favicon.ico` }
   ] as HTMLLinkElement[];
 
-  // Remove duplicates based on href
   const uniqueLinks = Array.from(new Map(faviconLinks.map(link => [link.href, link])).values());
 
-  // Try each favicon URL until we find one that works
+  // Loop through all favicon links and try to get the bytes of the first valid favicon.
   for (const link of uniqueLinks) {
     try {
       const response = await fetch(link.href);

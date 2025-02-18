@@ -7,8 +7,6 @@ import { useAuth } from '../../context/AuthContext';
  * Header props.
  */
 type HeaderProps = {
-  toggleUserMenu: () => void;
-  isUserMenuOpen: boolean;
   routes?: {
     path: string;
     showBackButton?: boolean;

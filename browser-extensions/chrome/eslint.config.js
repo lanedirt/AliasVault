@@ -23,6 +23,8 @@ export default [
                 ecmaFeatures: { jsx: true },
                 ecmaVersion: "latest",
                 sourceType: "module",
+                project: "./tsconfig.json",
+                tsconfigRootDir: ".",
             },
         },
         plugins: {
@@ -36,8 +38,22 @@ export default [
             ...tsPlugin.configs.recommended.rules,
             ...reactPlugin.configs.recommended.rules,
             ...reactHooksPlugin.configs.recommended.rules,
+            "@typescript-eslint/await-thenable": "error",
+            "@typescript-eslint/prefer-nullish-coalescing": ["error", {
+                "ignoreTernaryTests": false,
+                "ignoreConditionalTests": false,
+                "ignoreMixedLogicalExpressions": false
+            }],
             "react/react-in-jsx-scope": "off",
+            "react/no-unused-prop-types": "error",
             "@typescript-eslint/explicit-module-boundary-types": "off",
+            "@typescript-eslint/no-unused-vars": ["error", {
+                "vars": "all",
+                "args": "after-used",
+                "ignoreRestSiblings": true,
+                "varsIgnorePattern": "^_",
+                "argsIgnorePattern": "^_"
+            }],
             "indent": ["error", 2, {
                 "SwitchCase": 1,
                 "VariableDeclarator": 1,
@@ -88,7 +104,9 @@ export default [
                     "selector": "class",
                     "format": ["PascalCase"]
                 }
-            ]
+            ],
+            "react-hooks/exhaustive-deps": "warn",
+            "react/jsx-no-constructed-context-values": "error",
         },
         settings: {
             react: {

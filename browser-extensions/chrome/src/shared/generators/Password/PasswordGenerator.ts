@@ -16,7 +16,7 @@ export class PasswordGenerator {
   /**
    * Set the length of the password.
    */
-  public setLength(length: number): PasswordGenerator {
+  public setLength(length: number): this {
     this.length = length;
     return this;
   }
@@ -24,7 +24,7 @@ export class PasswordGenerator {
   /**
    * Set if lowercase letters should be used.
    */
-  public useLowercaseLetters(use: boolean): PasswordGenerator {
+  public useLowercaseLetters(use: boolean): this {
     this.useLowercase = use;
     return this;
   }
@@ -32,7 +32,7 @@ export class PasswordGenerator {
   /**
    * Set if uppercase letters should be used.
    */
-  public useUppercaseLetters(use: boolean): PasswordGenerator {
+  public useUppercaseLetters(use: boolean): this {
     this.useUppercase = use;
     return this;
   }
@@ -40,7 +40,7 @@ export class PasswordGenerator {
   /**
    * Set if numeric characters should be used.
    */
-  public useNumericCharacters(use: boolean): PasswordGenerator {
+  public useNumericCharacters(use: boolean): this {
     this.useNumbers = use;
     return this;
   }
@@ -48,7 +48,7 @@ export class PasswordGenerator {
   /**
    * Set if special characters should be used.
    */
-  public useSpecialCharacters(use: boolean): PasswordGenerator {
+  public useSpecialCharacters(use: boolean): this {
     this.useSpecial = use;
     return this;
   }

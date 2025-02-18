@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useDb } from './DbContext';
 
 type AuthContextType = {
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Login.
    */
-  const login = async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
+  const login = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await chrome.storage.local.set({
       username,
       accessToken,
@@ -57,15 +57,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUsername(username);
     setIsLoggedIn(true);
-  };
+  }, []);
 
   /**
    * Logout.
    */
-  const logout = async (errorMessage?: string) : Promise<void> => {
+  const logout = useCallback(async (errorMessage?: string) : Promise<void> => {
     await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
     await chrome.storage.local.remove(['username', 'accessToken', 'refreshToken']);
-    await dbContext?.clearDatabase();
+    dbContext?.clearDatabase();
 
     // Set local storage global message that will be shown on the login page.
     if (errorMessage) {
@@ -74,17 +74,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUsername(null);
     setIsLoggedIn(false);
-  };
+  }, [dbContext]);
 
   /**
    * Clear global message (called after displaying the message).
    */
-  const clearGlobalMessage = () : void => {
+  const clearGlobalMessage = useCallback(() : void => {
     setGlobalMessage(null);
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    isLoggedIn,
+    isInitialized,
+    username,
+    login,
+    logout,
+    globalMessage,
+    clearGlobalMessage
+  }), [isLoggedIn, isInitialized, username, globalMessage, login, logout, clearGlobalMessage]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isInitialized, username, login, logout, globalMessage, clearGlobalMessage }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

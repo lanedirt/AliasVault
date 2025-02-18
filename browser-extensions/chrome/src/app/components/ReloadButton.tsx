@@ -13,7 +13,6 @@ type ReloadButtonProps = {
 const ReloadButton: React.FC<ReloadButtonProps> = ({ onClick }) => {
   return (
     <div
-      role="status"
       className="px-2 items-center"
     >
       <div className="relative inline-flex items-center">

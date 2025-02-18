@@ -58,7 +58,7 @@ const Unlock: React.FC = () => {
       );
 
       // Make API call to get latest vault
-      const vaultResponseJson = await webApi.get('Vault') as VaultResponse;
+      const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {

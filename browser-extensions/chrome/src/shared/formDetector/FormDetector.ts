@@ -4,17 +4,17 @@ import { LoginForm } from "./types/LoginForm";
  * Form detector.
  */
 export class FormDetector {
-  private document: Document;
-  private clickedElement: HTMLElement | null;
-  private processedForms = new Set<HTMLFormElement | null>();
-  private forms: LoginForm[] = [];
+  private readonly document: Document;
+  private readonly clickedElement: HTMLElement | null;
+  private readonly processedForms = new Set<HTMLFormElement | null>();
+  private readonly forms: LoginForm[] = [];
 
   /**
    * Constructor.
    */
   public constructor(document: Document, clickedElement?: HTMLElement) {
     this.document = document;
-    this.clickedElement = clickedElement || null;
+    this.clickedElement = clickedElement ?? null;
   }
 
   /**
@@ -99,13 +99,13 @@ export class FormDetector {
         input.id,
         input.name,
         input.placeholder
-      ].map(attr => attr?.toLowerCase() || '');
+      ].map(attr => attr?.toLowerCase() ?? '');
 
       // Check for associated labels if input has an ID or name
       if (input.id || input.name) {
         const label = this.document.querySelector(`label[for="${input.id || input.name}"]`);
         if (label) {
-          attributes.push(label.textContent?.toLowerCase() || '');
+          attributes.push(label.textContent?.toLowerCase() ?? '');
         }
       }
 
@@ -114,7 +114,7 @@ export class FormDetector {
       for (let i = 0; i < 3; i++) {
         const parentLabel = currentElement.closest('label');
         if (parentLabel) {
-          attributes.push(parentLabel.textContent?.toLowerCase() || '');
+          attributes.push(parentLabel.textContent?.toLowerCase() ?? '');
           break;
         }
 
@@ -189,7 +189,7 @@ export class FormDetector {
         ];
 
         const allText = elements
-          .map(el => el.textContent?.toLowerCase() || '')
+          .map(el => el.textContent?.toLowerCase() ?? '')
           .join(' ')
           // Normalize different types of spaces and separators
           .replace(/[\s\u00A0]/g, '')
@@ -281,8 +281,8 @@ export class FormDetector {
             radio.value,
             radio.id,
             radio.name,
-            radio.labels?.[0]?.textContent || ''
-          ].map(attr => attr?.toLowerCase() || '');
+            radio.labels?.[0]?.textContent ?? ''
+          ].map(attr => attr?.toLowerCase() ?? '');
 
           // For "other" patterns, skip if it matches male or female patterns
           if (isOther && (
@@ -295,7 +295,7 @@ export class FormDetector {
           return patterns.some(pattern =>
             attributes.some(attr => attr.includes(pattern))
           );
-        }) || null;
+        }) ?? null;
       };
 
       return {
@@ -328,7 +328,7 @@ export class FormDetector {
       input.name,
       input.className,
       input.placeholder
-    ].map(attr => attr?.toLowerCase() || '');
+    ].map(attr => attr?.toLowerCase() ?? '');
 
     const patterns = ['email', 'e-mail', 'mail', 'address', '@'];
     return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
@@ -344,7 +344,7 @@ export class FormDetector {
       input.name,
       input.className,
       input.placeholder
-    ].map(attr => attr?.toLowerCase() || '');
+    ].map(attr => attr?.toLowerCase() ?? '');
 
     const patterns = ['user', 'username', 'login', 'identifier'];
     return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
@@ -370,7 +370,7 @@ export class FormDetector {
         input.id,
         input.name,
         input.placeholder
-      ].map(attr => attr?.toLowerCase() || '');
+      ].map(attr => attr?.toLowerCase() ?? '');
 
       const confirmPatterns = ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'];
       if (!confirmPatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
@@ -394,7 +394,7 @@ export class FormDetector {
           input.name,
           input.className,
           input.placeholder
-        ].map(attr => attr?.toLowerCase() || '');
+        ].map(attr => attr?.toLowerCase() ?? '');
 
         const confirmPatterns = ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'];
         if (confirmPatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {

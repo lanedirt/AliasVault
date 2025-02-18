@@ -131,7 +131,7 @@ const EmailDetails: React.FC = () => {
       }
 
       // Create blob from decrypted bytes with proper MIME type
-      const blob = new Blob([decryptedBytes], { type: attachment.contentType || 'application/octet-stream' });
+      const blob = new Blob([decryptedBytes], { type: attachment.contentType ?? 'application/octet-stream' });
 
       // Create download link and trigger download
       const url = window.URL.createObjectURL(blob);
@@ -246,10 +246,10 @@ const EmailDetails: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {email.attachments.map((attachment) => (
-                <div
+                <button
                   key={attachment.id}
                   onClick={() => handleDownloadAttachment(attachment)}
-                  className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400"
+                  className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-left"
                 >
                   <svg
                     className="w-4 h-4"
@@ -267,7 +267,7 @@ const EmailDetails: React.FC = () => {
                   <span>
                     {attachment.filename} ({Math.ceil(attachment.filesize / 1024)} KB)
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>

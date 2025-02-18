@@ -14,7 +14,7 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
   );
 
   // 2. Base URL match with fuzzy domain comparison if no exact matches
-  filtered = credentials.filter(cred => {
+  filtered = filtered.concat(credentials.filter(cred => {
     if (!cred.ServiceUrl) return false;
     try {
       const credUrlObject = new URL(cred.ServiceUrl);
@@ -34,7 +34,7 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
     } catch {
       return false;
     }
-  });
+  }));
 
   // 3. Page title word match if still no matches
   if (filtered.length === 0 && pageTitle.length > 0) {

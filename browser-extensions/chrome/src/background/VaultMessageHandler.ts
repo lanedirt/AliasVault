@@ -58,7 +58,7 @@ export async function handleSyncVault(
 
   if (response.vaultRevision > result.vaultRevisionNumber) {
     // Retrieve the latest vault from the server.
-    const vaultResponse = await webApi.get('Vault') as VaultResponse;
+    const vaultResponse = await webApi.get<VaultResponse>('Vault');
 
     // Store encrypted vault in chrome.storage.session
     await chrome.storage.session.set({
@@ -105,9 +105,9 @@ export async function handleGetVault(
 
     sendResponse({
       vault: decryptedVault,
-      publicEmailDomains: result.publicEmailDomains || [],
-      privateEmailDomains: result.privateEmailDomains || [],
-      vaultRevisionNumber: result.vaultRevisionNumber || 0
+      publicEmailDomains: result.publicEmailDomains ?? [],
+      privateEmailDomains: result.privateEmailDomains ?? [],
+      vaultRevisionNumber: result.vaultRevisionNumber ?? 0
     });
   } catch (error) {
     console.error('Failed to get vault:', error);
@@ -171,7 +171,7 @@ export async function handleCreateIdentity(
     const sqliteClient = await createVaultSqliteClient(vaultState);
 
     // Add the new credential to the vault/database.
-    await sqliteClient.createCredential(message.credential);
+    sqliteClient.createCredential(message.credential);
 
     // Upload the new vault to the server.
     await uploadNewVaultToServer(sqliteClient, vaultState);
@@ -219,8 +219,8 @@ export function handleGetDefaultEmailDomain(
   }
 
   chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], async (result) => {
-    const privateEmailDomains = result.privateEmailDomains || [];
-    const publicEmailDomains = result.publicEmailDomains || [];
+    const privateEmailDomains = result.privateEmailDomains ?? [];
+    const publicEmailDomains = result.publicEmailDomains ?? [];
 
     const sqliteClient = await createVaultSqliteClient(vaultState);
     const defaultEmailDomain = sqliteClient.getDefaultEmailDomain();

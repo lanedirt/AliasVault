@@ -29,7 +29,7 @@ const AuthSettings: React.FC = () => {
       } else if (savedUrl) {
         setSelectedOption('custom');
         setCustomUrl(savedUrl);
-        setCustomClientUrl(savedClientUrl || '');
+        setCustomClientUrl(savedClientUrl ?? '');
       } else {
         setSelectedOption(DEFAULT_OPTIONS[0].value);
       }
@@ -72,7 +72,7 @@ const AuthSettings: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+        <label htmlFor="api-connection" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           API Connection
         </label>
         <select
@@ -91,7 +91,7 @@ const AuthSettings: React.FC = () => {
       {selectedOption === 'custom' && (
         <>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="custom-client-url" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Custom client URL
             </label>
             <input
@@ -104,7 +104,7 @@ const AuthSettings: React.FC = () => {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="custom-api-url" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Custom API URL
             </label>
             <input

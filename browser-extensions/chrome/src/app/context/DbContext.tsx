@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import SqliteClient from '../../shared/SqliteClient';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import EncryptionUtility from '../../shared/EncryptionUtility';
@@ -35,7 +35,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Public email domains.
    */
-  const [, setPublicEmailDomains] = useState<string[]>([]);
+  const [_publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
 
   /**
    * Vault revision.
@@ -45,7 +45,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Private email domains.
    */
-  const [, setPrivateEmailDomains] = useState<string[]>([]);
+  const [_privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
     // Attempt to decrypt the blob.
@@ -77,7 +77,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const checkStoredVault = useCallback(async () => {
     try {
       const response = await chrome.runtime.sendMessage({ type: 'GET_VAULT' });
-      if (response && response.vault) {
+      if (response?.vault) {
         const client = new SqliteClient();
         await client.initializeFromBase64(response.vault);
         setSqliteClient(client);
@@ -130,14 +130,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Clear database and remove from background worker, called when logging out.
    */
-  const clearDatabase = () : void => {
+  const clearDatabase = useCallback(() : void => {
     setSqliteClient(null);
     setDbInitialized(false);
     chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    sqliteClient,
+    dbInitialized,
+    dbAvailable,
+    initializeDatabase,
+    clearDatabase,
+    vaultRevision
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision]);
 
   return (
-    <DbContext.Provider value={{ sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision }}>
+    <DbContext.Provider value={contextValue}>
       {children}
     </DbContext.Provider>
   );

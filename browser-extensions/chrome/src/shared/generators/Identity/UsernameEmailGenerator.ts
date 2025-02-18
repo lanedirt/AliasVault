@@ -99,7 +99,7 @@ export class UsernameEmailGenerator {
 
     // Remove leading and trailing dots, underscores, or hyphens
     sanitized = sanitized.replace(/^[-._]+/, ''); // Remove from start
-    sanitized = sanitized.replace(/[-._]+$/, ''); // Remove from end
+    sanitized = sanitized.replace(/[-._]*$/, ''); // Remove from end
 
     return sanitized;
   }

@@ -22,7 +22,7 @@ export class WebApiService {
    * @param {Function} handleLogout - Function to handle logout.
    */
   public constructor(
-    private handleLogout: () => void
+    private readonly handleLogout: () => void
   ) {
     // Remove initialization of baseUrl
   }
@@ -32,7 +32,7 @@ export class WebApiService {
    */
   private async getBaseUrl(): Promise<string> {
     const result = await chrome.storage.local.get(['apiUrl']);
-    return (result.apiUrl || 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
+    return (result.apiUrl ?? 'https://app.aliasvault.net/api').replace(/\/$/, '') + '/v1/';
   }
 
   /**
@@ -45,7 +45,7 @@ export class WebApiService {
   ): Promise<T> {
     const baseUrl = await this.getBaseUrl();
     const url = baseUrl + endpoint;
-    const headers = new Headers(options.headers || {});
+    const headers = new Headers(options.headers ?? {});
 
     // Add authorization header if we have an access token
     const accessToken = await this.getAccessToken();
@@ -215,7 +215,7 @@ export class WebApiService {
    * Calls the status endpoint to check if the auth tokens are still valid, app is supported and the vault is up to date.
    */
   public async getStatus(): Promise<StatusResponse> {
-    return await this.get('Auth/status') as StatusResponse;
+    return await this.get<StatusResponse>('Auth/status');
   }
 
   /**
@@ -246,7 +246,7 @@ export class WebApiService {
    */
   private async getAccessToken(): Promise<string | null> {
     const token = await chrome.storage.local.get('accessToken');
-    return token.accessToken || null;
+    return token.accessToken ?? null;
   }
 
   /**
@@ -254,7 +254,7 @@ export class WebApiService {
    */
   private async getRefreshToken(): Promise<string | null> {
     const token = await chrome.storage.local.get('refreshToken');
-    return token.refreshToken || null;
+    return token.refreshToken ?? null;
   }
 
   /**

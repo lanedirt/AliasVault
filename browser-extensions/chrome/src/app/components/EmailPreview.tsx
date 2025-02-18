@@ -54,7 +54,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           const latestMails = data?.mails
             ?.sort((a: MailboxEmail, b: MailboxEmail) =>
               new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-            ?.slice(0, 2) || [];
+            ?.slice(0, 2) ?? [];
 
           if (loading && latestMails.length > 0) {
             setLastEmailId(latestMails[0].id);

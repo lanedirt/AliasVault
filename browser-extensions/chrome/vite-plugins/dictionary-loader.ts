@@ -19,9 +19,8 @@ export default function dictionaryLoader() {
       // E.g. for French, add IdentityGeneratorFr.ts and ensure the dictionary files are present in the '/dictionaries/fr' folder.
       const match = id.match(/IdentityGenerator([A-Za-z]{2})\.ts$/);
       if (match) {
-        const lang = match[1].toLowerCase(); // Extract language code and convert to lowercase
-        // Load dictionaries from the repository root 'dictionaries' folder
-        const dictionaryPath = path.resolve(__dirname, `../../../dictionaries/${lang}`);
+        const lang = match[1].toLowerCase();
+        const dictionaryPath = path.resolve(__dirname, '..', '..', '..', 'dictionaries', lang);
 
         try {
           // Read dictionary files and clean up entries
@@ -40,21 +39,27 @@ export default function dictionaryLoader() {
             .filter(name => name.trim())
             .map(name => name.trim());
 
-          // Update placeholder replacements to use dynamic language code
-          code = code.replace(
-            new RegExp(`['"\`]__FIRSTNAMES_MALE_${lang.toUpperCase()}__['"\`]`, 'g'),
-            `[${firstNamesMale.map(name => `"${name}"`).join(',')}]`
-          );
+          const placeholderReplacements = [
+            {
+              pattern: `__FIRSTNAMES_MALE_${lang.toUpperCase()}__`,
+              values: firstNamesMale
+            },
+            {
+              pattern: `__FIRSTNAMES_FEMALE_${lang.toUpperCase()}__`,
+              values: firstNamesFemale
+            },
+            {
+              pattern: `__LASTNAMES_${lang.toUpperCase()}__`,
+              values: lastNames
+            }
+          ];
 
-          code = code.replace(
-            new RegExp(`['"\`]__FIRSTNAMES_FEMALE_${lang.toUpperCase()}__['"\`]`, 'g'),
-            `[${firstNamesFemale.map(name => `"${name}"`).join(',')}]`
-          );
-
-          code = code.replace(
-            new RegExp(`['"\`]__LASTNAMES_${lang.toUpperCase()}__['"\`]`, 'g'),
-            `[${lastNames.map(name => `"${name}"`).join(',')}]`
-          );
+          // Perform replacements
+          for (const { pattern, values } of placeholderReplacements) {
+            const regexPattern = new RegExp(`['"\`]${pattern}['"\`]`, 'g');
+            const replacement = `[${values.map(name => `"${name}"`).join(',')}]`;
+            code = code.replace(regexPattern, replacement);
+          }
 
           return {
             code,

@@ -7,7 +7,7 @@ import { ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse } 
  * Utility class for SRP authentication operations.
  */
 class SrpUtility {
-  private webApiService: WebApiService;
+  private readonly webApiService: WebApiService;
 
   /**
    * Constructor for the SrpUtility class.

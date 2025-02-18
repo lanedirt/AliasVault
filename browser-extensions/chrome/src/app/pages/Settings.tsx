@@ -36,11 +36,11 @@ const Settings: React.FC = () => {
    */
   const loadSettings = useCallback(async () : Promise<void> => {
     const tab = await getCurrentTab();
-    const currentUrl = new URL(tab.url || '').hostname;
+    const currentUrl = new URL(tab.url ?? '').hostname;
 
     // Load settings from chrome.storage.local
     chrome.storage.local.get([DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY], (result) => {
-      const disabledUrls = result[DISABLED_SITES_KEY] || [];
+      const disabledUrls = result[DISABLED_SITES_KEY] ?? [];
       const isGloballyEnabled = result[GLOBAL_POPUP_ENABLED_KEY] !== false; // Default to true if not set
 
       setSettings({

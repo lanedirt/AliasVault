@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import LoadingSpinnerFullScreen from '../components/LoadingSpinnerFullScreen';
 
 type LoadingContextType = {
@@ -40,8 +40,19 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
    */
   const hideLoading = (): void => setIsLoading(false);
 
+  const value = useMemo(
+    () => ({
+      isLoading,
+      showLoading,
+      hideLoading,
+      isInitialLoading,
+      setIsInitialLoading,
+    }),
+    [isLoading, isInitialLoading]
+  );
+
   return (
-    <LoadingContext.Provider value={{ isLoading, showLoading, hideLoading, isInitialLoading, setIsInitialLoading }}>
+    <LoadingContext.Provider value={value}>
       <LoadingSpinnerFullScreen />
       {children}
     </LoadingContext.Provider>
