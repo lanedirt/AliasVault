@@ -119,7 +119,7 @@ const Settings: React.FC = () => {
           <div className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Autofill Popup</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Automatically open popup</p>
                 <p className={`text-sm mt-1 ${settings.isGloballyEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
                   {settings.isGloballyEnabled ? 'Active on all sites (unless disabled below)' : 'Disabled on all sites'}
                 </p>
@@ -144,13 +144,9 @@ const Settings: React.FC = () => {
         <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Site-Specific Settings</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Control the autofill popup behavior for individual websites. You can disable it for specific sites that you don't want the popup to appear on.
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Current Site: {settings.currentUrl}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Open popup on: {settings.currentUrl}</p>
                 <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
                   {settings.isEnabled ? 'Popup is active' : 'Popup is disabled'}
                 </p>
