@@ -144,7 +144,7 @@ const CredentialsList: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           autoFocus
-          className="w-full p-2 mb-4 border dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-2 mb-4 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
         />
       ) : (
         <></>
@@ -167,7 +167,7 @@ const CredentialsList: React.FC = () => {
           {filteredCredentials.map(cred => (
             <li key={cred.Id}
               onClick={() => navigate(`/credentials/${cred.Id}`)}
-              className="p-2 border dark:border-gray-600 rounded flex items-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+              className="p-2 border dark:border-gray-600 rounded flex items-center bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
               <img
                 src={cred.Logo ? `data:image/x-icon;base64,${Buffer.from(cred.Logo).toString('base64')}` : '/assets/images/service-placeholder.webp'}
                 alt={cred.ServiceName}

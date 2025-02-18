@@ -80,13 +80,13 @@ const App: React.FC = () => {
         />
 
         <main
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
           style={{
             paddingTop: '64px',
             height: 'calc(100vh - 120px)',
           }}
         >
-          <div className="p-4 dark:bg-gray-900 mb-16">
+          <div className="p-4 mb-16">
             {message && (
               <p className="text-red-500 mb-4">{message}</p>
             )}
