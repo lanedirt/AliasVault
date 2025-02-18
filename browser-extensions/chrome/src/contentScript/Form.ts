@@ -256,8 +256,10 @@ export function injectIcon(input: HTMLInputElement): void {
   // Enable pointer events just for the icon
   icon.style.pointerEvents = 'auto';
 
-  // Function to update icon position
-  const updateIconPosition = () => {
+  /**
+   * Update position of the icon.
+   */
+  const updateIconPosition = () : void => {
     const rect = input.getBoundingClientRect();
     icon.style.position = 'fixed';
     icon.style.top = `${rect.top + (rect.height - 24) / 2}px`;
@@ -285,7 +287,9 @@ export function injectIcon(input: HTMLInputElement): void {
     icon.style.opacity = '1';
   });
 
-  // Remove the icon when the input loses focus
+  /**
+   * Remove the icon when the input loses focus.
+   */
   const handleBlur = (): void => {
     icon.style.opacity = '0';
     setTimeout(() => {

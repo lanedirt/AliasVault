@@ -273,7 +273,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       // Extract favicon from page and get the bytes
       const faviconBytes = await getFaviconBytes(document);
 
-      // Take URL from current page but without querystring params, validating the URL
+      /**
+       * Get a valid service URL from the current page.
+       */
       const getValidServiceUrl = (): string | null => {
         try {
           // Check if we're in an iframe with invalid/null source

@@ -25,11 +25,11 @@ const EmailDetails: React.FC = () => {
   /**
    * Make sure the initial loading state is set to false when this component is loaded itself.
    */
-    useEffect(() => {
-      if (!isLoading) {
-        setIsInitialLoading(false);
-      }
-    }, [setIsInitialLoading, isLoading]);
+  useEffect(() => {
+    if (!isLoading) {
+      setIsInitialLoading(false);
+    }
+  }, [setIsInitialLoading, isLoading]);
 
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation

@@ -93,6 +93,9 @@ const Settings: React.FC = () => {
     }));
   };
 
+  /**
+   * Toggle global popup.
+   */
   const toggleGlobalPopup = async () : Promise<void> => {
     const newGloballyEnabled = !settings.isGloballyEnabled;
 

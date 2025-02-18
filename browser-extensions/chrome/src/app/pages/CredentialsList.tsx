@@ -138,7 +138,7 @@ const CredentialsList: React.FC = () => {
       </div>
 
       {credentials.length > 0 ? (
-      <input
+        <input
           type="text"
           placeholder="Search credentials..."
           value={searchTerm}
