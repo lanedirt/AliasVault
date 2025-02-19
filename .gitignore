@@ -377,6 +377,10 @@ FodyWeavers.xsd
 .idea
 *.licenseheader
 
+# Junie JetBrains plugin
+.junie
+.output.txt
+
 # Codebuddy Rider plugin
 .codebuddy
 
