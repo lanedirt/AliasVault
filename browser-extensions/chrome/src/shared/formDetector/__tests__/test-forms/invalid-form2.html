@@ -1,0 +1,117 @@
+<!--
+This is a form with only a dropdown that should not be detected as a login/registration form.
+-->
+<div class="d-flex flex-justify-between mb-md-3 flex-column-reverse flex-md-row flex-items-end">
+    <div class="d-flex flex-justify-start flex-auto my-4 my-md-0 width-full width-md-auto" role="search">
+        <details class="details-reset details-overlay subnav-search-context flex-shrink-0" id="filters-select-menu">
+          <summary data-view-component="true" class="rounded-right-0 color-border-emphasis Button--secondary Button--medium Button" aria-haspopup="menu" role="button">  <span class="Button-content">
+      <span class="Button-label">Filters</span>
+    </span>
+      <span class="Button-visual Button-trailingAction">
+        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-triangle-down">
+      <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
+  </svg>
+      </span>
+  </summary>
+          <details-menu class="SelectMenu" role="menu">
+            <div class="SelectMenu-modal">
+              <div class="SelectMenu-header">
+                <h3 class="SelectMenu-title">Filter Issues</h3>
+                <button class="SelectMenu-closeButton" type="button" data-toggle-for="filters-select-menu">
+                  <svg aria-label="Close menu" aria-hidden="false" role="img" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-x">
+      <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+  </svg>
+                </button>
+              </div>
+              <div class="SelectMenu-list" data-pjax="#repo-content-pjax-container" data-turbo-frame="repo-content-turbo-frame">
+                  <a class="SelectMenu-item" role="menuitemradio" aria-checked="false" href="/lanedirt/AliasVault/issues?q=is%3Aopen" data-ga-click="Pull Requests, Search filter, Open issues and pull requests" data-turbo-frame="repo-content-turbo-frame">
+                    <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check SelectMenu-icon SelectMenu-icon--check">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+  </svg>
+                    Open issues and pull requests
+                  </a>
+                  <a class="SelectMenu-item" role="menuitemradio" aria-checked="false" href="/lanedirt/AliasVault/issues?q=is%3Aopen+is%3Aissue+author%3A%40me" data-ga-click="Pull Requests, Search filter, Your issues" data-turbo-frame="repo-content-turbo-frame">
+                    <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check SelectMenu-icon SelectMenu-icon--check">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+  </svg>
+                    Your issues
+                  </a>
+                <a class="SelectMenu-item" role="menuitemradio" aria-checked="false" href="/lanedirt/AliasVault/issues?q=is%3Aopen+is%3Apr+author%3A%40me" data-ga-click="Pull Requests, Search filter, Your pull requests" data-turbo-frame="repo-content-turbo-frame">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check SelectMenu-icon SelectMenu-icon--check">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+  </svg>
+                  Your pull requests
+                </a>
+                <a class="SelectMenu-item" role="menuitemradio" aria-checked="false" href="/lanedirt/AliasVault/issues?q=is%3Aopen+assignee%3A%40me" data-ga-click="Pull Requests, Search filter, Everything assigned to you" data-turbo-frame="repo-content-turbo-frame">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check SelectMenu-icon SelectMenu-icon--check">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+  </svg>
+                  Everything assigned to you
+                </a>
+                <a class="SelectMenu-item" role="menuitemradio" aria-checked="false" href="/lanedirt/AliasVault/issues?q=is%3Aopen+mentions%3A%40me" data-ga-click="Pull Requests, Search filter, Everything mentioning you" data-turbo-frame="repo-content-turbo-frame">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check SelectMenu-icon SelectMenu-icon--check">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+  </svg>
+                  Everything mentioning you
+                </a>
+                <a class="SelectMenu-item" role="menuitemradio" href="#" target="_blank" rel="noopener noreferrer" data-turbo-frame="repo-content-turbo-frame">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-link-external mr-2">
+      <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
+  </svg>
+                  <strong>View advanced search syntax</strong>
+                </a>
+              </div>
+            </div>
+          </details-menu>
+        </details>
+
+      <!-- '"` --><!-- </textarea></xmp> --><form class="subnav-search width-full d-flex " data-pjax="#repo-content-pjax-container" data-turbo-frame="repo-content-turbo-frame" role="search" aria-label="Issues" data-turbo="false" action="/lanedirt/AliasVault/pulls" accept-charset="UTF-8" method="get">
+        <input type="text" name="q" id="js-issues-search" value="is:pr is:open " class="form-control subnav-search-input input-contrast width-full" placeholder="Search all issues" aria-label="Search all issues" data-hotkey="Control+/,Meta+/" autocomplete="false">
+        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-search subnav-search-icon">
+      <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
+  </svg>
+  </form>    <div class="ml-2 pl-2 d-none d-md-flex">
+
+  <nav class="subnav-links float-left d-flex no-wrap" aria-label="Issue">
+    <a selected_link="repo_pulls" class="js-selected-navigation-item subnav-item" data-selected-links="repo_labels /lanedirt/AliasVault/labels" href="/lanedirt/AliasVault/labels">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-tag">
+      <path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.752 1.752 0 0 1 1 7.775Zm1.5 0c0 .066.026.13.073.177l6.25 6.25a.25.25 0 0 0 .354 0l5.025-5.025a.25.25 0 0 0 0-.354l-6.25-6.25a.25.25 0 0 0-.177-.073H2.75a.25.25 0 0 0-.25.25ZM6 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"></path>
+  </svg>
+      Labels
+        <span title="12" data-view-component="true" class="Counter d-none d-md-inline">12</span>
+  </a>  <a selected_link="repo_pulls" class="js-selected-navigation-item subnav-item" data-selected-links="repo_milestones /lanedirt/AliasVault/milestones" href="/lanedirt/AliasVault/milestones">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-milestone">
+      <path d="M7.75 0a.75.75 0 0 1 .75.75V3h3.634c.414 0 .814.147 1.13.414l2.07 1.75a1.75 1.75 0 0 1 0 2.672l-2.07 1.75a1.75 1.75 0 0 1-1.13.414H8.5v5.25a.75.75 0 0 1-1.5 0V10H2.75A1.75 1.75 0 0 1 1 8.25v-3.5C1 3.784 1.784 3 2.75 3H7V.75A.75.75 0 0 1 7.75 0Zm4.384 8.5a.25.25 0 0 0 .161-.06l2.07-1.75a.248.248 0 0 0 0-.38l-2.07-1.75a.25.25 0 0 0-.161-.06H2.75a.25.25 0 0 0-.25.25v3.5c0 .138.112.25.25.25h9.384Z"></path>
+  </svg>
+      Milestones
+        <span title="0" data-view-component="true" class="Counter d-none d-md-inline">0</span>
+  </a></nav>
+
+      </div>
+    </div>
+    <div class="ml-3 d-flex flex-justify-between width-full width-md-auto" data-pjax="">
+      <span class="d-md-none">
+
+  <nav class="subnav-links float-left d-flex no-wrap" aria-label="Issue">
+    <a selected_link="repo_pulls" class="js-selected-navigation-item subnav-item" data-selected-links="repo_labels /lanedirt/AliasVault/labels" href="/lanedirt/AliasVault/labels">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-tag">
+      <path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.752 1.752 0 0 1 1 7.775Zm1.5 0c0 .066.026.13.073.177l6.25 6.25a.25.25 0 0 0 .354 0l5.025-5.025a.25.25 0 0 0 0-.354l-6.25-6.25a.25.25 0 0 0-.177-.073H2.75a.25.25 0 0 0-.25.25ZM6 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"></path>
+  </svg>
+      Labels
+        <span title="12" data-view-component="true" class="Counter d-none d-md-inline">12</span>
+  </a>  <a selected_link="repo_pulls" class="js-selected-navigation-item subnav-item" data-selected-links="repo_milestones /lanedirt/AliasVault/milestones" href="/lanedirt/AliasVault/milestones">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-milestone">
+      <path d="M7.75 0a.75.75 0 0 1 .75.75V3h3.634c.414 0 .814.147 1.13.414l2.07 1.75a1.75 1.75 0 0 1 0 2.672l-2.07 1.75a1.75 1.75 0 0 1-1.13.414H8.5v5.25a.75.75 0 0 1-1.5 0V10H2.75A1.75 1.75 0 0 1 1 8.25v-3.5C1 3.784 1.784 3 2.75 3H7V.75A.75.75 0 0 1 7.75 0Zm4.384 8.5a.25.25 0 0 0 .161-.06l2.07-1.75a.248.248 0 0 0 0-.38l-2.07-1.75a.25.25 0 0 0-.161-.06H2.75a.25.25 0 0 0-.25.25v3.5c0 .138.112.25.25.25h9.384Z"></path>
+  </svg>
+      Milestones
+        <span title="0" data-view-component="true" class="Counter d-none d-md-inline">0</span>
+  </a></nav>
+
+      </span>
+            <a href="/lanedirt/AliasVault/compare" data-hotkey="c" data-ga-click="Repository, go to compare view, location:pull request list; text:New pull request" tabindex="0" data-view-component="true" class="Button--primary Button--medium Button">  <span class="Button-content">
+      <span class="Button-label"><span class="d-none d-md-block">New pull request</span>
+              <span class="d-block d-md-none">New</span></span>
+    </span>
+  </a>
+    </div>
+  </div>

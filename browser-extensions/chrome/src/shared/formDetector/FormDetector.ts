@@ -18,53 +18,17 @@ export class FormDetector {
   }
 
   /**
-   * Detect login forms on the page, prioritizing the form containing the clicked element.
+   * Detect login forms on the page based on the clicked element.
    */
   public detectForms(): LoginForm[] {
-    // If we have a clicked element, try to find its form first
     if (this.clickedElement) {
-      const formWrapper = this.clickedElement.closest('form');
+      const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
 
-      if (formWrapper) {
+      // Check if the wrapper contains a password or likely username field before processing.
+      if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper)) {
         this.createFormEntry(formWrapper);
-
-        // If we found a valid form, return early
-        if (this.forms.length > 0) {
-          return this.forms;
-        }
       }
     }
-
-    // Find all input fields that could be part of a login form
-    const passwordFields = this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
-    const emailFields = this.document.querySelectorAll<HTMLInputElement>('input[type="email"], input[type="text"]');
-    const textFields = this.document.querySelectorAll<HTMLInputElement>('input[type="text"]');
-
-    // Process password fields first
-    passwordFields.forEach(passwordField => {
-      const form = passwordField.closest('form');
-      this.createFormEntry(form);
-    });
-
-    // Process email fields that aren't already part of a processed form
-    emailFields.forEach(field => {
-      const form = field.closest('form');
-      if (form && this.processedForms.has(form)) return;
-
-      if (this.isLikelyEmailField(field)) {
-        this.createFormEntry(form);
-      }
-    });
-
-    // Process potential username fields that aren't already part of a processed form
-    textFields.forEach(field => {
-      const form = field.closest('form');
-      if (form && this.processedForms.has(form)) return;
-
-      if (this.isLikelyUsernameField(field)) {
-        this.createFormEntry(form);
-      }
-    });
 
     return this.forms;
   }
@@ -319,38 +283,6 @@ export class FormDetector {
   }
 
   /**
-   * Check if a field is likely an email field based on its attributes
-   */
-  private isLikelyEmailField(input: HTMLInputElement): boolean {
-    const attributes = [
-      input.type,
-      input.id,
-      input.name,
-      input.className,
-      input.placeholder
-    ].map(attr => attr?.toLowerCase() ?? '');
-
-    const patterns = ['email', 'e-mail', 'mail', 'address', '@'];
-    return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
-  }
-
-  /**
-   * Check if a field is likely a username field based on its attributes
-   */
-  private isLikelyUsernameField(input: HTMLInputElement): boolean {
-    const attributes = [
-      input.type,
-      input.id,
-      input.name,
-      input.className,
-      input.placeholder
-    ].map(attr => attr?.toLowerCase() ?? '');
-
-    const patterns = ['user', 'username', 'login', 'identifier'];
-    return patterns.some(pattern => attributes.some(attr => attr.includes(pattern)));
-  }
-
-  /**
    * Find the password field in a form.
    */
   private findPasswordField(form: HTMLFormElement | null): {
@@ -411,45 +343,76 @@ export class FormDetector {
   }
 
   /**
+   * Check if a form contains a password field.
+   */
+  private containsPasswordField(wrapper: HTMLElement): boolean {
+    const passwordFields = this.findPasswordField(wrapper as HTMLFormElement | null);
+    if (passwordFields.primary) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a form contains a likely username or email field.
+   */
+  private containsLikelyUsernameOrEmailField(wrapper: HTMLElement): boolean {
+    // Check if the form contains an email field.
+    const emailFields = this.findEmailField(wrapper as HTMLFormElement | null);
+    if (emailFields.primary && emailFields.primary.getAttribute('autocomplete') !== 'off') {
+      return true;
+    }
+
+    // Check if the form contains a username field.
+    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'], ['text'], []);
+    if (usernameField && usernameField.getAttribute('autocomplete') !== 'off') {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Create a form entry.
    */
-  private createFormEntry(form: HTMLFormElement | null): void {
+  private createFormEntry(wrapper: HTMLElement | null): void {
     // Skip if we've already processed this form
-    if (form && this.processedForms.has(form)) return;
-    this.processedForms.add(form);
+    if (wrapper && this.processedForms.has(wrapper as HTMLFormElement)) return;
+    this.processedForms.add(wrapper as HTMLFormElement);
 
     // Keep track of detected fields to prevent overlap
     const detectedFields: HTMLInputElement[] = [];
 
     // Find fields in priority order (most specific to least specific).
-    const emailFields = this.findEmailField(form);
+    const emailFields = this.findEmailField(wrapper as HTMLFormElement | null);
     if (emailFields.primary) detectedFields.push(emailFields.primary);
     if (emailFields.confirm) detectedFields.push(emailFields.confirm);
 
-    const passwordFields = this.findPasswordField(form);
+    const passwordFields = this.findPasswordField(wrapper as HTMLFormElement | null);
     if (passwordFields.primary) detectedFields.push(passwordFields.primary);
     if (passwordFields.confirm) detectedFields.push(passwordFields.confirm);
 
-    const usernameField = this.findInputField(form, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'],['text'], detectedFields);
+    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'],['text'], detectedFields);
     if (usernameField) detectedFields.push(usernameField);
 
-    const firstNameField = this.findInputField(form, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text'], detectedFields);
+    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text'], detectedFields);
     if (firstNameField) detectedFields.push(firstNameField);
 
-    const lastNameField = this.findInputField(form, ['lastname', 'last-name', 'lname', 'achternaam'], ['text'], detectedFields);
+    const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, ['lastname', 'last-name', 'lname', 'achternaam'], ['text'], detectedFields);
     if (lastNameField) detectedFields.push(lastNameField);
 
-    const birthdateField = this.findBirthdateFields(form, detectedFields);
+    const birthdateField = this.findBirthdateFields(wrapper as HTMLFormElement | null, detectedFields);
     if (birthdateField.single) detectedFields.push(birthdateField.single);
     if (birthdateField.day) detectedFields.push(birthdateField.day);
     if (birthdateField.month) detectedFields.push(birthdateField.month);
     if (birthdateField.year) detectedFields.push(birthdateField.year);
 
-    const genderField = this.findGenderField(form, detectedFields);
+    const genderField = this.findGenderField(wrapper as HTMLFormElement | null, detectedFields);
     if (genderField.field) detectedFields.push(genderField.field as HTMLInputElement);
 
     this.forms.push({
-      form,
+      form: wrapper as HTMLFormElement,
       emailField: emailFields.primary,
       emailConfirmField: emailFields.confirm,
       usernameField,

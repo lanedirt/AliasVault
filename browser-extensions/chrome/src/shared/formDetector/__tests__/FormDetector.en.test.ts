@@ -1,7 +1,7 @@
 import { describe } from 'vitest';
 import { FormField, testField } from './TestUtils';
 
-describe('FormDetector', () => {
+describe('FormDetector English tests', () => {
   describe('English registration form 1 detection', () => {
     const htmlFile = 'en-registration-form1.html';
 
@@ -26,6 +26,7 @@ describe('FormDetector', () => {
   describe('English email form 1 detection', () => {
     const htmlFile = 'en-email-form1.html';
 
+    // Assert that this test fails, because the autocomplete=off for the specified element.
     testField(FormField.Email, 'P0-0', htmlFile);
   });
 });

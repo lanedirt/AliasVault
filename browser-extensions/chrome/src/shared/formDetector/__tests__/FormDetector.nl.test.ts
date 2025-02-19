@@ -1,7 +1,7 @@
 import { describe } from 'vitest';
 import { FormField, testField, testBirthdateFormat } from './TestUtils';
 
-describe('FormDetector', () => {
+describe('FormDetector Dutch tests', () => {
   describe('Dutch registration form detection', () => {
     const htmlFile = 'nl-registration-form1.html';
 
@@ -35,7 +35,7 @@ describe('FormDetector', () => {
     testField(FormField.Password, 'password', htmlFile);
 
     testField(FormField.BirthDate, 'date', htmlFile);
-    testBirthdateFormat('dd-mm-yyyy', htmlFile);
+    testBirthdateFormat('dd-mm-yyyy', htmlFile, 'date');
     testField(FormField.GenderMale, 'gender1', htmlFile);
     testField(FormField.GenderFemale, 'gender2', htmlFile);
     testField(FormField.GenderOther, 'gender3', htmlFile);
@@ -55,7 +55,7 @@ describe('FormDetector', () => {
     testField(FormField.FirstName, 'input_25_14', htmlFile);
     testField(FormField.LastName, 'input_25_15', htmlFile);
     testField(FormField.BirthDate, 'input_25_10', htmlFile);
-    testBirthdateFormat('dd/mm/yyyy', htmlFile);
+    testBirthdateFormat('dd/mm/yyyy', htmlFile, 'input_25_10');
   });
 
   describe('Dutch registration form 6 detection', () => {

@@ -1,0 +1,44 @@
+import { describe, it, expect } from 'vitest';
+import { createTestDom } from './TestUtils';
+import { FormDetector } from '../FormDetector';
+
+describe('FormDetector generic tests', () => {
+  describe('Invalid form not detected as login form 1', () => {
+    const htmlFile = 'invalid-form1.html';
+
+    it('should not detect any forms', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+      const formDetector = new FormDetector(document);
+      const forms = formDetector.detectForms();
+      expect(forms).toHaveLength(0);
+    });
+  });
+
+  describe('Invalid form not detected as login form 2', () => {
+    const htmlFile = 'invalid-form2.html';
+
+    it('should not detect any forms even when clicking search input', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+
+      // Pass the search input as the clicked element to test if it's still not detected as a login form.
+      const searchInput = document.getElementById('js-issues-search');
+      const formDetector = new FormDetector(document, searchInput as HTMLElement);
+      const forms = formDetector.detectForms();
+      expect(forms).toHaveLength(0);
+    });
+  });
+
+  describe('Form with autocomplete="off" not detected', () => {
+    const htmlFile = 'autocomplete-off.html';
+
+    it('should not detect form with autocomplete="off" on email field', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+      const formDetector = new FormDetector(document);
+      const forms = formDetector.detectForms();
+      expect(forms).toHaveLength(0);
+    });
+  });
+});
