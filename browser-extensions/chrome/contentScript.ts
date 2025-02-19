@@ -29,7 +29,26 @@ document.addEventListener('focusin', async (e) => {
   }
 });
 
-// Also listen for popstate events (back/forward navigation)
+/**
+ * Listen for popstate events (back/forward navigation)
+ */
 window.addEventListener('popstate', () => {
   removeExistingPopup();
+});
+
+/**
+ * Listen for messages from the background script.
+ */
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'OPEN_ALIASVAULT_POPUP') {
+    const elementIdentifier = event.data.elementIdentifier;
+    if (elementIdentifier) {
+      const target = document.getElementById(elementIdentifier) ||
+                    document.getElementsByName(elementIdentifier)[0];
+
+      if (target instanceof HTMLInputElement) {
+        openAutofillPopup(target, true); // Pass true to force open
+      }
+    }
+  }
 });

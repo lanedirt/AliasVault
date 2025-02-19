@@ -4,16 +4,34 @@ import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerat
  * Setup the context menus.
  */
 export function setupContextMenus() : void {
+  // Create root menu
   chrome.contextMenus.create({
     id: "aliasvault-root",
     title: "AliasVault",
     contexts: ["all"]
   });
 
+  // Add fill option first (only for editable fields)
+  chrome.contextMenus.create({
+    id: "aliasvault-activate-form",
+    parentId: "aliasvault-root",
+    title: "Autofill with AliasVault",
+    contexts: ["editable"],
+  });
+
+  // Add separator (only for editable fields)
+  chrome.contextMenus.create({
+    id: "aliasvault-separator",
+    parentId: "aliasvault-root",
+    type: "separator",
+    contexts: ["editable"],
+  });
+
+  // Add password generator option
   chrome.contextMenus.create({
     id: "aliasvault-generate-password",
     parentId: "aliasvault-root",
-    title: "Generate Password (copy to clipboard)",
+    title: "Generate random password (copy to clipboard)",
     contexts: ["all"]
   });
 }
@@ -35,6 +53,13 @@ export function handleContextMenuClick(info: chrome.contextMenus.OnClickData, ta
         args: [password]
       });
     }
+  }
+
+  if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: activateAliasVaultForm,
+    });
   }
 }
 
@@ -65,5 +90,22 @@ function copyPasswordToClipboard(generatedPassword: string) : void {
     `;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
+  }
+}
+
+/**
+ * Activate AliasVault for the active input element.
+ */
+function activateAliasVaultForm() : void {
+  const target = document.activeElement;
+  if (target instanceof HTMLInputElement) {
+    // Get the element's identifier (id or name)
+    const elementIdentifier = target.id || target.name || '';
+    if (elementIdentifier) {
+      window.postMessage({
+        type: 'OPEN_ALIASVAULT_POPUP',
+        elementIdentifier
+      }, '*');
+    }
   }
 }

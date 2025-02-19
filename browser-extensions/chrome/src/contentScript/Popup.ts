@@ -1009,9 +1009,9 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
 /**
  * Open (or refresh) the autofill popup including check if vault is locked.
  */
-export function openAutofillPopup(input: HTMLInputElement) : void {
+export function openAutofillPopup(input: HTMLInputElement, forceOpen: boolean = false) : void {
   const formDetector = new FormDetector(document, input);
-  const forms = formDetector.detectForms();
+  const forms = formDetector.detectForms(forceOpen);
 
   if (!forms.length) return;
 

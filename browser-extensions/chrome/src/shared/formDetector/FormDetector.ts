@@ -19,13 +19,15 @@ export class FormDetector {
 
   /**
    * Detect login forms on the page based on the clicked element.
+   *
+   * @param force - Force the detection of forms, skipping checks such as if the element contains autocomplete="off".
    */
-  public detectForms(): LoginForm[] {
+  public detectForms(force: boolean = false): LoginForm[] {
     if (this.clickedElement) {
       const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
 
       // Check if the wrapper contains a password or likely username field before processing.
-      if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper)) {
+      if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper, force)) {
         this.createFormEntry(formWrapper);
       }
     }
@@ -357,17 +359,23 @@ export class FormDetector {
   /**
    * Check if a form contains a likely username or email field.
    */
-  private containsLikelyUsernameOrEmailField(wrapper: HTMLElement): boolean {
+  private containsLikelyUsernameOrEmailField(wrapper: HTMLElement, force: boolean = false): boolean {
     // Check if the form contains an email field.
     const emailFields = this.findEmailField(wrapper as HTMLFormElement | null);
-    if (emailFields.primary && emailFields.primary.getAttribute('autocomplete') !== 'off') {
-      return true;
+    if (emailFields.primary) {
+      const isValid = force || emailFields.primary.getAttribute('autocomplete') !== 'off';
+      if (isValid) {
+        return true;
+      }
     }
 
     // Check if the form contains a username field.
     const usernameField = this.findInputField(wrapper as HTMLFormElement | null, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'], ['text'], []);
-    if (usernameField && usernameField.getAttribute('autocomplete') !== 'off') {
-      return true;
+    if (usernameField) {
+      const isValid = force || usernameField.getAttribute('autocomplete') !== 'off';
+      if (isValid) {
+        return true;
+      }
     }
 
     return false;
