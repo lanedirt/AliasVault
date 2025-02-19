@@ -3,12 +3,41 @@ import { Credential } from "../shared/types/Credential";
 import { openAutofillPopup } from "./Popup";
 
 /**
+ * Global timestamp to track popup debounce time.
+ * This is used to not show the popup again for a specific amount of time.
+ * Used after autofill events to prevent spamming the popup from automatic
+ * triggered browser events which can cause "focus" events to trigger.
+ */
+let popupDebounceTime = 0;
+
+/**
+ * Check if popup can be shown based on debounce time.
+ */
+export function canShowPopup() : boolean {
+  if (Date.now() < popupDebounceTime) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Hide popup for a specific amount of time.
+ */
+export function hidePopupFor(ms: number) : void {
+  popupDebounceTime = Date.now() + ms;
+}
+
+/**
  * Fill credential into current form.
  *
  * @param credential - The credential to fill.
  * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
 export function fillCredential(credential: Credential, input: HTMLInputElement) : void {
+  // Set debounce time to 800ms to prevent the popup from being shown again within 800ms because of autofill events.
+  hidePopupFor(800);
+
   const formDetector = new FormDetector(document, input);
   const forms = formDetector.detectForms();
 

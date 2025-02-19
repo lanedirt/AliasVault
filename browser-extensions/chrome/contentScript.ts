@@ -1,6 +1,6 @@
 import { FormDetector } from './src/shared/formDetector/FormDetector';
 import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './src/contentScript/Popup';
-import { injectIcon } from './src/contentScript/Form';
+import { canShowPopup, injectIcon } from './src/contentScript/Form';
 
 /**
  * Listen for input field focus
@@ -20,7 +20,10 @@ document.addEventListener('focusin', async (e) => {
     injectIcon(target);
 
     const isDisabled = await isAutoShowPopupDisabled();
-    if (!isDisabled) {
+    const canShow = canShowPopup();
+
+    // Only show popup if it's not disabled and the popup can be shown (not blocked by debounce)
+    if (!isDisabled && canShow) {
       openAutofillPopup(target);
     }
   }
