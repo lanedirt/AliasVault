@@ -5,6 +5,10 @@ export class AppInfo {
   // Current extension version - should be updated with each release.
   public static readonly VERSION = '0.12.0';
 
+  // Minimum supported AliasVault server (API) version. If the server version is below this, the
+  // client will throw an error stating that the server should be updated.
+  public static readonly MIN_SERVER_VERSION = '0.13.0';
+
   // Minimum supported AliasVault client vault version.
   public static readonly MIN_VAULT_VERSION = '1.4.1';
 
@@ -25,27 +29,49 @@ export class AppInfo {
    * @returns boolean indicating if the version is supported
    */
   public static isVaultVersionSupported(vaultVersion: string): boolean {
-    return this.compareVersions(vaultVersion, this.MIN_VAULT_VERSION) >= 0;
+    return this.versionGreaterThanOrEqualTo(vaultVersion, this.MIN_VAULT_VERSION);
   }
 
   /**
-   * Compares two version strings
-   * @param version1 First version string (e.g., "1.2.3")
-   * @param version2 Second version string (e.g., "1.2.0")
-   * @returns -1 if version1 < version2, 0 if equal, 1 if version1 > version2
+   * Checks if a given server version is supported
+   * @param serverVersion The version to check
+   * @returns boolean indicating if the version is supported
    */
-  private static compareVersions(version1: string, version2: string): number {
-    const parts1 = version1.split('.').map(Number);
-    const parts2 = version2.split('.').map(Number);
+  public static isServerVersionSupported(serverVersion: string): boolean {
+    return this.versionGreaterThanOrEqualTo(serverVersion, this.MIN_SERVER_VERSION);
+  }
 
+  /**
+   * Checks if version1 is greater than or equal to version2, following SemVer rules.
+   * Pre-release versions (e.g., -alpha, -beta) are considered lower than release versions.
+   * @param version1 First version string (e.g., "1.2.3" or "1.2.3-beta")
+   * @param version2 Second version string (e.g., "1.2.0" or "1.2.0-alpha")
+   * @returns true if version1 >= version2, false otherwise
+   */
+  public static versionGreaterThanOrEqualTo(version1: string, version2: string): boolean {
+    // Split versions into core and pre-release parts
+    const [core1, preRelease1] = version1.split('-');
+    const [core2, preRelease2] = version2.split('-');
+
+    const parts1 = core1.split('.').map(Number);
+    const parts2 = core2.split('.').map(Number);
+
+    // Compare core versions first
     for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
       const part1 = parts1[i] ?? 0;
       const part2 = parts2[i] ?? 0;
 
-      if (part1 < part2) return -1;
-      if (part1 > part2) return 1;
+      if (part1 > part2) return true;
+      if (part1 < part2) return false;
     }
 
-    return 0;
+    // If core versions are equal, check pre-release versions
+    // No pre-release > pre-release
+    if (!preRelease1 && preRelease2) return true;
+    if (preRelease1 && !preRelease2) return false;
+    if (!preRelease1 && !preRelease2) return true;
+
+    // Both have pre-release versions, compare them lexically
+    return preRelease1 >= preRelease2;
   }
 }

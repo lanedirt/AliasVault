@@ -2,6 +2,7 @@
  * Status response type.
  */
 export type StatusResponse = {
-  supported: boolean;
+  clientVersionSupported: boolean;
+  serverVersion: string;
   vaultRevision: number;
 }

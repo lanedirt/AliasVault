@@ -29,7 +29,7 @@ const Unlock: React.FC = () => {
      */
     const checkStatus = async () : Promise<void> => {
       const status = await webApi.getStatus();
-      if (!status.supported) {
+      if (!status.clientVersionSupported) {
         authContext.logout('The browser extension is outdated. Please update to the latest version.');
       }
     };

@@ -109,11 +109,14 @@ const Login: React.FC = () => {
         return;
       }
 
-      // All is good. Store auth info which makes the user logged in.
-      await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+      // All is good. Store auth info which is required to make requests to the web API.
+      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+
+      // Set logged in status to true which refreshes the app.
+      await authContext.login();
 
       // Show app.
       hideLoading();
@@ -164,11 +167,15 @@ const Login: React.FC = () => {
         return;
       }
 
-      // All is good. Store auth info which makes the user logged in.
-      await authContext.login(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+
+      // All is good. Store auth info which is required to make requests to the web API.
+      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+
+      // Set logged in status to true which refreshes the app.
+      await authContext.login();
 
       // Reset 2FA state and login response as it's no longer needed
       setTwoFactorRequired(false);

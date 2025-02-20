@@ -47,7 +47,7 @@ export async function handleSyncVault(
   const webApi = new WebApiService(() => {});
   const response = await webApi.getStatus();
 
-  if (!response.supported) {
+  if (!response.clientVersionSupported) {
     sendResponse({ success: false, error: 'The browser extension is outdated. Please update to the latest version.' });
     return;
   }

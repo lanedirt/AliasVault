@@ -13,9 +13,16 @@ namespace AliasVault.Shared.Models.WebApi.Auth;
 public class StatusResponse
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the client version is supported by this API.
+    /// Gets or sets a value indicating whether the client version is supported by this API, as
+    /// determined by the server based on the client provided header.
     /// </summary>
-    public required bool Supported { get; set; }
+    public required bool ClientVersionSupported { get; set; }
+
+    /// <summary>
+    /// Gets or sets the API version of the server. This is used by the client to determine if it
+    /// is compatible with the server or if the server should be updated to a newer version.
+    /// </summary>
+    public required string ServerVersion { get; set; }
 
     /// <summary>
     /// Gets or sets the latest vault revision number for the authenticated user, which the client

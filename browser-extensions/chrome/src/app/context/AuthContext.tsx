@@ -5,7 +5,8 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isInitialized: boolean;
   username: string | null;
-  login: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
+  setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
+  login: () => Promise<void>;
   logout: (errorMessage?: string) => Promise<void>;
   globalMessage: string | null;
   clearGlobalMessage: () => void;
@@ -46,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Login.
+   * Set auth tokens in chrome storage as part of the login process. After db is initialized, the login method should be called as well.
    */
-  const login = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
+  const setAuthTokens = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await chrome.storage.local.set({
       username,
       accessToken,
@@ -56,11 +57,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     setUsername(username);
+  }, []);
+
+  /**
+   * Set logged in status to true which refreshes the app.
+   */
+  const login = useCallback(async () : Promise<void> => {
     setIsLoggedIn(true);
   }, []);
 
   /**
-   * Logout.
+   * Logout the user and clear the auth tokens from chrome storage.
    */
   const logout = useCallback(async (errorMessage?: string) : Promise<void> => {
     await chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
@@ -87,11 +94,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoggedIn,
     isInitialized,
     username,
+    setAuthTokens,
     login,
     logout,
     globalMessage,
-    clearGlobalMessage
-  }), [isLoggedIn, isInitialized, username, globalMessage, login, logout, clearGlobalMessage]);
+    clearGlobalMessage,
+  }), [isLoggedIn, isInitialized, username, globalMessage, setAuthTokens, login, logout, clearGlobalMessage]);
 
   return (
     <AuthContext.Provider value={contextValue}>

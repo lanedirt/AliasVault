@@ -98,7 +98,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var latestRevision = latestVault?.RevisionNumber ?? 0;
 
         // Check client version compatibility if header is provided
-        var isSupported = false;
+        var clientSupported = false;
         if (!string.IsNullOrEmpty(clientHeader))
         {
             // Client header format should be "{platform}-{version}" e.g. "chrome-1.4.0"
@@ -112,25 +112,26 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
                 {
                     if (VersionHelper.IsVersionEqualOrNewer(clientVersion, minimumVersion))
                     {
-                        isSupported = true;
+                        clientSupported = true;
                     }
                 }
                 else
                 {
                     // Unknown platform
-                    isSupported = false;
+                    clientSupported = false;
                 }
             }
             else
             {
                 // Invalid header format
-                isSupported = false;
+                clientSupported = false;
             }
         }
 
         return Ok(new StatusResponse
         {
-            Supported = isSupported,
+            ClientVersionSupported = clientSupported,
+            ServerVersion = AppInfo.GetFullVersion(),
             VaultRevision = latestRevision,
         });
     }

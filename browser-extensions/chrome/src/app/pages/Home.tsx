@@ -38,20 +38,29 @@ const Home: React.FC = () => {
   // Show loading state if not fully initialized or when about to redirect to credentials.
   if (!isFullyInitialized || (isFullyInitialized && !requireLoginOrUnlock)) {
     // Global loading spinner will be shown by the parent component.
+    console.log('Home: not fully initialized');
     return null;
   }
 
   setIsInitialLoading(false);
 
   if (!isAuthenticated) {
+    console.log('Home: not authenticated');
     return <Login />;
   }
 
   if (!isDatabaseAvailable) {
+    console.log('isFullyInitialized', isFullyInitialized);
+    console.log('isAuthenticated', isAuthenticated);
+    console.log('isDatabaseAvailable', isDatabaseAvailable);
+    console.log('isInlineUnlockMode', isInlineUnlockMode);
+    console.log('requireLoginOrUnlock', requireLoginOrUnlock);
+    console.log('Home: not database available');
     return <Unlock />;
   }
 
   if (isInlineUnlockMode) {
+    console.log('Home: inline unlock mode');
     return <UnlockSuccess onClose={() => setIsInlineUnlockMode(false)} />;
   }
 
