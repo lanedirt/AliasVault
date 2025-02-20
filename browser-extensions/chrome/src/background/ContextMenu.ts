@@ -56,9 +56,19 @@ export function handleContextMenuClick(info: chrome.contextMenus.OnClickData, ta
   }
 
   if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
+    // First get the active element's identifier
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: activateAliasVaultForm,
+      func: getActiveElementIdentifier,
+    }, (results) => {
+      const elementIdentifier = results[0]?.result;
+      if (elementIdentifier) {
+        // Then send message to content script
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'OPEN_ALIASVAULT_POPUP',
+          elementIdentifier
+        });
+      }
     });
   }
 }
@@ -96,16 +106,10 @@ function copyPasswordToClipboard(generatedPassword: string) : void {
 /**
  * Activate AliasVault for the active input element.
  */
-function activateAliasVaultForm() : void {
+function getActiveElementIdentifier() : string {
   const target = document.activeElement;
   if (target instanceof HTMLInputElement) {
-    // Get the element's identifier (id or name)
-    const elementIdentifier = target.id || target.name || '';
-    if (elementIdentifier) {
-      window.postMessage({
-        type: 'OPEN_ALIASVAULT_POPUP',
-        elementIdentifier
-      }, '*');
-    }
+    return target.id || target.name || '';
   }
+  return '';
 }

@@ -37,11 +37,12 @@ window.addEventListener('popstate', () => {
 });
 
 /**
- * Listen for messages from the background script.
+ * Listen for messages from the background script context menu
+ * to open the AliasVault popup on a specific element.
  */
-window.addEventListener('message', (event) => {
-  if (event.data.type === 'OPEN_ALIASVAULT_POPUP') {
-    const elementIdentifier = event.data.elementIdentifier;
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'OPEN_ALIASVAULT_POPUP') {
+    const elementIdentifier = message.elementIdentifier;
     if (elementIdentifier) {
       const target = document.getElementById(elementIdentifier) ||
                     document.getElementsByName(elementIdentifier)[0];
@@ -51,4 +52,6 @@ window.addEventListener('message', (event) => {
       }
     }
   }
+  // Must return true if response is sent asynchronously
+  return true;
 });
