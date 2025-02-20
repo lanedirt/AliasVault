@@ -35,7 +35,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Public email domains.
    */
-  const [_publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
+  const [, setPublicEmailDomains] = useState<string[]>([]);
 
   /**
    * Vault revision.
@@ -45,7 +45,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Private email domains.
    */
-  const [_privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
+  const [, setPrivateEmailDomains] = useState<string[]>([]);
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
     // Attempt to decrypt the blob.

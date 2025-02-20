@@ -292,7 +292,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
           }
 
           // Check for valid protocol (only http/https)
-          if (!url.protocol.match(/^https?:$/)) {
+          if (!(/^https?:$/).exec(url.protocol)) {
             return null;
           }
 
@@ -648,7 +648,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       // Handle base64 image data
       if (cred.Logo) {
         try {
-          const base64Logo = base64Encode(cred.Logo);
+          const base64Logo = base64Encode(cred.Logo as Uint8Array<ArrayBufferLike>);
           imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
         } catch (error) {
           console.error('Error setting logo:', error);
@@ -1054,7 +1054,7 @@ function base64Encode(buffer: Uint8Array): string | null {
     const byteArray = Object.values(buffer);
 
     // Convert to binary string
-    const binary = String.fromCharCode.apply(null, byteArray as number[]);
+    const binary = String.fromCharCode.apply(null, byteArray);
 
     // Use btoa to encode binary string to base64
     return btoa(binary);

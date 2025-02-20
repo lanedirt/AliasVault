@@ -254,7 +254,7 @@ export function injectIcon(input: HTMLInputElement): void {
 
   // Generate unique ID if input doesn't have one
   if (!input.id) {
-    input.id = `aliasvault-input-${Math.random().toString(36).substr(2, 9)}`;
+    input.id = `aliasvault-input-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   // Create an overlay container at document level if it doesn't exist
