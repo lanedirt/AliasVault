@@ -56,8 +56,8 @@ export default function dictionaryLoader() {
 
           // Perform replacements
           for (const { pattern, values } of placeholderReplacements) {
-            const regexPattern = new RegExp(`['"\`]${pattern}['"\`]`, 'g');
-            const replacement = `[${values.map(name => `"${name}"`).join(',')}]`;
+            const regexPattern = new RegExp("['\"\\`]" + pattern + "['\"\\`]", 'g');
+            const replacement = '[' + values.map(name => '"' + name + '"').join(',') + ']';
             code = code.replace(regexPattern, replacement);
           }
 

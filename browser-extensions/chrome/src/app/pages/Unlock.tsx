@@ -32,7 +32,6 @@ const Unlock: React.FC = () => {
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
         authContext.logout(statusError);
-        return;
       }
     };
 

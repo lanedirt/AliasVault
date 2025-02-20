@@ -134,19 +134,18 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    if (!passwordHashString || !passwordHashBase64) {
-      throw new Error('Password hash not found');
+    if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
+      throw new Error('Required login data not found');
     }
 
     try {
       showLoading();
 
-      // TODO: Implement 2FA validation API call
       const validationResponse = await srpUtil.validateLogin2Fa(
         credentials.username,
         passwordHashString,
         rememberMe,
-        loginResponse!,
+        loginResponse,
         parseInt(twoFactorCode)
       );
 

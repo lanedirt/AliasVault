@@ -1,3 +1,4 @@
+// NOSONAR - Tests are implemented via testField helper in TestUtils
 import { describe } from 'vitest';
 import { FormField, testField, testBirthdateFormat } from './TestUtils';
 

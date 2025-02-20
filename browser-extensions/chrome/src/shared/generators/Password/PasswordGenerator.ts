@@ -96,25 +96,25 @@ export class PasswordGenerator {
     }
 
     // Ensure password contains at least one character from each selected set
-    if (this.useLowercase && !password.match(/[a-z]/)) {
+    if (this.useLowercase && !RegExp('[a-z]').exec(password)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.lowercaseChars[this.getUnbiasedRandomIndex(this.lowercaseChars.length)] +
                       password.substring(pos + 1);
     }
-    if (this.useUppercase && !password.match(/[A-Z]/)) {
+    if (this.useUppercase && !RegExp('[A-Z]').exec(password)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.uppercaseChars[this.getUnbiasedRandomIndex(this.uppercaseChars.length)] +
                       password.substring(pos + 1);
     }
-    if (this.useNumbers && !password.match(/[0-9]/)) {
+    if (this.useNumbers && !RegExp('[\d]').exec(password)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.numberChars[this.getUnbiasedRandomIndex(this.numberChars.length)] +
                       password.substring(pos + 1);
     }
-    if (this.useSpecial && !password.match(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/)) {
+    if (this.useSpecial && !RegExp('[!@#$%^&*()_+\\-=\\[\\]{}|;:,.<>?]').exec(password)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.specialChars[this.getUnbiasedRandomIndex(this.specialChars.length)] +

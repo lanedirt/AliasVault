@@ -232,7 +232,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     let suggestedName = document.title;
 
     // First try to extract the last part after common divider characters using a safe pattern
-    const dividerMatch = document.title.match(/[|\-–—/\\][^|\-–—/\\]*$/);
+    const dividerRegex = /[|\-–—/\\][^|\-–—/\\]*$/;
+    const dividerMatch = dividerRegex.exec(document.title);
     if (dividerMatch && dividerMatch[0].trim().split(/\s+/).length === 1) {
       // If we found a match and it's a single word, use it
       suggestedName = dividerMatch[0].trim();

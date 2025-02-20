@@ -6,6 +6,7 @@ import { WebApiService } from '../shared/WebApiService';
 import { Vault } from '../shared/types/webapi/Vault';
 import { Credential } from '../shared/types/Credential';
 import { VaultResponse } from '../shared/types/webapi/VaultResponse';
+import { VaultPostResponse } from '../shared/types/webapi/VaultPostResponse';
 
 /**
  * Store the vault in browser storage.
@@ -197,7 +198,7 @@ export async function getEmailAddressesForVault(
 
   const emailAddresses = credentials
     .filter(cred => cred.Email != null)
-    .map(cred => cred.Email!)
+    .map(cred => cred.Email)
     .filter((email, index, self) => self.indexOf(email) === index);
 
   return emailAddresses.filter(email => {
@@ -308,7 +309,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
   };
 
   const webApi = new WebApiService(() => {});
-  const response = await webApi.post('Vault', newVault) as { status: number, newRevisionNumber: number };
+  const response = await webApi.post<Vault, VaultPostResponse>('Vault', newVault);
 
   // Check if response is successful (.status === 0)
   if (response.status === 0) {

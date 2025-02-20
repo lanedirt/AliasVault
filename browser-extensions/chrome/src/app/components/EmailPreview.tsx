@@ -52,7 +52,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
 
           // Only show the latest 2 emails to save space in UI
           const latestMails = data?.mails
-            ?.sort((a: MailboxEmail, b: MailboxEmail) =>
+            ?.toSorted((a: MailboxEmail, b: MailboxEmail) =>
               new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
             ?.slice(0, 2) ?? [];
 
@@ -67,8 +67,8 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           const data = response as { mails: MailboxEmail[] };
 
           // Only show the latest 2 emails to save space in UI
-          const latestMails = data?.mails
-            .sort((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
+          const latestMails = data.mails
+            .toSorted((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
             .slice(0, 2);
 
           if (latestMails) {

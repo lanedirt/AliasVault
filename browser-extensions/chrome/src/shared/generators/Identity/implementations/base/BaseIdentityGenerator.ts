@@ -10,7 +10,7 @@ export abstract class BaseIdentityGenerator implements IIdentityGenerator {
   protected firstNamesMale: string[] = [];
   protected firstNamesFemale: string[] = [];
   protected lastNames: string[] = [];
-  private random = Math.random;
+  private readonly random = Math.random;
 
   /**
    * Constructor.

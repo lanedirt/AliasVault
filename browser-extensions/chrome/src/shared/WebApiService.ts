@@ -302,9 +302,11 @@ export class WebApiService {
       };
 
       /**
-       * If the reader encounters an error, reject the promise.
+       * If the reader encounters an error, reject the promise with a proper Error object.
        */
-      reader.onerror = (error) : void => reject(error);
+      reader.onerror = () : void => {
+        reject(new Error('Failed to read blob as Data URL'));
+      };
       reader.readAsDataURL(blob);
     });
   }

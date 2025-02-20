@@ -114,8 +114,8 @@ const EmailDetails: React.FC = () => {
       // Get the encrypted attachment bytes from the API
       const base64EncryptedAttachment = await webApi.downloadBlobAndConvertToBase64(`Email/${id}/attachments/${attachment.id}`);
 
-      if (!dbContext?.sqliteClient) {
-        setError('Database context not available');
+      if (!dbContext?.sqliteClient || !email) {
+        setError('Database context or email not available');
         return;
       }
 
@@ -123,7 +123,7 @@ const EmailDetails: React.FC = () => {
       const encryptionKeys = dbContext.sqliteClient.getAllEncryptionKeys();
 
       // Decrypt the attachment using ArrayBuffer
-      const decryptedBytes = await EncryptionUtility.decryptAttachment(base64EncryptedAttachment, email!, encryptionKeys);
+      const decryptedBytes = await EncryptionUtility.decryptAttachment(base64EncryptedAttachment, email, encryptionKeys);
 
       if (!decryptedBytes) {
         setError('Failed to decrypt attachment');
@@ -131,7 +131,7 @@ const EmailDetails: React.FC = () => {
       }
 
       // Create blob from decrypted bytes with proper MIME type
-      const blob = new Blob([decryptedBytes], { type: attachment.contentType ?? 'application/octet-stream' });
+      const blob = new Blob([decryptedBytes], { type: attachment.mimeType ?? 'application/octet-stream' });
 
       // Create download link and trigger download
       const url = window.URL.createObjectURL(blob);
