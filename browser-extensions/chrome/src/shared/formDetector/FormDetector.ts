@@ -1,4 +1,5 @@
 import { LoginForm } from "./types/LoginForm";
+import { CombinedFieldPatterns, CombinedGenderOptionPatterns } from "./FieldPatterns";
 
 /**
  * Form detector.
@@ -115,7 +116,7 @@ export class FormDetector {
     // Find primary email field
     const primaryEmail = this.findInputField(
       form,
-      ['e-mailadres', 'e-mail', 'email', 'mail', '@', 'emailaddress'],
+      CombinedFieldPatterns.email,
       ['text', 'email']
     );
 
@@ -123,7 +124,7 @@ export class FormDetector {
     const confirmEmail = primaryEmail
       ? this.findInputField(
         form,
-        ['confirm', 'verification', 'repeat', 'retype', 'verify'],
+        CombinedFieldPatterns.emailConfirm,
         ['text', 'email']
       )
       : null;
@@ -139,7 +140,7 @@ export class FormDetector {
    */
   private findBirthdateFields(form: HTMLFormElement | null, excludeElements: HTMLInputElement[] = []): LoginForm['birthdateField'] {
     // First try to find a single date input
-    const singleDateField = this.findInputField(form, ['birthdate', 'birth-date', 'dob', 'geboortedatum'], ['date', 'text'], excludeElements);
+    const singleDateField = this.findInputField(form, CombinedFieldPatterns.birthdate, ['date', 'text'], excludeElements);
 
     // Detect date format by searching all text content in the form
     let format = 'yyyy-mm-dd'; // default format
@@ -195,9 +196,9 @@ export class FormDetector {
     }
 
     // Look for separate day/month/year fields
-    const dayField = this.findInputField(form, ['birth-day', 'birthday', 'day', 'dag', 'birthdate_d'], ['text', 'number', 'select'], excludeElements);
-    const monthField = this.findInputField(form, ['birth-month', 'birthmonth', 'month', 'maand', 'birthdate_m'], ['text', 'number', 'select'], excludeElements);
-    const yearField = this.findInputField(form, ['birth-year', 'birthyear', 'year', 'jaar', 'birthdate_y'], ['text', 'number', 'select'], excludeElements);
+    const dayField = this.findInputField(form, CombinedFieldPatterns.birthDateDay, ['text', 'number', 'select'], excludeElements);
+    const monthField = this.findInputField(form, CombinedFieldPatterns.birthDateMonth, ['text', 'number', 'select'], excludeElements);
+    const yearField = this.findInputField(form, CombinedFieldPatterns.birthDateYear, ['text', 'number', 'select'], excludeElements);
 
     return {
       single: null,
@@ -215,7 +216,7 @@ export class FormDetector {
     // Try to find select or input element using the shared method
     const genderField = this.findInputField(
       form,
-      ['gender', 'sex', 'geslacht', 'aanhef'],
+      CombinedFieldPatterns.gender,
       ['select'],
       excludeElements
     );
@@ -233,11 +234,6 @@ export class FormDetector {
       : null;
 
     if (radioButtons && radioButtons.length > 0) {
-      // Map specific gender radio buttons
-      const malePatterns = ['male', 'man', 'm', 'man', 'gender1'];
-      const femalePatterns = ['female', 'woman', 'f', 'vrouw', 'gender2'];
-      const otherPatterns = ['other', 'diverse', 'custom', 'prefer not', 'anders', 'iets', 'unknown', 'gender3'];
-
       /**
        * Find a radio button by patterns.
        */
@@ -252,8 +248,8 @@ export class FormDetector {
 
           // For "other" patterns, skip if it matches male or female patterns
           if (isOther && (
-            malePatterns.some(pattern => attributes.some(attr => attr.includes(pattern))) ||
-            femalePatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))
+            CombinedGenderOptionPatterns.male.some(pattern => attributes.some(attr => attr.includes(pattern))) ||
+            CombinedGenderOptionPatterns.female.some(pattern => attributes.some(attr => attr.includes(pattern)))
           )) {
             return false;
           }
@@ -268,15 +264,15 @@ export class FormDetector {
         type: 'radio',
         field: null, // Set to null since we're providing specific mappings
         radioButtons: {
-          male: findRadioByPatterns(malePatterns),
-          female: findRadioByPatterns(femalePatterns),
-          other: findRadioByPatterns(otherPatterns)
+          male: findRadioByPatterns(CombinedGenderOptionPatterns.male),
+          female: findRadioByPatterns(CombinedGenderOptionPatterns.female),
+          other: findRadioByPatterns(CombinedGenderOptionPatterns.other)
         }
       };
     }
 
     // Fall back to regular text input
-    const textField = this.findInputField(form, ['gender', 'sex', 'geslacht', 'aanhef'], ['text'], excludeElements);
+    const textField = this.findInputField(form, CombinedFieldPatterns.gender, ['text'], excludeElements);
 
     return {
       type: 'text',
@@ -306,8 +302,7 @@ export class FormDetector {
         input.placeholder
       ].map(attr => attr?.toLowerCase() ?? '');
 
-      const confirmPatterns = ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'];
-      if (!confirmPatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
+      if (!CombinedFieldPatterns.passwordConfirm.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
         primaryPassword = input;
         break;
       }
@@ -370,9 +365,17 @@ export class FormDetector {
     }
 
     // Check if the form contains a username field.
-    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'], ['text'], []);
-    if (usernameField) {
-      const isValid = force || usernameField.getAttribute('autocomplete') !== 'off';
+    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text'], []);
+
+    // Check if the form contains name fields.
+    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], []);
+    const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], []);
+
+    // Get the first field that is not null.
+    const field = usernameField ?? firstNameField ?? lastNameField;
+    if (field) {
+      // Check if the field is valid by checking if the autocomplete attribute is not set to off (which would indicate that the website considers this field not meant to be autofilled)
+      const isValid = force || field?.getAttribute('autocomplete') !== 'off';
       if (isValid) {
         return true;
       }
@@ -401,13 +404,13 @@ export class FormDetector {
     if (passwordFields.primary) detectedFields.push(passwordFields.primary);
     if (passwordFields.confirm) detectedFields.push(passwordFields.confirm);
 
-    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, ['username', 'gebruikersnaam', 'gebruiker', 'login', 'identifier', 'user'],['text'], detectedFields);
+    const usernameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text'], detectedFields);
     if (usernameField) detectedFields.push(usernameField);
 
-    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, ['firstname', 'first-name', 'fname', 'voornaam', 'name'], ['text'], detectedFields);
+    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], detectedFields);
     if (firstNameField) detectedFields.push(firstNameField);
 
-    const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, ['lastname', 'last-name', 'lname', 'achternaam'], ['text'], detectedFields);
+    const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], detectedFields);
     if (lastNameField) detectedFields.push(lastNameField);
 
     const birthdateField = this.findBirthdateFields(wrapper as HTMLFormElement | null, detectedFields);

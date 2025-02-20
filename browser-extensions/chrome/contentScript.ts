@@ -48,10 +48,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     document.getElementsByName(elementIdentifier)[0];
 
       if (target instanceof HTMLInputElement) {
-        openAutofillPopup(target, true); // Pass true to force open
+        // Inject icon
+        injectIcon(target);
+        // Force open the popup
+        openAutofillPopup(target, true);
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false, error: 'Target element is not an input field' });
       }
+    } else {
+      sendResponse({ success: false, error: 'No element identifier provided' });
     }
   }
+
   // Must return true if response is sent asynchronously
   return true;
 });

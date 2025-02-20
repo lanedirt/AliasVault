@@ -108,7 +108,7 @@ export class PasswordGenerator {
                       this.uppercaseChars[this.getUnbiasedRandomIndex(this.uppercaseChars.length)] +
                       password.substring(pos + 1);
     }
-    if (this.useNumbers && !RegExp('[\d]').exec(password)) {
+    if (this.useNumbers && !RegExp('\\d').exec(password)) {
       const pos = this.getUnbiasedRandomIndex(this.length);
       password = password.substring(0, pos) +
                       this.numberChars[this.getUnbiasedRandomIndex(this.numberChars.length)] +

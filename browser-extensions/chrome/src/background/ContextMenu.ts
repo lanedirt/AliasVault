@@ -63,10 +63,15 @@ export function handleContextMenuClick(info: chrome.contextMenus.OnClickData, ta
     }, (results) => {
       const elementIdentifier = results[0]?.result;
       if (elementIdentifier) {
-        // Then send message to content script
-        chrome.tabs.sendMessage(tab.id, {
-          type: 'OPEN_ALIASVAULT_POPUP',
-          elementIdentifier
+        // Then send message to content script with proper error handling
+        chrome.tabs.sendMessage(
+          tab.id,
+          {
+            type: 'OPEN_ALIASVAULT_POPUP',
+            elementIdentifier
+          }
+        ).catch(error => {
+          console.error('Error sending message to content script:', error);
         });
       }
     });
