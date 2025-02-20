@@ -45,10 +45,10 @@ export async function handleSyncVault(
   sendResponse: (response: any) => void
 ) : Promise<void> {
   const webApi = new WebApiService(() => {});
-  const response = await webApi.getStatus();
-
-  if (!response.clientVersionSupported) {
-    sendResponse({ success: false, error: 'The browser extension is outdated. Please update to the latest version.' });
+  const statusResponse = await webApi.getStatus();
+  const statusError = webApi.validateStatusResponse(statusResponse);
+  if (statusError !== null) {
+    sendResponse({ success: false, error: statusError });
     return;
   }
 
@@ -56,7 +56,7 @@ export async function handleSyncVault(
     'vaultRevisionNumber'
   ]);
 
-  if (response.vaultRevision > result.vaultRevisionNumber) {
+  if (statusResponse.vaultRevision > result.vaultRevisionNumber) {
     // Retrieve the latest vault from the server.
     const vaultResponse = await webApi.get<VaultResponse>('Vault');
 

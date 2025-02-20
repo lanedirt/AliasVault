@@ -10,7 +10,6 @@ import ReloadButton from '../components/ReloadButton';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
-import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Credentials list page.
@@ -38,15 +37,9 @@ const CredentialsList: React.FC = () => {
 
     // Do status check first to ensure the extension is (still) supported.
     const statusResponse = await webApi.getStatus();
-    console.log('CredentialsList: statusResponse', statusResponse);
-    if (!statusResponse.clientVersionSupported) {
-      authContext.logout('This version of the AliasVault browser extension is outdated. Please update your browser extension to the latest version.');
-      return;
-    }
-
-    // Check if server version is supported by this client.
-    if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-      authContext.logout('The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help.');
+    const statusError = webApi.validateStatusResponse(statusResponse);
+    if (statusError !== null) {
+      authContext.logout(statusError);
       return;
     }
 

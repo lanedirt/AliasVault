@@ -25,12 +25,12 @@ public static class AppInfo
     /// <summary>
     /// Gets the minor version number.
     /// </summary>
-    public const int VersionMinor = 11;
+    public const int VersionMinor = 12;
 
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 1;
+    public const int VersionPatch = 0;
 
     /// <summary>
     /// Gets a dictionary of minimum supported client versions that the WebApi supports.

@@ -167,7 +167,6 @@ const Login: React.FC = () => {
         return;
       }
 
-
       // All is good. Store auth info which is required to make requests to the web API.
       await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 

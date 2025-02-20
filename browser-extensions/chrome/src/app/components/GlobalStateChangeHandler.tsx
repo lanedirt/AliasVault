@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,13 +9,15 @@ import { useAuth } from '../context/AuthContext';
 const GlobalStateChangeHandler: React.FC = () => {
   const authContext = useAuth();
   const navigate = useNavigate();
+  const lastLoginState = useRef(authContext.isLoggedIn);
 
   /**
    * Listen for auth logged in changes and redirect to home page if logged in state changes to handle logins and logouts.
    */
   useEffect(() => {
-    // Only navigate when auth state changes and we're not already on home page
-    if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
+    // Only navigate when auth state is different from the last state we acted on.
+    if (lastLoginState.current !== authContext.isLoggedIn) {
+      lastLoginState.current = authContext.isLoggedIn;
       navigate('/');
     }
   }, [authContext.isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps

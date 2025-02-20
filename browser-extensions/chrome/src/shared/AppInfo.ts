@@ -2,14 +2,20 @@
  * AppInfo class which contains information about the application version.
  */
 export class AppInfo {
-  // Current extension version - should be updated with each release.
+  /**
+   * The current extension version. This should be updated with each release of the extension.
+   */
   public static readonly VERSION = '0.12.0';
 
-  // Minimum supported AliasVault server (API) version. If the server version is below this, the
-  // client will throw an error stating that the server should be updated.
-  public static readonly MIN_SERVER_VERSION = '0.13.0';
+  /**
+   * The minimum supported AliasVault server (API) version. If the server version is below this, the
+   * client will throw an error stating that the server should be updated.
+   */
+  public static readonly MIN_SERVER_VERSION = '0.12.0-dev';
 
-  // Minimum supported AliasVault client vault version.
+  /**
+   * The minimum supported AliasVault client vault version.
+   */
   public static readonly MIN_VAULT_VERSION = '1.4.1';
 
   /*
@@ -65,8 +71,7 @@ export class AppInfo {
       if (part1 < part2) return false;
     }
 
-    // If core versions are equal, check pre-release versions
-    // No pre-release > pre-release
+    // If core versions are equal, check pre-release versions.
     if (!preRelease1 && preRelease2) return true;
     if (preRelease1 && !preRelease2) return false;
     if (!preRelease1 && !preRelease2) return true;
