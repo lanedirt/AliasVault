@@ -33,6 +33,17 @@ describe('FormDetector English tests', () => {
     testField(FormField.EmailConfirm, 'reenter_email', htmlFile);
   });
 
+  describe('English registration form 4 detection', () => {
+    const htmlFile = 'en-registration-form4.html';
+
+    testField(FormField.Email, 'fbclc_userName', htmlFile);
+    testField(FormField.EmailConfirm, 'fbclc_emailConf', htmlFile);
+    testField(FormField.Password, 'fbclc_pwd', htmlFile);
+    testField(FormField.PasswordConfirm, 'fbclc_pwdConf', htmlFile);
+    testField(FormField.FirstName, 'fbclc_fName', htmlFile);
+    testField(FormField.LastName, 'fbclc_lName', htmlFile);
+  });
+
   describe('English email form 1 detection', () => {
     const htmlFile = 'en-email-form1.html';
 

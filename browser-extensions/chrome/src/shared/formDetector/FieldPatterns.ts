@@ -8,7 +8,6 @@ export type FieldPatterns = {
     email: string[];
     emailConfirm: string[];
     password: string[];
-    passwordConfirm: string[];
     birthdate: string[];
     gender: string[];
     birthDateDay: string[];
@@ -35,7 +34,6 @@ export const EnglishFieldPatterns: FieldPatterns = {
   email: ['email', 'mail', 'emailaddress'],
   emailConfirm: ['confirm', 'verification', 'repeat', 'retype', 'verify'],
   password: ['password', 'pwd', 'pass'],
-  passwordConfirm: ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'],
   birthdate: ['birthdate', 'birth-date', 'dob', 'date-of-birth'],
   gender: ['gender', 'sex'],
   birthDateDay: ['birth-day', 'birthday', 'day', 'birthdate_d'],
@@ -62,7 +60,6 @@ export const DutchFieldPatterns: FieldPatterns = {
   email: ['e-mailadres', 'e-mail'],
   emailConfirm: ['bevestig', 'herhaal', 'verificatie'],
   password: ['wachtwoord', 'pwd'],
-  passwordConfirm: ['bevestig', 'herhaal', 'verificatie'],
   birthdate: ['geboortedatum', 'geboorte-datum'],
   gender: ['geslacht', 'aanhef'],
   birthDateDay: ['dag'],
@@ -95,7 +92,6 @@ export const CombinedFieldPatterns: FieldPatterns = {
   email: [...new Set([...DutchFieldPatterns.email, ...EnglishFieldPatterns.email])],
   emailConfirm: [...new Set([...EnglishFieldPatterns.emailConfirm, ...DutchFieldPatterns.emailConfirm])],
   password: [...new Set([...EnglishFieldPatterns.password, ...DutchFieldPatterns.password])],
-  passwordConfirm: [...new Set([...EnglishFieldPatterns.passwordConfirm, ...DutchFieldPatterns.passwordConfirm])],
   birthdate: [...new Set([...EnglishFieldPatterns.birthdate, ...DutchFieldPatterns.birthdate])],
   gender: [...new Set([...EnglishFieldPatterns.gender, ...DutchFieldPatterns.gender])],
   birthDateDay: [...new Set([...EnglishFieldPatterns.birthDateDay, ...DutchFieldPatterns.birthDateDay])],

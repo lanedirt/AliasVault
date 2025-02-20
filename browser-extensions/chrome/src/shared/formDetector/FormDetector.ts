@@ -291,51 +291,11 @@ export class FormDetector {
       ? form.querySelectorAll<HTMLInputElement>('input[type="password"]')
       : this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
 
-    let primaryPassword: HTMLInputElement | null = null;
-    let confirmPassword: HTMLInputElement | null = null;
-
-    // Look for the first password field that doesn't appear to be a confirmation field
-    for (const input of Array.from(candidates)) {
-      const attributes = [
-        input.id,
-        input.name,
-        input.placeholder
-      ].map(attr => attr?.toLowerCase() ?? '');
-
-      if (!CombinedFieldPatterns.passwordConfirm.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-        primaryPassword = input;
-        break;
-      }
-    }
-
-    // If no clear primary password field is found, use the first password field as primary
-    if (!primaryPassword && candidates.length > 0) {
-      primaryPassword = candidates[0];
-    }
-
-    // If we found a primary password, look for a confirmation field
-    if (primaryPassword) {
-      for (const input of Array.from(candidates)) {
-        if (input === primaryPassword) continue;
-
-        const attributes = [
-          input.id,
-          input.name,
-          input.className,
-          input.placeholder
-        ].map(attr => attr?.toLowerCase() ?? '');
-
-        const confirmPatterns = ['confirm', 'verification', 'repeat', 'retype', '2', 'verify'];
-        if (confirmPatterns.some(pattern => attributes.some(attr => attr.includes(pattern)))) {
-          confirmPassword = input;
-          break;
-        }
-      }
-    }
+    const candidateArray = Array.from(candidates);
 
     return {
-      primary: primaryPassword,
-      confirm: confirmPassword
+      primary: candidateArray[0] ?? null,
+      confirm: candidateArray[1] ?? null
     };
   }
 
