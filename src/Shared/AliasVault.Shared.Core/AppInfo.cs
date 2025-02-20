@@ -35,7 +35,7 @@ public static class AppInfo
     /// <summary>
     /// Gets a dictionary of minimum supported client versions that the WebApi supports.
     /// If client version is lower than the minimum supported version, the client will show a message
-    /// to update to the minimum supported version.
+    /// to the user to update itself to the minimum supported version.
     /// </summary>
     public static IReadOnlyDictionary<string, string> MinimumClientVersions { get; } = new Dictionary<string, string>
     {

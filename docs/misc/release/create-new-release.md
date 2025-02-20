@@ -11,12 +11,16 @@ nav_order: 1
 Follow the steps in the checklist below to prepare a new release.
 
 ## Versioning client and server
-- [ ] Update ./src/Shared/AliasVault.Shared.Core/AppInfo.cs and update major/minor/patch to the new version. This version will be shown in the client and admin app footer.
+- [ ] Update ./src/Shared/AliasVault.Shared.Core/AppInfo.cs and update major/minor/patch to the new version. This version will be shown in the client and admin app footer. This version should be equal to the git release tag.
+- [ ] Update ./src/Shared/AliasVault.Shared.Core/AppInfo.cs with the minimum supported client versions (in case API output breaks earlier client versions).
 - [ ] Update ./install.sh `@version` in header if the install script has changed. This allows the install script to self-update when running the `./install.sh update` command on default installations.
 - [ ] Update README.md install.sh download link to point to the new release version
 
-# Versioning browser extension
-- [ ] Update ./chrome/src/shared/AppInfo.ts with the new version for the extension and minimum supported client vault version.
+## Versioning browser extension
+- [ ] Update ./chrome/manifest.json with the new version for the extension. This will be shown in the Chrome Web Store. This version should be equal to the git release tag.
+- [ ] Update ./chrome/src/shared/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update ./chrome/src/shared/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update ./chrome/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
 
 ## Docker Images
 If docker containers have been added or removed:
