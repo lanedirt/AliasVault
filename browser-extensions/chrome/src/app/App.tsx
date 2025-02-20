@@ -33,7 +33,6 @@ const App: React.FC = () => {
   const authContext = useAuth();
   const { isInitialLoading } = useLoading();
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   // Add these route configurations
@@ -74,8 +73,6 @@ const App: React.FC = () => {
 
         <GlobalStateChangeHandler />
         <Header
-          toggleUserMenu={() => setIsUserMenuOpen(!isUserMenuOpen)}
-          isUserMenuOpen={isUserMenuOpen}
           routes={routes}
         />
 
