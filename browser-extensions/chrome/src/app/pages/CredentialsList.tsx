@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
@@ -22,6 +22,7 @@ const CredentialsList: React.FC = () => {
   const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
   const authContext = useAuth();
+  const isMounted = useRef(false);
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -29,10 +30,28 @@ const CredentialsList: React.FC = () => {
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
 
   /**
-   * Retrieve latest vault and refresh the page.
+   * Retrieve latest vault and refresh the credentials list.
    */
   const onRefresh = useCallback(async () : Promise<void> => {
     if (!dbContext?.sqliteClient) return;
+
+    // Do status check first to ensure the extension is (still) supported.
+    const statusResponse = await webApi.getStatus();
+    if (!statusResponse.supported) {
+      authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
+      return;
+    }
+
+    // If the vault has not been updated on the server, just load existing credentials
+    if (statusResponse.vaultRevision <= dbContext.vaultRevision) {
+      try {
+        const results = dbContext.sqliteClient.getAllCredentials();
+        setCredentials(results);
+        return;
+      } catch (err) {
+        console.error('Error loading credentials:', err);
+      }
+    }
 
     try {
       // Make API call to get latest vault
@@ -55,53 +74,34 @@ const CredentialsList: React.FC = () => {
       try {
         const results = dbContext.sqliteClient.getAllCredentials();
         setCredentials(results);
-        setIsLoading(false);
       } catch (err) {
         console.error('Error loading credentials:', err);
       }
     } catch (err) {
       console.error('Refresh error:', err);
     }
-  }, [dbContext, webApi, authContext, hideLoading, setIsLoading]);
-
-  useEffect(() => {
-    /**
-     * Check if the extension is (still) supported by the API and if the local vault is up to date.
-     */
-    const checkStatus = async (): Promise<void> => {
-      if (!dbContext?.sqliteClient) return;
-
-      const statusResponse = await webApi.getStatus();
-      if (!statusResponse.supported) {
-        authContext.logout('This version of the AliasVault browser extension is outdated. Please update to the latest version.');
-        return;
-      }
-
-      if (statusResponse.vaultRevision > dbContext.vaultRevision) {
-        await onRefresh();
-      }
-
-      // Load credentials
-      try {
-        const results = dbContext.sqliteClient.getAllCredentials();
-        setCredentials(results);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error loading credentials:', err);
-      }
-    };
-
-    checkStatus();
-  }, [authContext, dbContext?.sqliteClient, dbContext?.vaultRevision, onRefresh, webApi, setIsInitialLoading, setIsLoading]);
+  }, [dbContext, webApi, authContext, hideLoading]);
 
   /**
-   * Make sure the initial loading state is set to false when this component is loaded itself.
+   * Load the credentials list when the component is mounted (only once).
    */
   useEffect(() => {
-    if (!isLoading) {
+    if (isMounted.current) return;
+    isMounted.current = true;
+
+    /**
+     * Asynchronously load the credentials list.
+     */
+    const loadInitialData = async () : Promise<void> => {
+      setIsLoading(true);
+      await onRefresh();
+      setIsLoading(false);
+
+      // Hide the global app initial loading state after the credentials list is loaded.
       setIsInitialLoading(false);
-    }
-  }, [setIsInitialLoading, isLoading]);
+    };
+    loadInitialData();
+  }, [onRefresh, setIsLoading, setIsInitialLoading]);
 
   /**
    * Manually refresh the credentials list.
