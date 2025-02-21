@@ -1,0 +1,20 @@
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Delete account</h3>
+    <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
+        Permanently delete your account and all associated data. This action cannot be undone.
+    </div>
+    <Button Color="danger" OnClick="DeleteAccount">Delete Account</Button>
+</div>
+
+@code {
+    /// <summary>
+    /// Navigates to the delete account page.
+    /// </summary>
+    private void DeleteAccount()
+    {
+        NavigationManager.NavigateTo("settings/security/delete-account");
+    }
+}

@@ -1,13 +1,11 @@
 ﻿@inherits ComponentBase
 
-@if (Message == string.Empty)
+@if (!string.IsNullOrEmpty(Message))
 {
-    return;
+    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border-2 dark:bg-green-800 dark:text-white dark:border-green-500 dark:border" role="alert">
+        @Message
+    </div>
 }
-
-<div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 border-2 dark:bg-green-800 dark:text-white dark:border-green-500 dark:border" role="alert">
-    @Message
-</div>
 
 @code {
     /// <summary>

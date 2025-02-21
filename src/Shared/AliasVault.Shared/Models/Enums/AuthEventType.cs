@@ -56,4 +56,9 @@ public enum AuthEventType
     /// Represents a user registration event.
     /// </summary>
     Register = 30,
+
+    /// <summary>
+    /// Represents a user account deletion event.
+    /// </summary>
+    AccountDeletion = 99,
 }

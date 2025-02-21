@@ -517,6 +517,83 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     }
 
     /// <summary>
+    /// Initiates the account deletion process.
+    /// </summary>
+    /// <param name="model">The login initiate request model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("delete-account/initiate")]
+    [Authorize]
+    public async Task<IActionResult> InitiateAccountDeletion([FromBody] LoginInitiateRequest model)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+        }
+
+        // Verify the username matches the current user.
+        if (user.UserName != model.Username)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create("Username does not match the current user.", 400));
+        }
+
+        // Retrieve latest vault of user which contains the current salt and verifier.
+        var latestVaultEncryptionSettings = AuthHelper.GetUserLatestVaultEncryptionSettings(user);
+
+        // Server creates ephemeral and sends to client
+        var ephemeral = Srp.GenerateEphemeralServer(latestVaultEncryptionSettings.Verifier);
+
+        // Store the server ephemeral in memory cache for confirmation endpoint.
+        cache.Set(AuthHelper.CachePrefixEphemeral + model.Username, ephemeral.Secret, TimeSpan.FromMinutes(5));
+
+        return Ok(new LoginInitiateResponse(
+            latestVaultEncryptionSettings.Salt,
+            ephemeral.Public,
+            latestVaultEncryptionSettings.EncryptionType,
+            latestVaultEncryptionSettings.EncryptionSettings));
+    }
+
+    /// <summary>
+    /// Confirms the account deletion process.
+    /// </summary>
+    /// <param name="model">The login initiate request model.</param>
+    /// <returns>IActionResult.</returns>
+    [HttpPost("delete-account/confirm")]
+    [Authorize]
+    public async Task<IActionResult> ConfirmAccountDeletion([FromBody] DeleteAccountRequest model)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+        }
+
+        // Verify the username matches the current user.
+        if (user.UserName != model.Username)
+        {
+            return BadRequest(ServerValidationErrorResponse.Create("Username does not match the current user.", 400));
+        }
+
+        // Validate the SRP session (actual password check).
+        var serverSession = AuthHelper.ValidateSrpSession(cache, user, model.ClientPublicEphemeral, model.ClientSessionProof);
+        if (serverSession is null)
+        {
+            await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.AccountDeletion, AuthFailureReason.InvalidPassword);
+            return BadRequest(ServerValidationErrorResponse.Create("The provided password does not match your current password.", 400));
+        }
+
+        // Log the successful account deletion.
+        await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.AccountDeletion);
+
+        // Delete the user and their data.
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        context.AliasVaultUsers.Remove(user);
+        await context.SaveChangesAsync();
+
+        return Ok(new { message = "Account successfully deleted." });
+    }
+
+    /// <summary>
     /// Normalizes a username by trimming and lowercasing it.
     /// </summary>
     /// <param name="username">The username to normalize.</param>
