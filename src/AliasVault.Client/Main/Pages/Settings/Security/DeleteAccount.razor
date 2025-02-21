@@ -32,13 +32,10 @@
                 </ul>
             </div>
 
-            <EditForm Model="@_usernameModel" OnValidSubmit="@ConfirmUsername">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-
+            <EditForm Model="@_usernameModel" OnSubmit="@ConfirmUsername">
                 <div class="mb-4">
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm your username</label>
-                    <InputText @bind-Value="_usernameModel.Username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                    <InputText id="username" @bind-Value="_usernameModel.Username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
@@ -66,7 +63,7 @@
 
                 <div class="mb-4">
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter your password</label>
-                    <InputText type="password" @bind-Value="_passwordModel.Password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                    <InputText id="password" type="password" @bind-Value="_passwordModel.Password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
@@ -79,10 +76,29 @@
 </div>
 
 @code {
+    /// <summary>
+    /// The model for the username confirmation step.
+    /// </summary>
     private readonly DeleteAccountUsernameModel _usernameModel = new();
+
+    /// <summary>
+    /// The model for the password confirmation step.
+    /// </summary>
     private readonly DeleteAccountPasswordModel _passwordModel = new();
+
+    /// <summary>
+    /// Whether to show the password confirmation step.
+    /// </summary>
     private bool _showPasswordConfirm;
+
+    /// <summary>
+    /// The ephemeral client for SRP.
+    /// </summary>
     private SrpEphemeral ClientEphemeral { get; set; } = null!;
+
+    /// <summary>
+    /// The session client for SRP.
+    /// </summary>
     private SrpSession ClientSession { get; set; } = null!;
 
     /// <inheritdoc />
@@ -92,20 +108,31 @@
 
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Security settings", Url = "/settings/security" });
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete Account" });
-
-        // Set the current username for form validation.
-        var username = await GetUsernameAsync();
-        DeleteAccountUsernameModel.SetCurrentUsername(username);
     }
 
     /// <summary>
     /// Confirms the username for account deletion.
     /// </summary>
-    private void ConfirmUsername()
+    private async Task ConfirmUsername()
     {
-        Console.WriteLine("ConfirmUsername step begin");
         GlobalNotificationService.ClearMessages();
+
+        if (string.IsNullOrEmpty(_usernameModel.Username))
+        {
+            GlobalNotificationService.AddErrorMessage("Username is required", true);
+            return;
+        }
+
+        var username = await GetUsernameAsync();
+        var usernameMatches = string.Equals(_usernameModel.Username.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase);
+        if (!usernameMatches)
+        {
+            GlobalNotificationService.AddErrorMessage("The username you entered does not match your current username. Please try again.", true);
+            return;
+        }
+
         _showPasswordConfirm = true;
+        StateHasChanged();
     }
 
     /// <summary>
@@ -187,45 +214,11 @@
     /// </summary>
     public class DeleteAccountUsernameModel
     {
-        private static string? _currentUsername;
-
         /// <summary>
         /// Gets or sets the username.
         /// </summary>
         [Required(ErrorMessage = "Username is required")]
-        [CustomValidation(typeof(DeleteAccountUsernameModel), nameof(ValidateUsername))]
         public string Username { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Sets the current username which the form input is validated against.
-        /// </summary>
-        /// <param name="username"></param>
-        public static void SetCurrentUsername(string username)
-        {
-            _currentUsername = username;
-        }
-
-        /// <summary>
-        /// Validates the username against the current username.
-        /// </summary>
-        /// <param name="value">The username to validate.</param>
-        /// <param name="context">The validation context.</param>
-        /// <returns>A validation result.</returns>
-        public static ValidationResult ValidateUsername(string? value, ValidationContext context)
-        {
-            if (string.IsNullOrEmpty(_currentUsername))
-            {
-                return new ValidationResult("Current username not set.");
-            }
-
-            var usernameMatches = string.Equals(value?.Trim(), _currentUsername.Trim(), StringComparison.OrdinalIgnoreCase);
-            if (!usernameMatches)
-            {
-                return new ValidationResult("The username you entered does not match your current username. Please try again.");
-            }
-
-            return ValidationResult.Success!;
-        }
     }
 
     /// <summary>

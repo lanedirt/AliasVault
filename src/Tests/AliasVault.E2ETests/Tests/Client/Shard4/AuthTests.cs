@@ -139,12 +139,103 @@ public class AuthTests : ClientPlaywrightTest
         Assert.That(refreshToken.ExpireDate, Is.EqualTo(refreshToken.CreatedAt.AddHours(settings.RefreshTokenLifetimeLong)), "Refresh token expiration date does not match the configured long lifetime while rememberMe was checked.");
     }
 
+     /// <summary>
+    /// Test account self-deletion with various validation scenarios.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(5)]
+    public async Task AccountSelfDeletionTest()
+    {
+        // Try deleting with wrong username first
+        await NavigateUsingBlazorRouter("settings/security/delete-account");
+        await WaitForUrlAsync("settings/security/delete-account", "Delete Account");
+
+        // Fill in wrong username
+        var usernameField = await WaitForAndGetElement("input[id='username']");
+        await usernameField.FillAsync("wrongusername@example.com");
+
+        var deleteButton = await WaitForAndGetElement("button[type='submit']");
+        await deleteButton.ClickAsync();
+
+        // Check for error message about wrong username
+        var warning = await Page.TextContentAsync("div[role='alert']");
+        Assert.That(warning, Does.Contain("The username you entered does not match your current username"), "No warning shown when attempting to delete account with wrong username.");
+
+        // Try with correct username
+        await usernameField.FillAsync(TestUserUsername);
+        await deleteButton.ClickAsync();
+
+        // Check that we are now on the delete account confirmation page
+        await WaitForUrlAsync("settings/security/delete-account", "Final warning");
+
+        // Fill in wrong password
+        var passwordField = await WaitForAndGetElement("input[id='password']");
+        await passwordField.FillAsync("wrongpassword");
+
+        var confirmButton = await WaitForAndGetElement("button[type='submit']");
+        await confirmButton.ClickAsync();
+
+        // Check for error message about wrong password
+        warning = await Page.TextContentAsync("div[role='alert']");
+        Assert.That(warning, Does.Contain("The provided password does not match"), "No warning shown when attempting to delete account with wrong password.");
+
+        // Fill in correct password
+        await passwordField.FillAsync(TestUserPassword);
+        await confirmButton.ClickAsync();
+
+        // Should be redirected to the start page after successful deletion
+        await WaitForUrlAsync("user/start", "Create new vault");
+
+        // Verify that the API contains auth record for deleted account
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.AccountDeletion);
+        Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after deleting account.");
+
+        // Verify that we can't login with the deleted account
+        await NavigateToLogin();
+        var loginUsernameField = await WaitForAndGetElement("input[id='email']");
+        var loginPasswordField = await WaitForAndGetElement("input[id='password']");
+        await loginUsernameField.FillAsync(TestUserUsername);
+        await loginPasswordField.FillAsync(TestUserPassword);
+        var loginButton = await WaitForAndGetElement("button[type='submit']");
+        await loginButton.ClickAsync();
+
+        warning = await Page.TextContentAsync("div[role='alert']");
+        Assert.That(warning, Does.Contain("Invalid username or password"), "No error shown when attempting to login with deleted account.");
+    }
+
+    /// <summary>
+    /// Re-register the test account after deletion.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(6)]
+    public async Task ReRegisterAfterDeletion()
+    {
+        // Re-register with the same credentials
+        await Register(checkForSuccess: true);
+
+        // Logout
+        await Logout();
+
+        // Verify we can log in with the new account
+        await Login();
+        await WaitForUrlAsync("**", "Credentials");
+
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(WelcomeMessage), "No welcome message shown after re-registering deleted account.");
+
+        // Verify that a new auth log entry was created for the registration
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
+        Assert.That(authLogEntry, Is.Not.Null, "No auth log entry found for re-registration.");
+    }
+
     /// <summary>
     /// Test if registering an account with the same email address as an existing account shows a warning.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(5)]
+    [Order(7)]
     public async Task RegisterFormWarningTest()
     {
         await Logout();
@@ -159,11 +250,15 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(6)]
+    [Order(8)]
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();
         await NavigateToLogin();
+
+        // Delete all auth records for the deleted account to clean up for the test.
+        ApiDbContext.AuthLogs.RemoveRange(ApiDbContext.AuthLogs.Where(x => x.Username == TestUserUsername));
+        await ApiDbContext.SaveChangesAsync();
 
         // Fill in wrong password 11 times. After 11 times, the account should be locked.
         // Note: the actual lockout happens on the 10th wrong attempt, but the lockout message is only displayed
