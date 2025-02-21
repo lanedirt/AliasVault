@@ -40,7 +40,7 @@ jobs:
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aliasvault-chrome-extension-${{ github.ref_name == 'main' && format('main-{0}', github.event.head_commit.timestamp) || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('{0}-{1}', github.head_ref || github.ref_name, github.sha) }}
+          name: aliasvault-chrome-extension-${{ github.ref_name == 'main' && format('main-{0}', github.sha) || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || format('{0}-{1}', github.head_ref || github.ref_name, github.sha) }}
           path: browser-extensions/chrome/dist/
 
   upload-release-assets:
