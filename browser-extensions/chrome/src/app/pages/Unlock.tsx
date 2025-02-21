@@ -104,10 +104,7 @@ const Unlock: React.FC = () => {
   return (
     <div className="max-w-md">
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="flex space-x-4 mb-6">
-          <img className="w-8 h-8 rounded-full" src="/assets/images/avatar.webp" alt="User avatar" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white break-all overflow-hidden">{authContext.username}</h2>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white break-all overflow-hidden mb-4">{authContext.username}</h2>
 
         <p className="text-base text-gray-500 dark:text-gray-200 mb-6">
           Enter your master password to unlock your vault.

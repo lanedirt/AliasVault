@@ -57,6 +57,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // Initialize the SQLite client.
     const client = new SqliteClient();
     await client.initializeFromBase64(decryptedBlob);
+
     setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
@@ -80,6 +81,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (response?.vault) {
         const client = new SqliteClient();
         await client.initializeFromBase64(response.vault);
+
         setSqliteClient(client);
         setDbInitialized(true);
         setDbAvailable(true);
@@ -104,26 +106,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!dbInitialized) {
       checkStoredVault();
     }
-  }, [dbInitialized, checkStoredVault]);
-
-  /**
-   * Add a listener for when the popup becomes visible
-   */
-  useEffect(() : void => {
-    /**
-     * Handles visibility state changes of the document.
-     * Checks and retrieves stored vault data when document becomes visible and database is not initialized.
-     */
-    const handleVisibilityChange = () : void => {
-      if (document.visibilityState === 'visible' && !dbInitialized) {
-        checkStoredVault();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () : void => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, [dbInitialized, checkStoredVault]);
 
   /**

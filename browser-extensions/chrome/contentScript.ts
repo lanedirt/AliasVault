@@ -9,14 +9,10 @@ document.addEventListener('focusin', async (e) => {
   const target = e.target as HTMLInputElement;
   const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
 
-  console.log('focusin triggered 1:', target);
-
   if (target.tagName === 'INPUT' &&
       textInputTypes.includes(target.type) &&
       !target.dataset.aliasvaultIgnore) {
     const formDetector = new FormDetector(document, target);
-
-    console.log('focusin triggered 2');
 
     if (!formDetector.containsLoginForm()) return;
 

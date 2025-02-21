@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../../shared/types/Credential';
 import { Buffer } from 'buffer';
@@ -22,7 +22,6 @@ const CredentialsList: React.FC = () => {
   const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
   const authContext = useAuth();
-  const isMounted = useRef(false);
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -45,19 +44,18 @@ const CredentialsList: React.FC = () => {
       return;
     }
 
-    // If the vault has not been updated on the server, just load existing credentials
-    if (statusResponse.vaultRevision <= dbContext.vaultRevision) {
-      try {
+    try {
+      // If the vault revision is the same or lower, (re)load existing credentials.
+      if (statusResponse.vaultRevision <= dbContext.vaultRevision) {
         const results = dbContext.sqliteClient.getAllCredentials();
         setCredentials(results);
         return;
-      } catch (err) {
-        console.error('Error loading credentials:', err);
       }
-    }
 
-    try {
-      // Make API call to get latest vault
+      /**
+       * If the vault revision is higher, fetch the latest vault and initialize the SQLite context again.
+       * This will trigger a new credentials list refresh.
+       */
       const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
@@ -72,41 +70,10 @@ const CredentialsList: React.FC = () => {
 
       // Initialize the SQLite context again with the newly retrieved decrypted blob
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-
-      // Load credentials
-      try {
-        const results = dbContext.sqliteClient.getAllCredentials();
-        setCredentials(results);
-      } catch (err) {
-        console.error('Error loading credentials:', err);
-      }
     } catch (err) {
       console.error('Refresh error:', err);
     }
   }, [dbContext, webApi, authContext, hideLoading]);
-
-  /**
-   * Load the credentials list when the component is mounted (only once).
-   */
-  useEffect(() => {
-    if (isMounted.current) {
-      return;
-    }
-    isMounted.current = true;
-
-    /**
-     * Asynchronously load the credentials list.
-     */
-    const loadInitialData = async () : Promise<void> => {
-      setIsLoading(true);
-      await onRefresh();
-      setIsLoading(false);
-
-      // Hide the global app initial loading state after the credentials list is loaded.
-      setIsInitialLoading(false);
-    };
-    loadInitialData();
-  }, [onRefresh, setIsLoading, setIsInitialLoading]);
 
   /**
    * Manually refresh the credentials list.
@@ -116,6 +83,27 @@ const CredentialsList: React.FC = () => {
     await onRefresh();
     hideLoading();
   };
+
+  /**
+   * Load credentials list on mount and on sqlite client change.
+   */
+  useEffect(() => {
+    /**
+     * Refresh credentials list when sqlite client is available.
+     */
+    const refreshCredentials = async () : Promise<void> => {
+      if (dbContext?.sqliteClient) {
+        setIsLoading(true);
+        await onRefresh();
+        setIsLoading(false);
+
+        // Hide the global app initial loading state after the credentials list is loaded.
+        setIsInitialLoading(false);
+      }
+    };
+
+    refreshCredentials();
+  }, [dbContext?.sqliteClient, onRefresh, setIsLoading, setIsInitialLoading]);
 
   // Add this function to filter credentials
   const filteredCredentials = credentials.filter(cred => {
