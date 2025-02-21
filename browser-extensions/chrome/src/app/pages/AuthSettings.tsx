@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AppInfo } from '../../shared/AppInfo';
 
 type ApiOption = {
   label: string;
@@ -6,7 +7,7 @@ type ApiOption = {
 };
 
 const DEFAULT_OPTIONS: ApiOption[] = [
-  { label: 'Aliasvault.net', value: 'https://app.aliasvault.net/api' },
+  { label: 'Aliasvault.net', value: AppInfo.DEFAULT_API_URL },
   { label: 'Self-hosted', value: 'custom' }
 ];
 

@@ -1,5 +1,6 @@
 /**
- * AppInfo class which contains information about the application version.
+ * AppInfo class which contains information about the application version
+ * and default server URLs.
  */
 export class AppInfo {
   /**
@@ -23,6 +24,16 @@ export class AppInfo {
    * TODO: make this configurable when adding other browser support (e.g. Firefox).
    */
   public static readonly CLIENT_NAME = 'chrome';
+
+  /**
+   * The default AliasVault client URL.
+   */
+  public static readonly DEFAULT_CLIENT_URL = 'https://app.aliasvault.net';
+
+  /**
+   * The default AliasVault web API URL.
+   */
+  public static readonly DEFAULT_API_URL = 'https://app.aliasvault.net/api';
 
   /**
    * Prevent instantiation of this utility class

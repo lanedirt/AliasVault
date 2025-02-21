@@ -9,6 +9,7 @@ import SrpUtility from '../utils/SrpUtility';
 import { useLoading } from '../context/LoadingContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import { LoginResponse } from '../../shared/types/webapi/Login';
+import LoginServerInfo from '../components/LoginServerInfo';
 
 /**
  * Login page
@@ -266,7 +267,8 @@ const Login: React.FC = () => {
             {error}
           </div>
         )}
-        <h2 className="text-xl font-bold mb-4 dark:text-gray-200">Login to AliasVault</h2>
+        <h2 className="text-xl font-bold dark:text-gray-200">Login to AliasVault</h2>
+        <LoginServerInfo />
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="username">
             Username or email

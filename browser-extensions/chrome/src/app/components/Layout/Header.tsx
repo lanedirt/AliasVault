@@ -2,7 +2,7 @@ import React from 'react';
 import { UserMenu } from './UserMenu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
+import { AppInfo } from '../../../shared/AppInfo';
 /**
  * Header props.
  */
@@ -29,7 +29,12 @@ const Header: React.FC<HeaderProps> = ({
    */
   const openClientTab = async () : Promise<void> => {
     const setting = await chrome.storage.local.get(['clientUrl']);
-    window.open(setting.clientUrl, '_blank');
+    let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
+    if (setting.clientUrl.length > 0) {
+      clientUrl = setting.clientUrl;
+    }
+
+    window.open(clientUrl, '_blank');
   };
 
   // Updated route matching logic to handle URL parameters
