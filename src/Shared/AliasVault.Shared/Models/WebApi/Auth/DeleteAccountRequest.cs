@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+namespace AliasVault.Shared.Models.WebApi.Auth;
+
 /// <summary>
 /// Request model for deleting an account.
 /// </summary>
