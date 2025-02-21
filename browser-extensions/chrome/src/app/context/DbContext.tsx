@@ -86,8 +86,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setPublicEmailDomains(response.publicEmailDomains);
         setPrivateEmailDomains(response.privateEmailDomains);
         setVaultRevision(response.vaultRevisionNumber);
-      }
-      else {
+      } else {
         setDbInitialized(true);
         setDbAvailable(false);
       }

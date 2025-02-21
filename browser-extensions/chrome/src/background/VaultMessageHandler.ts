@@ -309,8 +309,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
     await chrome.storage.session.set({
       vaultRevisionNumber: response.newRevisionNumber
     });
-  }
-  else {
+  } else {
     throw new Error('Failed to upload new vault to server');
   }
 }

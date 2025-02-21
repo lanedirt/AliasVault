@@ -4,7 +4,6 @@ import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../shared/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../shared/generators/Password/PasswordGenerator';
-import { FormDetector } from '../shared/formDetector/FormDetector';
 
 /**
  * Placeholder base64 image for credentials without a logo.
@@ -110,7 +109,9 @@ export function updatePopupContent(credentials: Credential[], credentialList: HT
     credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
   }
 
-  if (!credentialList) return;
+  if (!credentialList) {
+    return;
+  }
 
   // Clear existing content
   credentialList.innerHTML = '';
@@ -249,7 +250,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     }
 
     const serviceName = await createEditNamePopup(suggestedName);
-    if (!serviceName) return; // User cancelled
+    if (!serviceName) {
+      return;
+    } // User cancelled
 
     const loadingPopup = createLoadingPopup(input, 'Creating new alias...');
 
@@ -1010,12 +1013,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
 /**
  * Open (or refresh) the autofill popup including check if vault is locked.
  */
-export function openAutofillPopup(input: HTMLInputElement, forceOpen: boolean = false) : void {
-  const formDetector = new FormDetector(document, input);
-  const forms = formDetector.detectForms(forceOpen);
-
-  if (!forms.length) return;
-
+export function openAutofillPopup(input: HTMLInputElement) : void {
   /**
    * Handle the Enter key.
    */

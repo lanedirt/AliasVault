@@ -49,7 +49,9 @@ class EncryptionUtility {
    * Encrypts data using AES-GCM symmetric encryption
    */
   public static async symmetricEncrypt(plaintext: string, base64Key: string): Promise<string> {
-    if (!plaintext) return plaintext;
+    if (!plaintext) {
+      return plaintext;
+    }
 
     const key = await crypto.subtle.importKey(
       "raw",
@@ -87,7 +89,9 @@ class EncryptionUtility {
    * Decrypts data using AES-GCM symmetric encryption
    */
   public static async symmetricDecrypt(base64Ciphertext: string, base64Key: string): Promise<string> {
-    if (!base64Ciphertext) return base64Ciphertext;
+    if (!base64Ciphertext) {
+      return base64Ciphertext;
+    }
 
     const key = await crypto.subtle.importKey(
       "raw",

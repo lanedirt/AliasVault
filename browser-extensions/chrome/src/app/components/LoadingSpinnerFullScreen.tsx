@@ -8,7 +8,9 @@ import { useLoading } from '../context/LoadingContext';
 const LoadingSpinnerFullScreen: React.FC = () => {
   const { isLoading } = useLoading();
 
-  if (!isLoading) return null;
+  if (!isLoading) {
+    return null;
+  }
 
   const spinnerStyle: React.CSSProperties = {
     width: '40px',

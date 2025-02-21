@@ -38,6 +38,8 @@ export default [
             ...tsPlugin.configs.recommended.rules,
             ...reactPlugin.configs.recommended.rules,
             ...reactHooksPlugin.configs.recommended.rules,
+            "curly": ["error", "all"],
+            "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
             "@typescript-eslint/await-thenable": "error",
             "@typescript-eslint/prefer-nullish-coalescing": ["error", {
                 "ignoreTernaryTests": false,

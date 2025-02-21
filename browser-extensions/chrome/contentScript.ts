@@ -9,13 +9,16 @@ document.addEventListener('focusin', async (e) => {
   const target = e.target as HTMLInputElement;
   const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
 
+  console.log('focusin triggered 1:', target);
+
   if (target.tagName === 'INPUT' &&
       textInputTypes.includes(target.type) &&
       !target.dataset.aliasvaultIgnore) {
     const formDetector = new FormDetector(document, target);
-    const forms = formDetector.detectForms();
 
-    if (!forms.length) return;
+    console.log('focusin triggered 2');
+
+    if (!formDetector.containsLoginForm()) return;
 
     injectIcon(target);
 
@@ -48,10 +51,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     document.getElementsByName(elementIdentifier)[0];
 
       if (target instanceof HTMLInputElement) {
+        const formDetector = new FormDetector(document, target);
+
+        if (!formDetector.containsLoginForm(true)) {
+          // No form found, so we don't show the popup.
+          sendResponse({ success: false, error: 'No form found' });
+          return;
+        }
+
         // Inject icon
         injectIcon(target);
         // Force open the popup
-        openAutofillPopup(target, true);
+        openAutofillPopup(target);
         sendResponse({ success: true });
       } else {
         sendResponse({ success: false, error: 'Target element is not an input field' });

@@ -33,7 +33,9 @@ const CredentialsList: React.FC = () => {
    * Retrieve latest vault and refresh the credentials list.
    */
   const onRefresh = useCallback(async () : Promise<void> => {
-    if (!dbContext?.sqliteClient) return;
+    if (!dbContext?.sqliteClient) {
+      return;
+    }
 
     // Do status check first to ensure the extension is (still) supported.
     const statusResponse = await webApi.getStatus();
@@ -87,7 +89,9 @@ const CredentialsList: React.FC = () => {
    * Load the credentials list when the component is mounted (only once).
    */
   useEffect(() => {
-    if (isMounted.current) return;
+    if (isMounted.current) {
+      return;
+    }
     isMounted.current = true;
 
     /**

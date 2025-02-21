@@ -80,10 +80,18 @@ export class PasswordGenerator {
     let password = '';
 
     // Build character set based on options
-    if (this.useLowercase) chars += this.lowercaseChars;
-    if (this.useUppercase) chars += this.uppercaseChars;
-    if (this.useNumbers) chars += this.numberChars;
-    if (this.useSpecial) chars += this.specialChars;
+    if (this.useLowercase) {
+      chars += this.lowercaseChars;
+    }
+    if (this.useUppercase) {
+      chars += this.uppercaseChars;
+    }
+    if (this.useNumbers) {
+      chars += this.numberChars;
+    }
+    if (this.useSpecial) {
+      chars += this.specialChars;
+    }
 
     // Ensure at least one character set is selected
     if (chars.length === 0) {

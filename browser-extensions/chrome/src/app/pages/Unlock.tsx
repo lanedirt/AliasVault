@@ -96,8 +96,7 @@ const Unlock: React.FC = () => {
       await authContext.logout();
     } catch (err) {
       console.error('Logout error:', err);
-    }
-    finally {
+    } finally {
       hideLoading();
     }
   };

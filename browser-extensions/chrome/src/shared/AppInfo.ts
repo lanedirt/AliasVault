@@ -78,14 +78,24 @@ export class AppInfo {
       const part1 = parts1[i] ?? 0;
       const part2 = parts2[i] ?? 0;
 
-      if (part1 > part2) return true;
-      if (part1 < part2) return false;
+      if (part1 > part2) {
+        return true;
+      }
+      if (part1 < part2) {
+        return false;
+      }
     }
 
     // If core versions are equal, check pre-release versions.
-    if (!preRelease1 && preRelease2) return true;
-    if (preRelease1 && !preRelease2) return false;
-    if (!preRelease1 && !preRelease2) return true;
+    if (!preRelease1 && preRelease2) {
+      return true;
+    }
+    if (preRelease1 && !preRelease2) {
+      return false;
+    }
+    if (!preRelease1 && !preRelease2) {
+      return true;
+    }
 
     // Both have pre-release versions, compare them lexically
     return preRelease1 >= preRelease2;

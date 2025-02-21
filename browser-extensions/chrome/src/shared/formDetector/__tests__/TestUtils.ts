@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { LoginForm } from '../types/LoginForm';
+import { LoginForm } from '../types/FormFields';
 
 export enum FormField {
   Username = 'username',
@@ -59,9 +59,8 @@ export const testField = (fieldName: FormField, elementId: string, htmlFile: str
       expect(result.birthdateField.month).toBe(expectedElement);
     } else if (fieldName === FormField.BirthYear) {
       expect(result.birthdateField.year).toBe(expectedElement);
-    }
     // Handle gender field differently
-    else if (fieldName === FormField.Gender) {
+    } else if (fieldName === FormField.Gender) {
       expect(result.genderField.field).toBe(expectedElement);
     } else if (fieldName === FormField.GenderMale) {
       expect(result.genderField.radioButtons?.male).toBe(expectedElement);
@@ -69,9 +68,8 @@ export const testField = (fieldName: FormField, elementId: string, htmlFile: str
       expect(result.genderField.radioButtons?.female).toBe(expectedElement);
     } else if (fieldName === FormField.GenderOther) {
       expect(result.genderField.radioButtons?.other).toBe(expectedElement);
-    }
     // Handle default fields
-    else {
+    } else {
       const fieldKey = `${fieldName}Field` as keyof typeof result;
       expect(result[fieldKey]).toBeDefined();
       expect(result[fieldKey]).toBe(expectedElement);
@@ -116,6 +114,6 @@ const setupFormTest = (htmlFile: string, focusedElementId: string) : { document:
 
   // Create a new form detector with the focused element.
   const formDetector = new FormDetector(document, focusedElement);
-  const result = formDetector.detectForms()[0];
+  const result = formDetector.getForm();
   return { document, result };
 };

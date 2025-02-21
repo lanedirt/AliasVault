@@ -1,4 +1,4 @@
-export type LoginForm = {
+export type FormFields = {
     form: HTMLFormElement | null;
     emailField: HTMLInputElement | null;
     emailConfirmField: HTMLInputElement | null;

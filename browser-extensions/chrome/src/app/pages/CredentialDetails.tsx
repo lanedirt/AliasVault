@@ -52,7 +52,9 @@ const CredentialDetails: React.FC = () => {
       window.history.pushState({}, '', `index.html#/credentials/${id}`);
     }
 
-    if (!dbContext?.sqliteClient || !id) return;
+    if (!dbContext?.sqliteClient || !id) {
+      return;
+    }
 
     try {
       const result = dbContext.sqliteClient.getCredentialById(id);

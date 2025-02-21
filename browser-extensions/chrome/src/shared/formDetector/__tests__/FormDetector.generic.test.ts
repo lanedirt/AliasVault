@@ -10,8 +10,8 @@ describe('FormDetector generic tests', () => {
       const dom = createTestDom(htmlFile);
       const document = dom.window.document;
       const formDetector = new FormDetector(document);
-      const forms = formDetector.detectForms();
-      expect(forms).toHaveLength(0);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
     });
   });
 
@@ -25,8 +25,8 @@ describe('FormDetector generic tests', () => {
       // Pass the search input as the clicked element to test if it's still not detected as a login form.
       const searchInput = document.getElementById('js-issues-search');
       const formDetector = new FormDetector(document, searchInput as HTMLElement);
-      const forms = formDetector.detectForms();
-      expect(forms).toHaveLength(0);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
     });
   });
 
@@ -37,8 +37,8 @@ describe('FormDetector generic tests', () => {
       const dom = createTestDom(htmlFile);
       const document = dom.window.document;
       const formDetector = new FormDetector(document);
-      const forms = formDetector.detectForms();
-      expect(forms).toHaveLength(0);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
     });
   });
 });

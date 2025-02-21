@@ -39,11 +39,13 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
   hidePopupFor(800);
 
   const formDetector = new FormDetector(document, input);
-  const forms = formDetector.detectForms();
+  const form = formDetector.getForm();
 
-  if (!forms.length) return;
+  if (!form) {
+    // No form found, so we can't fill anything.
+    return;
+  }
 
-  const form = forms[0];
   if (form.usernameField) {
     form.usernameField.value = credential.Username;
     triggerInputEvents(form.usernameField);
@@ -194,7 +196,9 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
       break;
     case 'radio': {
       const radioButtons = form.genderField.radioButtons;
-      if (!radioButtons) break;
+      if (!radioButtons) {
+        break;
+      }
 
       let selectedRadio: HTMLInputElement | null = null;
       if (credential.Alias.Gender === 'Male' && radioButtons.male) {

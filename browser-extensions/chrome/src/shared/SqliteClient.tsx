@@ -281,9 +281,8 @@ class SqliteClient {
           if (typeof credential.Logo === 'object' && !ArrayBuffer.isView(credential.Logo)) {
             const values = Object.values(credential.Logo);
             logoData = new Uint8Array(values);
-          }
           // Handle existing array types
-          else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
+          } else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
             logoData = new Uint8Array(credential.Logo);
           }
         }
