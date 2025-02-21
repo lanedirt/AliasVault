@@ -65,6 +65,9 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
     );
   }
 
+  // Ensure we have unique credentials
+  const uniqueCredentials = Array.from(new Map(filtered.map(cred => [cred.Id, cred])).values());
+
   // Show max 3 results
-  return filtered.slice(0, 3);
+  return uniqueCredentials.slice(0, 3);
 }

@@ -251,8 +251,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
     const serviceName = await createEditNamePopup(suggestedName);
     if (!serviceName) {
+      // User cancelled
       return;
-    } // User cancelled
+    }
 
     const loadingPopup = createLoadingPopup(input, 'Creating new alias...');
 
@@ -389,12 +390,14 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
     chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
       if (response.status === 'OK' && response.credentials) {
+        // Ensure we have unique credentials
+        const uniqueCredentials = Array.from(new Map(response.credentials.map(cred => [cred.Id, cred])).values());
         let filteredCredentials;
 
         if (searchTerm === '') {
           // If search is empty, use original URL-based filtering
           filteredCredentials = filterCredentials(
-            response.credentials,
+            uniqueCredentials,
             window.location.href,
             document.title
           ).sort((a, b) => {
@@ -409,7 +412,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
           });
         } else {
           // Otherwise filter based on search term
-          filteredCredentials = response.credentials.filter(cred =>
+          filteredCredentials = uniqueCredentials.filter(cred =>
             cred.ServiceName.toLowerCase().includes(searchTerm) ||
             cred.Username.toLowerCase().includes(searchTerm) ||
             cred.Email.toLowerCase().includes(searchTerm) ||
