@@ -7,12 +7,13 @@ nav_order: 2
 ---
 
 # Browser Extensions
-AliasVault has browser extensions for Chrome and Firefox. In order to locally build and debug the extension, you can follow the steps below.
+AliasVault has browser extensions for Chrome (with Firefox support coming soon). In order to locally build and debug the extension, you can follow the steps below.
 
 ## Chrome Extension
 The Chrome extension is built with React as framework and Vite as build tool.
 
 ### Install dependencies
+Make sure you have Node.js installed on your host machine. Then install the dependencies by running the following command.
 
 ```bash
 cd browser-extensions/chrome
@@ -29,7 +30,7 @@ npm run build
 
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable "Developer mode" in the top right corner.
-3. Click "Load unpacked" and select the `dist` folder in the `chrome` directory.
+3. Click "Load unpacked" and select the `dist` folder in the `./browser-extensions/chrome` directory.
 4. The extension should now be loaded and ready to use.
 
 ### Auto-build on changes
@@ -49,7 +50,7 @@ npm run test
 In order to test for client side issues, here is a list of public websites that have caused issues in the past and can be used to test whether the extension is (still) working correctly.
 
 ### Websites that have caused issues
-The following websites have been known to cause issues in the past (but should be fixed now).
+The following websites have been known to cause issues in the past (but should be fixed now). After making changes to the extension, you can test whether the extension is (still) working correctly by using the websites below.
 
 | Website | Reason |
 | --- | --- |
