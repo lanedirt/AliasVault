@@ -1084,7 +1084,7 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
 
   const uniqueLinks = Array.from(new Map(faviconLinks.map(link => [link.href, link])).values());
 
-  // Loop through all favicon links and try to get the bytes of the first valid favicon.
+  // Get the bytes of the first valid favicon.
   for (const link of uniqueLinks) {
     try {
       const response = await fetch(link.href);

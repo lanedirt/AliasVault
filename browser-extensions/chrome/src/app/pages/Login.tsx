@@ -267,7 +267,7 @@ const Login: React.FC = () => {
             {error}
           </div>
         )}
-        <h2 className="text-xl font-bold dark:text-gray-200">Login to AliasVault</h2>
+        <h2 className="text-xl font-bold dark:text-gray-200">Log in to AliasVault</h2>
         <LoginServerInfo />
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="username">

@@ -271,7 +271,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
 
   const encryptedVault = await EncryptionUtility.symmetricEncrypt(
     updatedVaultData,
-    result.derivedKey!
+    result.derivedKey
   );
 
   // Store updated encrypted vault in chrome.storage.session.

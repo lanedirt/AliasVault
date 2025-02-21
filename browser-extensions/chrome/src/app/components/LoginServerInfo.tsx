@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Component for displaying the login server information.
@@ -13,14 +14,13 @@ const LoginServerInfo: React.FC = () => {
      * Loads the base URL for the login server.
      */
     const loadApiUrl = async () : Promise<void> => {
-      // TODO: store base webapi configurable in one place.
       const result = await chrome.storage.local.get(['apiUrl']);
-      setBaseUrl(result.apiUrl || 'https://api.aliasvault.net/');
+      setBaseUrl(result.apiUrl ?? AppInfo.DEFAULT_API_URL);
     };
     loadApiUrl();
   }, []);
 
-  const isDefaultServer = !baseUrl || baseUrl === 'https://api.aliasvault.net/';
+  const isDefaultServer = !baseUrl || baseUrl === AppInfo.DEFAULT_API_URL;
   const displayUrl = isDefaultServer ? 'aliasvault.net' : new URL(baseUrl).hostname;
 
   /**
@@ -32,15 +32,14 @@ const LoginServerInfo: React.FC = () => {
 
   return (
     <div className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-      (Logging into{' '}
+      (Connecting to{' '}
       <button
         onClick={handleClick}
         type="button"
         className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500 underline"
       >
         {displayUrl}
-      </button>
-      )
+      </button>)
     </div>
   );
 };
