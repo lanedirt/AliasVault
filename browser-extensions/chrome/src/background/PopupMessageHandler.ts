@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { VaultState } from "./VaultState";
 
 /**
  * Handle opening the popup.
  */
-export function handleOpenPopup(message: any, vaultState: VaultState, sendResponse: (response: any) => void) : void {
+export function handleOpenPopup(message: any, sendResponse: (response: any) => void) : void {
   chrome.windows.create({
     url: chrome.runtime.getURL('index.html?mode=inline_unlock'),
     type: 'popup',
@@ -18,7 +17,7 @@ export function handleOpenPopup(message: any, vaultState: VaultState, sendRespon
 /**
  * Handle opening the popup with a credential.
  */
-export function handlePopupWithCredential(message: any, vaultState: VaultState, sendResponse: (response: any) => void) : void {
+export function handlePopupWithCredential(message: any, sendResponse: (response: any) => void) : void {
   chrome.windows.create({
     url: chrome.runtime.getURL(`index.html?popup=true#/credentials/${message.credentialId}`),
     type: 'popup',

@@ -1,9 +1,6 @@
-import { VaultState, initialVaultState } from './src/background/VaultState';
 import { setupContextMenus, handleContextMenuClick } from './src/background/ContextMenu';
 import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './src/background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './src/background/PopupMessageHandler';
-
-let vaultState: VaultState = { ...initialVaultState };
 
 // Set up context menus
 chrome.runtime.onInstalled.addListener(setupContextMenus);
@@ -14,45 +11,45 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     // Vault-related messages
     case 'STORE_VAULT':
-      handleStoreVault(message, vaultState, sendResponse);
+      handleStoreVault(message, sendResponse);
       break;
 
     case 'SYNC_VAULT':
-      handleSyncVault(vaultState, sendResponse);
+      handleSyncVault(sendResponse);
       break;
 
     case 'GET_VAULT':
-      handleGetVault(vaultState, sendResponse);
+      handleGetVault(sendResponse);
       break;
 
     case 'CLEAR_VAULT':
-      handleClearVault(vaultState, sendResponse);
+      handleClearVault(sendResponse);
       break;
 
     case 'GET_CREDENTIALS':
-      handleGetCredentials(vaultState, sendResponse);
+      handleGetCredentials(sendResponse);
       break;
 
     case 'CREATE_IDENTITY':
-      handleCreateIdentity(message, vaultState, sendResponse);
+      handleCreateIdentity(message, sendResponse);
       break;
 
     case 'GET_DEFAULT_EMAIL_DOMAIN':
-      handleGetDefaultEmailDomain(vaultState, sendResponse);
+      handleGetDefaultEmailDomain(sendResponse);
       break;
 
     case 'GET_DERIVED_KEY':
-      handleGetDerivedKey(vaultState, sendResponse);
+      handleGetDerivedKey(sendResponse);
       break;
 
     // Popup-related messages
     case 'OPEN_POPUP': {
-      handleOpenPopup(message, vaultState, sendResponse);
+      handleOpenPopup(message, sendResponse);
       break;
     }
 
     case 'OPEN_POPUP_WITH_CREDENTIAL': {
-      handlePopupWithCredential(message, vaultState, sendResponse);
+      handlePopupWithCredential(message, sendResponse);
       break;
     }
 

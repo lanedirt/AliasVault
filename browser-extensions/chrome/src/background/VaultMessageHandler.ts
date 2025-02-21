@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { VaultState } from './VaultState';
 import EncryptionUtility from '../shared/EncryptionUtility';
 import SqliteClient from '../shared/SqliteClient';
 import { WebApiService } from '../shared/WebApiService';
@@ -13,19 +12,16 @@ import { VaultPostResponse } from '../shared/types/webapi/VaultPostResponse';
  */
 export async function handleStoreVault(
   message: any,
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : Promise<void> {
   try {
     const vaultResponse = message.vaultResponse as VaultResponse;
     const encryptedVaultBlob = vaultResponse.vault.blob;
 
-    // Store derived key in local memory
-    vaultState.derivedKey = message.derivedKey;
-
-    // Store encrypted vault in chrome.storage.session
+    // Store encrypted vault and derived key in chrome.storage.session.
     await chrome.storage.session.set({
       encryptedVault: encryptedVaultBlob,
+      derivedKey: message.derivedKey,
       publicEmailDomains: vaultResponse.vault.publicEmailDomainList,
       privateEmailDomains: vaultResponse.vault.privateEmailDomainList,
       vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber
@@ -42,7 +38,6 @@ export async function handleStoreVault(
  * Sync the vault with the server to check if a newer vault is available. If so, the vault will be updated.
  */
 export async function handleSyncVault(
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : Promise<void> {
   const webApi = new WebApiService(() => {});
@@ -77,31 +72,26 @@ export async function handleSyncVault(
  * Get the vault from browser storage.
  */
 export async function handleGetVault(
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : Promise<void> {
-  if (!vaultState.derivedKey) {
-    sendResponse({ vault: null });
-    return;
-  }
-
   try {
     const result = await chrome.storage.session.get([
       'encryptedVault',
+      'derivedKey',
       'publicEmailDomains',
       'privateEmailDomains',
       'vaultRevisionNumber'
     ]);
 
     if (!result.encryptedVault) {
-      console.error('No encrypted vault found in storage');
+      console.error('Vault not available');
       sendResponse({ vault: null });
       return;
     }
 
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
       result.encryptedVault,
-      vaultState.derivedKey
+      result.derivedKey
     );
 
     sendResponse({
@@ -120,12 +110,11 @@ export async function handleGetVault(
  * Clear the vault from browser storage.
  */
 export function handleClearVault(
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : void {
-  vaultState.derivedKey = null;
   chrome.storage.session.remove([
     'encryptedVault',
+    'derivedKey',
     'publicEmailDomains',
     'privateEmailDomains',
     'vaultRevisionNumber'
@@ -137,16 +126,18 @@ export function handleClearVault(
  * Get all credentials.
  */
 export async function handleGetCredentials(
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : Promise<void> {
-  if (!vaultState.derivedKey) {
+  // Get derived key from chrome.storage.session.
+  const result = await chrome.storage.session.get(['derivedKey']);
+
+  if (!result.derivedKey) {
     sendResponse({ credentials: [], status: 'LOCKED' });
     return;
   }
 
   try {
-    const sqliteClient = await createVaultSqliteClient(vaultState);
+    const sqliteClient = await createVaultSqliteClient();
     const credentials = sqliteClient.getAllCredentials();
     sendResponse({ credentials: credentials, status: 'OK' });
   } catch (error) {
@@ -160,22 +151,24 @@ export async function handleGetCredentials(
  */
 export async function handleCreateIdentity(
   message: { credential: Credential },
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : Promise<void> {
-  if (!vaultState.derivedKey) {
+  // Get derived key from chrome.storage.session.
+  const result = await chrome.storage.session.get(['derivedKey']);
+
+  if (!result.derivedKey) {
     sendResponse({ success: false, error: 'Vault is locked' });
     return;
   }
 
   try {
-    const sqliteClient = await createVaultSqliteClient(vaultState);
+    const sqliteClient = await createVaultSqliteClient();
 
     // Add the new credential to the vault/database.
     sqliteClient.createCredential(message.credential);
 
     // Upload the new vault to the server.
-    await uploadNewVaultToServer(sqliteClient, vaultState);
+    await uploadNewVaultToServer(sqliteClient);
 
     sendResponse({ success: true });
   } catch (error) {
@@ -211,19 +204,13 @@ export async function getEmailAddressesForVault(
  * Get default email domain for a vault.
  */
 export function handleGetDefaultEmailDomain(
-  vaultState: VaultState,
   sendResponse: (response: any) => void
 ) : void {
-  if (!vaultState.derivedKey) {
-    sendResponse({ domain: null });
-    return;
-  }
-
   chrome.storage.session.get(['publicEmailDomains', 'privateEmailDomains'], async (result) => {
     const privateEmailDomains = result.privateEmailDomains ?? [];
     const publicEmailDomains = result.publicEmailDomains ?? [];
 
-    const sqliteClient = await createVaultSqliteClient(vaultState);
+    const sqliteClient = await createVaultSqliteClient();
     const defaultEmailDomain = sqliteClient.getDefaultEmailDomain();
 
     /**
@@ -263,23 +250,28 @@ export function handleGetDefaultEmailDomain(
 }
 
 /**
- * Get the derived key for a vault which is stored in local memory only.
+ * Get the derived key for the encrypted vault.
  */
-export function handleGetDerivedKey(
-  vaultState: VaultState,
+export async function handleGetDerivedKey(
   sendResponse: (response: any) => void
-) : void {
-  sendResponse(vaultState.derivedKey ? vaultState.derivedKey : null);
+) : Promise<void> {
+  // Get derived key from chrome.storage.session.
+  const result = await chrome.storage.session.get(['derivedKey']);
+  sendResponse(result.derivedKey ?? null);
 }
 
 /**
  * Upload a new version of the vault to the server using the provided sqlite client.
  */
-async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: VaultState) : Promise<void> {
+async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void> {
   const updatedVaultData = sqliteClient.exportToBase64();
+
+  // Get derived key from chrome.storage.session.
+  const result = await chrome.storage.session.get(['derivedKey']);
+
   const encryptedVault = await EncryptionUtility.symmetricEncrypt(
     updatedVaultData,
-    vaultState.derivedKey!
+    result.derivedKey!
   );
 
   // Store updated encrypted vault in chrome.storage.session.
@@ -326,18 +318,18 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient, vaultState: Va
 /**
  * Create a new sqlite client for the stored vault.
  */
-async function createVaultSqliteClient(vaultState: VaultState) : Promise<SqliteClient> {
+async function createVaultSqliteClient() : Promise<SqliteClient> {
   // Get the encrypted vault from chrome.storage.session.
-  const result = await chrome.storage.session.get(['encryptedVault']);
+  const result = await chrome.storage.session.get(['encryptedVault', 'derivedKey']);
 
-  if (!result.encryptedVault) {
-    throw new Error('No vault found');
+  if (!result.encryptedVault || !result.derivedKey) {
+    throw new Error('No vault or derived key found');
   }
 
   // Decrypt the vault.
   const decryptedVault = await EncryptionUtility.symmetricDecrypt(
     result.encryptedVault,
-      vaultState.derivedKey!
+    result.derivedKey
   );
 
   // Initialize the SQLite client with the decrypted vault.
