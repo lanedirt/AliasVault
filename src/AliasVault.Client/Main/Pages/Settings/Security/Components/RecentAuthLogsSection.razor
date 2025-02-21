@@ -76,7 +76,8 @@
         var authlogResponse = await Http.GetFromJsonAsync<List<AuthLogModel>>("v1/Security/authlogs");
         if (authlogResponse is not null)
         {
-            AuthLogs = authlogResponse;
+            // Only show the latest 20 auth logs to save space in UI.
+            AuthLogs = authlogResponse.OrderByDescending(x => x.Timestamp).Take(20).ToList();
         }
 
         IsLoading = false;
