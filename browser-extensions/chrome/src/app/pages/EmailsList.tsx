@@ -85,11 +85,11 @@ const EmailsList: React.FC = () => {
     } else if (secondsAgo < 3600) {
       // Less than 1 hour ago
       const minutes = Math.floor(secondsAgo / 60);
-      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+      return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`;
     } else if (secondsAgo < 86400) {
       // Less than 24 hours ago
       const hours = Math.floor(secondsAgo / 3600);
-      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+      return `${hours} ${hours === 1 ? 'hr' : 'hrs'} ago`;
     } else if (secondsAgo < 172800) {
       // Less than 48 hours ago
       return 'yesterday';
@@ -144,15 +144,12 @@ const EmailsList: React.FC = () => {
             className="block p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <div className="flex justify-between items-start mb-2">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {email.fromDisplay}
+              <div className="text-sm text-gray-900 dark:text-white mb-1 font-bold">
+                {email.subject}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
                 {formatEmailDate(email.dateSystem)}
               </div>
-            </div>
-            <div className="text-sm text-gray-900 dark:text-white mb-1 font-bold">
-              {email.subject}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
               {email.messagePreview}

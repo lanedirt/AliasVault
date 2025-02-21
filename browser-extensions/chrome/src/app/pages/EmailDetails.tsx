@@ -224,7 +224,7 @@ const EmailDetails: React.FC = () => {
         </div>
 
         {/* Email Body */}
-        <div className="p-6">
+        <div className="bg-white">
           {email.messageHtml ? (
             <iframe
               srcDoc={email.messageHtml}
