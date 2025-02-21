@@ -241,6 +241,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("Client")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Country")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -614,6 +618,10 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Client")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

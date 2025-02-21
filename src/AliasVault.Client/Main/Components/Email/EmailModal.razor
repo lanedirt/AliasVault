@@ -1,5 +1,6 @@
 ﻿@using AliasVault.Shared.Models.Spamok
 @using AliasVault.Shared.Utilities
+@using AliasVault.Shared.Core;
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
@@ -146,7 +147,12 @@
         try
         {
             var client = HttpClientFactory.CreateClient("EmailClient");
-            var response = await client.DeleteAsync($"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.spamok.com/v2/Email/{Email.ToLocal}/{Email.Id}");
+            request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
+            request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
+
+            var response = await client.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
@@ -181,18 +187,16 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
-                await Close();
+                GlobalNotificationService.AddSuccessMessage($"Email deleted successfully.", true);
             }
             else
             {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+                GlobalNotificationService.AddErrorMessage($"Failed to delete email.", true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"Failed to delete email: {ex.Message}", true);
         }
     }
 
@@ -233,8 +237,11 @@
             if (IsSpamOk)
             {
                 var client = HttpClientFactory.CreateClient("EmailClient");
-                var response = await client.GetAsync($"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
+                var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/Attachment/{Email!.Id}/{attachment.Id}/download");
+                request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
+                request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
+                var response = await client.SendAsync(request);
                 if (response.IsSuccessStatusCode)
                 {
                     var bytes = await response.Content.ReadAsByteArrayAsync();

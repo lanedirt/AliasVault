@@ -35,8 +35,9 @@ using Microsoft.Extensions.Caching.Memory;
 /// <param name="timeProvider">ITimeProvider instance.</param>
 /// <param name="authLoggingService">AuthLoggingService instance.</param>
 /// <param name="cache">IMemoryCache instance.</param>
+/// <param name="config">Config instance.</param>
 [ApiVersion("1")]
-public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache) : AuthenticatedRequestController(userManager)
+public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache, Config config) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
     /// Error message for providing an invalid current password (during password change).
@@ -95,7 +96,9 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                     CurrentRevisionNumber = 0,
                     EncryptionPublicKey = string.Empty,
                     CredentialsCount = 0,
-                    EmailAddressList = new List<string>(),
+                    EmailAddressList = [],
+                    PrivateEmailDomainList = [],
+                    PublicEmailDomainList = [],
                     CreatedAt = DateTime.MinValue,
                     UpdatedAt = DateTime.MinValue,
                 },
@@ -117,6 +120,13 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             });
         }
 
+        // Get dynamic list of private email domains from config.
+        var privateEmailDomainList = config.PrivateEmailDomains;
+
+        // Hardcoded list of public (SpamOK) email domains that are available to the client.
+        var publicEmailDomainList = new List<string>(["spamok.com", "solarflarecorp.com", "spamok.nl", "3060.nl",
+            "landmail.nl", "asdasd.nl", "spamok.de", "spamok.com.ua", "spamok.es", "spamok.fr"]);
+
         return Ok(new Shared.Models.WebApi.Vault.VaultGetResponse
         {
             Status = VaultStatus.Ok,
@@ -129,6 +139,8 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 EncryptionPublicKey = string.Empty,
                 CredentialsCount = 0,
                 EmailAddressList = [],
+                PrivateEmailDomainList = privateEmailDomainList,
+                PublicEmailDomainList = publicEmailDomainList,
                 CreatedAt = vault.CreatedAt,
                 UpdatedAt = vault.UpdatedAt,
             },
@@ -168,6 +180,8 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 EncryptionPublicKey = string.Empty,
                 CredentialsCount = 0,
                 EmailAddressList = [],
+                PrivateEmailDomainList = [],
+                PublicEmailDomainList = [],
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
             }).ToList(),
@@ -178,9 +192,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     /// Save a new vault to the database for the current user.
     /// </summary>
     /// <param name="model">Vault model.</param>
+    /// <param name="clientHeader">Client header.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("")]
-    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model)
+    public async Task<IActionResult> Update([FromBody] Shared.Models.WebApi.Vault.Vault model, [FromHeader(Name = "X-AliasVault-Client")] string? clientHeader)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -200,7 +215,13 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
-        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber }).First();
+        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings, x.RevisionNumber, x.Version }).First();
+
+        // Reject vaults with a version that is lower than the last vault version.
+        if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
+        {
+            return BadRequest("The uploaded vault version is lower than the last vault version. Please update and/or refresh your client.");
+        }
 
         // Calculate the new revision number for the vault.
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
@@ -226,6 +247,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             Verifier = latestVault.Verifier,
             EncryptionType = latestVault.EncryptionType,
             EncryptionSettings = latestVault.EncryptionSettings,
+            Client = clientHeader,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -256,9 +278,12 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     /// Save a new vault to the database based on a new encryption password for the current user.
     /// </summary>
     /// <param name="model">Vault model.</param>
+    /// <param name="clientHeader">Client header.</param>
     /// <returns>IActionResult.</returns>
     [HttpPost("change-password")]
-    public async Task<IActionResult> UpdateChangePassword([FromBody] VaultPasswordChangeRequest model)
+    public async Task<IActionResult> UpdateChangePassword(
+        [FromBody] VaultPasswordChangeRequest model,
+        [FromHeader(Name = "X-AliasVault-Client")] string? clientHeader)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -308,6 +333,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             Verifier = model.NewPasswordVerifier,
             EncryptionType = Defaults.EncryptionType,
             EncryptionSettings = Defaults.EncryptionSettings,
+            Client = clientHeader,
             CreatedAt = timeProvider.UtcNow,
             UpdatedAt = timeProvider.UtcNow,
         };
@@ -356,6 +382,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 Verifier = x.Verifier,
                 EncryptionType = x.EncryptionType,
                 EncryptionSettings = x.EncryptionSettings,
+                Client = x.Client,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
             })

@@ -126,6 +126,7 @@ else
         IsLoading = true;
         NoEmailClaims = false;
         StateHasChanged();
+        CloseEmailModal();
 
         var emailClaimList = await DbService.GetEmailClaimListAsync();
 

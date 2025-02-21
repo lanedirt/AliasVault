@@ -9,6 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.code-workspace
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -375,6 +376,10 @@ FodyWeavers.xsd
 
 .idea
 *.licenseheader
+
+# Junie JetBrains plugin
+.junie
+.output.txt
 
 # Codebuddy Rider plugin
 .codebuddy

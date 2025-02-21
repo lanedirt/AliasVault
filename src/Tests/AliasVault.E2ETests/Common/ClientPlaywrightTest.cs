@@ -61,11 +61,14 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [OneTimeTearDown]
-    public async Task OneTimeTearDown()
+    public virtual async Task OneTimeTearDown()
     {
         await Page.CloseAsync();
         await Context.CloseAsync();
-        await Browser.CloseAsync();
+        if (Browser != null)
+        {
+            await Browser.CloseAsync();
+        }
 
         await _apiFactory.DisposeAsync();
         await _clientFactory.DisposeAsync();
@@ -90,6 +93,10 @@ public class ClientPlaywrightTest : PlaywrightTest
         AppBaseUrl = "http://localhost:" + appPort + "/";
         ApiBaseUrl = "http://localhost:" + apiPort + "/";
 
+        // Set environment variables for the API.
+        string[] privateEmailDomains = ["example.tld", "example2.tld"];
+        Environment.SetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS", string.Join(",", privateEmailDomains));
+
         // Start WebAPI in-memory.
         _apiFactory.Port = apiPort;
         _apiFactory.CreateDefaultClient();
@@ -101,7 +108,6 @@ public class ClientPlaywrightTest : PlaywrightTest
         await SetupPlaywrightBrowserAndContext();
 
         // Intercept Blazor WASM app requests to override appsettings.json
-        string[] privateEmailDomains = ["example.tld", "example2.tld"];
         var appSettings = new
         {
             ApiUrl = ApiBaseUrl.TrimEnd('/'),
@@ -381,6 +387,9 @@ public class ClientPlaywrightTest : PlaywrightTest
         await emailField.FillAsync(username ?? TestUserUsername);
         await passwordField.FillAsync(password ?? TestUserPassword);
         await password2Field.FillAsync(password ?? TestUserPassword);
+
+        // Click somewhere on the page to hide the browser extension automatic popup, otherwise checkbox below cannot be checked.
+        await Page.ClickAsync("body");
 
         // Check the terms of service checkbox
         var termsCheckbox = await WaitForAndGetElement("input[id='terms']");

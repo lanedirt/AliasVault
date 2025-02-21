@@ -36,7 +36,7 @@ For most version updates, you can use the standard update process:
 ## Version-Specific Upgrade Guides
 Some versions require additional steps during upgrade. If you are upgrading from an older version, please check the relevant upgrade guide below:
 
-- [Updating to v0.10.0](v0-10-0.html) - SQLite to PostgreSQL migration
+- [Updating to v0.10.0](v0.10.0.html) - SQLite to PostgreSQL migration
 
 ## Additional Update Options
 

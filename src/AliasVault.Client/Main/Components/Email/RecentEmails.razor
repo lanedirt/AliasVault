@@ -9,7 +9,7 @@
 @inject DbService DbService
 @inject Config Config
 @inject EmailService EmailService
-@using System.Timers
+@using AliasVault.Shared.Core
 @inject ILogger<RecentEmails> Logger
 @implements IAsyncDisposable
 
@@ -245,6 +245,7 @@
     {
         IsLoading = true;
         StateHasChanged();
+        CloseEmailModal();
         await LoadRecentEmailsAsync();
         IsLoading = false;
         StateHasChanged();
@@ -307,12 +308,19 @@
         // We construct a new HttpClient to avoid using the default one, which is used for the API and sends
         // the Authorization header. We don't want to send the Authorization header to the external email API.
         var client = HttpClientFactory.CreateClient("EmailClient");
-        var mailbox = await client.GetFromJsonAsync<MailboxApiModel>($"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/EmailBox/{emailPrefix}");
+        request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
+        request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
 
-        if (mailbox?.Mails != null)
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
         {
-            // Show maximum of 10 recent emails.
-            MailboxEmails = mailbox.Mails.Take(10).ToList();
+            var mailbox = await response.Content.ReadFromJsonAsync<MailboxApiModel>();
+            if (mailbox != null)
+            {
+                // Show maximum of 10 recent emails.
+                MailboxEmails = mailbox.Mails.Take(10).ToList();
+            }
         }
     }
 
@@ -322,12 +330,20 @@
     private async Task ShowSpamOkEmailInModal(string emailPrefix, int emailId)
     {
         var client = HttpClientFactory.CreateClient("EmailClient");
-        EmailApiModel? mail = await client.GetFromJsonAsync<EmailApiModel>($"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
-        if (mail != null)
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.spamok.com/v2/Email/{emailPrefix}/{emailId}");
+        request.Headers.Add("X-Asdasd-Platform-Id", "av-web");
+        request.Headers.Add("X-Asdasd-Platform-Version", AppInfo.GetFullVersion());
+
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
         {
-            Email = mail;
-            EmailModalVisible = true;
-            StateHasChanged();
+            var mail = await response.Content.ReadFromJsonAsync<EmailApiModel>();
+            if (mail != null)
+            {
+                Email = mail;
+                EmailModalVisible = true;
+                StateHasChanged();
+            }
         }
     }
 

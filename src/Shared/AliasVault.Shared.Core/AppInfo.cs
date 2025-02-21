@@ -25,12 +25,23 @@ public static class AppInfo
     /// <summary>
     /// Gets the minor version number.
     /// </summary>
-    public const int VersionMinor = 11;
+    public const int VersionMinor = 12;
 
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 1;
+    public const int VersionPatch = 0;
+
+    /// <summary>
+    /// Gets a dictionary of minimum supported client versions that the WebApi supports.
+    /// If client version is lower than the minimum supported version, the client will show a message
+    /// to the user to update itself to the minimum supported version.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> MinimumClientVersions { get; } = new Dictionary<string, string>
+    {
+        { "chrome", "0.12.0" },
+        { "web", "0.12.0" },
+    }.AsReadOnly();
 
     /// <summary>
     /// Gets the build number, typically used in CI/CD pipelines.

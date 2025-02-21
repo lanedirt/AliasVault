@@ -235,6 +235,10 @@ namespace AliasServerDb.Migrations.SqliteMigrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Client")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Country")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
@@ -599,6 +603,10 @@ namespace AliasServerDb.Migrations.SqliteMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Client")
+                        .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")

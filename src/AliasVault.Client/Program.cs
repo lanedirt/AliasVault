@@ -8,6 +8,7 @@
 using AliasVault.Client;
 using AliasVault.Client.Providers;
 using AliasVault.RazorComponents.Services;
+using AliasVault.Shared.Core;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -56,6 +57,10 @@ builder.Services.AddScoped(sp =>
     // If API URL override is set (used e.g. in dev), then ensure the API URL ends with a forward slash.
     var baseUrl = string.IsNullOrEmpty(apiConfig.ApiUrl) ? builder.HostEnvironment.BaseAddress + "api/" : apiConfig.ApiUrl.TrimEnd('/') + "/";
     httpClient.BaseAddress = new Uri(baseUrl);
+
+    // Add client header.
+    httpClient.DefaultRequestHeaders.Add("X-AliasVault-Client", "web-" + AppInfo.GetFullVersion());
+
     return httpClient;
 });
 builder.Services.AddTransient<AliasVaultApiHandlerService>();
