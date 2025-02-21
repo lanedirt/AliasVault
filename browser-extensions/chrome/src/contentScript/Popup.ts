@@ -1045,20 +1045,21 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
 /**
  * Base64 encode binary data.
  */
-function base64Encode(buffer: Uint8Array): string | null {
-  if (!buffer || typeof buffer !== 'object') {
-    return null;
-  }
-
+function base64Encode(buffer: Uint8Array | number[] | {[key: number]: number}): string | null {
   try {
-    // Convert object to array of numbers
-    const byteArray = Object.values(buffer);
+    // Handle object with numeric keys
+    if (typeof buffer === 'object' && !Array.isArray(buffer) && !(buffer instanceof Uint8Array)) {
+      const length = Object.keys(buffer).length;
+      const arr = new Uint8Array(length);
+      for (let i = 0; i < length; i++) {
+        arr[i] = buffer[i];
+      }
+      buffer = arr;
+    }
 
-    // Convert to binary string
-    const binary = String.fromCharCode.apply(null, byteArray);
-
-    // Use btoa to encode binary string to base64
-    return btoa(binary);
+    // Convert to array if Uint8Array
+    const arr = Array.from(buffer as Uint8Array | number[]);
+    return btoa(arr.reduce((data, byte) => data + String.fromCharCode(byte), ''));
   } catch (error) {
     console.error('Error encoding to base64:', error);
     return null;
