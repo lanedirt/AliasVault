@@ -70,7 +70,14 @@
                                     {
                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-600">
                                             <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                                <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@(mail.Subject.Substring(0, mail.Subject.Length > 30 ? 30 : mail.Subject.Length))...</span>
+                                                @if (mail.Subject.Length > 30)
+                                                {
+                                                    <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@(mail.Subject.Substring(0, 30))...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@mail.Subject</span>
+                                                }
                                             </td>
                                             <td class="p-4 text-sm font-normal text-gray-500 whitespace-nowrap dark:text-gray-400">
                                                 <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@mail.DateSystem</span>
@@ -158,6 +165,7 @@
         if (_refreshTimer is not null)
         {
             await _cancellationTokenSource.CancelAsync();
+            await Task.Delay(100); // Give time for the polling loop to complete
             _refreshTimer.Dispose();
             _refreshTimer = null;
         }
@@ -166,8 +174,11 @@
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        await StopPolling();
-        _cancellationTokenSource.Dispose();
+        if (_refreshTimer is not null)
+        {
+            await StopPolling();
+            _cancellationTokenSource.Dispose();
+        }
     }
 
     /// <inheritdoc />
