@@ -43,7 +43,7 @@
     private bool IsPopupVisible = false;
     private bool IsCreating = false;
     private CreateModel Model = new();
-    private string PopupStyle { get; set; } = "";
+    private string PopupStyle { get; set; } = string.Empty;
     private ElementReference buttonRef;
     private IJSObjectReference? Module;
 
@@ -84,6 +84,9 @@
         });
     }
 
+    /// <summary>
+    /// Toggle the popup.
+    /// </summary>
     private async Task TogglePopup()
     {
         IsPopupVisible = !IsPopupVisible;
@@ -93,6 +96,9 @@
         }
     }
 
+    /// <summary>
+    /// Show the popup.
+    /// </summary>
     private async Task ShowPopup()
     {
         IsPopupVisible = true;
@@ -106,23 +112,32 @@
         await JsInteropService.FocusElementById("serviceName");
     }
 
+    /// <summary>
+    /// Close the popup.
+    /// </summary>
     private void ClosePopup()
     {
         IsPopupVisible = false;
     }
 
+    /// <summary>
+    /// Update the popup style so that it is positioned correctly.
+    /// </summary>
     private async Task UpdatePopupStyle()
     {
         var windowWidth = await JSRuntime.InvokeAsync<int>("getWindowWidth");
         var buttonRect = await JSRuntime.InvokeAsync<BoundingClientRect>("getElementRect", buttonRef);
 
-        var popupWidth = Math.Min(400, windowWidth - 20); // 20px for some padding
-        var leftPosition = Math.Max(0, Math.Min(buttonRect.Left, windowWidth - popupWidth - 10));
+        // Constrain the popup width to 400px minus some padding.
+        var popupWidth = Math.Min(400, windowWidth - 20);
 
-        PopupStyle = $"width: {popupWidth}px; left: {leftPosition}px; top: {buttonRect.Bottom}px;";
+        PopupStyle = $"width: {popupWidth}px; top: {buttonRect.Bottom}px;";
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Create the new identity.
+    /// </summary>
     private async Task CreateIdentity()
     {
         if (IsCreating)
@@ -169,6 +184,9 @@
         ClosePopup();
     }
 
+    /// <summary>
+    /// Open the advanced mode for creating a new identity.
+    /// </summary>
     private void OpenAdvancedMode()
     {
         NavigationManager.NavigateTo("/credentials/create");
