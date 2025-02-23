@@ -14,6 +14,7 @@ using AliasVault.Api.Jwt;
 using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
+using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Providers.Time;
 using AliasVault.Shared.Server.Services;
 using Asp.Versioning;
@@ -38,6 +39,7 @@ var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") 
 config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
 
 builder.Services.AddSingleton(config);
+builder.Services.AddSingleton<SharedConfig>(sp => sp.GetRequiredService<Config>());
 
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 

@@ -17,6 +17,7 @@ using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
+using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -40,6 +41,7 @@ var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") 
 config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
 
 builder.Services.AddSingleton(config);
+builder.Services.AddSingleton<SharedConfig>(sp => sp.GetRequiredService<Config>());
 
 builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 

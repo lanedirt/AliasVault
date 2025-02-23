@@ -32,6 +32,10 @@ public class AuthTests : ClientPlaywrightTest
         var authLogEntry = await ApiDbContext.AuthLogs.FirstOrDefaultAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
         Assert.That(authLogEntry, Is.Not.Null, "Auth log entry not found in database after registration.");
 
+        // Check if the IP address is not anonymized as IP logging is disabled by default.
+        // The opposite of this is tested in the IP logging test in ApiTests.cs.
+        Assert.That(authLogEntry.IpAddress, Is.EqualTo("xxx.xxx.xxx.xxx"), "Auth log entry IP address is not anonymized while IP logging should be disabled. Check test configuration.");
+
         // Check if the refresh token is stored in the database and its expiration date is set to the long lifetime
         // after registration. The registration page does not have a "Remember me" checkbox, but it is assumed that
         // the device is trusted so the refresh token will be valid for the extended duration.
