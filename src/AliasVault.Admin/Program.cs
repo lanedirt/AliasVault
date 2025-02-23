@@ -29,12 +29,15 @@ builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.Environment
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
 // Create global config object, get values from environment variables.
-Config config = new Config();
+var config = new Config();
 var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
 config.AdminPasswordHash = adminPasswordHash;
 
 var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
 config.LastPasswordChanged = DateTime.Parse(lastPasswordChanged, CultureInfo.InvariantCulture);
+
+var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") ?? "false";
+config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
 
 builder.Services.AddSingleton(config);
 
