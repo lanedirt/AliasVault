@@ -66,7 +66,7 @@ public abstract class PlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public virtual async Task OneTimeSetUp()
     {
         const int maxRetries = 10;
         int currentRetry = 0;
@@ -230,7 +230,7 @@ public abstract class PlaywrightTest
     }
 
     /// <summary>
-    /// Setup the Playwright test environment. This method is required to be implemented by the derived class.
+    /// Set up the Playwright test environment. This method is required to be implemented by the derived class.
     /// </summary>
     /// <returns>Async task.</returns>
     protected abstract Task SetupEnvironment();

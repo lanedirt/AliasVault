@@ -45,6 +45,7 @@ show_usage() {
     printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
     printf "  configure-email           Configure email domains for receiving emails\n"
     printf "  configure-registration    Configure new account registration (enable or disable)\n"
+    printf "  configure-ip-logging      Configure IP address logging (enable or disable)\n"
     printf "  start                     Start AliasVault containers using remote images\n"
     printf "  stop                      Stop AliasVault containers using remote images\n"
     printf "  restart                   Restart AliasVault containers using remote images\n"
@@ -131,6 +132,10 @@ parse_args() {
             ;;
         configure-registration|registration)
             COMMAND="configure-registration"
+            shift
+            ;;
+        configure-ip-logging|ip-logging)
+            COMMAND="configure-ip-logging"
             shift
             ;;
         start|s)
@@ -253,6 +258,9 @@ main() {
             ;;
         "configure-hostname")
             handle_hostname_configuration
+            ;;
+        "configure-ip-logging")
+            handle_ip_logging_configuration
             ;;
         "start")
             handle_start
@@ -516,6 +524,15 @@ set_public_registration() {
         update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
     else
         printf "  ${GREEN}> PUBLIC_REGISTRATION_ENABLED already exists.${NC}\n"
+    fi
+}
+
+set_ip_logging() {
+    printf "${CYAN}> Checking IP_LOGGING_ENABLED...${NC}\n"
+    if ! grep -q "^IP_LOGGING_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^IP_LOGGING_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "IP_LOGGING_ENABLED" "true"
+    else
+        printf "  ${GREEN}> IP_LOGGING_ENABLED already exists.${NC}\n"
     fi
 }
 
@@ -829,6 +846,7 @@ handle_build() {
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
+    set_ip_logging || { printf "${RED}> Failed to set IP logging${NC}\n"; exit 1; }
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -2032,6 +2050,57 @@ handle_hostname_configuration() {
         printf "${MAGENTA}=========================================================${NC}\n"
         exit 1
     fi
+}
+
+# Function to handle IP logging configuration
+handle_ip_logging_configuration() {
+    # Get current IP logging setting
+    CURRENT_SETTING=$(grep "^IP_LOGGING_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
+
+    printf "${YELLOW}+++ Configure IP Address Logging +++${NC}\n"
+    printf "\n"
+    printf "Current setting: ${CYAN}${CURRENT_SETTING}${NC}\n"
+    printf "\n"
+    printf "1) Enable IP address logging\n"
+    printf "2) Disable IP address logging\n"
+    printf "\n"
+    printf "Choose an option (1-2): "
+    read -r choice
+
+    case $choice in
+        1)
+            update_env_var "IP_LOGGING_ENABLED" "true"
+            printf "${GREEN}> IP address logging enabled.${NC}\n"
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Restart now? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Please restart manually to apply the changes.${NC}\n"
+                exit 0
+            fi
+
+            handle_restart
+            ;;
+        2)
+            update_env_var "IP_LOGGING_ENABLED" "false"
+            printf "${GREEN}> IP address logging disabled.${NC}\n"
+
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
+            read -p "Restart now? (y/n): " restart_confirm
+
+            if [ "$restart_confirm" != "y" ] && [ "$restart_confirm" != "Y" ]; then
+                printf "${YELLOW}Please restart manually to apply the changes.${NC}\n"
+                exit 0
+            fi
+
+            handle_restart
+            ;;
+        *)
+            printf "${RED}Invalid option selected.${NC}\n"
+            return 1
+            ;;
+    esac
 }
 
 main "$@"

@@ -8,6 +8,7 @@
 namespace AliasVault.Auth;
 
 using AliasServerDb;
+using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,9 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
         var httpContext = httpContextAccessor.HttpContext;
         var clientHeader = httpContext?.Request.Headers["X-AliasVault-Client"].FirstOrDefault();
 
+        var config = scope.ServiceProvider.GetRequiredService<SharedConfig>();
+        var ipAddress = config.IpLoggingEnabled ? IpAddressUtility.GetIpFromContext(httpContext) : "xxx.xxx.xxx.xxx";
+
         var authAttempt = new AuthLog
         {
             Timestamp = DateTime.UtcNow,
@@ -39,7 +43,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             EventType = eventType,
             IsSuccess = true,
             FailureReason = null,
-            IpAddress = IpAddressUtility.GetIpFromContext(httpContext),
+            IpAddress = ipAddress,
             UserAgent = httpContext?.Request.Headers.UserAgent,
             Client = clientHeader,
             RequestPath = httpContext?.Request.Path,
@@ -68,6 +72,9 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
         var httpContext = httpContextAccessor.HttpContext;
         var clientHeader = httpContext?.Request.Headers["X-AliasVault-Client"].FirstOrDefault();
 
+        var config = httpContext?.RequestServices.GetService<SharedConfig>();
+        var ipAddress = config?.IpLoggingEnabled == true ? IpAddressUtility.GetIpFromContext(httpContext) : "xxx.xxx.xxx.xxx";
+
         var authAttempt = new AuthLog
         {
             Timestamp = DateTime.UtcNow,
@@ -75,7 +82,7 @@ public class AuthLoggingService(IServiceProvider serviceProvider, IHttpContextAc
             EventType = eventType,
             IsSuccess = false,
             FailureReason = failureReason,
-            IpAddress = IpAddressUtility.GetIpFromContext(httpContext),
+            IpAddress = ipAddress,
             UserAgent = httpContext?.Request.Headers.UserAgent,
             Client = clientHeader,
             RequestPath = httpContext?.Request.Path,

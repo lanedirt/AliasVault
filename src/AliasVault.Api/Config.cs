@@ -7,10 +7,12 @@
 
 namespace AliasVault.Api;
 
+using AliasVault.Shared.Models.Configuration;
+
 /// <summary>
 /// Configuration class for the Client project with values loaded from appsettings.json.
 /// </summary>
-public class Config
+public class Config : SharedConfig
 {
     /// <summary>
     /// Gets or sets a value indicating whether public registration is enabled.

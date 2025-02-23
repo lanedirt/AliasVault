@@ -8,6 +8,7 @@
 namespace AliasVault.E2ETests.Tests.Client.Shard1;
 
 using AliasServerDb;
+using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
@@ -18,6 +19,18 @@ using Microsoft.EntityFrameworkCore;
 [NonParallelizable]
 public class ApiTests : ClientPlaywrightTest
 {
+    /// <summary>
+    /// Set the environment variables for the test.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [OneTimeSetUp]
+    public override async Task OneTimeSetUp()
+    {
+        // Enable IP logging for this test (default is false).
+        Environment.SetEnvironmentVariable("IP_LOGGING_ENABLED", "true");
+        await base.OneTimeSetUp();
+    }
+
     /// <summary>
     /// Test if an error in the API is logged to the database.
     /// </summary>
@@ -41,6 +54,19 @@ public class ApiTests : ClientPlaywrightTest
 
         Assert.That(logEntry, Is.Not.Null, "Log entry for triggered exception not found in database. Check Serilog configuration and /v1/Test/Error endpoint.");
         Assert.That(logEntry.Exception, Does.Contain("Test error"), "Log entry in database does not contain expected message. Check exception and Serilog configuration.");
+    }
+
+    /// <summary>
+    /// Test if IP addresses are logged correctly when IP logging is enabled.
+    /// </summary>
+    /// <remarks>The opposite of this test is covered by AuthTests.cs.</remarks>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task IpLoggingTest()
+    {
+        // Check if the IP address is not anonymized as we enabled IP logging for this test file, see OneTimeSetUp().
+        var authLogEntry = await ApiDbContext.AuthLogs.FirstAsync(x => x.Username == TestUserUsername && x.EventType == AuthEventType.Register);
+        Assert.That(authLogEntry.IpAddress, Is.EqualTo("::1"), "IP address is anonymized while IP logging should be enabled. Check test configuration.");
     }
 
     /// <summary>
