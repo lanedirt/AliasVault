@@ -40,5 +40,5 @@ public sealed class CredentialListEntry
     /// <summary>
     /// Gets or sets the alias create date.
     /// </summary>
-    public DateTime CreateDate { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
