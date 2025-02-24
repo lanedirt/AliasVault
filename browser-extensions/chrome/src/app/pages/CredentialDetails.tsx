@@ -44,6 +44,30 @@ const CredentialDetails: React.FC = () => {
     window.close();
   };
 
+  /**
+   * Checks if the email domain is supported for email preview.
+   *
+   * @param email The email address to check
+   * @returns True if the domain is supported, false otherwise
+   */
+  const isEmailDomainSupported = (email: string): boolean => {
+    // Extract domain from email
+    const domain = email.split('@')[1]?.toLowerCase();
+
+    if (!domain) {
+      return false;
+    }
+
+    // Check if domain is in public or private domains
+    const publicDomains = dbContext.publicEmailDomains ?? [];
+    const privateDomains = dbContext.privateEmailDomains ?? [];
+
+    // Check if the domain ends with any of the supported domains
+    return [...publicDomains, ...privateDomains].some(supportedDomain =>
+      domain === supportedDomain || domain.endsWith(`.${supportedDomain}`)
+    );
+  };
+
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation
     if (isPopup()) {
@@ -121,11 +145,15 @@ const CredentialDetails: React.FC = () => {
         </div>
 
         {credential.Email && (
-          <div className="mt-6">
-            <EmailPreview
-              email={credential.Email}
-            />
-          </div>
+          <>
+            {isEmailDomainSupported(credential.Email) && (
+              <div className="mt-6">
+                <EmailPreview
+                  email={credential.Email}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 
