@@ -219,13 +219,29 @@ export class WebApiService {
    * Calls the status endpoint to check if the auth tokens are still valid, app is supported and the vault is up to date.
    */
   public async getStatus(): Promise<StatusResponse> {
-    return await this.get<StatusResponse>('Auth/status');
+    try {
+      return await this.get<StatusResponse>('Auth/status');
+    } catch {
+      /**
+       * If the status endpoint is not available, return a default status response which will trigger
+       * a logout and error message.
+       */
+      return {
+        clientVersionSupported: true,
+        serverVersion: '0.0.0',
+        vaultRevision: 0
+      };
+    }
   }
 
   /**
    * Validates the status response and returns an error message if validation fails.
    */
   public validateStatusResponse(statusResponse: StatusResponse): string | null {
+    if (statusResponse.serverVersion === '0.0.0') {
+      return 'The AliasVault server is not available. Please try again later or contact support if the problem persists.';
+    }
+
     if (!statusResponse.clientVersionSupported) {
       return 'This version of the AliasVault browser extension is outdated. Please update your browser extension to the latest version.';
     }

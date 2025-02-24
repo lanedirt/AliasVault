@@ -58,7 +58,8 @@ const App: React.FC = () => {
   useEffect(() => {
     if (authContext.globalMessage) {
       setMessage(authContext.globalMessage);
-      authContext.clearGlobalMessage();
+    } else {
+      setMessage(null);
     }
   }, [authContext, authContext.globalMessage]);
 
