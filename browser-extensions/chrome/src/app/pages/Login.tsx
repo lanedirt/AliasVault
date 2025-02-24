@@ -54,6 +54,9 @@ const Login: React.FC = () => {
     try {
       showLoading();
 
+      // Clear global message if set with every login attempt.
+      authContext.clearGlobalMessage();
+
       // Use the srpUtil instance instead of the imported singleton
       const loginResponse = await srpUtil.initiateLogin(credentials.username);
 
@@ -121,9 +124,8 @@ const Login: React.FC = () => {
 
       // Show app.
       hideLoading();
-    } catch (err) {
-      setError('Login failed. Please check your credentials and try again.');
-      console.error('Login error:', err);
+    } catch {
+      setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
       hideLoading();
     }
   };
