@@ -1566,6 +1566,7 @@ handle_install_version() {
     set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
     set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
     set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
+    set_ip_logging || { printf "${RED}> Failed to set IP logging${NC}\n"; exit 1; }
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
