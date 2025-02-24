@@ -19,6 +19,9 @@ public static class ConversionUtility
     /// </summary>
     /// <param name="html">HTML input.</param>
     /// <returns>HTML with all anchor tags converted to open in a new tab when clicked on.</returns>
+    /// <remarks>
+    /// Note: same implementation exists in browser extension Typescript version in ConversionUtility.ts.
+    /// </remarks>
     public static string ConvertAnchorTagsToOpenInNewTab(string html)
     {
         try

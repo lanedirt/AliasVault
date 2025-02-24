@@ -8,6 +8,7 @@ import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 import EncryptionUtility from '../../shared/EncryptionUtility';
 import { Attachment } from '../../shared/types/webapi/Attachment';
 import { useLoading } from '../context/LoadingContext';
+import ConversionUtility from '../utils/ConversionUtility';
 
 /**
  * Email details page.
@@ -227,7 +228,7 @@ const EmailDetails: React.FC = () => {
         <div className="bg-white">
           {email.messageHtml ? (
             <iframe
-              srcDoc={email.messageHtml}
+              srcDoc={ConversionUtility.convertAnchorTagsToOpenInNewTab(email.messageHtml)}
               className="w-full min-h-[500px] border-0"
               title="Email content"
             />
