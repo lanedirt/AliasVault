@@ -43,12 +43,24 @@ public sealed class SettingsService
     /// Gets the DefaultIdentityLanguage setting.
     /// </summary>
     /// <returns>Default identity language as two-letter code.</returns>
-    public string DefaultIdentityLanguage => GetSetting<string>("DefaultIdentityLanguage", "en")!;
+    public string DefaultIdentityLanguage => GetSetting("DefaultIdentityLanguage", "en")!;
 
     /// <summary>
     /// Gets a value indicating whether the tutorial has been completed.
     /// </summary>
     public bool TutorialDone => GetSetting("TutorialDone", false);
+
+    /// <summary>
+    /// Gets the CredentialsViewMode setting.
+    /// </summary>
+    /// <returns>Credentials view mode as string.</returns>
+    public string CredentialsViewMode => GetSetting("CredentialsViewMode", "grid")!;
+
+    /// <summary>
+    /// Gets the CredentialsSortOrder setting.
+    /// </summary>
+    /// <returns>Credentials sort order as string.</returns>
+    public string CredentialsSortOrder => GetSetting("CredentialsSortOrder", "asc")!;
 
     /// <summary>
     /// Sets the DefaultEmailDomain setting.
@@ -77,6 +89,20 @@ public sealed class SettingsService
     /// <param name="value">Value to set.</param>
     /// <returns>Task.</returns>
     public Task SetTutorialDoneAsync(bool value) => SetSettingAsync("TutorialDone", value);
+
+    /// <summary>
+    /// Sets the CredentialsViewMode setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetCredentialsViewMode(string value) => SetSettingAsync("CredentialsViewMode", value);
+
+    /// <summary>
+    /// Sets the CredentialsSortOrder setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetCredentialsSortOrder(string value) => SetSettingAsync("CredentialsSortOrder", value);
 
     /// <summary>
     /// Initializes the settings service asynchronously.
