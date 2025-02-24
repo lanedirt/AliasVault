@@ -10,6 +10,7 @@ import { useLoading } from '../context/LoadingContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import { LoginResponse } from '../../shared/types/webapi/Login';
 import LoginServerInfo from '../components/LoginServerInfo';
+import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Login page
@@ -39,7 +40,12 @@ const Login: React.FC = () => {
      */
     const loadClientUrl = async () : Promise<void> => {
       const setting = await chrome.storage.local.get(['clientUrl']);
-      setClientUrl(setting.clientUrl);
+      let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
+      if (setting.clientUrl.length > 0) {
+        clientUrl = setting.clientUrl;
+      }
+
+      setClientUrl(clientUrl);
     };
     loadClientUrl();
   }, []);
