@@ -60,7 +60,7 @@ jobs:
       - name: Zip Chrome Extension
         run: |
           cd browser-extensions/chrome/dist
-          zip -r ../../aliasvault-chrome-extension.zip .
+          zip -r ../../../aliasvault-chrome-extension.zip .
 
       - name: Upload Chrome Extension ZIP to Release
         uses: softprops/action-gh-release@v2
