@@ -142,7 +142,21 @@ If you want to disable public registration, you can do so by running the install
 
 ---
 
-## 5. Troubleshooting
+## 5. Configure IP logging
+
+By default, AliasVault is configured to log (anonymized) IP addressses for all authentication attempts. This is used to monitor and combat potential abuse. However for privacy reasons the last octet of the IP address is anonymized, e.g. the IP address `127.0.0.1` is logged as `127.0.0.xxx`. This is to prevent an IP address directly being linked to an individual person or household.
+
+If you want to entirely disable IP logging, you can do so by running the install script with the `configure-ip-logging` option and then choosing option 2.
+
+```bash
+./install.sh configure-ip-logging
+```
+
+> Note: disabling IP logging means the ability to monitor and track abusive users on your AliasVault server is disabled.
+
+---
+
+## 6. Troubleshooting
 
 ### Resetting the admin password
 If you have lost your admin password, you can reset it by running the install script with the `reset-password` option. This will generate a new random password and update the .env file with it. After that it will restart the AliasVault containers to apply the changes.

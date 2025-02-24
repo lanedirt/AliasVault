@@ -14,6 +14,7 @@ using AliasVault.Api.Jwt;
 using AliasVault.Auth;
 using AliasVault.Cryptography.Server;
 using AliasVault.Logging;
+using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Providers.Time;
 using AliasVault.Shared.Server.Services;
 using Asp.Versioning;
@@ -34,7 +35,11 @@ config.PublicRegistrationEnabled = bool.Parse(publicRegistrationEnabled);
 var privateEmailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")?.Split(",").Select(d => d.Trim());
 config.PrivateEmailDomains = privateEmailDomains?.ToList() ?? new List<string>();
 
+var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") ?? "false";
+config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
+
 builder.Services.AddSingleton(config);
+builder.Services.AddSingleton<SharedConfig>(sp => sp.GetRequiredService<Config>());
 
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
