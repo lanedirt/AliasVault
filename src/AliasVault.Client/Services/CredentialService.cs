@@ -353,7 +353,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
                 Service = x.Service.Name,
                 Username = x.Username,
                 Email = x.Alias.Email,
-                CreateDate = x.CreatedAt,
+                CreatedAt = x.CreatedAt,
             })
             .ToListAsync();
     }
