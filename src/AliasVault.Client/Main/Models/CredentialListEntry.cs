@@ -28,6 +28,16 @@ public sealed class CredentialListEntry
     public string? Service { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the alias username.
+    /// </summary>
+    public string? Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the alias email.
+    /// </summary>
+    public string? Email { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the alias create date.
     /// </summary>
     public DateTime CreateDate { get; set; }

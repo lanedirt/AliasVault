@@ -121,7 +121,8 @@
             {
                 query = query.Where(x =>
                     (x.Service.Name != null && EF.Functions.Like(x.Service.Name.ToLower(), $"%{term}%")) ||
-                    (x.Alias.Email != null && EF.Functions.Like(x.Alias.Email.ToLower(), $"%{term}%"))
+                    (x.Alias.Email != null && EF.Functions.Like(x.Alias.Email.ToLower(), $"%{term}%")) ||
+                    (x.Username != null && EF.Functions.Like(x.Username.ToLower(), $"%{term}%"))
                 );
             }
 
