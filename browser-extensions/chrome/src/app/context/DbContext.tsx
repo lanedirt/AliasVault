@@ -9,6 +9,8 @@ type DbContextType = {
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
   clearDatabase: () => void;
   vaultRevision: number;
+  publicEmailDomains: string[];
+  privateEmailDomains: string[];
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -35,7 +37,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Public email domains.
    */
-  const [, setPublicEmailDomains] = useState<string[]>([]);
+  const [publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
 
   /**
    * Vault revision.
@@ -45,7 +47,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Private email domains.
    */
-  const [, setPrivateEmailDomains] = useState<string[]>([]);
+  const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
     // Attempt to decrypt the blob.
@@ -123,8 +125,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     dbAvailable,
     initializeDatabase,
     clearDatabase,
-    vaultRevision
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision]);
+    vaultRevision,
+    publicEmailDomains,
+    privateEmailDomains
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision, publicEmailDomains, privateEmailDomains]);
 
   return (
     <DbContext.Provider value={contextValue}>
