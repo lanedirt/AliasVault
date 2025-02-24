@@ -58,7 +58,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 
 ```bash
 # Download install script from latest stable release
-curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/0.11.1/install.sh
+curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/0.12.0/install.sh
 
 # Make install script executable and run it. This will create the .env file, pull the Docker images, and start the AliasVault containers.
 chmod +x install.sh
@@ -97,7 +97,7 @@ AliasVault is under active development with new features being added regularly. 
 - [x] End-to-end encryption
 - [x] Built-in email server for aliases
 - [x] Single-command Docker-based installation
-- [x] Chrome browser extension (https://github.com/lanedirt/AliasVault/issues/541)
+- [x] Chrome browser extension - (Pending Chrome Web Store approval. Manual installation possible, see latest release)
 - [ ] Firefox browser extension (https://github.com/lanedirt/AliasVault/issues/581)
 - [ ] Add and associate TOTP MFA tokens to credentials (https://github.com/lanedirt/AliasVault/issues/181)
 - [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
