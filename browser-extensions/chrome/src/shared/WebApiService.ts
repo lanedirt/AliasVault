@@ -32,7 +32,11 @@ export class WebApiService {
    */
   private async getBaseUrl(): Promise<string> {
     const result = await chrome.storage.local.get(['apiUrl']);
-    return (result.apiUrl ?? AppInfo.DEFAULT_API_URL).replace(/\/$/, '') + '/v1/';
+    if (result.apiUrl && result.apiUrl.length > 0) {
+      return result.apiUrl.replace(/\/$/, '') + '/v1/';
+    }
+
+    return AppInfo.DEFAULT_API_URL.replace(/\/$/, '') + '/v1/';
   }
 
   /**
