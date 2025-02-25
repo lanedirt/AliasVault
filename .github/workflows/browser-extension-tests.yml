@@ -61,10 +61,10 @@ jobs:
       - name: Zip Chrome Extension
         run: |
           cd browser-extensions/chrome/dist
-          zip -r ../../../aliasvault-chrome-extension.zip .
+          zip -r ../../../aliasvault-chrome-extension-${{ github.ref_name }}.zip .
 
       - name: Upload Chrome Extension ZIP to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: aliasvault-chrome-extension.zip
+          files: aliasvault-chrome-extension-${{ github.ref_name }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
