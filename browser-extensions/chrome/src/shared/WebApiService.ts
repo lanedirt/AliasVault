@@ -21,11 +21,7 @@ export class WebApiService {
    *
    * @param {Function} handleLogout - Function to handle logout.
    */
-  public constructor(
-    private readonly handleLogout: () => void
-  ) {
-    // Remove initialization of baseUrl
-  }
+  public constructor(private readonly handleLogout: () => void) { }
 
   /**
    * Get the base URL for the API from settings.

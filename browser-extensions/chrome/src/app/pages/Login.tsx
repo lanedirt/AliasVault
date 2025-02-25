@@ -41,7 +41,7 @@ const Login: React.FC = () => {
     const loadClientUrl = async () : Promise<void> => {
       const setting = await chrome.storage.local.get(['clientUrl']);
       let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
-      if (setting.clientUrl.length > 0) {
+      if (setting.clientUrl && setting.clientUrl.length > 0) {
         clientUrl = setting.clientUrl;
       }
 
