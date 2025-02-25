@@ -230,6 +230,25 @@ class SqliteClient {
   }
 
   /**
+   * Fetch all unique email addresses from all credentials.
+   * @returns Array of email addresses.
+   */
+  public getAllEmailAddresses(): string[] {
+    const query = `
+      SELECT DISTINCT
+        a.Email
+      FROM Credentials c
+      LEFT JOIN Aliases a ON c.AliasId = a.Id
+      WHERE a.Email IS NOT NULL AND a.Email != '' AND c.IsDeleted = 0
+    `;
+
+    const results = this.executeQuery(query);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return results.map((row: any) => row.Email);
+  }
+
+  /**
    * Fetch all encryption keys.
    */
   public getAllEncryptionKeys(): EncryptionKey[] {
