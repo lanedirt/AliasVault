@@ -34,13 +34,8 @@ const EmailsList: React.FC = () => {
         return;
       }
 
-      // TODO: create separate query to only get email addresses to avoid loading all credentials.
-      const credentials = dbContext.sqliteClient.getAllCredentials();
-
       // Get unique email addresses from all credentials.
-      const emailAddresses = credentials
-        .map(cred => cred.Email.trim()) // Trim whitespace
-        .filter((email, index, self) => self.indexOf(email) === index);
+      const emailAddresses = dbContext.sqliteClient.getAllEmailAddresses();
 
       try {
         // For now we only show the latest 50 emails. No pagination.
