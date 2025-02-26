@@ -27,7 +27,7 @@
 
 </div>
 
-AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. The core of AliasVault is built with C# ASP.NET Blazor WASM technology. AliasVault can be self-hosted on your own server with Docker.
+AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. AliasVault can be self-hosted on your own server with Docker.
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
@@ -42,9 +42,8 @@ The official cloud version of AliasVault is freely available at [app.aliasvault.
 
 [<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
-## Self-host
-
-To self-host and install AliasVault on your own server, the easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
+## Self-hosting
+For full control over your own data you can self-host and install AliasVault on your own servers. The easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
 
 ### Install using install script
 
@@ -75,8 +74,6 @@ The install script will output the URL where the app is available. By default th
 For more detailed information about the installation process and other topics, please see the official documentation website:
 - [Documentation website (docs.aliasvault.net) 📚](https://docs.aliasvault.net)
 
-Here you can also find step-by-step instructions on how to install AliasVault to e.g. Azure, AWS and other popular cloud providers.
-
 ## Security Architecture
 <a href="https://docs.aliasvault.net/architecture"><img alt="AliasVault Security Architecture Diagram" src="docs/assets/diagrams/security-architecture/aliasvault-security-architecture-thumb.jpg" width="343"></a>
 
@@ -97,7 +94,7 @@ AliasVault is under active development with new features being added regularly. 
 - [x] End-to-end encryption
 - [x] Built-in email server for aliases
 - [x] Single-command Docker-based installation
-- [x] Chrome browser extension - (Pending Chrome Web Store approval. Manual installation possible, see latest release)
+- [x] Chrome browser extension
 - [ ] Firefox browser extension (https://github.com/lanedirt/AliasVault/issues/581)
 - [ ] Add and associate TOTP MFA tokens to credentials (https://github.com/lanedirt/AliasVault/issues/181)
 - [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
@@ -110,22 +107,26 @@ AliasVault is under active development with new features being added regularly. 
 
 Want to suggest a feature? Join our [Discord](https://discord.gg/DsaXMTEtpF) or create an issue on GitHub.
 
-## Tech stack / credits
-The following technologies, frameworks and libraries are used in this project:
+## Tech Stack & Security
 
-- [C#](https://docs.microsoft.com/en-us/dotnet/csharp/) - A simple, modern, object-oriented, and type-safe programming language.
-- [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - An open-source framework for building modern multi-platform web applications.
-- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - Object-relational mapping framework for .NET.
-- [Blazor WASM](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) - A framework for building interactive web UIs using C# instead of JavaScript. It's a single-page app framework that runs in the browser via WebAssembly.
-- [PostgreSQL](https://www.postgresql.org/) - An open-source object-relational database system used as the database for the server.
-- [Docker](https://www.docker.com/) - Used for containerizing the server and client apps.
-- [SQLite](https://www.sqlite.org/index.html) - A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine. Used as database engine for the encrypted user's vault.
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
-- [Flowbite](https://flowbite.com/) - A free and open-source UI component library based on Tailwind CSS.
-- [Konscious.Security.Cryptography](https://github.com/kmaragon/Konscious.Security.Cryptography) - A .NET library that implements Argon2id, a memory-hard password hashing algorithm.
-- [SRP.net](https://github.com/secure-remote-password/srp.net) - SRP6a Secure Remote Password protocol for secure password authentication without sending plaintext passwords over the network.
-- [Playwright](https://playwright.dev/) - A Node.js library to automate Chromium, Firefox and WebKit with a single API. Used for end-to-end testing.
-- [SmtpServer](https://github.com/cosullivan/SmtpServer) - A SMTP server library for .NET that is used for the virtual email address feature.
-- [MimeKit](https://github.com/jstedfast/MimeKit) - A .NET MIME creation and parser library used for the virtual email address feature.
-- [StyleCop.Analyzers](https://github.com/DotNetAnalyzers/StyleCopAnalyzers) - Static code analysis tool that enforces style and consistency rules for C# code.
-- [SonarQube Cloud](https://www.sonarqube.org/) - A platform for continuous code quality management.
+AliasVault is built with a modern, secure, and scalable technology stack, ensuring robust encryption and privacy protection.
+
+### Core Technologies
+- **C# & ASP.NET Core** – Reliable, high-performance backend for Web API.
+- **Blazor WASM** – Secure, interactive web UI.
+- **PostgreSQL & SQLite** – Database solutions, with SQLite powering encrypted user vaults.
+- **Docker** – Containerized deployment for scalability.
+- **Next.JS & React & Typescript** - Powering the AliasVault website and browser extensions
+
+### Security & Cryptography
+- **Argon2id (Konscious.Security.Cryptography)** – Industry-leading password hashing.
+- **SRP** – Secure Remote Password (SRP-6a) protocol for authentication.
+- **MimeKit & SmtpServer** – Secure email processing and virtual addresses.
+
+### Additional Tools
+- **Tailwind CSS & Flowbite** – Modern UI design.
+- **Playwright** – Automated end-to-end testing.
+- **SonarCloud** – Continuous code quality monitoring.
+
+AliasVault prioritizes security, performance, and user privacy with a technology stack trusted by the industry.
+
