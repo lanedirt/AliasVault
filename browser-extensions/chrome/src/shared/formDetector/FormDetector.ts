@@ -101,13 +101,31 @@ export class FormDetector {
         }
       }
 
-      // Check for parent label
+      // Check for parent label and table cell structure
       let currentElement = input;
       for (let i = 0; i < 3; i++) {
+        // Check for parent label
         const parentLabel = currentElement.closest('label');
         if (parentLabel) {
           attributes.push(parentLabel.textContent?.toLowerCase() ?? '');
           break;
+        }
+
+        // Check for table cell structure
+        const parentTd = currentElement.closest('td');
+        if (parentTd) {
+          // Get the parent row
+          const parentTr = parentTd.closest('tr');
+          if (parentTr) {
+            // Check all sibling cells in the row
+            const siblingTds = parentTr.querySelectorAll('td');
+            for (const td of siblingTds) {
+              if (td !== parentTd) { // Skip the cell containing the input
+                attributes.push(td.textContent?.toLowerCase() ?? '');
+              }
+            }
+          }
+          break; // Found table structure, no need to continue up the tree
         }
 
         if (currentElement.parentElement) {
