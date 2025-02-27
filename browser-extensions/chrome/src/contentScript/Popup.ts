@@ -34,7 +34,7 @@ export function createBasePopup(input: HTMLInputElement) : HTMLElement {
   popup.style.cssText = `
         all: unset;
         position: absolute;
-        z-index: 999999999;
+        z-index: 999999991;
         background: ${isDarkMode() ? '#1f2937' : 'white'};
         border: 1px solid ${isDarkMode() ? '#374151' : '#ccc'};
         border-radius: 4px;
@@ -228,7 +228,12 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     createButton.style.backgroundColor = isDarkMode() ? '#374151' : '#f3f4f6';
   });
 
-  createButton.addEventListener('click', async () => {
+  // Handle create button click
+  const handleCreateClick = async (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
     // Determine service name based on conditions
     let suggestedName = document.title;
 
@@ -331,7 +336,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       };
 
       chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential }, () => {
-        // Refresh the popup to show new identity
+        // Refresh the popup to show new identity.
         openAutofillPopup(input);
       });
     } catch (error) {
@@ -345,9 +350,32 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         removeExistingPopup();
       }, 2000);
     }
+  };
+
+  // Add click listener with capture and prevent removal.
+  createButton.addEventListener('click', handleCreateClick, {
+    capture: true,
+    passive: false
   });
 
-  // Create search input instead of button
+  // Backup click handling using mousedown/mouseup if needed.
+  let isMouseDown = false;
+  createButton.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isMouseDown = true;
+  }, { capture: true });
+
+  createButton.addEventListener('mouseup', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMouseDown) {
+      handleCreateClick(e);
+    }
+    isMouseDown = false;
+  }, { capture: true });
+
+  // Create search input.
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.dataset.aliasvaultIgnore = 'true';
@@ -370,7 +398,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     text-align: left;
   `;
 
-  // Add focus styles
+  // Add focus styles.
   searchInput.addEventListener('focus', () => {
     searchInput.style.borderColor = '#2563eb';
     searchInput.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.2)';
@@ -381,7 +409,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     searchInput.style.boxShadow = 'none';
   });
 
-  // Handle search input
+  // Handle search input.
   let searchTimeout: NodeJS.Timeout;
 
   searchInput.addEventListener('input', () => {
@@ -837,7 +865,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 999999999;
+        z-index: 999999995;
         display: flex;
         align-items: center;
         justify-content: center;
