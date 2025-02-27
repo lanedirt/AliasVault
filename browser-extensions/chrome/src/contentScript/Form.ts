@@ -273,7 +273,7 @@ export function injectIcon(input: HTMLInputElement): void {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 2147483647;
+      z-index: 2147483640;
     `;
     document.body.appendChild(overlayContainer);
   }

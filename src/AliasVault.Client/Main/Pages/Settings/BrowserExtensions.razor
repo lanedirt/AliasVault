@@ -1,0 +1,138 @@
+@page "/settings/browser-extensions"
+@inherits MainBase
+@inject IJSRuntime JsRuntime
+@inject ILogger<BrowserExtensions> Logger
+
+<LayoutPageTitle>Browser Extensions</LayoutPageTitle>
+
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Browser Extensions"
+    Description="Install browser extensions to automatically fill credentials on websites.">
+</PageHeader>
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Available Extensions</h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            The AliasVault browser extension allows you to:
+        </p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600 dark:text-gray-400">
+            <li>Autofill existing credentials on any website</li>
+            <li>Generate new aliases during registration</li>
+            <li>Access received emails on all of your aliases</li>
+            <li>View your aliases and identities</li>
+        </ul>
+    </div>
+
+    @if (!string.IsNullOrEmpty(CurrentBrowser))
+    {
+        <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommended for Your Browser</h3>
+            <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                @switch (CurrentBrowser)
+                {
+                    case "Google Chrome":
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <img src="/img/browser-icons/chrome.svg" alt="Chrome" class="w-8 h-8 mr-3">
+                                <h4 class="text-lg font-medium text-gray-900 dark:text-white">Google Chrome</h4>
+                            </div>
+                            <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                               target="_blank"
+                               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                                Install for Chrome
+                            </a>
+                        </div>
+                        break;
+                    default:
+                        <div class="flex items-center">
+                            <p class="text-sm text-blue-800 dark:text-blue-400">
+                                Support for @CurrentBrowser is coming soon! For now, you can use our Chrome extension.
+                            </p>
+                        </div>
+                        break;
+                }
+            </div>
+        </div>
+    }
+
+    <div class="mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="p-4 border rounded-lg dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <img src="/img/browser-icons/firefox.svg" alt="Firefox" class="w-8 h-8 mr-3">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Firefox</h4>
+                </div>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                    Coming soon
+                </span>
+            </div>
+
+            <div class="p-4 border rounded-lg dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <img src="/img/browser-icons/edge.svg" alt="Edge" class="w-8 h-8 mr-3">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Microsoft Edge</h4>
+                </div>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                    Coming soon
+                </span>
+            </div>
+
+            <div class="p-4 border rounded-lg dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <img src="/img/browser-icons/safari.svg" alt="Safari" class="w-8 h-8 mr-3">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Safari</h4>
+                </div>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                    Coming soon
+                </span>
+            </div>
+
+            <div class="p-4 border rounded-lg dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <img src="/img/browser-icons/brave.svg" alt="Brave" class="w-8 h-8 mr-3">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Brave</h4>
+                </div>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                    Coming soon
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? CurrentBrowser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Browser Extensions" });
+
+        try
+        {
+            var userAgent = await JsRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
+            CurrentBrowser = DetermineBrowser(userAgent);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error determining browser type");
+        }
+    }
+
+    private static string? DetermineBrowser(string userAgent)
+    {
+        var ua = userAgent.ToLower();
+        return ua switch
+        {
+            var x when x.Contains("firefox") => "Mozilla Firefox",
+            var x when x.Contains("chrome") && !x.Contains("edg") => "Google Chrome",
+            var x when x.Contains("safari") && !x.Contains("chrome") => "Safari",
+            var x when x.Contains("edg") => "Microsoft Edge",
+            var x when x.Contains("opr") || x.Contains("opera") => "Opera",
+            _ => null
+        };
+    }
+}
