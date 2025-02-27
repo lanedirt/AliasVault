@@ -3,11 +3,11 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<BrowserExtensions> Logger
 
-<LayoutPageTitle>Browser Extensions</LayoutPageTitle>
+<LayoutPageTitle>Install Browser Extension</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Browser Extensions"
+    Title="Install Browser Extension"
     Description="Install browser extensions to automatically fill credentials on websites.">
 </PageHeader>
 
@@ -25,34 +25,33 @@
         </ul>
     </div>
 
-    @if (!string.IsNullOrEmpty(CurrentBrowser))
+    @if (CurrentBrowser != BrowserType.Unknown)
     {
         <div class="mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommended for Your Browser</h3>
-            <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                @switch (CurrentBrowser)
-                {
-                    case "Google Chrome":
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <img src="/img/browser-icons/chrome.svg" alt="Chrome" class="w-8 h-8 mr-3">
-                                <h4 class="text-lg font-medium text-gray-900 dark:text-white">Google Chrome</h4>
-                            </div>
-                            <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
-                               target="_blank"
-                               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                                Install for Chrome
-                            </a>
-                        </div>
-                        break;
-                    default:
+            <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <img src="@GetBrowserIcon(CurrentBrowser)" alt="@CurrentBrowser" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(CurrentBrowser)</h4>
+                    </div>
+                    @if (CurrentBrowser == BrowserType.Chrome)
+                    {
+                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                            Install for Chrome
+                        </a>
+                    }
+                    else
+                    {
                         <div class="flex items-center">
                             <p class="text-sm text-blue-800 dark:text-blue-400">
-                                Support for @CurrentBrowser is coming soon! For now, you can use our Chrome extension.
+                                Support for @GetBrowserName(CurrentBrowser) is coming soon! For now, you can use our Chrome extension.
                             </p>
                         </div>
-                        break;
-                }
+                    }
+                </div>
             </div>
         </div>
     }
@@ -60,56 +59,57 @@
     <div class="mb-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="p-4 border rounded-lg dark:border-gray-700">
-                <div class="flex items-center mb-4">
-                    <img src="/img/browser-icons/firefox.svg" alt="Firefox" class="w-8 h-8 mr-3">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Firefox</h4>
+            @foreach (var browser in Enum.GetValues<BrowserType>().Where(b => b != BrowserType.Unknown && b != CurrentBrowser))
+            {
+                <div class="p-4 border rounded-lg dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <img src="@GetBrowserIcon(browser)" alt="@GetBrowserName(browser)" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(browser)</h4>
+                    </div>
+                    @if (browser == BrowserType.Chrome)
+                    {
+                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                            Install for Chrome
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                            Coming soon
+                        </span>
+                    }
                 </div>
-                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                    Coming soon
-                </span>
-            </div>
-
-            <div class="p-4 border rounded-lg dark:border-gray-700">
-                <div class="flex items-center mb-4">
-                    <img src="/img/browser-icons/edge.svg" alt="Edge" class="w-8 h-8 mr-3">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Microsoft Edge</h4>
-                </div>
-                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                    Coming soon
-                </span>
-            </div>
-
-            <div class="p-4 border rounded-lg dark:border-gray-700">
-                <div class="flex items-center mb-4">
-                    <img src="/img/browser-icons/safari.svg" alt="Safari" class="w-8 h-8 mr-3">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Safari</h4>
-                </div>
-                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                    Coming soon
-                </span>
-            </div>
-
-            <div class="p-4 border rounded-lg dark:border-gray-700">
-                <div class="flex items-center mb-4">
-                    <img src="/img/browser-icons/brave.svg" alt="Brave" class="w-8 h-8 mr-3">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Brave</h4>
-                </div>
-                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                    Coming soon
-                </span>
-            </div>
+            }
         </div>
     </div>
 </div>
 
 @code {
-    private string? CurrentBrowser { get; set; }
+    /// <summary>
+    /// The type of browser.
+    /// </summary>
+    private enum BrowserType
+    {
+        Unknown,
+        Firefox,
+        Chrome,
+        Safari,
+        Edge,
+        Opera
+    }
 
+    /// <summary>
+    /// The current browser of the user.
+    /// </summary>
+    private BrowserType CurrentBrowser { get; set; }
+
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Browser Extensions" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Install Browser Extension" });
 
         try
         {
@@ -122,17 +122,48 @@
         }
     }
 
-    private static string? DetermineBrowser(string userAgent)
+    /// <summary>
+    /// Determine current browser.
+    /// </summary>
+    /// <param name="userAgent">User agent string.</param>
+    /// <returns>Browser type enum value.</returns>
+    private static BrowserType DetermineBrowser(string userAgent)
     {
         var ua = userAgent.ToLower();
         return ua switch
         {
-            var x when x.Contains("firefox") => "Mozilla Firefox",
-            var x when x.Contains("chrome") && !x.Contains("edg") => "Google Chrome",
-            var x when x.Contains("safari") && !x.Contains("chrome") => "Safari",
-            var x when x.Contains("edg") => "Microsoft Edge",
-            var x when x.Contains("opr") || x.Contains("opera") => "Opera",
-            _ => null
+            var x when x.Contains("firefox") => BrowserType.Firefox,
+            var x when x.Contains("chrome") && !x.Contains("edg") => BrowserType.Chrome,
+            var x when x.Contains("safari") && !x.Contains("chrome") => BrowserType.Safari,
+            var x when x.Contains("edg") => BrowserType.Edge,
+            var x when x.Contains("opr") || x.Contains("opera") => BrowserType.Opera,
+            _ => BrowserType.Unknown
         };
     }
+
+    /// <summary>
+    /// Gets the browser icon path.
+    /// </summary>
+    private static string GetBrowserIcon(BrowserType browser) => browser switch
+    {
+        BrowserType.Firefox => "/img/browser-icons/firefox.svg",
+        BrowserType.Chrome => "/img/browser-icons/chrome.svg",
+        BrowserType.Safari => "/img/browser-icons/safari.svg",
+        BrowserType.Edge => "/img/browser-icons/edge.svg",
+        BrowserType.Opera => "/img/browser-icons/brave.svg",
+        _ => string.Empty
+    };
+
+    /// <summary>
+    /// Gets the browser display name.
+    /// </summary>
+    private static string GetBrowserName(BrowserType browser) => browser switch
+    {
+        BrowserType.Firefox => "Firefox",
+        BrowserType.Chrome => "Google Chrome",
+        BrowserType.Safari => "Safari",
+        BrowserType.Edge => "Microsoft Edge",
+        BrowserType.Opera => "Brave",
+        _ => string.Empty
+    };
 }
