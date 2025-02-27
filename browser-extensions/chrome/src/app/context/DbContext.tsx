@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import SqliteClient from '../../shared/SqliteClient';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import EncryptionUtility from '../../shared/EncryptionUtility';
+
 type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;

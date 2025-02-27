@@ -44,6 +44,13 @@ describe('FormDetector English tests', () => {
     testField(FormField.LastName, 'fbclc_lName', htmlFile);
   });
 
+  describe('English registration form 5 detection', () => {
+    const htmlFile = 'en-registration-form5.html';
+
+    testField(FormField.Username, 'aliasvault-input-7owmnahd9', htmlFile);
+    testField(FormField.Password, 'aliasvault-input-ienw3qgxv', htmlFile);
+  });
+
   describe('English email form 1 detection', () => {
     const htmlFile = 'en-email-form1.html';
 

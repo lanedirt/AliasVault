@@ -19,9 +19,9 @@ export class WebApiService {
   /**
    * Constructor for the WebApiService class.
    *
-   * @param {Function} handleLogout - Function to handle logout.
+   * @param {Function} authContextLogout - Function to handle logout.
    */
-  public constructor(private readonly handleLogout: () => void) { }
+  public constructor(private readonly authContextLogout: (statusError: string | null) => void) { }
 
   /**
    * Get the base URL for the API from settings.
@@ -79,7 +79,7 @@ export class WebApiService {
 
           return parseJson ? retryResponse.json() : retryResponse as unknown as T;
         } else {
-          this.handleLogout();
+          this.authContextLogout(null);
           throw new Error('Session expired');
         }
       }
@@ -106,11 +106,13 @@ export class WebApiService {
 
     try {
       const baseUrl = await this.getBaseUrl();
+
       const response = await fetch(`${baseUrl}Auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Ignore-Failure': 'true',
+          'X-AliasVault-Client': `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`,
         },
         body: JSON.stringify({
           token: await this.getAccessToken(),
@@ -126,7 +128,7 @@ export class WebApiService {
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
     } catch {
-      this.handleLogout();
+      this.authContextLogout('Your session has expired. Please login again.');
       return null;
     }
   }
@@ -146,7 +148,7 @@ export class WebApiService {
       const response = await this.fetch<Response>(endpoint, {
         method: 'GET',
         headers: {
-          'Accept': 'application/octet-stream'
+          'Accept': 'application/octet-stream',
         }
       }, false);
 
@@ -197,18 +199,26 @@ export class WebApiService {
   }
 
   /**
-   * Logout and revoke tokens via WebApi.
+   * Logout and revoke tokens via WebApi and remove local storage tokens via AuthContext.
    */
-  public async logout(): Promise<void> {
-    const refreshToken = await this.getRefreshToken();
-    if (!refreshToken) {
-      return;
+  public async logout(statusError: string | null = null): Promise<void> {
+    // Logout and revoke tokens via WebApi.
+    try {
+      const refreshToken = await this.getRefreshToken();
+      if (!refreshToken) {
+        return;
+      }
+
+      await this.post('Auth/revoke', {
+        token: await this.getAccessToken(),
+        refreshToken: refreshToken,
+      }, false);
+    } catch (err) {
+      console.error('WebApi logout error:', err);
     }
 
-    await this.post('Auth/revoke', {
-      token: await this.getAccessToken(),
-      refreshToken: refreshToken,
-    }, false);
+    // Logout and remove tokens from local storage via AuthContext.
+    this.authContextLogout(statusError);
   }
 
   /**
@@ -308,7 +318,7 @@ export class WebApiService {
       /**
        * When the reader has finished loading, convert the result to a Base64 string.
        */
-      reader.onloadend = () : void => {
+      reader.onloadend = (): void => {
         const result = reader.result;
         if (typeof result === 'string') {
           resolve(result.split(',')[1]); // Remove the data URL prefix
@@ -320,7 +330,7 @@ export class WebApiService {
       /**
        * If the reader encounters an error, reject the promise with a proper Error object.
        */
-      reader.onerror = () : void => {
+      reader.onerror = (): void => {
         reject(new Error('Failed to read blob as Data URL'));
       };
       reader.readAsDataURL(blob);

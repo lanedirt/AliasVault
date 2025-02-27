@@ -56,3 +56,5 @@ The following websites have been known to cause issues in the past (but should b
 | --- | --- |
 | https://www.paprika-shopping.nl/nieuwsbrief/newsletter-register-landing.html | Popup CSS style conflicts |
 | https://bloshing.com/inschrijven-nieuwsbrief | Popup CSS style conflicts |
+| https://gamefaqs.gamespot.com/user | Popup buttons not working |
+| https://news.ycombinator.com/login?goto=news | Popup and client favicon not showing due to SVG format |
