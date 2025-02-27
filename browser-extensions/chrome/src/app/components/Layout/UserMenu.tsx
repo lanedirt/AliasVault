@@ -47,10 +47,7 @@ export const UserMenu: React.FC = () => {
    */
   const onLogout = async () : Promise<void> => {
     showLoading();
-    await authContext.logout();
-    navigate('/', { replace: true });
-    // Delay for 100ms for improved UX
-    await new Promise(resolve => setTimeout(resolve, 100));
+    navigate('/logout', { replace: true });
     hideLoading();
   };
 
