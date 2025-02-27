@@ -31,6 +31,12 @@ const Unlock: React.FC = () => {
       const statusResponse = await webApi.getStatus();
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
+        try {
+          await webApi.logout();
+        } catch (err) {
+          console.error('WebApi logout error:', err);
+        }
+
         authContext.logout(statusError);
       }
     };
@@ -81,26 +87,6 @@ const Unlock: React.FC = () => {
     }
   };
 
-  /**
-   * Handle logout
-   */
-  const handleLogout = async () : Promise<void> => {
-    showLoading();
-    try {
-      await webApi.logout();
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-
-    try {
-      await authContext.logout();
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      hideLoading();
-    }
-  };
-
   return (
     <div className="max-w-md">
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -136,7 +122,7 @@ const Unlock: React.FC = () => {
         </Button>
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-200 mt-6">
-          Switch accounts? <a href="#" onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
+          Switch accounts? <a href="/logout" className="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
         </div>
       </form>
     </div>
