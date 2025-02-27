@@ -18,13 +18,7 @@ const Logout: React.FC = () => {
      * Perform logout via async method to ensure logout is completed before navigating to home page.
      */
     const performLogout = async () : Promise<void> => {
-      try {
-        await webApi.logout();
-      } catch (err) {
-        console.error('WebApi logout error:', err);
-      }
-
-      await authContext.logout();
+      await webApi.logout();
       navigate('/');
     };
 
