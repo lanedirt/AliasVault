@@ -1087,12 +1087,12 @@ function toUint8Array(buffer: Uint8Array | number[] | {[key: number]: number}): 
     return new Uint8Array(buffer);
   }
 
-  // Handle object with numeric keys
   const length = Object.keys(buffer).length;
   const arr = new Uint8Array(length);
   for (let i = 0; i < length; i++) {
     arr[i] = buffer[i];
   }
+
   return arr;
 }
 
@@ -1195,6 +1195,5 @@ function detectMimeType(bytes: Uint8Array): string {
     return 'image/png';
   }
 
-  // Default to x-icon if unknown
   return 'image/x-icon';
 }
