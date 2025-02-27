@@ -30,7 +30,7 @@
         <div class="mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommended for Your Browser</h3>
             <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div class="flex items-center">
                         <img src="@GetBrowserIcon(CurrentBrowser)" alt="@CurrentBrowser" class="w-8 h-8 mr-3">
                         <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(CurrentBrowser)</h4>
@@ -45,11 +45,9 @@
                     }
                     else
                     {
-                        <div class="flex items-center">
-                            <p class="text-sm text-blue-800 dark:text-blue-400">
-                                Support for @GetBrowserName(CurrentBrowser) is coming soon! For now, you can use our Chrome extension.
-                            </p>
-                        </div>
+                        <p class="text-sm text-blue-800 dark:text-blue-400">
+                            Support for @GetBrowserName(CurrentBrowser) is coming soon! For now, you can use our Chrome extension.
+                        </p>
                     }
                 </div>
             </div>
@@ -97,7 +95,7 @@
         Chrome,
         Safari,
         Edge,
-        Opera
+        Brave
     }
 
     /// <summary>
@@ -113,8 +111,7 @@
 
         try
         {
-            var userAgent = await JsRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
-            CurrentBrowser = DetermineBrowser(userAgent);
+            CurrentBrowser = await DetermineBrowser();
         }
         catch (Exception ex)
         {
@@ -125,18 +122,30 @@
     /// <summary>
     /// Determine current browser.
     /// </summary>
-    /// <param name="userAgent">User agent string.</param>
     /// <returns>Browser type enum value.</returns>
-    private static BrowserType DetermineBrowser(string userAgent)
+    private async Task<BrowserType> DetermineBrowser()
     {
-        var ua = userAgent.ToLower();
-        return ua switch
+        try
+        {
+            // First check if it's Brave.
+            var isBrave = await JsRuntime.InvokeAsync<bool>("eval", "navigator.brave?.isBrave() || false");
+            if (isBrave)
+            {
+                return BrowserType.Brave;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error checking for Brave browser");
+        }
+
+        var userAgent = await JsRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
+        return userAgent.ToLower() switch
         {
             var x when x.Contains("firefox") => BrowserType.Firefox,
             var x when x.Contains("chrome") && !x.Contains("edg") => BrowserType.Chrome,
             var x when x.Contains("safari") && !x.Contains("chrome") => BrowserType.Safari,
             var x when x.Contains("edg") => BrowserType.Edge,
-            var x when x.Contains("opr") || x.Contains("opera") => BrowserType.Opera,
             _ => BrowserType.Unknown
         };
     }
@@ -150,7 +159,7 @@
         BrowserType.Chrome => "/img/browser-icons/chrome.svg",
         BrowserType.Safari => "/img/browser-icons/safari.svg",
         BrowserType.Edge => "/img/browser-icons/edge.svg",
-        BrowserType.Opera => "/img/browser-icons/brave.svg",
+        BrowserType.Brave => "/img/browser-icons/brave.svg",
         _ => string.Empty
     };
 
@@ -163,7 +172,7 @@
         BrowserType.Chrome => "Google Chrome",
         BrowserType.Safari => "Safari",
         BrowserType.Edge => "Microsoft Edge",
-        BrowserType.Opera => "Brave",
+        BrowserType.Brave => "Brave",
         _ => string.Empty
     };
 }
