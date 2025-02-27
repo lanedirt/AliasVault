@@ -228,8 +228,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     createButton.style.backgroundColor = isDarkMode() ? '#374151' : '#f3f4f6';
   });
 
-  // Handle create button click
-  const handleCreateClick = async (e: Event) => {
+  /**
+   * Handle create button click
+   */
+  const handleCreateClick = async (e: Event) : Promise<void> => {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
@@ -682,8 +684,11 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       // Handle base64 image data
       if (cred.Logo) {
         try {
-          const base64Logo = base64Encode(cred.Logo as Uint8Array<ArrayBufferLike>);
-          imgElement.src = `data:image/x-icon;base64,${base64Logo}`;
+          const logoBytes = toUint8Array(cred.Logo);
+          const base64Logo = base64Encode(logoBytes);
+          // Detect image type from first few bytes
+          const mimeType = detectMimeType(logoBytes);
+          imgElement.src = `data:${mimeType};base64,${base64Logo}`;
         } catch (error) {
           console.error('Error setting logo:', error);
           imgElement.src = `data:image/x-icon;base64,${placeholderBase64}`;
@@ -1071,22 +1076,32 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
 }
 
 /**
+ * Convert various binary data formats to Uint8Array
+ */
+function toUint8Array(buffer: Uint8Array | number[] | {[key: number]: number}): Uint8Array {
+  if (buffer instanceof Uint8Array) {
+    return buffer;
+  }
+
+  if (Array.isArray(buffer)) {
+    return new Uint8Array(buffer);
+  }
+
+  // Handle object with numeric keys
+  const length = Object.keys(buffer).length;
+  const arr = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    arr[i] = buffer[i];
+  }
+  return arr;
+}
+
+/**
  * Base64 encode binary data.
  */
 function base64Encode(buffer: Uint8Array | number[] | {[key: number]: number}): string | null {
   try {
-    // Handle object with numeric keys
-    if (typeof buffer === 'object' && !Array.isArray(buffer) && !(buffer instanceof Uint8Array)) {
-      const length = Object.keys(buffer).length;
-      const arr = new Uint8Array(length);
-      for (let i = 0; i < length; i++) {
-        arr[i] = buffer[i];
-      }
-      buffer = arr;
-    }
-
-    // Convert to array if Uint8Array
-    const arr = Array.from(buffer as Uint8Array | number[]);
+    const arr = Array.from(toUint8Array(buffer));
     return btoa(arr.reduce((data, byte) => data + String.fromCharCode(byte), ''));
   } catch (error) {
     console.error('Error encoding to base64:', error);
@@ -1142,4 +1157,44 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
   }
 
   return null; // Return null if no favicon could be downloaded
+}
+
+/**
+ * Detect MIME type from file signature (magic numbers)
+ */
+function detectMimeType(bytes: Uint8Array): string {
+  /**
+   * Check if the file is an SVG file.
+   */
+  const isSvg = () : boolean => {
+    const header = new TextDecoder().decode(bytes.slice(0, 5)).toLowerCase();
+    return header.includes('<?xml') || header.includes('<svg');
+  };
+
+  /**
+   * Check if the file is an ICO file.
+   */
+  const isIco = () : boolean => {
+    return bytes[0] === 0x00 && bytes[1] === 0x00 && bytes[2] === 0x01 && bytes[3] === 0x00;
+  };
+
+  /**
+   * Check if the file is an PNG file.
+   */
+  const isPng = () : boolean => {
+    return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
+  };
+
+  if (isSvg()) {
+    return 'image/svg+xml';
+  }
+  if (isIco()) {
+    return 'image/x-icon';
+  }
+  if (isPng()) {
+    return 'image/png';
+  }
+
+  // Default to x-icon if unknown
+  return 'image/x-icon';
 }
