@@ -7,7 +7,6 @@ import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
 import { VaultResponse } from '../../shared/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
-import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../hooks/useMinDurationLoading';
 
@@ -21,7 +20,6 @@ const CredentialsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
-  const authContext = useAuth();
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -40,13 +38,7 @@ const CredentialsList: React.FC = () => {
     const statusResponse = await webApi.getStatus();
     const statusError = webApi.validateStatusResponse(statusResponse);
     if (statusError !== null) {
-      try {
-        await webApi.logout();
-      } catch (err) {
-        console.error('WebApi logout error:', err);
-      }
-
-      authContext.logout(statusError);
+      await webApi.logout(statusError);
       return;
     }
 
@@ -66,13 +58,7 @@ const CredentialsList: React.FC = () => {
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
-        try {
-          await webApi.logout();
-        } catch (err) {
-          console.error('WebApi logout error:', err);
-        }
-
-        authContext.logout(vaultError);
+        await webApi.logout(vaultError);
         hideLoading();
         return;
       }
@@ -85,7 +71,7 @@ const CredentialsList: React.FC = () => {
     } catch (err) {
       console.error('Refresh error:', err);
     }
-  }, [dbContext, webApi, authContext, hideLoading]);
+  }, [dbContext, webApi, hideLoading]);
 
   /**
    * Manually refresh the credentials list.

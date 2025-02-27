@@ -16,7 +16,13 @@ export const WebApiProvider: React.FC<{ children: React.ReactNode }> = ({ childr
    */
   useEffect(() : void => {
     const service = new WebApiService(
-      logout
+      (statusError: string | null) => {
+        if (statusError) {
+          logout(statusError);
+        } else {
+          logout();
+        }
+      }
     );
     setWebApiService(service);
   }, [logout]);
