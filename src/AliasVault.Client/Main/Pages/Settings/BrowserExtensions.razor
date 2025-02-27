@@ -1,0 +1,178 @@
+@page "/settings/browser-extensions"
+@inherits MainBase
+@inject IJSRuntime JsRuntime
+@inject ILogger<BrowserExtensions> Logger
+
+<LayoutPageTitle>Install Browser Extension</LayoutPageTitle>
+
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="Install Browser Extension"
+    Description="Install browser extensions to automatically fill credentials on websites.">
+</PageHeader>
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Available Extensions</h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            The AliasVault browser extension allows you to:
+        </p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600 dark:text-gray-400">
+            <li>Autofill existing credentials on any website</li>
+            <li>Generate new aliases during registration</li>
+            <li>Access received emails on all of your aliases</li>
+            <li>View your aliases and identities</li>
+        </ul>
+    </div>
+
+    @if (CurrentBrowser != BrowserType.Unknown)
+    {
+        <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommended for Your Browser</h3>
+            <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center">
+                        <img src="@GetBrowserIcon(CurrentBrowser)" alt="@CurrentBrowser" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(CurrentBrowser)</h4>
+                    </div>
+                    @if (CurrentBrowser == BrowserType.Chrome)
+                    {
+                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                            Install for Chrome
+                        </a>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-blue-800 dark:text-blue-400">
+                            Support for @GetBrowserName(CurrentBrowser) is coming soon! For now, you can use our Chrome extension.
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var browser in Enum.GetValues<BrowserType>().Where(b => b != BrowserType.Unknown && b != CurrentBrowser))
+            {
+                <div class="p-4 border rounded-lg dark:border-gray-700">
+                    <div class="flex items-center mb-4">
+                        <img src="@GetBrowserIcon(browser)" alt="@GetBrowserName(browser)" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(browser)</h4>
+                    </div>
+                    @if (browser == BrowserType.Chrome)
+                    {
+                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                            Install for Chrome
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                            Coming soon
+                        </span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The type of browser.
+    /// </summary>
+    private enum BrowserType
+    {
+        Unknown,
+        Firefox,
+        Chrome,
+        Safari,
+        Edge,
+        Brave
+    }
+
+    /// <summary>
+    /// The current browser of the user.
+    /// </summary>
+    private BrowserType CurrentBrowser { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Install Browser Extension" });
+
+        try
+        {
+            CurrentBrowser = await DetermineBrowser();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error determining browser type");
+        }
+    }
+
+    /// <summary>
+    /// Determine current browser.
+    /// </summary>
+    /// <returns>Browser type enum value.</returns>
+    private async Task<BrowserType> DetermineBrowser()
+    {
+        try
+        {
+            // First check if it's Brave.
+            var isBrave = await JsRuntime.InvokeAsync<bool>("eval", "navigator.brave?.isBrave() || false");
+            if (isBrave)
+            {
+                return BrowserType.Brave;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error checking for Brave browser");
+        }
+
+        var userAgent = await JsRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
+        return userAgent.ToLower() switch
+        {
+            var x when x.Contains("firefox") => BrowserType.Firefox,
+            var x when x.Contains("chrome") && !x.Contains("edg") => BrowserType.Chrome,
+            var x when x.Contains("safari") && !x.Contains("chrome") => BrowserType.Safari,
+            var x when x.Contains("edg") => BrowserType.Edge,
+            _ => BrowserType.Unknown
+        };
+    }
+
+    /// <summary>
+    /// Gets the browser icon path.
+    /// </summary>
+    private static string GetBrowserIcon(BrowserType browser) => browser switch
+    {
+        BrowserType.Firefox => "/img/browser-icons/firefox.svg",
+        BrowserType.Chrome => "/img/browser-icons/chrome.svg",
+        BrowserType.Safari => "/img/browser-icons/safari.svg",
+        BrowserType.Edge => "/img/browser-icons/edge.svg",
+        BrowserType.Brave => "/img/browser-icons/brave.svg",
+        _ => string.Empty
+    };
+
+    /// <summary>
+    /// Gets the browser display name.
+    /// </summary>
+    private static string GetBrowserName(BrowserType browser) => browser switch
+    {
+        BrowserType.Firefox => "Firefox",
+        BrowserType.Chrome => "Google Chrome",
+        BrowserType.Safari => "Safari",
+        BrowserType.Edge => "Microsoft Edge",
+        BrowserType.Brave => "Brave",
+        _ => string.Empty
+    };
+}
