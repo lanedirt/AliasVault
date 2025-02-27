@@ -308,7 +308,7 @@ export class WebApiService {
       /**
        * When the reader has finished loading, convert the result to a Base64 string.
        */
-      reader.onloadend = () : void => {
+      reader.onloadend = (): void => {
         const result = reader.result;
         if (typeof result === 'string') {
           resolve(result.split(',')[1]); // Remove the data URL prefix
@@ -320,7 +320,7 @@ export class WebApiService {
       /**
        * If the reader encounters an error, reject the promise with a proper Error object.
        */
-      reader.onerror = () : void => {
+      reader.onerror = (): void => {
         reject(new Error('Failed to read blob as Data URL'));
       };
       reader.readAsDataURL(blob);

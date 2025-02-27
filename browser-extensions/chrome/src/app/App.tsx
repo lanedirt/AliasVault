@@ -9,12 +9,13 @@ import CredentialsList from './pages/CredentialsList';
 import EmailsList from './pages/EmailsList';
 import LoadingSpinner from './components/LoadingSpinner';
 import Home from './pages/Home';
-import './style.css';
 import CredentialDetails from './pages/CredentialDetails';
 import EmailDetails from './pages/EmailDetails';
 import Settings from './pages/Settings';
 import GlobalStateChangeHandler from './components/GlobalStateChangeHandler';
 import { useLoading } from './context/LoadingContext';
+import Logout from './pages/Logout';
+import './style.css';
 
 /**
  * Route configuration.
@@ -44,6 +45,7 @@ const App: React.FC = () => {
     { path: '/emails', element: <EmailsList />, showBackButton: false },
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
     { path: '/settings', element: <Settings />, showBackButton: false },
+    { path: '/logout', element: <Logout />, showBackButton: false },
   ];
 
   useEffect(() => {
