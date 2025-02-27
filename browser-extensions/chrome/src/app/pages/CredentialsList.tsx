@@ -40,6 +40,12 @@ const CredentialsList: React.FC = () => {
     const statusResponse = await webApi.getStatus();
     const statusError = webApi.validateStatusResponse(statusResponse);
     if (statusError !== null) {
+      try {
+        await webApi.logout();
+      } catch (err) {
+        console.error('WebApi logout error:', err);
+      }
+
       authContext.logout(statusError);
       return;
     }
@@ -60,6 +66,12 @@ const CredentialsList: React.FC = () => {
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
+        try {
+          await webApi.logout();
+        } catch (err) {
+          console.error('WebApi logout error:', err);
+        }
+
         authContext.logout(vaultError);
         hideLoading();
         return;
