@@ -31,8 +31,8 @@ export type GenderOptionPatterns = {
 export const EnglishFieldPatterns: FieldPatterns = {
   username: ['username', 'login', 'identifier', 'user'],
   fullName: ['fullname', 'full-name', 'full name'],
-  firstName: ['firstname', 'first-name', 'fname', 'name', 'given-name'],
-  lastName: ['lastname', 'last-name', 'lname', 'surname', 'family-name'],
+  firstName: ['firstname', 'first-name', 'first_name', 'fname', 'name', 'given-name'],
+  lastName: ['lastname', 'last-name', 'last_name', 'lname', 'surname', 'family-name'],
   email: ['email', 'mail', 'emailaddress'],
   emailConfirm: ['confirm', 'verification', 'repeat', 'retype', 'verify'],
   password: ['password', 'pwd', 'pass'],
