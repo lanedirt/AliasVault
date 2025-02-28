@@ -106,11 +106,13 @@ export class WebApiService {
 
     try {
       const baseUrl = await this.getBaseUrl();
+
       const response = await fetch(`${baseUrl}Auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Ignore-Failure': 'true',
+          'X-AliasVault-Client': `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`,
         },
         body: JSON.stringify({
           token: await this.getAccessToken(),
@@ -146,7 +148,7 @@ export class WebApiService {
       const response = await this.fetch<Response>(endpoint, {
         method: 'GET',
         headers: {
-          'Accept': 'application/octet-stream'
+          'Accept': 'application/octet-stream',
         }
       }, false);
 
