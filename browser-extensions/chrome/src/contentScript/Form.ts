@@ -66,6 +66,10 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
     form.emailConfirmField.value = credential.Email;
     triggerInputEvents(form.emailConfirmField);
   }
+  if (form.fullNameField) {
+    form.fullNameField.value = `${credential.Alias.FirstName} ${credential.Alias.LastName}`;
+    triggerInputEvents(form.fullNameField);
+  }
   if (form.firstNameField) {
     form.firstNameField.value = credential.Alias.FirstName;
     triggerInputEvents(form.firstNameField);

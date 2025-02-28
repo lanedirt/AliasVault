@@ -338,8 +338,11 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       };
 
       chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential }, () => {
-        // Refresh the popup to show new identity.
-        openAutofillPopup(input);
+        // Close popup.
+        removeExistingPopup();
+
+        // Fill the form with the new identity immediately.
+        fillCredential(credential, input);
       });
     } catch (error) {
       console.error('Error creating identity:', error);

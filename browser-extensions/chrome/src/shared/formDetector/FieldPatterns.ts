@@ -5,6 +5,7 @@ export type FieldPatterns = {
     username: string[];
     firstName: string[];
     lastName: string[];
+    fullName: string[];
     email: string[];
     emailConfirm: string[];
     password: string[];
@@ -29,8 +30,9 @@ export type GenderOptionPatterns = {
  */
 export const EnglishFieldPatterns: FieldPatterns = {
   username: ['username', 'login', 'identifier', 'user'],
-  firstName: ['firstname', 'first-name', 'fname', 'name', 'given-name'],
-  lastName: ['lastname', 'last-name', 'lname', 'surname', 'family-name'],
+  fullName: ['fullname', 'full-name', 'full name'],
+  firstName: ['firstname', 'first-name', 'first_name', 'fname', 'name', 'given-name'],
+  lastName: ['lastname', 'last-name', 'last_name', 'lname', 'surname', 'family-name'],
   email: ['email', 'mail', 'emailaddress'],
   emailConfirm: ['confirm', 'verification', 'repeat', 'retype', 'verify'],
   password: ['password', 'pwd', 'pass'],
@@ -55,6 +57,7 @@ export const EnglishGenderOptionPatterns: GenderOptionPatterns = {
  */
 export const DutchFieldPatterns: FieldPatterns = {
   username: ['gebruikersnaam', 'gebruiker', 'login', 'identifier'],
+  fullName: ['volledige naam'],
   firstName: ['voornaam', 'naam'],
   lastName: ['achternaam'],
   email: ['e-mailadres', 'e-mail'],
@@ -81,6 +84,7 @@ export const DutchGenderOptionPatterns: GenderOptionPatterns = {
  */
 export const CombinedFieldPatterns: FieldPatterns = {
   username: [...new Set([...EnglishFieldPatterns.username, ...DutchFieldPatterns.username])],
+  fullName: [...new Set([...EnglishFieldPatterns.fullName, ...DutchFieldPatterns.fullName])],
   firstName: [...new Set([...EnglishFieldPatterns.firstName, ...DutchFieldPatterns.firstName])],
   lastName: [...new Set([...EnglishFieldPatterns.lastName, ...DutchFieldPatterns.lastName])],
   /**

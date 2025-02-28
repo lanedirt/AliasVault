@@ -7,6 +7,7 @@ export type FormFields = {
     passwordConfirmField: HTMLInputElement | null;
 
     // Identity fields
+    fullNameField: HTMLInputElement | null;
     firstNameField: HTMLInputElement | null;
     lastNameField: HTMLInputElement | null;
 

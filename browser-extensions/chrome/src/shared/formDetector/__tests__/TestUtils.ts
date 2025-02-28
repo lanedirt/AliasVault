@@ -3,12 +3,13 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { LoginForm } from '../types/FormFields';
+import { FormFields } from '../types/FormFields';
 
 export enum FormField {
   Username = 'username',
   FirstName = 'firstName',
   LastName = 'lastName',
+  FullName = 'fullName',
   Email = 'email',
   EmailConfirm = 'emailConfirm',
   Password = 'password',
@@ -97,7 +98,7 @@ const loadTestHtml = (filename: string): string => {
 /**
  * Set up a form detection test.
  */
-const setupFormTest = (htmlFile: string, focusedElementId: string) : { document: Document, result: LoginForm } => {
+const setupFormTest = (htmlFile: string, focusedElementId: string) : { document: Document, result: FormFields | null } => {
   const html = loadTestHtml(htmlFile);
   const dom = new JSDOM(html, {
     url: 'http://localhost',
