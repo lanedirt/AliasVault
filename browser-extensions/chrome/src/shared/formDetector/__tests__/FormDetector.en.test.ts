@@ -56,7 +56,13 @@ describe('FormDetector English tests', () => {
 
     testField(FormField.FirstName, 'id_first_name', htmlFile);
     testField(FormField.LastName, 'id_last_name', htmlFile);
+  });
 
+  describe('English registration form 7 detection', () => {
+    const htmlFile = 'en-registration-form7.html';
+
+    testField(FormField.FullName, 'form-group--2', htmlFile);
+    testField(FormField.Email, 'form-group--4', htmlFile);
   });
 
   describe('English email form 1 detection', () => {
