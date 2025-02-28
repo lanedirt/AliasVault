@@ -57,7 +57,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 
 ```bash
 # Download install script from latest stable release
-curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/0.12.2/install.sh
+curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/0.12.3/install.sh
 
 # Make install script executable and run it. This will create the .env file, pull the Docker images, and start the AliasVault containers.
 chmod +x install.sh
@@ -129,4 +129,3 @@ AliasVault is built with a modern, secure, and scalable technology stack, ensuri
 - **SonarCloud** – Continuous code quality monitoring.
 
 AliasVault prioritizes security, performance, and user privacy with a technology stack trusted by the industry.
-

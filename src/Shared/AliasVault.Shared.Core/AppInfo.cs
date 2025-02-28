@@ -30,7 +30,7 @@ public static class AppInfo
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 2;
+    public const int VersionPatch = 3;
 
     /// <summary>
     /// Gets a dictionary of minimum supported client versions that the WebApi supports.
