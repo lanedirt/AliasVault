@@ -428,6 +428,11 @@ export class FormDetector {
       detectedFields.push(usernameField);
     }
 
+    const fullNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.fullName, ['text'], detectedFields);
+    if (fullNameField) {
+      detectedFields.push(fullNameField);
+    }
+
     const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], detectedFields);
     if (firstNameField) {
       detectedFields.push(firstNameField);
@@ -464,6 +469,7 @@ export class FormDetector {
       usernameField,
       passwordField: passwordFields.primary,
       passwordConfirmField: passwordFields.confirm,
+      fullNameField,
       firstNameField,
       lastNameField,
       birthdateField,
