@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="MimeKit" Version="4.10.0" />
-    <PackageReference Include="NUglify" Version="1.21.12" />
+    <PackageReference Include="NUglify" Version="1.21.13" />
     <PackageReference Include="SmtpServer" Version="10.0.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
