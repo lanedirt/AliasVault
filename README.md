@@ -14,9 +14,38 @@
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app.
+- **Built-in email server**: AliasVault includes its own email server that allows you to generate real working email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app and browser extension.
 - **Alias generation**: Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
-- **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
+- **Open-source**: The source code is available on GitHub and AliasVault can be self-hosted on your own server via an easy install script.
+
+## Screenshots
+
+<table>
+    <tr>
+        <th align="center">Browser Extension</th>
+        <th align="center">Generate email and aliases</th>
+    </tr>
+    <tr>
+        <td align="center">
+            <img src="https://github.com/user-attachments/assets/d9ffd3dc-08a0-462d-8148-e8da5ec5a520" alt="Browser Autofill" />
+        </td>
+        <td align="center">
+            <img src="https://github.com/user-attachments/assets/86752994-d469-4b0e-b633-c089e0aed12b" alt="Generate Aliases" />
+		</td>
+    </tr>
+    <tr>
+        <th align="center">Strong security</th>
+        <th align="center">Easy self-host</th>
+    </tr>
+    <tr>
+		<td align="center">
+            <img src="https://github.com/user-attachments/assets/26b66379-10a5-4b8b-9c69-e64b553a10be" alt="Strong security" />
+		</td>
+		<td align="center">
+           <img src="https://github.com/user-attachments/assets/47c7002a-e326-4507-8801-194e134e00dd" alt="Easy self-host installation" />
+        </td>
+	</tr>
+</table>
 
 ## Official Cloud Version
 The official cloud version of AliasVault is freely available at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release. Create an account to protect your privacy today.
