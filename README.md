@@ -1,4 +1,4 @@
-# AliasVault: password and (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
+# AliasVault: password & (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
