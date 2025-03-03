@@ -1,4 +1,4 @@
-# AliasVault: password and (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
+# AliasVault: password & (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
@@ -10,16 +10,42 @@
 > AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
 
 ## Quick links
-- <a href="https://app.aliasvault.net">Try cloud version 🔥</a>
-- <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a>
-- <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a>
-- <a href="#self-hosting">Self-host instructions ⚙️</a>
+- <a href="https://app.aliasvault.net">Try cloud version 🔥</a> - <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> - <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> - <a href="#self-hosting">Self-host instructions ⚙️</a>
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Built-in email server**: AliasVault includes its own email server that allows you to generate virtual email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app.
+- **Built-in email server**: AliasVault includes its own email server that allows you to generate real working email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app and browser extension.
 - **Alias generation**: Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
-- **Open-source**: The source code is available on GitHub and can be self-hosted on your own server.
+- **Open-source**: The source code is available on GitHub and AliasVault can be self-hosted on your own server via an easy install script.
+
+## Screenshots
+
+<table>
+    <tr>
+        <th align="center">Browser Extension</th>
+        <th align="center">Generate email and aliases</th>
+    </tr>
+    <tr>
+        <td align="center">
+            <img src="https://github.com/user-attachments/assets/d9ffd3dc-08a0-462d-8148-e8da5ec5a520" alt="Browser Autofill" />
+        </td>
+        <td align="center">
+            <img src="https://github.com/user-attachments/assets/86752994-d469-4b0e-b633-c089e0aed12b" alt="Generate Aliases" />
+		</td>
+    </tr>
+    <tr>
+        <th align="center">Strong security</th>
+        <th align="center">Easy self-host</th>
+    </tr>
+    <tr>
+		<td align="center">
+            <img src="https://github.com/user-attachments/assets/26b66379-10a5-4b8b-9c69-e64b553a10be" alt="Strong security" />
+		</td>
+		<td align="center">
+           <img src="https://github.com/user-attachments/assets/47c7002a-e326-4507-8801-194e134e00dd" alt="Easy self-host installation" />
+        </td>
+	</tr>
+</table>
 
 ## Official Cloud Version
 The official cloud version of AliasVault is freely available at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release. Create an account to protect your privacy today.
