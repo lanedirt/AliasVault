@@ -1,31 +1,19 @@
-<div align="center">
-    
-<h1><img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="40" /> AliasVault</h1>
-
-<p align="center">
-<strong>Open-source password and (email) alias manager - built-in email server</strong>
-</p>
-
-<p align="center">
-<a href="https://app.aliasvault.net">Try cloud version 🔥</a> • <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> • <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> • <a href="#self-hosting">Self-host instructions ⚙️</a>
-</p>
-
-<p align="center">(🌟 If you find this project useful, please consider giving it a star! 🌟)</p>
+# AliasVault: password and (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-integration-tests.yml?label=integration tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
 [<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-e2e-client-tests.yml?label=e2e tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-client-tests.yml)
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
-</div>
+[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
 
-<div align="center">
+> AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
 
-[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=join%20discord%20chat&color=%237289da">](https://discord.gg/DsaXMTEtpF)
-
-</div>
-
-AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
+## Quick links
+- <a href="https://app.aliasvault.net">Try cloud version 🔥</a>
+- <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a>
+- <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a>
+- <a href="#self-hosting">Self-host instructions ⚙️</a>
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
