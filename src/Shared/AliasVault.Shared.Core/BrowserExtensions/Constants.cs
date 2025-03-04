@@ -4,6 +4,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
+#pragma warning disable S1075 // URIs should not be hardcoded
 
 namespace AliasVault.Shared.Core.BrowserExtensions;
 
@@ -15,7 +16,7 @@ public static class Constants
     /// <summary>
     /// Gets the browser extensions available for AliasVault. This is used to render download links in the client.
     /// </summary>
-    public static readonly Dictionary<BrowserType, BrowserExtensionInfo> Extensions = new()
+    public static IReadOnlyDictionary<BrowserType, BrowserExtensionInfo> Extensions { get; } = new Dictionary<BrowserType, BrowserExtensionInfo>
     {
         [BrowserType.Chrome] = new BrowserExtensionInfo
         {
