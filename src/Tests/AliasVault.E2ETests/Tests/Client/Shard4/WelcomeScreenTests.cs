@@ -34,8 +34,8 @@ public class WelcomeScreenTests : ClientPlaywrightTest
         continueButton = await WaitForAndGetElement("button:has-text('Continue')");
         await continueButton.ClickAsync();
 
-        // Wait for the "Privacy & Security Tips" step to load.
-        await WaitForUrlAsync("welcome", "Security Tips");
+        // Wait for the "Tips" step to load.
+        await WaitForUrlAsync("welcome", "Tips");
 
         // Click on the "Get started" button.
         var getStartedButton = await WaitForAndGetElement("button:has-text('Get started')");
