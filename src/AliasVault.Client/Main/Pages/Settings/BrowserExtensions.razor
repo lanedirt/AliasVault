@@ -37,10 +37,10 @@
                     </div>
                     @if (CurrentBrowserExtension?.IsAvailable ?? false)
                     {
-                        <a href="@CurrentBrowserExtension?.DownloadUrl"
+                        <a href="@CurrentBrowserExtension.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for @CurrentBrowserExtension?.Name
+                            Install for @CurrentBrowserExtension.Name
                         </a>
                     }
                     else
@@ -57,19 +57,21 @@
     <div class="mb-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach (var extension in Constants.Extensions.Where(x => x.Key != BrowserType.Unknown && x.Key != CurrentBrowser))
+            @foreach (var extension in Constants.Extensions
+                .Where(x => x.Key != BrowserType.Unknown && x.Key != CurrentBrowser)
+                .Select(x => x.Value))
             {
                 <div class="p-4 border rounded-lg dark:border-gray-700">
                     <div class="flex items-center mb-4">
-                        <img src="@extension.Value.IconPath" alt="@extension.Value.Name" class="w-8 h-8 mr-3">
-                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@extension.Value.Name</h4>
+                        <img src="@extension.IconPath" alt="@extension.Name" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@extension.Name</h4>
                     </div>
-                    @if (extension.Value.IsAvailable)
+                    @if (extension.IsAvailable)
                     {
-                        <a href="@extension.Value.DownloadUrl"
+                        <a href="@extension.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for @extension.Value.Name
+                            Install for @extension.Name
                         </a>
                     }
                     else
