@@ -56,16 +56,17 @@ public class DbPersistTests : ClientPlaywrightTest
     [Order(2)]
     public async Task VaultRevisionNumberIncrementTest()
     {
-        // Assert that the vault revision number is 1 in the server database.
+        // Assert that the vault revision number is 2 in the server database.
+        // Account registration will create a new vault with revision number 1, first credential save will increment to 2.
         // Note: for this we expect the previous test to have run first and created a first credential.
-        var firstUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
-        Assert.That(firstUpdateVault.RevisionNumber, Is.EqualTo(1), "Vault revision number is not at 1 after creating the first credential in a new vault.");
+        var firstUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.RevisionNumber).FirstAsync();
+        Assert.That(firstUpdateVault.RevisionNumber, Is.EqualTo(2), "Vault revision number is not at 2 after creating the first credential in a new vault.");
 
         // Create a new credential which will trigger a vault save to the server.
         await CreateCredentialEntry();
 
-        // Assert that the vault revision number is now 2 in the server database.
-        var secondUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.UpdatedAt).FirstAsync();
-        Assert.That(secondUpdateVault.RevisionNumber, Is.EqualTo(2), "Vault revision number is not 2 after the second credential save.");
+        // Assert that the vault revision number is now 3 in the server database.
+        var secondUpdateVault = await ApiDbContext.Vaults.OrderByDescending(x => x.RevisionNumber).FirstAsync();
+        Assert.That(secondUpdateVault.RevisionNumber, Is.EqualTo(3), "Vault revision number is not 3 after the second credential save.");
     }
 }

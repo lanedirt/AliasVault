@@ -34,7 +34,7 @@ public class ClientPlaywrightTest : PlaywrightTest
     /// Gets the welcome message that is expected to be displayed on the index page.
     /// This is used to verify that the user is logged in successfully.
     /// </summary>
-    protected static string WelcomeMessage { get; } = "Your account has been successfully created";
+    protected static string WelcomeMessage { get; } = "Your vault has been successfully created";
 
     /// <summary>
     /// Gets the time provider instance for mutating the current WebApi time in tests.
