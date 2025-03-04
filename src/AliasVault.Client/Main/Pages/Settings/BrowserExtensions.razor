@@ -2,7 +2,7 @@
 @inherits MainBase
 @inject IJSRuntime JsRuntime
 @inject ILogger<BrowserExtensions> Logger
-
+@using AliasVault.Shared.Core.BrowserExtensions
 <LayoutPageTitle>Install Browser Extension</LayoutPageTitle>
 
 <PageHeader
@@ -32,21 +32,21 @@
             <div class="p-4 border rounded-lg dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 border-blue-200">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div class="flex items-center">
-                        <img src="@GetBrowserIcon(CurrentBrowser)" alt="@CurrentBrowser" class="w-8 h-8 mr-3">
-                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(CurrentBrowser)</h4>
+                        <img src="@CurrentBrowserExtension?.IconPath" alt="@CurrentBrowserExtension?.Name" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@CurrentBrowserExtension?.Name</h4>
                     </div>
-                    @if (CurrentBrowser == BrowserType.Chrome)
+                    @if (CurrentBrowserExtension?.IsAvailable ?? false)
                     {
-                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                        <a href="@CurrentBrowserExtension?.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for Chrome
+                            Install for @CurrentBrowserExtension?.Name
                         </a>
                     }
                     else
                     {
                         <p class="text-sm text-blue-800 dark:text-blue-400">
-                            Support for @GetBrowserName(CurrentBrowser) is coming soon! For now, you can use our Chrome extension.
+                            Support for @CurrentBrowserExtension?.Name is coming soon!
                         </p>
                     }
                 </div>
@@ -57,19 +57,19 @@
     <div class="mb-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach (var browser in Enum.GetValues<BrowserType>().Where(b => b != BrowserType.Unknown && b != CurrentBrowser))
+            @foreach (var extension in Constants.Extensions.Where(x => x.Key != BrowserType.Unknown && x.Key != CurrentBrowser))
             {
                 <div class="p-4 border rounded-lg dark:border-gray-700">
                     <div class="flex items-center mb-4">
-                        <img src="@GetBrowserIcon(browser)" alt="@GetBrowserName(browser)" class="w-8 h-8 mr-3">
-                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@GetBrowserName(browser)</h4>
+                        <img src="@extension.Value.IconPath" alt="@extension.Value.Name" class="w-8 h-8 mr-3">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@extension.Value.Name</h4>
                     </div>
-                    @if (browser == BrowserType.Chrome)
+                    @if (extension.Value.IsAvailable)
                     {
-                        <a href="https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj"
+                        <a href="@extension.Value.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for Chrome
+                            Install for @extension.Value.Name
                         </a>
                     }
                     else
@@ -86,22 +86,14 @@
 
 @code {
     /// <summary>
-    /// The type of browser.
-    /// </summary>
-    private enum BrowserType
-    {
-        Unknown,
-        Firefox,
-        Chrome,
-        Safari,
-        Edge,
-        Brave
-    }
-
-    /// <summary>
     /// The current browser of the user.
     /// </summary>
     private BrowserType CurrentBrowser { get; set; }
+
+    /// <summary>
+    /// Information for extension for the current browser of the user.
+    /// </summary>
+    private BrowserExtensionInfo? CurrentBrowserExtension { get; set; } = null;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -112,6 +104,7 @@
         try
         {
             CurrentBrowser = await DetermineBrowser();
+            CurrentBrowserExtension = Constants.Extensions[CurrentBrowser];
         }
         catch (Exception ex)
         {
@@ -149,30 +142,4 @@
             _ => BrowserType.Unknown
         };
     }
-
-    /// <summary>
-    /// Gets the browser icon path.
-    /// </summary>
-    private static string GetBrowserIcon(BrowserType browser) => browser switch
-    {
-        BrowserType.Firefox => "/img/browser-icons/firefox.svg",
-        BrowserType.Chrome => "/img/browser-icons/chrome.svg",
-        BrowserType.Safari => "/img/browser-icons/safari.svg",
-        BrowserType.Edge => "/img/browser-icons/edge.svg",
-        BrowserType.Brave => "/img/browser-icons/brave.svg",
-        _ => string.Empty
-    };
-
-    /// <summary>
-    /// Gets the browser display name.
-    /// </summary>
-    private static string GetBrowserName(BrowserType browser) => browser switch
-    {
-        BrowserType.Firefox => "Firefox",
-        BrowserType.Chrome => "Google Chrome",
-        BrowserType.Safari => "Safari",
-        BrowserType.Edge => "Microsoft Edge",
-        BrowserType.Brave => "Brave",
-        _ => string.Empty
-    };
 }
