@@ -41,15 +41,23 @@
         }
     }
 
+    /// <summary>
+    /// Migrate (create) the database and upload it to the server.
+    /// </summary>
     private async Task MigrateDatabase()
     {
         // Simulate a delay.
         await Task.Delay(1000);
 
-        // Migrate the database
+        // Migrate (create) the database.
         if (await DbService.MigrateDatabaseAsync())
         {
-            // Migration successful
+            // Save the database to the server.
+            if (!await DbService.SaveDatabaseAsync())
+            {
+                // Migration failed
+                ErrorMessage = "Vault creation successful but failed to save to server. Please refresh the page and try again or contact support.";
+            }
         }
         else
         {
