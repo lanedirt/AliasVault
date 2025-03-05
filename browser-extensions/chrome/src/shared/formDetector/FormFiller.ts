@@ -8,7 +8,7 @@ export class FormFiller {
   /**
    * Constructor.
    */
-  constructor(
+  public constructor(
     private readonly form: FormFields,
     private readonly triggerInputEvents: (element: HTMLInputElement | HTMLSelectElement) => void
   ) {}
@@ -177,6 +177,7 @@ export class FormFiller {
     switch (this.form.genderField.type) {
       case 'select':
         if (this.form.genderField.field) {
+          // TODO: make this locale aware.
           const maleValues = ['m', 'male', 'heer', 'mr', 'mr.', 'man'];
           const femaleValues = ['f', 'female', 'mevrouw', 'mrs', 'mrs.', 'ms', 'ms.', 'vrouw'];
 
