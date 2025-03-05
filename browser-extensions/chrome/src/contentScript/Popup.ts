@@ -866,6 +866,7 @@ export async function createEditNamePopup(defaultName: string): Promise<string |
   return new Promise((resolve) => {
     // Create modal overlay
     const overlay = document.createElement('div');
+    overlay.id = 'aliasvault-create-popup';
     overlay.style.cssText = `
         position: fixed;
         top: 0;
