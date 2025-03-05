@@ -7,21 +7,21 @@
 
 namespace AliasVault.E2ETests.Tests.Extensions;
 
+using Microsoft.EntityFrameworkCore;
+
 /// <summary>
-/// End-to-end tests for the Chrome extension. We extend from ClientPlaywrightTest as extension tess requires
-/// mutating things via the client too to test all extension functionality properly such as syncing vaults.
+/// End-to-end tests for the Chrome extension.
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [Category("ExtensionTests")]
 [TestFixture]
-public class ChromeExtensionTests : ClientPlaywrightTest
+public class ChromeExtensionTests : BrowserExtensionPlaywrightTest
 {
-    private string _extensionPath = string.Empty;
-
     /// <summary>
     /// Tests if the extension can load a vault and a previously created credential entry is present.
     /// </summary>
     /// <returns>Async task.</returns>
+    [Order(1)]
     [Test]
     public async Task ExtensionCredentialExists()
     {
@@ -41,135 +41,99 @@ public class ChromeExtensionTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Set up the Playwright browser and context based on settings defined in appsettings.json.
+    /// Tests the extension's ability to create a new credential.
     /// </summary>
-    /// <returns>Task.</returns>
-    protected override async Task SetupPlaywrightBrowserAndContext()
+    /// <returns>Async task.</returns>
+    [Order(2)]
+    [Test]
+    public async Task ExtensionCreateCredentialTest()
     {
-        // Make sure the extension is built and ready to use.
-        ExtensionSetup();
+        var emailClaimsCountInitial = await ApiDbContext.UserEmailClaims.CountAsync();
 
-        var playwright = await Playwright.CreateAsync();
+        // Login to the extension
+        var extensionPopup = await LoginToExtension();
 
-        // Launch persistent context with the extension loaded
-        Context = await playwright.Chromium.LaunchPersistentContextAsync(
-            userDataDir: string.Empty, // Empty string means temporary directory
-            new BrowserTypeLaunchPersistentContextOptions
-            {
-                Headless = false,
-                Args = new[]
-                {
-                    "--disable-extensions-except=" + _extensionPath,
-                    "--load-extension=" + _extensionPath,
-                },
-                ServiceWorkers = ServiceWorkerPolicy.Allow,
-            });
-    }
+        // Create a temporary HTML file with the test form
+        var tempHtmlPath = Path.Combine(Path.GetTempPath(), "test-form.html");
+        var testFormHtml = @"
+            <html>
+            <head>
+                <title>Login</title>
+            </head>
+            <body>
+                <h1>AliasVault browser extension form test</h1>
+                <form>
+                    <input type='text' id='username' placeholder='Username'>
+                    <input type='password' id='password' placeholder='Password'>
+                    <button type='submit'>Login</button>
+                </form>
+            </body>
+            </html>
+        ";
 
-    /// <summary>
-    /// Find the solution root directory by walking up from the current assembly location.
-    /// </summary>
-    /// <param name="startPath">The starting directory.</param>
-    /// <returns>The solution root directory.</returns>
-    private static string FindSolutionRoot(string startPath)
-    {
-        var directory = new DirectoryInfo(startPath);
-        while (directory != null && !File.Exists(Path.Combine(directory.FullName, "AliasVault.sln")))
+        await File.WriteAllTextAsync(tempHtmlPath, testFormHtml);
+
+        // Navigate to the file using the file:// protocol
+        await extensionPopup.GotoAsync($"file://{tempHtmlPath}");
+
+        // Focus the username field which should trigger the AliasVault popup
+        await extensionPopup.FocusAsync("input#username");
+
+        // Wait for the AliasVault popup to appear
+        await extensionPopup.WaitForSelectorAsync("#aliasvault-credential-popup");
+
+        // Click the "New" button in the popup
+        await extensionPopup.ClickAsync("button:has-text('New')");
+
+        // Set the service name for the new credential
+        var serviceName = "Test Service Extension";
+        await extensionPopup.FillAsync("input[id='service-name-input']", serviceName);
+
+        // Click the "Create" button
+        await extensionPopup.ClickAsync("button[id='save-btn']");
+
+        // Wait for the "aliasvault-create-popup" to disappear
+        await extensionPopup.WaitForSelectorAsync("#aliasvault-create-popup", new() { State = WaitForSelectorState.Hidden });
+
+        // Wait for the credential to be created and the form fields to be filled with values
+        await extensionPopup.WaitForFunctionAsync(
+            @"() => {
+            const username = document.querySelector('input#username');
+            const password = document.querySelector('input#password');
+            return username?.value && password?.value;
+            }",
+            null,
+            new() { Timeout = 10000 });
+
+        // Verify the form fields were filled
+        var username = await extensionPopup.InputValueAsync("input#username");
+        var password = await extensionPopup.InputValueAsync("input#password");
+        Assert.Multiple(() =>
         {
-            directory = directory.Parent;
-        }
+            Assert.That(username, Is.Not.Empty, "Username field was not filled");
+            Assert.That(password, Is.Not.Empty, "Password field was not filled");
+        });
 
-        if (directory == null)
-        {
-            throw new DirectoryNotFoundException("Could not find solution root directory");
-        }
+        // Now verify the credential appears in the client app
+        await Page.BringToFrontAsync();
 
-        return directory.FullName;
-    }
+        // Refresh the vault via the refresh button to get the latest vault that browser extension just uploaded
+        await Page.ClickAsync("button[id='vault-refresh-btn']");
 
-    /// <summary>
-    /// Sets up the extension by running npm install and build.
-    /// </summary>
-    private void ExtensionSetup()
-    {
-        // Get the solution directory by walking up from the current assembly location
-        var currentDir = Path.GetDirectoryName(typeof(ChromeExtensionTests).Assembly.Location)
-            ?? throw new InvalidOperationException("Current directory not found");
-        var solutionDir = FindSolutionRoot(currentDir);
+        // Navigate to the credentials page explicitly in case we were stuck on the welcome screen.
+        await Page.ClickAsync("a[href='/credentials']");
 
-        // Construct absolute path to extension directory
-        var extensionDir = Path.GetFullPath(Path.Combine(solutionDir, "browser-extensions", "chrome"));
-        var distDir = Path.GetFullPath(Path.Combine(extensionDir, "dist"));
-        var manifestPath = Path.Combine(distDir, "manifest.json");
+        // Wait for credentials page to load and verify the new credential appears
+        await Page.WaitForSelectorAsync("text=" + serviceName);
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain(serviceName), "Created credential service name does not appear in client app");
 
-        // Verify the dist directory exists and contains required files
-        if (!Directory.Exists(distDir) || !File.Exists(manifestPath))
-        {
-            throw new ArgumentException($"Chrome extension dist directory and/or manifest.json not found at {distDir}. Please run 'npm install && npm run build' in {extensionDir}.");
-        }
+        // Assert that email claims is now at one to verify that the email claim was correctly passed to the API from
+        // the browser extension.
+        var emailClaimsCount = await ApiDbContext.UserEmailClaims.CountAsync();
+        Assert.That(emailClaimsCount, Is.EqualTo(emailClaimsCountInitial + 1), "Email claim for user not at expected count. Check browser extension and API email claim register logic.");
 
-        _extensionPath = distDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-    }
-
-    /// <summary>
-    /// Open the extension popup, configure the API URL and login with the test credentials.
-    /// </summary>
-    /// <returns>Task.</returns>
-    private async Task<IPage> LoginToExtension()
-    {
-        // Use reflection to access the ServiceWorkers property
-        List<object> serviceWorkers;
-        try
-        {
-            var serviceWorkersProperty = Context.GetType().GetProperty("ServiceWorkers");
-            var serviceWorkersEnumerable = serviceWorkersProperty?.GetValue(Context) as IEnumerable<object>;
-
-            if (serviceWorkersEnumerable == null)
-            {
-                throw new InvalidOperationException("Could not find extension service workers");
-            }
-
-            serviceWorkers = serviceWorkersEnumerable.ToList();
-            if (serviceWorkers.Count == 0)
-            {
-                throw new InvalidOperationException("No extension service workers found");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to get service workers, check if the extension is loaded properly: {ex.Message}");
-            throw;
-        }
-
-        // Get the first service worker's URL using reflection
-        var firstWorker = serviceWorkers[0];
-        var urlProperty = firstWorker.GetType().GetProperty("Url");
-        var url = urlProperty?.GetValue(firstWorker) as string;
-
-        var extensionId = url?.Split('/')[2]
-            ?? throw new InvalidOperationException("Could not find extension service worker URL");
-
-        // Open popup in a new page
-        var extensionPopup = await Context.NewPageAsync();
-        await extensionPopup.GotoAsync($"chrome-extension://{extensionId}/index.html");
-
-        // Configure API URL in settings first
-        await extensionPopup.ClickAsync("button[id='settings']");
-
-        // Select "Self-hosted" option first
-        await extensionPopup.SelectOptionAsync("select", ["custom"]);
-
-        // Fill in the custom URL input that appears
-        await extensionPopup.FillAsync("input[id='custom-api-url']", ApiBaseUrl);
-
-        // Go back to main page
-        await extensionPopup.ClickAsync("button[id='back']");
-
-        // Test vault loading with username and password
-        await extensionPopup.FillAsync("input[type='text']", TestUserUsername);
-        await extensionPopup.FillAsync("input[type='password']", TestUserPassword);
-        await extensionPopup.ClickAsync("button:has-text('Login')");
-
-        return extensionPopup;
+        // Clean up the temporary file after the test
+        File.Delete(tempHtmlPath);
     }
 }
