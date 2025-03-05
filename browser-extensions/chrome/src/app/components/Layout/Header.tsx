@@ -52,6 +52,19 @@ const Header: React.FC<HeaderProps> = ({
     navigate('/auth-settings');
   };
 
+  /**
+   * Handle logo click.
+   */
+  const logoClick = () : void => {
+    // If logged in, navigate to credentials.
+    if (authContext.isLoggedIn) {
+      navigate('/credentials');
+    } else {
+      // If not logged in, navigate to index.
+      navigate('/');
+    }
+  };
+
   return (
     <header className="fixed z-30 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex items-center h-16 px-4">
@@ -74,9 +87,14 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         ) : (
           <div className="flex items-center">
-            <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
-            <h1 className="text-gray-900 dark:text-white text-xl font-bold">AliasVault</h1>
-            <span className="text-primary-500 text-[10px] ml-1 font-normal">BETA</span>
+            <button
+              onClick={() => logoClick()}
+              className="flex items-center hover:opacity-80 transition-opacity"
+            >
+              <img src="/assets/images/logo.svg" alt="AliasVault" className="h-8 w-8 mr-2" />
+              <h1 className="text-gray-900 dark:text-white text-xl font-bold">AliasVault</h1>
+              <span className="text-primary-500 text-[10px] ml-1 font-normal">BETA</span>
+            </button>
           </div>
         )}
 
