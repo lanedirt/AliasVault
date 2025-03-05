@@ -1,3 +1,5 @@
+import { Gender } from "../generators/Identity/types/Gender";
+
 /**
  * Credential SQLite database type.
  */
@@ -15,7 +17,7 @@ export type Credential = {
         LastName: string;
         NickName?: string;
         BirthDate: string;
-        Gender?: string;
+        Gender?: Gender;
         Email?: string;
     };
 }
