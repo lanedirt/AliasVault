@@ -76,7 +76,8 @@
             // Save the database to the server.
             if (await DbService.SaveDatabaseAsync())
             {
-                // Migration successful.
+                // Migration successful, update state which will trigger the status message UI to refresh and redirect user.
+                DbService.GetState().UpdateState(DbServiceState.DatabaseStatus.Ready);
                 GlobalNotificationService.AddSuccessMessage("Vault upgrade successful.", true);
             }
             else
