@@ -1114,53 +1114,100 @@ function base64Encode(buffer: Uint8Array | number[] | {[key: number]: number}): 
 }
 
 /**
- * Get favicon bytes from page.
+ * Get favicon bytes from page and resize if necessary.
  */
 async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
-  // Get all possible favicon links, ordered by preference
+  const MAX_SIZE_BYTES = 50 * 1024; // 50KB max size before resizing
+  const TARGET_WIDTH = 96; // Resize target width
+
   const faviconLinks = [
-    // Explicit SVG icons
     ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')),
-    // High-res icons
     ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="192x192"], link[rel="icon"][sizes="128x128"]')),
-    // Apple touch icons (usually high quality)
     ...Array.from(document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="apple-touch-icon-precomposed"]')),
-    // Standard favicons
     ...Array.from(document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')),
-    // Fallback to root favicon.ico
     { href: `${window.location.origin}/favicon.ico` }
   ] as HTMLLinkElement[];
 
   const uniqueLinks = Array.from(new Map(faviconLinks.map(link => [link.href, link])).values());
 
-  // Get the bytes of the first valid favicon.
   for (const link of uniqueLinks) {
     try {
       const response = await fetch(link.href);
       if (!response.ok) {
-        continue; // Try next link if this one fails
+        // Could not fetch favicon, skip.
+        continue;
       }
 
       const contentType = response.headers.get('content-type');
-      // Skip if content type indicates it's not an image
-      if (contentType && !contentType.startsWith('image/')) {
+      if (!contentType || !contentType.startsWith('image/')) {
+        // Not a valid favicon, skip.
         continue;
       }
 
       const arrayBuffer = await response.arrayBuffer();
-      // Skip if the file is too large (> 100KB) or empty
-      if (arrayBuffer.byteLength === 0 || arrayBuffer.byteLength > 102400) {
+      if (arrayBuffer.byteLength === 0) {
+        // Empty favicon, skip.
         continue;
       }
 
-      return new Uint8Array(arrayBuffer);
+      let imageData = new Uint8Array(arrayBuffer);
+
+      // If image is too large, attempt to resize.
+      if (imageData.byteLength > MAX_SIZE_BYTES) {
+        const resizedBlob = await resizeImage(imageData, contentType, TARGET_WIDTH);
+        if (resizedBlob) {
+          imageData = new Uint8Array(await resizedBlob.arrayBuffer());
+        }
+      }
+
+      // Ensure final size is within limits.
+      if (imageData.byteLength <= MAX_SIZE_BYTES) {
+        return imageData;
+      }
     } catch (error) {
-      console.debug('Error fetching favicon:', link.href, error);
-      continue; // Try next link if this one fails
+      console.error('Error fetching favicon:', link.href, error);
     }
   }
 
-  return null; // Return null if no favicon could be downloaded
+  return null;
+}
+
+/**
+ * Resizes an image using OffscreenCanvas and compresses it.
+ */
+async function resizeImage(imageData: Uint8Array, contentType: string, targetWidth: number): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const blob = new Blob([imageData], { type: contentType });
+    const img = new Image();
+
+    /**
+     * Handle image load.
+     */
+    img.onload = () : void => {
+      const scale = targetWidth / img.width;
+      const targetHeight = Math.floor(img.height * scale);
+
+      const canvas = new OffscreenCanvas(targetWidth, targetHeight);
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      canvas.convertToBlob({ type: "image/png", quality: 0.7 }).then(resolve).catch(() => resolve(null));
+    };
+
+    /**
+     * Handle image load error.
+     */
+    img.onerror = () : void => {
+      resolve(null);
+    };
+
+    img.src = URL.createObjectURL(blob);
+  });
 }
 
 /**
