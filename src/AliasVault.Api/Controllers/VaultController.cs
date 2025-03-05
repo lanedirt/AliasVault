@@ -76,7 +76,6 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         }
 
         // Logic to retrieve vault for the user.
-        var vaults = await context.Vaults.ToListAsync();
         var vault = await context.Vaults
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(x => x.RevisionNumber)
