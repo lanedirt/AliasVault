@@ -251,8 +251,11 @@ public sealed class DbService : IDisposable
     /// <returns>Bool which indicates if saving database to server was successful.</returns>
     public async Task<bool> SaveDatabaseAsync()
     {
-        // Set the initial state of the database service.
-        _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
+        if (_state.CurrentState.Status != DbServiceState.DatabaseStatus.Creating)
+        {
+            // If database is not in the process of being created, update status to saving which is reflected in the UI.
+            _state.UpdateState(DbServiceState.DatabaseStatus.SavingToServer);
+        }
 
         // Make sure a public/private RSA encryption key exists before saving the database.
         await GetOrCreateEncryptionKeyAsync();
@@ -264,7 +267,11 @@ public sealed class DbService : IDisposable
         if (success)
         {
             _logger.LogInformation("Database successfully saved to server.");
-            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+            if (_state.CurrentState.Status != DbServiceState.DatabaseStatus.Creating)
+            {
+                // If database is not in the process of being created, update status to ready which is reflected in the UI.
+                _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+            }
         }
 
         return success;
@@ -306,7 +313,6 @@ public sealed class DbService : IDisposable
             await _dbContext.Database.MigrateAsync();
             _isSuccessfullyInitialized = true;
             await _settingsService.InitializeAsync(this);
-            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
         }
         catch (Exception ex)
         {

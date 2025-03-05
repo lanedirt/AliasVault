@@ -53,7 +53,12 @@
         if (await DbService.MigrateDatabaseAsync())
         {
             // Save the database to the server.
-            if (!await DbService.SaveDatabaseAsync())
+            if (await DbService.SaveDatabaseAsync())
+            {
+                // Migration successful, update state which will trigger the status message UI to refresh and redirect user.
+                DbService.GetState().UpdateState(DbServiceState.DatabaseStatus.Ready);
+            }
+            else
             {
                 // Migration failed
                 ErrorMessage = "Vault creation successful but failed to save to server. Please refresh the page and try again or contact support.";
