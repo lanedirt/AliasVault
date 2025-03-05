@@ -2,11 +2,11 @@ import { FormDetector } from '../FormDetector';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { it, expect, vi } from 'vitest';
-import { JSDOM } from 'jsdom';
+import { JSDOM, DOMWindow } from 'jsdom';
 import { FormFields } from '../types/FormFields';
 import { Credential } from '../../types/Credential';
 import { Gender } from '../../generators/Identity/types/Gender';
-import { DOMWindow } from 'jsdom';
+
 export enum FormField {
   Username = 'username',
   FirstName = 'firstName',
