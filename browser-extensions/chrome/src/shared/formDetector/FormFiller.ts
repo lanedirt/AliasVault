@@ -1,6 +1,7 @@
 import { Credential } from "../types/Credential";
 import { FormFields } from "./types/FormFields";
-
+import { CombinedDateOptionPatterns, CombinedGenderOptionPatterns } from "./FieldPatterns";
+import { Gender } from "../generators/Identity/types/Gender";
 /**
  * Class to fill the fields of a form with the given credential.
  */
@@ -109,61 +110,64 @@ export class FormFiller {
       const birthDate = new Date(credential.Alias.BirthDate);
 
       if (this.form.birthdateField.day) {
-        if (this.form.birthdateField.day instanceof HTMLSelectElement) {
+        const dayElement = this.form.birthdateField.day as HTMLSelectElement | HTMLInputElement;
+        if ('options' in dayElement && dayElement.options) {
           const dayValue = birthDate.getDate().toString().padStart(2, '0');
-          const dayOption = Array.from(this.form.birthdateField.day.options).find(opt =>
+          const dayOption = Array.from(dayElement.options).find(opt =>
             opt.value === dayValue ||
-                opt.value === birthDate.getDate().toString() ||
-                opt.text === dayValue ||
-                opt.text === birthDate.getDate().toString()
+            opt.value === birthDate.getDate().toString() ||
+            opt.text === dayValue ||
+            opt.text === birthDate.getDate().toString()
           );
           if (dayOption) {
-            this.form.birthdateField.day.value = dayOption.value;
+            dayElement.value = dayOption.value;
           }
         } else {
-          this.form.birthdateField.day.value = birthDate.getDate().toString().padStart(2, '0');
+          dayElement.value = birthDate.getDate().toString().padStart(2, '0');
         }
-        this.triggerInputEvents(this.form.birthdateField.day);
+        this.triggerInputEvents(dayElement);
       }
 
       if (this.form.birthdateField.month) {
-        if (this.form.birthdateField.month instanceof HTMLSelectElement) {
-          const monthValue = (birthDate.getMonth() + 1).toString().padStart(2, '0');
-          // TODO: make this locale aware.
-          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'];
-          const monthOption = Array.from(this.form.birthdateField.month.options).find(opt =>
-            opt.value === monthValue ||
+        const monthElement = this.form.birthdateField.month as HTMLSelectElement | HTMLInputElement;
+        if ('options' in monthElement && monthElement.options) {
+          // Loop through all supported languages and find a match for the month name.
+          CombinedDateOptionPatterns.months.forEach((monthNames, _) => {
+            const monthValue = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+            const monthOption = Array.from(monthElement.options).find(opt =>
+              opt.value === monthValue ||
             opt.value === (birthDate.getMonth() + 1).toString() ||
             opt.text === monthValue ||
             opt.text === (birthDate.getMonth() + 1).toString() ||
             opt.text.toLowerCase() === monthNames[birthDate.getMonth()].toLowerCase() ||
             opt.text.toLowerCase() === monthNames[birthDate.getMonth()].substring(0, 3).toLowerCase()
-          );
-          if (monthOption) {
-            this.form.birthdateField.month.value = monthOption.value;
-          }
+            );
+            if (monthOption) {
+              monthElement.value = monthOption.value;
+            }
+          });
         } else {
-          this.form.birthdateField.month.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+          monthElement.value = (birthDate.getMonth() + 1).toString().padStart(2, '0');
         }
-        this.triggerInputEvents(this.form.birthdateField.month);
+        this.triggerInputEvents(monthElement);
       }
 
       if (this.form.birthdateField.year) {
-        if (this.form.birthdateField.year instanceof HTMLSelectElement) {
+        const yearElement = this.form.birthdateField.year as HTMLSelectElement | HTMLInputElement;
+        if ('options' in yearElement && yearElement.options) {
           const yearValue = birthDate.getFullYear().toString();
-          const yearOption = Array.from(this.form.birthdateField.year.options).find(opt =>
+          const yearOption = Array.from(yearElement.options).find(opt =>
             opt.value === yearValue ||
             opt.text === yearValue
           );
           if (yearOption) {
-            this.form.birthdateField.year.value = yearOption.value;
+            yearElement.value = yearOption.value;
           }
         } else {
-          this.form.birthdateField.year.value = birthDate.getFullYear().toString();
+          yearElement.value = birthDate.getFullYear().toString();
         }
 
-        this.triggerInputEvents(this.form.birthdateField.year);
+        this.triggerInputEvents(yearElement);
       }
     }
   }
@@ -177,14 +181,13 @@ export class FormFiller {
     switch (this.form.genderField.type) {
       case 'select':
         if (this.form.genderField.field) {
-          // TODO: make this locale aware.
-          const maleValues = ['m', 'male', 'heer', 'mr', 'mr.', 'man'];
-          const femaleValues = ['f', 'female', 'mevrouw', 'mrs', 'mrs.', 'ms', 'ms.', 'vrouw'];
+          const maleValues = CombinedGenderOptionPatterns.male;
+          const femaleValues = CombinedGenderOptionPatterns.female;
 
           const selectElement = this.form.genderField.field as HTMLSelectElement;
           const options = Array.from(selectElement.options);
 
-          if (credential.Alias.Gender === 'Male') {
+          if (credential.Alias.Gender === Gender.Male) {
             const maleOption = options.find(opt =>
               maleValues.includes(opt.value.toLowerCase()) ||
             maleValues.includes(opt.text.toLowerCase())
@@ -192,7 +195,7 @@ export class FormFiller {
             if (maleOption) {
               selectElement.value = maleOption.value;
             }
-          } else if (credential.Alias.Gender === 'Female') {
+          } else if (credential.Alias.Gender === Gender.Female) {
             const femaleOption = options.find(opt =>
               femaleValues.includes(opt.value.toLowerCase()) ||
             femaleValues.includes(opt.text.toLowerCase())
@@ -212,13 +215,13 @@ export class FormFiller {
         }
 
         let selectedRadio: HTMLInputElement | null = null;
-        if (credential.Alias.Gender === 'Male' && radioButtons.male) {
+        if (credential.Alias.Gender === Gender.Male && radioButtons.male) {
           radioButtons.male.checked = true;
           selectedRadio = radioButtons.male;
-        } else if (credential.Alias.Gender === 'Female' && radioButtons.female) {
+        } else if (credential.Alias.Gender === Gender.Female && radioButtons.female) {
           radioButtons.female.checked = true;
           selectedRadio = radioButtons.female;
-        } else if (credential.Alias.Gender === 'Other' && radioButtons.other) {
+        } else if (credential.Alias.Gender === Gender.Other && radioButtons.other) {
           radioButtons.other.checked = true;
           selectedRadio = radioButtons.other;
         }
