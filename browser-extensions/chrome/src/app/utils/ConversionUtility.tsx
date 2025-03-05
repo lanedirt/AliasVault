@@ -21,9 +21,7 @@ class ConversionUtility {
       if (anchors.length > 0) {
         anchors.forEach((anchor: Element) => {
           // Handle target attribute
-          if (!anchor.hasAttribute('target')) {
-            anchor.setAttribute('target', '_blank');
-          } else if (anchor.getAttribute('target') !== '_blank') {
+          if (!anchor.hasAttribute('target') || anchor.getAttribute('target') !== '_blank') {
             anchor.setAttribute('target', '_blank');
           }
 
