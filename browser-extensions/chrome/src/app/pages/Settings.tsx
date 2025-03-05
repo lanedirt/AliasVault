@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '../../contentScript/Popup';
+import { AppInfo } from '../../shared/AppInfo';
 
 /**
  * Popup settings type.
@@ -177,6 +178,10 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <div className="text-center text-gray-400 dark:text-gray-600">
+        Version: {AppInfo.VERSION}
+      </div>
     </div>
   );
 };
