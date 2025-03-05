@@ -1131,45 +1131,51 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
   const uniqueLinks = Array.from(new Map(faviconLinks.map(link => [link.href, link])).values());
 
   for (const link of uniqueLinks) {
-    try {
-      const response = await fetch(link.href);
-      if (!response.ok) {
-        // Could not fetch favicon, skip.
-        continue;
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.startsWith('image/')) {
-        // Not a valid favicon, skip.
-        continue;
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      if (arrayBuffer.byteLength === 0) {
-        // Empty favicon, skip.
-        continue;
-      }
-
-      let imageData = new Uint8Array(arrayBuffer);
-
-      // If image is too large, attempt to resize.
-      if (imageData.byteLength > MAX_SIZE_BYTES) {
-        const resizedBlob = await resizeImage(imageData, contentType, TARGET_WIDTH);
-        if (resizedBlob) {
-          imageData = new Uint8Array(await resizedBlob.arrayBuffer());
-        }
-      }
-
-      // Ensure final size is within limits.
-      if (imageData.byteLength <= MAX_SIZE_BYTES) {
-        return imageData;
-      }
-    } catch (error) {
-      console.error('Error fetching favicon:', link.href, error);
+    const imageData = await fetchAndProcessFavicon(link.href, MAX_SIZE_BYTES, TARGET_WIDTH);
+    if (imageData) {
+      return imageData;
     }
   }
 
   return null;
+}
+
+/**
+ * Attempt to fetch and process a favicon from a given URL
+ */
+async function fetchAndProcessFavicon(url: string, maxSize: number, targetWidth: number): Promise<Uint8Array | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.startsWith('image/')) {
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    if (arrayBuffer.byteLength === 0) {
+      return null;
+    }
+
+    let imageData = new Uint8Array(arrayBuffer);
+
+    // If image is too large, attempt to resize
+    if (imageData.byteLength > maxSize) {
+      const resizedBlob = await resizeImage(imageData, contentType, targetWidth);
+      if (resizedBlob) {
+        imageData = new Uint8Array(await resizedBlob.arrayBuffer());
+      }
+    }
+
+    // Return only if within size limits
+    return imageData.byteLength <= maxSize ? imageData : null;
+  } catch (error) {
+    console.error('Error fetching favicon:', url, error);
+    return null;
+  }
 }
 
 /**
