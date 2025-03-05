@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDb } from '../../context/DbContext';
 
+type TabName = 'credentials' | 'emails' | 'settings';
+
 /**
  * Bottom nav component.
  */
@@ -11,11 +13,11 @@ const BottomNav: React.FC = () => {
   const dbContext = useDb();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentTab, setCurrentTab] = useState<'credentials' | 'emails' | 'settings'>('credentials');
+  const [currentTab, setCurrentTab] = useState<TabName>('credentials');
 
   // Add effect to update currentTab based on route
   useEffect(() => {
-    const path = location.pathname.substring(1) as 'credentials' | 'emails' | 'settings';
+    const path = location.pathname.substring(1) as TabName;
     if (['credentials', 'emails', 'settings'].includes(path)) {
       setCurrentTab(path);
     }
@@ -24,7 +26,7 @@ const BottomNav: React.FC = () => {
   /**
    * Handle tab change.
    */
-  const handleTabChange = (tab: 'credentials' | 'emails' | 'settings') : void => {
+  const handleTabChange = (tab: TabName) : void => {
     setCurrentTab(tab);
     navigate(`/${tab}`);
   };

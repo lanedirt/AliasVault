@@ -119,6 +119,10 @@ const AuthSettings: React.FC = () => {
           </div>
         </>
       )}
+
+      <div className="text-center text-gray-400 dark:text-gray-600">
+        Version: {AppInfo.VERSION}
+      </div>
     </div>
   );
 };
