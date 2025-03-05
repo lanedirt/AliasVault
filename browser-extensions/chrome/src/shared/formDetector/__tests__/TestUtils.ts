@@ -1,10 +1,12 @@
 import { FormDetector } from '../FormDetector';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { it, expect } from 'vitest';
+import { it, expect, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { FormFields } from '../types/FormFields';
-
+import { Credential } from '../../types/Credential';
+import { Gender } from '../../generators/Identity/types/Gender';
+import { DOMWindow } from 'jsdom';
 export enum FormField {
   Username = 'username',
   FirstName = 'firstName',
@@ -117,4 +119,110 @@ const setupFormTest = (htmlFile: string, focusedElementId: string) : { document:
   const formDetector = new FormDetector(document, focusedElement);
   const result = formDetector.getForm();
   return { document, result };
+};
+
+/**
+ * Setup a test DOM to be used in unit test context.
+ */
+export const setupTestDOM = () : { window: DOMWindow, document: Document } => {
+  const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+    url: 'http://localhost',
+    storageQuota: 10000000
+  });
+  const window = dom.window;
+  const document = window.document;
+
+  // Mock localStorage
+  const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    clear: vi.fn(),
+    removeItem: vi.fn(),
+    length: 0,
+    key: vi.fn(),
+  };
+  Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+  return { window, document };
+};
+
+/**
+ * Create a mock form fields object with dummy form element instances.
+ */
+export const createMockFormFields = (document: Document): FormFields => ({
+  form: document.createElement('form'),
+  usernameField: document.createElement('input'),
+  passwordField: document.createElement('input'),
+  passwordConfirmField: document.createElement('input'),
+  emailField: document.createElement('input'),
+  emailConfirmField: document.createElement('input'),
+  fullNameField: document.createElement('input'),
+  firstNameField: document.createElement('input'),
+  lastNameField: document.createElement('input'),
+  birthdateField: {
+    single: document.createElement('input'),
+    format: 'yyyy-mm-dd',
+    day: null,
+    month: null,
+    year: null
+  },
+  genderField: {
+    type: 'select',
+    field: document.createElement('select')
+  }
+});
+
+/**
+ * Create a mock credential object with dummy values.
+ */
+export const createMockCredential = (): Credential => ({
+  Id: '123',
+  Username: 'testuser',
+  Password: 'testpass',
+  Email: 'test@example.com',
+  ServiceName: 'Test Service',
+  Alias: {
+    FirstName: 'John',
+    LastName: 'Doe',
+    BirthDate: '1991-02-03',
+    Gender: Gender.Male
+  }
+});
+
+/**
+ * Create date select elements.
+ */
+export const createDateSelects = (document: Document) : { daySelect: HTMLSelectElement, monthSelect: HTMLSelectElement, yearSelect: HTMLSelectElement } => {
+  const daySelect = document.createElement('select');
+  const monthSelect = document.createElement('select');
+  const yearSelect = document.createElement('select');
+
+  // Add day options (1-31)
+  for (let i = 1; i <= 31; i++) {
+    const option = document.createElement('option');
+    const value = i.toString().padStart(2, '0');
+    option.value = value;
+    option.text = value;
+    daySelect.appendChild(option);
+  }
+
+  // Add year options (1900-2024)
+  for (let i = 1900; i <= 2024; i++) {
+    const option = document.createElement('option');
+    option.value = i.toString();
+    option.text = i.toString();
+    yearSelect.appendChild(option);
+  }
+
+  return { daySelect, monthSelect, yearSelect };
+};
+
+/**
+ * Check if the trigger input event was called for a specific field.
+ */
+export const wasTriggerCalledFor = (mockTriggerInputEvents: ReturnType<typeof vi.fn>, field: HTMLElement | null): boolean => {
+  if (!field) {
+    return false;
+  }
+  return mockTriggerInputEvents.mock.calls.some(call => call[0] === field);
 };

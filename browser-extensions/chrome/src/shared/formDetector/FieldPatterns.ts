@@ -26,6 +26,14 @@ export type GenderOptionPatterns = {
 }
 
 /**
+ * Type for date option patterns. These patterns are used to detect individual date options (select) in the form.
+ * Each array in months must contain exactly 12 elements representing the months in a specific language.
+ */
+export type DateOptionPatterns = {
+    months: string[][];
+}
+
+/**
  * English field patterns to detect English form fields.
  */
 export const EnglishFieldPatterns: FieldPatterns = {
@@ -47,9 +55,18 @@ export const EnglishFieldPatterns: FieldPatterns = {
  * English gender option patterns.
  */
 export const EnglishGenderOptionPatterns: GenderOptionPatterns = {
-  male: ['male', 'man', 'm', 'gender1'],
-  female: ['female', 'woman', 'f', 'gender2'],
+  male: ['male', 'man', 'm', 'gender1', 'mr', 'mr.'],
+  female: ['female', 'woman', 'f', 'gender2', 'mrs', 'mrs.', 'ms', 'ms.'],
   other: ['other', 'diverse', 'custom', 'prefer not', 'unknown', 'gender3']
+};
+
+/**
+ * English date option patterns. These are used to detect the month name in the date field.
+ */
+export const EnglishDateOptionPatterns: DateOptionPatterns = {
+  months: [
+    ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+  ],
 };
 
 /**
@@ -74,9 +91,18 @@ export const DutchFieldPatterns: FieldPatterns = {
  * Dutch gender option patterns
  */
 export const DutchGenderOptionPatterns: GenderOptionPatterns = {
-  male: ['man', 'mannelijk', 'm'],
-  female: ['vrouw', 'vrouwelijk', 'v'],
+  male: ['man', 'mannelijk', 'heer'],
+  female: ['vrouw', 'vrouwelijk', 'mevrouw'],
   other: ['anders', 'iets', 'overig', 'onbekend']
+};
+
+/**
+ * Dutch date option patterns. These are used to detect the month name in the date field.
+ */
+export const DutchDateOptionPatterns: DateOptionPatterns = {
+  months: [
+    ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
+  ],
 };
 
 /**
@@ -110,4 +136,16 @@ export const CombinedGenderOptionPatterns: GenderOptionPatterns = {
   male: [...new Set([...EnglishGenderOptionPatterns.male, ...DutchGenderOptionPatterns.male])],
   female: [...new Set([...EnglishGenderOptionPatterns.female, ...DutchGenderOptionPatterns.female])],
   other: [...new Set([...EnglishGenderOptionPatterns.other, ...DutchGenderOptionPatterns.other])]
+};
+
+/**
+ * Combined date option patterns which includes all supported languages.
+ * Each array in months must contain exactly 12 elements representing the months in a specific language.
+ * These are used to detect the month name in the date field.
+ */
+export const CombinedDateOptionPatterns: DateOptionPatterns = {
+  months: [
+    ...EnglishDateOptionPatterns.months,
+    ...DutchDateOptionPatterns.months
+  ],
 };

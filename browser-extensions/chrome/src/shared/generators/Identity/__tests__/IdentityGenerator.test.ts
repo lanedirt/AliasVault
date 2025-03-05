@@ -2,7 +2,7 @@ import { IdentityGeneratorEn } from '../implementations/IdentityGeneratorEn';
 import { IdentityGeneratorNl } from '../implementations/IdentityGeneratorNl';
 import { describe, it, expect } from 'vitest';
 import { IIdentityGenerator } from '../interfaces/IIdentityGenerator';
-
+import { Gender } from '../types/Gender';
 /**
  * Test the identity generator.
  */
@@ -18,7 +18,7 @@ const testIdentityGenerator = (
         expect(identity).toBeDefined();
         expect(identity.firstName).toBeTruthy();
         expect(identity.lastName).toBeTruthy();
-        expect(['Male', 'Female']).toContain(identity.gender);
+        expect([Gender.Male, Gender.Female]).toContain(identity.gender);
       });
 
       it('should generate unique identities on subsequent calls', async () => {
