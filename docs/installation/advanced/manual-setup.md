@@ -172,4 +172,4 @@ If you encounter any issues during the setup:
    docker compose logs postgres
    ```
 
-For further assistance, please refer to the project documentation or seek support through the appropriate channels.
+For more detailed troubleshooting information, please refer to the full [troubleshooting guide](../troubleshooting.md).

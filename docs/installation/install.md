@@ -158,21 +158,11 @@ If you want to entirely disable IP logging, you can do so by running the install
 
 ## 6. Troubleshooting
 
-### Resetting the admin password
-If you have lost your admin password, you can reset it by running the install script with the `reset-password` option. This will generate a new random password and update the .env file with it. After that it will restart the AliasVault containers to apply the changes.
-```bash
-./install.sh reset-password
-```
-
 ### Verbose output
 If you need more detailed output from the install script, you can run it with the `--verbose` option. This will print more information to the console.
 ```bash
 ./install.sh install --verbose
 ```
 
-### No emails being received
-If you are not receiving emails on your aliases, check the following:
-- Verify DNS records are correctly configured
-- Ensure ports 25 and 587 are accessible
-- Check your server's firewall settings
-- Verify that your ISP/hosting provider allows SMTP traffic
+### Troubleshooting guide
+For more detailed troubleshooting information, please refer to the [troubleshooting guide](./troubleshooting.md).
