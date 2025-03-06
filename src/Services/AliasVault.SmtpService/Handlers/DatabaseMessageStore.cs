@@ -317,6 +317,16 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             return false;
         }
 
+        if (userEmailClaim.UserId is null)
+        {
+            // This email claim has no user attached to it (anymore), which most likely means the user has deleted
+            // its account. We cannot process this email.
+            logger.LogWarning(
+                "Rejected email: email for {ToAddress} is claimed but has no user associated with it. User has most likely deleted their account.",
+                toAddress.User + "@" + toAddress.Host);
+            return false;
+        }
+
         // Retrieve user public encryption key from database
         var userPublicKey = await dbContext.UserEncryptionKeys.FirstOrDefaultAsync(
             x =>
