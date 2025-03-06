@@ -16,7 +16,7 @@ import { DefaultEmailDomainResponse as messageDefaultEmailDomainResponse } from 
  */
 export async function handleStoreVault(
   message: any,
-  ) : Promise<messageBoolResponse> {
+) : Promise<messageBoolResponse> {
   try {
     const vaultResponse = message.vaultResponse as VaultResponse;
     const encryptedVaultBlob = vaultResponse.vault.blob;
@@ -41,7 +41,7 @@ export async function handleStoreVault(
  * Sync the vault with the server to check if a newer vault is available. If so, the vault will be updated.
  */
 export async function handleSyncVault(
-  ) : Promise<messageBoolResponse> {
+) : Promise<messageBoolResponse> {
   const webApi = new WebApiService(() => {});
   const statusResponse = await webApi.getStatus();
   const statusError = webApi.validateStatusResponse(statusResponse);
@@ -70,7 +70,7 @@ export async function handleSyncVault(
  * Get the vault from browser storage.
  */
 export async function handleGetVault(
-  ) : Promise<messageVaultResponse> {
+) : Promise<messageVaultResponse> {
   try {
     const encryptedVault = await storage.getItem('session:encryptedVault') as string;
     const derivedKey = await storage.getItem('session:derivedKey') as string;
@@ -105,7 +105,7 @@ export async function handleGetVault(
  * Clear the vault from browser storage.
  */
 export function handleClearVault(
-  ) : messageBoolResponse {
+) : messageBoolResponse {
   storage.removeItems([
     'session:encryptedVault',
     'session:derivedKey',
@@ -121,7 +121,7 @@ export function handleClearVault(
  * Get all credentials.
  */
 export async function handleGetCredentials(
-  ) : Promise<messageCredentialsResponse> {
+) : Promise<messageCredentialsResponse> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
@@ -143,7 +143,7 @@ export async function handleGetCredentials(
  */
 export async function handleCreateIdentity(
   message: any,
-  ) : Promise<messageBoolResponse> {
+) : Promise<messageBoolResponse> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
@@ -193,7 +193,7 @@ export async function getEmailAddressesForVault(
  * Get default email domain for a vault.
  */
 export function handleGetDefaultEmailDomain(
-  ) : Promise<messageDefaultEmailDomainResponse> {
+) : Promise<messageDefaultEmailDomainResponse> {
   return (async () => {
     try {
       const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
@@ -245,7 +245,7 @@ export function handleGetDefaultEmailDomain(
  * Get the derived key for the encrypted vault.
  */
 export async function handleGetDerivedKey(
-  ) : Promise<string> {
+) : Promise<string> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   return derivedKey;
 }

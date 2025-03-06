@@ -20,6 +20,9 @@ const AuthSettings: React.FC = () => {
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
 
   useEffect(() => {
+    /**
+     *
+     */
     const loadStoredSettings = async () => {
       const apiUrl = await storage.getItem('local:apiUrl') as string;
       const clientUrl = await storage.getItem('local:clientUrl') as string;

@@ -5,6 +5,9 @@ import { onMessage } from "webext-bridge/content-script";
 
 export default defineContentScript({
   matches: ['<all_urls>'],
+  /**
+   *
+   */
   main(ctx) {
     if (ctx.isInvalid) {
       return;
@@ -24,7 +27,9 @@ export default defineContentScript({
           !target.dataset.aliasvaultIgnore) {
         const formDetector = new FormDetector(document, target);
 
-        if (!formDetector.containsLoginForm()) return;
+        if (!formDetector.containsLoginForm()) {
+          return;
+        }
 
         injectIcon(target);
 

@@ -5,6 +5,9 @@ import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGet
 import { handleOpenPopup, handlePopupWithCredential } from './background/PopupMessageHandler';
 
 export default defineBackground({
+  /**
+   *
+   */
   main() {
     // Set up context menus
     setupContextMenus();
