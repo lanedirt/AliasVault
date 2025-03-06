@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { onMessage } from "webext-bridge/background";
 import { setupContextMenus, handleContextMenuClick } from './background/ContextMenu';
 import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './background/PopupMessageHandler';
@@ -9,45 +10,16 @@ export default defineBackground({
     setupContextMenus();
     browser.contextMenus.onClicked.addListener(handleContextMenuClick as any);
 
-    // Listen for messages from popup
-    browser.runtime.onMessage.addListener((message: any, sender: any) => {
-      switch (message.type) {
-        // Vault-related messages
-        case 'STORE_VAULT':
-          return handleStoreVault(message, sender);
-
-        case 'SYNC_VAULT':
-          return handleSyncVault(sender);
-
-        case 'GET_VAULT':
-          return handleGetVault(sender);
-
-        case 'CLEAR_VAULT':
-          return handleClearVault(sender);
-
-        case 'GET_CREDENTIALS':
-          return handleGetCredentials(sender);
-
-        case 'CREATE_IDENTITY':
-          return handleCreateIdentity(message, sender);
-
-        case 'GET_DEFAULT_EMAIL_DOMAIN':
-          return handleGetDefaultEmailDomain(sender);
-
-        case 'GET_DERIVED_KEY':
-          return handleGetDerivedKey(sender);
-
-        // Popup-related messages
-        case 'OPEN_POPUP':
-          return handleOpenPopup(message, sender);
-
-        case 'OPEN_POPUP_WITH_CREDENTIAL':
-          return handlePopupWithCredential(message, sender);
-
-        default:
-          console.error(`Unknown message type: ${message.type}`);
-          return;
-      }
-    });
+    // Listen for messages using webext-bridge
+    onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
+    onMessage('SYNC_VAULT', () => handleSyncVault());
+    onMessage('GET_VAULT', () => handleGetVault());
+    onMessage('CLEAR_VAULT', () => handleClearVault());
+    onMessage('GET_CREDENTIALS', () => handleGetCredentials());
+    onMessage('CREATE_IDENTITY', ({ data }) => handleCreateIdentity(data));
+    onMessage('GET_DEFAULT_EMAIL_DOMAIN', () => handleGetDefaultEmailDomain());
+    onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
+    onMessage('OPEN_POPUP', () => handleOpenPopup());
+    onMessage('OPEN_POPUP_WITH_CREDENTIAL', ({ data }) => handlePopupWithCredential(data));
   }
 });

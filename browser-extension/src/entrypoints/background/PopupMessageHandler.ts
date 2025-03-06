@@ -1,29 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { browser } from "wxt/browser";
+import { BoolResponse } from '../../utils/types/messaging/BoolResponse';
 /**
  * Handle opening the popup.
  */
-export function handleOpenPopup(message: any, sendResponse: (response: any) => void) : void {
-  chrome.windows.create({
-    url: chrome.runtime.getURL('index.html?mode=inline_unlock'),
-    type: 'popup',
-    width: 400,
-    height: 600,
-    focused: true
-  });
-  sendResponse({ success: true });
+export function handleOpenPopup() : Promise<BoolResponse> {
+  return (async () => {
+    browser.windows.create({
+      url: browser.runtime.getURL('/popup.html?mode=inline_unlock'),
+      type: 'popup',
+      width: 400,
+      height: 600,
+      focused: true
+    });
+    return { success: true };
+  })();
 }
 
 /**
  * Handle opening the popup with a credential.
  */
-export function handlePopupWithCredential(message: any, sendResponse: (response: any) => void) : void {
-  chrome.windows.create({
-    url: chrome.runtime.getURL(`index.html?popup=true#/credentials/${message.credentialId}`),
-    type: 'popup',
-    width: 400,
-    height: 600,
-    focused: true
-  });
-  sendResponse({ success: true });
+export function handlePopupWithCredential(message: any) : Promise<BoolResponse> {
+  return (async () => {
+    browser.windows.create({
+      url: browser.runtime.getURL(`/popup.html#/credentials/${message.credentialId}`),
+      type: 'popup',
+      width: 400,
+      height: 600,
+      focused: true
+    });
+    return { success: true };
+  })();
 }

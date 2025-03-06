@@ -4,19 +4,15 @@ import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../../utils/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
+import { browser } from "wxt/browser";
+import { storage } from "wxt/storage";
+import { sendMessage, onMessage } from "webext-bridge/content-script";
+import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 
 /**
  * Placeholder base64 image for credentials without a logo.
  */
 const placeholderBase64 = 'UklGRjoEAABXRUJQVlA4IC4EAAAwFwCdASqAAIAAPpFCm0olo6Ihp5IraLASCWUA0eb/0s56RrLtCnYfLPiBshdXWMx8j1Ez65f169iA4xUDBTEV6ylMQeCIj2b7RngGi7gKZ9WjKdSoy9R8JcgOmjCMlDmLG20KhNo/i/Dc/Ah5GAvGfm8kfniV3AkR6fxN6eKwjDc6xrDgSfS48G5uGV6WzQt24YAVlLSK9BMwndzfHnePK1KFchFrL7O3ulB8cGNCeomu4o+l0SrS/JKblJ4WTzj0DAD++lCUEouSfgRKdiV2TiYCD+H+l3tANKSPQFPQuzi7rbvxqGeRmXB9kDwURaoSTTpYjA9REMUi9uA6aV7PWtBNXgUzMLowYMZeos6Xvyhb34GmufswMHA5ZyYpxzjTphOak4ZjNOiz8aScO5ygiTx99SqwX/uL+HSeVOSraHw8IymrMwm+jLxqN8BS8dGcItLlm/ioulqH2j4V8glDgSut+ExkxiD7m8TGPrrjCQNJbRDzpOFsyCyfBZupvp8QjGKW2KGziSZeIWes4aTB9tRmeEBhnUrmTDZQuXcc67Fg82KHrSfaeeOEq6jjuUjQ8wUnzM4Zz3dhrwSyslVz/WvnKqYkr4V/TTXPFF5EjF4rM1bHZ8bK63EfTnK41+n3n4gEFoYP4mXkNH0hntnYcdTqiE7Gn+q0BpRRxnkpBSZlA6Wa70jpW0FGqkw5e591A5/H+OV+60WAo+4Mi+NlsKrvLZ9EiVaPnoEFZlJQx1fA777AJ2MjXJ4KSsrWDWJi1lE8yPs8V6XvcC0chDTYt8456sKXAagCZyY+fzQriFMaddXyKQdG8qBqcdYjAsiIcjzaRFBBoOK9sU+sFY7N6B6+xtrlu3c37rQKkI3O2EoiJOris54EjJ5OFuumA0M6riNUuBf/MEPFBVx1JRcUEs+upEBsCnwYski7FT3TTqHrx7v5AjgFN97xhPTkmVpu6sxRnWBi1fxIRp8eWZeFM6mUcGgVk1WeVb1yhdV9hoMo2TsNEPE0tHo/wvuSJSzbZo7wibeXM9v/rRfKcx7X93rfiXVnyQ9f/5CaAQ4lxedPp/6uzLtOS4FyL0bCNeZ6L5w+AiuyWCTDFIYaUzhwfG+/YTQpWyeZCdQIKzhV+3GeXI2cxoP0ER/DlOKymf1gm+zRU3sqf1lBVQ0y+mK/Awl9bS3uaaQmI0FUyUwHUKP7PKuXnO+LcwDv4OfPT6hph8smc1EtMe5ib/apar/qZ9dyaEaElALJ1KKxnHziuvVl8atk1fINSQh7OtXDyqbPw9o/nGIpTnv5iFmwmWJLis2oyEgPkJqyx0vYI8rjkVEzKc8eQavAJBYSpjMwM193Swt+yJyjvaGYWPnqExxKiNarpB2WSO7soCAZXhS1uEYHryrK47BH6W1dRiruqT0xpLih3MXiwU3VDwAAAA==';
-
-/**
- * Response from the background script.
- */
-type CredentialResponse = {
-    status: 'OK' | 'LOCKED';
-    credentials?: Credential[];
-}
 
 /**
  * Create basic popup with default style.
@@ -266,13 +262,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
     try {
       // Sync with api to ensure we have the latest vault.
-      await chrome.runtime.sendMessage({ type: 'SYNC_VAULT' });
+      await browser.runtime.sendMessage({ type: 'SYNC_VAULT' });
 
       // Retrieve default email domain from background
-      const response = await new Promise<{ domain: string }>((resolve) => {
-        chrome.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }, resolve);
-      });
-
+      const response = await browser.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }) as { domain: string };
       const domain = response.domain;
 
       // Generate new identity locally
@@ -337,13 +330,14 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         }
       };
 
-      chrome.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential }, () => {
-        // Close popup.
-        removeExistingPopup();
+      // Create identity in background.
+      await browser.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential });
 
-        // Fill the form with the new identity immediately.
-        fillCredential(credential, input);
-      });
+      // Close popup.
+      removeExistingPopup();
+
+      // Fill the form with the new identity immediately.
+      fillCredential(credential, input);
     } catch (error) {
       console.error('Error creating identity:', error);
       loadingPopup.innerHTML = `
@@ -417,15 +411,15 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   // Handle search input.
   let searchTimeout: NodeJS.Timeout;
 
-  searchInput.addEventListener('input', () => {
+  searchInput.addEventListener('input', async () => {
     clearTimeout(searchTimeout);
     const searchTerm = searchInput.value.toLowerCase();
 
-    chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
-      if (response.status === 'OK' && response.credentials) {
-        // Ensure we have unique credentials
-        const uniqueCredentials = Array.from(new Map(response.credentials.map(cred => [cred.Id, cred])).values());
-        let filteredCredentials;
+    const response = await browser.runtime.sendMessage({ type: 'GET_CREDENTIALS' }) as CredentialsResponse;
+    if (response.success && response.credentials) {
+      // Ensure we have unique credentials
+      const uniqueCredentials = Array.from(new Map(response.credentials.map(cred => [cred.Id, cred])).values());
+      let filteredCredentials;
 
         if (searchTerm === '') {
           // If search is empty, use original URL-based filtering
@@ -463,9 +457,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         }
 
         // Update popup content with filtered results
-        updatePopupContent(filteredCredentials, credentialList, input);
-      }
-    });
+      updatePopupContent(filteredCredentials, credentialList, input);
+    }
   });
 
   // Close button
@@ -575,7 +568,7 @@ export function createVaultLockedPopup(input: HTMLInputElement): void {
 
   // Make the whole popup clickable to open the main extension login popup.
   popup.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
+    sendMessage('OPEN_POPUP', {}, 'background');
     removeExistingPopup();
   });
 
@@ -781,10 +774,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       // Handle popout click
       popoutIcon.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent credential fill
-        chrome.runtime.sendMessage({
-          type: 'OPEN_POPUP_WITH_CREDENTIAL',
-          credentialId: cred.Id
-        });
+        sendMessage('OPEN_POPUP_WITH_CREDENTIAL', { credentialId: cred.Id }, 'background');
         removeExistingPopup();
       });
 
@@ -829,30 +819,29 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
   return elements;
 }
 
-export const DISABLED_SITES_KEY = 'aliasvault_disabled_sites';
-export const GLOBAL_POPUP_ENABLED_KEY = 'aliasvault_global_popup_enabled';
+export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
+export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
 
 /**
  * Check if auto-popup is disabled for current site
  */
 export async function isAutoShowPopupDisabled(): Promise<boolean> {
-  const settings = await chrome.storage.local.get([DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY]);
-  const disabledUrls = settings[DISABLED_SITES_KEY] ?? [];
-  const isGloballyEnabled = settings[GLOBAL_POPUP_ENABLED_KEY] !== false;
+  const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
+  const globalPopupEnabled = await storage.getItem(GLOBAL_POPUP_ENABLED_KEY) ?? true;
+
   const currentHostname = window.location.hostname;
 
-  return !isGloballyEnabled || disabledUrls.includes(currentHostname);
+  return !globalPopupEnabled || disabledSites.includes(currentHostname);
 }
 
 /**
  * Disable auto-popup for current site
  */
 export async function disableAutoShowPopup(): Promise<void> {
-  const result = await chrome.storage.local.get(DISABLED_SITES_KEY);
-  const disabledSites = result[DISABLED_SITES_KEY] ?? [];
+  const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
   if (!disabledSites.includes(window.location.hostname)) {
     disabledSites.push(window.location.hostname);
-    await chrome.storage.local.set({ [DISABLED_SITES_KEY]: disabledSites });
+    await storage.setItem(DISABLED_SITES_KEY, disabledSites);
   }
 }
 
@@ -1066,17 +1055,20 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
   };
   document.addEventListener('keydown', handleEnterKey);
 
-  chrome.runtime.sendMessage({ type: 'GET_CREDENTIALS' }, (response: CredentialResponse) => {
-    switch (response.status) {
-      case 'OK':
-        createAutofillPopup(input, response.credentials);
-        break;
+  (async () => {
+    const response = await sendMessage(
+      "GET_CREDENTIALS",
+      { },
+      "background"
+    ) as CredentialsResponse;
 
-      case 'LOCKED':
-        createVaultLockedPopup(input);
-        break;
+    console.log('response', response);
+    if (response.success) {
+      createAutofillPopup(input, response.credentials);
+    } else {
+      createVaultLockedPopup(input);
     }
-  });
+  })();
 }
 
 /**

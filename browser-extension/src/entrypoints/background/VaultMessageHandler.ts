@@ -3,18 +3,20 @@ import EncryptionUtility from '../../utils/EncryptionUtility';
 import SqliteClient from '../../utils/SqliteClient';
 import { WebApiService } from '../../utils/WebApiService';
 import { Vault } from '../../utils/types/webapi/Vault';
-import { Credential } from '../../utils/types/Credential';
 import { VaultResponse } from '../../utils/types/webapi/VaultResponse';
 import { VaultPostResponse } from '../../utils/types/webapi/VaultPostResponse';
 import { storage } from 'wxt/storage';
+import { BoolResponse as messageBoolResponse } from '../../utils/types/messaging/BoolResponse';
+import { VaultResponse as messageVaultResponse } from '../../utils/types/messaging/VaultResponse';
+import { CredentialsResponse as messageCredentialsResponse } from '../../utils/types/messaging/CredentialsResponse';
+import { DefaultEmailDomainResponse as messageDefaultEmailDomainResponse } from '../../utils/types/messaging/DefaultEmailDomainResponse';
 
 /**
  * Store the vault in browser storage.
  */
 export async function handleStoreVault(
   message: any,
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  ) : Promise<messageBoolResponse> {
   try {
     const vaultResponse = message.vaultResponse as VaultResponse;
     const encryptedVaultBlob = vaultResponse.vault.blob;
@@ -28,10 +30,10 @@ export async function handleStoreVault(
       { key: 'session:vaultRevisionNumber', value: vaultResponse.vault.currentRevisionNumber }
     ]);
 
-    sendResponse({ success: true });
+    return { success: true };
   } catch (error) {
     console.error('Failed to store vault:', error);
-    sendResponse({ success: false, error: 'Failed to store vault' });
+    return { success: false, error: 'Failed to store vault' };
   }
 }
 
@@ -39,14 +41,12 @@ export async function handleStoreVault(
  * Sync the vault with the server to check if a newer vault is available. If so, the vault will be updated.
  */
 export async function handleSyncVault(
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  ) : Promise<messageBoolResponse> {
   const webApi = new WebApiService(() => {});
   const statusResponse = await webApi.getStatus();
   const statusError = webApi.validateStatusResponse(statusResponse);
   if (statusError !== null) {
-    sendResponse({ success: false, error: statusError });
-    return;
+    return { success: false, error: statusError };
   }
 
   const vaultRevisionNumber = await storage.getItem('session:vaultRevisionNumber') as number;
@@ -64,15 +64,14 @@ export async function handleSyncVault(
     ]);
   }
 
-  sendResponse({ success: true });
+  return { success: true };
 }
 
 /**
  * Get the vault from browser storage.
  */
 export async function handleGetVault(
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  ) : Promise<messageVaultResponse> {
   try {
     const encryptedVault = await storage.getItem('session:encryptedVault') as string;
     const derivedKey = await storage.getItem('session:derivedKey') as string;
@@ -82,8 +81,7 @@ export async function handleGetVault(
 
     if (!encryptedVault) {
       console.error('Vault not available');
-      sendResponse({ vault: null });
-      return;
+      return { success: false, error: 'Vault not available' };
     }
 
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
@@ -91,15 +89,16 @@ export async function handleGetVault(
       derivedKey
     );
 
-    sendResponse({
+    return {
+      success: true,
       vault: decryptedVault,
       publicEmailDomains: publicEmailDomains ?? [],
       privateEmailDomains: privateEmailDomains ?? [],
       vaultRevisionNumber: vaultRevisionNumber ?? 0
-    });
+    };
   } catch (error) {
     console.error('Failed to get vault:', error);
-    sendResponse({ vault: null, error: 'Failed to get vault' });
+    return { success: false, error: 'Failed to get vault' };
   }
 }
 
@@ -107,8 +106,7 @@ export async function handleGetVault(
  * Clear the vault from browser storage.
  */
 export function handleClearVault(
-  sendResponse: (response: any) => void
-) : void {
+  ) : messageBoolResponse {
   storage.removeItems([
     'session:encryptedVault',
     'session:derivedKey',
@@ -116,30 +114,29 @@ export function handleClearVault(
     'session:privateEmailDomains',
     'session:vaultRevisionNumber'
   ]);
-  sendResponse({ success: true });
+
+  return { success: true };
 }
 
 /**
  * Get all credentials.
  */
 export async function handleGetCredentials(
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  ) : Promise<messageCredentialsResponse> {
   // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
-    sendResponse({ credentials: [], status: 'LOCKED' });
-    return;
+    return { success: false, error: 'Vault is locked' };
   }
 
   try {
     const sqliteClient = await createVaultSqliteClient();
     const credentials = sqliteClient.getAllCredentials();
-    sendResponse({ credentials: credentials, status: 'OK' });
+    return { success: true, credentials: credentials };
   } catch (error) {
     console.error('Error getting credentials:', error);
-    sendResponse({ credentials: [], status: 'LOCKED', error: 'Failed to get credentials' });
+    return { success: false, error: 'Failed to get credentials' };
   }
 }
 
@@ -147,15 +144,13 @@ export async function handleGetCredentials(
  * Create an identity.
  */
 export async function handleCreateIdentity(
-  message: { credential: Credential },
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  message: any,
+  ) : Promise<messageBoolResponse> {
   // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
-    sendResponse({ success: false, error: 'Vault is locked' });
-    return;
+    return { success: false, error: 'Vault is locked' };
   }
 
   try {
@@ -167,10 +162,10 @@ export async function handleCreateIdentity(
     // Upload the new vault to the server.
     await uploadNewVaultToServer(sqliteClient);
 
-    sendResponse({ success: true });
+    return { success: true };
   } catch (error) {
     console.error('Failed to create identity:', error);
-    sendResponse({ success: false, error: 'Failed to create identity' });
+    return { success: false, error: 'Failed to create identity' };
   }
 }
 
@@ -201,10 +196,8 @@ export async function getEmailAddressesForVault(
  * Get default email domain for a vault.
  */
 export function handleGetDefaultEmailDomain(
-  sendResponse: (response: any) => void
-) : void {
-  // Wrap async operations in an IIFE
-  (async () => {
+  ) : Promise<messageDefaultEmailDomainResponse> {
+  return (async () => {
     try {
       const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
       const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];
@@ -225,31 +218,28 @@ export function handleGetDefaultEmailDomain(
 
       // First check if the default domain that is configured in the vault is still valid.
       if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
-        sendResponse({ domain: defaultEmailDomain });
-        return;
+        return { success: true, domain: defaultEmailDomain };
       }
 
       // If default domain is not valid, fall back to first available private domain.
       const firstPrivate = privateEmailDomains.find(isValidDomain);
 
       if (firstPrivate) {
-        sendResponse({ domain: firstPrivate });
-        return;
+        return { success: true, domain: firstPrivate };
       }
 
       // Return first valid public domain if no private domains are available.
       const firstPublic = publicEmailDomains.find(isValidDomain);
 
       if (firstPublic) {
-        sendResponse({ domain: firstPublic });
-        return;
+        return { success: true, domain: firstPublic };
       }
 
       // Return null if no valid domains are found
-      sendResponse({ domain: null });
+      return { success: true };
     } catch (error) {
       console.error('Error getting default email domain:', error);
-      sendResponse({ domain: null, error: 'Failed to get default email domain' });
+      return { success: false, error: 'Failed to get default email domain' };
     }
   })();
 }
@@ -258,11 +248,10 @@ export function handleGetDefaultEmailDomain(
  * Get the derived key for the encrypted vault.
  */
 export async function handleGetDerivedKey(
-  sendResponse: (response: any) => void
-) : Promise<void> {
+  ) : Promise<messageDefaultEmailDomainResponse> {
   // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
-  sendResponse(derivedKey ?? null);
+  return { success: true, domain: derivedKey ?? null };
 }
 
 /**
