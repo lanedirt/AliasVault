@@ -9,6 +9,7 @@ import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
 import ReloadButton from '../components/ReloadButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../../../hooks/useMinDurationLoading';
+import { sendMessage } from 'webext-bridge/popup';
 
 /**
  * Credentials list page.
@@ -64,7 +65,7 @@ const CredentialsList: React.FC = () => {
       }
 
       // Get derived key from background worker
-      const passwordHashBase64 = await chrome.runtime.sendMessage({ type: 'GET_DERIVED_KEY' });
+      const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
 
       // Initialize the SQLite context again with the newly retrieved decrypted blob
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);

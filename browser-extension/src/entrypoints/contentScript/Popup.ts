@@ -4,7 +4,6 @@ import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../../utils/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
-import { browser } from "wxt/browser";
 import { storage } from "wxt/storage";
 import { sendMessage, onMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
@@ -262,10 +261,10 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
     try {
       // Sync with api to ensure we have the latest vault.
-      await browser.runtime.sendMessage({ type: 'SYNC_VAULT' });
+      await sendMessage('SYNC_VAULT', {}, 'background');
 
       // Retrieve default email domain from background
-      const response = await browser.runtime.sendMessage({ type: 'GET_DEFAULT_EMAIL_DOMAIN' }) as { domain: string };
+      const response = await sendMessage('GET_DEFAULT_EMAIL_DOMAIN', {}, 'background') as { domain: string };
       const domain = response.domain;
 
       // Generate new identity locally
@@ -331,7 +330,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       };
 
       // Create identity in background.
-      await browser.runtime.sendMessage({ type: 'CREATE_IDENTITY', credential });
+      await sendMessage('CREATE_IDENTITY', { credential: credential }, 'background');
 
       // Close popup.
       removeExistingPopup();
@@ -415,7 +414,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     clearTimeout(searchTimeout);
     const searchTerm = searchInput.value.toLowerCase();
 
-    const response = await browser.runtime.sendMessage({ type: 'GET_CREDENTIALS' }) as CredentialsResponse;
+    const response = await sendMessage('GET_CREDENTIALS', {}, 'background') as CredentialsResponse;
     if (response.success && response.credentials) {
       // Ensure we have unique credentials
       const uniqueCredentials = Array.from(new Map(response.credentials.map(cred => [cred.Id, cred])).values());
@@ -1053,14 +1052,11 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
       document.removeEventListener('keydown', handleEnterKey);
     }
   };
+
   document.addEventListener('keydown', handleEnterKey);
 
   (async () => {
-    const response = await sendMessage(
-      "GET_CREDENTIALS",
-      { },
-      "background"
-    ) as CredentialsResponse;
+    const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
 
     console.log('response', response);
     if (response.success) {

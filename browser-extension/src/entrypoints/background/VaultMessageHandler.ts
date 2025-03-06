@@ -55,7 +55,6 @@ export async function handleSyncVault(
     // Retrieve the latest vault from the server.
     const vaultResponse = await webApi.get<VaultResponse>('Vault');
 
-    // Store encrypted vault in chrome.storage.session
     await storage.setItems([
       { key: 'session:encryptedVault', value: vaultResponse.vault.blob },
       { key: 'session:publicEmailDomains', value: vaultResponse.vault.publicEmailDomainList },
@@ -123,7 +122,6 @@ export function handleClearVault(
  */
 export async function handleGetCredentials(
   ) : Promise<messageCredentialsResponse> {
-  // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
@@ -146,7 +144,6 @@ export async function handleGetCredentials(
 export async function handleCreateIdentity(
   message: any,
   ) : Promise<messageBoolResponse> {
-  // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
@@ -248,10 +245,9 @@ export function handleGetDefaultEmailDomain(
  * Get the derived key for the encrypted vault.
  */
 export async function handleGetDerivedKey(
-  ) : Promise<messageDefaultEmailDomainResponse> {
-  // Get derived key from chrome.storage.session.
+  ) : Promise<string> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
-  return { success: true, domain: derivedKey ?? null };
+  return derivedKey;
 }
 
 /**
@@ -259,8 +255,6 @@ export async function handleGetDerivedKey(
  */
 async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void> {
   const updatedVaultData = sqliteClient.exportToBase64();
-
-  // Get derived key from chrome.storage.session.
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   const encryptedVault = await EncryptionUtility.symmetricEncrypt(
@@ -268,7 +262,6 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
     derivedKey
   );
 
-  // Store updated encrypted vault in chrome.storage.session.
   await storage.setItems([
     { key: 'session:encryptedVault', value: encryptedVault }
   ]);
@@ -300,7 +293,6 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
 
   // Check if response is successful (.status === 0)
   if (response.status === 0) {
-    // Update the vault revision number in chrome.storage.session.
     await storage.setItem('session:vaultRevisionNumber', response.newRevisionNumber);
   } else {
     throw new Error('Failed to upload new vault to server');
@@ -311,7 +303,6 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
  * Create a new sqlite client for the stored vault.
  */
 async function createVaultSqliteClient() : Promise<SqliteClient> {
-  // Get the encrypted vault from chrome.storage.session.
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 

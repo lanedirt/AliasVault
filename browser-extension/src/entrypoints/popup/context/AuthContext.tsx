@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useDb } from './DbContext';
 import { storage } from 'wxt/storage';
-import { browser } from 'wxt/browser';
+import { sendMessage } from 'webext-bridge/popup';
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Logout the user and clear the auth tokens from chrome storage.
    */
   const logout = useCallback(async (errorMessage?: string) : Promise<void> => {
-    await browser.runtime.sendMessage({ type: 'CLEAR_VAULT' });
+    await sendMessage('CLEAR_VAULT', {}, 'background');
     await storage.removeItems(['local:username', 'local:accessToken', 'local:refreshToken']);
     dbContext?.clearDatabase();
 

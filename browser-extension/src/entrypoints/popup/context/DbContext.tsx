@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import SqliteClient from '../../../utils/SqliteClient';
 import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
 import EncryptionUtility from '../../../utils/EncryptionUtility';
+import { VaultResponse as messageVaultResponse } from '../../../utils/types/messaging/VaultResponse';
+import { sendMessage } from 'webext-bridge/popup';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -71,16 +73,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     /*
      * Store encrypted vault in background worker.
      */
-    chrome.runtime.sendMessage({
-      type: 'STORE_VAULT',
+    sendMessage('STORE_VAULT', {
       derivedKey: derivedKey,
       vaultResponse: vaultResponse,
-    });
+    }, 'background');
   }, []);
 
   const checkStoredVault = useCallback(async () => {
     try {
-      const response = await chrome.runtime.sendMessage({ type: 'GET_VAULT' });
+      const response = await sendMessage('GET_VAULT', {}, 'background') as messageVaultResponse;
       if (response?.vault) {
         const client = new SqliteClient();
         await client.initializeFromBase64(response.vault);
@@ -88,9 +89,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSqliteClient(client);
         setDbInitialized(true);
         setDbAvailable(true);
-        setPublicEmailDomains(response.publicEmailDomains);
-        setPrivateEmailDomains(response.privateEmailDomains);
-        setVaultRevision(response.vaultRevisionNumber);
+        setPublicEmailDomains(response.publicEmailDomains ?? []);
+        setPrivateEmailDomains(response.privateEmailDomains ?? []);
+        setVaultRevision(response.vaultRevisionNumber ?? 0);
       } else {
         setDbInitialized(true);
         setDbAvailable(false);
@@ -117,7 +118,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const clearDatabase = useCallback(() : void => {
     setSqliteClient(null);
     setDbInitialized(false);
-    chrome.runtime.sendMessage({ type: 'CLEAR_VAULT' });
+    sendMessage('CLEAR_VAULT', {}, 'background');
   }, []);
 
   const contextValue = useMemo(() => ({
