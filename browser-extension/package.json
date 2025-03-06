@@ -9,6 +9,8 @@
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
@@ -22,12 +24,14 @@
     "react-router-dom": "^7.1.4",
     "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
     "sql.js": "^1.12.0",
+    "vitest": "^3.0.8",
     "webext-bridge": "^6.0.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "@vitest/coverage-v8": "^3.0.8",
     "@wxt-dev/module-react": "^1.1.2",
     "autoprefixer": "^10.4.20",
     "jsdom": "^26.0.0",

@@ -3,6 +3,7 @@ import { IdentityGeneratorNl } from '../implementations/IdentityGeneratorNl';
 import { describe, it, expect } from 'vitest';
 import { IIdentityGenerator } from '../interfaces/IIdentityGenerator';
 import { Gender } from '../types/Gender';
+
 /**
  * Test the identity generator.
  */
@@ -38,7 +39,7 @@ const testIdentityGenerator = (
           expect(value).not.toBeUndefined();
         });
 
-        // Add length checks for first and last names
+        // Check if the first and last names are longer than 1 character.
         expect(identity.firstName.length).toBeGreaterThan(1);
         expect(identity.lastName.length).toBeGreaterThan(1);
       });
