@@ -1,19 +1,20 @@
 import { sendMessage } from 'webext-bridge/background';
 import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
+import { browser } from 'wxt/browser';
 
 /**
  * Setup the context menus.
  */
 export function setupContextMenus() : void {
   // Create root menu
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "aliasvault-root",
     title: "AliasVault",
     contexts: ["all"]
   });
 
   // Add fill option first (only for editable fields)
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "aliasvault-activate-form",
     parentId: "aliasvault-root",
     title: "Autofill with AliasVault",
@@ -21,7 +22,7 @@ export function setupContextMenus() : void {
   });
 
   // Add separator (only for editable fields)
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "aliasvault-separator",
     parentId: "aliasvault-root",
     type: "separator",
@@ -29,7 +30,7 @@ export function setupContextMenus() : void {
   });
 
   // Add password generator option
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "aliasvault-generate-password",
     parentId: "aliasvault-root",
     title: "Generate random password (copy to clipboard)",
@@ -40,15 +41,15 @@ export function setupContextMenus() : void {
 /**
  * Handle context menu clicks.
  */
-export function handleContextMenuClick(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) : void {
+export function handleContextMenuClick(info: browser.contextMenus.OnClickData, tab?: browser.tabs.Tab) : void {
   if (info.menuItemId === "aliasvault-generate-password") {
     // Initialize password generator
     const passwordGenerator = new PasswordGenerator();
     const password = passwordGenerator.generateRandomPassword();
 
-    // Use chrome.scripting to write password to clipboard from active tab
+    // Use browser.scripting to write password to clipboard from active tab
     if (tab?.id) {
-      chrome.scripting.executeScript({
+      browser.scripting.executeScript({
         target: { tabId: tab.id },
         func: copyPasswordToClipboard,
         args: [password]
@@ -58,14 +59,14 @@ export function handleContextMenuClick(info: chrome.contextMenus.OnClickData, ta
 
   if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
     // First get the active element's identifier
-    chrome.scripting.executeScript({
+    browser.scripting.executeScript({
       target: { tabId: tab.id },
       func: getActiveElementIdentifier,
     }, (results) => {
       const elementIdentifier = results[0]?.result;
       if (elementIdentifier) {
-        // Then send message to content script.
-        sendMessage('OPEN_AUTOFILL_POPUP', { elementIdentifier }, 'content-script');
+        // Send message to content script with proper tab targeting
+        sendMessage('OPEN_AUTOFILL_POPUP', { elementIdentifier }, `content-script@${tab.id}`);
       }
     });
   }
