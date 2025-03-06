@@ -150,6 +150,7 @@ export function injectIcon(input: HTMLInputElement): void {
     setTimeout(() => {
       icon.remove();
       input.removeEventListener('blur', handleBlur);
+      input.removeEventListener('keydown', handleKeyPress);
       window.removeEventListener('scroll', updateIconPosition, true);
       window.removeEventListener('resize', updateIconPosition);
 
@@ -160,7 +161,18 @@ export function injectIcon(input: HTMLInputElement): void {
     }, 200);
   };
 
+  /**
+   * Handle key press to dismiss icon.
+   */
+  const handleKeyPress = (e: KeyboardEvent): void => {
+    // Dismiss on Enter, Escape, or Tab.
+    if (e.key === 'Enter' || e.key === 'Escape' || e.key === 'Tab') {
+      handleBlur();
+    }
+  };
+
   input.addEventListener('blur', handleBlur);
+  input.addEventListener('keydown', handleKeyPress);
 }
 
 /**
