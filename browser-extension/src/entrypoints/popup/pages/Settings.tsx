@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '../../contentScript/Popup';
 import { AppInfo } from '../../../utils/AppInfo';
+import { storage } from "wxt/storage";
+import { browser } from 'wxt/browser';
 
 /**
  * Popup settings type.
@@ -26,9 +28,9 @@ const Settings: React.FC = () => {
   /**
    * Get current tab in browser.
    */
-  const getCurrentTab = async () : Promise<chrome.tabs.Tab> => {
+  const getCurrentTab = async (): Promise<browser.tabs.Tab> => {
     const queryOptions = { active: true, currentWindow: true };
-    const [tab] = await chrome.tabs.query(queryOptions);
+    const [tab] = await browser.tabs.query(queryOptions);
     return tab;
   };
 
@@ -39,17 +41,15 @@ const Settings: React.FC = () => {
     const tab = await getCurrentTab();
     const currentUrl = new URL(tab.url ?? '').hostname;
 
-    // Load settings from chrome.storage.local
-    chrome.storage.local.get([DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY], (result) => {
-      const disabledUrls = result[DISABLED_SITES_KEY] ?? [];
-      const isGloballyEnabled = result[GLOBAL_POPUP_ENABLED_KEY] !== false; // Default to true if not set
+    // Load settings local storage.
+    const disabledUrls = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
+    const isGloballyEnabled = await storage.getItem(GLOBAL_POPUP_ENABLED_KEY) !== false; // Default to true if not set
 
-      setSettings({
-        disabledUrls,
-        currentUrl,
-        isEnabled: !disabledUrls.includes(currentUrl),
-        isGloballyEnabled
-      });
+    setSettings({
+      disabledUrls,
+      currentUrl,
+      isEnabled: !disabledUrls.includes(currentUrl),
+      isGloballyEnabled
     });
   }, []);
 
@@ -70,8 +70,7 @@ const Settings: React.FC = () => {
       newDisabledUrls = newDisabledUrls.filter(url => url !== currentUrl);
     }
 
-    const storageData = { [DISABLED_SITES_KEY]: newDisabledUrls };
-    await chrome.storage.local.set(storageData);
+    await storage.setItem(DISABLED_SITES_KEY, newDisabledUrls);
 
     setSettings(prev => ({
       ...prev,
@@ -84,8 +83,7 @@ const Settings: React.FC = () => {
    * Reset settings.
    */
   const resetSettings = async () : Promise<void> => {
-    const storageData = { [DISABLED_SITES_KEY]: [] };
-    await chrome.storage.local.set(storageData);
+    await storage.setItem(DISABLED_SITES_KEY, []);
 
     setSettings(prev => ({
       ...prev,
@@ -100,9 +98,7 @@ const Settings: React.FC = () => {
   const toggleGlobalPopup = async () : Promise<void> => {
     const newGloballyEnabled = !settings.isGloballyEnabled;
 
-    await chrome.storage.local.set({
-      [GLOBAL_POPUP_ENABLED_KEY]: newGloballyEnabled
-    });
+    await storage.setItem(GLOBAL_POPUP_ENABLED_KEY, newGloballyEnabled);
 
     setSettings(prev => ({
       ...prev,

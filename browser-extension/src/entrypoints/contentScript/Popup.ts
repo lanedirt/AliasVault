@@ -5,7 +5,7 @@ import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../../utils/generators/Identity/implementations/IdentityGeneratorEn';
 import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
 import { storage } from "wxt/storage";
-import { sendMessage, onMessage } from "webext-bridge/content-script";
+import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 
 /**
