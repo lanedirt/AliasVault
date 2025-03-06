@@ -9,7 +9,8 @@ permalink: /
 # AliasVault Documentation
 {: .fs-9 }
 
-Open-source password and identity manager with email alias generation and zero-knowledge architecture.
+Open-source E2EE password and alias manager with built-in email server and zero-knowledge architecture.
+
 {: .fs-6 .fw-300 }
 
 [Installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
@@ -19,7 +20,7 @@ Open-source password and identity manager with email alias generation and zero-k
 
 ## What is AliasVault?
 
-AliasVault is a self-hosted password and identity manager that helps you:
+AliasVault is a self-hosted password and (email) alias manager that helps you:
 
 - 🔐 **Secure Passwords** - Store and manage passwords with zero-knowledge encryption
 - 📧 **Email Aliases** - Generate unique email addresses for each service
