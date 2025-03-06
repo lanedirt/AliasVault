@@ -1,11 +1,15 @@
 import { FormDetector } from '../utils/formDetector/FormDetector';
 import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
 import { canShowPopup, injectIcon } from './contentScript/Form';
-import { sendMessage, onMessage } from "webext-bridge/content-script";
+import { onMessage } from "webext-bridge/content-script";
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   main(ctx) {
+    if (ctx.isInvalid) {
+      return;
+    }
+
     // Listen for input field focus
     document.addEventListener('focusin', async (e) => {
       if (ctx.isInvalid) {

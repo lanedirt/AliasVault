@@ -35,7 +35,7 @@ const CredentialDetails: React.FC = () => {
     const top = window.screen.height / 2 - height / 2;
 
     window.open(
-      `index.html?popup=true#/credentials/${id}`,
+      `popup.html?popup=true#/credentials/${id}`,
       'CredentialDetails',
       `width=${width},height=${height},left=${left},top=${top},popup=true`
     );
@@ -72,8 +72,8 @@ const CredentialDetails: React.FC = () => {
     // For popup windows, ensure we have proper history state for navigation
     if (isPopup()) {
       // Clear existing history and create fresh entries
-      window.history.replaceState({}, '', `index.html#/credentials`);
-      window.history.pushState({}, '', `index.html#/credentials/${id}`);
+      window.history.replaceState({}, '', `popup.html#/credentials`);
+      window.history.pushState({}, '', `popup.html#/credentials/${id}`);
     }
 
     if (!dbContext?.sqliteClient || !id) {
