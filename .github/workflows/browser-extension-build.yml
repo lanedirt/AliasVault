@@ -154,9 +154,7 @@ jobs:
       - name: Upload Firefox Extension ZIP to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            browser-extension/dist/aliasvault-browser-extension-*-firefox
-            browser-extension/dist/aliasvault-browser-extension-*-sources
+          files: browser-extension/dist/aliasvault-browser-extension-*{-firefox,-sources}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-edge-release-assets:
