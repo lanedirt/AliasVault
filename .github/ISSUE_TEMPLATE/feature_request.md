@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for AliasVault
 title: '[Feature Request] '
-labels: enhancement
+labels: '⚡️ enhancement'
 assignees: ''
 
 ---
