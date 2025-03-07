@@ -82,13 +82,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-firefox
-          path: browser-extension/dist/aliasvault-browser-extension-*-firefox
+          path: browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
 
       - name: Upload dist artifact Firefox sources
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-sources
-          path: browser-extension/dist/aliasvault-browser-extension-*-sources
+          path: browser-extension/dist/aliasvault-browser-extension-*-sources.zip
 
   build-edge-extension:
     runs-on: ubuntu-latest
@@ -164,7 +164,7 @@ jobs:
       - name: Upload Firefox Extension ZIP to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: browser-extension/dist/aliasvault-browser-extension-*{-firefox,-sources}
+          files: browser-extension/dist/aliasvault-browser-extension-*{-firefox,-sources}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-edge-release-assets:
