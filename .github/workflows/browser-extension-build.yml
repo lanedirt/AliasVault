@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-chrome-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}
-          path: browser-extension/.output/chrome-mv3/
+          path: browser-extension/dist/chrome-mv3/
 
   upload-release-assets:
     runs-on: ubuntu-latest
@@ -56,11 +56,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: aliasvault-chrome-extension-${{ github.ref_name }}
-          path: browser-extension/.output/chrome-mv3/
+          path: browser-extension/dist/chrome-mv3/
 
       - name: Zip Chrome Extension
         run: |
-          cd browser-extension/.output/chrome-mv3
+          cd browser-extension/dist/chrome-mv3
           zip -r ../../../aliasvault-chrome-extension-${{ github.ref_name }}.zip .
 
       - name: Upload Chrome Extension ZIP to Release
