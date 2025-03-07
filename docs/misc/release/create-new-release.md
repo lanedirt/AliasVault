@@ -54,3 +54,5 @@ The GitHub Actions workflow `Publish Browser Extension` will build the browser e
 
 1. Download the browser extension archive from the GitHub Actions Artifacts page.
 2. Upload the archive to the Chrome Web Store.
+3. Upload the archive (normal + sources) to the Firefox Add-ons page.
+4. Upload the archive to the Microsoft Edge Add-ons page.

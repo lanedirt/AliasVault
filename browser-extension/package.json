@@ -7,8 +7,10 @@
   "scripts": {
     "dev:chrome": "wxt -b chrome",
     "dev:firefox": "wxt -b firefox",
+    "dev:edge": "wxt -b edge",
     "build:chrome": "wxt build -b chrome",
     "build:firefox": "wxt build -b firefox",
+    "build:edge": "wxt build -b edge",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
@@ -17,6 +19,7 @@
     "zip": "wxt zip",
     "zip:chrome": "wxt zip -b chrome",
     "zip:firefox": "wxt zip -b firefox",
+    "zip:edge": "wxt zip -b edge",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare"
   },

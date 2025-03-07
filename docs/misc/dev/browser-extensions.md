@@ -27,16 +27,19 @@ npm install
 WXT provides a development mode that automatically reloads changes and opens a new browser window with the extension loaded:
 
 ```bash
-# For Chrome development
+# For Google Chrome development
 npm run dev:chrome
 
 # For Firefox development
 npm run dev:firefox
+
+# For Microsoft Edge development
+npm run dev:edge
 ```
 
 ## Building and Loading the Extensions Manually
 
-### Chrome
+### Google Chrome
 
 1. Build the extension:
 ```bash
@@ -60,6 +63,18 @@ npm run build:firefox
    - Click "This Firefox" in the left sidebar
    - Click "Load Temporary Add-on"
    - Navigate to the `./browser-extension/dist/firefox-mv2` folder and select the `manifest.json` file
+
+### Microsoft Edge
+
+1. Build the extension:
+```bash
+npm run build:edge
+```
+
+2. Load in Edge:
+   - Open Edge and navigate to `edge://extensions/`
+   - Enable "Developer mode" in the top right corner
+   - Click "Load unpacked" and the folder `./browser-extension/dist/edge-mv3`
 
 ## Automatic tests
 The extension has a suite of automatic tests that are run on every pull request. These tests are located in the `__tests__` directories scattered throughout the browser extension codebase.

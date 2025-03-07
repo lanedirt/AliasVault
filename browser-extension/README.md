@@ -13,6 +13,9 @@ npm install
 # Build the Chrome extension (saves in dist/chrome-mv3)
 npm run zip:chrome
 
-# Build the Firefox extension (saves in dist/firefox-mv2)
+# Build the Firefox extension (creates two zip files in dist)
 npm run zip:firefox
+
+# Build the Edge extension (saves in dist/edge-mv3)
+npm run zip:edge
 ```
