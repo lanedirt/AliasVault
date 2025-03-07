@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,8 +48,11 @@ jobs:
       - name: Upload dist artifact Chrome
         uses: actions/upload-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-chrome
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-chrome
           path: browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
+
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
 
   build-firefox-extension:
     runs-on: ubuntu-latest
@@ -55,6 +62,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -81,14 +92,17 @@ jobs:
       - name: Upload dist artifact Firefox
         uses: actions/upload-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-firefox
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-firefox
           path: browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
 
       - name: Upload dist artifact Firefox sources
         uses: actions/upload-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-sources
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-sources
           path: browser-extension/dist/aliasvault-browser-extension-*-sources.zip
+
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
 
   build-edge-extension:
     runs-on: ubuntu-latest
@@ -98,6 +112,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -124,8 +142,11 @@ jobs:
       - name: Upload dist artifact Edge
         uses: actions/upload-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-edge
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-edge
           path: browser-extension/dist/aliasvault-browser-extension-*-edge.zip
+
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
 
   upload-chrome-release-assets:
     runs-on: ubuntu-latest
@@ -135,7 +156,7 @@ jobs:
       - name: Download built artifact
         uses: actions/download-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-chrome
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', needs.build-chrome-extension.outputs.sha_short) || needs.build-chrome-extension.outputs.sha_short) }}-chrome
           path: browser-extension/dist
 
       - name: Upload Chrome Extension ZIP to Release
@@ -152,14 +173,14 @@ jobs:
       - name: Download built artifact Firefox
         uses: actions/download-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-firefox
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', needs.build-firefox-extension.outputs.sha_short) || needs.build-firefox-extension.outputs.sha_short) }}-firefox
           path: browser-extension/dist
 
       - name: Download built artifact Firefox sources
         uses: actions/download-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-sources
-          path: browser-extension/dist
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', needs.build-firefox-extension.outputs.sha_short) || needs.build-firefox-extension.outputs.sha_short) }}-sources
+          path: browser-extension/dist/aliasvault-browser-extension-*-sources.zip
 
       - name: Upload Firefox Extension ZIP to Release
         uses: softprops/action-gh-release@v2
@@ -175,7 +196,7 @@ jobs:
       - name: Download built artifact
         uses: actions/download-artifact@v4
         with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}-edge
+          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', needs.build-edge-extension.outputs.sha_short) || needs.build-edge-extension.outputs.sha_short) }}-edge
           path: browser-extension/dist
 
       - name: Upload Edge Extension ZIP to Release
