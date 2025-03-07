@@ -33,14 +33,35 @@ public static class AppInfo
     public const int VersionPatch = 3;
 
     /// <summary>
+    /// Gets the minimum supported AliasVault client version. Normally the minimum client version is the same
+    /// for all clients as we are using a monorepo to build all clients from the same source code. But it's
+    /// possible to override the minimum client version for a specific client if needed.
+    /// </summary>
+    public const string MinimumClientVersion = "0.12.0";
+
+    /// <summary>
     /// Gets a dictionary of minimum supported client versions that the WebApi supports.
     /// If client version is lower than the minimum supported version, the client will show a message
     /// to the user to update itself to the minimum supported version.
     /// </summary>
     public static IReadOnlyDictionary<string, string> MinimumClientVersions { get; } = new Dictionary<string, string>
     {
-        { "chrome", "0.12.0" },
-        { "web", "0.12.0" },
+        // Main WASM client.
+        { "web", MinimumClientVersion },
+
+        // Browser extensions.
+        { "chrome", MinimumClientVersion },
+        { "firefox", MinimumClientVersion },
+        { "edge", MinimumClientVersion },
+        { "safari", MinimumClientVersion },
+        { "brave", MinimumClientVersion },
+
+        // Fallback for unknown browsers.
+        { "browser", MinimumClientVersion },
+
+        // Mobile apps.
+        { "ios", MinimumClientVersion },
+        { "android", MinimumClientVersion },
     }.AsReadOnly();
 
     /// <summary>
