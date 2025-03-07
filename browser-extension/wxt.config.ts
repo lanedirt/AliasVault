@@ -45,4 +45,7 @@ export default defineConfig({
       })
     ],
   }),
+  zip: {
+    includeSources: ['dictionaries', 'README.md'],
+  },
 });

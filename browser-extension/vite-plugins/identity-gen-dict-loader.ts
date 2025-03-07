@@ -20,9 +20,38 @@ export default function identityGenDictLoader() {
       const match = id.match(/IdentityGenerator([A-Za-z]{2})\.ts$/);
       if (match) {
         const lang = match[1].toLowerCase();
-        const dictionaryPath = path.resolve(__dirname, '..', '..', 'dictionaries', lang);
+
+        // Define paths
+        const parentDictPath = path.resolve(__dirname, '..', '..', 'dictionaries');
+        const localDictPath = path.resolve(__dirname, '..', 'dictionaries');
+
+        // Ensure local dictionary directory exists
+        if (!fs.existsSync(localDictPath)) {
+          fs.mkdirSync(localDictPath, { recursive: true });
+        }
+
+        // Firefox requires the complete source code when submitting extensions.
+        // In our monorepo setup, dictionary files are stored at the root level
+        // to be shared across different packages. However, for Firefox submission,
+        // we need these dictionaries to be present within the browser-extension
+        // directory itself.
+
+        // Therefore, we first check if dictionaries exist in the parent (root) directory
+        // and copy them to the local browser-extension directory if found.
+        if (fs.existsSync(parentDictPath)) {
+          // Recursively copy the entire dictionaries folder
+          fs.cpSync(parentDictPath, localDictPath, {
+            recursive: true,
+            force: true
+          });
+        } else {
+          console.log('No parent dictionaries folder found, using local version instead. This is expected when running the firefox build separately.');
+        }
 
         try {
+          // Use local dictionary path for reading files
+          const dictionaryPath = path.join(localDictPath, lang);
+
           // Read dictionary files and clean up entries
           const firstNamesMale = fs.readFileSync(path.join(dictionaryPath, 'firstnames_male'), 'utf-8')
             .split('\n')
