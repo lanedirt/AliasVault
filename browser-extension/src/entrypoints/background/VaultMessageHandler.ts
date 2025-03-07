@@ -194,7 +194,7 @@ export async function getEmailAddressesForVault(
  */
 export function handleGetDefaultEmailDomain(
 ) : Promise<messageDefaultEmailDomainResponse> {
-  return (async () => {
+  return (async () : Promise<messageDefaultEmailDomainResponse> => {
     try {
       const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
       const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];

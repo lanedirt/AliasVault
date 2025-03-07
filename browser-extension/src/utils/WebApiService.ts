@@ -1,6 +1,7 @@
 import { AppInfo } from "./AppInfo";
 import { StatusResponse } from "./types/webapi/StatusResponse";
 import { VaultResponse } from "./types/webapi/VaultResponse";
+import { storage } from 'wxt/storage';
 
 type RequestInit = globalThis.RequestInit;
 

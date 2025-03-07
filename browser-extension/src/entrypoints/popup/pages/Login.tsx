@@ -11,7 +11,7 @@ import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
 import { LoginResponse } from '../../../utils/types/webapi/Login';
 import LoginServerInfo from '../components/LoginServerInfo';
 import { AppInfo } from '../../../utils/AppInfo';
-
+import { storage } from 'wxt/storage';
 /**
  * Login page
  */

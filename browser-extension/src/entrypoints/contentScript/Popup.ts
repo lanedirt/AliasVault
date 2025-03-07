@@ -1055,10 +1055,9 @@ export function openAutofillPopup(input: HTMLInputElement) : void {
 
   document.addEventListener('keydown', handleEnterKey);
 
-  (async () => {
+  (async () : Promise<void> => {
     const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
 
-    console.log('response', response);
     if (response.success) {
       createAutofillPopup(input, response.credentials);
     } else {

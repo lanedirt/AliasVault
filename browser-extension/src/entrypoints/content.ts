@@ -2,11 +2,13 @@ import { FormDetector } from '../utils/formDetector/FormDetector';
 import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
 import { canShowPopup, injectIcon } from './contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
+import { BoolResponse as messageBoolResponse } from '../utils/types/messaging/BoolResponse';
+import { defineContentScript } from 'wxt/sandbox';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   /**
-   *
+   * Main entry point for the content script.
    */
   main(ctx) {
     if (ctx.isInvalid) {
@@ -53,16 +55,15 @@ export default defineContentScript({
     });
 
     // Listen for messages from the background script
-    onMessage('OPEN_AUTOFILL_POPUP', async (message: any) => {
-      const { data, sender } = message;
+    onMessage('OPEN_AUTOFILL_POPUP', async (message: { data: { elementIdentifier: string } }) : Promise<messageBoolResponse> => {
+      const { data } = message;
       const { elementIdentifier } = data;
 
       if (!elementIdentifier) {
         return { success: false, error: 'No element identifier provided' };
       }
 
-      const target = document.getElementById(elementIdentifier) ||
-                    document.getElementsByName(elementIdentifier)[0];
+      const target = document.getElementById(elementIdentifier) ?? document.getElementsByName(elementIdentifier)[0];
 
       if (!(target instanceof HTMLInputElement)) {
         return { success: false, error: 'Target element is not an input field' };

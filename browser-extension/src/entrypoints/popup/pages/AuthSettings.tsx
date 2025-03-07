@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppInfo } from '../../../utils/AppInfo';
+import { storage } from 'wxt/storage';
 
 type ApiOption = {
   label: string;
@@ -21,9 +22,9 @@ const AuthSettings: React.FC = () => {
 
   useEffect(() => {
     /**
-     *
+     * Load the stored settings from the storage.
      */
-    const loadStoredSettings = async () => {
+    const loadStoredSettings = async () : Promise<void> => {
       const apiUrl = await storage.getItem('local:apiUrl') as string;
       const clientUrl = await storage.getItem('local:clientUrl') as string;
       const matchingOption = DEFAULT_OPTIONS.find(opt => opt.value === apiUrl);
