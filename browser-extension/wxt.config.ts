@@ -22,9 +22,9 @@ export default defineConfig({
     ],
     host_permissions: [
       "<all_urls>"
-    ]
+    ],
   },
-  extensionApi: 'chrome',
+  extensionApi: 'webextension-polyfill',
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
   outDir: 'dist',

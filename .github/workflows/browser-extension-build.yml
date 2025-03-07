@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: browser-extensions/chrome/package-lock.json
+          cache-dependency-path: chrome/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -38,33 +38,82 @@ jobs:
       - name: Run linting
         run: npm run lint
 
+      - name: Zip Chrome Extension
+        run: npm run zip:chrome
+
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-chrome-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}
-          path: browser-extension/dist/chrome-mv3/
+          path: dist/aliasvault-browser-extension-*-chrome.zip
 
-  upload-release-assets:
+  build-firefox-extension:
     runs-on: ubuntu-latest
-    needs: build-chrome-extension
+    defaults:
+      run:
+        working-directory: browser-extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: firefox/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build:firefox
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Zip Firefox Extension
+        run: npm run zip:firefox
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aliasvault-firefox-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}
+          path: dist/aliasvault-browser-extension-*-firefox.zip
+
+  upload-chrome-release-assets:
+    runs-on: ubuntu-latest
+    needs: [build-chrome-extension]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download built artifact
         uses: actions/download-artifact@v4
         with:
-          name: aliasvault-chrome-extension-${{ github.ref_name }}
-          path: browser-extension/dist/chrome-mv3/
-
-      - name: Zip Chrome Extension
-        run: |
-          cd browser-extension/dist/chrome-mv3
-          zip -r ../../../aliasvault-chrome-extension-${{ github.ref_name }}.zip .
+          name: aliasvault-chrome-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}
+          path: dist
 
       - name: Upload Chrome Extension ZIP to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: aliasvault-chrome-extension-${{ github.ref_name }}.zip
+          files: dist/aliasvault-browser-extension-*-chrome.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-firefox-release-assets:
+    runs-on: ubuntu-latest
+    needs: [build-firefox-extension]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - name: Download built artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aliasvault-firefox-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', github.sha) || github.sha) }}
+          path: dist
+
+      - name: Upload Firefox Extension ZIP to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/aliasvault-browser-extension-*-firefox.zip
           token: ${{ secrets.GITHUB_TOKEN }}
