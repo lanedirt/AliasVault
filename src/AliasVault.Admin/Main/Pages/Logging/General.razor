@@ -6,7 +6,7 @@
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="General logs"
+    Title="@(TotalRecords > 0 ? $"General logs ({TotalRecords:N0})" : "General logs")"
     Description="This page gives an overview of recent system logs.">
     <CustomActions>
         <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
