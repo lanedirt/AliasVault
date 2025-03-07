@@ -1,6 +1,6 @@
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Emails received</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Email aliases created</h3>
     </div>
     @if (IsLoading)
     {
@@ -9,21 +9,21 @@
     else
     {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Hours24</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailClaimsStats.Hours24</h4>
             </div>
-            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days3</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailClaimsStats.Days3</h4>
             </div>
-            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days7</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailClaimsStats.Days7</h4>
             </div>
-            <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days14</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailClaimsStats.Days14</h4>
             </div>
         </div>
     }
@@ -31,7 +31,7 @@
 
 @code {
     private bool IsLoading { get; set; } = true;
-    private EmailStatistics EmailStats { get; set; } = new();
+    private EmailClaimsStatistics EmailClaimsStats { get; set; } = new();
 
     /// <summary>
     /// Refreshes the data displayed on the card.
@@ -47,22 +47,22 @@
         var days7 = now.AddDays(-7);
         var days14 = now.AddDays(-14);
 
-        // Get email statistics
+        // Get email claims statistics
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var emailQuery = dbContext.Emails.AsQueryable();
-        EmailStats = new EmailStatistics
+        var emailClaimsQuery = dbContext.UserEmailClaims.AsQueryable();
+        EmailClaimsStats = new EmailClaimsStatistics
         {
-            Hours24 = await emailQuery.CountAsync(e => e.DateSystem >= hours24),
-            Days3 = await emailQuery.CountAsync(e => e.DateSystem >= days3),
-            Days7 = await emailQuery.CountAsync(e => e.DateSystem >= days7),
-            Days14 = await emailQuery.CountAsync(e => e.DateSystem >= days14)
+            Hours24 = await emailClaimsQuery.CountAsync(e => e.CreatedAt >= hours24),
+            Days3 = await emailClaimsQuery.CountAsync(e => e.CreatedAt >= days3),
+            Days7 = await emailClaimsQuery.CountAsync(e => e.CreatedAt >= days7),
+            Days14 = await emailClaimsQuery.CountAsync(e => e.CreatedAt >= days14)
         };
 
         IsLoading = false;
         StateHasChanged();
     }
 
-    private sealed class EmailStatistics
+    private sealed class EmailClaimsStatistics
     {
         public int Hours24 { get; set; }
         public int Days3 { get; set; }

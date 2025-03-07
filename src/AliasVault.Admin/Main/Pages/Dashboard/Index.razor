@@ -15,16 +15,20 @@
 
 <div class="px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <ActiveUsersCard @ref="_activeUsersCard" />
         <RegistrationStatisticsCard @ref="_registrationStatisticsCard" />
         <EmailStatisticsCard @ref="_emailStatisticsCard" />
+        <ReturningUsersCard @ref="_returningUsersCard" />
+        <ActiveUsersCard @ref="_activeUsersCard" />
+        <EmailClaimsCard @ref="_emailClaimsCard" />
     </div>
 </div>
 
 @code {
     private ActiveUsersCard? _activeUsersCard;
+    private ReturningUsersCard? _returningUsersCard;
     private RegistrationStatisticsCard? _registrationStatisticsCard;
     private EmailStatisticsCard? _emailStatisticsCard;
+    private EmailClaimsCard? _emailClaimsCard;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -53,13 +57,17 @@
     private async Task RefreshData()
     {
         if (_activeUsersCard != null &&
+            _returningUsersCard != null &&
             _registrationStatisticsCard != null &&
-            _emailStatisticsCard != null)
+            _emailStatisticsCard != null &&
+            _emailClaimsCard != null)
         {
             await Task.WhenAll(
                 _activeUsersCard.RefreshData(),
+                _returningUsersCard.RefreshData(),
                 _registrationStatisticsCard.RefreshData(),
-                _emailStatisticsCard.RefreshData()
+                _emailStatisticsCard.RefreshData(),
+                _emailClaimsCard.RefreshData()
             );
         }
     }

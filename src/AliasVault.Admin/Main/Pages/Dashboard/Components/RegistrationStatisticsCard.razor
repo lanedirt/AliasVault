@@ -8,18 +8,22 @@
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last24Hours</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Hours24</h4>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days3</h4>
             </div>
             <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last7Days</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days7</h4>
             </div>
             <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Last14Days</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days14</h4>
             </div>
         </div>
     }
@@ -38,18 +42,20 @@
         StateHasChanged();
 
         var now = DateTime.UtcNow;
-        var last24Hours = now.AddHours(-24);
-        var last7Days = now.AddDays(-7);
-        var last14Days = now.AddDays(-14);
+        var hours24 = now.AddHours(-24);
+        var days3 = now.AddDays(-3);
+        var days7 = now.AddDays(-7);
+        var days14 = now.AddDays(-14);
 
         // Get registration statistics
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var registrationQuery = dbContext.AliasVaultUsers.AsQueryable();
         RegistrationStats = new RegistrationStatistics
         {
-            Last24Hours = await registrationQuery.CountAsync(u => u.CreatedAt >= last24Hours),
-            Last7Days = await registrationQuery.CountAsync(u => u.CreatedAt >= last7Days),
-            Last14Days = await registrationQuery.CountAsync(u => u.CreatedAt >= last14Days)
+            Hours24 = await registrationQuery.CountAsync(u => u.CreatedAt >= hours24),
+            Days3 = await registrationQuery.CountAsync(u => u.CreatedAt >= days3),
+            Days7 = await registrationQuery.CountAsync(u => u.CreatedAt >= days7),
+            Days14 = await registrationQuery.CountAsync(u => u.CreatedAt >= days14)
         };
 
         IsLoading = false;
@@ -58,8 +64,9 @@
 
     private sealed class RegistrationStatistics
     {
-        public int Last24Hours { get; set; }
-        public int Last7Days { get; set; }
-        public int Last14Days { get; set; }
+        public int Hours24 { get; set; }
+        public int Days3 { get; set; }
+        public int Days7 { get; set; }
+        public int Days14 { get; set; }
     }
 }

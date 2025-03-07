@@ -1,6 +1,6 @@
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total active users</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Returning users</h3>
         <button
             @onclick="ToggleUserNames"
             class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
@@ -9,7 +9,7 @@
     </div>
     <div class="flex items-center justify-between mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-            This card shows the number of active users in the last 24 hours, 7 days, and 14 days. This includes users who have created their accounts in these time periods.
+            This card shows the number of returning users in the last 24 hours, 3 days, 7 days, and 14 days. This excludes users who have created their accounts in these time periods.
         </p>
     </div>
     @if (IsLoading)
@@ -18,8 +18,8 @@
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last24Hours</h4>
                 @if (ShowUserNames)
@@ -34,7 +34,7 @@
                     </div>
                 }
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last3Days</h4>
                 @if (ShowUserNames)
@@ -49,7 +49,7 @@
                     </div>
                 }
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last7Days</h4>
                 @if (ShowUserNames)
@@ -64,7 +64,7 @@
                     </div>
                 }
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last14Days</h4>
                 @if (ShowUserNames)
@@ -85,8 +85,16 @@
 
 @code {
     private bool IsLoading { get; set; } = true;
+    private bool ShowUserNames { get; set; } = false;
     private UserStatistics UserStats { get; set; } = new();
-    private bool ShowUserNames { get; set; }
+
+    /// <summary>
+    /// Toggles the visibility of user names.
+    /// </summary>
+    private void ToggleUserNames()
+    {
+        ShowUserNames = !ShowUserNames;
+    }
 
     /// <summary>
     /// Refreshes the data displayed on the card.
@@ -102,11 +110,10 @@
         var last7Days = now.AddDays(-7);
         var last14Days = now.AddDays(-14);
 
-        // Get user statistics
-        var (count24h, users24h) = await GetActiveUserCount(last24Hours);
-        var (count3d, users3d) = await GetActiveUserCount(last3Days);
-        var (count7d, users7d) = await GetActiveUserCount(last7Days);
-        var (count14d, users14d) = await GetActiveUserCount(last14Days);
+        var (count24h, users24h) = await GetReturningUserCount(last24Hours);
+        var (count3d, users3d) = await GetReturningUserCount(last3Days);
+        var (count7d, users7d) = await GetReturningUserCount(last7Days);
+        var (count14d, users14d) = await GetReturningUserCount(last14Days);
 
         UserStats = new UserStatistics
         {
@@ -124,32 +131,24 @@
         StateHasChanged();
     }
 
-    private async Task<(int count, List<string> users)> GetActiveUserCount(DateTime since)
+    private async Task<(int count, List<string?> users)> GetReturningUserCount(DateTime since)
     {
-        // Get unique users who either:
-        // 1. Have successful auth logs
-        // 2. Have updated their vault
-        // 3. Are not the admin user
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-        var activeUsers = await dbContext.AuthLogs
-            .Where(l => l.Timestamp >= since && l.IsSuccess && l.Username != "admin")
+        // Get users who have auth logs in the time period
+        var activeUserNames = await dbContext.AuthLogs
+            .Where(l => l.Timestamp >= since)
             .Select(l => l.Username)
-            .Union(
-                dbContext.Vaults
-                    .Where(v => v.UpdatedAt >= since)
-                    .Select(v => v.User.UserName!)
-            )
             .Distinct()
             .ToListAsync();
 
-        return (activeUsers.Count, activeUsers);
-    }
+        // Get returning users (created before the time period)
+        var returningUsers = await dbContext.AliasVaultUsers
+            .Where(u => activeUserNames.Contains(u.UserName!) && u.CreatedAt < since)
+            .Select(u => u.UserName)
+            .ToListAsync();
 
-    private void ToggleUserNames()
-    {
-        ShowUserNames = !ShowUserNames;
-        StateHasChanged();
+        return (returningUsers.Count, returningUsers);
     }
 
     private sealed class UserStatistics
@@ -158,9 +157,9 @@
         public int Last3Days { get; set; }
         public int Last7Days { get; set; }
         public int Last14Days { get; set; }
-        public List<string> Last24HourUsers { get; set; } = new();
-        public List<string> Last3DayUsers { get; set; } = new();
-        public List<string> Last7DayUsers { get; set; } = new();
-        public List<string> Last14DayUsers { get; set; } = new();
+        public List<string?> Last24HourUsers { get; set; } = new();
+        public List<string?> Last3DayUsers { get; set; } = new();
+        public List<string?> Last7DayUsers { get; set; } = new();
+        public List<string?> Last14DayUsers { get; set; } = new();
     }
 }
