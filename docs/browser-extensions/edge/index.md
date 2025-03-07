@@ -1,18 +1,18 @@
 ---
 layout: default
-title: Google Chrome
+title: Microsoft Edge
 parent: Browser Extensions
 nav_order: 1
 ---
 
-# Google Chrome Extension
-In order to install the Google Chrome Extension, see the options below.
+# Microsoft Edge Extension
+In order to install the Microsoft Edge Extension, see the options below.
 
-## Chrome Web Store
-Installing the extension from the Chrome Web Store is the easiest way to get started. This ensures that you are always using the latest version of the extension.
+## Microsoft Edge Add-ons
+Installing the extension from the Microsoft Edge Add-ons is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
-1. Go to the [Chrome Web Store](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj)
-2. Click on the "Add to Chrome" button
+1. Go to the TODO: add Edge URL
+2. Click on the "Get" button
 3. The extension will be installed and added to your browser
 
 ## Build from Source
