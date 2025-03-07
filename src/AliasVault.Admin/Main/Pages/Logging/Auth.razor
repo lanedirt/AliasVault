@@ -7,7 +7,7 @@
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Auth logs"
+    Title="@(TotalRecords > 0 ? $"Auth logs ({TotalRecords:N0})" : "Auth logs")"
     Description="This page gives an overview of recent auth attempts.">
     <CustomActions>
         <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
