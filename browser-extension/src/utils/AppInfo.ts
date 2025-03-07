@@ -19,11 +19,32 @@ export class AppInfo {
    */
   public static readonly MIN_VAULT_VERSION = '1.4.1';
 
-  /*
+  /**
    * The client name to use in the X-AliasVault-Client header.
-   * TODO: make this configurable when adding other browser support (e.g. Firefox).
+   * Detects the specific browser being used.
    */
-  public static readonly CLIENT_NAME = 'chrome';
+  public static readonly CLIENT_NAME = (() : 'chrome' | 'firefox' | 'edge' | 'safari' | 'browser' => {
+    // This uses the WXT environment variables to detect the specific browser being used.
+    const env = import.meta.env;
+
+    if (env.FIREFOX) {
+      return 'firefox';
+    }
+
+    if (env.CHROME) {
+      return 'chrome';
+    }
+
+    if (env.EDGE) {
+      return 'edge';
+    }
+
+    if (env.SAFARI) {
+      return 'safari';
+    }
+
+    return 'browser';
+  })();
 
   /**
    * The default AliasVault client URL.
