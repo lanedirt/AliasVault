@@ -7,34 +7,74 @@ nav_order: 2
 ---
 
 # Browser Extensions
-AliasVault has browser extensions for Chrome (with Firefox support coming soon). In order to locally build and debug the extension, you can follow the steps below.
+AliasVault offers browser extensions compatible with both Chrome and Firefox. This guide explains how to build and debug the extensions locally.
 
-## Chrome Extension
-The Chrome extension is built with React as framework and Vite as build tool.
+## Development Setup
+The browser extensions are built using:
+- React: https://react.dev/
+- WXT: https://wxt.dev/ (A framework for cross-browser extension development)
+- Vite: https://vitejs.dev/
 
 ### Install dependencies
-Make sure you have Node.js installed on your host machine. Then install the dependencies by running the following command.
+Make sure you have Node.js installed on your host machine, then install the dependencies:
 
 ```bash
 cd browser-extensions/chrome
 npm install
 ```
 
-### Build the extension
+### Development Mode
+WXT provides a development mode that automatically reloads changes and opens a new browser window with the extension loaded:
 
 ```bash
-npm run build
+# For Google Chrome development
+npm run dev:chrome
+
+# For Firefox development
+npm run dev:firefox
+
+# For Microsoft Edge development
+npm run dev:edge
 ```
 
-### Add the extension to Chrome
+## Building and Loading the Extensions Manually
 
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Enable "Developer mode" in the top right corner.
-3. Click "Load unpacked" and select the `dist` folder in the `./browser-extensions/chrome` directory.
-4. The extension should now be loaded and ready to use.
+### Google Chrome
 
-### Auto-build on changes
-When developing the extension, you can use the `npm run dev` command. This will automatically build the extension when you make changes to the code which will then automatically reload the extension in Chrome. This means you can make changes and see the results immediately.
+1. Build the extension:
+```bash
+npm run build:chrome
+```
+
+2. Load in Chrome:
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" in the top right corner
+   - Click "Load unpacked" and the folder `./browser-extension/dist/chrome-mv3`
+
+### Firefox
+
+1. Build the extension:
+```bash
+npm run build:firefox
+```
+
+2. Load in Firefox:
+   - Open Firefox and navigate to `about:debugging`
+   - Click "This Firefox" in the left sidebar
+   - Click "Load Temporary Add-on"
+   - Navigate to the `./browser-extension/dist/firefox-mv2` folder and select the `manifest.json` file
+
+### Microsoft Edge
+
+1. Build the extension:
+```bash
+npm run build:edge
+```
+
+2. Load in Edge:
+   - Open Edge and navigate to `edge://extensions/`
+   - Enable "Developer mode" in the top right corner
+   - Click "Load unpacked" and the folder `./browser-extension/dist/edge-mv3`
 
 ## Automatic tests
 The extension has a suite of automatic tests that are run on every pull request. These tests are located in the `__tests__` directories scattered throughout the browser extension codebase.

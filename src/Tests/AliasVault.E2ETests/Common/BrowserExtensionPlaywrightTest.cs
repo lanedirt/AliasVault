@@ -85,7 +85,7 @@ public class BrowserExtensionPlaywrightTest : ClientPlaywrightTest
 
         // Open popup in a new page
         var extensionPopup = await Context.NewPageAsync();
-        await extensionPopup.GotoAsync($"chrome-extension://{extensionId}/index.html");
+        await extensionPopup.GotoAsync($"chrome-extension://{extensionId}/popup.html");
 
         // Check if already logged in by looking for elements that only appear on the logged-in view
         try
@@ -155,13 +155,12 @@ public class BrowserExtensionPlaywrightTest : ClientPlaywrightTest
     private void ExtensionSetup()
     {
         // Get the solution directory by walking up from the current assembly location
-        var currentDir = Path.GetDirectoryName(typeof(ChromeExtensionTests).Assembly.Location)
-                         ?? throw new InvalidOperationException("Current directory not found");
+        var currentDir = Path.GetDirectoryName(typeof(ChromeExtensionTests).Assembly.Location) ?? throw new InvalidOperationException("Current directory not found");
         var solutionDir = FindSolutionRoot(currentDir);
 
         // Construct absolute path to extension directory
-        var extensionDir = Path.GetFullPath(Path.Combine(solutionDir, "browser-extensions", "chrome"));
-        var distDir = Path.GetFullPath(Path.Combine(extensionDir, "dist"));
+        var extensionDir = Path.GetFullPath(Path.Combine(solutionDir, "browser-extension"));
+        var distDir = Path.GetFullPath(Path.Combine(extensionDir, "dist", "chrome-mv3"));
         var manifestPath = Path.Combine(distDir, "manifest.json");
 
         // Verify the dist directory exists and contains required files

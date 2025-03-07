@@ -1,21 +1,21 @@
 ---
 layout: default
 title: Build from Source
-parent: Google Chrome
+parent: Microsoft Edge
 grand_parent: Browser Extensions
 nav_order: 2
 ---
 
-# Building Google Chrome Extension from Source
+# Building Microsoft Edge Extension from Source
 
-This guide explains how to build and install the AliasVault Google Chrome extension from source code.
+This guide explains how to build and install the AliasVault Microsoft Edge extension from source code.
 
 ## Prerequisites
 
 - Node.js installed on your computer
 - Git to clone the repository (optional)
 
-## Building the Google Chrome Extension
+## Building the Microsoft Edge Extension
 
 1. Clone the repository:
 ```bash
@@ -34,15 +34,15 @@ npm install
 
 4. Build the extension:
 ```bash
-npm run build:chrome
+npm run build:edge
 ```
 
-## Installing in Google Chrome
+## Installing in Microsoft Edge
 
-1. Open Google Chrome and go to `chrome://extensions/`
+1. Open Microsoft Edge and go to `edge://extensions/`
 2. Enable "Developer mode" using the toggle in the top right corner
 3. Click "Load unpacked"
-4. Navigate to and select the folder `browser-extension/dist/chrome-mv3`
+4. Navigate to and select the folder `browser-extension/dist/edge-mv3`
 5. The AliasVault extension should now appear in your extensions list
 
 ## Development Mode (Optional)
