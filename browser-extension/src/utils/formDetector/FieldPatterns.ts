@@ -70,6 +70,42 @@ export const EnglishDateOptionPatterns: DateOptionPatterns = {
 };
 
 /**
+ * English words to filter out from page titles during autofill matching to
+ * prevent generic words from causing false positives.
+ */
+export const EnglishStopWords = new Set([
+  // Authentication related
+  'login', 'signin', 'sign', 'register', 'signup', 'account',
+  'authentication', 'password', 'access', 'auth', 'session',
+  'authenticate', 'credentials', 'logout', 'signout',
+
+  // Navigation/Site sections
+  'portal', 'dashboard', 'home', 'welcome', 'page', 'site',
+  'secure', 'member', 'user', 'profile', 'settings', 'menu',
+  'overview', 'index', 'main', 'start', 'landing',
+
+  // Marketing/Promotional
+  'free', 'create', 'new', 'your', 'special', 'offer',
+  'deal', 'discount', 'promotion',
+
+  // Common website sections
+  'help', 'support', 'contact', 'about', 'faq', 'terms',
+  'privacy', 'cookie', 'service', 'services', 'products',
+  'shop', 'store', 'cart', 'checkout',
+
+  // Generic descriptors
+  'online', 'web', 'digital', 'mobile', 'my', 'personal',
+  'private', 'general', 'default', 'standard',
+
+  // System/Technical
+  'system', 'admin', 'administrator', 'platform', 'portal',
+  'gateway', 'api', 'interface', 'console',
+
+  // Time-related
+  'today', 'now', 'current', 'latest', 'newest', 'recent'
+]);
+
+/**
  * Dutch field patterns used to detect Dutch form fields.
  */
 export const DutchFieldPatterns: FieldPatterns = {
@@ -104,6 +140,42 @@ export const DutchDateOptionPatterns: DateOptionPatterns = {
     ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
   ],
 };
+
+/**
+ * Dutch words to filter out from page titles during autofill matching to
+ * prevent generic words from causing false positives.
+ */
+export const DutchStopWords = new Set([
+  // Authentication related
+  'inloggen', 'registreren', 'registratie', 'aanmelden',
+  'inschrijven', 'uitloggen', 'wachtwoord', 'toegang',
+  'authenticatie', 'account',
+
+  // Navigation/Site sections
+  'portaal', 'overzicht', 'startpagina', 'welkom', 'pagina',
+  'beveiligd', 'lid', 'gebruiker', 'profiel', 'instellingen',
+  'menu', 'begin', 'hoofdpagina',
+
+  // Marketing/Promotional
+  'gratis', 'nieuw', 'jouw', 'schrijf', 'nieuwsbrief',
+  'aanbieding', 'korting', 'speciaal', 'actie',
+
+  // Common website sections
+  'hulp', 'ondersteuning', 'contact', 'over', 'voorwaarden',
+  'privacy', 'cookie', 'dienst', 'diensten', 'producten',
+  'winkel', 'bestellen', 'winkelwagen',
+
+  // Generic descriptors
+  'online', 'web', 'digitaal', 'mobiel', 'mijn', 'persoonlijk',
+  'privé', 'algemeen', 'standaard',
+
+  // System/Technical
+  'systeem', 'beheer', 'beheerder', 'platform', 'portaal',
+  'interface', 'console',
+
+  // Time-related
+  'vandaag', 'nu', 'huidig', 'recent', 'nieuwste'
+]);
 
 /**
  * Combined field patterns which includes all supported languages.
@@ -149,3 +221,12 @@ export const CombinedDateOptionPatterns: DateOptionPatterns = {
     ...DutchDateOptionPatterns.months
   ],
 };
+
+/**
+ * Combined stop words from all supported languages. These are used to filter out generic words from page titles
+ * during autofill matching to prevent generic words from causing false positives.
+ */
+export const CombinedStopWords = new Set([
+  ...EnglishStopWords,
+  ...DutchStopWords
+]);
