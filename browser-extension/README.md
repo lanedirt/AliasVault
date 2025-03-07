@@ -8,10 +8,13 @@ To build the browser extension, run the following command in this directory:
 
 ```bash
 npm install
-npm run build
-```
 
-This will build the browser extension and save it in the `dist/chrome-mv3` folder.
+# Build the Chrome extension (saves in dist/chrome-mv3)
+npm run build:chrome
+
+# Build the Firefox extension (saves in dist/firefox-mv2)
+npm run build:firefox
+```
 
 To load the browser extension in Chrome, follow these steps:
 

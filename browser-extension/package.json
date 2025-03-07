@@ -5,9 +5,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wxt",
+    "dev:chrome": "wxt -b chrome",
     "dev:firefox": "wxt -b firefox",
-    "build": "wxt build",
     "build:chrome": "wxt build -b chrome",
     "build:firefox": "wxt build -b firefox",
     "test": "vitest",
