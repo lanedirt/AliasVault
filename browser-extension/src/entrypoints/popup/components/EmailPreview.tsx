@@ -5,6 +5,7 @@ import EncryptionUtility from '../../../utils/EncryptionUtility';
 import { MailboxEmail } from '../../../utils/types/webapi/MailboxEmail';
 import { Link } from 'react-router-dom';
 import { AppInfo } from '../../../utils/AppInfo';
+import { storage } from 'wxt/storage';
 
 type EmailPreviewProps = {
   email: string;
