@@ -7,7 +7,7 @@ import { BoolResponse } from '../../utils/types/messaging/BoolResponse';
 export function handleOpenPopup() : Promise<BoolResponse> {
   return (async () : Promise<BoolResponse> => {
     browser.windows.create({
-      url: browser.runtime.getURL('/popup.html?mode=inline_unlock'),
+      url: browser.runtime.getURL('/popup.html?mode=inline_unlock&expanded=true'),
       type: 'popup',
       width: 400,
       height: 600,
@@ -23,7 +23,7 @@ export function handleOpenPopup() : Promise<BoolResponse> {
 export function handlePopupWithCredential(message: any) : Promise<BoolResponse> {
   return (async () : Promise<BoolResponse> => {
     browser.windows.create({
-      url: browser.runtime.getURL(`/popup.html#/credentials/${message.credentialId}`),
+      url: browser.runtime.getURL(`/popup.html?expanded=true#/credentials/${message.credentialId}`),
       type: 'popup',
       width: 400,
       height: 600,

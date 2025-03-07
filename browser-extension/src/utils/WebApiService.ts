@@ -287,26 +287,24 @@ export class WebApiService {
    * Get the current access token from storage.
    */
   private async getAccessToken(): Promise<string | null> {
-    const token = await chrome.storage.local.get('accessToken');
-    return token.accessToken ?? null;
+    const token = await storage.getItem('local:accessToken') as string;
+    return token ?? null;
   }
 
   /**
    * Get the current refresh token from storage.
    */
   private async getRefreshToken(): Promise<string | null> {
-    const token = await chrome.storage.local.get('refreshToken');
-    return token.refreshToken ?? null;
+    const token = await storage.getItem('local:refreshToken') as string;
+    return token ?? null;
   }
 
   /**
    * Update both access and refresh tokens in storage.
    */
   private async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await chrome.storage.local.set({
-      accessToken,
-      refreshToken
-    });
+    await storage.setItem('local:accessToken', accessToken);
+    await storage.setItem('local:refreshToken', refreshToken);
   }
 
   /**

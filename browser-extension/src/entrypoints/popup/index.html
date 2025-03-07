@@ -6,8 +6,16 @@
   <title>AliasVault</title>
   <link href="~/assets/tailwind.css" rel="stylesheet" />
   <meta name="manifest.type" content="browser_action" />
+  <script>
+    // Check if expanded=true is in the URL, which means the popup was opened in expanded mode with unlimited width.
+    // If not, set the width to 350px to force the default popup to a fixed width.
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('expanded')) {
+      document.documentElement.classList.add('max-w-[350px]');
+    }
+  </script>
 </head>
-<body class="bg-white dark:bg-gray-900">
+<body class="bg-white dark:bg-gray-900" style="font-size: 75%;">
   <div id="root"></div>
   <script type="module" src="./main.tsx"></script>
 </body>

@@ -26,8 +26,8 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
    */
   const isPublicDomain = async (emailAddress: string): Promise<boolean> => {
     // Get metadata from storage
-    const storageResult = await chrome.storage.session.get(['publicEmailDomains']);
-    return storageResult.publicEmailDomains.some(domain => emailAddress.toLowerCase().endsWith(domain));
+    const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[] ?? [];
+    return publicEmailDomains.some(domain => emailAddress.toLowerCase().endsWith(domain));
   };
 
   useEffect(() => {

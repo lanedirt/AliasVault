@@ -18,15 +18,15 @@ const CredentialDetails: React.FC = () => {
   const { setIsInitialLoading } = useLoading();
 
   /**
-   * Check if the current page is a popup.
+   * Check if the current page is an expanded popup.
    */
   const isPopup = () : boolean => {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('popup') === 'true';
+    return urlParams.get('expanded') === 'true';
   };
 
   /**
-   * Open the credential details in a new popup.
+   * Open the credential details in a new expanded popup.
    */
   const openInNewPopup = () : void => {
     const width = 380;
@@ -35,7 +35,7 @@ const CredentialDetails: React.FC = () => {
     const top = window.screen.height / 2 - height / 2;
 
     window.open(
-      `popup.html?popup=true#/credentials/${id}`,
+      `popup.html?expanded=true#/credentials/${id}`,
       'CredentialDetails',
       `width=${width},height=${height},left=${left},top=${top},popup=true`
     );
