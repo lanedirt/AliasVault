@@ -51,11 +51,11 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     {
         Rules =
         [
-            new RevisionRetentionRule { RevisionsToKeep = 10 },
-            new DailyRetentionRule { DaysToKeep = 3 },
+            new RevisionRetentionRule { RevisionsToKeep = 3 },
+            new DailyRetentionRule { DaysToKeep = 2 },
             new WeeklyRetentionRule { WeeksToKeep = 1 },
             new MonthlyRetentionRule { MonthsToKeep = 1 },
-            new DbVersionRetentionRule { VersionsToKeep = 3 },
+            new DbVersionRetentionRule { VersionsToKeep = 2 },
             new LoginCredentialRetentionRule { CredentialsToKeep = 2 },
         ],
     };
