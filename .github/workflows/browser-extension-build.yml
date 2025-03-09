@@ -50,6 +50,9 @@ jobs:
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-chrome
           path: browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
+          if-no-files-found: error
+          # Prevent re-compression of the ZIP file which can cause issues when uploading to the web store
+          compression-level: 0
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
@@ -94,12 +97,18 @@ jobs:
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-firefox
           path: browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
+          if-no-files-found: error
+          # Prevent re-compression of the ZIP file which can cause issues when uploading to the web store
+          compression-level: 0
 
       - name: Upload dist artifact Firefox sources
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-sources
           path: browser-extension/dist/aliasvault-browser-extension-*-sources.zip
+          if-no-files-found: error
+          # Prevent re-compression of the ZIP file which can cause issues when uploading to the web store
+          compression-level: 0
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
@@ -144,6 +153,9 @@ jobs:
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-edge
           path: browser-extension/dist/aliasvault-browser-extension-*-edge.zip
+          if-no-files-found: error
+          # Prevent re-compression of the ZIP file which can cause issues when uploading to the web store
+          compression-level: 0
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
