@@ -105,10 +105,11 @@ AliasVault is under active development with new features being added regularly. 
 - [x] Built-in email server for aliases
 - [x] Single-command Docker-based installation
 - [x] Chrome browser extension
-- [ ] Firefox browser extension (https://github.com/lanedirt/AliasVault/issues/581)
+- [x] Firefox and MS Edge browser extension
+- [ ] Safari and Brave browser extension (https://github.com/lanedirt/AliasVault/issues/661)
 - [ ] Add and associate TOTP MFA tokens to credentials (https://github.com/lanedirt/AliasVault/issues/181)
-- [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
 - [ ] Import passwords from existing password managers (https://github.com/lanedirt/AliasVault/issues/542)
+- [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
 
 ### Future Plans
 - [ ] Mobile apps (iOS, Android)
