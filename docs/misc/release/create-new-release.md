@@ -17,10 +17,10 @@ Follow the steps in the checklist below to prepare a new release.
 - [ ] Update README.md install.sh download link to point to the new release version
 
 ## Versioning browser extension
-- [ ] Update ./chrome/manifest.json with the new version for the extension. This will be shown in the Chrome Web Store. This version should be equal to the git release tag.
-- [ ] Update ./chrome/src/shared/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
-- [ ] Update ./chrome/src/shared/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
-- [ ] Update ./chrome/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
+- [ ] Update ./browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
+- [ ] Update ./browser-extension/src/utils/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update ./browser-extension/src/utils/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update ./browser-extension/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
 
 ## Docker Images
 If docker containers have been added or removed:
@@ -48,11 +48,11 @@ The creation of the new release tag will also trigger the GitHub Actions workflo
 3. Publish the release.
 
 ## Publish new browser extension version
-The GitHub Actions workflow `Publish Browser Extension` will build the browser extension(s) and publish the archive to the GitHub Actions Artifacts page.
+The GitHub Actions workflow `Browser Extension Build` will build the browser extension(s) and publish the archive to the GitHub Actions Artifacts page and also upload the archives to the release.
 
 > Note: this step is only required if the browser extension has been updated.
 
-1. Download the browser extension archive from the GitHub Actions Artifacts page.
-2. Upload the archive to the Chrome Web Store.
-3. Upload the archive (normal + sources) to the Firefox Add-ons page.
-4. Upload the archive to the Microsoft Edge Add-ons page.
+1. Download the browser extension archives from the newly published release. Note: it can take a few minutes for the artifacts to be available after the release has been published.
+2. Upload the Chrome archive to the Chrome Web Store.
+3. Upload the Firefox archive (normal + sources) to the Firefox Add-ons page.
+4. Upload the Edge archive to the Microsoft Edge Add-ons page.

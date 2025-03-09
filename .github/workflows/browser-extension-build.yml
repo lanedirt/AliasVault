@@ -45,11 +45,16 @@ jobs:
       - name: Zip Chrome Extension
         run: npm run zip:chrome
 
+      - name: Unzip for artifact
+        run: |
+          mkdir -p dist/chrome-unpacked
+          unzip dist/aliasvault-browser-extension-*-chrome.zip -d dist/chrome-unpacked
+
       - name: Upload dist artifact Chrome
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-chrome
-          path: browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
+          path: browser-extension/dist/chrome-unpacked
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
@@ -89,17 +94,24 @@ jobs:
       - name: Zip Firefox Extension
         run: npm run zip:firefox
 
+      - name: Unzip for artifact
+        run: |
+          mkdir -p dist/firefox-unpacked
+          unzip dist/aliasvault-browser-extension-*-firefox.zip -d dist/firefox-unpacked
+          mkdir -p dist/sources-unpacked
+          unzip dist/aliasvault-browser-extension-*-sources.zip -d dist/sources-unpacked
+
       - name: Upload dist artifact Firefox
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-firefox
-          path: browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
+          path: browser-extension/dist/firefox-unpacked
 
       - name: Upload dist artifact Firefox sources
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-sources
-          path: browser-extension/dist/aliasvault-browser-extension-*-sources.zip
+          path: browser-extension/dist/sources-unpacked
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
@@ -139,11 +151,16 @@ jobs:
       - name: Zip Edge Extension
         run: npm run zip:edge
 
+      - name: Unzip for artifact
+        run: |
+          mkdir -p dist/edge-unpacked
+          unzip dist/aliasvault-browser-extension-*-edge.zip -d dist/edge-unpacked
+
       - name: Upload dist artifact Edge
         uses: actions/upload-artifact@v4
         with:
           name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-edge
-          path: browser-extension/dist/aliasvault-browser-extension-*-edge.zip
+          path: browser-extension/dist/edge-unpacked
 
     outputs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
