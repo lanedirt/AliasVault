@@ -1,5 +1,7 @@
 @inherits ComponentBase
 @inject TotpCodeService TotpCodeService
+@inject ClipboardCopyService ClipboardCopyService
+@inject JsInteropService JsInteropService
 @implements IDisposable
 @using TotpGenerator
 
@@ -32,8 +34,19 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex flex-col items-end">
-                                <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
+                                <div class="text-2xl font-bold cursor-pointer text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors" @onclick="() => CopyToClipboard(totpCode)">
+                                    @GetTotpCode(totpCode.SecretKey)
+                                </div>
+                                <div class="text-xs">
+                                    @if (IsCopied(totpCode.Id.ToString()))
+                                    {
+                                        <span class="text-green-600 dark:text-green-400">Copied!</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</span>
+                                    }
+                                </div>
                             </div>
                             <div class="w-1.5 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
                                 <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
@@ -118,4 +131,22 @@
         // Invert the percentage so it counts down instead of up
         return (int)(((30.0 - remaining) / 30.0) * 100);
     }
+
+    private async Task CopyToClipboard(TotpCode totpCode)
+    {
+        var code = GetTotpCode(totpCode.SecretKey);
+        await JsInteropService.CopyToClipboard(code);
+        ClipboardCopyService.SetCopied(totpCode.Id.ToString());
+        StateHasChanged();
+
+        // After 2 seconds, reset the copied state
+        await Task.Delay(2000);
+        if (ClipboardCopyService.GetCopiedId() == totpCode.Id.ToString())
+        {
+            ClipboardCopyService.SetCopied(string.Empty);
+        }
+        StateHasChanged();
+    }
+
+    private bool IsCopied(string code) => ClipboardCopyService.GetCopiedId() == code;
 }

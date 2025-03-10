@@ -36,29 +36,34 @@
         @if (IsAddFormVisible)
         {
             <div class="p-4 mb-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Add 2FA TOTP Code</h4>
-                    <button @onclick="HideAddForm" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Close form</span>
-                    </button>
-                </div>
-                <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">If the website offers or requires 2FA for your account (such as Google Authenticator), you can use AliasVault instead to generate the codes for you.</p>
-                <div class="mb-4">
-                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-                    <input type="text" id="name" @bind="NewTotpCode.Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Service Name" required>
-                </div>
-                <div class="mb-4">
-                    <label for="secretKey" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Secret Key (32 characters)</label>
-                    <input type="text" id="secretKey" @bind="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter 32-character code" required>
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" @onclick="AddTotpCode" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        Save
-                    </button>
-                </div>
+                <EditForm Model="@NewTotpCode" OnValidSubmit="AddTotpCode">
+                    <DataAnnotationsValidator />
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">Add 2FA TOTP Code</h4>
+                        <button @onclick="HideAddForm" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                            <span class="sr-only">Close form</span>
+                        </button>
+                    </div>
+                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">If the website offers or requires 2FA for your account (such as Google Authenticator), you can use AliasVault instead to generate the codes for you.</p>
+                    <div class="mb-4">
+                        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name (optional)</label>
+                        <InputText id="name" @bind-Value="NewTotpCode.Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" />
+                        <ValidationMessage For="@(() => NewTotpCode.Name)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
+                    </div>
+                    <div class="mb-4">
+                        <label for="secretKey" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Secret Key</label>
+                        <InputText id="secretKey" @bind-Value="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter secret key (manual entry)" />
+                        <ValidationMessage For="@(() => NewTotpCode.SecretKey)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Save
+                        </button>
+                    </div>
+                </EditForm>
             </div>
         }
 
@@ -103,12 +108,6 @@
 
 @code {
     /// <summary>
-    /// The service name.
-    /// </summary>
-    [Parameter]
-    public string ServiceName { get; set; } = string.Empty;
-
-    /// <summary>
     /// The list of TOTP codes.
     /// </summary>
     [Parameter]
@@ -122,7 +121,7 @@
 
     private bool IsLoading { get; set; } = true;
     private bool IsAddFormVisible { get; set; } = false;
-    private TotpCode NewTotpCode { get; set; } = new();
+    private TotpCodeEdit NewTotpCode { get; set; } = new();
     private Timer? _refreshTimer;
     private Dictionary<string, string> _currentCodes = new();
     private List<Guid> OriginalTotpCodeIds { get; set; } = [];
@@ -208,10 +207,7 @@
 
     private void ShowAddForm()
     {
-        NewTotpCode = new TotpCode
-        {
-            Name = ServiceName
-        };
+        NewTotpCode = new TotpCodeEdit();
         IsAddFormVisible = true;
     }
 
@@ -222,22 +218,53 @@
 
     private async Task AddTotpCode()
     {
-        if (string.IsNullOrWhiteSpace(NewTotpCode.Name))
-        {
-            GlobalNotificationService.AddErrorMessage("Name is required.", true);
-            return;
-        }
+        string secretKey = NewTotpCode.SecretKey;
 
-        if (string.IsNullOrWhiteSpace(NewTotpCode.SecretKey))
+        // Sanitize the secret key (remove whitespace and hyphens)
+        secretKey = secretKey.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+        string? name = NewTotpCode.Name;
+
+        // Check if the input is a TOTP URI
+        if (secretKey.StartsWith("otpauth://totp/"))
         {
-            GlobalNotificationService.AddErrorMessage("Secret key is required.", true);
-            return;
+            try
+            {
+                var uri = new Uri(secretKey);
+                var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+                // Extract the secret from query parameters
+                secretKey = queryParams["secret"] ?? throw new Exception("Secret not found in URI");
+
+                // If no name was provided, try to get it from the URI
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    // The label is everything after 'totp/' and before '?'
+                    var label = uri.AbsolutePath.TrimStart('/');
+                    // If the label contains ':', take the part after it
+                    name = label.Contains(':') ? label.Split(':')[1] : label;
+
+                    // If there's an issuer in the query params, use it as a prefix
+                    var issuer = queryParams["issuer"];
+                    if (!string.IsNullOrWhiteSpace(issuer))
+                    {
+                        name = $"{issuer}: {name}";
+                    }
+                    NewTotpCode.Name = name;
+                }
+                NewTotpCode.SecretKey = secretKey;
+            }
+            catch (Exception)
+            {
+                GlobalNotificationService.AddErrorMessage("Invalid TOTP URI format. Please check and try again.", true);
+                return;
+            }
         }
 
         try
         {
             // Validate the secret key by trying to generate a code
-            TotpGenerator.GenerateTotpCode(NewTotpCode.SecretKey);
+            TotpGenerator.GenerateTotpCode(secretKey);
         }
         catch (Exception)
         {
@@ -246,14 +273,8 @@
         }
 
         // Create a new TOTP code in memory
-        var newTotpCode = new TotpCode
-        {
-            Id = Guid.Empty,
-            Name = NewTotpCode.Name,
-            SecretKey = NewTotpCode.SecretKey,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var newTotpCode = NewTotpCode.ToEntity();
+        newTotpCode.Name = name ?? "Authenticator";
 
         // Add to the list
         TotpCodeList.Add(newTotpCode);
