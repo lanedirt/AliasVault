@@ -10,7 +10,6 @@ namespace AliasClientDb;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// The AliasClientDbContext class.
@@ -79,6 +78,11 @@ public class AliasClientDbContext : DbContext
     public DbSet<Setting> Settings { get; set; }
 
     /// <summary>
+    /// Gets or sets the TotpCodes DbSet.
+    /// </summary>
+    public DbSet<TotpCode> TotpCodes { get; set; }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>
@@ -123,6 +127,13 @@ public class AliasClientDbContext : DbContext
         modelBuilder.Entity<Password>()
             .HasOne(l => l.Credential)
             .WithMany(c => c.Passwords)
+            .HasForeignKey(l => l.CredentialId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure TotpCode - Credential relationship
+        modelBuilder.Entity<TotpCode>()
+            .HasOne(l => l.Credential)
+            .WithMany(c => c.TotpCodes)
             .HasForeignKey(l => l.CredentialId)
             .OnDelete(DeleteBehavior.Cascade);
     }

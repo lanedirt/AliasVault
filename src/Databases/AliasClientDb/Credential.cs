@@ -54,6 +54,11 @@ public class Credential : SyncableEntity
     public virtual ICollection<Attachment> Attachments { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets the TOTP code objects.
+    /// </summary>
+    public virtual ICollection<TotpCode> TotpCodes { get; set; } = [];
+
+    /// <summary>
     /// Gets or sets the service ID foreign key.
     /// </summary>
     public Guid ServiceId { get; set; }
