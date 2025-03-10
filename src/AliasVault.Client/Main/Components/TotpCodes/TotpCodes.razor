@@ -4,7 +4,6 @@
 @inject ConfirmModalService ConfirmModalService
 @using AliasVault.RazorComponents.Services
 @using TotpGenerator
-@implements IDisposable
 
 <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex justify-between">
@@ -14,18 +13,14 @@
         @if (TotpCodeList.Where(t => !t.IsDeleted).Any() && !IsAddFormVisible)
         {
             <div>
-                <button @onclick="ShowAddForm" type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                <button id="add-totp-code" @onclick="ShowAddForm" type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                     Add TOTP Code
                 </button>
             </div>
         }
     </div>
 
-    @if (IsLoading)
-    {
-        <LoadingIndicator />
-    }
-    else if ((TotpCodeList.Count == 0 || TotpCodeList.All(t => t.IsDeleted)) && !IsAddFormVisible)
+    @if ((TotpCodeList.Count == 0 || TotpCodeList.All(t => t.IsDeleted)) && !IsAddFormVisible)
     {
         <div class="flex flex-col justify-center">
             <p class="text-gray-500 dark:text-gray-400"><a @onclick="ShowAddForm" href="javascript:void(0)" class="text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">Add a two-factor authenticator code</a></p>
@@ -77,23 +72,9 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex flex-col items-end">
-                                @if (OriginalTotpCodeIds.Contains(totpCode.Id))
-                                {
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
-                                }
-                                else
-                                {
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">Save to view code</div>
-                                }
+                                <div class="text-sm text-gray-500 dark:text-gray-400">Save to view code</div>
                             </div>
-                            <div class="w-1.5 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
-                                @if (OriginalTotpCodeIds.Contains(totpCode.Id))
-                                {
-                                    <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
-                                }
-                            </div>
-                            <button type="button" @onclick="() => DeleteTotpCode(totpCode)" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
+                            <button type="button" @onclick="() => DeleteTotpCode(totpCode)" class="delete-totp-code text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                                 </svg>
@@ -119,27 +100,19 @@
     [Parameter]
     public EventCallback<List<TotpCode>> TotpCodesChanged { get; set; }
 
-    private bool IsLoading { get; set; } = true;
+    /// <summary>
+    /// The dictionary of current cached TOTP codes.
+    /// </summary>
+    private Dictionary<string, string> _currentCodes = new();
+
     private bool IsAddFormVisible { get; set; } = false;
     private TotpCodeEdit NewTotpCode { get; set; } = new();
-    private Timer? _refreshTimer;
-    private Dictionary<string, string> _currentCodes = new();
     private List<Guid> OriginalTotpCodeIds { get; set; } = [];
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        _refreshTimer?.Dispose();
-    }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        LoadTotpCodes();
-
-        // Start a timer to refresh the TOTP codes every second
-        _refreshTimer = new Timer(async _ => await RefreshCodesAsync(), null, 0, 1000);
     }
 
     /// <inheritdoc/>
@@ -147,75 +120,30 @@
     {
         base.OnInitialized();
 
-        // Keep track of the original TOTP codes
+        // Keep track of the original TOTP codes.
         OriginalTotpCodeIds = TotpCodeList.Where(t => !t.IsDeleted).Select(t => t.Id).ToList();
     }
 
-    private void LoadTotpCodes()
-    {
-        IsLoading = true;
-        StateHasChanged();
-
-        // Generate initial codes
-        foreach (var code in TotpCodeList.Where(t => !t.IsDeleted))
-        {
-            _currentCodes[code.SecretKey] = TotpGenerator.GenerateTotpCode(code.SecretKey);
-        }
-
-        IsLoading = false;
-        StateHasChanged();
-    }
-
-    private async Task RefreshCodesAsync()
-    {
-        foreach (var code in TotpCodeList.Where(t => !t.IsDeleted))
-        {
-            var newCode = TotpGenerator.GenerateTotpCode(code.SecretKey);
-            if (!_currentCodes.ContainsKey(code.SecretKey) || _currentCodes[code.SecretKey] != newCode)
-            {
-                _currentCodes[code.SecretKey] = newCode;
-            }
-        }
-
-        // Always update the UI to refresh the progress bar
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private string GetTotpCode(string secretKey)
-    {
-        if (_currentCodes.TryGetValue(secretKey, out var code))
-        {
-            return code;
-        }
-
-        var newCode = TotpGenerator.GenerateTotpCode(secretKey);
-        _currentCodes[secretKey] = newCode;
-        return newCode;
-    }
-
-    private int GetRemainingSeconds()
-    {
-        return TotpCodeService.GetRemainingSeconds();
-    }
-
-    private int GetRemainingPercentage()
-    {
-        var remaining = GetRemainingSeconds();
-        // Invert the percentage so it counts down instead of up
-        return (int)(((30.0 - remaining) / 30.0) * 100);
-    }
-
+    /// <summary>
+    /// Shows the add form.
+    /// </summary>
     private void ShowAddForm()
     {
         NewTotpCode = new TotpCodeEdit();
         IsAddFormVisible = true;
     }
 
+    /// <summary>
+    /// Hides the add form.
+    /// </summary>
     private void HideAddForm()
     {
         IsAddFormVisible = false;
     }
 
+    /// <summary>
+    /// Adds a new TOTP code called from the add form.
+    /// </summary>
     private async Task AddTotpCode()
     {
         string secretKey = NewTotpCode.SecretKey;
@@ -289,6 +217,10 @@
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Deletes a TOTP code.
+    /// </summary>
+    /// <param name="totpCode">The TOTP code to delete.</param>
     private async Task DeleteTotpCode(TotpCode totpCode)
     {
         // Show confirmation modal.
