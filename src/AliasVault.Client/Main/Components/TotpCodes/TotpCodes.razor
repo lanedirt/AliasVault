@@ -1,12 +1,13 @@
 @inherits ComponentBase
 @inject TotpCodeService TotpCodeService
 @inject GlobalNotificationService GlobalNotificationService
+@inject DbService DbService
 @implements IDisposable
 
 <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex justify-between">
         <div>
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">Two-Factor Authentication</h3>
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">Two-factor authentication</h3>
         </div>
         @if (TotpCodeList.Count > 0)
         {
@@ -25,32 +26,33 @@
     else if (TotpCodeList.Count == 0)
     {
         <div class="flex flex-col justify-center">
-            <p class="mb-4 text-gray-500 dark:text-gray-400">No 2FA TOTP codes added yet.</p>
-            <button @onclick="ShowAddTotpCodeModal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                Add 2FA TOTP Code
-            </button>
+            <p class="text-gray-500 dark:text-gray-400"><a @onclick="ShowAddTotpCodeModal" href="javascript:void(0)" class="text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">Add a two-factor authenticator code</a></p>
         </div>
     }
     else
     {
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 mt-4">
             @foreach (var totpCode in TotpCodeList)
             {
                 <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@totpCode.Name</h4>
-                        <button @onclick="() => DeleteTotpCode(totpCode.Id)" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">@GetTotpCode(totpCode.SecretKey)</div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-2">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: @(GetRemainingPercentage())%"></div>
+                    <div class="flex justify-between items-center gap-4">
+                        <div class="flex items-center flex-1">
+                            <h4 class="text-lg font-medium text-gray-900 dark:text-white">@totpCode.Name</h4>
                         </div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Refreshes in @GetRemainingSeconds() seconds</div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col items-end">
+                                <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
+                            </div>
+                            <div class="w-1.5 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
+                                <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
+                            </div>
+                            <button @onclick="() => DeleteTotpCode(totpCode.Id)" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             }
@@ -75,14 +77,14 @@
                     </button>
                 </div>
                 <div class="p-4 md:p-5">
+                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">If the website offers or requires 2FA for your account (such as Google Authenticator), you can use AliasVault instead to generate the codes for you.</p>
                     <div class="mb-4">
                         <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                         <input type="text" id="name" @bind="NewTotpCode.Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Service Name" required>
                     </div>
                     <div class="mb-4">
                         <label for="secretKey" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Secret Key (32 characters)</label>
-                        <input type="text" id="secretKey" @bind="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="JBSWY3DPEHPK3PXP" required>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter the secret key provided by the service.</p>
+                        <input type="text" id="secretKey" @bind="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter 32-character code" required>
                     </div>
                     <button @onclick="AddTotpCode" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         Save
@@ -142,22 +144,17 @@
 
     private async Task RefreshCodesAsync()
     {
-        bool hasChanges = false;
-
         foreach (var code in TotpCodeList)
         {
             var newCode = TotpCodeService.GenerateTotpCode(code.SecretKey);
             if (!_currentCodes.ContainsKey(code.SecretKey) || _currentCodes[code.SecretKey] != newCode)
             {
                 _currentCodes[code.SecretKey] = newCode;
-                hasChanges = true;
             }
         }
 
-        if (hasChanges)
-        {
-            await InvokeAsync(StateHasChanged);
-        }
+        // Always update the UI to refresh the progress bar
+        await InvokeAsync(StateHasChanged);
     }
 
     private string GetTotpCode(string secretKey)
@@ -180,7 +177,8 @@
     private int GetRemainingPercentage()
     {
         var remaining = GetRemainingSeconds();
-        return (int)((remaining / 30.0) * 100);
+        // Invert the percentage so it counts down instead of up
+        return (int)(((30.0 - remaining) / 30.0) * 100);
     }
 
     private void ShowAddTotpCodeModal()
@@ -226,9 +224,10 @@
         var result = await TotpCodeService.AddTotpCodeAsync(NewTotpCode);
         if (result != null)
         {
-            GlobalNotificationService.AddSuccessMessage("TOTP code added successfully.", true);
             HideAddTotpCodeModal();
+            GlobalNotificationService.AddSuccessMessage("TOTP code added successfully.", true);
             await LoadTotpCodesAsync();
+            await DbService.SaveDatabaseAsync();
         }
         else
         {
@@ -243,6 +242,7 @@
         {
             GlobalNotificationService.AddSuccessMessage("TOTP code deleted successfully.", true);
             await LoadTotpCodesAsync();
+            await DbService.SaveDatabaseAsync();
         }
         else
         {
