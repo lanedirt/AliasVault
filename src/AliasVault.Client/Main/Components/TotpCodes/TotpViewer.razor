@@ -1,0 +1,121 @@
+@inherits ComponentBase
+@inject TotpCodeService TotpCodeService
+@implements IDisposable
+@using TotpGenerator
+
+<div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="flex justify-between">
+        <div>
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">Two-factor authentication</h3>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <LoadingIndicator />
+    }
+    else if (TotpCodeList.Count == 0)
+    {
+        <div class="flex flex-col justify-center">
+            <p class="text-gray-500 dark:text-gray-400">No two-factor authenticator codes available</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 gap-4 mt-4">
+            @foreach (var totpCode in TotpCodeList)
+            {
+                <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    <div class="flex justify-between items-center gap-4">
+                        <div class="flex items-center flex-1">
+                            <h4 class="text-lg font-medium text-gray-900 dark:text-white">@totpCode.Name</h4>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col items-end">
+                                <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
+                            </div>
+                            <div class="w-1.5 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
+                                <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The list of TOTP codes to display.
+    /// </summary>
+    [Parameter]
+    public required ICollection<TotpCode> TotpCodeList { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+    private Timer? _refreshTimer;
+    private Dictionary<string, string> _currentCodes = new();
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Generate initial codes
+        foreach (var code in TotpCodeList)
+        {
+            _currentCodes[code.SecretKey] = TotpGenerator.GenerateTotpCode(code.SecretKey);
+        }
+
+        // Start a timer to refresh the TOTP codes every second
+        _refreshTimer = new Timer(async _ => await RefreshCodesAsync(), null, 0, 1000);
+
+        IsLoading = false;
+    }
+
+    private async Task RefreshCodesAsync()
+    {
+        foreach (var code in TotpCodeList)
+        {
+            var newCode = TotpGenerator.GenerateTotpCode(code.SecretKey);
+            if (!_currentCodes.ContainsKey(code.SecretKey) || _currentCodes[code.SecretKey] != newCode)
+            {
+                _currentCodes[code.SecretKey] = newCode;
+            }
+        }
+
+        // Always update the UI to refresh the progress bar
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetTotpCode(string secretKey)
+    {
+        if (_currentCodes.TryGetValue(secretKey, out var code))
+        {
+            return code;
+        }
+
+        var newCode = TotpGenerator.GenerateTotpCode(secretKey);
+        _currentCodes[secretKey] = newCode;
+        return newCode;
+    }
+
+    private int GetRemainingSeconds()
+    {
+        return TotpCodeService.GetRemainingSeconds();
+    }
+
+    private int GetRemainingPercentage()
+    {
+        var remaining = GetRemainingSeconds();
+        // Invert the percentage so it counts down instead of up
+        return (int)(((30.0 - remaining) / 30.0) * 100);
+    }
+}

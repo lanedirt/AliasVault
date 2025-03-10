@@ -182,6 +182,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             login.Attachments.Add(attachment);
         }
 
+        // Add TOTP codes
+        foreach (var totpCode in loginObject.TotpCodes)
+        {
+            login.TotpCodes.Add(totpCode);
+        }
+
         context.Credentials.Add(login);
 
         // Add password.
@@ -253,8 +259,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         login.Service.UpdatedAt = DateTime.UtcNow;
 
         // Remove attachments that are no longer in the list
-        var attachmentsToRemove = login.Attachments.Where(existingAttachment =>
-            !loginObject.Attachments.Any(a => a.Id == existingAttachment.Id)).ToList();
+        var attachmentsToRemove = login.Attachments.Where(existingAttachment => !loginObject.Attachments.Any(a => a.Id == existingAttachment.Id)).ToList();
         foreach (var attachmentToRemove in attachmentsToRemove)
         {
             login.Attachments.Remove(attachmentToRemove);
@@ -280,6 +285,33 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             }
         }
 
+        // Remove TOTP codes that are no longer in the list
+        var totpCodesToRemove = login.TotpCodes.Where(existingTotp => !loginObject.TotpCodes.Any(t => t.Id == existingTotp.Id)).ToList();
+        foreach (var totpToRemove in totpCodesToRemove)
+        {
+            login.TotpCodes.Remove(totpToRemove);
+            context.Entry(totpToRemove).State = EntityState.Deleted;
+        }
+
+        // Update existing TOTP codes and add new ones
+        foreach (var totpCode in loginObject.TotpCodes)
+        {
+            if (totpCode.Id != Guid.Empty)
+            {
+                var existingTotpCode = login.TotpCodes.FirstOrDefault(t => t.Id == totpCode.Id);
+                if (existingTotpCode != null)
+                {
+                    // Update existing TOTP code
+                    context.Entry(existingTotpCode).CurrentValues.SetValues(totpCode);
+                }
+            }
+            else
+            {
+                // Add new TOTP code
+                login.TotpCodes.Add(totpCode);
+            }
+        }
+
         // Save the database to the server.
         if (!await dbService.SaveDatabaseAsync())
         {
@@ -300,14 +332,23 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         var context = await dbService.GetDbContextAsync();
 
         var loginObject = await context.Credentials
-        .Include(x => x.Passwords)
-        .Include(x => x.Alias)
-        .Include(x => x.Service)
-        .Include(x => x.Attachments)
-        .AsSplitQuery()
-        .Where(x => x.Id == loginId)
-        .Where(x => !x.IsDeleted)
-        .FirstOrDefaultAsync();
+            .Include(x => x.Passwords)
+            .Include(x => x.Alias)
+            .Include(x => x.Service)
+            .Include(x => x.Attachments)
+            .Include(x => x.TotpCodes)
+            .AsSplitQuery()
+            .Where(x => x.Id == loginId)
+            .Where(x => !x.IsDeleted)
+            .FirstOrDefaultAsync();
+
+        if (loginObject != null)
+        {
+            // Filter out deleted items from collections after loading
+            loginObject.Passwords = loginObject.Passwords.Where(p => !p.IsDeleted).ToList();
+            loginObject.Attachments = loginObject.Attachments.Where(a => !a.IsDeleted).ToList();
+            loginObject.TotpCodes = loginObject.TotpCodes.Where(t => !t.IsDeleted).ToList();
+        }
 
         return loginObject;
     }
@@ -321,13 +362,14 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         var context = await dbService.GetDbContextAsync();
 
         var loginObject = await context.Credentials
-        .Include(x => x.Passwords)
-        .Include(x => x.Alias)
-        .Include(x => x.Service)
-        .Include(x => x.Attachments)
-        .AsSplitQuery()
-        .Where(x => !x.IsDeleted)
-        .ToListAsync();
+            .Include(x => x.Passwords.Where(p => !p.IsDeleted))
+            .Include(x => x.Alias)
+            .Include(x => x.Service)
+            .Include(x => x.Attachments.Where(a => !a.IsDeleted))
+            .Include(x => x.TotpCodes.Where(t => !t.IsDeleted))
+            .AsSplitQuery()
+            .Where(x => !x.IsDeleted)
+            .ToListAsync();
 
         return loginObject;
     }

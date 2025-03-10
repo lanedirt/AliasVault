@@ -100,8 +100,12 @@
             if (OriginalAttachmentsIds.Contains(attachment.Id))
             {
                 // If it was part of the original set, we soft delete it.
-                attachment.IsDeleted = true;
-                attachment.UpdatedAt = DateTime.UtcNow;
+                var attachmentToDelete = Attachments.FirstOrDefault(a => a.Id == attachment.Id);
+                if (attachmentToDelete is not null)
+                {
+                    attachmentToDelete.IsDeleted = true;
+                    attachmentToDelete.UpdatedAt = DateTime.UtcNow;
+                }
             }
             else
             {
