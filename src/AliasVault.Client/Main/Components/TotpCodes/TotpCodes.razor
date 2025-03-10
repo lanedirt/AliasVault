@@ -1,7 +1,9 @@
 @inherits ComponentBase
 @inject TotpCodeService TotpCodeService
 @inject GlobalNotificationService GlobalNotificationService
-@inject DbService DbService
+@inject ConfirmModalService ConfirmModalService
+@using AliasVault.RazorComponents.Services
+@using TotpGenerator
 @implements IDisposable
 
 <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -9,10 +11,10 @@
         <div>
             <h3 class="mb-4 text-xl font-semibold dark:text-white">Two-factor authentication</h3>
         </div>
-        @if (TotpCodeList.Count > 0)
+        @if (TotpCodeList.Where(t => !t.IsDeleted).Any() && !IsAddFormVisible)
         {
             <div>
-                <button @onclick="ShowAddTotpCodeModal" type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                <button @onclick="ShowAddForm" type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                     Add TOTP Code
                 </button>
             </div>
@@ -23,16 +25,45 @@
     {
         <LoadingIndicator />
     }
-    else if (TotpCodeList.Count == 0)
+    else if ((TotpCodeList.Count == 0 || TotpCodeList.All(t => t.IsDeleted)) && !IsAddFormVisible)
     {
         <div class="flex flex-col justify-center">
-            <p class="text-gray-500 dark:text-gray-400"><a @onclick="ShowAddTotpCodeModal" href="javascript:void(0)" class="text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">Add a two-factor authenticator code</a></p>
+            <p class="text-gray-500 dark:text-gray-400"><a @onclick="ShowAddForm" href="javascript:void(0)" class="text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">Add a two-factor authenticator code</a></p>
         </div>
     }
     else
     {
+        @if (IsAddFormVisible)
+        {
+            <div class="p-4 mb-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Add 2FA TOTP Code</h4>
+                    <button @onclick="HideAddForm" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close form</span>
+                    </button>
+                </div>
+                <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">If the website offers or requires 2FA for your account (such as Google Authenticator), you can use AliasVault instead to generate the codes for you.</p>
+                <div class="mb-4">
+                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+                    <input type="text" id="name" @bind="NewTotpCode.Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Service Name" required>
+                </div>
+                <div class="mb-4">
+                    <label for="secretKey" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Secret Key (32 characters)</label>
+                    <input type="text" id="secretKey" @bind="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter 32-character code" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" @onclick="AddTotpCode" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Save
+                    </button>
+                </div>
+            </div>
+        }
+
         <div class="grid grid-cols-1 gap-4 mt-4">
-            @foreach (var totpCode in TotpCodeList)
+            @foreach (var totpCode in TotpCodeList.Where(t => !t.IsDeleted))
             {
                 <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
                     <div class="flex justify-between items-center gap-4">
@@ -41,13 +72,23 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex flex-col items-end">
-                                <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
+                                @if (OriginalTotpCodeIds.Contains(totpCode.Id))
+                                {
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">@GetTotpCode(totpCode.SecretKey)</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">@GetRemainingSeconds()s</div>
+                                }
+                                else
+                                {
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">Save to view code</div>
+                                }
                             </div>
                             <div class="w-1.5 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
-                                <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
+                                @if (OriginalTotpCodeIds.Contains(totpCode.Id))
+                                {
+                                    <div class="bg-blue-600 rounded-full transition-all" style="height: @(GetRemainingPercentage())%; width: 100%"></div>
+                                }
                             </div>
-                            <button @onclick="() => DeleteTotpCode(totpCode.Id)" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
+                            <button type="button" @onclick="() => DeleteTotpCode(totpCode)" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                                 </svg>
@@ -60,82 +101,66 @@
     }
 </div>
 
-@if (IsAddTotpCodeModalVisible)
-{
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="relative p-4 w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                        Add 2FA TOTP Code
-                    </h3>
-                    <button @onclick="HideAddTotpCodeModal" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <div class="p-4 md:p-5">
-                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">If the website offers or requires 2FA for your account (such as Google Authenticator), you can use AliasVault instead to generate the codes for you.</p>
-                    <div class="mb-4">
-                        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-                        <input type="text" id="name" @bind="NewTotpCode.Name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Service Name" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="secretKey" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Secret Key (32 characters)</label>
-                        <input type="text" id="secretKey" @bind="NewTotpCode.SecretKey" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter 32-character code" required>
-                    </div>
-                    <button @onclick="AddTotpCode" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        Save
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
 @code {
-    /// <summary>
-    /// The credential ID.
-    /// </summary>
-    [Parameter]
-    public Guid CredentialId { get; set; }
-
     /// <summary>
     /// The service name.
     /// </summary>
     [Parameter]
     public string ServiceName { get; set; } = string.Empty;
 
-    private List<TotpCode> TotpCodeList { get; set; } = new();
+    /// <summary>
+    /// The list of TOTP codes.
+    /// </summary>
+    [Parameter]
+    public List<TotpCode> TotpCodeList { get; set; } = [];
+
+    /// <summary>
+    /// Event callback for when the TOTP codes list changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<List<TotpCode>> TotpCodesChanged { get; set; }
+
     private bool IsLoading { get; set; } = true;
-    private bool IsAddTotpCodeModalVisible { get; set; } = false;
+    private bool IsAddFormVisible { get; set; } = false;
     private TotpCode NewTotpCode { get; set; } = new();
     private Timer? _refreshTimer;
     private Dictionary<string, string> _currentCodes = new();
+    private List<Guid> OriginalTotpCodeIds { get; set; } = [];
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+    }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await LoadTotpCodesAsync();
+        LoadTotpCodes();
 
         // Start a timer to refresh the TOTP codes every second
         _refreshTimer = new Timer(async _ => await RefreshCodesAsync(), null, 0, 1000);
     }
 
-    private async Task LoadTotpCodesAsync()
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Keep track of the original TOTP codes
+        OriginalTotpCodeIds = TotpCodeList.Where(t => !t.IsDeleted).Select(t => t.Id).ToList();
+    }
+
+    private void LoadTotpCodes()
     {
         IsLoading = true;
         StateHasChanged();
 
-        TotpCodeList = await TotpCodeService.GetTotpCodesAsync(CredentialId);
-
         // Generate initial codes
-        foreach (var code in TotpCodeList)
+        foreach (var code in TotpCodeList.Where(t => !t.IsDeleted))
         {
-            _currentCodes[code.SecretKey] = TotpCodeService.GenerateTotpCode(code.SecretKey);
+            _currentCodes[code.SecretKey] = TotpGenerator.GenerateTotpCode(code.SecretKey);
         }
 
         IsLoading = false;
@@ -144,9 +169,9 @@
 
     private async Task RefreshCodesAsync()
     {
-        foreach (var code in TotpCodeList)
+        foreach (var code in TotpCodeList.Where(t => !t.IsDeleted))
         {
-            var newCode = TotpCodeService.GenerateTotpCode(code.SecretKey);
+            var newCode = TotpGenerator.GenerateTotpCode(code.SecretKey);
             if (!_currentCodes.ContainsKey(code.SecretKey) || _currentCodes[code.SecretKey] != newCode)
             {
                 _currentCodes[code.SecretKey] = newCode;
@@ -164,7 +189,7 @@
             return code;
         }
 
-        var newCode = TotpCodeService.GenerateTotpCode(secretKey);
+        var newCode = TotpGenerator.GenerateTotpCode(secretKey);
         _currentCodes[secretKey] = newCode;
         return newCode;
     }
@@ -181,19 +206,18 @@
         return (int)(((30.0 - remaining) / 30.0) * 100);
     }
 
-    private void ShowAddTotpCodeModal()
+    private void ShowAddForm()
     {
         NewTotpCode = new TotpCode
         {
-            CredentialId = CredentialId,
             Name = ServiceName
         };
-        IsAddTotpCodeModalVisible = true;
+        IsAddFormVisible = true;
     }
 
-    private void HideAddTotpCodeModal()
+    private void HideAddForm()
     {
-        IsAddTotpCodeModalVisible = false;
+        IsAddFormVisible = false;
     }
 
     private async Task AddTotpCode()
@@ -213,7 +237,7 @@
         try
         {
             // Validate the secret key by trying to generate a code
-            TotpCodeService.GenerateTotpCode(NewTotpCode.SecretKey);
+            TotpGenerator.GenerateTotpCode(NewTotpCode.SecretKey);
         }
         catch (Exception)
         {
@@ -221,38 +245,57 @@
             return;
         }
 
-        var result = await TotpCodeService.AddTotpCodeAsync(NewTotpCode);
-        if (result != null)
+        // Create a new TOTP code in memory
+        var newTotpCode = new TotpCode
         {
-            HideAddTotpCodeModal();
-            GlobalNotificationService.AddSuccessMessage("TOTP code added successfully.", true);
-            await LoadTotpCodesAsync();
-            await DbService.SaveDatabaseAsync();
+            Id = Guid.Empty,
+            Name = NewTotpCode.Name,
+            SecretKey = NewTotpCode.SecretKey,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Add to the list
+        TotpCodeList.Add(newTotpCode);
+
+        // Notify parent component
+        await TotpCodesChanged.InvokeAsync(TotpCodeList);
+
+        HideAddForm();
+
+        // Refresh the codes
+        _currentCodes[newTotpCode.SecretKey] = TotpGenerator.GenerateTotpCode(newTotpCode.SecretKey);
+        StateHasChanged();
+    }
+
+    private async Task DeleteTotpCode(TotpCode totpCode)
+    {
+        // Show confirmation modal.
+        var result = await ConfirmModalService.ShowConfirmation("Delete TOTP code", "Are you sure you want to delete this TOTP code?");
+        if (!result)
+        {
+            return;
+        }
+
+        // Check if the TOTP code was part of the original set
+        if (OriginalTotpCodeIds.Contains(totpCode.Id))
+        {
+            // If it was part of the original set, we soft delete it
+            var totpCodeToDelete = TotpCodeList.FirstOrDefault(t => t.Id == totpCode.Id);
+            if (totpCodeToDelete is not null)
+            {
+                totpCodeToDelete.IsDeleted = true;
+                totpCodeToDelete.UpdatedAt = DateTime.UtcNow;
+            }
         }
         else
         {
-            GlobalNotificationService.AddErrorMessage("Failed to add TOTP code. Please try again.", true);
+            // If it was not part of the original set, we hard delete it
+            TotpCodeList.Remove(totpCode);
         }
-    }
 
-    private async Task DeleteTotpCode(Guid totpCodeId)
-    {
-        var result = await TotpCodeService.DeleteTotpCodeAsync(totpCodeId);
-        if (result)
-        {
-            GlobalNotificationService.AddSuccessMessage("TOTP code deleted successfully.", true);
-            await LoadTotpCodesAsync();
-            await DbService.SaveDatabaseAsync();
-        }
-        else
-        {
-            GlobalNotificationService.AddErrorMessage("Failed to delete TOTP code. Please try again.", true);
-        }
-    }
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        _refreshTimer?.Dispose();
+        // Notify parent component
+        await TotpCodesChanged.InvokeAsync(TotpCodeList);
+        StateHasChanged();
     }
 }

@@ -80,4 +80,9 @@ public sealed class CredentialEdit
     /// Gets or sets the Attachment list.
     /// </summary>
     public List<Attachment> Attachments { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the TOTP codes list.
+    /// </summary>
+    public List<TotpCode> TotpCodes { get; set; } = [];
 }
