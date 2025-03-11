@@ -72,6 +72,9 @@ and then in the prompt choose option 2.
 
 AliasVault includes a built-in email server that can handle multiple custom domains for your aliases.
 
+{: .note }
+Please be aware that if you skip this step, AliasVault will default to use public email domains offered by SpamOK. While this will still work for creating email aliases, it has privacy limitations. For complete privacy and control, we recommend following the setup steps below to use your own private domain. [Learn more about the differences between private and public email domains](../misc/private-vs-public-email.md).
+
 To set up the email server, you need the following:
 - Public IPv4 address
 - Open ports (25 and 587) in server firewall for SMTP traffic
