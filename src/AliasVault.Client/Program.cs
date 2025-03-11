@@ -74,7 +74,6 @@ builder.Services.AddScoped<GlobalLoadingService>();
 builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<TotpCodeService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 builder.Services.AddScoped<ConfirmModalService>();
 

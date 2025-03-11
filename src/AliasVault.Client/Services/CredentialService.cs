@@ -222,8 +222,6 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             throw new InvalidOperationException("Login object not found.");
         }
 
-        // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
-        // So we remove it.
         if (loginObject.Alias.Email is not null && loginObject.Alias.Email.StartsWith('@'))
         {
             loginObject.Alias.Email = null;
@@ -235,87 +233,13 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             loginObject.Service.Url = null;
         }
 
-        login.UpdatedAt = DateTime.UtcNow;
-        login.Notes = loginObject.Notes;
-        login.Username = loginObject.Username;
+        // Update all fields and collections.
+        UpdateBasicCredentialInfo(login, loginObject);
+        UpdateAttachments(context, login, loginObject);
+        UpdateTotpCodes(context, login, loginObject);
 
-        login.Alias.NickName = loginObject.Alias.NickName;
-        login.Alias.FirstName = loginObject.Alias.FirstName;
-        login.Alias.LastName = loginObject.Alias.LastName;
-        login.Alias.BirthDate = loginObject.Alias.BirthDate;
-        login.Alias.Gender = loginObject.Alias.Gender;
-        login.Alias.Email = loginObject.Alias.Email;
-        login.Alias.UpdatedAt = DateTime.UtcNow;
-
-        login.Passwords = loginObject.Passwords;
-        if (login.Passwords.Count > 0)
-        {
-            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
-        }
-
-        login.Service.Name = loginObject.Service.Name;
-        login.Service.Url = loginObject.Service.Url;
-        login.Service.Logo = loginObject.Service.Logo;
-        login.Service.UpdatedAt = DateTime.UtcNow;
-
-        // Remove attachments that are no longer in the list
-        var attachmentsToRemove = login.Attachments.Where(existingAttachment => !loginObject.Attachments.Any(a => a.Id == existingAttachment.Id)).ToList();
-        foreach (var attachmentToRemove in attachmentsToRemove)
-        {
-            login.Attachments.Remove(attachmentToRemove);
-            context.Entry(attachmentToRemove).State = EntityState.Deleted;
-        }
-
-        // Update existing attachments and add new ones
-        foreach (var attachment in loginObject.Attachments)
-        {
-            if (attachment.Id != Guid.Empty)
-            {
-                var existingAttachment = login.Attachments.FirstOrDefault(a => a.Id == attachment.Id);
-                if (existingAttachment != null)
-                {
-                    // Update existing attachment
-                    context.Entry(existingAttachment).CurrentValues.SetValues(attachment);
-                }
-            }
-            else
-            {
-                // Add new attachment
-                login.Attachments.Add(attachment);
-            }
-        }
-
-        // Remove TOTP codes that are no longer in the list
-        var totpCodesToRemove = login.TotpCodes.Where(existingTotp => !loginObject.TotpCodes.Any(t => t.Id == existingTotp.Id)).ToList();
-        foreach (var totpToRemove in totpCodesToRemove)
-        {
-            login.TotpCodes.Remove(totpToRemove);
-            context.Entry(totpToRemove).State = EntityState.Deleted;
-        }
-
-        // Update existing TOTP codes and add new ones
-        foreach (var totpCode in loginObject.TotpCodes)
-        {
-            if (totpCode.Id != Guid.Empty)
-            {
-                var existingTotpCode = login.TotpCodes.FirstOrDefault(t => t.Id == totpCode.Id);
-                if (existingTotpCode != null)
-                {
-                    // Update existing TOTP code
-                    context.Entry(existingTotpCode).CurrentValues.SetValues(totpCode);
-                }
-            }
-            else
-            {
-                // Add new TOTP code
-                login.TotpCodes.Add(totpCode);
-            }
-        }
-
-        // Save the database to the server.
         if (!await dbService.SaveDatabaseAsync())
         {
-            // If saving database failed, return empty guid to indicate error.
             return Guid.Empty;
         }
 
@@ -432,6 +356,107 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         service.UpdatedAt = DateTime.UtcNow;
 
         return await dbService.SaveDatabaseAsync();
+    }
+
+    /// <summary>
+    /// Update the basic credential information.
+    /// </summary>
+    /// <param name="login">The login object to update.</param>
+    /// <param name="loginObject">The login object to update from.</param>
+    private static void UpdateBasicCredentialInfo(Credential login, Credential loginObject)
+    {
+        login.UpdatedAt = DateTime.UtcNow;
+        login.Notes = loginObject.Notes;
+        login.Username = loginObject.Username;
+
+        login.Alias.NickName = loginObject.Alias.NickName;
+        login.Alias.FirstName = loginObject.Alias.FirstName;
+        login.Alias.LastName = loginObject.Alias.LastName;
+        login.Alias.BirthDate = loginObject.Alias.BirthDate;
+        login.Alias.Gender = loginObject.Alias.Gender;
+        login.Alias.Email = loginObject.Alias.Email;
+        login.Alias.UpdatedAt = DateTime.UtcNow;
+
+        login.Passwords = loginObject.Passwords;
+        if (login.Passwords.Count > 0)
+        {
+            login.Passwords.First().UpdatedAt = DateTime.UtcNow;
+        }
+
+        login.Service.Name = loginObject.Service.Name;
+        login.Service.Url = loginObject.Service.Url;
+        login.Service.Logo = loginObject.Service.Logo;
+        login.Service.UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Update the attachments.
+    /// </summary>
+    /// <param name="context">The database context.</param>
+    /// <param name="login">The login object to update.</param>
+    /// <param name="loginObject">The login object to update from.</param>
+    private static void UpdateAttachments(DbContext context, Credential login, Credential loginObject)
+    {
+        var attachmentsToRemove = login.Attachments
+            .Where(existingAttachment => !loginObject.Attachments.Any(a => a.Id == existingAttachment.Id))
+            .ToList();
+
+        foreach (var attachmentToRemove in attachmentsToRemove)
+        {
+            login.Attachments.Remove(attachmentToRemove);
+            context.Entry(attachmentToRemove).State = EntityState.Deleted;
+        }
+
+        foreach (var attachment in loginObject.Attachments)
+        {
+            if (attachment.Id != Guid.Empty)
+            {
+                var existingAttachment = login.Attachments.FirstOrDefault(a => a.Id == attachment.Id);
+                if (existingAttachment != null)
+                {
+                    context.Entry(existingAttachment).CurrentValues.SetValues(attachment);
+                }
+            }
+            else
+            {
+                login.Attachments.Add(attachment);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Update the TOTP codes.
+    /// </summary>
+    /// <param name="context">The database context.</param>
+    /// <param name="login">The login object to update.</param>
+    /// <param name="loginObject">The login object to update from.</param>
+    private static void UpdateTotpCodes(DbContext context, Credential login, Credential loginObject)
+    {
+        var totpCodesToRemove = login.TotpCodes
+            .Where(existingTotp => !loginObject.TotpCodes.Any(t => t.Id == existingTotp.Id))
+            .ToList();
+
+        foreach (var totpToRemove in totpCodesToRemove)
+        {
+            login.TotpCodes.Remove(totpToRemove);
+            context.Entry(totpToRemove).State = EntityState.Deleted;
+        }
+
+        foreach (var totpCode in loginObject.TotpCodes)
+        {
+            if (totpCode.Id != Guid.Empty)
+            {
+                var existingTotpCode = login.TotpCodes.FirstOrDefault(t => t.Id == totpCode.Id);
+                if (existingTotpCode != null)
+                {
+                    context.Entry(existingTotpCode).CurrentValues.SetValues(totpCode);
+                }
+            }
+            else
+            {
+                login.TotpCodes.Add(totpCode);
+            }
+        }
     }
 
     /// <summary>
