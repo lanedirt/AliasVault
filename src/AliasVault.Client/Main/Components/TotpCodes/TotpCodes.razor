@@ -1,5 +1,4 @@
 @inherits ComponentBase
-@inject TotpCodeService TotpCodeService
 @inject GlobalNotificationService GlobalNotificationService
 @inject ConfirmModalService ConfirmModalService
 @using AliasVault.RazorComponents.Services
@@ -10,7 +9,7 @@
         <div>
             <h3 class="mb-4 text-xl font-semibold dark:text-white">Two-factor authentication</h3>
         </div>
-        @if (TotpCodeList.Where(t => !t.IsDeleted).Any() && !IsAddFormVisible)
+        @if (TotpCodeList.Any(t => !t.IsDeleted) && !IsAddFormVisible)
         {
             <div>
                 <button id="add-totp-code" @onclick="ShowAddForm" type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
@@ -100,11 +99,6 @@
     [Parameter]
     public EventCallback<List<TotpCode>> TotpCodesChanged { get; set; }
 
-    /// <summary>
-    /// The dictionary of current cached TOTP codes.
-    /// </summary>
-    private Dictionary<string, string> _currentCodes = new();
-
     private bool IsAddFormVisible { get; set; } = false;
     private TotpCodeEdit NewTotpCode { get; set; } = new();
     private List<Guid> OriginalTotpCodeIds { get; set; } = [];
@@ -150,7 +144,6 @@
 
         // Sanitize the secret key (remove whitespace and hyphens)
         secretKey = secretKey.Replace(" ", string.Empty).Replace("-", string.Empty);
-
         string? name = NewTotpCode.Name;
 
         // Check if the input is a TOTP URI
@@ -162,7 +155,7 @@
                 var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
 
                 // Extract the secret from query parameters
-                secretKey = queryParams["secret"] ?? throw new Exception("Secret not found in URI");
+                secretKey = queryParams["secret"] ?? throw new ArgumentException("Secret not found in URI");
 
                 // If no name was provided, try to get it from the URI
                 if (string.IsNullOrWhiteSpace(name))
@@ -211,9 +204,6 @@
         await TotpCodesChanged.InvokeAsync(TotpCodeList);
 
         HideAddForm();
-
-        // Refresh the codes
-        _currentCodes[newTotpCode.SecretKey] = TotpGenerator.GenerateTotpCode(newTotpCode.SecretKey);
         StateHasChanged();
     }
 
