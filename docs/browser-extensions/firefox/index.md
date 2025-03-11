@@ -11,7 +11,7 @@ In order to install the Firefox Extension, see the options below.
 ## Firefox Add-ons
 Installing the extension from the Firefox Add-ons is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
-1. Go to the (TODO: add Firefox Add-ons link)
+1. Go to the [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) page
 2. Click on the "Add to Firefox" button
 3. The extension will be installed and added to your browser
 
