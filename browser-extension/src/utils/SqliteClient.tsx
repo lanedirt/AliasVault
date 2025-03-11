@@ -434,9 +434,11 @@ class SqliteClient {
     }
 
     try {
-      // Check if TotpCodes table exists (for backward compatibility).
-      // TODO: whenever the browser extension has a minimum client DB version of 1.5.0+,
-      // we can remove this check as the TotpCodes table then is guaranteed to exist.
+      /*
+       * Check if TotpCodes table exists (for backward compatibility).
+       * TODO: whenever the browser extension has a minimum client DB version of 1.5.0+,
+       * we can remove this check as the TotpCodes table then is guaranteed to exist.
+       */
       if (!this.tableExists('TotpCodes')) {
         return [];
       }
@@ -463,7 +465,7 @@ class SqliteClient {
    * @param tableName - The name of the table to check
    * @returns True if the table exists, false otherwise
    */
-   private tableExists(tableName: string): boolean {
+  private tableExists(tableName: string): boolean {
     if (!this.db) {
       throw new Error('Database not initialized');
     }

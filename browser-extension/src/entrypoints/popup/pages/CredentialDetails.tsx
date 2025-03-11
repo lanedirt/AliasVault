@@ -101,7 +101,7 @@ const CredentialDetails: React.FC = () => {
 
   return (
     <div className="">
-      <div className="space-y-6">
+      <div className="space-y-4 mb-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <img
@@ -148,17 +148,15 @@ const CredentialDetails: React.FC = () => {
         {credential.Email && (
           <>
             {isEmailDomainSupported(credential.Email) && (
-              <div className="mt-6">
-                <EmailPreview
-                  email={credential.Email}
-                />
-              </div>
+              <EmailPreview
+                email={credential.Email}
+              />
             )}
           </>
         )}
-      </div>
 
-      <TotpViewer credentialId={credential.Id} />
+        <TotpViewer credentialId={credential.Id} />
+      </div>
 
       <div className="grid gap-6">
         <div className="space-y-4 lg:col-span-2 xl:col-span-1">
