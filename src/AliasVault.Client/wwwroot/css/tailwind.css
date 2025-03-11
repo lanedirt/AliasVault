@@ -1172,6 +1172,10 @@ video {
   justify-content: space-between;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-3 {
   gap: 0.75rem;
 }
@@ -1749,6 +1753,22 @@ video {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pe-4 {
+  padding-inline-end: 1rem;
+}
+
+.ps-4 {
+  padding-inline-start: 1rem;
+}
+
+.pe-3 {
+  padding-inline-end: 0.75rem;
+}
+
+.ps-3 {
+  padding-inline-start: 0.75rem;
 }
 
 .text-left {

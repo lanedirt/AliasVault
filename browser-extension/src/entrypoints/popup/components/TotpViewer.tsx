@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDb } from '../context/DbContext';
 import { TotpCode } from '../../../utils/types/TotpCode';
 import  * as OTPAuth from 'otpauth';
@@ -16,7 +16,6 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
   const [currentCodes, setCurrentCodes] = useState<Record<string, string>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const dbContext = useDb();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
    * Gets the remaining seconds for the TOTP code.
@@ -59,26 +58,6 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
   };
 
   /**
-   * Refreshes the TOTP codes.
-   */
-  const refreshCodes = (): void => {
-    const newCodes: Record<string, string> = {};
-
-    totpCodes.forEach(code => {
-      const generatedCode = generateTotpCode(code.SecretKey);
-      // Only update if we have a valid code
-      if (generatedCode !== 'Error') {
-        newCodes[code.Id] = generatedCode;
-      } else {
-        // Keep the previous code if there's an error
-        newCodes[code.Id] = currentCodes[code.Id] || 'Error';
-      }
-    });
-
-    setCurrentCodes(newCodes);
-  };
-
-  /**
    * Copies a TOTP code to the clipboard.
    */
   const copyToClipboard = async (code: string, id: string): Promise<void> => {
@@ -96,6 +75,9 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
   };
 
   useEffect(() => {
+    /**
+     * Loads the TOTP codes for the credential.
+     */
     const loadTotpCodes = async (): Promise<void> => {
       if (!dbContext?.sqliteClient) {
         return;
@@ -115,6 +97,24 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
   }, [credentialId, dbContext?.sqliteClient]);
 
   useEffect(() => {
+    /**
+     * Updates the current TOTP codes.
+     */
+    const updateTotpCodes = (prevCodes: Record<string, string>): Record<string, string> => {
+      const newCodes: Record<string, string> = {};
+      totpCodes.forEach(code => {
+        const generatedCode = generateTotpCode(code.SecretKey);
+        // Only update if we have a valid code
+        if (generatedCode !== 'Error') {
+          newCodes[code.Id] = generatedCode;
+        } else {
+        // Keep the previous code if there's an error
+          newCodes[code.Id] = prevCodes[code.Id] ?? 'Error';
+        }
+      });
+      return newCodes;
+    };
+
     // Generate initial codes
     const initialCodes: Record<string, string> = {};
     totpCodes.forEach(code => {
@@ -123,48 +123,50 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
     setCurrentCodes(initialCodes);
 
     // Set up interval to refresh codes
-    const interval = setInterval(refreshCodes, 1000);
-    intervalRef.current = interval;
+    const intervalId = setInterval(() => {
+      setCurrentCodes(updateTotpCodes);
+    }, 1000);
 
     // Clean up interval on unmount or when totpCodes change
-    return () => {
-      clearInterval(interval);
-      intervalRef.current = null;
+    return () : void => {
+      clearInterval(intervalId);
     };
   }, [totpCodes]);
 
   if (loading) {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Two-factor authentication</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Two-factor authentication</h2>
         Loading TOTP codes...
       </div>
     );
   }
 
   if (totpCodes.length === 0) {
-    return null; // Don't show anything if there are no TOTP codes
+    return null;
   }
 
   return (
     <div className="mb-4">
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Two-factor authentication</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Two-factor authentication</h2>
         <div className="grid grid-cols-1 gap-2">
           {totpCodes.map(totpCode => (
-            <div key={totpCode.Id} className="p-2 bg-gray-50 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+            <button
+              key={totpCode.Id}
+              className={`w-full text-left p-2 ps-3 pe-3 rounded bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700`}
+              onClick={() => copyToClipboard(currentCodes[totpCode.Id], totpCode.Id)}
+              aria-label={`Copy ${totpCode.Name} code`}
+            >
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center flex-1">
-                  <h4 className="text-base font-medium text-gray-900 dark:text-white">{totpCode.Name}</h4>
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">{totpCode.Name}</h4>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col items-end">
-                    <div
-                      className="text-xl font-bold cursor-pointer text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                      onClick={() => copyToClipboard(currentCodes[totpCode.Id], totpCode.Id)}
-                    >
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">
                       {currentCodes[totpCode.Id]}
-                    </div>
+                    </span>
                     <div className="text-xs">
                       {copiedId === totpCode.Id ? (
                         <span className="text-green-600 dark:text-green-400">Copied!</span>
@@ -181,7 +183,7 @@ export const TotpViewer: React.FC<TotpViewerProps> = ({ credentialId }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

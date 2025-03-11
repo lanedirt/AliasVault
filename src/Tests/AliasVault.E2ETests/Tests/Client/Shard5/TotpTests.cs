@@ -61,7 +61,7 @@ public class TotpTests : ClientPlaywrightTest
         Assert.That(pageContent, Does.Contain("Test TOTP"), "TOTP code name does not appear on the page");
 
         // Verify that a 6-digit code is generated and displayed
-        var codeElement = Page.Locator(".text-2xl.font-bold");
+        var codeElement = Page.Locator(".totp-code");
         var code = await codeElement.TextContentAsync();
         Assert.That(code, Does.Match(@"^\d{6}$"), "Generated TOTP code is not a 6-digit number");
     }
