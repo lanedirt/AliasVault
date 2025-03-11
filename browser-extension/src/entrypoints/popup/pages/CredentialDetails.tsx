@@ -5,6 +5,7 @@ import { Credential } from '../../../utils/types/Credential';
 import { Buffer } from 'buffer';
 import { FormInputCopyToClipboard } from '../components/FormInputCopyToClipboard';
 import { EmailPreview } from '../components/EmailPreview';
+import { TotpViewer } from '../components/TotpViewer';
 import { useLoading } from '../context/LoadingContext';
 
 /**
@@ -156,6 +157,8 @@ const CredentialDetails: React.FC = () => {
           </>
         )}
       </div>
+
+      <TotpViewer credentialId={credential.Id} />
 
       <div className="grid gap-6">
         <div className="space-y-4 lg:col-span-2 xl:col-span-1">

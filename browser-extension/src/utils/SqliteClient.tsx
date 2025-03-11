@@ -1,6 +1,7 @@
 import initSqlJs, { Database } from 'sql.js';
 import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
+import { TotpCode } from './types/TotpCode';
 
 /**
  * Client for interacting with the SQLite database.
@@ -419,6 +420,64 @@ class SqliteClient {
     } catch (error) {
       console.error('Error getting database version:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get TOTP codes for a credential
+   * @param credentialId - The ID of the credential to get TOTP codes for
+   * @returns Array of TotpCode objects
+   */
+  public getTotpCodesForCredential(credentialId: string): TotpCode[] {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      // Check if TotpCodes table exists (for backward compatibility).
+      // TODO: whenever the browser extension has a minimum client DB version of 1.5.0+,
+      // we can remove this check as the TotpCodes table then is guaranteed to exist.
+      if (!this.tableExists('TotpCodes')) {
+        return [];
+      }
+
+      const query = `
+        SELECT
+          Id,
+          Name,
+          SecretKey,
+          CredentialId
+        FROM TotpCodes
+        WHERE CredentialId = ? AND IsDeleted = 0`;
+
+      return this.executeQuery<TotpCode>(query, [credentialId]);
+    } catch (error) {
+      console.error('Error getting TOTP codes:', error);
+      // Return empty array instead of throwing to be robust
+      return [];
+    }
+  }
+
+  /**
+   * Check if a table exists in the database
+   * @param tableName - The name of the table to check
+   * @returns True if the table exists, false otherwise
+   */
+   private tableExists(tableName: string): boolean {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      const query = `
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name=?`;
+
+      const results = this.executeQuery(query, [tableName]);
+      return results.length > 0;
+    } catch (error) {
+      console.error(`Error checking if table ${tableName} exists:`, error);
+      return false;
     }
   }
 }
