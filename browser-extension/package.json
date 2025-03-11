@@ -24,9 +24,11 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@types/node": "^22.13.10",
     "argon2-browser": "^1.18.0",
     "buffer": "^6.0.3",
     "globals": "^16.0.0",
+    "otpauth": "^9.3.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.4",
