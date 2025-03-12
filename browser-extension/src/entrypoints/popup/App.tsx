@@ -83,7 +83,8 @@ const App: React.FC = () => {
           className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
           style={{
             paddingTop: '64px',
-            height: 'calc(100vh - 120px)',
+            height: 'calc(100% - 120px)',
+            maxHeight: '600px',
           }}
         >
           <div className="p-4 mb-16">
