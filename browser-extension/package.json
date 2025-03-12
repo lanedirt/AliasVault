@@ -11,6 +11,7 @@
     "build:chrome": "wxt build -b chrome",
     "build:firefox": "wxt build -b firefox",
     "build:edge": "wxt build -b edge",
+    "build:safari": "wxt build -b safari",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
