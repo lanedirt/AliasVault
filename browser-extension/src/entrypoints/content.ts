@@ -10,6 +10,10 @@ import { createShadowRootUi } from 'wxt/client';
 export default defineContentScript({
   matches: ['<all_urls>'],
   cssInjectionMode: 'ui',
+  allFrames: true,
+  matchAboutBlank: true,
+  runAt: 'document_start',
+
   /**
    * Main entry point for the content script.
    */
@@ -100,6 +104,6 @@ export default defineContentScript({
     });
 
     // Mount the UI to create the shadow root
-    ui.mount();
+    ui.autoMount();
   },
 });
