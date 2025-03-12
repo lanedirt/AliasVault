@@ -119,6 +119,7 @@ export function updatePopupContent(credentials: Credential[], credentialList: HT
  */
 export function removeExistingPopup(container: HTMLElement) : void {
   const existingInContainer = container.querySelector('#aliasvault-credential-popup');
+
   if (existingInContainer) {
     // Remove event listeners before removing the element
     if (popupListeners && popupListeners.has(container)) {
@@ -128,8 +129,8 @@ export function removeExistingPopup(container: HTMLElement) : void {
         popupListeners.delete(container);
       }
     }
+
     existingInContainer.remove();
-    return;
   }
 }
 
