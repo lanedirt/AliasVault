@@ -3,6 +3,7 @@ import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '../../contentScrip
 import { AppInfo } from '../../../utils/AppInfo';
 import { storage } from "wxt/storage";
 import { browser } from 'wxt/browser';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Popup settings type.
@@ -18,6 +19,7 @@ type PopupSettings = {
  * Settings page component.
  */
 const Settings: React.FC = () => {
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
     currentUrl: '',
@@ -49,7 +51,7 @@ const Settings: React.FC = () => {
       disabledUrls,
       currentUrl,
       isEnabled: !disabledUrls.includes(currentUrl),
-      isGloballyEnabled
+      isGloballyEnabled,
     });
   }, []);
 
@@ -103,6 +105,20 @@ const Settings: React.FC = () => {
     setSettings(prev => ({
       ...prev,
       isGloballyEnabled: newGloballyEnabled
+    }));
+  };
+
+  /**
+   * Set theme preference.
+   */
+  const setThemePreference = async (newTheme: 'system' | 'light' | 'dark') : Promise<void> => {
+    // Use the ThemeContext to apply the theme
+    setTheme(newTheme);
+
+    // Update local state
+    setSettings(prev => ({
+      ...prev,
+      theme: newTheme
     }));
   };
 
@@ -170,6 +186,53 @@ const Settings: React.FC = () => {
               >
                 Reset all site-specific settings
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Appearance Settings Section */}
+      <section>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Appearance</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Theme</p>
+              <div className="flex flex-col space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="theme"
+                    value="system"
+                    checked={theme === 'system'}
+                    onChange={() => setThemePreference('system')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Use default</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="theme"
+                    value="light"
+                    checked={theme === 'light'}
+                    onChange={() => setThemePreference('light')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Light</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="theme"
+                    value="dark"
+                    checked={theme === 'dark'}
+                    onChange={() => setThemePreference('dark')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Dark</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
