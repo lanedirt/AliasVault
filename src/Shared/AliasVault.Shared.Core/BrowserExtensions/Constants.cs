@@ -29,25 +29,29 @@ public static class Constants
         {
             Name = "Firefox",
             IconPath = "/img/browser-icons/firefox.svg",
-            IsAvailable = false,
+            DownloadUrl = "https://addons.mozilla.org/en-US/firefox/addon/aliasvault/",
+            IsAvailable = true,
         },
         [BrowserType.Safari] = new BrowserExtensionInfo
         {
             Name = "Safari",
             IconPath = "/img/browser-icons/safari.svg",
-            IsAvailable = false,
+            DownloadUrl = "https://apps.apple.com/app/6743163173",
+            IsAvailable = true,
         },
         [BrowserType.Edge] = new BrowserExtensionInfo
         {
             Name = "Microsoft Edge",
             IconPath = "/img/browser-icons/edge.svg",
-            IsAvailable = false,
+            DownloadUrl = "https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo",
+            IsAvailable = true,
         },
         [BrowserType.Brave] = new BrowserExtensionInfo
         {
             Name = "Brave",
             IconPath = "/img/browser-icons/brave.svg",
-            IsAvailable = false,
+            DownloadUrl = "https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj",
+            IsAvailable = true,
         },
     };
 }
