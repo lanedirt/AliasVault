@@ -1,9 +1,9 @@
 function show(enabled, useSettingsInsteadOfPreferences) {
     if (useSettingsInsteadOfPreferences) {
-        document.getElementsByClassName('state-on')[0].innerText = "AliasVault’s extension is currently on. You can turn it off in the Extensions section of Safari Settings.";
-        document.getElementsByClassName('state-off')[0].innerText = "AliasVault’s extension is currently off. You can turn it on in the Extensions section of Safari Settings.";
-        document.getElementsByClassName('state-unknown')[0].innerText = "You can turn on AliasVault’s extension in the Extensions section of Safari Settings.";
-        document.getElementsByClassName('open-preferences')[0].innerText = "Quit and Open Safari Settings…";
+        document.getElementsByClassName('state-on')[0].innerText = "AliasVault's Safari browser extension is succesfully enabled. If you wish to turn it off, go to the Safari Extensions preferences.";
+        document.getElementsByClassName('state-off')[0].innerText = "AliasVault's Safari browser extension is currently disabled. If you wish to turn it on, go to the Safari Extensions preferences.";
+        document.getElementsByClassName('state-unknown')[0].innerText = "To enable AliasVault's Safari browser extension, go to the Safari Extensions preferences.";
+        document.getElementsByClassName('open-preferences')[0].innerText = "Open Safari Extensions Preferences…";
     }
 
     if (typeof enabled === "boolean") {

@@ -9,7 +9,7 @@ import Cocoa
 import SafariServices
 import WebKit
 
-let extensionBundleIdentifier = "net.aliasvault.AliasVault.Extension"
+let extensionBundleIdentifier = "net.aliasvault.safari.extension"
 
 class ViewController: NSViewController, WKNavigationDelegate, WKScriptMessageHandler {
 
@@ -46,6 +46,8 @@ class ViewController: NSViewController, WKNavigationDelegate, WKScriptMessageHan
         if (message.body as! String != "open-preferences") {
             return;
         }
+        
+        
 
         SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
             DispatchQueue.main.async {
