@@ -8,7 +8,6 @@ body {
   position: absolute;
   z-index: 2147483646;
   background-color: rgb(31, 41, 55);
-  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 320px;
   border: 1px solid rgb(55, 65, 81);
@@ -110,7 +109,6 @@ body {
   font-size: 0.85em;
   white-space: nowrap;
   overflow: hidden;
-  font-size: 12px;
   text-overflow: ellipsis;
   color: #9ca3af;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
