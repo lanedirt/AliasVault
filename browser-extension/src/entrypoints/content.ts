@@ -46,7 +46,7 @@ export default defineContentScript({
               return;
             }
 
-            injectIcon(target);
+            injectIcon(target, container);
 
             const isDisabled = await isAutoShowPopupDisabled();
             const canShow = canShowPopup();
@@ -91,7 +91,7 @@ export default defineContentScript({
             return { success: false, error: 'No form found' };
           }
 
-          injectIcon(target);
+          injectIcon(target, container);
           openAutofillPopup(target, container);
           return { success: true };
         });
