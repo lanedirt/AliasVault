@@ -32,7 +32,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   /**
    * Theme state that can be 'light', 'dark', or 'system'.
    */
-  const [theme, setThemeState] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>('system');
 
   /**
    * Tracks whether dark mode is active (based on theme or system preference).
@@ -45,16 +45,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
      */
     const loadTheme = async () : Promise<void> => {
       const savedTheme = await getTheme();
-      setThemeState(savedTheme);
+      setTheme(savedTheme);
     };
     loadTheme();
   }, []);
 
   /**
-   * Set the theme.
+   * Set the theme and save to storage.
    */
-  const setTheme = useCallback((newTheme: Theme): void => {
-    setThemeState(newTheme);
+  const updateTheme = useCallback((newTheme: Theme): void => {
+    setTheme(newTheme);
     setStoredTheme(newTheme);
   }, []);
 
@@ -109,10 +109,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value = useMemo(
     () => ({
       theme,
-      setTheme,
+      setTheme: updateTheme,
       isDarkMode,
     }),
-    [theme, isDarkMode, setTheme]
+    [theme, isDarkMode, updateTheme]
   );
 
   return (
