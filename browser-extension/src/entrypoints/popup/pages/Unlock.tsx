@@ -8,6 +8,7 @@ import EncryptionUtility from '../../../utils/EncryptionUtility';
 import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
 import { useLoading } from '../context/LoadingContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Unlock page
@@ -15,6 +16,7 @@ import { useLoading } from '../context/LoadingContext';
 const Unlock: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
+  const navigate = useNavigate();
 
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
@@ -81,6 +83,13 @@ const Unlock: React.FC = () => {
     }
   };
 
+  /**
+   * Handle logout
+   */
+  const handleLogout = () : void => {
+    navigate('/logout', { replace: true });
+  };
+
   return (
     <div className="max-w-md">
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -116,7 +125,7 @@ const Unlock: React.FC = () => {
         </Button>
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-200 mt-6">
-          Switch accounts? <a href="/logout" className="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
+          Switch accounts? <button onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">Log out</button>
         </div>
       </form>
     </div>
