@@ -1,3 +1,4 @@
+import './contentScript/style.css';
 import { FormDetector } from '../utils/formDetector/FormDetector';
 import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
 import { canShowPopup, injectIcon } from './contentScript/Form';
