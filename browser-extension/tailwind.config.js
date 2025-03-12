@@ -1,10 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./src/entrypoints/*.{js,jsx,ts,tsx}",
-    "./src/entrypoints/**/*.{js,jsx,ts,tsx}",
-    "./src/entrypoints/**/*/*.{html,js}"
+    "./src/**/*.{js,jsx,ts,tsx,html}"
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
