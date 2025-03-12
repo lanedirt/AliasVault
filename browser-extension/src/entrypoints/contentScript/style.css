@@ -1,9 +1,12 @@
 /* AliasVault Content Script Styles */
+body {
+    position: absolute;
+}
 
 /* Base Popup Styles */
 .av-popup {
   position: absolute;
-  z-index: 2147483647;
+  z-index: 2147483646;
   background-color: rgb(31, 41, 55);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -211,6 +214,10 @@
   padding: 6px 12px;
 }
 
+.av-search-input::placeholder {
+  color: #bdbebe;
+}
+
 .av-search-input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
@@ -261,7 +268,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999999995;
+  z-index: 2147483647;
   display: flex;
   align-items: center;
   justify-content: center;

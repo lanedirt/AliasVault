@@ -28,15 +28,25 @@ export function createBasePopup(input: HTMLInputElement, rootContainer: HTMLElem
   popup.id = 'aliasvault-credential-popup';
   popup.className = 'av-popup';
 
-  // Position popup below the input field
-  const rect = input.getBoundingClientRect();
-  const scrollTop = window.scrollY || document.documentElement.scrollTop;
-  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+  // Get position of the input field relative to the viewport
+  const inputRect = input.getBoundingClientRect();
 
-  popup.style.top = `${rect.bottom + scrollTop}px`;
-  popup.style.left = `${rect.left + scrollLeft}px`;
+  // Get position of the root container relative to the viewport
+  const rootContainerRect = rootContainer.getBoundingClientRect();
 
-  // Append popup to document body or container
+  /*
+   * Calculate the position relative to the root container
+   * This accounts for any offset the shadow root might have in the page
+   */
+  const relativeTop = inputRect.bottom - rootContainerRect.top;
+  const relativeLeft = inputRect.left - rootContainerRect.left;
+
+  // Set the position
+  popup.style.position = 'absolute';
+  popup.style.top = `${relativeTop}px`;
+  popup.style.left = `${relativeLeft}px`;
+
+  // Append popup to the root container
   rootContainer.appendChild(popup);
 
   return popup;
@@ -622,9 +632,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
   // Close existing popup
   removeExistingPopup(rootContainer);
 
-  // Sanitize default name, remove any special characters and convert to lowercase iwth only first char uppercase
-  const sanitizedName = defaultName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-
   return new Promise((resolve) => {
     // Create modal overlay
     const overlay = document.createElement('div');
@@ -642,7 +649,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
         type="text"
         id="service-name-input"
         data-aliasvault-ignore="true"
-        value="${sanitizedName}"
+        value="${defaultName}"
         class="av-create-popup-input"
       >
       <div class="av-create-popup-actions">

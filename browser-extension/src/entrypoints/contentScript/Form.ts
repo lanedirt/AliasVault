@@ -166,8 +166,8 @@ function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : voi
   const overlay = document.createElement('div');
 
   /**
-  * Update position of the overlay.
-  */
+   * Update position of the overlay.
+   */
   const updatePosition = () : void => {
     const rect = element.getBoundingClientRect();
     overlay.style.cssText = `
@@ -215,5 +215,5 @@ function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : voi
     element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-}
+  }
 }
