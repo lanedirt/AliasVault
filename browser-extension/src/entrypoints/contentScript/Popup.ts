@@ -26,26 +26,7 @@ export function createBasePopup(input: HTMLInputElement, rootContainer: HTMLElem
 
   const popup = document.createElement('div');
   popup.id = 'aliasvault-credential-popup';
-
-  // Set popup width to match input width, with min/max constraints
-  const popupWidth = 320;
-
-  popup.style.cssText = `
-        position: absolute;
-        z-index: 2147483647;
-        background-color: rgb(31, 41, 55);
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        width: ${popupWidth}px;
-        border: 1px solid rgb(55, 65, 81);
-        border-radius: 4px;
-        max-width: 90vw;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        font-size: 14px;
-        color: #333;
-        overflow: hidden;
-        box-sizing: border-box;
-    `;
+  popup.className = 'av-popup';
 
   // Position popup below the input field
   const rect = input.getBoundingClientRect();
@@ -69,14 +50,8 @@ export function createLoadingPopup(input: HTMLInputElement, message: string, roo
    * Get the loading wrapper HTML.
    */
   const getLoadingHtml = (message: string): string => `
-  <div style="
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    gap: 8px;
-  ">
-    <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+  <div class="av-loading-container">
+    <svg class="av-loading-spinner" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10"
         fill="none"
         stroke="#e5e7eb"
@@ -94,7 +69,7 @@ export function createLoadingPopup(input: HTMLInputElement, message: string, roo
         />
       </circle>
     </svg>
-    <span style="font-size: 14px; font-weight: 500; line-height: normal; color: #e5e7eb;">${message}</span>
+    <span class="av-loading-text">${message}</span>
   </div>
 `;
 
@@ -159,13 +134,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   // Create credential list container with ID
   const credentialList = document.createElement('div');
   credentialList.id = 'aliasvault-credential-list';
-  credentialList.style.cssText = `
-    max-height: 180px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #4b5563 #1f2937;
-    line-height: 1.3;
-  `;
+  credentialList.className = 'av-credential-list';
   popup.appendChild(credentialList);
 
   // Add initial credentials
@@ -183,58 +152,23 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
   // Add divider
   const divider = document.createElement('div');
-  divider.style.cssText = `
-    height: 1px;
-    background: #374151;
-    margin-bottom: 8px;
-  `;
+  divider.className = 'av-divider';
   popup.appendChild(divider);
 
   // Add action buttons container
   const actionContainer = document.createElement('div');
-  actionContainer.style.cssText = `
-    display: flex;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-bottom: 8px;
-    gap: 8px;
-  `;
+  actionContainer.className = 'av-action-container';
 
   // Create New button
   const createButton = document.createElement('button');
-  createButton.style.cssText = `
-    flex: 1;
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: #374151;
-    color: #e5e7eb;
-    font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    cursor: pointer;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    transition: background-color 0.2s ease;
-  `;
-
+  createButton.className = 'av-button av-button-primary';
   createButton.innerHTML = `
-    <svg style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+    <svg class="av-icon" viewBox="0 0 24 24">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
     New
   `;
-
-  // Add hover event listeners
-  createButton.addEventListener('mouseenter', () => {
-    createButton.style.backgroundColor = '#d68338'; // primary-600
-  });
-
-  createButton.addEventListener('mouseleave', () => {
-    createButton.style.backgroundColor = '#374151';
-  });
 
   /**
    * Handle create button click
@@ -343,7 +277,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       };
 
       // Create identity in background.
-      await sendMessage('CREATE_IDENTITY', { credential: credential }, 'background');
+      await sendMessage('CREATE_IDENTITY', {
+        credential: JSON.parse(JSON.stringify(credential))
+      }, 'background');
 
       // Close popup.
       removeExistingPopup(rootContainer);
@@ -391,35 +327,15 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   searchInput.type = 'text';
   searchInput.dataset.aliasvaultIgnore = 'true';
   searchInput.placeholder = 'Search vault...';
-  searchInput.style.cssText = `
-    flex: 2;
-    border-radius: 4px;
-    background: #374151;
-    color: #e5e7eb;
-    font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    border: 1px solid #4b5563;
-    outline: none;
-    line-height: 1;
-    text-align: center;
-  `;
-
-  // Add focus styles.
-  searchInput.addEventListener('focus', () => {
-    searchInput.style.borderColor = '#2563eb';
-    searchInput.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.2)';
-  });
-
-  searchInput.addEventListener('blur', () => {
-    searchInput.style.borderColor = '#4b5563';
-    searchInput.style.boxShadow = 'none';
-  });
+  searchInput.className = 'av-search-input';
 
   // Handle search input.
-  let searchTimeout: NodeJS.Timeout;
+  let searchTimeout: NodeJS.Timeout | null = null;
 
   searchInput.addEventListener('input', async () => {
-    clearTimeout(searchTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
     const searchTerm = searchInput.value.toLowerCase();
 
     const response = await sendMessage('GET_CREDENTIALS', {}, 'background') as CredentialsResponse;
@@ -470,38 +386,13 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
   // Close button
   const closeButton = document.createElement('button');
-  closeButton.style.cssText = `
-    padding: 6px;
-    border-radius: 4px;
-    background: #374151;
-    color: #e5e7eb;
-    font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    cursor: pointer;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-  `;
-
+  closeButton.className = 'av-button av-button-close';
   closeButton.innerHTML = `
-  <svg style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+  <svg class="av-icon" viewBox="0 0 24 24">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
 `;
-
-  // Add hover event listeners
-  closeButton.addEventListener('mouseenter', () => {
-    closeButton.style.backgroundColor = '#dc2626'; // red-600
-    closeButton.style.color = '#ffffff'; // White text on hover
-  });
-
-  closeButton.addEventListener('mouseleave', () => {
-    closeButton.style.backgroundColor = '#374151';
-    closeButton.style.color = '#e5e7eb';
-  });
 
   closeButton.addEventListener('click', async () => {
     await disableAutoShowPopup();
@@ -542,19 +433,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
  */
 export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement): void {
   const popup = createBasePopup(input, rootContainer);
-
-  // Adjust popup css
-  popup.style.padding = '12px 16px';
-  popup.style.cursor = 'pointer';
-
-  // Add hover effect to the entire popup
-  popup.addEventListener('mouseenter', () => {
-    popup.style.backgroundColor = '#374151';
-  });
-
-  popup.addEventListener('mouseleave', () => {
-    popup.style.backgroundColor = '#1f2937';
-  });
+  popup.classList.add('av-vault-locked');
 
   // Make the whole popup clickable to open the main extension login popup.
   popup.addEventListener('click', () => {
@@ -564,41 +443,20 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
 
   // Create container for message and button
   const container = document.createElement('div');
-  container.style.cssText = `
-    display: flex;
-    align-items: center;
-    position: relative;
-  `;
+  container.className = 'av-vault-locked-container';
 
   // Add message
   const messageElement = document.createElement('div');
-  messageElement.style.cssText = `
-    color: #d1d5db;
-    font-size: 14px;
-    padding-right: 32px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  `;
+  messageElement.className = 'av-vault-locked-message';
   messageElement.textContent = 'AliasVault is locked.';
   container.appendChild(messageElement);
 
   // Add unlock button with SVG icon
   const button = document.createElement('button');
   button.title = 'Unlock AliasVault';
-  button.style.cssText = `
-    position: absolute;
-    right: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #d68338;
-    border-radius: 4px;
-  `;
+  button.className = 'av-vault-locked-button';
   button.innerHTML = `
-    <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;" viewBox="0 0 24 24">
+    <svg class="av-icon-lock" viewBox="0 0 24 24">
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
     </svg>
@@ -640,36 +498,14 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
   if (credentials.length > 0) {
     credentials.forEach(cred => {
       const item = document.createElement('div');
-      item.style.cssText = `
-          padding: 6px 16px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-          transition: background-color 0.2s ease;
-          border-radius: 4px;
-          width: 100%;
-          box-sizing: border-box;
-          text-align: left;
-        `;
+      item.className = 'av-credential-item';
 
       // Create container for credential info (logo + username)
       const credentialInfo = document.createElement('div');
-      credentialInfo.style.cssText = `
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          flex-grow: 1;
-          padding: 4px;
-          border-radius: 4px;
-          transition: background-color 0.2s ease;
-          min-width: 0; /* Enable text truncation */
-        `;
+      credentialInfo.className = 'av-credential-info';
 
       const imgElement = document.createElement('img');
-      imgElement.style.width = '20px';
-      imgElement.style.height = '20px';
+      imgElement.className = 'av-credential-logo';
 
       // Handle base64 image data
       if (cred.Logo) {
@@ -689,38 +525,16 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
 
       credentialInfo.appendChild(imgElement);
       const credTextContainer = document.createElement('div');
-      credTextContainer.style.cssText = `
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-          min-width: 0; /* Enable text truncation */
-          margin-right: 8px; /* Add space between text and popout icon */
-        `;
+      credTextContainer.className = 'av-credential-text';
 
       // Service name (primary text)
       const serviceName = document.createElement('div');
-      serviceName.style.cssText = `
-          font-weight: 500;
-          white-space: nowrap;
-          overflow: hidden;
-          font-size: 14px;
-          text-overflow: ellipsis;
-          color: #f3f4f6;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-        `;
+      serviceName.className = 'av-service-name';
       serviceName.textContent = cred.ServiceName;
 
       // Details container (secondary text)
       const detailsContainer = document.createElement('div');
-      detailsContainer.style.cssText = `
-          font-size: 0.85em;
-          white-space: nowrap;
-          overflow: hidden;
-          font-size: 12px;
-          text-overflow: ellipsis;
-          color: #9ca3af;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-        `;
+      detailsContainer.className = 'av-service-details';
 
       // Combine full name (if available) and username
       const details = [];
@@ -736,35 +550,14 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
 
       // Add popout icon
       const popoutIcon = document.createElement('div');
-      popoutIcon.style.cssText = `
-          display: flex;
-          align-items: center;
-          padding: 4px;
-          opacity: 0.6;
-          border-radius: 4px;
-          flex-shrink: 0; /* Prevent icon from shrinking */
-          color: #ffffff;
-        `;
+      popoutIcon.className = 'av-popout-icon';
       popoutIcon.innerHTML = `
-          <svg style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+          <svg class="av-icon" viewBox="0 0 24 24">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
             <line x1="10" y1="14" x2="21" y2="3"></line>
           </svg>
         `;
-
-      // Add hover effects
-      popoutIcon.addEventListener('mouseenter', () => {
-        popoutIcon.style.opacity = '1';
-        popoutIcon.style.backgroundColor = '#ffffff';
-        popoutIcon.style.color = '#000000';
-      });
-
-      popoutIcon.addEventListener('mouseleave', () => {
-        popoutIcon.style.opacity = '0.6';
-        popoutIcon.style.backgroundColor = 'transparent';
-        popoutIcon.style.color = '#ffffff';
-      });
 
       // Handle popout click
       popoutIcon.addEventListener('click', (e) => {
@@ -776,17 +569,6 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       item.appendChild(credentialInfo);
       item.appendChild(popoutIcon);
 
-      // Update hover effect for the entire item
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = '#2d3748';
-        popoutIcon.style.opacity = '1';
-      });
-
-      item.addEventListener('mouseleave', () => {
-        item.style.backgroundColor = 'transparent';
-        popoutIcon.style.opacity = '0.6';
-      });
-
       // Update click handler to only trigger on credentialInfo
       credentialInfo.addEventListener('click', () => {
         fillCredential(cred, input);
@@ -797,16 +579,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
     });
   } else {
     const noMatches = document.createElement('div');
-    noMatches.style.cssText = `
-        padding-left: 10px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        font-size: 14px;
-        color: #9ca3af;
-        font-style: italic;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-        text-align: left;
-      `;
+    noMatches.className = 'av-no-matches';
     noMatches.textContent = 'No matches found';
     elements.push(noMatches);
   }
@@ -856,40 +629,13 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.id = 'aliasvault-create-popup';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999999995;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      `;
+    overlay.className = 'av-create-popup-overlay';
 
     const popup = document.createElement('div');
-    popup.style.cssText = `
-        position: relative;
-        z-index: 1000000000;
-        background: #1f2937;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                    0 2px 4px -1px rgba(0, 0, 0, 0.06),
-                    0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        width: 400px;
-        max-width: 90vw;
-        transform: scale(0.95);
-        opacity: 0;
-        padding: 24px;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-      `;
+    popup.className = 'av-create-popup';
 
     popup.innerHTML = `
-      <h3 style="margin: 0 0 16px 0; font-size: 18px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 600; color: #f8f9fa">
+      <h3 class="av-create-popup-title">
         New alias name
       </h3>
       <input
@@ -897,84 +643,25 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
         id="service-name-input"
         data-aliasvault-ignore="true"
         value="${sanitizedName}"
-        style="
-          width: 100%;
-          padding: 8px 12px;
-          margin-bottom: 24px;
-          border: 1px solid #374151;
-          border-radius: 6px;
-          background: #374151;
-          color: #f8f9fa;
-          font-size: 14px;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
-          box-sizing: border-box;
-        "
+        class="av-create-popup-input"
       >
-      <div style="display: flex; justify-content: flex-end; gap: 12px;">
-        <button id="cancel-btn" style="
-          padding: 8px 16px;
-          border-radius: 6px;
-          border: 1px solid #374151;
-          background: transparent;
-          color: #f8f9fa;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s ease;
-        ">Cancel</button>
-        <button id="save-btn" style="
-          padding: 8px 16px;
-          border-radius: 6px;
-          border: none;
-          background: #d68338;
-          color: white;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s ease;
-        ">Create alias</button>
+      <div class="av-create-popup-actions">
+        <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
+        <button id="save-btn" class="av-create-popup-save">Create alias</button>
       </div>
     `;
 
     overlay.appendChild(popup);
     rootContainer.appendChild(overlay);
 
-    // Add hover and focus styles
+    // Animate in
+    requestAnimationFrame(() => {
+      popup.classList.add('show');
+    });
+
     const input = popup.querySelector('#service-name-input') as HTMLInputElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
     const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
-
-    input.addEventListener('focus', () => {
-      input.style.borderColor = '#';
-      input.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
-    });
-
-    input.addEventListener('blur', () => {
-      input.style.borderColor = '#374151';
-      input.style.boxShadow = 'none';
-    });
-
-    saveBtn.addEventListener('mouseenter', () => {
-      saveBtn.style.background = '#c97731';
-      saveBtn.style.transform = 'translateY(-1px)';
-    });
-
-    saveBtn.addEventListener('mouseleave', () => {
-      saveBtn.style.background = '#d68338';
-      saveBtn.style.transform = 'translateY(0)';
-    });
-
-    cancelBtn.addEventListener('mouseenter', () => {
-      cancelBtn.style.background = '#374151';
-    });
-
-    cancelBtn.addEventListener('mouseleave', () => {
-      cancelBtn.style.background = 'transparent';
-    });
-
-    // Animate in
-    requestAnimationFrame(() => {
-      popup.style.transform = 'scale(1)';
-      popup.style.opacity = '1';
-    });
 
     // Select input text
     input.select();
@@ -983,8 +670,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
      * Close the popup.
      */
     const closePopup = (value: string | null) : void => {
-      popup.style.transform = 'scale(0.95)';
-      popup.style.opacity = '0';
+      popup.classList.remove('show');
       setTimeout(() => {
         overlay.remove();
         resolve(value);

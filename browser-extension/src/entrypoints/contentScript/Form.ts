@@ -2,6 +2,7 @@ import { FormDetector } from "../../utils/formDetector/FormDetector";
 import { FormFiller } from "../../utils/formDetector/FormFiller";
 import { Credential } from "../../utils/types/Credential";
 import { openAutofillPopup } from "./Popup";
+
 /**
  * Global timestamp to track popup debounce time.
  * This is used to not show the popup again for a specific amount of time.
@@ -64,18 +65,7 @@ export function injectIcon(input: HTMLInputElement, container: HTMLElement): voi
 </svg>`;
 
   const ICON_HTML = `
-<div class="aliasvault-input-icon" style="
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  pointer-events: auto;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-">
+<div class="av-input-icon">
   <img src="data:image/svg+xml;base64,${btoa(aliasvaultIconSvg)}" style="width: 100%; height: 100%;" />
 </div>
 `;
@@ -90,15 +80,7 @@ export function injectIcon(input: HTMLInputElement, container: HTMLElement): voi
   if (!overlayContainer) {
     overlayContainer = document.createElement('div') as HTMLElement;
     overlayContainer.id = 'aliasvault-overlay-container';
-    overlayContainer.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2147483640;
-    `;
+    overlayContainer.className = 'av-overlay-container';
     container.appendChild(overlayContainer);
   }
 
@@ -184,8 +166,8 @@ function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : voi
   const overlay = document.createElement('div');
 
   /**
-   * Update position of the overlay.
-   */
+  * Update position of the overlay.
+  */
   const updatePosition = () : void => {
     const rect = element.getBoundingClientRect();
     overlay.style.cssText = `
@@ -233,5 +215,5 @@ function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : voi
     element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-  }
+}
 }

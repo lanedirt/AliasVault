@@ -1,0 +1,402 @@
+/* AliasVault Content Script Styles */
+
+/* Base Popup Styles */
+.av-popup {
+  position: absolute;
+  z-index: 2147483647;
+  background-color: rgb(31, 41, 55);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  border: 1px solid rgb(55, 65, 81);
+  border-radius: 4px;
+  max-width: 90vw;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: #333;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+
+/* Loading Popup Styles */
+.av-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 8px;
+}
+
+.av-loading-spinner {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.av-loading-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  color: #e5e7eb;
+}
+
+/* Credential List Styles */
+.av-credential-list {
+  max-height: 180px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+  line-height: 1.3;
+}
+
+.av-credential-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.av-credential-item:hover {
+  background-color: #2d3748;
+}
+
+.av-credential-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-grow: 1;
+  padding: 10px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  min-width: 0; /* Enable text truncation */
+}
+
+.av-credential-logo {
+  width: 20px;
+  height: 20px;
+}
+
+.av-credential-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 0; /* Enable text truncation */
+  margin-right: 8px; /* Add space between text and popout icon */
+}
+
+.av-service-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  color: #f3f4f6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.av-service-details {
+  font-size: 0.85em;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  color: #9ca3af;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.av-popout-icon {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  margin-right: 16px;
+  opacity: 0.6;
+  border-radius: 4px;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  color: #ffffff;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.av-popout-icon:hover {
+  opacity: 1;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.av-no-matches {
+  padding-left: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+}
+
+/* Divider */
+.av-divider {
+  height: 1px;
+  background: #374151;
+  margin-bottom: 8px;
+}
+
+/* Action Container */
+.av-action-container {
+  display: flex;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-bottom: 8px;
+  gap: 8px;
+}
+
+/* Button Styles */
+.av-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: #374151;
+  color: #e5e7eb;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.av-button:hover {
+  background-color: #4b5563;
+}
+
+.av-button-primary {
+  background-color: #374151;
+}
+
+.av-button-primary:hover {
+  background-color: #d68338;
+}
+
+.av-button-close {
+  padding: 6px;
+}
+
+.av-button-close:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+/* Search Input */
+.av-search-input {
+  flex: 2;
+  border-radius: 4px;
+  background: #374151;
+  color: #e5e7eb;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  border: 1px solid #4b5563;
+  outline: none;
+  line-height: 1;
+  text-align: center;
+  padding: 6px 12px;
+}
+
+.av-search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Vault Locked Popup */
+.av-vault-locked {
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.av-vault-locked:hover {
+  background-color: #374151;
+}
+
+.av-vault-locked-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.av-vault-locked-message {
+  color: #d1d5db;
+  font-size: 14px;
+  padding-right: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.av-vault-locked-button {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d68338;
+  border-radius: 4px;
+}
+
+/* Create Name Popup */
+.av-create-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999999995;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.av-create-popup {
+  position: relative;
+  z-index: 1000000000;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06),
+              0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 90vw;
+  transform: scale(0.95);
+  opacity: 0;
+  padding: 24px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.av-create-popup.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.av-create-popup-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  color: #f8f9fa;
+}
+
+.av-create-popup-input {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  background: #374151;
+  color: #f8f9fa;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.av-create-popup-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.av-create-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.av-create-popup-cancel {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #374151;
+  background: transparent;
+  color: #f8f9fa;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.av-create-popup-cancel:hover {
+  background: #374151;
+}
+
+.av-create-popup-save {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #d68338;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.av-create-popup-save:hover {
+  background: #c97731;
+  transform: translateY(-1px);
+}
+
+/* SVG Icons */
+.av-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.av-icon-lock {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Form Icon Styles */
+.av-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2147483640;
+}
+
+.av-input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1); }
+}
