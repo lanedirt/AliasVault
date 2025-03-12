@@ -381,7 +381,6 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   searchInput.style.cssText = `
     all: unset;
     flex: 2;
-    padding: 6px 12px;
     border-radius: 4px;
     background: ${isDarkMode() ? '#374151' : '#f3f4f6'};
     color: ${isDarkMode() ? '#e5e7eb' : '#374151'};
@@ -393,7 +392,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     box-shadow: none;
     margin: 0;
     height: auto;
-    text-align: left;
+    text-align: center;
   `;
 
   // Add focus styles.
