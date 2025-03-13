@@ -6,6 +6,7 @@ import { PasswordGenerator } from '../../utils/generators/Password/PasswordGener
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
+import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 
 /**
  * WeakMap to store event listeners for popup containers
@@ -189,27 +190,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    // Determine service name based on conditions
-    let suggestedName = document.title;
-
-    // First try to extract the last part after common divider characters using a safe pattern
-    const dividerRegex = /[|\-–—/\\][^|\-–—/\\]*$/;
-    const dividerMatch = dividerRegex.exec(document.title);
-    if (dividerMatch && dividerMatch[0].trim().split(/\s+/).length === 1) {
-      // If we found a match and it's a single word, use it
-      suggestedName = dividerMatch[0].trim();
-    } else {
-      // Fall back to previous logic for long titles
-      const wordCount = document.title.trim().split(/\s+/).length;
-      if (wordCount > 3) {
-        // Extract main domain + extension by taking last 2 parts of hostname
-        const domainParts = window.location.hostname.replace(/^www\./, '').split('.');
-        const mainDomain = domainParts.slice(-2).join('.');
-        suggestedName = mainDomain;
-      }
-    }
-
+    const suggestedName = getSuggestedServiceName(document, window.location);
     const serviceName = await createEditNamePopup(suggestedName, rootContainer);
+
     if (!serviceName) {
       // User cancelled
       return;
@@ -995,4 +978,55 @@ export async function dismissVaultLockedPopup(): Promise<void> {
     const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
     await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, threeDaysFromNow);
   }
+}
+
+/**
+ * Get a suggested service name from the page title and URL.
+ * Attempts to extract meaningful parts while maintaining original capitalization.
+ */
+function getSuggestedServiceName(document: Document, location: Location): string {
+  const title = document.title;
+
+  /**
+   * Filter out common words and keep meaningful parts of the title
+   */
+  const getMeaningfulTitleParts = (title: string): string[] => {
+    return title
+      .toLowerCase()
+      .split(/[\s|\-—/\\]+/) // Split on spaces and common dividers
+      .filter(word =>
+        word.length > 1 && // Filter out single characters
+        !CombinedStopWords.has(word.toLowerCase()) // Filter out common words
+      );
+  };
+
+  /**
+   * Get original case version of meaningful words
+   */
+  const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
+    return text
+      .split(/[\s|\-—/\\]+/)
+      .filter(word => meaningfulParts.includes(word.toLowerCase()))
+      .join(' ');
+  };
+
+  // First try to extract meaningful parts after the last divider
+  const dividerRegex = /[|\-—/\\][^|\-—/\\]*$/;
+  const dividerMatch = dividerRegex.exec(title);
+  if (dividerMatch) {
+    const meaningfulParts = getMeaningfulTitleParts(dividerMatch[0]);
+    if (meaningfulParts.length > 0) {
+      return getOriginalCase(dividerMatch[0].trim(), meaningfulParts);
+    }
+  }
+
+  // If no meaningful parts found after divider, try the full title
+  const meaningfulParts = getMeaningfulTitleParts(title);
+  if (meaningfulParts.length > 0) {
+    return getOriginalCase(title, meaningfulParts);
+  }
+
+  // Fall back to domain name if no meaningful parts found
+  const domainParts = location.hostname.replace(/^www\./, '').split('.');
+  return domainParts.slice(-2).join('.');
 }
