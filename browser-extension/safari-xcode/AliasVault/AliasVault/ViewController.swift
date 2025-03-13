@@ -46,12 +46,27 @@ class ViewController: NSViewController, WKNavigationDelegate, WKScriptMessageHan
         if (message.body as! String != "open-preferences") {
             return;
         }
-        
-        
 
         SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
             DispatchQueue.main.async {
-                NSApplication.shared.terminate(nil)
+                if let error = error {
+                    // Show manual instructions in case opening the preferences fails due to restricted permissions.
+                    let alert = NSAlert()
+                    alert.messageText = "Safari Extensions Settings"
+                    alert.informativeText = """
+                        Please follow these steps to enable the extension:
+                        1. Open Safari
+                        2. Click Safari > Settings in the menu bar
+                        3. Go to Extensions
+                        4. Find and enable "AliasVault"
+                        """
+                    alert.addButton(withTitle: "OK")
+                    alert.runModal()
+                }
+                else {
+                    // Close app
+                    NSApplication.shared.terminate(nil)
+                }
             }
         }
     }
