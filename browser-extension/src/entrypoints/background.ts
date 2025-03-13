@@ -2,7 +2,7 @@ import { browser } from "wxt/browser";
 import { defineBackground } from 'wxt/sandbox';
 import { onMessage } from "webext-bridge/background";
 import { setupContextMenus, handleContextMenuClick } from './background/ContextMenu';
-import { handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
+import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './background/PopupMessageHandler';
 
 export default defineBackground({
@@ -17,6 +17,7 @@ export default defineBackground({
     );
 
     // Listen for messages using webext-bridge
+    onMessage('CHECK_AUTH_STATUS', () => handleCheckAuthStatus());
     onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
     onMessage('SYNC_VAULT', () => handleSyncVault());
     onMessage('GET_VAULT', () => handleGetVault());

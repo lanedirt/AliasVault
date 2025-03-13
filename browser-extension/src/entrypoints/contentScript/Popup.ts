@@ -443,18 +443,24 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
  * Create vault locked popup.
  */
 export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement): void {
-  const popup = createBasePopup(input, rootContainer);
-  popup.classList.add('av-vault-locked');
-
-  // Make the whole popup clickable to open the main extension login popup.
-  popup.addEventListener('click', () => {
+  /**
+   * Handle unlock click.
+   */
+  const handleUnlockClick = () : void => {
     sendMessage('OPEN_POPUP', {}, 'background');
     removeExistingPopup(rootContainer);
-  });
+  }
+
+  const popup = createBasePopup(input, rootContainer);
+  popup.classList.add('av-vault-locked');
 
   // Create container for message and button
   const container = document.createElement('div');
   container.className = 'av-vault-locked-container';
+
+  // Make the entire container clickable
+  container.addEventListener('click', handleUnlockClick);
+  container.style.cursor = 'pointer';
 
   // Add message
   const messageElement = document.createElement('div');
@@ -472,9 +478,36 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
     </svg>
   `;
-
   container.appendChild(button);
+
+  // Add the container to the popup
   popup.appendChild(container);
+
+  // Add close button as a separate element positioned to the right
+  const closeButton = document.createElement('button');
+  closeButton.className = 'av-button av-button-close av-vault-locked-close';
+  closeButton.title = 'Dismiss popup';
+  closeButton.innerHTML = `
+    <svg class="av-icon" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  `;
+
+  // Position the close button to the right of the container
+  closeButton.style.position = 'absolute';
+  closeButton.style.right = '8px';
+  closeButton.style.top = '50%';
+  closeButton.style.transform = 'translateY(-50%)';
+
+  // Handle close button click
+  closeButton.addEventListener('click', async (e) => {
+    e.stopPropagation(); // Prevent opening the unlock popup
+    await dismissVaultLockedPopup();
+    removeExistingPopup(rootContainer);
+  });
+
+  popup.appendChild(closeButton);
 
   /**
    * Add event listener to document to close popup when clicking outside.
@@ -600,17 +633,35 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
 
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
 export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
+export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
 
 /**
  * Check if auto-popup is disabled for current site
  */
-export async function isAutoShowPopupDisabled(): Promise<boolean> {
+export async function isAutoShowPopupEnabled(): Promise<boolean> {
   const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
   const globalPopupEnabled = await storage.getItem(GLOBAL_POPUP_ENABLED_KEY) ?? true;
 
   const currentHostname = window.location.hostname;
 
-  return !globalPopupEnabled || disabledSites.includes(currentHostname);
+  if (!globalPopupEnabled) {
+    // Popup is disabled for all sites.
+    return false;
+  }
+
+  if (disabledSites.includes(currentHostname)) {
+    // Popup is disabled for current site.
+    return false;
+  }
+
+  // Check time-based dismissal
+  const dismissUntil = await storage.getItem(VAULT_LOCKED_DISMISS_UNTIL_KEY) as number;
+  if (dismissUntil && Date.now() < dismissUntil) {
+    // Popup is dismissed for a certain amount of time.
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -925,4 +976,23 @@ function detectMimeType(bytes: Uint8Array): string {
   }
 
   return 'image/x-icon';
+}
+
+/**
+ * Dismiss vault locked popup for 4 hours if user is logged in but vault is locked,
+ * or for 3 days if user is not logged in.
+ */
+export async function dismissVaultLockedPopup(): Promise<void> {
+  // First check if user is logged in but vault is locked, or not logged in at all
+  const authStatus = await sendMessage('CHECK_AUTH_STATUS', {}, 'background') as { isLoggedIn: boolean, isVaultLocked: boolean };
+
+  if (authStatus.isLoggedIn && authStatus.isVaultLocked) {
+    // User is logged in but vault is locked - dismiss for 4 hours
+    const fourHoursFromNow = Date.now() + (4 * 60 * 60 * 1000);
+    await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, fourHoursFromNow);
+  } else if (!authStatus.isLoggedIn) {
+    // User is not logged in - dismiss for 3 days
+    const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
+    await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, threeDaysFromNow);
+  }
 }

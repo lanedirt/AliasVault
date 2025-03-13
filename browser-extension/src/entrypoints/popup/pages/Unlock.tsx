@@ -9,6 +9,8 @@ import SrpUtility from '../utils/SrpUtility';
 import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
 import { useLoading } from '../context/LoadingContext';
 import { useNavigate } from 'react-router-dom';
+import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
+import { storage } from 'wxt/storage';
 
 /**
  * Unlock page
@@ -75,6 +77,9 @@ const Unlock: React.FC = () => {
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+
+      // Clear dismiss until (which can be enabled after user has dimissed vault is locked popup) to ensure popup is shown.
+      await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, 0);
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);

@@ -79,7 +79,7 @@ body {
   padding: 10px 16px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
-  min-width: 0; /* Enable text truncation */
+  min-width: 0;
 }
 
 .av-credential-logo {
@@ -91,8 +91,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  min-width: 0; /* Enable text truncation */
-  margin-right: 8px; /* Add space between text and popout icon */
+  min-width: 0;
+  margin-right: 8px;
 }
 
 .av-service-name {
@@ -121,7 +121,7 @@ body {
   margin-right: 16px;
   opacity: 0.6;
   border-radius: 4px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  flex-shrink: 0;
   color: #ffffff;
   transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
@@ -209,7 +209,6 @@ body {
   outline: none;
   line-height: 1;
   text-align: center;
-  padding: 6px 12px;
 }
 
 .av-search-input::placeholder {
@@ -224,7 +223,7 @@ body {
 /* Vault Locked Popup */
 .av-vault-locked {
   padding: 12px 16px;
-  cursor: pointer;
+  position: relative;
 }
 
 .av-vault-locked:hover {
@@ -234,28 +233,46 @@ body {
 .av-vault-locked-container {
   display: flex;
   align-items: center;
-  position: relative;
+  padding-right: 32px;
+  width: 100%;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
 }
 
 .av-vault-locked-message {
   color: #d1d5db;
   font-size: 14px;
-  padding-right: 32px;
+  flex-grow: 1;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .av-vault-locked-button {
-  position: absolute;
-  right: 0;
   background: none;
   border: none;
   cursor: pointer;
   padding: 4px;
+  padding-right: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #d68338;
   border-radius: 4px;
+  margin-left: 8px;
+}
+
+.av-vault-locked-close {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  border: 1px solid #6f6f6f;
 }
 
 /* Create Name Popup */

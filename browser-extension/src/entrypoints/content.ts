@@ -1,7 +1,7 @@
 import './contentScript/style.css';
 import { FormDetector } from '../utils/formDetector/FormDetector';
-import { isAutoShowPopupDisabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
-import { canShowPopup, injectIcon } from './contentScript/Form';
+import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
+import { injectIcon, popupDebounceTimeHasPassed } from './contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
 import { BoolResponse as messageBoolResponse } from '../utils/types/messaging/BoolResponse';
 import { defineContentScript } from 'wxt/sandbox';
@@ -42,22 +42,16 @@ export default defineContentScript({
           const target = e.target as HTMLInputElement;
           const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
 
-          if (target.tagName === 'INPUT' &&
-              textInputTypes.includes(target.type) &&
-              !target.dataset.aliasvaultIgnore) {
+          if (target.tagName === 'INPUT' && textInputTypes.includes(target.type) && !target.dataset.aliasvaultIgnore) {
             const formDetector = new FormDetector(document, target);
-
             if (!formDetector.containsLoginForm()) {
               return;
             }
 
             injectIcon(target, container);
 
-            const isDisabled = await isAutoShowPopupDisabled();
-            const canShow = canShowPopup();
-
-            // Only show popup if it's not disabled and the popup can be shown
-            if (!isDisabled && canShow) {
+            // Only show popup if its enabled and debounce time has passed.
+            if (await isAutoShowPopupEnabled() && popupDebounceTimeHasPassed()) {
               openAutofillPopup(target, container);
             }
           }

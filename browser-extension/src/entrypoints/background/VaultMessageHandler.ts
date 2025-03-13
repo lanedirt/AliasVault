@@ -12,6 +12,23 @@ import { CredentialsResponse as messageCredentialsResponse } from '../../utils/t
 import { DefaultEmailDomainResponse as messageDefaultEmailDomainResponse } from '../../utils/types/messaging/DefaultEmailDomainResponse';
 
 /**
+ * Check if the user is logged in and if the vault is locked.
+ */
+export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, isVaultLocked: boolean }> {
+  const username = await storage.getItem('local:username');
+  const accessToken = await storage.getItem('local:accessToken');
+  const vaultData = await storage.getItem('session:encryptedVault');
+
+  const isLoggedIn = username !== null && accessToken !== null;
+  const isVaultLocked = isLoggedIn && vaultData !== null;
+
+  return {
+    isLoggedIn,
+    isVaultLocked
+  };
+}
+
+/**
  * Store the vault in browser storage.
  */
 export async function handleStoreVault(
