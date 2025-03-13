@@ -24,6 +24,7 @@ body {
     height: 100%;
     text-align: center;
     font: -apple-system-short-body;
+    font-family: -apple-system-short-body, system-ui;
 }
 
 body:not(.state-on, .state-off) :is(.state-on, .state-off) {
