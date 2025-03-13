@@ -14,7 +14,7 @@ let popupDebounceTime = 0;
 /**
  * Check if popup can be shown based on debounce time.
  */
-export function canShowPopup() : boolean {
+export function popupDebounceTimeHasPassed() : boolean {
   if (Date.now() < popupDebounceTime) {
     return false;
   }

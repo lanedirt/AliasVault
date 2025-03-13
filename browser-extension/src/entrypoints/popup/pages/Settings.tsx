@@ -144,11 +144,11 @@ const Settings: React.FC = () => {
                 onClick={toggleGlobalPopup}
                 className={`px-4 py-2 rounded-md transition-colors ${
                   settings.isGloballyEnabled
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-green-500 hover:bg-green-600 text-white'
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-red-500 hover:bg-red-600 text-white'
                 }`}
               >
-                {settings.isGloballyEnabled ? 'Disable' : 'Enable'}
+                {settings.isGloballyEnabled ? 'Enabled' : 'Disabled'}
               </button>
             </div>
           </div>
@@ -164,18 +164,18 @@ const Settings: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">Open popup on: {settings.currentUrl}</p>
                 <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isEnabled ? 'Popup is active' : 'Popup is disabled'}
+                  {settings.isEnabled ? 'Enabled for this site' : 'Disabled for this site'}
                 </p>
               </div>
               <button
                 onClick={toggleCurrentSite}
                 className={`px-4 py-2 rounded-md transition-colors ${
                   settings.isEnabled
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-green-500 hover:bg-green-600 text-white'
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-red-500 hover:bg-red-600 text-white'
                 }`}
               >
-                {settings.isEnabled ? 'Disable' : 'Enable'}
+                {settings.isEnabled ? 'Enabled' : 'Disabled'}
               </button>
             </div>
 

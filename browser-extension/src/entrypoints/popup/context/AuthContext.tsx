@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { useDb } from './DbContext';
 import { storage } from 'wxt/storage';
 import { sendMessage } from 'webext-bridge/popup';
+import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -66,6 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const login = useCallback(async () : Promise<void> => {
     setIsLoggedIn(true);
+
+    // Clear dismiss until (which can be enabled after user has dimissed vault is locked popup) to ensure popup is shown.
+    await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, 0);
   }, []);
 
   /**
