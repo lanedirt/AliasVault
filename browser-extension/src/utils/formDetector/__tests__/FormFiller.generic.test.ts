@@ -44,10 +44,13 @@ describe('FormFiller', () => {
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.emailConfirmField)).toBe(true);
     });
 
-    it('should fill password and confirmation fields', () => {
+    it('should fill password and confirmation fields', async () => {
       formFields.passwordConfirmField = document.createElement('input');
 
       formFiller.fillFields(mockCredential);
+
+      // Delay for 150ms to ensure the password field is filled as it uses a small delay between each character.
+      await new Promise(resolve => setTimeout(resolve, 150));
 
       expect(formFields.passwordField?.value).toBe('testpass');
       expect(formFields.passwordConfirmField?.value).toBe('testpass');
