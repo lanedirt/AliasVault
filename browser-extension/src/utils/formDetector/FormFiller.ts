@@ -35,12 +35,12 @@ export class FormFiller {
     }
 
     if (this.form.passwordField) {
-      this.form.passwordField.value = credential.Password;
+      this.fillPasswordField(this.form.passwordField, credential.Password);
       this.triggerInputEvents(this.form.passwordField);
     }
 
     if (this.form.passwordConfirmField) {
-      this.form.passwordConfirmField.value = credential.Password;
+      this.fillPasswordField(this.form.passwordConfirmField, credential.Password);
       this.triggerInputEvents(this.form.passwordConfirmField);
     }
 
@@ -67,6 +67,26 @@ export class FormFiller {
     if (this.form.lastNameField) {
       this.form.lastNameField.value = credential.Alias.LastName;
       this.triggerInputEvents(this.form.lastNameField);
+    }
+  }
+
+  /**
+   * Fill the password field with the given password. This uses a small delay between each character to simulate human typing.
+   * In the past there have been issues where Microsoft 365 login forms would clear the password field when just setting the value directly.
+   *
+   * @param field The password field to fill.
+   * @param password The password to fill the field with.
+   */
+  private async fillPasswordField(field: HTMLInputElement, password: string): Promise<void> {
+    // Clear the field first
+    field.value = '';
+    this.triggerInputEvents(field);
+
+    // Type each character with a small delay
+    for (let i = 0; i < password.length; i++) {
+      field.value = password.substring(0, i + 1);
+      // Small random delay between 5-15ms to simulate human typing
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 5));
     }
   }
 
