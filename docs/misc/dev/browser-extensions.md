@@ -76,6 +76,17 @@ npm run build:edge
    - Enable "Developer mode" in the top right corner
    - Click "Load unpacked" and the folder `./browser-extension/dist/edge-mv3`
 
+### Safari
+
+1. Build the extension:
+```bash
+npm run build:safari
+```
+
+2. Open the Xcode project in the `safari-xcode/AliasVault/AliasVault.xcodeproj` folder and build / run the app.
+
+3. The extension will be installed automatically in Safari. Follow the on-screen MacOS app instructions to complete the installation.
+
 ## Automatic tests
 The extension has a suite of automatic tests that are run on every pull request. These tests are located in the `__tests__` directories scattered throughout the browser extension codebase.
 

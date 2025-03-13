@@ -10,7 +10,7 @@
 > AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
 
 ## Quick links
-- <a href="https://app.aliasvault.net">Try the cloud version 🔥</a> - <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> - <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> - <a href="#self-hosting">Self-host instructions ⚙️</a>
+- <a href="https://app.aliasvault.net">Try the cloud version 🔥</a> - <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> - <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> - <a href="#self-hosting">Self-host instructions ⚙️</a> - <a href="https://aliasvault.net/plugins?utm_source=gh-readme">Browser Extensions 🔌</a>
 
 ### What makes AliasVault unique:
 - **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
@@ -106,8 +106,8 @@ AliasVault is under active development with new features being added regularly. 
 - [x] Single-command Docker-based installation
 - [x] Chrome browser extension
 - [x] Firefox and MS Edge browser extension
-- [ ] Safari and Brave browser extension (https://github.com/lanedirt/AliasVault/issues/661)
-- [ ] Add and associate TOTP MFA tokens to credentials (https://github.com/lanedirt/AliasVault/issues/181)
+- [x] Safari and Brave browser extension
+- [x] Add and associate TOTP MFA tokens to credentials
 - [ ] Import passwords from existing password managers (https://github.com/lanedirt/AliasVault/issues/542)
 - [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
 
@@ -117,6 +117,11 @@ AliasVault is under active development with new features being added regularly. 
 - [ ] Disposable phone number service
 
 Want to suggest a feature? Join our [Discord](https://discord.gg/DsaXMTEtpF) or create an issue on GitHub.
+
+### Support the mission
+Your donation helps me dedicate more time and resources to improving AliasVault, making the internet safer for everyone!
+
+<a href="https://www.buymeacoffee.com/lanedirt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Tech Stack & Security
 
