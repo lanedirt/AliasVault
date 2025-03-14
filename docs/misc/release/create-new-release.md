@@ -18,7 +18,7 @@ Follow the steps in the checklist below to prepare a new release.
 
 ## Versioning browser extension
 - [ ] Update ./browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
-- [ ] Update the version in the ./browser-extension/safari-xcode/AliasVault.xcodeproj project file in MacOS Xcode, this is the version that will be shown in the Safari Browser Extension App Store.
+- [ ] Update the version `MARKETING_VERSION` and increase the build number `CURRENT_PROJECT_VERSION` in the ./browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj project file in MacOS Xcode. This is the version that will be shown in the Safari Browser Extension App Store.
 - [ ] Update ./browser-extension/src/utils/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
 - [ ] Update ./browser-extension/src/utils/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
 - [ ] Update ./browser-extension/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
