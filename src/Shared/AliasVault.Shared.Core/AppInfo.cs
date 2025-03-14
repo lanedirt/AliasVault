@@ -25,7 +25,7 @@ public static class AppInfo
     /// <summary>
     /// Gets the minor version number.
     /// </summary>
-    public const int VersionMinor = 13;
+    public const int VersionMinor = 14;
 
     /// <summary>
     /// Gets the patch version number.
@@ -54,6 +54,8 @@ public static class AppInfo
         { "firefox", MinimumClientVersion },
         { "edge", MinimumClientVersion },
         { "safari", MinimumClientVersion },
+
+        // Note: Brave currently identifies as "chrome" in the user agent string, so this version definition might be obsolete.
         { "brave", MinimumClientVersion },
 
         // Fallback for unknown browsers.
