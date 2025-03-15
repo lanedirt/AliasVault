@@ -38,26 +38,27 @@ show_usage() {
     printf "\n"
     printf "Commands:\n"
     printf "  install                   Install AliasVault by pulling pre-built images from GitHub Container Registry (recommended)\n"
-    printf "  uninstall                 Uninstall AliasVault\n"
-    printf "  update                    Update AliasVault to the latest version\n"
-    printf "  update-installer          Check and update install.sh script if newer version available\n"
+    printf "  build                     Build AliasVault containers locally from source (takes longer and requires sufficient specs)\n"
+    printf "  start                     Start AliasVault containers\n"
+    printf "  restart                   Restart AliasVault containers\n"
+    printf "  stop                      Stop AliasVault containers\n"
+    printf "\n"
     printf "  configure-hostname        Configure the hostname where AliasVault can be accessed from\n"
     printf "  configure-ssl             Configure SSL certificates (Let's Encrypt or self-signed)\n"
     printf "  configure-email           Configure email domains for receiving emails\n"
     printf "  configure-registration    Configure new account registration (enable or disable)\n"
     printf "  configure-ip-logging      Configure IP address logging (enable or disable)\n"
-    printf "  start                     Start AliasVault containers using remote images\n"
-    printf "  stop                      Stop AliasVault containers using remote images\n"
-    printf "  restart                   Restart AliasVault containers using remote images\n"
-    printf "  reset-password            Reset admin password\n"
-    printf "  build [operation]         Build AliasVault from source (takes longer and requires sufficient specs)\n"
-    printf "                            Optional operations: start|stop|restart (uses locally built images)\n"
+    printf "  reset-admin-password      Reset admin password\n"
+    printf "  uninstall                 Uninstall AliasVault\n"
+    printf "\n"
+    printf "  update                    Update AliasVault including install.sh script to the latest version\n"
+    printf "  update-installer          Update install.sh script if newer version is available\n"
     printf "\n"
     printf "  db-export                 Export database to file\n"
     printf "  db-import                 Import database from file\n"
     printf "\n"
     printf "  configure-dev-db          Enable/disable development database (for local development only)\n"
-    printf "  migrate-db                Migrate data from SQLite to PostgreSQL when upgrading from a version prior to 0.10.0\n"
+    printf "  migrate-db                Migrate data from SQLite to PostgreSQL (only when upgrading from a version prior to 0.10.0)\n"
     printf "\n"
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
@@ -115,7 +116,7 @@ parse_args() {
             shift
             ;;
         reset-password|reset-admin-password|rp)
-            COMMAND="reset-password"
+            COMMAND="reset-admin-password"
             shift
             ;;
         configure-hostname|hostname)
@@ -235,7 +236,7 @@ main() {
         "uninstall")
             handle_uninstall
             ;;
-        "reset-password")
+        "reset-admin-password")
             generate_admin_password
             if [ $? -eq 0 ]; then
                 printf "${CYAN}> Restarting admin container...${NC}\n"
@@ -651,7 +652,7 @@ print_success_message() {
     else
         printf "Admin Panel: https://localhost/admin\n"
         printf "Username: admin\n"
-        printf "Password: (Previously set. Use ./install.sh reset-password to generate new one.)\n"
+        printf "Password: (Previously set. Use ./install.sh reset-admin-password to generate new one.)\n"
     fi
     printf "\n"
     printf "${CYAN}===========================${NC}\n"

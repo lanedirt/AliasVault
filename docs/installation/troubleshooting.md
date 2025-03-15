@@ -102,10 +102,10 @@ Refer to the [installation guide](./install.md) for more information on how to c
 
 
 ### 4. Forgot AliasVault Admin Password
-If you have lost your admin password, you can reset it by running the install script with the `reset-password` option. This will generate a new random password and update the .env file with it. After that it will restart the AliasVault containers to apply the changes.
+If you have lost your admin password, you can reset it by running the install script with the `reset-admin-password` option. This will generate a new random password and update the .env file with it. After that it will restart the AliasVault containers to apply the changes.
 
 ```bash
-./install.sh reset-password
+./install.sh reset-admin-password
 ```
 
 ---
