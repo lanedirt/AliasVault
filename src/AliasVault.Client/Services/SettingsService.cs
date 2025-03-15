@@ -105,6 +105,30 @@ public sealed class SettingsService
     public Task SetCredentialsSortOrder(string value) => SetSettingAsync("CredentialsSortOrder", value);
 
     /// <summary>
+    /// Gets a setting value by key.
+    /// </summary>
+    /// <typeparam name="T">The type to cast the setting to.</typeparam>
+    /// <param name="key">The key of the setting.</param>
+    /// <returns>The setting value cast to type T, or default if not found.</returns>
+    public Task<T?> GetSettingAsync<T>(string key)
+    {
+        return Task.FromResult(GetSetting<T>(key, default));
+    }
+
+    /// <summary>
+    /// Sets a setting asynchronously, converting the value to a string so its compatible with the database field.
+    /// </summary>
+    /// <typeparam name="T">The type of the value being set.</typeparam>
+    /// <param name="key">The key of the setting.</param>
+    /// <param name="value">The value to set.</param>
+    /// <returns>Task.</returns>
+    public Task SetSettingAsync<T>(string key, T value)
+    {
+        string stringValue = ConvertToString(value);
+        return SetSettingAsync(key, stringValue);
+    }
+
+    /// <summary>
     /// Initializes the settings service asynchronously.
     /// </summary>
     /// <param name="dbService">DbService instance.</param>
@@ -243,19 +267,6 @@ public sealed class SettingsService
         {
             throw new InvalidOperationException($"Failed to cast setting {key} to type {typeof(T)}", ex);
         }
-    }
-
-    /// <summary>
-    /// Sets a setting asynchronously, converting the value to a string so its compatible with the database field.
-    /// </summary>
-    /// <typeparam name="T">The type of the value being set.</typeparam>
-    /// <param name="key">The key of the setting.</param>
-    /// <param name="value">The value to set.</param>
-    /// <returns>Task.</returns>
-    private Task SetSettingAsync<T>(string key, T value)
-    {
-        string stringValue = ConvertToString(value);
-        return SetSettingAsync(key, stringValue);
     }
 
     /// <summary>

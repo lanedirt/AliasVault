@@ -43,6 +43,34 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     }
 
     /// <summary>
+    /// Generates a random password for a credential using the specified settings.
+    /// </summary>
+    /// <param name="length">The length of the password.</param>
+    /// <param name="useLowercase">Whether to include lowercase letters.</param>
+    /// <param name="useUppercase">Whether to include uppercase letters.</param>
+    /// <param name="useNumbers">Whether to include numbers.</param>
+    /// <param name="useSpecialChars">Whether to include special characters.</param>
+    /// <param name="useNonAmbiguousChars">Whether to avoid ambiguous characters.</param>
+    /// <returns>Random password.</returns>
+    public static string GenerateRandomPassword(int length, bool useLowercase, bool useUppercase, bool useNumbers, bool useSpecialChars, bool useNonAmbiguousChars)
+    {
+        // Generate a random password using a IPasswordGenerator implementation.
+        var passwordGenerator = new SpamOkPasswordGenerator();
+        var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
+        string password = passwordBuilder
+            .SetLength(length)
+            .UseLowercaseLetters(useLowercase)
+            .UseUppercaseLetters(useUppercase)
+            .UseNumbers(useNumbers)
+            .UseSpecialChars(useSpecialChars)
+            .UseNonAmbiguousChars(useNonAmbiguousChars)
+            .GeneratePassword()
+            .ToString();
+
+        return password;
+    }
+
+    /// <summary>
     /// Generates a random identity for a credential.
     /// </summary>
     /// <param name="credential">The credential object to update.</param>
