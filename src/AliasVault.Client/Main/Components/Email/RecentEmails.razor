@@ -113,71 +113,77 @@
 
     private const int ACTIVE_TAB_REFRESH_INTERVAL = 2000; // 2 seconds
 
-    private PeriodicTimer? _refreshTimer;
-    private CancellationTokenSource _cancellationTokenSource = new();
+    private CancellationTokenSource? _pollingCts;
+    private DotNetObjectReference<RecentEmails>? _dotNetRef;
+    private bool _isPageVisible = true;
 
     /// <summary>
     /// Callback invoked by JavaScript when the page visibility changes. This is used to start/stop the polling for new emails.
     /// </summary>
     /// <param name="isVisible">Indicates whether the page is visible or not.</param>
     [JSInvokable]
-    public async Task OnVisibilityChange(bool isVisible)
+    public void OnVisibilityChange(bool isVisible)
     {
+        _isPageVisible = isVisible;
+        
         if (isVisible && DbService.Settings.AutoEmailRefresh)
         {
-            await StartPolling();
+            // Start polling if visible and auto-refresh is enabled
+            StartPolling();
         }
         else
         {
-            await StopPolling();
+            // Stop polling if hidden
+            StopPolling();
         }
-
-        // Refresh immediately when tab becomes visible
+        
+        // If becoming visible, do an immediate refresh
         if (isVisible)
         {
-            await ManualRefresh();
+            _ = ManualRefresh();
         }
     }
 
-    private async Task StartPolling()
+    private void StartPolling()
     {
-        await StopPolling();
-
-        // Create a new CancellationTokenSource since the old one might have been cancelled
-        _cancellationTokenSource = new CancellationTokenSource();
-        _refreshTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(ACTIVE_TAB_REFRESH_INTERVAL));
-
+        // If already polling, no need to start again
+        if (_pollingCts != null) {
+            return;
+        }
+            
+        _pollingCts = new CancellationTokenSource();
+        
+        // Start polling task
+        _ = PollForEmails(_pollingCts.Token);
+    }
+    
+    private void StopPolling()
+    {
+        if (_pollingCts != null)
+        {
+            _pollingCts.Cancel();
+            _pollingCts.Dispose();
+            _pollingCts = null;
+        }
+    }
+    
+    private async Task PollForEmails(CancellationToken cancellationToken)
+    {
         try
         {
-            while (await _refreshTimer.WaitForNextTickAsync(_cancellationTokenSource.Token))
+            while (!cancellationToken.IsCancellationRequested)
             {
                 await LoadRecentEmailsAsync();
+                await Task.Delay(ACTIVE_TAB_REFRESH_INTERVAL, cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
-            // Normal cancellation, ignore
+            // Normal cancellation, ignore.
         }
-    }
-
-    private async Task StopPolling()
-    {
-        if (_refreshTimer is not null)
+        catch (Exception ex)
         {
-            await _cancellationTokenSource.CancelAsync();
-            await Task.Delay(100); // Give time for the polling loop to complete
-            _refreshTimer.Dispose();
-            _refreshTimer = null;
-        }
-    }
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-    {
-        if (_refreshTimer is not null)
-        {
-            await StopPolling();
-            _cancellationTokenSource.Dispose();
+            Logger.LogError(ex, "Error in email refresh polling");
         }
     }
 
@@ -195,11 +201,28 @@
         ShowComponent = IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress);
         IsSpamOk = IsSpamOkDomain(EmailAddress);
 
-        await JsInteropService.RegisterVisibilityCallback(DotNetObjectReference.Create(this));
+        // Create a single object reference for JS interop
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JsInteropService.RegisterVisibilityCallback(_dotNetRef);
 
-        if (DbService.Settings.AutoEmailRefresh)
+        // Only start polling if auto-refresh is enabled and page is visible
+        if (DbService.Settings.AutoEmailRefresh && _isPageVisible)
         {
-            await StartPolling();
+            StartPolling();
+        }
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        // Stop polling
+        StopPolling();
+        
+        // Unregister the visibility callback using the same reference
+        if (_dotNetRef != null)
+        {
+            await JsInteropService.UnregisterVisibilityCallback(_dotNetRef);
+            _dotNetRef.Dispose();
         }
     }
 

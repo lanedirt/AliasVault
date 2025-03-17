@@ -249,6 +249,16 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("window.registerVisibilityCallback", objRef);
 
     /// <summary>
+    /// Unregisters the visibility callback to prevent memory leaks.
+    /// </summary>
+    /// <typeparam name="TComponent">Component type.</typeparam>
+    /// <param name="objRef">DotNetObjectReference.</param>
+    /// <returns>Task.</returns>
+    public async Task UnregisterVisibilityCallback<TComponent>(DotNetObjectReference<TComponent> objRef)
+        where TComponent : class =>
+        await jsRuntime.InvokeVoidAsync("window.unregisterVisibilityCallback", objRef);
+
+    /// <summary>
     /// Symmetrically decrypts a byte array using the provided encryption key.
     /// </summary>
     /// <param name="cipherBytes">Cipher bytes to decrypt.</param>

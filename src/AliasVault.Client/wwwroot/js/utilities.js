@@ -299,8 +299,39 @@ async function createWebAuthnCredentialAndDeriveKey(username) {
     }
 }
 
+// Store the event listener references.
+const visibilityChangeHandlers = new Map();
+
+/**
+ * Registers visibility callback that is invoked when the visibility state of the current page/tab changes.
+ * 
+ * @param {any} dotnetHelper
+ */
 window.registerVisibilityCallback = function (dotnetHelper) {
-    document.addEventListener("visibilitychange", function () {
+    // Create a named function so we can reference it later for removal.
+    const handler = function() {
         dotnetHelper.invokeMethodAsync('OnVisibilityChange', !document.hidden);
-    });
+    };
+    
+    visibilityChangeHandlers.set(dotnetHelper, handler);
+    document.addEventListener("visibilitychange", handler);
+    
+    // Initial call to set the correct initial state.
+    dotnetHelper.invokeMethodAsync('OnVisibilityChange', !document.hidden);
+};
+
+/**
+ * Unregisters any previously registered visibility callbacks to prevent memory leaks.
+ * 
+ * @param {any} dotnetHelper
+ */
+window.unregisterVisibilityCallback = function (dotnetHelper) {
+    // Get the stored handler.
+    const handler = visibilityChangeHandlers.get(dotnetHelper);
+    
+    if (handler) {
+        // Remove the event listener with the same function reference.
+        document.removeEventListener("visibilitychange", handler);
+        visibilityChangeHandlers.delete(dotnetHelper);
+    }
 };
