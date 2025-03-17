@@ -1,7 +1,7 @@
 # Contributing to the source code
 We welcome contributions to AliasVault. Please read the guidelines on the official AliasVault docs website on how to get your local development environment setup and the general contribution guidelines:
 
-https://docs.aliasvault.net/misc/dev/contributing.html
+https://docs.aliasvault.net/misc/dev/
 
 > Tip: if the URL above is not available, the raw doc pages can also be found in the `docs` folder in this repository.
 
