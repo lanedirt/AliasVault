@@ -63,6 +63,32 @@ public sealed class SettingsService
     public string CredentialsSortOrder => GetSetting("CredentialsSortOrder", "asc")!;
 
     /// <summary>
+    /// Gets the password settings from the database. If it fails, we use the model's default values.
+    /// </summary>
+    public PasswordSettings PasswordSettings
+    {
+        get
+        {
+            try
+            {
+                var settingsJson = GetSetting<string>("PasswordGenerationSettings");
+                if (!string.IsNullOrEmpty(settingsJson))
+                {
+                    // If settings are saved, load them.
+                    return System.Text.Json.JsonSerializer.Deserialize<PasswordSettings>(settingsJson) ?? new PasswordSettings();
+                }
+            }
+            catch
+            {
+                // Ignore.
+            }
+
+            // If no settings are saved, return default settings.
+            return new PasswordSettings();
+        }
+    }
+
+    /// <summary>
     /// Sets the DefaultEmailDomain setting.
     /// </summary>
     /// <param name="value">The new DefaultEmailDomain setting.</param>

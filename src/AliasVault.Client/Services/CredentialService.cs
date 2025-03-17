@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using AliasClientDb;
 using AliasVault.Generators.Identity.Implementations.Factories;
 using AliasVault.Generators.Identity.Models;
-using AliasVault.Generators.Password.Implementations;
 using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,38 +31,23 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     public const string DefaultServiceUrl = "https://";
 
     /// <summary>
-    /// Generates a random password for a credential.
-    /// </summary>
-    /// <returns>Random password.</returns>
-    public static string GenerateRandomPassword()
-    {
-        // Generate a random password using a IPasswordGenerator implementation.
-        var passwordGenerator = new SpamOkPasswordGenerator();
-        return passwordGenerator.GenerateRandomPassword();
-    }
-
-    /// <summary>
     /// Generates a random password for a credential using the specified settings.
     /// </summary>
-    /// <param name="length">The length of the password.</param>
-    /// <param name="useLowercase">Whether to include lowercase letters.</param>
-    /// <param name="useUppercase">Whether to include uppercase letters.</param>
-    /// <param name="useNumbers">Whether to include numbers.</param>
-    /// <param name="useSpecialChars">Whether to include special characters.</param>
-    /// <param name="useNonAmbiguousChars">Whether to avoid ambiguous characters.</param>
+    /// <param name="settings">PasswordSettings model.</param>
     /// <returns>Random password.</returns>
-    public static string GenerateRandomPassword(int length, bool useLowercase, bool useUppercase, bool useNumbers, bool useSpecialChars, bool useNonAmbiguousChars)
+    public static string GenerateRandomPassword(PasswordSettings settings)
     {
         // Generate a random password using a IPasswordGenerator implementation.
-        var passwordGenerator = new SpamOkPasswordGenerator();
         var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
-        string password = passwordBuilder
-            .SetLength(length)
-            .UseLowercaseLetters(useLowercase)
-            .UseUppercaseLetters(useUppercase)
-            .UseNumbers(useNumbers)
-            .UseSpecialChars(useSpecialChars)
-            .UseNonAmbiguousChars(useNonAmbiguousChars)
+
+        // Apply the settings.
+        var password = passwordBuilder
+            .SetLength(settings.Length)
+            .UseLowercaseLetters(settings.UseLowercase)
+            .UseUppercaseLetters(settings.UseUppercase)
+            .UseNumbers(settings.UseNumbers)
+            .UseSpecialChars(settings.UseSpecialChars)
+            .UseNonAmbiguousChars(settings.UseNonAmbiguousChars)
             .GeneratePassword()
             .ToString();
 
@@ -116,7 +100,8 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         while (isEmailTaken && attempts < MaxAttempts);
 
         // Generate password
-        credential.Passwords.First().Value = GenerateRandomPassword();
+        var passwordSettings = dbService.Settings.PasswordSettings;
+        credential.Passwords.First().Value = GenerateRandomPassword(passwordSettings);
 
         return credential;
     }

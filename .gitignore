@@ -423,3 +423,6 @@ database/postgres-dev
 
 # Temp files
 temp
+
+# VScode
+.vscode
