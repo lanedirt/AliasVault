@@ -140,7 +140,7 @@ public class CredentialTests : ClientPlaywrightTest
             });
 
         // 1. First try to generate new username with no identity fields set yet.
-        var newUsernameButton = Page.Locator("text=New Username").First;
+        var newUsernameButton = Page.Locator("button[id='generate-username-button']");
         Assert.That(newUsernameButton, Is.Not.Null, "Generate button not found.");
         await newUsernameButton.ClickAsync();
         await Task.Delay(100);
@@ -170,7 +170,7 @@ public class CredentialTests : ClientPlaywrightTest
         });
 
         // 3. Regenerate the username field again.
-        newUsernameButton = Page.Locator("text=New Username").First;
+        newUsernameButton = Page.Locator("button[id='generate-username-button']");
         await newUsernameButton.ClickAsync();
 
         await Task.Delay(100);

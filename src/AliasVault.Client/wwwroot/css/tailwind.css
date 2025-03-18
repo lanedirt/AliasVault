@@ -642,14 +642,6 @@ video {
   bottom: 0px;
 }
 
-.bottom-1 {
-  bottom: 0.25rem;
-}
-
-.end-1 {
-  inset-inline-end: 0.25rem;
-}
-
 .left-0 {
   left: 0px;
 }
@@ -704,6 +696,10 @@ video {
 
 .\!m-0 {
   margin: 0px !important;
+}
+
+.m-2 {
+  margin: 0.5rem;
 }
 
 .mx-4 {
@@ -1172,6 +1168,10 @@ video {
   justify-content: space-between;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-3 {
   gap: 0.75rem;
 }
@@ -1182,10 +1182,6 @@ video {
 
 .gap-6 {
   gap: 1.5rem;
-}
-
-.gap-2 {
-  gap: 0.5rem;
 }
 
 .space-x-1 > :not([hidden]) ~ :not([hidden]) {
@@ -1351,6 +1347,10 @@ video {
 
 .border-b-2 {
   border-bottom-width: 2px;
+}
+
+.border-l {
+  border-left-width: 1px;
 }
 
 .border-l-0 {
@@ -1719,6 +1719,10 @@ video {
   padding-bottom: 2rem;
 }
 
+.pe-3 {
+  padding-inline-end: 0.75rem;
+}
+
 .pl-2 {
   padding-left: 0.5rem;
 }
@@ -1727,12 +1731,20 @@ video {
   padding-right: 2.5rem;
 }
 
+.pr-16 {
+  padding-right: 4rem;
+}
+
 .pr-20 {
   padding-right: 5rem;
 }
 
 .pr-3 {
   padding-right: 0.75rem;
+}
+
+.ps-3 {
+  padding-inline-start: 0.75rem;
 }
 
 .pt-16 {
@@ -1753,14 +1765,6 @@ video {
 
 .pt-8 {
   padding-top: 2rem;
-}
-
-.pe-3 {
-  padding-inline-end: 0.75rem;
-}
-
-.ps-3 {
-  padding-inline-start: 0.75rem;
 }
 
 .text-left {
@@ -1858,6 +1862,10 @@ video {
 
 .uppercase {
   text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
 }
 
 .italic {
@@ -2328,6 +2336,11 @@ video {
   --tw-ring-color: rgb(156 163 175 / var(--tw-ring-opacity));
 }
 
+.focus\:ring-gray-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(107 114 128 / var(--tw-ring-opacity));
+}
+
 .focus\:ring-green-300:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(134 239 172 / var(--tw-ring-opacity));
@@ -2504,6 +2517,11 @@ video {
 .dark\:bg-primary-600:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(214 131 56 / var(--tw-bg-opacity));
+}
+
+.dark\:bg-primary-700:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(184 112 47 / var(--tw-bg-opacity));
 }
 
 .dark\:bg-primary-900:is(.dark *) {

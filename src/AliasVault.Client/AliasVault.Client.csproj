@@ -54,6 +54,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
+        <PackageReference Include="SpamOK.PasswordGenerator" Version="1.1.0" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -77,7 +78,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasClientDb\AliasClientDb.csproj" />
       <ProjectReference Include="..\Generators\AliasVault.Generators.Identity\AliasVault.Generators.Identity.csproj" />
-      <ProjectReference Include="..\Generators\AliasVault.Generators.Password\AliasVault.Generators.Password.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared.Core\AliasVault.Shared.Core.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />

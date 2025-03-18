@@ -114,7 +114,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Navigate to the email index page and ensure that the decrypted email is also readable there.
         await NavigateUsingBlazorRouter("emails");
-        await WaitForUrlAsync("emails", "Inbox");
+        await WaitForUrlAsync("emails", textSubject);
 
         // Check if the email is visible on the page now.
         emailContent = await Page.TextContentAsync("body");
@@ -227,7 +227,7 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Navigate to the email index page and ensure that the decrypted email is also readable there.
         await NavigateUsingBlazorRouter("emails");
-        await WaitForUrlAsync("emails", "Inbox");
+        await WaitForUrlAsync("emails", textSubject);
 
         // Check if the email is visible on the page now.
         emailContent = await Page.TextContentAsync("body");

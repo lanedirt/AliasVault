@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using AliasClientDb;
 using AliasVault.Generators.Identity.Implementations.Factories;
 using AliasVault.Generators.Identity.Models;
-using AliasVault.Generators.Password.Implementations;
 using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,14 +31,33 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     public const string DefaultServiceUrl = "https://";
 
     /// <summary>
-    /// Generates a random password for a credential.
+    /// Generates a random password for a credential using the specified settings.
     /// </summary>
+    /// <param name="settings">PasswordSettings model.</param>
     /// <returns>Random password.</returns>
-    public static string GenerateRandomPassword()
+    public static string GenerateRandomPassword(PasswordSettings settings)
     {
         // Generate a random password using a IPasswordGenerator implementation.
-        var passwordGenerator = new SpamOkPasswordGenerator();
-        return passwordGenerator.GenerateRandomPassword();
+        var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
+
+        // Sanity check: if all settings are false, then default to use lowercase letters only.
+        if (!settings.UseLowercase && !settings.UseUppercase && !settings.UseNumbers && !settings.UseSpecialChars && !settings.UseNonAmbiguousChars)
+        {
+            settings.UseLowercase = true;
+        }
+
+        // Apply the settings.
+        var password = passwordBuilder
+            .SetLength(settings.Length)
+            .UseLowercaseLetters(settings.UseLowercase)
+            .UseUppercaseLetters(settings.UseUppercase)
+            .UseNumbers(settings.UseNumbers)
+            .UseSpecialChars(settings.UseSpecialChars)
+            .UseNonAmbiguousChars(settings.UseNonAmbiguousChars)
+            .GeneratePassword()
+            .ToString();
+
+        return password;
     }
 
     /// <summary>
@@ -88,7 +106,8 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         while (isEmailTaken && attempts < MaxAttempts);
 
         // Generate password
-        credential.Passwords.First().Value = GenerateRandomPassword();
+        var passwordSettings = dbService.Settings.PasswordSettings;
+        credential.Passwords.First().Value = GenerateRandomPassword(passwordSettings);
 
         return credential;
     }

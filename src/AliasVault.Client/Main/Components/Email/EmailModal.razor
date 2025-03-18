@@ -1,6 +1,7 @@
 ﻿@using AliasVault.Shared.Models.Spamok
 @using AliasVault.Shared.Utilities
 @using AliasVault.Shared.Core;
+@using AliasVault.Client.Main.Components.Layout
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
@@ -8,8 +9,8 @@
 @inject HttpClient HttpClient
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
-    <div class="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center">
-        <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh]">
+    <ModalWrapper OnEnter="Close">
+        <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh] border-2 border-gray-300 dark:border-gray-400">
             <!-- Header -->
             <div class="p-4 border-b">
                 <div class="flex items-center justify-between">
@@ -72,7 +73,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </ModalWrapper>
 </ClickOutsideHandler>
 
 @code {

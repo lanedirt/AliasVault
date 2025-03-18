@@ -27,7 +27,7 @@ public class GeneralSettingsTests : ClientPlaywrightTest
 
         // Check if the expected content is present.
         var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Default Email Domain"), "No general settings option visible.");
+        Assert.That(pageContent, Does.Contain("Default email domain"), "No general settings option visible.");
 
         // Set the default email domain to "example2.tld".
         var defaultEmailDomainField = Page.Locator("select[id='defaultEmailDomain']");
