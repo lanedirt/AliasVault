@@ -44,9 +44,6 @@ else
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged"/>
 
         <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden mt-6">
-            <div class="px-4 py-2 bg-gray-100 border-b dark:bg-gray-600 dark:border-gray-700">
-                <h2 class="font-semibold text-gray-800 dark:text-gray-200">Inbox</h2>
-            </div>
             <ul class="divide-y divide-gray-200 dark:divide-gray-600">
                 @if (EmailList.Count == 0)
                 {
