@@ -7,6 +7,7 @@ import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
+import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 
 /**
  * WeakMap to store event listeners for popup containers
@@ -212,7 +213,11 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       const identityGenerator = new IdentityGeneratorEn();
       const identity = await identityGenerator.generateRandomIdentity();
 
-      const passwordGenerator = new PasswordGenerator();
+      // Get password settings from background
+      const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
+      
+      // Initialize password generator with the retrieved settings
+      const passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
       const password = passwordGenerator.generateRandomPassword();
 
       // Extract favicon from page and get the bytes

@@ -10,6 +10,7 @@ import { BoolResponse as messageBoolResponse } from '../../utils/types/messaging
 import { VaultResponse as messageVaultResponse } from '../../utils/types/messaging/VaultResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '../../utils/types/messaging/CredentialsResponse';
 import { DefaultEmailDomainResponse as messageDefaultEmailDomainResponse } from '../../utils/types/messaging/DefaultEmailDomainResponse';
+import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '../../utils/types/messaging/PasswordSettingsResponse';
 
 /**
  * Check if the user is logged in and if the vault is locked.
@@ -256,6 +257,22 @@ export function handleGetDefaultEmailDomain(
       return { success: false, error: 'Failed to get default email domain' };
     }
   })();
+}
+
+/**
+ * Get the password settings.
+ */
+export async function handleGetPasswordSettings(
+) : Promise<messagePasswordSettingsResponse> {
+  try {
+    const sqliteClient = await createVaultSqliteClient();
+    const passwordSettings = sqliteClient.getPasswordSettings();
+
+    return { success: true, settings: passwordSettings };
+  } catch (error) {
+    console.error('Error getting password settings:', error);
+    return { success: false, error: 'Failed to get password settings' };
+  }
 }
 
 /**

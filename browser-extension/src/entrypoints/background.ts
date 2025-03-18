@@ -2,7 +2,7 @@ import { browser } from "wxt/browser";
 import { defineBackground } from 'wxt/sandbox';
 import { onMessage } from "webext-bridge/background";
 import { setupContextMenus, handleContextMenuClick } from './background/ContextMenu';
-import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
+import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential } from './background/PopupMessageHandler';
 
 export default defineBackground({
@@ -12,7 +12,7 @@ export default defineBackground({
   main() {
     // Set up context menus
     setupContextMenus();
-    browser.contextMenus.onClicked.addListener((info: browser.menus.OnClickData, tab?: browser.tabs.Tab) =>
+    browser.contextMenus.onClicked.addListener((info: browser.contextMenus.OnClickData, tab?: browser.tabs.Tab) =>
       handleContextMenuClick(info, tab)
     );
 
@@ -25,6 +25,7 @@ export default defineBackground({
     onMessage('GET_CREDENTIALS', () => handleGetCredentials());
     onMessage('CREATE_IDENTITY', ({ data }) => handleCreateIdentity(data));
     onMessage('GET_DEFAULT_EMAIL_DOMAIN', () => handleGetDefaultEmailDomain());
+    onMessage('GET_PASSWORD_SETTINGS', () => handleGetPasswordSettings());
     onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
     onMessage('OPEN_POPUP', () => handleOpenPopup());
     onMessage('OPEN_POPUP_WITH_CREDENTIAL', ({ data }) => handlePopupWithCredential(data));

@@ -2,6 +2,7 @@ import initSqlJs, { Database } from 'sql.js';
 import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
+import { PasswordSettings } from './types/PasswordSettings';
 
 /**
  * Client for interacting with the SQLite database.
@@ -278,6 +279,33 @@ class SqliteClient {
    */
   public getDefaultEmailDomain(): string {
     return this.getSetting('DefaultEmailDomain');
+  }
+
+  /**
+   * Get the password settings from the database.
+   */
+  public getPasswordSettings(): PasswordSettings {
+    const settingsJson = this.getSetting('PasswordGenerationSettings');
+    
+    // Default settings if none found or parsing fails
+    const defaultSettings: PasswordSettings = {
+      Length: 18,
+      UseLowercase: true,
+      UseUppercase: true,
+      UseNumbers: true,
+      UseSpecialChars: true,
+      UseNonAmbiguousChars: false
+    };
+    
+    try {
+      if (settingsJson) {
+        return { ...defaultSettings, ...JSON.parse(settingsJson) };
+      }
+    } catch (error) {
+      console.warn('Failed to parse password settings:', error);
+    }
+    
+    return defaultSettings;
   }
 
   /**
