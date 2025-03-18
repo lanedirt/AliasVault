@@ -1,2 +1,22 @@
-# Auto detect text files and perform LF normalization
+# Set default behavior to automatically normalize line endings
 * text=auto
+
+# Shell scripts should always use LF (Unix-style) line endings
+*.sh text eol=lf
+
+# Batch scripts should always use CRLF (Windows-style) line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Docker files should use LF
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# Config files should use LF
+*.conf text eol=lf
+*.config text eol=lf
+.env* text eol=lf
+
+# Documentation should be normalized
+*.md text
+*.txt text

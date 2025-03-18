@@ -3,7 +3,7 @@ layout: default
 title: Browser Extensions
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 2
+nav_order: 3
 ---
 
 # Browser Extensions
