@@ -39,6 +39,12 @@ export default defineContentScript({
             return;
           }
 
+          // Check if element itself, html or body has av-disable attribute like av-disable="true"
+          const avDisable = (e.target as HTMLElement).getAttribute('av-disable') ?? document.body?.getAttribute('av-disable') ?? document.documentElement.getAttribute('av-disable');
+          if (avDisable === 'true') {
+            return;
+          }
+
           const target = e.target as HTMLInputElement;
           const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
 
