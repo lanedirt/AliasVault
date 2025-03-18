@@ -136,4 +136,111 @@ public class ChromeExtensionTests : BrowserExtensionPlaywrightTest
         // Clean up the temporary file after the test
         File.Delete(tempHtmlPath);
     }
+
+    /// <summary>
+    /// Tests if the extension applies custom password settings configured in the client app.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Order(3)]
+    [Test]
+    public async Task ExtensionAppliesCustomPasswordSettings()
+    {
+        // First configure password settings in the client app
+        await Page.BringToFrontAsync();
+
+        // Navigate to settings/general
+        await NavigateUsingBlazorRouter("settings/general");
+        await WaitForUrlAsync("settings/general", "General Settings");
+
+        // Click the "Password Generator Settings" button to open the settings popup
+        await Page.ClickAsync("button[id='password-generator-settings-modal']");
+
+        // Wait for the password settings modal to appear
+        await Page.WaitForSelectorAsync("div.modal-dialog");
+
+        // Uncheck all checkboxes except lowercase
+        await Page.UncheckAsync("#use-uppercase");
+        await Page.UncheckAsync("#use-numbers");
+        await Page.UncheckAsync("#use-special-chars");
+        await Page.CheckAsync("#use-lowercase");
+
+        // Set password length to 10
+        await Page.FillAsync("input#password-length", "10");
+
+        // Save the settings
+        await Page.ClickAsync("button[id='save-button']");
+
+        // Wait for settings to be saved (modal to disappear)
+        await Page.WaitForSelectorAsync("div.modal-dialog", new() { State = WaitForSelectorState.Hidden });
+
+        // Login to the extension
+        var extensionPopup = await LoginToExtension();
+
+        // Create a temporary HTML file with the test form
+        var tempHtmlPath = Path.Combine(Path.GetTempPath(), "test-form-password-settings.html");
+        var testFormHtml = @"
+            <html>
+            <head>
+                <title>Password Settings Test</title>
+            </head>
+            <body>
+                <h1>AliasVault browser extension password settings test</h1>
+                <form>
+                    <input type='text' id='username' placeholder='Username'>
+                    <input type='password' id='password' placeholder='Password'>
+                    <button type='submit'>Login</button>
+                </form>
+            </body>
+            </html>
+        ";
+
+        await File.WriteAllTextAsync(tempHtmlPath, testFormHtml);
+
+        // Navigate to the file using the file:// protocol
+        await extensionPopup.GotoAsync($"file://{tempHtmlPath}");
+
+        // Focus the username field which should trigger the AliasVault popup
+        await extensionPopup.FocusAsync("input#username");
+
+        // Wait for the AliasVault popup to appear
+        await extensionPopup.WaitForSelectorAsync("#aliasvault-credential-popup");
+
+        // Click the "New" button in the popup
+        await extensionPopup.ClickAsync("button:has-text('New')");
+
+        // Set the service name for the new credential
+        var serviceName = "Password Settings Test";
+        await extensionPopup.FillAsync("input[id='service-name-input']", serviceName);
+
+        // Click the "Create" button
+        await extensionPopup.ClickAsync("button[id='save-btn']");
+
+        // Wait for the "aliasvault-create-popup" to disappear
+        await extensionPopup.WaitForSelectorAsync("#aliasvault-create-popup", new() { State = WaitForSelectorState.Hidden });
+
+        // Wait for 0.5 second because the password is being typed in char by char
+        await Task.Delay(500);
+
+        // Wait for the credential to be created and the form fields to be filled with values
+        await extensionPopup.WaitForFunctionAsync(
+            @"() => {
+            const username = document.querySelector('input#username');
+            const password = document.querySelector('input#password');
+            return username?.value && password?.value;
+            }",
+            null,
+            new() { Timeout = 10000 });
+
+        // Get the generated password
+        var password = await extensionPopup.InputValueAsync("input#password");
+
+        // Verify the password is 10 characters long
+        Assert.That(password.Length, Is.EqualTo(10), "Password length does not match the configured length of 10");
+
+        // Verify the password only contains lowercase letters (a-z)
+        Assert.That(password, Does.Match("^[a-z]+$"), "Password contains characters other than lowercase letters");
+
+        // Clean up the temporary file after the test
+        File.Delete(tempHtmlPath);
+    }
 }

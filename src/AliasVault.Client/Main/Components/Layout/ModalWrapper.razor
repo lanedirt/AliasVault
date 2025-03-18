@@ -22,7 +22,7 @@
     /// CSS class string to apply to the wrapper div.
     /// </summary>
     [Parameter]
-    public string CssClass { get; set; } = "fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center";
+    public string CssClass { get; set; } = "modal-dialog fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex items-center justify-center";
 
     /// <summary>
     /// Determines if the default behavior should be prevented for keyboard events.
@@ -48,4 +48,4 @@
     {
         return ValueTask.CompletedTask;
     }
-} 
+}
