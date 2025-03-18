@@ -2,9 +2,13 @@
 @inject JsInteropService JsInteropService
 @implements IDisposable
 
-<label for="@Id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
-<div class="relative">
-    <input type="text" id="@Id" class="outline-0 shadow-sm bg-gray-50 border @(Copied ? "border-green-500 border-2" : "border-gray-300") text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-@(Copied ? "green-500" : "gray-600") dark:placeholder-gray-400 dark:text-white" value="@Value" @onclick="CopyToClipboard" readonly>
+@if (Label != null)
+{
+    <label for="@Id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Label</label>
+}
+
+<div class="relative flex-grow">
+    <input type="text" autocomplete="off" id="@Id" class="outline-0 shadow-sm bg-gray-50 border @(Copied ? "border-green-500 border-2" : "border-gray-300") text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-@(Copied ? "green-500" : "gray-600") dark:placeholder-gray-400 dark:text-white" value="@Value" @onclick="CopyToClipboard" readonly>
     @if (Copied)
     {
         <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500 dark:text-green-400">
@@ -24,7 +28,7 @@
     /// The label for the input.
     /// </summary>
     [Parameter]
-    public string Label { get; set; } = "Value";
+    public string? Label { get; set; }
 
     /// <summary>
     /// The value to copy to the clipboard.
