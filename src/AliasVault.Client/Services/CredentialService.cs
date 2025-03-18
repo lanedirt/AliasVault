@@ -40,6 +40,12 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         // Generate a random password using a IPasswordGenerator implementation.
         var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
 
+        // Sanity check: if all settings are false, then default to use lowercase letters only.
+        if (!settings.UseLowercase && !settings.UseUppercase && !settings.UseNumbers && !settings.UseSpecialChars && !settings.UseNonAmbiguousChars)
+        {
+            settings.UseLowercase = true;
+        }
+
         // Apply the settings.
         var password = passwordBuilder
             .SetLength(settings.Length)
