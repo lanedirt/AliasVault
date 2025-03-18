@@ -18,8 +18,8 @@ export class PasswordGenerator {
   private useNonAmbiguous: boolean = false;
 
   /**
-   * Create a new instance of PasswordGenerator
-   * @param settings Optional password settings to initialize with
+   * Create a new instance of PasswordGenerator.
+   * @param settings Optional password settings to initialize with.
    */
   public constructor(settings?: PasswordSettings) {
     if (settings) {
@@ -28,7 +28,7 @@ export class PasswordGenerator {
   }
 
   /**
-   * Apply password settings to this generator
+   * Apply password settings to this generator.
    */
   public applySettings(settings: PasswordSettings): this {
     this.length = settings.Length;
@@ -92,7 +92,7 @@ export class PasswordGenerator {
    * Get a random index from the crypto module.
    */
   private getUnbiasedRandomIndex(max: number): number {
-    // Calculate the largest multiple of max that fits within Uint32
+    // Calculate the largest multiple of max that fits within Uint32.
     const limit = Math.floor((2 ** 32) / max) * max;
 
     while (true) {
@@ -100,7 +100,7 @@ export class PasswordGenerator {
       crypto.getRandomValues(array);
       const value = array[0];
 
-      // Reject values that would introduce bias
+      // Reject values that would introduce bias.
       if (value < limit) {
         return value % max;
       }
@@ -111,86 +111,149 @@ export class PasswordGenerator {
    * Generate a random password.
    */
   public generateRandomPassword(): string {
-    let chars = '';
-    let password = '';
+    // Build the character set based on settings
+    const chars = this.buildCharacterSet();
 
-    // Build character set based on options
+    // Generate initial password.
+    let password = this.generateInitialPassword(chars);
+
+    // Ensure a character from each set is present as some websites require this.
+    password = this.ensureRequirements(password);
+
+    return password;
+  }
+
+  /**
+   * Build character set based on selected options.
+   */
+  private buildCharacterSet(): string {
+    let chars = '';
+
     if (this.useLowercase) {
       chars += this.lowercaseChars;
     }
+
     if (this.useUppercase) {
       chars += this.uppercaseChars;
     }
+
     if (this.useNumbers) {
       chars += this.numberChars;
     }
+
     if (this.useSpecial) {
       chars += this.specialChars;
     }
 
-    // Ensure at least one character set is selected
+    // Ensure at least one character set is selected, otherwise default to lowercase.
     if (chars.length === 0) {
       chars = this.lowercaseChars;
     }
 
-    // Remove ambiguous characters if needed
+    // Remove ambiguous characters if needed.
     if (this.useNonAmbiguous) {
-      for (const ambChar of this.ambiguousChars) {
-        chars = chars.replace(ambChar, '');
-      }
+      chars = this.removeAmbiguousCharacters(chars);
     }
 
-    // Generate password
+    return chars;
+  }
+
+  /**
+   * Remove ambiguous characters from a character set.
+   */
+  private removeAmbiguousCharacters(chars: string): string {
+    for (const ambChar of this.ambiguousChars) {
+      chars = chars.replace(ambChar, '');
+    }
+    return chars;
+  }
+
+  /**
+   * Generate initial random password.
+   */
+  private generateInitialPassword(chars: string): string {
+    let password = '';
     for (let i = 0; i < this.length; i++) {
       password += chars[this.getUnbiasedRandomIndex(chars.length)];
     }
+    return password;
+  }
 
-    // Ensure password contains at least one character from each selected set
+  /**
+   * Ensure the generated password meets all specified requirements.
+   */
+  private ensureRequirements(password: string): string {
     if (this.useLowercase && !/[a-z]/.exec(password)) {
-      let lowercaseCharsToUse = this.lowercaseChars;
-      if (this.useNonAmbiguous) {
-        for (const ambChar of this.ambiguousChars) {
-          lowercaseCharsToUse = lowercaseCharsToUse.replace(ambChar.toLowerCase(), '');
-        }
-      }
-      const pos = this.getUnbiasedRandomIndex(this.length);
-      password = password.substring(0, pos) +
-                      lowercaseCharsToUse[this.getUnbiasedRandomIndex(lowercaseCharsToUse.length)] +
-                      password.substring(pos + 1);
+      password = this.addCharacterFromSet(
+        password,
+        this.getSafeCharacterSet(this.lowercaseChars, true)
+      );
     }
+
     if (this.useUppercase && !/[A-Z]/.exec(password)) {
-      let uppercaseCharsToUse = this.uppercaseChars;
-      if (this.useNonAmbiguous) {
-        for (const ambChar of this.ambiguousChars) {
-          uppercaseCharsToUse = uppercaseCharsToUse.replace(ambChar.toUpperCase(), '');
-        }
-      }
-      const pos = this.getUnbiasedRandomIndex(this.length);
-      password = password.substring(0, pos) +
-                      uppercaseCharsToUse[this.getUnbiasedRandomIndex(uppercaseCharsToUse.length)] +
-                      password.substring(pos + 1);
+      password = this.addCharacterFromSet(
+        password,
+        this.getSafeCharacterSet(this.uppercaseChars, true)
+      );
     }
+
     if (this.useNumbers && !/\d/.exec(password)) {
-      let numberCharsToUse = this.numberChars;
-      if (this.useNonAmbiguous) {
-        for (const ambChar of this.ambiguousChars) {
-          if (/\d/.test(ambChar)) {
-            numberCharsToUse = numberCharsToUse.replace(ambChar, '');
-          }
-        }
-      }
-      const pos = this.getUnbiasedRandomIndex(this.length);
-      password = password.substring(0, pos) +
-                      numberCharsToUse[this.getUnbiasedRandomIndex(numberCharsToUse.length)] +
-                      password.substring(pos + 1);
+      password = this.addCharacterFromSet(
+        password,
+        this.getSafeCharacterSet(this.numberChars, false)
+      );
     }
+
     if (this.useSpecial && !/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.exec(password)) {
-      const pos = this.getUnbiasedRandomIndex(this.length);
-      password = password.substring(0, pos) +
-                      this.specialChars[this.getUnbiasedRandomIndex(this.specialChars.length)] +
-                      password.substring(pos + 1);
+      password = this.addCharacterFromSet(
+        password,
+        this.specialChars
+      );
     }
 
     return password;
+  }
+
+  /**
+   * Get a character set with ambiguous characters removed if needed.
+   */
+  private getSafeCharacterSet(charSet: string, isAlpha: boolean): string {
+    // If we're not using non-ambiguous characters, just return the original set.
+    if (!this.useNonAmbiguous) {
+      return charSet;
+    }
+
+    let safeSet = charSet;
+    for (const ambChar of this.ambiguousChars) {
+      // For numeric sets, only process numeric ambiguous characters
+      if (!isAlpha && !/\d/.test(ambChar)) {
+        continue;
+      }
+
+      let charToRemove = ambChar;
+      
+      // Handle case conversion for alphabetic characters.
+      if (isAlpha) {
+        if (charSet === this.lowercaseChars) {
+          charToRemove = ambChar.toLowerCase();
+        } else {
+          charToRemove = ambChar.toUpperCase();
+        }
+      }
+
+      safeSet = safeSet.replace(charToRemove, '');
+    }
+
+    return safeSet;
+  }
+
+  /**
+   * Add a character from the given set at a random position in the password.
+   */
+  private addCharacterFromSet(password: string, charSet: string): string {
+    const pos = this.getUnbiasedRandomIndex(this.length);
+    const char = charSet[this.getUnbiasedRandomIndex(charSet.length)];
+
+    return password.substring(0, pos) + char + password.substring(pos + 1);
   }
 }

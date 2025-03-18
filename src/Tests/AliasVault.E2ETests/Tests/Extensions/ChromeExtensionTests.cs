@@ -235,7 +235,7 @@ public class ChromeExtensionTests : BrowserExtensionPlaywrightTest
         var password = await extensionPopup.InputValueAsync("input#password");
 
         // Verify the password is 10 characters long
-        Assert.That(password.Length, Is.EqualTo(10), "Password length does not match the configured length of 10");
+        Assert.That(password, Has.Length.EqualTo(10), "Password length does not match the configured length of 10");
 
         // Verify the password only contains lowercase letters (a-z)
         Assert.That(password, Does.Match("^[a-z]+$"), "Password contains characters other than lowercase letters");
