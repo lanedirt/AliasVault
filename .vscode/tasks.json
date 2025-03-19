@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run and watch API",
+            "type": "shell",
+            "command": "dotnet watch",
+            "args": [],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/src/AliasVault.Api"
+            }
+        },
+        {
+            "label": "Run and watch Client",
+            "type": "shell",
+            "command": "dotnet watch",
+            "args": [],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/src/AliasVault.Client"
+            }
+        },
+        {
+            "label": "Run and watch Admin",
+            "type": "shell",
+            "command": "dotnet watch",
+            "args": [],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/src/AliasVault.Admin"
+            }
+        }
+    ]
+}
