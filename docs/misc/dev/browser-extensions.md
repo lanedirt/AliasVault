@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Browser Extensions
+title: Browser extensions
 parent: Development
 grand_parent: Miscellaneous
 nav_order: 3
 ---
 
-# Browser Extensions
+# Browser extensions
 AliasVault offers browser extensions compatible with both Chrome and Firefox. This guide explains how to build and debug the extensions locally.
 
 ## Development Setup

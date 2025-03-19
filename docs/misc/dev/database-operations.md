@@ -1,21 +1,51 @@
 ---
 layout: default
-title: PostgreSQL Commands
+title: Database operations
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 2
+nav_order: 3
 ---
 
-# PostgreSQL Commands
+# Database operations
+This article contains tips for how to work with the AliasVault PostgreSQL database in both production and development environments.
 
-## Backup database to file
+## Using install.sh helper methods (recommended)
+The `install.sh` script contains helper methods that makes it easy to export and import databases with a simple single command.
+
+
+### Export database
+```bash
+# Export from normal database container (port 5432, production)
+./install.sh db-export > aliasvault-db-export.sql.gz
+
+# Export from dev database container (port 5433, development)
+./install.sh db-export --dev > aliasvault-db-export.sql.gz
+```
+
+### Import database
+```bash
+# Import to normal database container (port 5432, production)
+./install.sh db-import < aliasvault-db-export.sql.gz
+
+# Import to dev database container (port 5433, development)
+./install.sh db-import --dev < aliasvault-db-export.sql.gz
+```
+
+> Tip: you can also use the optional parameters `--yes` (to skip confirmation prompt) and `--verbose` (to get more output on what the operation is doing).
+
+---
+
+## Using docker commands
+Instead of using the `install.sh script, you can also use manual Docker commands.
+
+### Backup database to file
 To backup the database to a file, you can use the following command:
 
 ```bash
 docker compose exec postgres pg_dump -U aliasvault aliasvault | gzip > aliasvault.sql.gz
 ```
 
-## Import database from file
+### Import database from file
 To drop the existing database and restore the database from a file, you can use the following command:
 
 {: .warning }
@@ -27,7 +57,7 @@ docker compose exec postgres psql -U aliasvault postgres -c "CREATE DATABASE ali
 gunzip < aliasvault.sql.gz | docker compose exec -iT postgres psql -U aliasvault aliasvault
 ```
 
-## Change master password
+### Change master password
 By default during initial installation the PostgreSQL master password is set to a random string that is
 stored in the `.env` file with the `POSTGRES_PASSWORD` variable.
 
