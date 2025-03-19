@@ -76,6 +76,7 @@ else
     private int TotalRecords { get; set; }
 
     private string _searchTerm = string.Empty;
+    private string _lastSearchTerm = string.Empty;
     private string SearchTerm
     {
         get => _searchTerm;
@@ -135,7 +136,24 @@ else
 
         if (!string.IsNullOrEmpty(SearchTerm))
         {
-            query = query.Where(x => EF.Functions.Like(x.Username.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+            // Reset page number back to 1 if the search term has changed.
+            if (SearchTerm != _lastSearchTerm)
+            {
+                CurrentPage = 1;
+            }
+            _lastSearchTerm = SearchTerm;
+
+            // If the search term starts with "client:", we search for the client header.
+            if (SearchTerm.StartsWith("client:", StringComparison.OrdinalIgnoreCase))
+            {
+                var clientSearchTerm = SearchTerm.Substring(7).ToLower();
+                query = query.Where(x => EF.Functions.Like((x.Client ?? string.Empty).ToLower(), "%" + clientSearchTerm + "%"));
+            }
+            else
+            {
+                query = query.Where(x => EF.Functions.Like((x.Username ?? string.Empty).ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                         EF.Functions.Like((x.IpAddress ?? string.Empty).ToLower(), "%" + SearchTerm.ToLower() + "%"));
+            }
         }
 
         if (!string.IsNullOrEmpty(SelectedEventType))
