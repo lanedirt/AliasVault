@@ -7,7 +7,7 @@
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
     Title="@(TotalRecords > 0 ? $"Emails ({TotalRecords:N0})" : "Emails")"
-    Description="This page gives an overview of recently received mails by this AliasVault server. Note that all email fields except 'To' are encrypted with the public key of the user and cannot be decrypted by the server.">
+    Description="This page shows an overview of recently received mails by this AliasVault server. Note that all email fields except 'To' are encrypted with the public key of the user and cannot be decrypted by the server.">
     <CustomActions>
         <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
     </CustomActions>
