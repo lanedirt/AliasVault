@@ -1,12 +1,17 @@
 # Set default behavior to automatically normalize line endings
 * text=auto
 
-# Shell scripts should always use LF (Unix-style) line endings
+# Common files should always use LF (Unix-style) line endings
 *.sh text eol=lf
-
-# Batch scripts should always use CRLF (Windows-style) line endings
-*.bat text eol=crlf
-*.cmd text eol=crlf
+*.cs text eol=lf
+*.razor text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
 
 # Docker files should use LF
 Dockerfile text eol=lf
@@ -16,6 +21,10 @@ docker-compose*.yml text eol=lf
 *.conf text eol=lf
 *.config text eol=lf
 .env* text eol=lf
+
+# Batch scripts should always use CRLF (Windows-style) line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
 
 # Documentation should be normalized
 *.md text

@@ -19,6 +19,7 @@ using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Server.Services;
+using ApexCharts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -61,6 +62,7 @@ builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddScoped<ConfirmModalService>();
 builder.Services.AddScoped<ServerSettingsService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
+builder.Services.AddApexCharts();
 
 builder.Services.AddAuthentication(options =>
     {

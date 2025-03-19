@@ -14,6 +14,10 @@ window.initTopMenu = function() {
     initDarkModeSwitcher();
 };
 
+window.isDarkMode = function() {
+    return document.documentElement.classList.contains('dark');
+};
+
 window.registerClickOutsideHandler = (dotNetHelper) => {
     document.addEventListener('click', (event) => {
         const menu = document.getElementById('userMenuDropdown');

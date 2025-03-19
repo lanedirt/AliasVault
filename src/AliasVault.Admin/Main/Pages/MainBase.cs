@@ -12,9 +12,9 @@ using AliasVault.Admin.Services;
 using AliasVault.Auth;
 using AliasVault.RazorComponents.Models;
 using AliasVault.RazorComponents.Services;
+using ApexCharts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -74,6 +74,12 @@ public abstract class MainBase : OwningComponentBase
     protected ConfirmModalService ConfirmModalService { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the ApexChartService.
+    /// </summary>
+    [Inject]
+    protected IApexChartService ApexChartService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the injected JSRuntime instance.
     /// </summary>
     [Inject]
@@ -96,6 +102,18 @@ public abstract class MainBase : OwningComponentBase
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = NavigationService.BaseUri });
     }
 
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            // Update default ApexCharts chart color based on the dark mode setting.
+            await SetDefaultApexChartOptionsAsync();
+        }
+    }
+
     /// <summary>
     /// Gets the username from the authentication state asynchronously.
     /// </summary>
@@ -103,5 +121,51 @@ public abstract class MainBase : OwningComponentBase
     protected string GetUsername()
     {
         return UserService.User().UserName ?? "[Unknown]";
+    }
+
+    /// <summary>
+    /// Sets the default ApexCharts chart color based on the dark mode setting.
+    /// </summary>
+    private async Task SetDefaultApexChartOptionsAsync()
+    {
+        var darkMode = await JsInvokeService.RetryInvokeWithResultAsync<bool>("isDarkMode", TimeSpan.Zero, 5);
+        var options = new ApexChartBaseOptions
+            {
+                Chart = new Chart
+                {
+                    ForeColor = darkMode ? "#bbb" : "#555",
+                },
+                Fill = new Fill
+                {
+                    Colors = darkMode ?
+                    [
+                        "#FFB84D", // Bright gold
+                        "#8B6CB9", // Darker Purple
+                        "#68A890", // Darker Sea Green
+                        "#CD5C5C", // Darker Coral
+                        "#4F94CD", // Darker Sky Blue
+                        "#BA55D3", // Darker Plum
+                        "#CDC673", // Darker Khaki
+                        "#6B8E23", // Darker Sage Green
+                        "#CD853F", // Darker Burlywood
+                        "#7B68EE", // Darker Slate Blue
+                    ]
+                    :
+                    [
+                        "#FFB366", // Light Orange
+                        "#B19CD9", // Light Purple
+                        "#98D8C1", // Light Sea Green
+                        "#F08080", // Light Coral
+                        "#87CEEB", // Sky Blue
+                        "#DDA0DD", // Plum
+                        "#F0E68C", // Khaki
+                        "#9CB071", // Sage Green
+                        "#DEB887", // Burlywood
+                        "#A7A1E8", // Light Slate Blue
+                    ],
+                },
+            };
+
+        await ApexChartService.SetGlobalOptionsAsync(options, false);
     }
 }
