@@ -7,7 +7,7 @@
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
     Title="@(TotalRecords > 0 ? $"Users ({TotalRecords:N0})" : "Users")"
-    Description="This page gives an overview of all registered users and the associated vaults.">
+    Description="This page shows an overview of all registered users and the associated vaults.">
     <CustomActions>
         <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
     </CustomActions>
@@ -33,14 +33,18 @@ else
                     <SortableTableColumn IsPrimary="true">@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
                     <SortableTableColumn>@user.UserName</SortableTableColumn>
                     <SortableTableColumn>@user.VaultCount</SortableTableColumn>
+                    <SortableTableColumn>@user.CredentialCount</SortableTableColumn>
                     <SortableTableColumn>@user.EmailClaimCount</SortableTableColumn>
                     <SortableTableColumn>@Math.Round((double)user.VaultStorageInKb / 1024, 1) MB</SortableTableColumn>
-                    <SortableTableColumn><StatusPill Enabled="user.TwoFactorEnabled" /></SortableTableColumn>
                     <SortableTableColumn>@user.LastVaultUpdate.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
                     <SortableTableColumn>
                         @if (user.Blocked)
                         {
                             <StatusPill Enabled="false" TextFalse="Blocked" />
+                        }
+                        @if (user.TwoFactorEnabled)
+                        {
+                            <StatusPill Enabled="true" TextTrue="2FA enabled" />
                         }
                     </SortableTableColumn>
                     <SortableTableColumn>
@@ -57,9 +61,9 @@ else
         new TableColumn { Title = "Registered", PropertyName = "CreatedAt" },
         new TableColumn { Title = "Username", PropertyName = "UserName" },
         new TableColumn { Title = "# Vaults", PropertyName = "VaultCount" },
+        new TableColumn { Title = "# Credentials", PropertyName = "CredentialCount" },
         new TableColumn { Title = "# Email claims", PropertyName = "EmailClaimCount" },
         new TableColumn { Title = "Storage", PropertyName = "VaultStorageInKb" },
-        new TableColumn { Title = "2FA", PropertyName = "TwoFactorEnabled" },
         new TableColumn { Title = "LastVaultUpdate", PropertyName = "LastVaultUpdate" },
         new TableColumn { Title = "Status", Sortable = false },
         new TableColumn { Title = "Actions", Sortable = false},
@@ -72,7 +76,18 @@ else
     private int TotalRecords { get; set; }
 
     private string _searchTerm = string.Empty;
+
+    /// <summary>
+    /// The last search term.
+    /// </summary>
     private string _lastSearchTerm = string.Empty;
+
+    /// <summary>
+    /// The page number before the search term was changed.
+    /// This is used to reset the page number back to the previous page when the search term is removed.
+    /// </summary>
+    private int _currentPageBeforeSearch = 1;
+
     private string SearchTerm
     {
         get => _searchTerm;
@@ -119,8 +134,9 @@ else
         if (SearchTerm.Length > 0)
         {
             // Reset page number back to 1 if the search term has changed.
-            if (SearchTerm != _lastSearchTerm)
+            if (SearchTerm != _lastSearchTerm && CurrentPage != 1)
             {
+                _currentPageBeforeSearch = CurrentPage;
                 CurrentPage = 1;
             }
             _lastSearchTerm = SearchTerm;
@@ -145,7 +161,9 @@ else
                 Vaults = u.Vaults.Select(v => new
                 {
                     v.FileSize,
-                    v.CreatedAt
+                    v.CreatedAt,
+                    v.RevisionNumber,
+                    CredentialCount = v.CredentialsCount,
                 }),
                 EmailClaims = u.EmailClaims.Select(ec => new
                 {
@@ -162,6 +180,7 @@ else
             Blocked = user.Blocked,
             CreatedAt = user.CreatedAt,
             VaultCount = user.Vaults.Count(),
+            CredentialCount = user.Vaults.OrderByDescending(x => x.RevisionNumber).First().CredentialCount,
             EmailClaimCount = user.EmailClaims.Count(),
             VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
             LastVaultUpdate = user.Vaults.Any() ? user.Vaults.Max(x => x.CreatedAt) : user.CreatedAt,
@@ -199,6 +218,11 @@ else
                     ? query.OrderBy(x => x.Vaults.Count)
                     : query.OrderByDescending(x => x.Vaults.Count);
                 break;
+            case "CredentialCount":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Vaults.OrderByDescending(x => x.RevisionNumber).First().CredentialsCount)
+                    : query.OrderByDescending(x => x.Vaults.OrderByDescending(x => x.RevisionNumber).First().CredentialsCount);
+                break;
             case "EmailClaimCount":
                 query = SortDirection == SortDirection.Ascending
                     ? query.OrderBy(x => x.EmailClaims.Count)
@@ -208,11 +232,6 @@ else
                 query = SortDirection == SortDirection.Ascending
                     ? query.OrderBy(x => x.Vaults.Sum(v => v.FileSize))
                     : query.OrderByDescending(x => x.Vaults.Sum(v => v.FileSize));
-                break;
-            case "TwoFactorEnabled":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.TwoFactorEnabled)
-                    : query.OrderByDescending(x => x.TwoFactorEnabled);
                 break;
             case "LastVaultUpdate":
                 query = SortDirection == SortDirection.Ascending
