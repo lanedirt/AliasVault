@@ -72,6 +72,7 @@ else
     private int TotalRecords { get; set; }
 
     private string _searchTerm = string.Empty;
+    private string _lastSearchTerm = string.Empty;
     private string SearchTerm
     {
         get => _searchTerm;
@@ -117,6 +118,13 @@ else
 
         if (SearchTerm.Length > 0)
         {
+            // Reset page number back to 1 if the search term has changed.
+            if (SearchTerm != _lastSearchTerm)
+            {
+                CurrentPage = 1;
+            }
+            _lastSearchTerm = SearchTerm;
+
             query = query.Where(x => EF.Functions.Like(x.UserName!.ToLower(), "%" + SearchTerm.ToLower() + "%"));
         }
 
