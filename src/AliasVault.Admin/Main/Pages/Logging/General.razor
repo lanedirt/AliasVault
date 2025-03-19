@@ -153,24 +153,8 @@ else
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var query = dbContext.Logs.AsQueryable();
 
-        if (!string.IsNullOrEmpty(SearchTerm))
-        {
-            // Reset page number back to 1 if the search term has changed.
-            if (SearchTerm != _lastSearchTerm)
-            {
-                CurrentPage = 1;
-            }
-            _lastSearchTerm = SearchTerm;
-
-            query = query.Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%"));
-        }
-
-        if (!string.IsNullOrEmpty(SelectedServiceName))
-        {
-            query = query.Where(x => x.Application == SelectedServiceName);
-        }
+        query = ApplySearchTermFilter(query);
+        query = ApplyServiceNameFilter(query);
 
         // Apply sort.
         switch (SortColumn)
@@ -210,6 +194,44 @@ else
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Applies a search term filter to the query.
+    /// </summary>
+    /// <param name="query">The query to apply the filter to.</param>
+    private IQueryable<Log> ApplySearchTermFilter(IQueryable<Log> query)
+    {
+        if (!string.IsNullOrEmpty(SearchTerm))
+        {
+            // Reset page number back to 1 if the search term has changed.
+            if (SearchTerm != _lastSearchTerm)
+            {
+                CurrentPage = 1;
+            }
+            _lastSearchTerm = SearchTerm;
+
+            query = query.Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
+                                     EF.Functions.Like(x.SourceContext.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies a service name filter to the query.
+    /// </summary>
+    /// <param name="query">The query to apply the filter to.</param>
+    private IQueryable<Log> ApplyServiceNameFilter(IQueryable<Log> query)
+    {
+        if (!string.IsNullOrEmpty(SelectedServiceName))
+        {
+            query = query.Where(x => x.Application == SelectedServiceName);
+        }
+
+        return query;
     }
 
     private async Task DeleteLogsWithConfirmation()

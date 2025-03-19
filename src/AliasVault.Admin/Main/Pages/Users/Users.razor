@@ -82,12 +82,6 @@ else
     /// </summary>
     private string _lastSearchTerm = string.Empty;
 
-    /// <summary>
-    /// The page number before the search term was changed.
-    /// This is used to reset the page number back to the previous page when the search term is removed.
-    /// </summary>
-    private int _currentPageBeforeSearch = 1;
-
     private string SearchTerm
     {
         get => _searchTerm;
@@ -136,7 +130,6 @@ else
             // Reset page number back to 1 if the search term has changed.
             if (SearchTerm != _lastSearchTerm && CurrentPage != 1)
             {
-                _currentPageBeforeSearch = CurrentPage;
                 CurrentPage = 1;
             }
             _lastSearchTerm = SearchTerm;
