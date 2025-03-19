@@ -1,6 +1,11 @@
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Emails received</h3>
+        <button
+            @onclick="ToggleChart"
+            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+            @(ShowChart ? "Hide chart" : "Show chart")
+        </button>
     </div>
     @if (IsLoading)
     {
@@ -11,20 +16,36 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Hours24</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Hours24.ToString("N0")</h4>
             </div>
             <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days3</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days3.ToString("N0")</h4>
             </div>
             <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days7</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days7.ToString("N0")</h4>
             </div>
             <div class="bg-primary-50 dark:bg-gray-700/50 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days14</h4>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@EmailStats.Days14.ToString("N0")</h4>
             </div>
+        </div>
+    }
+    
+    @if (ShowChart && !IsLoading)
+    {
+        <div class="mt-6">
+            <ApexChart TItem="DailyEmailCount"
+                Title="@($"Emails received - last {DaysToShow} days")"
+                Height="250">
+                <ApexPointSeries TItem="DailyEmailCount"
+                            Items="DailyEmailCounts"
+                            SeriesType="@SeriesType.Bar"
+                            Name="Emails received"
+                            XValue="@(e => e.Date.ToString("MM-dd"))"
+                            YValue="@(e => e.Count)" />
+            </ApexChart>
         </div>
     }
 </div>
@@ -32,6 +53,23 @@
 @code {
     private bool IsLoading { get; set; } = true;
     private EmailStatistics EmailStats { get; set; } = new();
+    private List<DailyEmailCount> DailyEmailCounts { get; set; } = new();
+
+    /// <summary>
+    /// The number of days to show in the chart.
+    /// </summary>
+    private int DaysToShow { get; set; } = 30;
+
+    /// <summary>
+    /// Whether the chart is visible.
+    /// </summary>
+    private bool ShowChart { get; set; } = false;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshData();
+    }
 
     /// <summary>
     /// Refreshes the data displayed on the card.
@@ -41,6 +79,18 @@
         IsLoading = true;
         StateHasChanged();
 
+        await RefreshCardData();
+        await RefreshChartData();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Refreshes the card data.
+    /// </summary>
+    private async Task RefreshCardData()
+    {
         var now = DateTime.UtcNow;
         var hours24 = now.AddHours(-24);
         var days3 = now.AddDays(-3);
@@ -57,9 +107,58 @@
             Days7 = await emailQuery.CountAsync(e => e.DateSystem >= days7),
             Days14 = await emailQuery.CountAsync(e => e.DateSystem >= days14)
         };
+    }
 
-        IsLoading = false;
-        StateHasChanged();
+    /// <summary>
+    /// Refreshes the chart data.
+    /// </summary>
+    private async Task RefreshChartData()
+    {
+        // Only fetch chart data if the chart is visible.
+        if (ShowChart)
+        {
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+            var dateFrom = DateTime.UtcNow.AddDays(-DaysToShow);
+
+            // Get daily email counts for the chart.
+            DailyEmailCounts = await dbContext.Emails
+                .Where(e => e.DateSystem >= dateFrom)
+                .GroupBy(e => e.DateSystem.Date)
+                .Select(g => new DailyEmailCount
+                {
+                    Date = g.Key,
+                    Count = g.Count()
+                }).ToListAsync();
+            
+            // Fill in any missing days with zero counts
+            var allDates = Enumerable.Range(0, DaysToShow)
+                .Select(offset => DateTime.UtcNow.Date.AddDays(-offset))
+                .Reverse();
+                
+            DailyEmailCounts = allDates
+                .GroupJoin(
+                    DailyEmailCounts,
+                    date => date,
+                    emailCount => emailCount.Date,
+                    (date, emailCounts) => emailCounts.FirstOrDefault() ?? new DailyEmailCount { Date = date, Count = 0 }
+                )
+                .ToList();
+        }
+    }
+
+    private void ToggleChart()
+    {
+        ShowChart = !ShowChart;
+        
+        // If we're showing the chart but haven't loaded the data yet
+        if (ShowChart && DailyEmailCounts.Count == 0)
+        {
+            _ = RefreshData();
+        }
+        else
+        {
+            StateHasChanged();
+        }
     }
 
     private sealed class EmailStatistics
@@ -68,5 +167,11 @@
         public int Days3 { get; set; }
         public int Days7 { get; set; }
         public int Days14 { get; set; }
+    }
+    
+    private sealed class DailyEmailCount
+    {
+        public DateTime Date { get; set; }
+        public int Count { get; set; }
     }
 }
