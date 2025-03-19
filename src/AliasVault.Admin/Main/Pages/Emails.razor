@@ -7,11 +7,24 @@
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
     Title="@(TotalRecords > 0 ? $"Emails ({TotalRecords:N0})" : "Emails")"
-    Description="This page shows an overview of recently received mails by this AliasVault server. Note that all email fields except 'To' are encrypted with the public key of the user and cannot be decrypted by the server.">
+    Description="This page shows an overview of recently received mails by this AliasVault server. Note: all email fields except 'To' are encrypted with the public key of the user and are unreadable by the server.">
     <CustomActions>
         <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
+
+@if (IsInitialized)
+{
+    <div class="px-4">
+        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+        <div class="mb-3">
+            <div class="relative">
+                <SearchIcon />
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search emails..." class="w-full px-4 ps-10 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+            </div>
+        </div>
+    </div>
+}
 
 @if (IsLoading)
 {
@@ -20,23 +33,25 @@
 else
 {
     <div class="overflow-x-auto px-4">
-        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
-
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
-            @foreach (var email in EmailList)
+            @foreach (var viewModel in EmailViewModelList)
             {
                 <SortableTableRow>
-                    <SortableTableColumn IsPrimary="true">@email.Id</SortableTableColumn>
-                    <SortableTableColumn>@email.DateSystem.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
-                    <SortableTableColumn>@(email.FromLocal.Length > 15 ? email.FromLocal.Substring(0, 15) : email.FromLocal)@@@(email.FromDomain.Length > 15 ? email.FromDomain.Substring(0, 15) : email.FromDomain)</SortableTableColumn>
-                    <SortableTableColumn>@email.ToLocal@@@email.ToDomain</SortableTableColumn>
-                    <SortableTableColumn>@(email.Subject.Length > 30 ? email.Subject.Substring(0, 30) : email.Subject)</SortableTableColumn>
+                    <SortableTableColumn IsPrimary="true">@viewModel.Email.Id</SortableTableColumn>
+                    <SortableTableColumn>@viewModel.Email.DateSystem.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                    <SortableTableColumn>@(viewModel.Email.FromLocal.Length > 10 ? viewModel.Email.FromLocal.Substring(0, 10) : viewModel.Email.FromLocal)@@@(viewModel.Email.FromDomain.Length > 10 ? viewModel.Email.FromDomain.Substring(0, 10) : viewModel.Email.FromDomain)</SortableTableColumn>
+                    <SortableTableColumn>@viewModel.Email.ToLocal@@@viewModel.Email.ToDomain</SortableTableColumn>
                     <SortableTableColumn>
-                        <span class="line-clamp-1">
-                            @(email.MessagePreview?.Length > 30 ? email.MessagePreview.Substring(0, 30) : email.MessagePreview)
-                        </span>
+                        @if (viewModel.UserName.Length > 0)
+                        {
+                            <span class="line-clamp-1"><a href="/users/@viewModel.UserId">@viewModel.UserName</a></span>
+                        }
+                        else
+                        {
+                            <span class="line-clamp-1">n/a</span>
+                        }
                     </SortableTableColumn>
-                    <SortableTableColumn>@email.Attachments.Count</SortableTableColumn>
+                    <SortableTableColumn>@viewModel.Email.Attachments.Count</SortableTableColumn>
                 </SortableTableRow>
             }
         </SortableTable>
@@ -49,20 +64,40 @@ else
         new TableColumn { Title = "Time", PropertyName = "DateSystem" },
         new TableColumn { Title = "From", PropertyName = "From" },
         new TableColumn { Title = "To", PropertyName = "To" },
-        new TableColumn { Title = "Subject", PropertyName = "Subject" },
-        new TableColumn { Title = "Preview", PropertyName = "MessagePreview" },
+        new TableColumn { Title = "User", Sortable = false },
         new TableColumn { Title = "Attachments", PropertyName = "Attachments" },
     ];
 
-    private List<Email> EmailList { get; set; } = [];
+    private List<EmailViewModel> EmailViewModelList { get; set; } = [];
+    private bool IsInitialized { get; set; } = false;
+
     private bool IsLoading { get; set; } = true;
+
     private int CurrentPage { get; set; } = 1;
     private int PageSize { get; set; } = 50;
     private int TotalRecords { get; set; }
+    private string _searchTerm = string.Empty;
+
+    /// <summary>
+    /// The last search term.
+    /// </summary>
+    private string _lastSearchTerm = string.Empty;
+
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            if (_searchTerm != value)
+            {
+                _searchTerm = value;
+                _ = RefreshData();
+            }
+        }
+    }
 
     private string SortColumn { get; set; } = "Id";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
-
     private async Task HandleSortChanged((string column, SortDirection direction) sort)
     {
         SortColumn = sort.column;
@@ -91,8 +126,68 @@ else
         StateHasChanged();
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
         IQueryable<Email> query = dbContext.Emails;
 
+        query = ApplySearchFilter(query);
+        query = ApplySort(query);
+
+        TotalRecords = await query.CountAsync();
+        var emailList = await query
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToListAsync();
+
+        // Get all usernames for the emails in the current list
+        var encryptionKeyIds = emailList.Select(x => x.UserEncryptionKeyId).Distinct().ToList();
+        var encryptionKeyUsernames = await dbContext.UserEncryptionKeys
+                    .Where(x => encryptionKeyIds.Contains(x.Id))
+                    .Join(dbContext.AliasVaultUsers, x => x.UserId, y => y.Id, (x, y) => new { EncryptionKeyId = x.Id, UserId = y.Id, y.UserName })
+                    .ToListAsync();
+
+        // Create new list of viewmodels
+        EmailViewModelList = new List<EmailViewModel>();
+
+        foreach (var email in emailList)
+        {
+            var encryptionKey = encryptionKeyUsernames.FirstOrDefault(x => x.EncryptionKeyId == email.UserEncryptionKeyId);
+            EmailViewModelList.Add(new EmailViewModel { Email = email, UserId = encryptionKey?.UserId ?? string.Empty, UserName = encryptionKey?.UserName ?? string.Empty });
+        }
+
+        IsLoading = false;
+        IsInitialized = true;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Applies a search filter to the query based on the search term.
+    /// </summary>
+    /// <param name="query">The query to filter.</param>
+    /// <returns>The filtered query.</returns>
+    private IQueryable<Email> ApplySearchFilter(IQueryable<Email> query)
+    {
+        if (SearchTerm.Length > 0)
+        {
+            // Reset page number back to 1 if the search term has changed.
+            if (SearchTerm != _lastSearchTerm && CurrentPage != 1)
+            {
+                CurrentPage = 1;
+            }
+            _lastSearchTerm = SearchTerm;
+
+            query = query.Where(x => EF.Functions.Like(x.To.ToLower(), "%" + SearchTerm.Trim().ToLower() + "%"));
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies sorting to the query based on the sort column and direction.
+    /// </summary>
+    /// <param name="query">The query to sort.</param>
+    /// <returns>The sorted query.</returns>
+    private IQueryable<Email> ApplySort(IQueryable<Email> query)
+    {
         // Apply sort
         switch (SortColumn)
         {
@@ -116,16 +211,6 @@ else
                     ? query.OrderBy(x => x.ToLocal + "@" + x.ToDomain)
                     : query.OrderByDescending(x => x.ToLocal + "@" + x.ToDomain);
                 break;
-            case "Subject":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Subject)
-                    : query.OrderByDescending(x => x.Subject);
-                break;
-            case "MessagePreview":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.MessagePreview)
-                    : query.OrderByDescending(x => x.MessagePreview);
-                break;
             case "Attachments":
                 query = SortDirection == SortDirection.Ascending
                     ? query.OrderBy(x => x.Attachments.Count)
@@ -136,13 +221,13 @@ else
                 break;
         }
 
-        TotalRecords = await query.CountAsync();
-        EmailList = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToListAsync();
+        return query;
+    }
 
-        IsLoading = false;
-        StateHasChanged();
+    private sealed class EmailViewModel
+    {
+        public Email Email { get; set; } = new();
+        public string UserId { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
     }
 }

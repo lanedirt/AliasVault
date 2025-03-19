@@ -25,39 +25,57 @@ else
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <div class="items-center xl:block sm:space-x-4 xl:space-x-0 2xl:space-x-4">
                     <div>
-                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">@User.UserName</h3>
+                        <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-200 pb-2">@User.UserName</h3>
 
-                        <div class="mb-4">
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id</label>
-                            <div class="text-gray-700 dark:text-gray-300">@User.Id</div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">2FA Status:</span>
-                            <StatusPill Enabled="@User.TwoFactorEnabled"/>
-                            <span class="text-gray-700 dark:text-gray-300">Authenticator key(s) active: @TwoFactorKeysCount</span>
-                            @if (User.TwoFactorEnabled)
-                            {
-                                <Button Color="danger" OnClick="DisableTwoFactor">Disable 2FA</Button>
-                            }
-                            else
-                            {
-                                if (TwoFactorKeysCount > 0)
-                                {
-                                    <Button Color="success" OnClick="EnableTwoFactor">Enable 2FA</Button>
-                                    <Button Color="danger" OnClick="ResetTwoFactor">Remove 2FA keys</Button>
-                                }
-                            }
-                        </div>
-                        <div class="flex items-center space-x-2 mt-4">
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">Account Status:</span>
-                            <StatusPill Enabled="@(!User.Blocked)" TextTrue="Active" TextFalse="Blocked" />
-                            <Button Color="@(User.Blocked ? "success" : "danger")" OnClick="ToggleBlockStatus">
-                                @(User.Blocked ? "Unblock User" : "Block User")
-                            </Button>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Blocking a user prevents them from logging in or accessing AliasVault
-                            </span>
+                        <div class="w-full mb-4 overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <tbody>
+                                    <tr class="border-b dark:border-gray-700">
+                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Id</th>
+                                        <td class="px-4 py-3">@User.Id</td>
+                                    </tr>
+                                    <tr class="border-b dark:border-gray-700">
+                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Registered at</th>
+                                        <td class="px-4 py-3">@User.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">2FA Status</th>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center space-x-2">
+                                                <StatusPill Enabled="@User.TwoFactorEnabled"/>
+                                                <span class="text-gray-700 dark:text-gray-300">Authenticator key(s) active: @TwoFactorKeysCount</span>
+                                                @if (User.TwoFactorEnabled)
+                                                {
+                                                    <Button Color="danger" OnClick="DisableTwoFactor">Disable 2FA</Button>
+                                                }
+                                                else
+                                                {
+                                                    if (TwoFactorKeysCount > 0)
+                                                    {
+                                                        <Button Color="success" OnClick="EnableTwoFactor">Enable 2FA</Button>
+                                                        <Button Color="danger" OnClick="ResetTwoFactor">Remove 2FA keys</Button>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Account Status</th>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center space-x-2">
+                                                <StatusPill Enabled="@(!User.Blocked)" TextTrue="Active" TextFalse="Blocked" />
+                                                <Button Color="@(User.Blocked ? "success" : "danger")" OnClick="ToggleBlockStatus">
+                                                    @(User.Blocked ? "Unblock User" : "Block User")
+                                                </Button>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                    <i class="fas fa-info-circle mr-1"></i>
+                                                    Blocking a user prevents them from logging in or accessing AliasVault
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
