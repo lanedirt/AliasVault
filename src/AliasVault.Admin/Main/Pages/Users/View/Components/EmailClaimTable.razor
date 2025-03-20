@@ -24,7 +24,7 @@ else
             <SortableTableRow Class="@(entry.Disabled ? "bg-secondary" : "")">
                 <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
                 <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
-                <SortableTableColumn><a href="/emails?search=@entry.Address">@entry.Address</a></SortableTableColumn>
+                <SortableTableColumn><a href="emails?search=@entry.Address">@entry.Address</a></SortableTableColumn>
                 <SortableTableColumn>@entry.EmailCount</SortableTableColumn>
                 <SortableTableColumn>@(entry.Disabled ? "Disabled" : "Enabled")</SortableTableColumn>
                 <SortableTableColumn>
