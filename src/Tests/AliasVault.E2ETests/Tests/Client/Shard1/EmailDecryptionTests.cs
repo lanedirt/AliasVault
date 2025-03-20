@@ -344,6 +344,61 @@ public class EmailDecryptionTests : ClientPlaywrightTest
     }
 
     /// <summary>
+    /// Test that when a user deletes an alias, the email claim gets disabled in the database.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(5)]
+    public async Task EmailClaimDeleteDisableTest()
+    {
+        // Create two credential which should automatically create claims on server during database sync.
+        const string serviceName1 = "Test 1 Service";
+        const string email1 = "testclaimdisabled@example.tld";
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName1 },
+            { "email", email1 },
+        });
+
+        // Create credential which should automatically create claim on server during database sync.
+        const string serviceName2 = "Test 2 Service";
+        const string email2 = "testclaimenabled@example.tld";
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName2 },
+            { "email", email2 },
+        });
+
+        // Assert that both claims were created on the server.
+        var claim1 = await ApiDbContext.UserEmailClaims.AsNoTracking().FirstOrDefaultAsync(x => x.Address == email1);
+        var claim2 = await ApiDbContext.UserEmailClaims.AsNoTracking().FirstOrDefaultAsync(x => x.Address == email2);
+        Assert.Multiple(() =>
+        {
+            Assert.That(claim1, Is.Not.Null, "Claim for email address not found in database. Check if credential creation and claim creation are working correctly.");
+            Assert.That(claim2, Is.Not.Null, "Claim for email address not found in database. Check if credential creation and claim creation are working correctly.");
+        });
+
+        // Assert that both claims are not disabled.
+        Assert.Multiple(() =>
+        {
+            Assert.That(claim1.Disabled, Is.False, "Claim for new email address is marked disabled after creation.");
+            Assert.That(claim2.Disabled, Is.False, "Claim for new email address is marked disabled after creation.");
+        });
+
+        // Delete the first credential.
+        await DeleteCredentialEntry(serviceName1);
+
+        // Assert that the first claim is now disabled, and second still enabled.
+        claim1 = await ApiDbContext.UserEmailClaims.AsNoTracking().FirstAsync(x => x.Address == email1);
+        claim2 = await ApiDbContext.UserEmailClaims.AsNoTracking().FirstAsync(x => x.Address == email2);
+        Assert.Multiple(() =>
+        {
+            Assert.That(claim1.Disabled, Is.True, "Claim for deleted alias is not marked as disabled after deletion.");
+            Assert.That(claim2.Disabled, Is.False, "Claim for existing email address is marked disabled after deleting another claim.");
+        });
+    }
+
+    /// <summary>
     /// Tear down logic for every test.
     /// </summary>
     /// <returns>Task.</returns>

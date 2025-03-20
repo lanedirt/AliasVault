@@ -406,14 +406,17 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Get all existing user email claims.
         var existingEmailClaims = await context.UserEmailClaims
             .Where(x => x.UserId == user.Id)
-            .Select(x => x.Address)
             .ToListAsync();
+
+        // Keep track of processed and sanitized email addresses to know which ones still exist.
+        var processedEmailAddresses = new List<string>();
 
         // Register new email addresses.
         foreach (var email in newEmailAddresses)
         {
             // Sanitize email address.
             var sanitizedEmail = EmailHelper.SanitizeEmail(email);
+            processedEmailAddresses.Add(sanitizedEmail);
 
             // If email address is invalid according to the EmailAddressAttribute, skip it.
             if (!new EmailAddressAttribute().IsValid(sanitizedEmail))
@@ -421,9 +424,14 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 continue;
             }
 
+            // If email address is already claimed by current user, we don't need to claim it again.
+            if (existingEmailClaims.Any(x => x.Address == sanitizedEmail))
+            {
+                continue;
+            }
+
             // Check if the email address is already claimed (by another user).
-            var existingClaim = await context.UserEmailClaims
-                .FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
+            var existingClaim = await context.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
 
             if (existingClaim != null && existingClaim.UserId != user.Id)
             {
@@ -432,11 +440,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                 continue;
             }
 
-            if (!existingEmailClaims.Contains(sanitizedEmail))
+            // If we get to this point, the email address is new and not claimed by another user, so we can add it.
+            try
             {
-                try
-                {
-                    context.UserEmailClaims.Add(new UserEmailClaim
+                context.UserEmailClaims.Add(new UserEmailClaim
                     {
                         UserId = user.Id,
                         Address = sanitizedEmail,
@@ -445,19 +452,27 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
                         CreatedAt = timeProvider.UtcNow,
                         UpdatedAt = timeProvider.UtcNow,
                     });
-                }
-                catch (DbUpdateException ex)
-                {
-                    // Error while adding email claim. Log the error and continue.
-                    logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", sanitizedEmail, user.UserName);
-                }
+            }
+            catch (DbUpdateException ex)
+            {
+                // Error while adding email claim. Log the error and continue.
+                logger.LogWarning(ex, "Error while adding UserEmailClaim with email: {Email} for user: {UserId}.", sanitizedEmail, user.UserName);
             }
         }
 
-        // Do not delete email claims that are not in the new list
-        // as they may be re-used by the user in the future. We don't want
-        // to allow other users to re-use emails used by other users.
+        // Disable email claims that are no longer in the new list and have not been disabled yet.
+        // Important: we do not delete email claims ever, as they may be re-used by the user in the future.
+        // We also don't want to allow other users to re-use emails used by other users.
         // Email claims are considered permanent.
+        foreach (var existingClaim in existingEmailClaims.Where(x => !x.Disabled).ToList())
+        {
+            if (!processedEmailAddresses.Contains(existingClaim.Address))
+            {
+                // Email address is no longer in the new list and has not been disabled yet, so disable it.
+                existingClaim.Disabled = true;
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 
