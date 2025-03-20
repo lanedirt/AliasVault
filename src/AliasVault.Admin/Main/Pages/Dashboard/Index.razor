@@ -7,7 +7,7 @@
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
     Title="AliasVault Admin"
-    Description="Welcome to the AliasVault admin portal. Below you can find statistics about recent email activity and active users.">
+    Description="Welcome to the AliasVault admin dashboard. Below you can find statistics about recent activity on this server.">
     <CustomActions>
         <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
     </CustomActions>
@@ -15,17 +15,17 @@
 
 <div class="px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <ActiveUsersChart @ref="_activeUsersChart" />
+        <ActiveUsersCard @ref="_activeUsersCard" />
         <RegistrationStatisticsCard @ref="_registrationStatisticsCard" />
         <EmailStatisticsCard @ref="_emailStatisticsCard" />
-        <ReturningUsersCard @ref="_returningUsersCard" />
-        <ActiveUsersCard @ref="_activeUsersCard" />
         <EmailClaimsCard @ref="_emailClaimsCard" />
     </div>
 </div>
 
 @code {
+    private ActiveUsersChart? _activeUsersChart;
     private ActiveUsersCard? _activeUsersCard;
-    private ReturningUsersCard? _returningUsersCard;
     private RegistrationStatisticsCard? _registrationStatisticsCard;
     private EmailStatisticsCard? _emailStatisticsCard;
     private EmailClaimsCard? _emailClaimsCard;
@@ -45,6 +45,8 @@
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             await RefreshData();
@@ -56,15 +58,15 @@
     /// </summary>
     private async Task RefreshData()
     {
-        if (_activeUsersCard != null &&
-            _returningUsersCard != null &&
+        if (_activeUsersChart != null &&
+            _activeUsersCard != null &&
             _registrationStatisticsCard != null &&
             _emailStatisticsCard != null &&
             _emailClaimsCard != null)
         {
             await Task.WhenAll(
+                _activeUsersChart.RefreshData(),
                 _activeUsersCard.RefreshData(),
-                _returningUsersCard.RefreshData(),
                 _registrationStatisticsCard.RefreshData(),
                 _emailStatisticsCard.RefreshData(),
                 _emailClaimsCard.RefreshData()

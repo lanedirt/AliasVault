@@ -1,7 +1,7 @@
 ﻿@if (TotalRecords > PageSize)
 {
     <!-- Navigation component for pagination -->
-    <nav aria-label="Page navigation" class="mt-4 flex justify-end mb-4">
+    <nav aria-label="Page navigation" class="mt-4 flex justify-end mb-5">
         <ul class="flex space-x-2">
             <!-- First page button -->
             <li class="@(CurrentPage == 1 ? "opacity-50 cursor-not-allowed" : "")">
@@ -14,7 +14,7 @@
             @for (var i = 1; i <= PageCount; i++)
             {
                 var pageNum = i;
-                if (i > 5 && i < PageCount - 5 && Math.Abs(CurrentPage - i) > 2)
+                if (i > 2 && i < PageCount - 2 && Math.Abs(CurrentPage - i) > 3)
                 {
                     // Don't render intermediate pages when there are many pages
                     continue;

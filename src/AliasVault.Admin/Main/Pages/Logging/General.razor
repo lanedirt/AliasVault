@@ -14,19 +14,18 @@
     </CustomActions>
 </PageHeader>
 
-@if (IsLoading)
-{
-    <LoadingIndicator />
-}
-else
+@if (IsInitialized)
 {
     <div class="px-4">
         <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
-        <div class="mb-4 flex space-x-4">
+       <div class="mb-3 flex space-x-4">
             <div class="flex w-full">
                 <div class="w-2/3 pr-2">
-                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    <div class="relative">
+                        <SearchIcon />
+                        <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 ps-10 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </div>
                 </div>
                 <div class="w-1/3 pl-2">
                     <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
@@ -39,7 +38,16 @@ else
                 </div>
             </div>
         </div>
+    </div>
+}
 
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <div class="px-4">
         <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
             @foreach (var log in LogList)
             {
@@ -85,6 +93,8 @@ else
     ];
 
     private List<Log> LogList { get; set; } = [];
+    private bool IsInitialized { get; set; } = false;
+
     private bool IsLoading { get; set; } = true;
     private int CurrentPage { get; set; } = 1;
     private int PageSize { get; set; } = 50;
@@ -150,6 +160,9 @@ else
 
     private async Task RefreshData()
     {
+        IsLoading = true;
+        StateHasChanged();
+
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var query = dbContext.Logs.AsQueryable();
 
@@ -193,6 +206,7 @@ else
             .ToListAsync();
 
         IsLoading = false;
+        IsInitialized = true;
         StateHasChanged();
     }
 
@@ -211,10 +225,11 @@ else
             }
             _lastSearchTerm = SearchTerm;
 
-            query = query.Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.Message.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.Level.ToLower(), "%" + SearchTerm.ToLower() + "%") ||
-                                     EF.Functions.Like(x.SourceContext.ToLower(), "%" + SearchTerm.ToLower() + "%"));
+            var searchTerm = SearchTerm.Trim().ToLower();
+            query = query.Where(x => EF.Functions.Like(x.Application.ToLower(), "%" + searchTerm + "%") ||
+                                     EF.Functions.Like(x.Message.ToLower(), "%" + searchTerm + "%") ||
+                                     EF.Functions.Like(x.Level.ToLower(), "%" + searchTerm + "%") ||
+                                     EF.Functions.Like(x.SourceContext.ToLower(), "%" + searchTerm + "%"));
         }
 
         return query;

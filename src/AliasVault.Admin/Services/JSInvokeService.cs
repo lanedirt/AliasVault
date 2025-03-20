@@ -50,4 +50,44 @@ public class JsInvokeService(IJSRuntime js)
 
         // Optionally log that the JS function could not be called after maxAttempts
     }
+
+    /// <summary>
+    /// Invoke a JavaScript function with retry and exponential backoff that returns a value.
+    /// </summary>
+    /// <typeparam name="TValue">The type of value to return from the JavaScript function.</typeparam>
+    /// <param name="functionName">The JS function name to call.</param>
+    /// <param name="initialDelay">Initial delay before calling the function.</param>
+    /// <param name="maxAttempts">Maximum attempts before giving up.</param>
+    /// <param name="args">Arguments to pass on to the javascript function.</param>
+    /// <returns>The value returned from the JavaScript function.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the JS function could not be called after all attempts.</exception>
+    public async Task<TValue> RetryInvokeWithResultAsync<TValue>(string functionName, TimeSpan initialDelay, int maxAttempts, params object[] args)
+    {
+        TimeSpan delay = initialDelay;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                bool isDefined = await js.InvokeAsync<bool>("isFunctionDefined", functionName);
+                if (isDefined)
+                {
+                    return await js.InvokeAsync<TValue>(functionName, args);
+                }
+            }
+            catch
+            {
+                // Optionally log the exception
+            }
+
+            // Wait for the delay before the next attempt
+            await Task.Delay(delay);
+
+            // Exponential backoff: double the delay for the next attempt
+            delay = TimeSpan.FromTicks(delay.Ticks * 2);
+        }
+
+        // All attempts failed, throw an exception
+        throw new InvalidOperationException($"Failed to invoke JavaScript function '{functionName}' after {maxAttempts} attempts.");
+    }
 }

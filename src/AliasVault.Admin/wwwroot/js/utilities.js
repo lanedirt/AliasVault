@@ -14,6 +14,10 @@ window.initTopMenu = function() {
     initDarkModeSwitcher();
 };
 
+window.isDarkMode = function() {
+    return document.documentElement.classList.contains('dark');
+};
+
 window.registerClickOutsideHandler = (dotNetHelper) => {
     document.addEventListener('click', (event) => {
         const menu = document.getElementById('userMenuDropdown');
@@ -89,3 +93,35 @@ function generateQrCode(id) {
     qrcode.makeCode(dataUrl);
 }
 
+// Keyboard navigation for pagination
+window.enablePaginationKeyboardNavigation = (element, dotNetHelper, currentPage, maxPage) => {
+    if (!element) return;
+    
+    // Add tabindex and focus if not already set
+    if (!element.hasAttribute('tabindex')) {
+        element.setAttribute('tabindex', '0');
+    }
+    
+    // Remove any existing event listener to prevent duplicates
+    if (element._paginationKeyHandler) {
+        element.removeEventListener('keydown', element._paginationKeyHandler);
+    }
+    
+    // Create keyboard event handler
+    element._paginationKeyHandler = (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            
+            const newPage = e.key === 'ArrowLeft' 
+                ? Math.max(1, currentPage - 1)
+                : Math.min(maxPage, currentPage + 1);
+                
+            if (newPage !== currentPage) {
+                dotNetHelper.invokeMethodAsync('NavigateToPage', newPage);
+            }
+        }
+    };
+    
+    // Add event listener
+    element.addEventListener('keydown', element._paginationKeyHandler);
+};

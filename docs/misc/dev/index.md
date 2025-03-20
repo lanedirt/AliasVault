@@ -16,8 +16,8 @@ Choose your platform to get started with AliasVault development:
 
 ## Common Development Topics
 
-- [Browser Extensions](browser-extensions.md)
-- [PostgreSQL Commands](postgresql-commands.md)
+- [Browser extensions](browser-extensions.md)
+- [Database operations](database-operations.md)
 - [Running GitHub Actions Locally](run-github-actions-locally.md)
 - [Upgrading EF Server Model](upgrade-ef-server-model.md)
 - [Upgrading EF Client Model](upgrade-ef-client-model.md)

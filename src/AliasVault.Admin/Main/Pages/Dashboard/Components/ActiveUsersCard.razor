@@ -7,11 +7,6 @@
             @(ShowUserNames ? "Hide names" : "Show names")
         </button>
     </div>
-    <div class="flex items-center justify-between mb-4">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-            This card shows the number of active users in the last 24 hours, 7 days, and 14 days. This includes users who have created their accounts in these time periods.
-        </p>
-    </div>
     @if (IsLoading)
     {
         <LoadingIndicator />
@@ -126,20 +121,14 @@
 
     private async Task<(int count, List<string> users)> GetActiveUserCount(DateTime since)
     {
-        // Get unique users who either:
+        // Get unique users who:
         // 1. Have successful auth logs
-        // 2. Have updated their vault
-        // 3. Are not the admin user
+        // 2. Are not the admin user
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
         var activeUsers = await dbContext.AuthLogs
             .Where(l => l.Timestamp >= since && l.IsSuccess && l.Username != "admin")
             .Select(l => l.Username)
-            .Union(
-                dbContext.Vaults
-                    .Where(v => v.UpdatedAt >= since)
-                    .Select(v => v.User.UserName!)
-            )
             .Distinct()
             .ToListAsync();
 
