@@ -327,6 +327,16 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
             return false;
         }
 
+        // Check if the email claim is disabled.
+        if (userEmailClaim.Disabled)
+        {
+            // Email claim is disabled, so we cannot process this email.
+            logger.LogWarning(
+                "Rejected email: email for {ToAddress} is claimed but is disabled which means the user has deleted the email alias.",
+                toAddress.User + "@" + toAddress.Host);
+            return false;
+        }
+
         // Retrieve user public encryption key from database
         var userPublicKey = await dbContext.UserEncryptionKeys.FirstOrDefaultAsync(
             x =>

@@ -75,6 +75,7 @@ public class SmtpServerTests
             AddressDomain = "example.tld",
         };
         dbContext.UserEmailClaims.Add(emailClaim);
+
         var emailClaim2 = new UserEmailClaim
         {
             UserId = user.Id,
@@ -83,6 +84,17 @@ public class SmtpServerTests
             AddressDomain = "example.tld",
         };
         dbContext.UserEmailClaims.Add(emailClaim2);
+
+        // Create disabled email claim.
+        var emailClaimDisabled = new UserEmailClaim
+        {
+            UserId = user.Id,
+            Address = "disabled@example.tld",
+            AddressLocal = "disabled",
+            AddressDomain = "example.tld",
+            Disabled = true,
+        };
+        dbContext.UserEmailClaims.Add(emailClaimDisabled);
 
         // Create public key.
         var encryptionKey = new UserEncryptionKey
@@ -218,7 +230,7 @@ public class SmtpServerTests
     [Test]
     public async Task MultipleRecipientsEmail()
     {
-        // Send an email to the SMTP server.
+        // Send email to the SMTP server.
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
         message.To.Add(new MailboxAddress("Test Recipient", "claimed@example.tld"));
@@ -240,10 +252,28 @@ public class SmtpServerTests
     [Test]
     public void SingleEmailUnknownRecipientDomain()
     {
-        // Send an email to the SMTP server.
+        // Send email to the SMTP server.
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
         message.To.Add(new MailboxAddress("Test Recipient", "recipient@unknowndomain.tld"));
+        message.Subject = "Test Email";
+        const string textBody = "This is a test email plain.";
+        message.Body = new BodyBuilder { TextBody = textBody }.ToMessageBody();
+
+        // Expect error from SmtpClient when sending email to unknown domain.
+        Assert.ThrowsAsync<SmtpCommandException>(async () => await SendMessageToSmtpServer(message));
+    }
+
+    /// <summary>
+    /// Tests sending an email to an existing but disabled email claim, we expect to get an error from the SMTP server.
+    /// </summary>
+    [Test]
+    public void SingleEmailDisabledUserClaim()
+    {
+        // Send email to the SMTP server.
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
+        message.To.Add(new MailboxAddress("Test Recipient", "disabled@example.tld"));
         message.Subject = "Test Email";
         const string textBody = "This is a test email plain.";
         message.Body = new BodyBuilder { TextBody = textBody }.ToMessageBody();
@@ -259,7 +289,7 @@ public class SmtpServerTests
     [Test]
     public void SingleEmailNoUserClaim()
     {
-        // Send an email to the SMTP server.
+        // Send email to the SMTP server.
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Test Sender", "sender@example.com"));
         message.To.Add(new MailboxAddress("Test Recipient", "not-claimed@example.tld"));
