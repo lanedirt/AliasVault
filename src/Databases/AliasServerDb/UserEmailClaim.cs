@@ -56,6 +56,14 @@ public class UserEmailClaim
     public string AddressDomain { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the email claim has been disabled. Disabled means that
+    /// the email claim was claimed by a user previously, but that user has deleted this alias since.
+    /// Incoming emails addressed to dusabled aliases are rejected by the server. However if the user
+    /// later claims this alias again it will be automatically re-enabled.
+    /// </summary>
+    public bool Disabled { get; set; }
+
+    /// <summary>
     /// Gets or sets created timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }

@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AliasServerDb.Migrations.PostgresqlMigrations
 {
     /// <inheritdoc />
-    public partial class AddVaultClientColumn : Migration
+    public partial class AddEmailClaimDisabledFlag : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Client",
-                table: "Vaults",
-                type: "character varying(255)",
-                maxLength: 255,
-                nullable: true);
+            migrationBuilder.AddColumn<bool>(
+                name: "Disabled",
+                table: "UserEmailClaims",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Client",
-                table: "Vaults");
+                name: "Disabled",
+                table: "UserEmailClaims");
         }
     }
 }

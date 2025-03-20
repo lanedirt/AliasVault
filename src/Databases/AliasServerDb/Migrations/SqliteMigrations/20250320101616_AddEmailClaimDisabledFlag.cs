@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AliasServerDb.Migrations.SqliteMigrations
 {
     /// <inheritdoc />
-    public partial class AddVaultClientColumn : Migration
+    public partial class AddEmailClaimDisabledFlag : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Client",
-                table: "Vaults",
-                type: "TEXT",
-                maxLength: 255,
-                nullable: true);
+            migrationBuilder.AddColumn<bool>(
+                name: "Disabled",
+                table: "UserEmailClaims",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Client",
-                table: "Vaults");
+                name: "Disabled",
+                table: "UserEmailClaims");
         }
     }
 }
