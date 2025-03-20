@@ -105,8 +105,12 @@ else
                 <div class="items-center">
                     <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Email claims</h3>
-
-                        <EmailClaimTable EmailClaimList="@EmailClaimList" />
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Email claims represent the email addresses that the user has (historically) used. Whenever a user deletes an email alias
+                            the claim gets disabled and the server will reject all emails sent to that alias. A user can always re-enable
+                            the claim by using it again. Email claims are permanently tied to a user and cannot be transferred to another user.
+                        </p>
+                        <EmailClaimTable User="@User" />
                     </div>
                 </div>
             </div>
@@ -126,7 +130,6 @@ else
     private int TwoFactorKeysCount { get; set; }
     private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
     private List<Vault> VaultList { get; set; } = [];
-    private List<UserEmailClaimWithCount> EmailClaimList { get; set; } = [];
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -199,22 +202,6 @@ else
                 Client = x.Client,
             })
             .OrderBy(x => x.UpdatedAt)
-            .ToListAsync();
-
-        // Load all email claims for this user.
-        EmailClaimList = await dbContext.UserEmailClaims
-            .Where(x => x.UserId == User.Id)
-            .Select(x => new UserEmailClaimWithCount
-            {
-                Id = x.Id,
-                Address = x.Address,
-                AddressLocal = x.AddressLocal,
-                AddressDomain = x.AddressDomain,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt,
-                EmailCount = dbContext.Emails.Count(e => e.To == x.Address)
-            })
-            .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 
         IsLoading = false;
