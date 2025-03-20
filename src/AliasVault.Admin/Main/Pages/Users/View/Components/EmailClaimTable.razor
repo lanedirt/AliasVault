@@ -1,41 +1,212 @@
 ﻿@using AliasVault.RazorComponents.Tables
 
-<SortableTable Columns="@_emailClaimTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
-    @foreach (var entry in SortedEmailClaimList)
-    {
-        <SortableTableRow>
-            <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
-            <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
-            <SortableTableColumn>@entry.Address</SortableTableColumn>
-            <SortableTableColumn>@entry.EmailCount</SortableTableColumn>
-        </SortableTableRow>
-    }
-</SortableTable>
+<div class="d-flex justify-content-between mb-3">
+    <div class="flex items-center space-x-2">
+        <Button Color="secondary" OnClick="ToggleShowDisabled">
+            @(ShowDisabled ? "Hide Disabled Claims" : "Show Disabled Claims")
+        </Button>
+        @if (EmailClaimList.Any(e => !e.Disabled))
+        {
+            <Button Color="danger" OnClick="DisableAllEmailClaims">Disable All</Button>
+        }
+    </div>
+</div>
+
+@if (IsLoading)
+{
+    <LoadingIndicator />
+}
+else
+{
+    <SortableTable Columns="@_emailClaimTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        @foreach (var entry in SortedEmailClaimList)
+        {
+            <SortableTableRow Class="@(entry.Disabled ? "bg-secondary" : "")">
+                <SortableTableColumn IsPrimary="true">@entry.Id</SortableTableColumn>
+                <SortableTableColumn>@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                <SortableTableColumn><a href="/emails?search=@entry.Address">@entry.Address</a></SortableTableColumn>
+                <SortableTableColumn>@entry.EmailCount</SortableTableColumn>
+                <SortableTableColumn>@(entry.Disabled ? "Disabled" : "Enabled")</SortableTableColumn>
+                <SortableTableColumn>
+                    @if (entry.Disabled)
+                    {
+                        <Button Color="success" OnClick="() => ToggleEmailClaimStatus(entry)">Enable</Button>
+                    }
+                    else
+                    {
+                        <Button Color="danger" OnClick="() => ToggleEmailClaimStatus(entry)">Disable</Button>
+                    }
+                </SortableTableColumn>
+            </SortableTableRow>
+        }
+    </SortableTable>
+}
 
 @code {
     /// <summary>
-    /// Gets or sets the list of email claims to display.
+    /// Gets or sets the user.
     /// </summary>
     [Parameter]
-    public List<UserEmailClaimWithCount> EmailClaimList { get; set; } = [];
+    public AliasVaultUser User { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the callback for when an email claim is enabled or disabled.
+    /// </summary>
+    [Parameter]
+    public EventCallback<(Guid id, bool disabled)> OnEmailClaimStatusChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of email claims to display.
+    /// </summary>
+    private List<UserEmailClaimWithCount> EmailClaimList { get; set; } = [];
+
+    private bool IsLoading { get; set; } = true;
 
     private string SortColumn { get; set; } = "CreatedAt";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+    private bool ShowDisabled { get; set; } = false;
 
     private readonly List<TableColumn> _emailClaimTableColumns = [
         new TableColumn { Title = "ID", PropertyName = "Id" },
         new TableColumn { Title = "Created", PropertyName = "CreatedAt" },
         new TableColumn { Title = "Email", PropertyName = "Address" },
         new TableColumn { Title = "Email Count", PropertyName = "EmailCount" },
+        new TableColumn { Title = "Status", PropertyName = "Disabled" },
+        new TableColumn { Title = "Actions", PropertyName = "" },
     ];
 
-    private IEnumerable<UserEmailClaimWithCount> SortedEmailClaimList => SortList(EmailClaimList, SortColumn, SortDirection);
+    private IEnumerable<UserEmailClaimWithCount> SortedEmailClaimList =>
+        SortList(ShowDisabled ? EmailClaimList : EmailClaimList.Where(e => !e.Disabled).ToList(), SortColumn, SortDirection);
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        await RefreshData();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// This method will refresh the email claim list.
+    /// </summary>
+    private async Task RefreshData()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        if (string.IsNullOrEmpty(User.Id))
+        {
+            EmailClaimList = [];
+            return;
+        }
+
+        // Load all email claims for this user.
+        EmailClaimList = await dbContext.UserEmailClaims
+            .Where(x => x.UserId == User.Id)
+            .Select(x => new UserEmailClaimWithCount
+            {
+                Id = x.Id,
+                Address = x.Address,
+                AddressLocal = x.AddressLocal,
+                AddressDomain = x.AddressDomain,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                EmailCount = dbContext.Emails.Count(e => e.To == x.Address),
+                Disabled = x.Disabled
+            })
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
+    }
 
     private void HandleSortChanged((string column, SortDirection direction) sort)
     {
         SortColumn = sort.column;
         SortDirection = sort.direction;
         StateHasChanged();
+    }
+
+    private void ToggleShowDisabled()
+    {
+        ShowDisabled = !ShowDisabled;
+        StateHasChanged();
+    }
+
+    /// <summary>   
+    /// This method will toggle the disabled status of an email claim.
+    /// </summary>
+    private async Task ToggleEmailClaimStatus(UserEmailClaimWithCount entry)
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        if (entry.Disabled)
+        {
+            // Enable email claim without confirmation.
+            var emailClaim = await dbContext.UserEmailClaims.FindAsync(entry.Id);
+            if (emailClaim != null)
+            {
+                // Re-enable the email claim.
+                emailClaim.Disabled = false;
+                emailClaim.UpdatedAt = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync();
+                await RefreshData();
+            }
+        }
+        else
+        {
+            if (await ConfirmModalService.ShowConfirmation(
+                title: "Confirm Email Claim Disable",
+                message: @"Are you sure you want to disable this email claim?
+
+Important notes:
+• Disabling an email claim means that emails will no longer be received for this address and will be rejected by the server.
+• The user can re-enable this at will by re-saving their vault which will claim it again.
+
+Do you want to proceed with disabling this claim?"))
+            {
+                // Load email claim
+                var emailClaim = await dbContext.UserEmailClaims.FindAsync(entry.Id);
+                if (emailClaim != null)
+                {
+                    // Set the disabled status to true.
+                    emailClaim.Disabled = true;
+                    emailClaim.UpdatedAt = DateTime.UtcNow;
+                    await dbContext.SaveChangesAsync();
+                    await RefreshData();
+                }
+            }
+        }
+    }
+
+    private async Task DisableAllEmailClaims()
+    {
+        if (await ConfirmModalService.ShowConfirmation(
+            title: "Confirm Email Claim Disable",
+            message: @"Are you sure you want to disable all email claims?
+
+Important notes:
+• Disabling an email claim means that emails will no longer be received for this address and will be rejected by the server.
+• The user can re-enable this at will by re-saving their vault which will claim it again.
+
+Do you want to proceed with disabling all email claims?"))
+        {
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+            // Load email claims
+            var emailClaims = await dbContext.UserEmailClaims.Where(x => x.UserId == User.Id).ToListAsync();
+
+            // Disable all email claims.
+            foreach (var emailClaim in emailClaims)
+            {
+                emailClaim.Disabled = true;
+                emailClaim.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await dbContext.SaveChangesAsync();
+            await RefreshData();
+        }
     }
 
     private static IEnumerable<UserEmailClaimWithCount> SortList(List<UserEmailClaimWithCount> emailClaims, string sortColumn, SortDirection sortDirection)
@@ -46,6 +217,7 @@
             "CreatedAt" => SortableTable.SortListByProperty(emailClaims, e => e.CreatedAt, sortDirection),
             "Address" => SortableTable.SortListByProperty(emailClaims, e => e.Address, sortDirection),
             "EmailCount" => SortableTable.SortListByProperty(emailClaims, e => e.EmailCount, sortDirection),
+            "Disabled" => SortableTable.SortListByProperty(emailClaims, e => e.Disabled, sortDirection),
             _ => emailClaims
         };
     }

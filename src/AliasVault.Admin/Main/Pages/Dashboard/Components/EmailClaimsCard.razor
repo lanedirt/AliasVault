@@ -32,7 +32,7 @@
             </div>
         </div>
     }
-    
+
     @if (ShowChart && !IsLoading)
     {
         <div class="mt-6">
@@ -65,6 +65,7 @@
     /// </summary>
     private bool ShowChart { get; set; } = false;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await RefreshData();
@@ -128,12 +129,12 @@
                     Date = g.Key,
                     Count = g.Count()
                 }).ToListAsync();
-            
+
             // Fill in any missing days with zero counts
             var allDates = Enumerable.Range(0, DaysToShow)
                 .Select(offset => DateTime.UtcNow.Date.AddDays(-offset))
                 .Reverse();
-                
+
             DailyEmailClaimCounts = allDates
                 .GroupJoin(
                     DailyEmailClaimCounts,
@@ -148,7 +149,7 @@
     private void ToggleChart()
     {
         ShowChart = !ShowChart;
-        
+
         // If we're showing the chart but haven't loaded the data yet
         if (ShowChart && DailyEmailClaimCounts.Count == 0)
         {
@@ -167,7 +168,7 @@
         public int Days7 { get; set; }
         public int Days14 { get; set; }
     }
-    
+
     private sealed class DailyEmailClaimCount
     {
         public DateTime Date { get; set; }

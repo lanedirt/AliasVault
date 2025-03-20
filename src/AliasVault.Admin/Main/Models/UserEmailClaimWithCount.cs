@@ -33,6 +33,11 @@ public class UserEmailClaimWithCount
     public string AddressDomain { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the email claim is disabled.
+    /// </summary>
+    public bool Disabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the created at timestamp.
     /// </summary>
     public DateTime CreatedAt { get; set; }
