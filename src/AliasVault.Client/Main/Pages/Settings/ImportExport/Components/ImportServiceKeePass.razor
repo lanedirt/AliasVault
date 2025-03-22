@@ -1,0 +1,58 @@
+@inherits ImportServiceCard
+@inject ILogger<ImportServiceKeePass> Logger
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        ServiceName = "KeePass";
+        Description = "Import passwords from your KeePass vault";
+        LogoUrl = "img/importers/keepass.svg";
+        
+        // Define the modal content for KeePass
+        ModalContent = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "mb-4");
+            
+            builder.OpenElement(2, "p");
+            builder.AddAttribute(3, "class", "mb-4 text-gray-700 dark:text-gray-300");
+            builder.AddContent(4, "Upload your KeePass export file:");
+            builder.CloseElement(); // p
+            
+            builder.OpenComponent<InputFile>(5);
+            builder.AddAttribute(6, "OnChange", EventCallback.Factory.Create<InputFileChangeEventArgs>(this, HandleFileUpload));
+            builder.AddAttribute(7, "class", "dark:text-white text-sm");
+            builder.CloseComponent(); // InputFile
+            
+            builder.CloseElement(); // div
+        };
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        try {
+            // KeePass specific file upload and parsing logic
+            Logger.LogInformation($"Processing KeePass file: {e.File.Name}");
+            
+            // Process file contents here
+            // ...
+
+            // Once processing is complete, you can notify the parent
+            await OnImportComplete.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling KeePass file upload");
+        }
+    }
+
+    protected override async Task HandleModalConfirm()
+    {
+        // Override with KeePass specific confirmation logic if needed
+        await base.HandleModalConfirm();
+    }
+} 

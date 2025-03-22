@@ -1,15 +1,29 @@
-﻿@page "/settings/vault"
+﻿@page "/settings/import-export"
 @inherits MainBase
 @inject CredentialService CredentialService
-@inject ILogger<Vault> Logger
+@inject ILogger<ImportExport> Logger
+@using AliasVault.Client.Main.Components.Settings
+@using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
 
-<LayoutPageTitle>Vault settings</LayoutPageTitle>
+<LayoutPageTitle>Import / Export</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Vault settings"
-    Description="On this page you can configure your vault settings.">
+    Title="Import / Export"
+    Description="On this page you can import and export your vault.">
 </PageHeader>
+
+<div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">Import vault</h3>
+    <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Select a service to import from. If you are using a service that is not listed here, you can import from a CSV file manually. Or if you believe we are missing a popular service, please contact us and let us know.
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ImportServiceBitwarden OnImportComplete="RefreshVault" />
+        <ImportServiceKeePass OnImportComplete="RefreshVault" />
+        <ImportServiceAliasVault OnImportComplete="RefreshVault" />
+    </div>
+</div>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
@@ -27,16 +41,6 @@
         </div>
         <div class="mt-6">
             <Button OnClick="ExportVaultCsv">Export vault to unencrypted CSV file</Button>
-        </div>
-    </div>
-</div>
-
-<div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-xl font-semibold dark:text-white">Import vault</h3>
-    <div class="mb-4">
-        <div class="text-gray-900 dark:text-white">
-            Import unencrypted CSV file:
-            <InputFile class="dark:text-white" OnChange="@LoadFiles" />
         </div>
     </div>
 </div>
@@ -63,7 +67,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Vault settings" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Import / Export" });
     }
 
     private async Task ExportVaultSqlite()
@@ -153,5 +157,67 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
             IsImporting = false;
             StateHasChanged();
         }
+    }
+
+    // Placeholder methods for other import types
+    private async Task LoadBitwardenFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("Bitwarden");
+    }
+
+    private async Task LoadLastPassFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("LastPass");
+    }
+
+    private async Task LoadKeePassFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("KeePass");
+    }
+
+    private async Task Load1PasswordFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("1Password");
+    }
+
+    private async Task LoadDashlaneFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("Dashlane");
+    }
+
+    private async Task LoadChromeFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("Chrome");
+    }
+
+    private async Task LoadFirefoxFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("Firefox");
+    }
+
+    private async Task LoadGenericCsvFile(InputFileChangeEventArgs e)
+    {
+        // Implementation will be added later
+        await NotImplementedImport("Generic CSV");
+    }
+
+    private Task NotImplementedImport(string serviceName)
+    {
+        ImportErrorMessage = $"Import from {serviceName} is not implemented yet.";
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void RefreshVault()
+    {
+        // Refresh vault data after import
+        // ...
     }
 }
