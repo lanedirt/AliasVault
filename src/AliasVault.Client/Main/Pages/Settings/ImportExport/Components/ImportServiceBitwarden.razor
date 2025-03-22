@@ -1,0 +1,52 @@
+@inherits ImportServiceCard
+@inject ILogger<ImportServiceBitwarden> Logger
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        ServiceName = "Bitwarden";
+        Description = "Import passwords from your Bitwarden vault";
+        LogoUrl = "img/importers/bitwarden.svg";
+        
+        // Define the modal content for Bitwarden
+        ModalContent = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "mb-4");
+            
+            builder.OpenElement(2, "p");
+            builder.AddAttribute(3, "class", "mb-4 text-gray-700 dark:text-gray-300");
+            builder.AddContent(4, "Upload your Bitwarden JSON export file:");
+            builder.CloseElement(); // p
+            
+            builder.OpenComponent<InputFile>(5);
+            builder.AddAttribute(6, "OnChange", EventCallback.Factory.Create<InputFileChangeEventArgs>(this, HandleFileUpload));
+            builder.AddAttribute(7, "class", "dark:text-white text-sm");
+            builder.CloseComponent(); // InputFile
+            
+            builder.CloseElement(); // div
+        };
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        try {
+            // Bitwarden specific file upload and parsing logic
+            Logger.LogInformation($"Processing Bitwarden file: {e.File.Name}");
+            
+            // Process file contents here
+            // ...
+
+            // Once processing is complete, you can notify the parent
+            await OnImportComplete.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling Bitwarden file upload");
+        }
+    }
+} 
