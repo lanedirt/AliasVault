@@ -1,0 +1,93 @@
+@inject ILogger<ImportServiceCard> Logger
+@inject IJSRuntime JSRuntime
+
+<div class="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+    <div class="flex items-center mb-3">
+        <div class="w-12 h-12 mr-3 flex-shrink-0">
+            @if (!string.IsNullOrEmpty(LogoUrl))
+            {
+                <img src="@LogoUrl" alt="@ServiceName logo" class="w-full h-full object-contain" />
+            }
+            else
+            {
+                <div class="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
+                    <span class="text-gray-500 dark:text-gray-400 text-xs">No logo</span>
+                </div>
+            }
+        </div>
+        <div>
+            <h4 class="text-lg font-semibold dark:text-white">@ServiceName</h4>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <p class="text-sm text-gray-500 dark:text-gray-400">@Description</p>
+            }
+        </div>
+    </div>
+    <div class="mt-auto">
+        <Button OnClick="@OpenImportModal">Import from @ServiceName</Button>
+    </div>
+</div>
+
+@if (IsModalOpen)
+{
+    <ClickOutsideHandler OnClose="CloseModal" ContentId="importServiceModal">
+        <ModalWrapper OnEnter="HandleModalConfirm">
+            <div id="importServiceModal" class="relative top-20 mx-auto p-5 shadow-lg rounded-md bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-400">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold dark:text-white">Import from @ServiceName</h3>
+                        <button @onclick="CloseModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    @ModalContent
+                    
+                    <div class="flex justify-end mt-6 space-x-2">
+                        <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
+                        <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
+                    </div>
+                </div>
+            </div>
+        </ModalWrapper>
+    </ClickOutsideHandler>
+}
+
+@code {
+    [Parameter]
+    public string ServiceName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Description { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LogoUrl { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback OnImportComplete { get; set; }
+
+    protected bool IsModalOpen { get; set; } = false;
+    
+    protected RenderFragment ModalContent { get; set; } = builder => { };
+
+    protected virtual void OpenImportModal()
+    {
+        IsModalOpen = true;
+        StateHasChanged();
+    }
+
+    protected virtual void CloseModal()
+    {
+        IsModalOpen = false;
+        StateHasChanged();
+    }
+
+    protected virtual async Task HandleModalConfirm()
+    {
+        // Base implementation - may be overridden by derived components
+        await OnImportComplete.InvokeAsync();
+        CloseModal();
+    }
+} 
