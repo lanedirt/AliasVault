@@ -22,7 +22,7 @@
 
         try
         {
-            using var stream = e.File.OpenReadStream();
+            await using var stream = e.File.OpenReadStream();
             using var reader = new StreamReader(stream);
             var fileContents = await reader.ReadToEndAsync();
 
