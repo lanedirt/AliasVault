@@ -1,5 +1,5 @@
 @inject ILogger<ImportServiceKeePass> Logger
-@using AliasVault.Client.Main.Pages.Settings.ImportExport.Models
+@using AliasVault.ImportExport.Importers
 
 <ImportServiceCard
     ServiceName="KeePass"
@@ -20,65 +20,14 @@
     {
         Logger.LogInformation($"Processing KeePass file: {e.File.Name}");
 
-        var importCredentials = new List<ImportCredential>();
-
         try
         {
             using var stream = e.File.OpenReadStream();
             using var reader = new StreamReader(stream);
+            var fileContents = await reader.ReadToEndAsync();
 
-            // Read and parse header row
-            var headerLine = await reader.ReadLineAsync();
-            if (headerLine == null) {
-                throw new InvalidDataException("CSV file header not found");
-            }
-
-            var headers = headerLine.Split(',')
-                .Select((header, index) => (header.Trim('"'), index))
-                .ToDictionary(h => h.Item1, h => h.index);
-
-            // Validate required headers
-            var requiredHeaders = new[] { "Title", "Username", "Password" };
-            var missingHeaders = requiredHeaders.Where(h => !headers.ContainsKey(h)).ToList();
-            if (missingHeaders.Any())
-            {
-                throw new InvalidDataException(
-                    $"Missing required headers: {string.Join(", ", missingHeaders)}");
-            }
-
-            string? line;
-            while ((line = await reader.ReadLineAsync()) != null)
-            {
-                if (string.IsNullOrWhiteSpace(line)) {
-                    continue;
-                }
-
-                var values = line.Split(',').Select(v => v.Trim('"')).ToArray();
-                if (values.Length < headers.Count) {
-                    continue;
-                }
-
-                // TODO: check how TOTP code should be parsed: can we store the full otpauth:// string
-                // or do we need to extract the secret key only?
-                // TODO: currently the TOTP auth component errors with full otpauth:// string.
-                var credential = new ImportCredential
-                {
-                    ServiceName = values[headers["Title"]],
-                    ServiceUrl = headers.ContainsKey("URL") && !string.IsNullOrEmpty(values[headers["URL"]])
-                        ? values[headers["URL"]]
-                        : string.Empty,
-                    Username = headers.ContainsKey("Email") && !string.IsNullOrEmpty(values[headers["Email"]])
-                        ? values[headers["Email"]]
-                        : values[headers["Username"]],
-                    Password = values[headers["Password"]],
-                    TwoFactorSecret = headers.ContainsKey("OTPAuth") && !string.IsNullOrEmpty(values[headers["OTPAuth"]])
-                        ? values[headers["OTPAuth"]]
-                        : string.Empty,
-                    Notes = headers.ContainsKey("Notes") ? values[headers["Notes"]] : string.Empty
-                };
-
-                importCredentials.Add(credential);
-            }
+            var importCredentials = await KeePassImporter.ImportFromCsvAsync(fileContents);
+            _importServiceCard.SetImportedCredentials(importCredentials);
         }
         catch (Exception ex)
         {
@@ -86,7 +35,6 @@
             throw;
         }
 
-        _importServiceCard.SetImportedCredentials(importCredentials);
     }
 
     private void RefreshVault()
