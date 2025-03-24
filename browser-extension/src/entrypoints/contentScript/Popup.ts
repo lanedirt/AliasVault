@@ -330,58 +330,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
   // Handle search input.
   let searchTimeout: NodeJS.Timeout | null = null;
-
-  searchInput.addEventListener('input', async () => {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    const searchTerm = searchInput.value.toLowerCase();
-
-    const response = await sendMessage('GET_CREDENTIALS', {}, 'background') as CredentialsResponse;
-    if (response.success && response.credentials) {
-      // Ensure we have unique credentials
-      const uniqueCredentials = Array.from(new Map(response.credentials.map(cred => [cred.Id, cred])).values());
-      let filteredCredentials;
-
-      if (searchTerm === '') {
-        // If search is empty, use original URL-based filtering
-        filteredCredentials = filterCredentials(
-          uniqueCredentials,
-          window.location.href,
-          document.title
-        ).sort((a, b) => {
-          // First compare by service name
-          const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
-          if (serviceNameComparison !== 0) {
-            return serviceNameComparison;
-          }
-
-          // If service names are equal, compare by username/nickname
-          return (a.Username ?? '').localeCompare(b.Username ?? '');
-        });
-      } else {
-        // Otherwise filter based on search term
-        filteredCredentials = uniqueCredentials.filter(cred =>
-          cred.ServiceName.toLowerCase().includes(searchTerm) ||
-            cred.Username.toLowerCase().includes(searchTerm) ||
-            cred.Email.toLowerCase().includes(searchTerm) ||
-            cred.ServiceUrl?.toLowerCase().includes(searchTerm)
-        ).sort((a, b) => {
-          // First compare by service name
-          const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
-          if (serviceNameComparison !== 0) {
-            return serviceNameComparison;
-          }
-
-          // If service names are equal, compare by username/nickname
-          return (a.Username ?? '').localeCompare(b.Username ?? '');
-        });
-      }
-
-      // Update popup content with filtered results
-      updatePopupContent(filteredCredentials, credentialList, input, rootContainer);
-    }
-  });
+  searchInput.addEventListener('input', () => handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input));
 
   // Close button
   const closeButton = document.createElement('button');
@@ -516,6 +465,58 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
   }, 100);
 
   rootContainer.appendChild(popup);
+}
+
+/**
+ * Handle popup search input by filtering credentials based on the search term.
+ */
+function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement) : void {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  const searchTerm = searchInput.value.toLowerCase();
+
+  // Ensure we have unique credentials
+  const uniqueCredentials = Array.from(new Map(credentials.map(cred => [cred.Id, cred])).values());
+  let filteredCredentials;
+
+  if (searchTerm === '') {
+    // If search is empty, use original URL-based filtering
+    filteredCredentials = filterCredentials(
+      uniqueCredentials,
+      window.location.href,
+      document.title
+    ).sort((a, b) => {
+      // First compare by service name
+      const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
+      if (serviceNameComparison !== 0) {
+        return serviceNameComparison;
+      }
+
+      // If service names are equal, compare by username/nickname
+      return (a.Username ?? '').localeCompare(b.Username ?? '');
+    });
+  } else {
+    // Otherwise filter based on search term
+    filteredCredentials = uniqueCredentials.filter(cred =>
+      cred.ServiceName?.toLowerCase().includes(searchTerm) ||
+        cred.Username?.toLowerCase().includes(searchTerm) ||
+        cred.Email?.toLowerCase().includes(searchTerm) ||
+        cred.ServiceUrl?.toLowerCase().includes(searchTerm)
+    ).sort((a, b) => {
+      // First compare by service name
+      const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
+      if (serviceNameComparison !== 0) {
+        return serviceNameComparison;
+      }
+
+      // If service names are equal, compare by username/nickname
+      return (a.Username ?? '').localeCompare(b.Username ?? '');
+    });
+  }
+
+  // Update popup content with filtered results
+  updatePopupContent(filteredCredentials, credentialList, input, rootContainer);
 }
 
 /**
