@@ -5,10 +5,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Utilities;
+namespace AliasVault.UnitTests.Utilities;
 
 using AliasClientDb;
 using AliasVault.ImportExport;
+using AliasVault.ImportExport.Importers;
+using AliasVault.UnitTests.Common;
 
 /// <summary>
 /// Tests for the AliasVault.ImportExport class.
@@ -100,6 +102,79 @@ public class ImportExportTests
             Assert.That(importedPassword.Value, Is.EqualTo(originalPassword.Value));
             Assert.That(importedPassword.CreatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.CreatedAt.ToString("yyyy-MM-dd")));
             Assert.That(importedPassword.UpdatedAt.ToString("yyyy-MM-dd"), Is.EqualTo(originalPassword.UpdatedAt.ToString("yyyy-MM-dd")));
+        });
+    }
+
+    /// <summary>
+    /// Test case for importing credentials from Bitwarden CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromBitwardenCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.bitwarden.csv");
+
+        // Act
+        var importedCredentials = await BitwardenImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(5));
+
+        // Test specific entries
+        var tutaNotaCredential = importedCredentials.First(c => c.ServiceName == "TutaNota");
+        Assert.Multiple(() =>
+        {
+            Assert.That(tutaNotaCredential.ServiceName, Is.EqualTo("TutaNota"));
+            Assert.That(tutaNotaCredential.Username, Is.EqualTo("avtest2@tutamail.com"));
+            Assert.That(tutaNotaCredential.Password, Is.EqualTo("blabla"));
+            Assert.That(tutaNotaCredential.TwoFactorSecret, Is.EqualTo("otpauth://totp/Strongbox?secret=PLW4SB3PQ7MKVXY2MXF4NEXS6Y&algorithm=SHA1&digits=6&period=30"));
+        });
+
+        var aliasVaultCredential = importedCredentials.First(c => c.ServiceName == "Aliasvault.net");
+        Assert.Multiple(() =>
+        {
+            Assert.That(aliasVaultCredential.ServiceName, Is.EqualTo("Aliasvault.net"));
+            Assert.That(aliasVaultCredential.ServiceUrl, Is.EqualTo("https://www.aliasvault.net"));
+            Assert.That(aliasVaultCredential.Username, Is.EqualTo("root"));
+            Assert.That(aliasVaultCredential.Password, Is.EqualTo("toor"));
+        });
+    }
+
+    /// <summary>
+    /// Test case for importing credentials from KeePass CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromKeePassCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepass.kdbx.csv");
+
+        // Act
+        var importedCredentials = await KeePassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(6));
+
+        // Test specific entries
+        var tutaNotaCredential = importedCredentials.First(c => c.ServiceName == "TutaNota");
+        Assert.Multiple(() =>
+        {
+            Assert.That(tutaNotaCredential.ServiceName, Is.EqualTo("TutaNota"));
+            Assert.That(tutaNotaCredential.Username, Is.EqualTo("avtest2@tutamail.com"));
+            Assert.That(tutaNotaCredential.Password, Is.EqualTo("blabla"));
+            Assert.That(tutaNotaCredential.TwoFactorSecret, Is.EqualTo("otpauth://totp/Strongbox?secret=PLW4SB3PQ7MKVXY2MXF4NEXS6Y&algorithm=SHA1&digits=6&period=30"));
+            Assert.That(tutaNotaCredential.Notes, Does.Contain("Recovery code for main account"));
+        });
+
+        var sampleCredential = importedCredentials.First(c => c.ServiceName == "Sample");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleCredential.ServiceName, Is.EqualTo("Sample"));
+            Assert.That(sampleCredential.ServiceUrl, Is.EqualTo("https://strongboxsafe.com"));
+            Assert.That(sampleCredential.Username, Is.EqualTo("username"));
+            Assert.That(sampleCredential.Password, Is.EqualTo("&3V_$z?Aiw-_x+nbYj"));
         });
     }
 }

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Utilities;
+namespace AliasVault.UnitTests.Utilities;
 
 /// <summary>
 /// Tests for the TotpGeneratorTests class.

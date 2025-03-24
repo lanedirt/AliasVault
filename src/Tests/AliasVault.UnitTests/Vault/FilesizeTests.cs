@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Vault;
+namespace AliasVault.UnitTests.Vault;
 
 using AliasVault.Api.Helpers;
 

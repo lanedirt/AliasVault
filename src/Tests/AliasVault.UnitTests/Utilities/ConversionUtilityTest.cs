@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Utilities;
+namespace AliasVault.UnitTests.Utilities;
 
 using System.Text.RegularExpressions;
 using AliasVault.Shared.Utilities;
