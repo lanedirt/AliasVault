@@ -2,8 +2,8 @@
 @inherits MainBase
 @inject CredentialService CredentialService
 @inject ILogger<ImportExport> Logger
-@using AliasVault.Client.Main.Components.Settings
 @using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
+@using AliasVault.ImportExport
 
 <LayoutPageTitle>Import / Export</LayoutPageTitle>
 
@@ -45,24 +45,7 @@
     </div>
 </div>
 
-@if (IsImporting)
-{
-    <p>Loading...</p>
-}
-else if (!string.IsNullOrEmpty(ImportErrorMessage))
-{
-    <p class="text-danger">@ImportErrorMessage</p>
-}
-else if (!string.IsNullOrEmpty(ImportSuccessMessage))
-{
-    <p class="text-success">@ImportSuccessMessage</p>
-}
-
 @code {
-    private bool IsImporting;
-    private string ImportErrorMessage = string.Empty;
-    private string ImportSuccessMessage = string.Empty;
-
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
@@ -96,7 +79,7 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
         {
             var credentials = await CredentialService.LoadAllAsync();
 
-            var csvBytes = CsvImportExport.CredentialCsvService.ExportCredentialsToCsv(credentials);
+            var csvBytes = CredentialCsvService.ExportCredentialsToCsv(credentials);
 
             // Create a memory stream from the byte array.
             using (MemoryStream memoryStream = new MemoryStream(csvBytes))
@@ -109,115 +92,5 @@ else if (!string.IsNullOrEmpty(ImportSuccessMessage))
         {
             Logger.LogError(ex, "Error downloading file");
         }
-    }
-
-    private async Task LoadFiles(InputFileChangeEventArgs e)
-    {
-        IsImporting = true;
-        StateHasChanged();
-        ImportErrorMessage = string.Empty;
-        ImportSuccessMessage = string.Empty;
-
-        try
-        {
-            var file = e.File;
-            var buffer = new byte[file.Size];
-            var bytesRead = await file.OpenReadStream().ReadAsync(buffer);
-            if (bytesRead != file.Size)
-            {
-                throw new FileLoadException("Error reading file");
-            }
-
-            var fileContent = System.Text.Encoding.UTF8.GetString(buffer);
-            var importedCredentials = CsvImportExport.CredentialCsvService.ImportCredentialsFromCsv(fileContent);
-
-            // Loop through the imported credentials and actually add them to the database.
-            foreach (var importedCredential in importedCredentials)
-            {
-                await CredentialService.InsertEntryAsync(importedCredential, false);
-            }
-
-            // Save the database.
-            var success = await DbService.SaveDatabaseAsync();
-            if (success)
-            {
-                ImportSuccessMessage = $"Successfully imported {importedCredentials.Count} credentials.";
-            }
-            else
-            {
-                ImportErrorMessage = "Error saving database.";
-            }
-        }
-        catch (Exception ex)
-        {
-            ImportErrorMessage = $"Error importing file: {ex.Message}";
-        }
-        finally
-        {
-            IsImporting = false;
-            StateHasChanged();
-        }
-    }
-
-    // Placeholder methods for other import types
-    private async Task LoadBitwardenFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("Bitwarden");
-    }
-
-    private async Task LoadLastPassFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("LastPass");
-    }
-
-    private async Task LoadKeePassFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("KeePass");
-    }
-
-    private async Task Load1PasswordFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("1Password");
-    }
-
-    private async Task LoadDashlaneFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("Dashlane");
-    }
-
-    private async Task LoadChromeFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("Chrome");
-    }
-
-    private async Task LoadFirefoxFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("Firefox");
-    }
-
-    private async Task LoadGenericCsvFile(InputFileChangeEventArgs e)
-    {
-        // Implementation will be added later
-        await NotImplementedImport("Generic CSV");
-    }
-
-    private Task NotImplementedImport(string serviceName)
-    {
-        ImportErrorMessage = $"Import from {serviceName} is not implemented yet.";
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
-
-    private void RefreshVault()
-    {
-        // Refresh vault data after import
-        // ...
     }
 }
