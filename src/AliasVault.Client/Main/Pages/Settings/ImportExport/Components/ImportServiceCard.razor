@@ -2,7 +2,7 @@
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject DbService DbService
-@using AliasVault.Client.Main.Pages.Settings.ImportExport.Models
+@using AliasVault.ImportExport.Models
 
 <div class="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
     <div class="flex items-center mb-3">
@@ -97,13 +97,13 @@
     /// <summary>
     /// The imported credentials.
     /// </summary>
-    private List<ImportCredential> ImportedCredentials { get; set; } = new();
+    private List<ImportedCredential> ImportedCredentials { get; set; } = new();
 
     /// <summary>
     /// Sets the imported credentials.
     /// </summary>
     /// <param name="importedCredentials">The imported credentials.</param>
-    public void SetImportedCredentials(List<ImportCredential> importedCredentials)
+    public void SetImportedCredentials(List<ImportedCredential> importedCredentials)
     {
         ImportedCredentials = importedCredentials;
     }
