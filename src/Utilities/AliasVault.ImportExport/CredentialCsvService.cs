@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.CsvImportExport;
+namespace AliasVault.ImportExport;
 
 using AliasClientDb;
 using CsvHelper;

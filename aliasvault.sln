@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.E2ETests.Client.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{607945F3-9896-4544-99EC-F3496CF4D36B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.CsvImportExport", "src\Utilities\AliasVault.CsvImportExport\AliasVault.CsvImportExport.csproj", "{A9C9A606-C87E-4298-AB32-09B1884D7487}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliasVault.ImportExport", "src\Utilities\AliasVault.ImportExport\AliasVault.ImportExport.csproj", "{A9C9A606-C87E-4298-AB32-09B1884D7487}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A477241-B96C-4174-968D-D40CB77F1ECD}"
 EndProject

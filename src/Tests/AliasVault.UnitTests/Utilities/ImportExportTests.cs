@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CsvImportExportTests.cs" company="lanedirt">
+// <copyright file="ImportExportTests.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -8,12 +8,12 @@
 namespace AliasVault.Tests.Utilities;
 
 using AliasClientDb;
-using AliasVault.CsvImportExport;
+using AliasVault.ImportExport;
 
 /// <summary>
-/// Tests for the AliasVault.CsvImportExport class.
+/// Tests for the AliasVault.ImportExport class.
 /// </summary>
-public class CsvImportExportTests
+public class ImportExportTests
 {
     /// <summary>
     /// Test case for importing credentials from CSV and ensuring all values are present.

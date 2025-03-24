@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using AliasVault.Shared.Utilities;
 
 /// <summary>
-/// Tests for the AliasVault.CsvImportExport class.
+/// Tests for the ConversionUtility class.
 /// </summary>
 public class ConversionUtilityTest
 {
