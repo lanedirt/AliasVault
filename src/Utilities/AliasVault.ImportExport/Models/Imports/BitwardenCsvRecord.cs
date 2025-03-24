@@ -5,6 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using AliasVault.ImportExport.Converters;
 using CsvHelper.Configuration.Attributes;
 
 namespace AliasVault.ImportExport.Models.Imports;
@@ -24,7 +25,8 @@ public class BitwardenCsvRecord
     /// Gets or sets whether the item is favorited.
     /// </summary>
     [Name("favorite")]
-    public bool Favorite { get; set; }
+    [TypeConverter(typeof(BooleanConverter))]
+    public bool Favorite { get; set; } = false;
 
     /// <summary>
     /// Gets or sets the type of the item.
