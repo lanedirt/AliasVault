@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
     <PropertyGroup>
         <RootNamespace>AliasVault.Client</RootNamespace>
         <TargetFramework>net9.0</TargetFramework>
@@ -52,7 +52,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.3" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.3" PrivateAssets="all" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
         <PackageReference Include="SpamOK.PasswordGenerator" Version="1.1.0" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
