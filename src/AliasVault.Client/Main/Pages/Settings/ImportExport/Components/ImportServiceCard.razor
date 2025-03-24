@@ -42,9 +42,9 @@
                             </svg>
                         </button>
                     </div>
-                    
-                    @ModalContent
-                    
+
+                    @ChildContent
+
                     <div class="flex justify-end mt-6 space-x-2">
                         <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
                         <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
@@ -69,8 +69,12 @@
     public EventCallback OnImportComplete { get; set; }
 
     protected bool IsModalOpen { get; set; } = false;
-    
-    protected RenderFragment ModalContent { get; set; } = builder => { };
+
+    /// <summary>
+    /// Child content which is shown in the modal popup. This can contain custom instructions.
+    /// </summary>
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
 
     protected virtual void OpenImportModal()
     {
@@ -90,4 +94,4 @@
         await OnImportComplete.InvokeAsync();
         CloseModal();
     }
-} 
+}
