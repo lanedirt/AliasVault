@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="CredentialCsvService.cs" company="lanedirt">
+// <copyright file="KeePassImporter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from KeePass.
 /// </summary>
-public static class KeePassImporter
+public class KeePassImporter
 {
     /// <summary>
     /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.

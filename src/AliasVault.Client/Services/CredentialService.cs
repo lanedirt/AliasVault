@@ -143,13 +143,17 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     /// </summary>
     /// <param name="loginObject">Login object to insert.</param>
     /// <param name="saveToDb">Whether to commit changes to database. Defaults to true, but can be set to false if entries are added in bulk by caller.</param>
+    /// <param name="extractFavicon">Whether to extract the favicon from the service URL. Defaults to true.</param>
     /// <returns>Guid of inserted entry.</returns>
-    public async Task<Guid> InsertEntryAsync(Credential loginObject, bool saveToDb = true)
+    public async Task<Guid> InsertEntryAsync(Credential loginObject, bool saveToDb = true, bool extractFavicon = true)
     {
         var context = await dbService.GetDbContextAsync();
 
         // Try to extract favicon from service URL
-        await ExtractFaviconAsync(loginObject);
+        if (extractFavicon)
+        {
+            await ExtractFaviconAsync(loginObject);
+        }
 
         // If the email starts with an @ it is most likely still the placeholder which hasn't been filled.
         // So we remove it.
