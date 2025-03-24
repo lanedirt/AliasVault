@@ -967,18 +967,17 @@ function detectMimeType(bytes: Uint8Array): string {
 }
 
 /**
- * Dismiss vault locked popup for 4 hours if user is logged in but vault is locked,
- * or for 3 days if user is not logged in.
+ * Dismiss vault locked popup for 4 hours if user is logged in, or for 3 days if user is not logged in.
  */
 export async function dismissVaultLockedPopup(): Promise<void> {
-  // First check if user is logged in but vault is locked, or not logged in at all
+  // First check if user is logged in or not.
   const authStatus = await sendMessage('CHECK_AUTH_STATUS', {}, 'background') as { isLoggedIn: boolean, isVaultLocked: boolean };
 
-  if (authStatus.isLoggedIn && authStatus.isVaultLocked) {
-    // User is logged in but vault is locked - dismiss for 4 hours
+  if (authStatus.isLoggedIn) {
+    // User is logged in - dismiss for 4 hours
     const fourHoursFromNow = Date.now() + (4 * 60 * 60 * 1000);
     await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, fourHoursFromNow);
-  } else if (!authStatus.isLoggedIn) {
+  } else {
     // User is not logged in - dismiss for 3 days
     const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
     await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, threeDaysFromNow);
