@@ -5,19 +5,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Main.Pages.Settings.ImportExport.Models;
+namespace AliasVault.ImportExport.Models;
 
 /// <summary>
-/// Represents a credential in an intermediary format for importing from various sources.
+/// Represents a credential in an intermediary format that is imported from various sources.
 /// This model is designed to be flexible enough to handle different import formats while
 /// maintaining all the essential fields needed for AliasVault credentials.
 /// </summary>
-public class ImportCredential
+public class ImportedCredential
 {
     /// <summary>
     /// Gets or sets the service name (e.g., "Facebook", "Gmail").
     /// </summary>
-    public string ServiceName { get; set; } = string.Empty;
+    public string? ServiceName { get; set; }
 
     /// <summary>
     /// Gets or sets the service URL.
@@ -27,12 +27,12 @@ public class ImportCredential
     /// <summary>
     /// Gets or sets the username or email.
     /// </summary>
-    public string Username { get; set; } = string.Empty;
+    public string? Username { get; set; }
 
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
-    public string Password { get; set; } = string.Empty;
+    public string? Password { get; set; }
 
     /// <summary>
     /// Gets or sets the email address.
