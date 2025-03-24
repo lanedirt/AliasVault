@@ -1,24 +1,41 @@
 @inject ILogger<ImportServiceKeePass> Logger
+@using AliasVault.Client.Main.Pages.Settings.ImportExport.Models
 
 <ImportServiceCard
     ServiceName="KeePass"
     Description="Import passwords from your KeePass vault"
     LogoUrl="img/importers/keepass.svg"
     OnImportComplete="RefreshVault"
->
+    @ref="_importServiceCard">
     <div class="mb-4">
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your KeePass export filess:</p>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your KeePass export file:</p>
     </div>
     <InputFile OnChange="HandleFileUpload" />
 </ImportServiceCard>
 
 @code {
+    private ImportServiceCard _importServiceCard = null!;
+
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
-        // KeePass specific file upload and parsing logic
-        await Task.Delay(500);
         Logger.LogInformation($"Processing KeePass file: {e.File.Name}");
 
+        await Task.Delay(500);
+
+        // TODO: Implement actual KeePass file parsing
+        // For now, return a sample credential
+        var importCredentials = new List<ImportCredential>
+        {
+            new()
+            {
+                ServiceName = "Sample Service",
+                Username = "sample_user",
+                Password = "sample_password",
+                Notes = "Imported from KeePass"
+            }
+        };
+
+        _importServiceCard.SetImportedCredentials(importCredentials);
     }
 
     private void RefreshVault()

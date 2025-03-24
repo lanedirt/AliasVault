@@ -1,5 +1,8 @@
 @inject ILogger<ImportServiceCard> Logger
 @inject IJSRuntime JSRuntime
+@inject CredentialService CredentialService
+@inject DbService DbService
+@using AliasVault.Client.Main.Pages.Settings.ImportExport.Models
 
 <div class="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
     <div class="flex items-center mb-3">
@@ -56,19 +59,34 @@
 }
 
 @code {
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
     public string ServiceName { get; set; } = string.Empty;
 
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
     public string Description { get; set; } = string.Empty;
 
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
     public string LogoUrl { get; set; } = string.Empty;
 
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
     public EventCallback OnImportComplete { get; set; }
 
-    protected bool IsModalOpen { get; set; } = false;
+    private bool IsModalOpen { get; set; } = false;
+    private bool IsImporting { get; set; } = false;
+    private string? ImportErrorMessage { get; set; }
+    private string? ImportSuccessMessage { get; set; }
 
     /// <summary>
     /// Child content which is shown in the modal popup. This can contain custom instructions.
@@ -76,21 +94,114 @@
     [Parameter]
     public RenderFragment ChildContent { get; set; } = default!;
 
+    /// <summary>
+    /// The imported credentials.
+    /// </summary>
+    private List<ImportCredential> ImportedCredentials { get; set; } = new();
+
+    /// <summary>
+    /// Sets the imported credentials.
+    /// </summary>
+    /// <param name="importedCredentials">The imported credentials.</param>
+    public void SetImportedCredentials(List<ImportCredential> importedCredentials)
+    {
+        ImportedCredentials = importedCredentials;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual void OpenImportModal()
     {
         IsModalOpen = true;
         StateHasChanged();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual void CloseModal()
     {
         IsModalOpen = false;
+        ImportErrorMessage = null;
+        ImportSuccessMessage = null;
         StateHasChanged();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual async Task HandleModalConfirm()
     {
-        // Base implementation - may be overridden by derived components
+        if (IsImporting)
+        {
+            return;
+        }
+
+        IsImporting = true;
+        ImportErrorMessage = null;
+        ImportSuccessMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            // Convert imported credentials to AliasVault format and save them
+            foreach (var importedCredential in ImportedCredentials)
+            {
+                var credential = new Credential
+                {
+                    Service = new Service { Name = importedCredential.ServiceName, Url = importedCredential.ServiceUrl },
+                    Username = importedCredential.Username,
+                    Passwords = new List<Password> { new() { Value = importedCredential.Password } },
+                    Notes = importedCredential.Notes,
+                    CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
+                    UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow
+                };
+
+                credential.Alias = new Alias
+                {
+                    CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
+                    UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow,
+                };
+
+                if (!string.IsNullOrEmpty(importedCredential.Email))
+                {
+                    credential.Alias = new Alias { Email = importedCredential.Email };
+                }
+
+                if (!string.IsNullOrEmpty(importedCredential.TwoFactorSecret))
+                {
+                    credential.TotpCodes = new List<TotpCode>
+                    {
+                        new() { SecretKey = importedCredential.TwoFactorSecret }
+                    };
+                }
+
+                await CredentialService.InsertEntryAsync(credential, false);
+            }
+
+            // Save the database
+            var success = await DbService.SaveDatabaseAsync();
+            if (success)
+            {
+                ImportSuccessMessage = $"Successfully imported {ImportedCredentials.Count} credentials.";
+            }
+            else
+            {
+                ImportErrorMessage = "Error saving database.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error importing credentials");
+            ImportErrorMessage = $"Error importing credentials: {ex.Message}";
+        }
+        finally
+        {
+            IsImporting = false;
+            StateHasChanged();
+        }
+
         await OnImportComplete.InvokeAsync();
         CloseModal();
     }
