@@ -82,7 +82,7 @@
       <ProjectReference Include="..\Shared\AliasVault.Shared.Core\AliasVault.Shared.Core.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.Shared\AliasVault.Shared.csproj" />
       <ProjectReference Include="..\Utilities\Cryptography\AliasVault.Cryptography.Client\AliasVault.Cryptography.Client.csproj" />
-      <ProjectReference Include="..\Utilities\AliasVault.CsvImportExport\AliasVault.CsvImportExport.csproj" />
+      <ProjectReference Include="..\Utilities\AliasVault.ImportExport\AliasVault.ImportExport.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.FaviconExtractor\AliasVault.FaviconExtractor.csproj" />
       <ProjectReference Include="..\Utilities\AliasVault.TotpGenerator\AliasVault.TotpGenerator.csproj" />
       <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
