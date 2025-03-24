@@ -161,51 +161,53 @@ export function injectIcon(input: HTMLInputElement, container: HTMLElement): voi
  * Trigger input events for an element to trigger form validation
  * which some websites require before the "continue" button is enabled.
  */
-function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement) : void {
-  // Create an overlay div that will show the highlight effect
-  const overlay = document.createElement('div');
+function triggerInputEvents(element: HTMLInputElement | HTMLSelectElement, animate: boolean = true) : void {
+  // Add keyframe animation if animation is requested
+  if (animate) {
+    // Create an overlay div that will show the highlight effect
+    const overlay = document.createElement('div');
 
-  /**
-   * Update position of the overlay.
-   */
-  const updatePosition = () : void => {
-    const rect = element.getBoundingClientRect();
-    overlay.style.cssText = `
-      position: fixed;
-      z-index: 999999991;
-      pointer-events: none;
-      top: ${rect.top}px;
-      left: ${rect.left}px;
-      width: ${rect.width}px;
-      height: ${rect.height}px;
-      background-color: rgba(244, 149, 65, 0.3);
-      border-radius: ${getComputedStyle(element).borderRadius};
-      animation: fadeOut 1.4s ease-out forwards;
+    /**
+     * Update position of the overlay.
+     */
+    const updatePosition = () : void => {
+      const rect = element.getBoundingClientRect();
+      overlay.style.cssText = `
+        position: fixed;
+        z-index: 999999991;
+        pointer-events: none;
+        top: ${rect.top}px;
+        left: ${rect.left}px;
+        width: ${rect.width}px;
+        height: ${rect.height}px;
+        background-color: rgba(244, 149, 65, 0.3);
+        border-radius: ${getComputedStyle(element).borderRadius};
+        animation: fadeOut 1.4s ease-out forwards;
+      `;
+    };
+
+    updatePosition();
+
+    // Add scroll event listener
+    window.addEventListener('scroll', updatePosition);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        0% { opacity: 1; transform: scale(1.02); }
+        100% { opacity: 0; transform: scale(1); }
+      }
     `;
-  };
+    document.head.appendChild(style);
+    document.body.appendChild(overlay);
 
-  updatePosition();
-
-  // Add scroll event listener
-  window.addEventListener('scroll', updatePosition);
-
-  // Add keyframe animation
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes fadeOut {
-      0% { opacity: 1; transform: scale(1.02); }
-      100% { opacity: 0; transform: scale(1); }
-    }
-  `;
-  document.head.appendChild(style);
-  document.body.appendChild(overlay);
-
-  // Remove overlay and cleanup after animation
-  setTimeout(() => {
-    window.removeEventListener('scroll', updatePosition);
-    overlay.remove();
-    style.remove();
-  }, 1400);
+    // Remove overlay and cleanup after animation
+    setTimeout(() => {
+      window.removeEventListener('scroll', updatePosition);
+      overlay.remove();
+      style.remove();
+    }, 1400);
+  }
 
   // Trigger events
   element.dispatchEvent(new Event('input', { bubbles: true }));
