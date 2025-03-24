@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Generators;
+namespace AliasVault.UnitTests.Generators;
 
 using System.Net.Mail;
 using AliasVault.Generators.Identity.Implementations.Factories;

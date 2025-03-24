@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
-        <RootNamespace>AliasVault.Tests</RootNamespace>
+        <RootNamespace>AliasVault.UnitTests</RootNamespace>
         <LangVersion>13</LangVersion>
     </PropertyGroup>
 
@@ -58,6 +58,13 @@
         <ProjectReference Include="..\..\Utilities\AliasVault.ImportExport\AliasVault.ImportExport.csproj" />
         <ProjectReference Include="..\..\Utilities\AliasVault.FaviconExtractor\AliasVault.FaviconExtractor.csproj" />
         <ProjectReference Include="..\..\Utilities\AliasVault.TotpGenerator\AliasVault.TotpGenerator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="TestData\Exports\bitwarden.csv" />
+      <EmbeddedResource Include="TestData\Exports\bitwarden.csv" />
+      <None Remove="TestData\Exports\keepass.kdbx.csv" />
+      <EmbeddedResource Include="TestData\Exports\keepass.kdbx.csv" />
     </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.E2ETests.Common;
+namespace AliasVault.UnitTests.Common;
 
 using System.IO;
 using System.Reflection;

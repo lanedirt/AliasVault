@@ -5,7 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Tests.Vault.RetentionManager;
+namespace AliasVault.UnitTests.Vault.RetentionManager;
 
 using AliasServerDb;
 using AliasVault.Api.Vault;
