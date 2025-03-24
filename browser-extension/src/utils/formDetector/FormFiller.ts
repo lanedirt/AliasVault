@@ -11,8 +11,13 @@ export class FormFiller {
    */
   public constructor(
     private readonly form: FormFields,
-    private readonly triggerInputEvents: (element: HTMLInputElement | HTMLSelectElement) => void
-  ) {}
+    private readonly triggerInputEvents: (element: HTMLInputElement | HTMLSelectElement, animate?: boolean) => void
+  ) {
+    /**
+     * Trigger input events.
+     */
+    this.triggerInputEvents = (element: HTMLInputElement | HTMLSelectElement, animate = true) : void => triggerInputEvents(element, animate);
+  }
 
   /**
    * Fill the fields of the form with the given credential.
@@ -72,7 +77,7 @@ export class FormFiller {
 
   /**
    * Fill the password field with the given password. This uses a small delay between each character to simulate human typing.
-   * In the past there have been issues where Microsoft 365 login forms would clear the password field when just setting the value directly.
+   * Simulates actual keystroke behavior by appending characters one by one.
    *
    * @param field The password field to fill.
    * @param password The password to fill the field with.
@@ -80,14 +85,17 @@ export class FormFiller {
   private async fillPasswordField(field: HTMLInputElement, password: string): Promise<void> {
     // Clear the field first
     field.value = '';
-    this.triggerInputEvents(field);
+    this.triggerInputEvents(field, false);
 
     // Type each character with a small delay
-    for (let i = 0; i < password.length; i++) {
-      field.value = password.substring(0, i + 1);
+    for (const char of password) {
+      // Append the character to the current value instead of using substring
+      field.value += char;
       // Small random delay between 5-15ms to simulate human typing
       await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 5));
     }
+
+    this.triggerInputEvents(field, false);
   }
 
   /**
