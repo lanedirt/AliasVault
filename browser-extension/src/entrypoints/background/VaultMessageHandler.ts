@@ -21,7 +21,7 @@ export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, i
   const vaultData = await storage.getItem('session:encryptedVault');
 
   const isLoggedIn = username !== null && accessToken !== null;
-  const isVaultLocked = isLoggedIn && vaultData !== null;
+  const isVaultLocked = isLoggedIn && vaultData === null;
 
   return {
     isLoggedIn,
