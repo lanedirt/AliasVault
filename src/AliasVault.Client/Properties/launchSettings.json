@@ -17,7 +17,7 @@
             "applicationUrl": "http://localhost:5067",
             "environmentVariables": {
                 "DOTNET_MODIFIABLE_ASSEMBLIES": "debug",
-                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_ENVIRONMENT": "Development"
             }
         },
         "http-release": {
