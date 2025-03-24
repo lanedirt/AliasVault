@@ -2,6 +2,7 @@
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject DbService DbService
+@using AliasVault.ImportExport.Importers
 @using AliasVault.ImportExport.Models
 
 <div class="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -145,39 +146,11 @@
 
         try
         {
-            // Convert imported credentials to AliasVault format and save them
-            foreach (var importedCredential in ImportedCredentials)
+            // Convert imported credentials to AliasVault format and insert them to the database.
+            var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
+            foreach (var credential in credentials)
             {
-                var credential = new Credential
-                {
-                    Service = new Service { Name = importedCredential.ServiceName, Url = importedCredential.ServiceUrl },
-                    Username = importedCredential.Username,
-                    Passwords = new List<Password> { new() { Value = importedCredential.Password } },
-                    Notes = importedCredential.Notes,
-                    CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow
-                };
-
-                credential.Alias = new Alias
-                {
-                    CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow,
-                };
-
-                if (!string.IsNullOrEmpty(importedCredential.Email))
-                {
-                    credential.Alias = new Alias { Email = importedCredential.Email };
-                }
-
-                if (!string.IsNullOrEmpty(importedCredential.TwoFactorSecret))
-                {
-                    credential.TotpCodes = new List<TotpCode>
-                    {
-                        new() { SecretKey = importedCredential.TwoFactorSecret }
-                    };
-                }
-
-                await CredentialService.InsertEntryAsync(credential, false);
+                await CredentialService.InsertEntryAsync(credential, false, false);
             }
 
             // Save the database
