@@ -1,3 +1,4 @@
+@using AliasVault.ImportExport.Importers
 @inject ILogger<ImportServiceBitwarden> Logger
 
 <ImportServiceCard
@@ -5,19 +6,33 @@
     Description="Import passwords from your Bitwarden vault"
     LogoUrl="img/importers/bitwarden.svg"
     OnImportComplete="RefreshVault"
->
+    @ref="_importServiceCard">
     <div class="mb-4">
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your Bitwarden JSON export file:</p>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your Bitwarden CSV export file:</p>
     </div>
     <InputFile OnChange="HandleFileUpload" />
 </ImportServiceCard>
 
 @code {
+    private ImportServiceCard _importServiceCard = null!;
+
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
         // Bitwarden specific file upload and parsing logic
-        await Task.Delay(500);
-        Logger.LogInformation($"Processing Bitwarden file: {e.File.Name}");
+        try
+        {
+            await using var stream = e.File.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            var fileContents = await reader.ReadToEndAsync();
+
+            var importCredentials = await BitwardenImporter.ImportFromCsvAsync(fileContents);
+            _importServiceCard.SetImportedCredentials(importCredentials);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error processing KeePass CSV file");
+            throw;
+        }
     }
 
     private void RefreshVault()
