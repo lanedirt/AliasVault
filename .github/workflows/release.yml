@@ -59,7 +59,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-docker:
-    needs: [upload-install-script, build-browser-extensions]
+    needs: [upload-install-script, package-browser-extensions]
     runs-on: ubuntu-latest
     permissions:
       contents: read
