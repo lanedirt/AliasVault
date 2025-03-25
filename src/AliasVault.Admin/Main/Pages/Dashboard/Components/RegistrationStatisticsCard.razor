@@ -22,8 +22,8 @@
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days7.ToString("N0")</h4>
             </div>
             <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days14.ToString("N0")</h4>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 30 days</p>
+                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days30.ToString("N0")</h4>
             </div>
         </div>
     }
@@ -45,7 +45,7 @@
         var hours24 = now.AddHours(-24);
         var days3 = now.AddDays(-3);
         var days7 = now.AddDays(-7);
-        var days14 = now.AddDays(-14);
+        var days30 = now.AddDays(-30);
 
         // Get registration statistics
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -55,7 +55,7 @@
             Hours24 = await registrationQuery.CountAsync(u => u.CreatedAt >= hours24),
             Days3 = await registrationQuery.CountAsync(u => u.CreatedAt >= days3),
             Days7 = await registrationQuery.CountAsync(u => u.CreatedAt >= days7),
-            Days14 = await registrationQuery.CountAsync(u => u.CreatedAt >= days14)
+            Days30 = await registrationQuery.CountAsync(u => u.CreatedAt >= days30)
         };
 
         IsLoading = false;
@@ -67,6 +67,6 @@
         public int Hours24 { get; set; }
         public int Days3 { get; set; }
         public int Days7 { get; set; }
-        public int Days14 { get; set; }
+        public int Days30 { get; set; }
     }
 }
