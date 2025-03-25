@@ -2,6 +2,7 @@
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject DbService DbService
+@inject NavigationManager NavigationManager
 @using AliasVault.ImportExport.Importers
 @using AliasVault.ImportExport.Models
 
@@ -53,13 +54,70 @@
                     }
                     else
                     {
-                        @ChildContent
-                    }
+                        @switch (CurrentStep)
+                        {
+                            case ImportStep.FileUpload:
+                                @if (!string.IsNullOrEmpty(ImportError))
+                                {
+                                    <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                                        @ImportError
+                                    </div>
+                                }
+                                <div class="mb-4">
+                                    @ChildContent
+                                </div>
+                                <div class="flex justify-end mt-6 space-x-2">
+                                    <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
+                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                                </div>
+                                break;
 
-                    <div class="flex justify-end mt-6 space-x-2">
-                        <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
-                        <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
-                    </div>
+                            case ImportStep.Preview:
+                                <div class="mb-4">
+                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Check if the credentials are correct before importing:</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Username</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                                @foreach (var credential in ImportedCredentials.Take(10))
+                                                {
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.ServiceName</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.Username</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@(new string('*', credential.Password?.Length ?? 0))</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                        @if (ImportedCredentials.Count > 10)
+                                        {
+                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 10) more credentials</p>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="flex justify-end mt-6 space-x-2">
+                                    <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
+                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                                </div>
+                                break;
+
+                            case ImportStep.Confirm:
+                                <div class="mb-4">
+                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Are you sure you want to import @ImportedCredentials.Count credentials?</p>
+                                </div>
+                                <div class="flex justify-end mt-6 space-x-2">
+                                    <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
+                                    <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
+                                </div>
+                                break;
+                        }
+                    }
                 </div>
             </div>
         </ModalWrapper>
@@ -67,6 +125,13 @@
 }
 
 @code {
+    private enum ImportStep
+    {
+        FileUpload,
+        Preview,
+        Confirm
+    }
+
     /// <summary>
     ///
     /// </summary>
@@ -96,8 +161,9 @@
 
     private bool IsModalOpen { get; set; } = false;
     private bool IsImporting { get; set; } = false;
-    private string? ImportErrorMessage { get; set; }
+    private string? ImportError { get; set; }
     private string? ImportSuccessMessage { get; set; }
+    private ImportStep CurrentStep { get; set; } = ImportStep.FileUpload;
 
     /// <summary>
     /// Child content which is shown in the modal popup. This can contain custom instructions.
@@ -125,6 +191,7 @@
     protected virtual void OpenImportModal()
     {
         IsModalOpen = true;
+        CurrentStep = ImportStep.FileUpload;
         StateHasChanged();
     }
 
@@ -134,8 +201,50 @@
     protected virtual void CloseModal()
     {
         IsModalOpen = false;
-        ImportErrorMessage = null;
+        CurrentStep = ImportStep.FileUpload;
+        ImportError = null;
         ImportSuccessMessage = null;
+        ImportedCredentials.Clear();
+        StateHasChanged();
+    }
+
+    protected virtual async Task HandleNextStep()
+    {
+        if (CurrentStep == ImportStep.FileUpload)
+        {
+            try
+            {
+                ImportError = null;
+                await OnImportConfirmed.InvokeAsync();
+                if (ImportedCredentials.Count > 0)
+                {
+                    CurrentStep = ImportStep.Preview;
+                }
+            }
+            catch (Exception ex)
+            {
+                ImportError = ex.Message;
+                Logger.LogError(ex, "Error during import confirmation");
+                StateHasChanged();
+            }
+        }
+        else if (CurrentStep == ImportStep.Preview)
+        {
+            CurrentStep = ImportStep.Confirm;
+        }
+        StateHasChanged();
+    }
+
+    protected virtual void HandlePreviousStep()
+    {
+        if (CurrentStep == ImportStep.Confirm)
+        {
+            CurrentStep = ImportStep.Preview;
+        }
+        else if (CurrentStep == ImportStep.Preview)
+        {
+            CurrentStep = ImportStep.FileUpload;
+        }
         StateHasChanged();
     }
 
@@ -150,15 +259,12 @@
         }
 
         IsImporting = true;
-        ImportErrorMessage = null;
+        ImportError = null;
         ImportSuccessMessage = null;
         StateHasChanged();
 
         try
         {
-            // Call the OnImportConfirmed callback first
-            await OnImportConfirmed.InvokeAsync();
-
             // Convert imported credentials to AliasVault format and insert them to the database.
             var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
             foreach (var credential in credentials)
@@ -171,24 +277,23 @@
             if (success)
             {
                 ImportSuccessMessage = $"Successfully imported {ImportedCredentials.Count} credentials.";
+                await OnImportComplete.InvokeAsync();
+                NavigationManager.NavigateTo("/credentials");
             }
             else
             {
-                ImportErrorMessage = "Error saving database.";
+                ImportError = "Error saving database.";
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error importing credentials");
-            ImportErrorMessage = $"Error importing credentials: {ex.Message}";
+            ImportError = $"Error importing credentials: {ex.Message}";
         }
         finally
         {
             IsImporting = false;
             StateHasChanged();
         }
-
-        await OnImportComplete.InvokeAsync();
-        CloseModal();
     }
 }
