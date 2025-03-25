@@ -1,4 +1,6 @@
 @using AliasVault.ImportExport.Importers
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
 @inject ILogger<ImportServiceBitwarden> Logger
 
 <ImportServiceCard
@@ -6,6 +8,7 @@
     Description="Import passwords from your Bitwarden vault"
     LogoUrl="img/importers/bitwarden.svg"
     OnImportComplete="RefreshVault"
+    OnImportConfirmed="ProcessFile"
     @ref="_importServiceCard">
     <div class="mb-4">
         <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your Bitwarden CSV export file:</p>
@@ -16,12 +19,27 @@
 @code {
     private ImportServiceCard _importServiceCard = null!;
 
-    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+     private IBrowserFile? _selectedFile;
+
+    private void HandleFileUpload(InputFileChangeEventArgs e)
     {
-        // Bitwarden specific file upload and parsing logic
+        Logger.LogInformation($"File selected: {e.File.Name}");
+        _selectedFile = e.File;
+    }
+
+    private async Task ProcessFile()
+    {
+        if (_selectedFile == null)
+        {
+            Logger.LogWarning("No file selected for import");
+            return;
+        }
+
+        Logger.LogInformation($"Processing KeePass file: {_selectedFile.Name}");
+
         try
         {
-            await using var stream = e.File.OpenReadStream();
+            await using var stream = _selectedFile.OpenReadStream();
             using var reader = new StreamReader(stream);
             var fileContents = await reader.ReadToEndAsync();
 
@@ -34,10 +52,9 @@
             throw;
         }
     }
-
     private void RefreshVault()
     {
-        // Refresh the vault
-        // ...
+        GlobalNotificationService.AddSuccessMessage("Bitwarden CSV import successful!");
+        NavigationManager.NavigateTo("/credentials");
     }
 }

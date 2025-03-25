@@ -47,7 +47,14 @@
                         </button>
                     </div>
 
-                    @ChildContent
+                    @if (IsImporting)
+                    {
+                        <LoadingIndicator />
+                    }
+                    else
+                    {
+                        @ChildContent
+                    }
 
                     <div class="flex justify-end mt-6 space-x-2">
                         <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
@@ -83,6 +90,9 @@
     /// </summary>
     [Parameter]
     public EventCallback OnImportComplete { get; set; }
+
+    [Parameter]
+    public EventCallback OnImportConfirmed { get; set; }
 
     private bool IsModalOpen { get; set; } = false;
     private bool IsImporting { get; set; } = false;
@@ -146,6 +156,9 @@
 
         try
         {
+            // Call the OnImportConfirmed callback first
+            await OnImportConfirmed.InvokeAsync();
+
             // Convert imported credentials to AliasVault format and insert them to the database.
             var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
             foreach (var credential in credentials)
