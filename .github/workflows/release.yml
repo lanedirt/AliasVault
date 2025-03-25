@@ -1,5 +1,4 @@
-# This workflow will publish new Docker images to the GitHub Container Registry when a new release is published.
-name: Publish Docker Images
+name: Release
 
 on:
   release:
@@ -11,7 +10,56 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  upload-install-script:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload install.sh to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: install.sh
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  package-browser-extensions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: browser-extension
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: browser-extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Zip extensions
+        run: |
+          npm run zip:chrome
+          npm run zip:firefox
+          npm run zip:edge
+
+      - name: Upload extensions to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/aliasvault-browser-extension-*-chrome.zip
+            dist/aliasvault-browser-extension-*-firefox.zip
+            dist/aliasvault-browser-extension-*-edge.zip
+            dist/aliasvault-browser-extension-*-sources.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-push-docker:
+    needs: [upload-install-script, build-browser-extensions]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -114,4 +162,4 @@ jobs:
           file: src/Utilities/AliasVault.InstallCli/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }} 
