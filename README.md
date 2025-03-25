@@ -108,7 +108,7 @@ AliasVault is under active development with new features being added regularly. 
 - [x] Firefox and MS Edge browser extension
 - [x] Safari and Brave browser extension
 - [x] Add and associate TOTP MFA tokens to credentials
-- [ ] Add GUI to allow customizing password generation options (length, special chars etc.) (https://github.com/lanedirt/AliasVault/issues/167)
+- [x] Add GUI to allow customizing password generation options (length, special chars etc.) (https://github.com/lanedirt/AliasVault/issues/167)
 - [ ] Import passwords from existing password managers (https://github.com/lanedirt/AliasVault/issues/542)
 - [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
 
