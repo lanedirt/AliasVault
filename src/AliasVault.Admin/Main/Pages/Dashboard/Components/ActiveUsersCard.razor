@@ -1,11 +1,6 @@
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total active users</h3>
-        <button
-            @onclick="ToggleUserNames"
-            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-            @(ShowUserNames ? "Hide names" : "Show names")
-        </button>
     </div>
     @if (IsLoading)
     {
@@ -16,63 +11,31 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last24Hours</h4>
-                @if (ShowUserNames)
-                {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        <ul>
-                            @foreach (var user in UserStats.Last24HourUsers)
-                            {
-                                <li>@user</li>
-                            }
-                        </ul>
-                    </div>
-                }
+                <div class="flex items-baseline gap-2">
+                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last24Hours</h4>
+                    <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast24Hours)</span>
+                </div>
             </div>
             <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last3Days</h4>
-                @if (ShowUserNames)
-                {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        <ul>
-                            @foreach (var user in UserStats.Last3DayUsers)
-                            {
-                                <li>@user</li>
-                            }
-                        </ul>
-                    </div>
-                }
+                <div class="flex items-baseline gap-2">
+                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last3Days</h4>
+                    <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast3Days)</span>
+                </div>
             </div>
             <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last7Days</h4>
-                @if (ShowUserNames)
-                {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        <ul>
-                            @foreach (var user in UserStats.Last7DayUsers)
-                            {
-                                <li>@user</li>
-                            }
-                        </ul>
-                    </div>
-                }
+                <div class="flex items-baseline gap-2">
+                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last7Days</h4>
+                    <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast7Days)</span>
+                </div>
             </div>
             <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 14 days</p>
-                <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last14Days</h4>
-                @if (ShowUserNames)
-                {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        <ul>
-                            @foreach (var user in UserStats.Last14DayUsers)
-                            {
-                                <li>@user</li>
-                            }
-                        </ul>
-                    </div>
-                }
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 30 days</p>
+                <div class="flex items-baseline gap-2">
+                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last30Days</h4>
+                    <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users (activity 24h after registration)">(@UserStats.ReturningLast30Days)</span>
+                </div>
             </div>
         </div>
     }
@@ -81,7 +44,6 @@
 @code {
     private bool IsLoading { get; set; } = true;
     private UserStatistics UserStats { get; set; } = new();
-    private bool ShowUserNames { get; set; }
 
     /// <summary>
     /// Refreshes the data displayed on the card.
@@ -95,50 +57,56 @@
         var last24Hours = now.AddHours(-24);
         var last3Days = now.AddDays(-3);
         var last7Days = now.AddDays(-7);
-        var last14Days = now.AddDays(-14);
+        var last30Days = now.AddDays(-30);
 
         // Get user statistics
-        var (count24h, users24h) = await GetActiveUserCount(last24Hours);
-        var (count3d, users3d) = await GetActiveUserCount(last3Days);
-        var (count7d, users7d) = await GetActiveUserCount(last7Days);
-        var (count14d, users14d) = await GetActiveUserCount(last14Days);
+        var (count24h, returning24h) = await GetActiveUserCount(last24Hours);
+        var (count3d, returning3d) = await GetActiveUserCount(last3Days);
+        var (count7d, returning7d) = await GetActiveUserCount(last7Days);
+        var (count30d, returning30d) = await GetActiveUserCount(last30Days);
 
         UserStats = new UserStatistics
         {
             Last24Hours = count24h,
             Last3Days = count3d,
             Last7Days = count7d,
-            Last14Days = count14d,
-            Last24HourUsers = users24h,
-            Last3DayUsers = users3d,
-            Last7DayUsers = users7d,
-            Last14DayUsers = users14d
+            Last30Days = count30d,
+            ReturningLast24Hours = returning24h,
+            ReturningLast3Days = returning3d,
+            ReturningLast7Days = returning7d,
+            ReturningLast30Days = returning30d,
         };
 
         IsLoading = false;
         StateHasChanged();
     }
 
-    private async Task<(int count, List<string> users)> GetActiveUserCount(DateTime since)
+    private async Task<(int totalCount, int returningCount)> GetActiveUserCount(DateTime since)
     {
-        // Get unique users who:
-        // 1. Have successful auth logs
-        // 2. Are not the admin user
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
+        // Get all active users for the period
         var activeUsers = await dbContext.AuthLogs
             .Where(l => l.Timestamp >= since && l.IsSuccess && l.Username != "admin")
             .Select(l => l.Username)
             .Distinct()
             .ToListAsync();
 
-        return (activeUsers.Count, activeUsers);
-    }
+        // Get returning users (those who have activity at least 24h after registration
+        var returningUsers = await dbContext.AuthLogs
+            .Where(l => l.Timestamp >= since && l.IsSuccess && l.Username != "admin")
+            .Join(
+                dbContext.AliasVaultUsers,
+                log => log.Username,
+                user => user.UserName,
+                (log, user) => new { log, user }
+            )
+            .Where(x => x.log.Timestamp >= x.user.CreatedAt.AddHours(24))
+            .Select(x => x.log.Username)
+            .Distinct()
+            .ToListAsync();
 
-    private void ToggleUserNames()
-    {
-        ShowUserNames = !ShowUserNames;
-        StateHasChanged();
+        return (activeUsers.Count, returningUsers.Count);
     }
 
     private sealed class UserStatistics
@@ -146,10 +114,10 @@
         public int Last24Hours { get; set; }
         public int Last3Days { get; set; }
         public int Last7Days { get; set; }
-        public int Last14Days { get; set; }
-        public List<string> Last24HourUsers { get; set; } = new();
-        public List<string> Last3DayUsers { get; set; } = new();
-        public List<string> Last7DayUsers { get; set; } = new();
-        public List<string> Last14DayUsers { get; set; } = new();
+        public int Last30Days { get; set; }
+        public int ReturningLast24Hours { get; set; }
+        public int ReturningLast3Days { get; set; }
+        public int ReturningLast7Days { get; set; }
+        public int ReturningLast30Days { get; set; }
     }
 }
