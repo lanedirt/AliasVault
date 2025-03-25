@@ -71,7 +71,7 @@ public static class FaviconExtractor
         var favicons = faviconNodes
             .Select(node => new
             {
-                Url = node.GetAttributeValue("href", null),
+                Url = node.GetAttributeValue("href", string.Empty),
                 Size = GetFaviconSize(node.GetAttributeValue("sizes", "0x0")),
             })
             .Where(favicon => !string.IsNullOrEmpty(favicon.Url))
