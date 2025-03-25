@@ -24,7 +24,7 @@ Follow the steps in the checklist below to prepare a new release.
 
 ## Docker Images
 If docker containers have been added or removed:
-- [ ] Verify that `.github/workflows/publish-docker-images.yml` contains references to all docker images that need to be published.
+- [ ] Verify that `.github/workflows/release.yml` contains references to all docker images that need to be published.
 - [ ] Update `install.sh` and verify that the `images=()` array that takes care of pulling the images from the GitHub Container Registry is updated.
 
 ## Manual Testing (since v0.10.0+)

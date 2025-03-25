@@ -1,5 +1,5 @@
 #!/bin/bash
-# @version 0.12.2
+# @version 0.15.0
 
 # Repository information used for downloading files and images from GitHub
 REPO_OWNER="lanedirt"
@@ -1545,7 +1545,7 @@ handle_install_version() {
                 printf "${GREEN}> Install script updated successfully.${NC}\n"
                 printf "${GREEN}> Backup of previous version saved as install.sh.backup${NC}\n"
                 printf "${YELLOW}> Please run the same install command again to continue with the installation.${NC}\n"
-                exit 0
+                exit 2
             else
                 printf "${RED}> Failed to update install script. Continuing with current version.${NC}\n"
                 mv "install.sh.backup" "install.sh"
