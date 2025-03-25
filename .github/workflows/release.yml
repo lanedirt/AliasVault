@@ -52,10 +52,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/aliasvault-browser-extension-*-chrome.zip
-            dist/aliasvault-browser-extension-*-firefox.zip
-            dist/aliasvault-browser-extension-*-edge.zip
-            dist/aliasvault-browser-extension-*-sources.zip
+            browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
+            browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
+            browser-extension/dist/aliasvault-browser-extension-*-edge.zip
+            browser-extension/dist/aliasvault-browser-extension-*-sources.zip
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-docker:
