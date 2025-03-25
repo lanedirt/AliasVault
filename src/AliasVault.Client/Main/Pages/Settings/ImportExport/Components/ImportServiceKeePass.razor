@@ -1,4 +1,6 @@
 @inject ILogger<ImportServiceKeePass> Logger
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
 @using AliasVault.ImportExport.Importers
 
 <ImportServiceCard
@@ -6,6 +8,7 @@
     Description="Import passwords from your KeePass vault"
     LogoUrl="img/importers/keepass.svg"
     OnImportComplete="RefreshVault"
+    OnImportConfirmed="ProcessFile"
     @ref="_importServiceCard">
     <div class="mb-4">
         <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your KeePass export file:</p>
@@ -15,14 +18,27 @@
 
 @code {
     private ImportServiceCard _importServiceCard = null!;
+    private IBrowserFile? _selectedFile;
 
-    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    private void HandleFileUpload(InputFileChangeEventArgs e)
     {
-        Logger.LogInformation($"Processing KeePass file: {e.File.Name}");
+        Logger.LogInformation($"File selected: {e.File.Name}");
+        _selectedFile = e.File;
+    }
+
+    private async Task ProcessFile()
+    {
+        if (_selectedFile == null)
+        {
+            Logger.LogWarning("No file selected for import");
+            return;
+        }
+
+        Logger.LogInformation($"Processing KeePass file: {_selectedFile.Name}");
 
         try
         {
-            await using var stream = e.File.OpenReadStream();
+            await using var stream = _selectedFile.OpenReadStream();
             using var reader = new StreamReader(stream);
             var fileContents = await reader.ReadToEndAsync();
 
@@ -34,12 +50,11 @@
             Logger.LogError(ex, "Error processing KeePass CSV file");
             throw;
         }
-
     }
 
     private void RefreshVault()
     {
-        // Refresh the vault
-        // ...
+        GlobalNotificationService.AddSuccessMessage("KeePass CSV import successful!");
+        NavigationManager.NavigateTo("/credentials");
     }
 }
