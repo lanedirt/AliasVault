@@ -8,7 +8,6 @@
     ServiceName="KeePass"
     Description="Import passwords from your KeePass vault"
     LogoUrl="img/importers/keepass.svg"
-    OnImportComplete="RefreshVault"
     ProcessFileCallback="ProcessFile">
 </ImportServiceCard>
 
@@ -16,10 +15,5 @@
     private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await KeePassImporter.ImportFromCsvAsync(fileContents);
-    }
-
-    private void RefreshVault()
-    {
-        GlobalNotificationService.AddSuccessMessage("KeePass CSV import successful!");
     }
 }

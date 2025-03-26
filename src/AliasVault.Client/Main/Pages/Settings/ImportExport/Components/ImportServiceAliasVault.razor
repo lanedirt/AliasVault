@@ -8,7 +8,6 @@
     ServiceName="AliasVault"
     Description="Import passwords from another AliasVault instance or manual back-up"
     LogoUrl="img/logo.svg"
-    OnImportComplete="RefreshVault"
     ProcessFileCallback="ProcessFile">
 </ImportServiceCard>
 
@@ -18,10 +17,5 @@
         // TODO: Implement AliasVault import.
         await Task.Delay(50);
         return new List<ImportedCredential>();
-    }
-
-    private void RefreshVault()
-    {
-        GlobalNotificationService.AddSuccessMessage("AliasVault import successful!");
     }
 }

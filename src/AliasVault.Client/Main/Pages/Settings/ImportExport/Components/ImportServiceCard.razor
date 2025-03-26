@@ -3,6 +3,7 @@
 @inject CredentialService CredentialService
 @inject DbService DbService
 @inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
 @using AliasVault.ImportExport.Importers
 @using AliasVault.ImportExport.Models
 
@@ -37,8 +38,8 @@
 {
     <ClickOutsideHandler OnClose="CloseModal" ContentId="importServiceModal">
         <ModalWrapper OnEnter="HandleModalConfirm">
-            <div id="importServiceModal" class="relative top-20 mx-auto p-5 shadow-lg rounded-md bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-400">
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-auto">
+            <div id="importServiceModal" class="relative top-20 mx-auto p-5 shadow-lg rounded-md bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-400 md:min-w-[32rem]">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-lg w-full mx-auto">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold dark:text-white">Import from @ServiceName</h3>
                         <button @onclick="CloseModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
@@ -46,6 +47,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
+                    </div>
+
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+                        <div class="bg-primary-600 h-2.5 rounded-full transition-all duration-300" style="width: @(GetProgressPercentage())%"></div>
                     </div>
                     @switch (CurrentStep)
                     {
@@ -153,12 +158,6 @@
     /// </summary>
     [Parameter]
     public string LogoUrl { get; set; } = string.Empty;
-
-    /// <summary>
-    ///
-    /// </summary>
-    [Parameter]
-    public EventCallback OnImportComplete { get; set; }
 
     [Parameter]
     public EventCallback OnImportConfirmed { get; set; }
@@ -325,8 +324,7 @@
             var success = await DbService.SaveDatabaseAsync();
             if (success)
             {
-                ImportSuccessMessage = $"Successfully imported {ImportedCredentials.Count} credentials.";
-                await OnImportComplete.InvokeAsync();
+                GlobalNotificationService.AddSuccessMessage($"Successfully imported {ImportedCredentials.Count} credentials.");
                 NavigationManager.NavigateTo("/credentials");
             }
             else
@@ -344,5 +342,14 @@
             IsImporting = false;
             StateHasChanged();
         }
+    }
+
+    /// <summary>
+    /// Calculates the progress percentage based on the current step in the import process.
+    /// </summary>
+    /// <returns>The progress percentage as an integer.</returns>
+    private int GetProgressPercentage()
+    {
+        return (int)CurrentStep * 100 / (Enum.GetValues(typeof(ImportStep)).Length - 1);
     }
 }
