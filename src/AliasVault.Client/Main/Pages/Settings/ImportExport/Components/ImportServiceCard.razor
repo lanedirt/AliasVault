@@ -68,9 +68,10 @@
                             }
 
                             <div class="@(IsImporting ? "hidden" : "")">
-                                <div class="mb-4">
-                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your @ServiceName export file:</p>
-                                    <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600" />
+                                @ChildContent
+                                <div class="mb-4 bg-amber-50 border border-amber-400 dark:bg-amber-800/30 dark:border-amber-500/50 rounded-lg p-4">
+                                    <p class="mb-4 text-gray-700 dark:text-gray-200">Upload your @ServiceName export file:</p>
+                                    <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-primary-900/40 dark:file:text-primary-300 dark:hover:file:bg-primary-800/60" />
                                 </div>
                                 <div class="flex justify-end mt-6 space-x-2">
                                     <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
@@ -310,6 +311,9 @@
         ImportError = null;
         ImportSuccessMessage = null;
         StateHasChanged();
+
+        // Let UI update to start showing the loading indicator as the save database call below can block the UI thread momentarily.
+        await Task.Delay(50);
 
         try
         {
