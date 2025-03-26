@@ -1331,7 +1331,7 @@ handle_update() {
     fi
 
     current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
-    latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
 
     if [ -z "$latest_version" ]; then
         printf "${RED}> Failed to check for updates. Please try again later.${NC}\n"
@@ -1413,7 +1413,7 @@ check_install_script_update() {
     printf "${CYAN}> Checking for install script updates...${NC}\n"
 
     # Get latest release version
-    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
 
     if [ -z "$latest_version" ]; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
@@ -1506,7 +1506,7 @@ handle_install_version() {
 
     # If latest, get actual version number from GitHub API
     if [ "$target_version" = "latest" ]; then
-        local actual_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        local actual_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
         if [ -n "$actual_version" ]; then
             target_version="$actual_version"
         fi
