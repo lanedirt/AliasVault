@@ -47,76 +47,80 @@
                             </svg>
                         </button>
                     </div>
+                    @switch (CurrentStep)
+                    {
+                        case ImportStep.FileUpload:
+                            @if (!string.IsNullOrEmpty(ImportError))
+                            {
+                                <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                                    @ImportError
+                                </div>
+                            }
 
-                    @if (IsImporting)
-                    {
-                        <LoadingIndicator />
-                    }
-                    else
-                    {
-                        @switch (CurrentStep)
-                        {
-                            case ImportStep.FileUpload:
-                                @if (!string.IsNullOrEmpty(ImportError))
-                                {
-                                    <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
-                                        @ImportError
-                                    </div>
-                                }
+                            @if (IsImporting)
+                            {
+                                <LoadingIndicator />
+                            }
+
+                            <div class="@(IsImporting ? "hidden" : "")">
                                 <div class="mb-4">
-                                    @ChildContent
+                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your @ServiceName export file:</p>
+                                    <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600" />
                                 </div>
                                 <div class="flex justify-end mt-6 space-x-2">
                                     <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
-                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
                                 </div>
-                                break;
+                            </div>
+                            break;
 
-                            case ImportStep.Preview:
-                                <div class="mb-4">
-                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Check if the credentials are correct before importing:</p>
-                                    <div class="overflow-x-auto">
-                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                                <tr>
-                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
-                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Username</th>
-                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                                @foreach (var credential in ImportedCredentials.Take(10))
-                                                {
-                                                    <tr>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.ServiceName</td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.Username</td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@(new string('*', credential.Password?.Length ?? 0))</td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                        @if (ImportedCredentials.Count > 10)
+                        case ImportStep.Preview:
+                            <div class="mb-4">
+                                <p class="mb-4 text-gray-700 dark:text-gray-300">Check if the following detected credentials look correct before continuing:</p>
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Username</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        @foreach (var credential in ImportedCredentials.Take(3))
                                         {
-                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 10) more credentials</p>
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.ServiceName</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.Username</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@(new string('*', credential.Password?.Length ?? 0))</td>
+                                            </tr>
                                         }
-                                    </div>
-                                </div>
-                                <div class="flex justify-end mt-6 space-x-2">
-                                    <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
-                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
-                                </div>
-                                break;
+                                    </tbody>
+                                </table>
+                                @if (ImportedCredentials.Count > 3)
+                                {
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 3) more credentials</p>
+                                }
+                            </div>
+                            <div class="flex justify-end mt-6 space-x-2">
+                                <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
+                                <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                            </div>
+                            break;
 
-                            case ImportStep.Confirm:
+                        case ImportStep.Confirm:
+                            @if (IsImporting)
+                            {
+                                <LoadingIndicator />
+                            }
+                            else {
                                 <div class="mb-4">
-                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Are you sure you want to import @ImportedCredentials.Count credentials?</p>
+                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Are you sure you want to import (@ImportedCredentials.Count) credentials? Note: the import process can take a short while.</p>
                                 </div>
                                 <div class="flex justify-end mt-6 space-x-2">
                                     <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
                                     <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
                                 </div>
-                                break;
-                        }
+                            }
+                            break;
                     }
                 </div>
             </div>
@@ -159,6 +163,9 @@
     [Parameter]
     public EventCallback OnImportConfirmed { get; set; }
 
+    [Parameter]
+    public Func<string, Task<List<ImportedCredential>>> ProcessFileCallback { get; set; } = default!;
+
     private bool IsModalOpen { get; set; } = false;
     private bool IsImporting { get; set; } = false;
     private string? ImportError { get; set; }
@@ -177,12 +184,24 @@
     private List<ImportedCredential> ImportedCredentials { get; set; } = new();
 
     /// <summary>
-    /// Sets the imported credentials.
+    /// Sets the imported credentials and continues to the preview step.
     /// </summary>
     /// <param name="importedCredentials">The imported credentials.</param>
-    public void SetImportedCredentials(List<ImportedCredential> importedCredentials)
+    public async Task SetImportedCredentials(List<ImportedCredential> importedCredentials)
     {
         ImportedCredentials = importedCredentials;
+
+        // Continue to step 2.
+        await HandleNextStep();
+    }
+
+    /// <summary>
+    /// Called when a file is selected in the parent file upload step.
+    /// </summary>
+    public async Task FileSelected()
+    {
+        // If the file is selected, we can go to the preview step.
+        await HandleNextStep();
     }
 
     /// <summary>
@@ -208,44 +227,74 @@
         StateHasChanged();
     }
 
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        Logger.LogInformation($"File selected: {e.File.Name}");
+
+        if (e.File == null || string.IsNullOrEmpty(e.File.Name))
+        {
+            ImportError = $"Please select a valid {ServiceName} export file to import";
+            return;
+        }
+
+        try
+        {
+            IsImporting = true;
+            StateHasChanged();
+
+            // Add file size validation
+            if (e.File.Size > 10 * 1024 * 1024) // 10MB limit
+            {
+                throw new Exception("File size exceeds 10MB limit");
+            }
+
+            // Create a new memory stream to hold the file data
+            using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            var fileContents = await reader.ReadToEndAsync();
+
+            var processingTask = ProcessFileCallback(fileContents);
+            var delayTask = Task.Delay(500);
+
+            await Task.WhenAll(processingTask, delayTask);
+
+            ImportedCredentials = await processingTask;
+            CurrentStep = ImportStep.Preview;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error processing {ServiceName} export file");
+            ImportError = $"Error processing {ServiceName} export file. Please check the file format and try again.";
+        }
+        finally
+        {
+            IsImporting = false;
+            StateHasChanged();
+        }
+    }
+
     protected virtual async Task HandleNextStep()
     {
-        if (CurrentStep == ImportStep.FileUpload)
-        {
-            try
-            {
-                ImportError = null;
-                await OnImportConfirmed.InvokeAsync();
-                if (ImportedCredentials.Count > 0)
-                {
-                    CurrentStep = ImportStep.Preview;
-                }
-            }
-            catch (Exception ex)
-            {
-                ImportError = ex.Message;
-                Logger.LogError(ex, "Error during import confirmation");
-                StateHasChanged();
-            }
-        }
-        else if (CurrentStep == ImportStep.Preview)
+        if (CurrentStep == ImportStep.Preview)
         {
             CurrentStep = ImportStep.Confirm;
         }
-        StateHasChanged();
+        else if (CurrentStep == ImportStep.Confirm)
+        {
+            await HandleModalConfirm();
+        }
     }
 
     protected virtual void HandlePreviousStep()
     {
-        if (CurrentStep == ImportStep.Confirm)
-        {
-            CurrentStep = ImportStep.Preview;
-        }
-        else if (CurrentStep == ImportStep.Preview)
+        if (CurrentStep == ImportStep.Preview)
         {
             CurrentStep = ImportStep.FileUpload;
         }
-        StateHasChanged();
+        else if (CurrentStep == ImportStep.Confirm)
+        {
+            CurrentStep = ImportStep.Preview;
+        }
     }
 
     /// <summary>

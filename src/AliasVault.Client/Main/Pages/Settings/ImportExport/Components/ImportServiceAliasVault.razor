@@ -2,49 +2,22 @@
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
 @using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
 
 <ImportServiceCard
     ServiceName="AliasVault"
     Description="Import passwords from another AliasVault instance or manual back-up"
     LogoUrl="img/logo.svg"
     OnImportComplete="RefreshVault"
-    OnImportConfirmed="ProcessFile"
-    @ref="_importServiceCard">
-    <div class="mb-4">
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your AliasVault export file:</p>
-        <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600" />
-    </div>
+    ProcessFileCallback="ProcessFile">
 </ImportServiceCard>
 
 @code {
-    private ImportServiceCard _importServiceCard = null!;
-    private IBrowserFile? _selectedFile;
-
-    private void HandleFileUpload(InputFileChangeEventArgs e)
+    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
-        Logger.LogInformation($"File selected: {e.File.Name}");
-        _selectedFile = e.File;
-    }
-
-    private async Task ProcessFile()
-    {
-        if (_selectedFile == null)
-        {
-            throw new ArgumentException("Please select a valid AliasVault export file to import");
-        }
-
-        Logger.LogInformation($"Processing AliasVault file: {_selectedFile.Name}");
-
-        try
-        {
-            await using var stream = _selectedFile.OpenReadStream();
-            using var reader = new StreamReader(stream);
-            var fileContents = await reader.ReadToEndAsync();
-        }
-        catch
-        {
-            throw new ArgumentException("Error processing AliasVault file. Please check the file format and try again.");
-        }
+        // TODO: Implement AliasVault import.
+        await Task.Delay(50);
+        return new List<ImportedCredential>();
     }
 
     private void RefreshVault()

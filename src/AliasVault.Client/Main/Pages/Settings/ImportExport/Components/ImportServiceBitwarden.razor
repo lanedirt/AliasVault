@@ -1,3 +1,4 @@
+@using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
@@ -8,47 +9,15 @@
     Description="Import passwords from your Bitwarden vault"
     LogoUrl="img/importers/bitwarden.svg"
     OnImportComplete="RefreshVault"
-    OnImportConfirmed="ProcessFile"
-    @ref="_importServiceCard">
-    <div class="mb-4">
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Upload your Bitwarden CSV export file:</p>
-        <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600" />
-    </div>
+    ProcessFileCallback="ProcessFile">
 </ImportServiceCard>
 
 @code {
-    private ImportServiceCard _importServiceCard = null!;
-    private IBrowserFile? _selectedFile;
-
-    private void HandleFileUpload(InputFileChangeEventArgs e)
+    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
-        Logger.LogInformation($"File selected: {e.File.Name}");
-        _selectedFile = e.File;
+        return await BitwardenImporter.ImportFromCsvAsync(fileContents);
     }
 
-    private async Task ProcessFile()
-    {
-        if (_selectedFile == null || string.IsNullOrEmpty(_selectedFile.Name))
-        {
-            throw new ArgumentException("Please select a valid Bitwarden CSV file to import");
-        }
-
-        Logger.LogInformation($"Processing Bitwarden file: {_selectedFile.Name}");
-
-        try
-        {
-            await using var stream = _selectedFile.OpenReadStream();
-            using var reader = new StreamReader(stream);
-            var fileContents = await reader.ReadToEndAsync();
-
-            var importCredentials = await BitwardenImporter.ImportFromCsvAsync(fileContents);
-            _importServiceCard.SetImportedCredentials(importCredentials);
-        }
-        catch
-        {
-            throw new ArgumentException("Error processing Bitwarden CSV file. Please check the file format and try again.");
-        }
-    }
 
     private void RefreshVault()
     {
