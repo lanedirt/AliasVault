@@ -27,14 +27,15 @@ To get AliasVault up and running quickly, run the install script to pull pre-bui
 ### Installation steps
 1. Download the install script to a directory of your choice. All AliasVault files and directories will be created in this directory.
 ```bash
-curl -o install.sh https://raw.githubusercontent.com/lanedirt/AliasVault/main/install.sh
+# Download the install script
+curl -o install.sh https://github.com/lanedirt/AliasVault/releases/latest/download/install.sh
 ```
-2. Make the install script executable.
+2. Run the install script. This will create the .env file, pull the Docker images, and start the AliasVault containers. Follow the on-screen prompts to configure AliasVault.
 ```bash
+# Make the install.sh script executable
 chmod +x install.sh
-```
-3. Run the install script. This will create the .env file, pull the Docker images, and start the AliasVault containers. Follow the on-screen prompts to configure AliasVault.
-```bash
+
+# Run the installation wizard
 ./install.sh install
 ```
 > **Note**: AliasVault binds to ports 80 and 443 by default. If you want to change the default AliasVault ports you can do so in the `.env` file. Afterwards re-run the `./install.sh install` command to restart the containers with the new port settings.
@@ -42,6 +43,8 @@ chmod +x install.sh
 3. After the script completes, you can access AliasVault at:
   - Client: `https://localhost`
   - Admin: `https://localhost/admin`
+
+> Note: if you do not wish to run the `install.sh` wizard but want to use Docker commands directly, follow the [manual setup guide](advanced/manual-setup.md). We do however encourage the use of `install.sh` as it will guide you through all configuration steps and allow for easy updating your AliasVault instance later.
 
 ---
 

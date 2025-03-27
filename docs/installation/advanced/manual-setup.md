@@ -2,7 +2,7 @@
 layout: default
 title: Manual Setup
 parent: Advanced
-nav_order: 3
+nav_order: 1
 ---
 
 # Manual Setup
@@ -27,7 +27,7 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
    cd AliasVault
    ```
 
-1. **Create required directories**
+2. **Create required directories**
 
    Create the following directories in your project root:
    ```bash
@@ -35,14 +35,14 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
    mkdir -p certificates/ssl certificates/app database/postgres
    ```
 
-2. **Create .env file**
+3. **Create .env file**
 
    ```bash
    # Copy the .env.example file to create a new .env file
    cp .env.example .env
    ```
 
-3. **Set all required settings in .env**
+4. **Set all required settings in .env**
 
    Open the .env file in your favorite text editor and fill in all required variables
    by following the instructions inside the file.
@@ -52,7 +52,7 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
    nano .env
    ```
 
-4. **Start the docker containers**
+5. **Start the docker containers**
 
    After you are done configuring your .env file, you can start the Docker Compose stack:
    ```bash
@@ -60,7 +60,7 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
    docker compose up -d
    ```
 
-5. **Access AliasVault**
+6. **Access AliasVault**
 
     AliasVault should now be running. You can access it at:
 
@@ -72,6 +72,13 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
         - Create your own account from here
 
    > Note: if you changed the default ports from 80/443 to something else in the .env file, use those ports to access AliasVault here.
+
+7. **Configuring private email domains**
+
+   By default, the AliasVault private email domains feature is disabled. If you wish to enable this so you can use your own private domains to create email aliases with, please read the `Email Server Setup` section in the main installation guide [Basic Install](../install.md).
+
+   For more information, read the article explaining the differences between AliasVault's [private and public domains](../../misc/private-vs-public-email.md).
+
 
 ## Important Notes
 
