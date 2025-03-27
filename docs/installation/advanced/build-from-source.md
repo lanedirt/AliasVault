@@ -26,7 +26,7 @@ cd AliasVault
 chmod +x install.sh
 ./install.sh build
 ```
-> **Note:** The build process can take a while depending on your hardware (5-15 minutes).
+> **Note:** The complete build process can take a while depending on your hardware (5-15 minutes).
 
 3.  After the script completes, you can access AliasVault at:
   - Client: `https://localhost`
