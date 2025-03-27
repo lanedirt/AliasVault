@@ -294,6 +294,16 @@ main() {
     esac
 }
 
+# Function to get the latest release version from GitHub
+get_latest_version() {
+    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+    if [ -z "$latest_version" ]; then
+        printf "${RED}> Failed to get latest version from GitHub.${NC}\n" >&2
+        return 1
+    fi
+    echo "$latest_version"
+}
+
 # Function to create required directories
 create_directories() {
     printf "${CYAN}> Checking workspace...${NC}\n"
@@ -411,13 +421,26 @@ print_logo() {
 create_env_file() {
     printf "${CYAN}> Checking .env file...${NC}\n"
     if [ ! -f "$ENV_FILE" ]; then
-        if [ -f "$ENV_EXAMPLE_FILE" ]; then
-            cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
-            printf "  ${GREEN}> New.env file created from .env.example.${NC}\n"
-        else
-            touch "$ENV_FILE"
-            printf "  ${YELLOW}> New blank .env file created.${NC}\n"
+        if [ ! -f "$ENV_EXAMPLE_FILE" ]; then
+            # Get latest release version
+            local latest_version=$(get_latest_version) || {
+                printf "  ${YELLOW}> Failed to check latest version. Creating blank .env file.${NC}\n"
+                touch "$ENV_FILE"
+                return 0
+            }
+
+            printf "  ${CYAN}> Downloading .env.example...${NC}"
+            if curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
+                printf "\n  ${GREEN}> .env.example downloaded successfully.${NC}\n"
+            else
+                printf "\n  ${YELLOW}> Failed to download .env.example. Creating blank .env file.${NC}\n"
+                touch "$ENV_FILE"
+                return 0
+            fi
         fi
+
+        cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
+        printf "  ${GREEN}> New .env file created from .env.example.${NC}\n"
     else
         printf "  ${GREEN}> .env file already exists.${NC}\n"
     fi
@@ -616,10 +639,19 @@ update_env_var() {
     local value=$2
 
     if [ -f "$ENV_FILE" ]; then
-        sed -i.bak "/^${key}=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        # Check if key exists
+        if grep -q "^${key}=" "$ENV_FILE"; then
+            # Update existing key inline
+            sed -i.bak "s|^${key}=.*|${key}=${value}|" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        else
+            # Key doesn't exist, append it
+            echo "$key=$value" >> "$ENV_FILE"
+        fi
+    else
+        # File doesn't exist, create it with the key-value pair
+        echo "$key=$value" > "$ENV_FILE"
     fi
 
-    echo "$key=$value" >> "$ENV_FILE"
     printf "  ${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
 }
 
@@ -1332,7 +1364,10 @@ handle_update() {
     fi
 
     current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
-    latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+    latest_version=$(get_latest_version) || {
+        printf "${RED}> Failed to check for updates. Please try again later.${NC}\n"
+        exit 1
+    }
 
     if [ -z "$latest_version" ]; then
         printf "${RED}> Failed to check for updates. Please try again later.${NC}\n"
@@ -1414,7 +1449,10 @@ check_install_script_update() {
     printf "${CYAN}> Checking for install script updates...${NC}\n"
 
     # Get latest release version
-    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+    local latest_version=$(get_latest_version) || {
+        printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
+        return 1
+    }
 
     if [ -z "$latest_version" ]; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
@@ -1507,7 +1545,10 @@ handle_install_version() {
 
     # If latest, get actual version number from GitHub API
     if [ "$target_version" = "latest" ]; then
-        local actual_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+        local actual_version=$(get_latest_version) || {
+            printf "${RED}> Failed to get latest version. Please try again later.${NC}\n"
+            exit 1
+        }
         if [ -n "$actual_version" ]; then
             target_version="$actual_version"
         fi
@@ -2035,25 +2076,27 @@ handle_hostname_configuration() {
 
     # Get current hostname
     CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
-    printf "${CYAN}Removing current hostname ${CURRENT_HOSTNAME}${NC}...\n"
+    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
     printf "\n"
 
-    # Force hostname to be empty so populate_hostname will ask for a new one
-    sed -i.bak "/^HOSTNAME=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+    # Ask for new hostname
+    while true; do
+        read -p "Enter new hostname (e.g. aliasvault.net): " NEW_HOSTNAME
+        if [ -n "$NEW_HOSTNAME" ]; then
+            break
+        else
+            printf "${YELLOW}> Hostname cannot be empty. Please enter a valid hostname.${NC}\n"
+        fi
+    done
 
-    # Reuse existing hostname population logic
-    populate_hostname
+    # Update the hostname
+    update_env_var "HOSTNAME" "$NEW_HOSTNAME"
 
-    if [ $? -eq 0 ]; then
-        printf "New hostname: ${CYAN}${HOSTNAME}${NC}\n"
-        printf "\n"
-        printf "${MAGENTA}=========================================================${NC}\n"
-    else
-        printf "${RED}> Failed to update hostname. Please try again.${NC}\n"
-        printf "\n"
-        printf "${MAGENTA}=========================================================${NC}\n"
-        exit 1
-    fi
+    printf "\n"
+    printf "${GREEN}Hostname updated successfully!${NC}\n"
+    printf "New hostname: ${CYAN}${NEW_HOSTNAME}${NC}\n"
+    printf "\n"
+    printf "${MAGENTA}=========================================================${NC}\n"
 }
 
 # Function to handle IP logging configuration
