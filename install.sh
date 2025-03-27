@@ -815,6 +815,8 @@ handle_install() {
 # Function to handle build
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
+    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
+    
     # Set deployment mode to build to ensure container lifecycle uses build configuration
     set_deployment_mode "build"
     printf "\n"
@@ -838,7 +840,6 @@ handle_build() {
     fi
 
     # Initialize environment with proper error handling
-    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
@@ -1513,6 +1514,8 @@ handle_install_version() {
     fi
 
     printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
+    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
+
     # Set deployment mode to install to ensure container lifecycle uses install configuration
     set_deployment_mode "install"
     printf "\n"
@@ -1558,7 +1561,6 @@ handle_install_version() {
     handle_docker_compose "$target_version"
 
     # Initialize environment
-    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
     populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
     populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
