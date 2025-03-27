@@ -16,6 +16,15 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
 
 ## Steps
 
+1. **Clone the git repository**
+   ```
+   # Clone repository
+   git clone https://github.com/lanedirt/AliasVault.git
+
+   # Navigate to the AliasVault directory
+   cd AliasVault
+   ```
+
 1. **Create required directories**
 
    Create the following directories in your project root:
@@ -30,12 +39,10 @@ If you prefer to manually set up AliasVault, this README provides step-by-step i
    cp .env.example .env
    ```
 
-3. **Set HOSTNAME**
+3. **Set all required settings in .env**
 
-   Update the .env file with your hostname (default is localhost):
-   ```bash
-   HOSTNAME=localhost
-   ```
+   Open the .env file in your favorite text editor and follow the instructions to fill in all
+   required variables.
 
 4. **Set default ports**
 
