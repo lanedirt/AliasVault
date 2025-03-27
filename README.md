@@ -81,7 +81,7 @@ The install script will output the URL where the app is available. By default th
 > Note: If you want to change the default AliasVault ports you can do so in the `.env` file.
 
 ## Documentation
-For more detailed information about the installation process and other topics, please see the official documentation website:
+For more information about the installation process, manual setup instructions and other topics, please see the official documentation website:
 - [Documentation website (docs.aliasvault.net) 📚](https://docs.aliasvault.net)
 
 ## Security Architecture
