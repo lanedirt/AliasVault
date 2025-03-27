@@ -9,6 +9,12 @@ nav_order: 1
 
 If you prefer to manually set up AliasVault instead of using the `install.sh` script, this README provides step-by-step instructions.
 
+{: .toc }
+* TOC
+{:toc}
+
+---
+
 ## Prerequisites
 
 - Docker and Docker Compose installed on your system
@@ -75,7 +81,7 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
 
 7. **Configuring private email domains**
 
-   By default, the AliasVault private email domains feature is disabled. If you wish to enable this so you can use your own private domains to create email aliases with, please read the `Email Server Setup` section in the main installation guide [Basic Install](../install.md).
+   By default, the AliasVault private email domains feature is disabled. If you wish to enable this so you can use your own private domains to create email aliases with, please read the `Email Server Setup` section in the main installation guide [Basic Install](../install.md#3-email-server-setup).
 
    For more information, read the article explaining the differences between AliasVault's [private and public domains](../../misc/private-vs-public-email.md).
 
