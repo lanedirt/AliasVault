@@ -9,14 +9,17 @@
 
 > AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
 
-## Quick links
 - <a href="https://app.aliasvault.net">Try the cloud version 🔥</a> - <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> - <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> - <a href="#self-hosting">Self-host instructions ⚙️</a> - <a href="https://aliasvault.net/plugins?utm_source=gh-readme">Browser Extensions 🔌</a>
 
 ### What makes AliasVault unique:
-- **Zero-knowledge architecture**: All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Built-in email server**: AliasVault includes its own email server that allows you to generate real working email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app and browser extension.
-- **Alias generation**: Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
-- **Open-source**: The source code is available on GitHub and AliasVault can be self-hosted on your own server via an easy install script.
+- **Zero-knowledge architecture**:
+    - All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
+- **Built-in email server**:
+    - AliasVault includes its own email server that allows you to generate real working email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app and browser extension.
+- **Alias generation**:
+     - Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
+- **Open-source & Self-hostable**:
+    - The source code is available on GitHub and AliasVault can be self-hosted on your own server via an easy install script.
 
 ## Screenshots
 
@@ -98,51 +101,34 @@ For detailed information about our encryption implementation and security archit
 - [Security Architecture Diagram](https://docs.aliasvault.net/architecture)
 
 ## Roadmap
-AliasVault is under active development with new features being added regularly. We believe in transparency and want to share our vision for the future of the platform. Here's what we've accomplished and what we're working on next:
+
+AliasVault is under active development, with a strong focus on usability, security, and cross-platform support.  
+The main focus is on ensuring robust usability for everyday tasks, including comprehensive autofill capabilities across all platforms.
+
+🛠️ Incremental releases are published every 2–3 weeks, with a strong emphasis on real-world testing and user feedback. 
+During this phase, AliasVault can safely be used in production as it maintains strict data integrity and automatic migration guarantees.
+
+Core features that are being worked on:
 
 - [x] Core password & alias management
-- [x] End-to-end encryption
+- [x] Full end-to-end encryption
 - [x] Built-in email server for aliases
-- [x] Single-command Docker-based installation
-- [x] Chrome browser extension
-- [x] Firefox and MS Edge browser extension
-- [x] Safari and Brave browser extension
-- [x] Add and associate TOTP MFA tokens to credentials
-- [x] Add GUI to allow customizing password generation options (length, special chars etc.) (https://github.com/lanedirt/AliasVault/issues/167)
-- [ ] Import passwords from existing password managers (https://github.com/lanedirt/AliasVault/issues/542)
-- [ ] Add support for connecting custom user domains to cloud hosted version (https://github.com/lanedirt/AliasVault/issues/485)
+- [x] Easy self-hosted installer
+- [x] Browser extensions with autofill feature (Chrome, Firefox, Edge, Safari, Brave)
+- [x] Built-in TOTP authenticator
+- [ ] Import passwords from traditional password managers
+- [ ] iOS and Android native apps
+- [ ] Data model improvements to support reusable identities in combination with aliases
+- [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
+- [ ] Adding support for family/team sharing (organization features)
 
-### Future Plans
-- [ ] Mobile apps (iOS, Android)
-- [ ] Team / organization features (sharing passwords/aliases)
-- [ ] Disposable phone number service
+👉 [View the full AliasVault roadmap here](https://github.com/lanedirt/AliasVault/issues/731)
 
-Want to suggest a feature? Join our [Discord](https://discord.gg/DsaXMTEtpF) or create an issue on GitHub.
+### Got feedback or ideas?  
+Feel free to open an issue or join our [Discord](https://discord.gg/DsaXMTEtpF)! Contributions are warmly welcomed—whether in feature development, testing, or spreading the word. Get in touch on Discord if you're interested in contributing.
 
 ### Support the mission
 Your donation helps me dedicate more time and resources to improving AliasVault, making the internet safer for everyone!
 
 <a href="https://www.buymeacoffee.com/lanedirt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-## Tech Stack & Security
-
-AliasVault is built with a modern, secure, and scalable technology stack, ensuring robust encryption and privacy protection.
-
-### Core Technologies
-- **C# & ASP.NET Core** – Reliable, high-performance backend for Web API.
-- **Blazor WASM** – Secure, interactive web UI.
-- **PostgreSQL & SQLite** – Database solutions, with SQLite powering encrypted user vaults.
-- **Docker** – Containerized deployment for scalability.
-- **Next.JS & React & Typescript** - Powering the AliasVault website and browser extensions
-
-### Security & Cryptography
-- **Argon2id (Konscious.Security.Cryptography)** – Industry-leading password hashing.
-- **SRP** – Secure Remote Password (SRP-6a) protocol for authentication.
-- **MimeKit & SmtpServer** – Secure email processing and virtual addresses.
-
-### Additional Tools
-- **Tailwind CSS & Flowbite** – Modern UI design.
-- **Playwright** – Automated end-to-end testing.
-- **SonarCloud** – Continuous code quality monitoring.
-
-AliasVault prioritizes security, performance, and user privacy with a technology stack trusted by the industry.
