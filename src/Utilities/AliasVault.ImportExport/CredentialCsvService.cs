@@ -8,6 +8,7 @@
 namespace AliasVault.ImportExport;
 
 using AliasClientDb;
+using AliasVault.ImportExport.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
@@ -17,7 +18,7 @@ using System.Globalization;
 /// </summary>
 public static class CredentialCsvService
 {
-    private const string CsvVersionIdentifier = "1.0.0";
+    private const string CsvVersionIdentifier = "1.5.0";
 
     /// <summary>
     /// Export list of credentials to CSV file.
@@ -33,24 +34,20 @@ public static class CredentialCsvService
             var record = new CredentialCsvRecord
             {
                 Version = CsvVersionIdentifier,
-                Id = credential.Id,
                 Username = credential.Username ?? string.Empty,
                 Notes = credential.Notes ?? string.Empty,
                 CreatedAt = credential.CreatedAt,
                 UpdatedAt = credential.UpdatedAt,
-                AliasId = credential.AliasId,
                 AliasGender = credential.Alias?.Gender ?? string.Empty,
                 AliasFirstName = credential.Alias?.FirstName ?? string.Empty,
                 AliasLastName = credential.Alias?.LastName ?? string.Empty,
                 AliasNickName = credential.Alias?.NickName ?? string.Empty,
                 AliasBirthDate = credential.Alias?.BirthDate,
                 AliasEmail = credential.Alias?.Email ?? string.Empty,
-                AliasCreatedAt = credential.Alias?.CreatedAt,
-                AliasUpdatedAt = credential.Alias?.UpdatedAt,
-                ServiceId = credential.ServiceId,
                 ServiceName = credential.Service?.Name ?? string.Empty,
                 ServiceUrl = credential.Service?.Url ?? string.Empty,
-                CurrentPassword = credential.Passwords.OrderByDescending(p => p.CreatedAt).FirstOrDefault()?.Value ?? string.Empty
+                CurrentPassword = credential.Passwords.OrderByDescending(p => p.CreatedAt).FirstOrDefault()?.Value ?? string.Empty,
+                TwoFactorSecret = credential.TotpCodes.FirstOrDefault()?.SecretKey ?? string.Empty
             };
 
             records.Add(record);
@@ -69,13 +66,17 @@ public static class CredentialCsvService
     /// Imports Credential objects from a CSV file.
     /// </summary>
     /// <param name="fileContent">The content of the CSV file.</param>
-    /// <returns>The imported list of Credential objects.</returns>
-    public static List<Credential> ImportCredentialsFromCsv(string fileContent)
+    /// <returns>The imported list of ImportedCredential objects.</returns>
+    public static async Task<List<ImportedCredential>> ImportCredentialsFromCsv(string fileContent)
     {
         using var reader = new StringReader(fileContent);
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
-        var records = csv.GetRecords<CredentialCsvRecord>().ToList();
+        var records = new List<CredentialCsvRecord>();
+        await foreach (var record in csv.GetRecordsAsync<CredentialCsvRecord>())
+        {
+            records.Add(record);
+        }
 
         if (records.Count == 0)
         {
@@ -87,45 +88,31 @@ public static class CredentialCsvService
             throw new InvalidOperationException("Invalid CSV file version.");
         }
 
-        var credentials = new List<Credential>();
+        var credentials = new List<ImportedCredential>();
 
         foreach (var record in records)
         {
-            var credential = new Credential
+            var credential = new ImportedCredential
             {
-                Id = record.Id,
+                ServiceName = record.ServiceName,
+                ServiceUrl = record.ServiceUrl,
                 Username = record.Username,
+                Password = record.CurrentPassword,
+                Email = record.AliasEmail,
                 Notes = record.Notes,
-                CreatedAt = record.CreatedAt,
-                UpdatedAt = record.UpdatedAt,
-                AliasId = record.AliasId,
-                Alias = new Alias
+                Alias = new ImportedAlias
                 {
-                    Id = record.AliasId,
                     Gender = record.AliasGender,
                     FirstName = record.AliasFirstName,
                     LastName = record.AliasLastName,
                     NickName = record.AliasNickName,
-                    BirthDate = record.AliasBirthDate ?? DateTime.MinValue,
-                    Email = record.AliasEmail,
-                    CreatedAt = record.AliasCreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = record.AliasUpdatedAt ?? DateTime.UtcNow
+                    BirthDate = record.AliasBirthDate,
+                    CreatedAt = record.CreatedAt,
+                    UpdatedAt = record.UpdatedAt
                 },
-                ServiceId = record.ServiceId,
-                Service = new Service
-                {
-                    Id = record.ServiceId,
-                    Name = record.ServiceName,
-                    Url = record.ServiceUrl
-                },
-                Passwords = [
-                    new Password
-                    {
-                        Value = record.CurrentPassword,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    }
-                ]
+                TwoFactorSecret = record.TwoFactorSecret,
+                CreatedAt = record.CreatedAt,
+                UpdatedAt = record.UpdatedAt,
             };
 
             credentials.Add(credential);
@@ -140,23 +127,19 @@ public static class CredentialCsvService
 /// </summary>
 public class CredentialCsvRecord
 {
-    public string Version { get; set; } = "1.0.0";
-    public Guid Id { get; set; } = Guid.Empty;
+    public string Version { get; set; } = "1.5.0";
     public string Username { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.MinValue;
     public DateTime UpdatedAt { get; set; } = DateTime.MinValue;
-    public Guid AliasId { get; set; } = Guid.Empty;
     public string AliasGender { get; set; } = string.Empty;
     public string AliasFirstName { get; set; } = string.Empty;
     public string AliasLastName { get; set; } = string.Empty;
     public string AliasNickName { get; set; } = string.Empty;
     public DateTime? AliasBirthDate { get; set; } = null;
     public string AliasEmail { get; set; } = string.Empty;
-    public DateTime? AliasCreatedAt { get; set; } = null;
-    public DateTime? AliasUpdatedAt { get; set; } = null;
-    public Guid ServiceId { get; set; } = Guid.Empty;
     public string ServiceName { get; set; } = string.Empty;
     public string ServiceUrl { get; set; } = string.Empty;
     public string CurrentPassword { get; set; } = string.Empty;
+    public string TwoFactorSecret { get; set; } = string.Empty;
 }

@@ -84,8 +84,11 @@
             // Create a memory stream from the byte array.
             using (MemoryStream memoryStream = new MemoryStream(csvBytes))
             {
-                // Invoke JavaScript to initiate the download.
-                await JsInteropService.DownloadFileFromStream("aliasvault-client.csv", memoryStream.ToArray());
+                var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                var username = await GetUsernameAsync();
+                
+                // Invoke JavaScript to initiate the download with date and username in filename
+                await JsInteropService.DownloadFileFromStream($"aliasvault-export-{username}-{dateStr}.csv", memoryStream.ToArray());
             }
         }
         catch (Exception ex)
