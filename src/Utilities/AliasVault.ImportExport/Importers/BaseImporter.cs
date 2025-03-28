@@ -9,6 +9,7 @@ namespace AliasVault.ImportExport.Importers;
 
 using AliasClientDb;
 using AliasVault.ImportExport.Models;
+using AliasVault.TotpGenerator;
 
 /// <summary>
 /// Base class for all importers.
@@ -51,12 +52,15 @@ public class BaseImporter
 
             if (!string.IsNullOrEmpty(importedCredential.TwoFactorSecret))
             {
+                // Sanitize the secret key by converting from potential URI to secret key and name.
+                var (secretKey, name) = TotpHelper.SanitizeSecretKey(importedCredential.TwoFactorSecret);
+
                 credential.TotpCodes = new List<TotpCode>
                 {
                     new()
                     {
-                        Name = "Authenticator",
-                        SecretKey = importedCredential.TwoFactorSecret,
+                        Name = name ?? "Authenticator",
+                        SecretKey = secretKey,
                         CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
                         UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
                     }
