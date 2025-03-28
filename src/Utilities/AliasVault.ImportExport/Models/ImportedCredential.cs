@@ -57,10 +57,15 @@ public class ImportedCredential
     /// <summary>
     /// Gets or sets the last modified date of the credential.
     /// </summary>
-    public DateTime? ModifiedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the favicon bytes.
     /// </summary>
     public byte[]? FaviconBytes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the alias information.
+    /// </summary>
+    public ImportedAlias? Alias { get; set; }
 }

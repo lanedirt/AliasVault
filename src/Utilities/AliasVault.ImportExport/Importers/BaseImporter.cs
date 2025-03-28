@@ -31,28 +31,35 @@ public class BaseImporter
             {
                 Service = new Service { Name = importedCredential.ServiceName, Url = importedCredential.ServiceUrl },
                 Username = importedCredential.Username,
-                Passwords = new List<Password> { new() { Value = importedCredential.Password } },
+                Passwords = [new() { Value = importedCredential.Password }],
                 Notes = importedCredential.Notes,
                 CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
-                UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow
+                UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
+                Alias = new Alias
+                {
+                    FirstName = importedCredential.Alias?.FirstName,
+                    LastName = importedCredential.Alias?.LastName,
+                    Gender = importedCredential.Alias?.Gender,
+                    // TODO: birth date should be made nullable in client DB as it's not always available.
+                    BirthDate = importedCredential.Alias?.BirthDate ?? DateTime.MinValue,
+                    Email = importedCredential.Email,
+                    NickName = importedCredential.Alias?.NickName,
+                    CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
+                    UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
+                }
             };
-
-            credential.Alias = new Alias
-            {
-                CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
-                UpdatedAt = importedCredential.ModifiedAt ?? DateTime.UtcNow,
-            };
-
-            if (!string.IsNullOrEmpty(importedCredential.Email))
-            {
-                credential.Alias = new Alias { Email = importedCredential.Email };
-            }
 
             if (!string.IsNullOrEmpty(importedCredential.TwoFactorSecret))
             {
                 credential.TotpCodes = new List<TotpCode>
                 {
-                    new() { SecretKey = importedCredential.TwoFactorSecret }
+                    new()
+                    {
+                        Name = "Authenticator",
+                        SecretKey = importedCredential.TwoFactorSecret,
+                        CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
+                        UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
+                    }
                 };
             }
 
