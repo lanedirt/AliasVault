@@ -2,6 +2,8 @@
 @inherits MainBase
 @inject CredentialService CredentialService
 @inject ILogger<ImportExport> Logger
+@inject ConfirmModalService ConfirmModalService
+@using AliasVault.RazorComponents.Services
 @using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
 @using AliasVault.ImportExport
 
@@ -16,7 +18,7 @@
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Import vault</h3>
     <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Select a service to import from. If you are using a service that is not listed here, you can import from a CSV file manually. Or if you believe we are missing a popular service, please raise an issue on <a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700">GitHub</a> or contact us.
+        Select a service to import from. If you are using a service that is not listed here and would like to see it supported, please raise an issue on <a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700">GitHub</a> or contact us.
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <ImportServiceBitwarden />
@@ -28,29 +30,65 @@
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
     <div class="mb-4">
-        <div class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-900 dark:text-yellow-100">
-            <p><strong>Warning:</strong> Exporting your vault to an unencrypted file will expose all of your passwords and sensitive information in plain text. Only do this on trusted computers and ensure you:</p>
-            <ul class="list-disc ml-6 mt-2">
-                <li>Store the exported file in a secure location</li>
-                <li>Delete the file when you no longer need it</li>
-                <li>Never share the exported file with others</li>
-            </ul>
-        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            If you want to export your AliasVault credentials to another AliasVault instance (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.
+        </p>
         <div>
-            <Button OnClick="ExportVaultSqlite">Export vault to unencrypted SQLite file</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">Export vault to unencrypted CSV file</Button>
         </div>
         <div class="mt-6">
-            <Button OnClick="ExportVaultCsv">Export vault to unencrypted CSV file</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Sqlite))">Export vault to unencrypted SQLite file</Button>
         </div>
     </div>
 </div>
 
 @code {
+    private ExportType _currentExportType;
+
+    private enum ExportType
+    {
+        Csv,
+        Sqlite
+    }
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Import / Export" });
+    }
+
+    private async Task ShowExportConfirmation(ExportType exportType)
+    {
+        _currentExportType = exportType;
+        var confirmMessage = @"Warning: Exporting your vault to an unencrypted file will expose all of your passwords and sensitive information in plain text. Only do this on trusted computers and ensure you:
+
+• Store the exported file in a secure location
+• Delete the file when you no longer need it
+• Never share the exported file with others
+
+Are you sure you want to continue with the export?";
+
+        var result = await ConfirmModalService.ShowConfirmation("Export vault", confirmMessage);
+        if (!result)
+        {
+            return;
+        }
+
+        await HandleExportConfirmed();
+    }
+
+    private async Task HandleExportConfirmed()
+    {
+        switch (_currentExportType)
+        {
+            case ExportType.Csv:
+                await ExportVaultCsv();
+                break;
+            case ExportType.Sqlite:
+                await ExportVaultSqlite();
+                break;
+        }
     }
 
     private async Task ExportVaultSqlite()
@@ -64,7 +102,7 @@
             using (MemoryStream memoryStream = new MemoryStream(fileBytes))
             {
                 // Invoke JavaScript to initiate the download.
-                await JsInteropService.DownloadFileFromStream("aliasvault-client.sqlite", memoryStream.ToArray());
+                await JsInteropService.DownloadFileFromStream($"{await GetExportFileName("sqlite")}", memoryStream.ToArray());
             }
         }
         catch (Exception ex)
@@ -84,16 +122,20 @@
             // Create a memory stream from the byte array.
             using (MemoryStream memoryStream = new MemoryStream(csvBytes))
             {
-                var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
-                var username = await GetUsernameAsync();
-                
                 // Invoke JavaScript to initiate the download with date and username in filename
-                await JsInteropService.DownloadFileFromStream($"aliasvault-export-{username}-{dateStr}.csv", memoryStream.ToArray());
+                await JsInteropService.DownloadFileFromStream($"{await GetExportFileName("csv")}", memoryStream.ToArray());
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error downloading file");
         }
+    }
+
+    private async Task<string> GetExportFileName(string extension)
+    {
+        var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        var username = await GetUsernameAsync();
+        return $"aliasvault-export-{username}-{dateStr}.{extension}";
     }
 }
