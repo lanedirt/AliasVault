@@ -140,62 +140,21 @@
     /// </summary>
     private async Task AddTotpCode()
     {
-        string secretKey = NewTotpCode.SecretKey;
-
-        // Sanitize the secret key (remove whitespace and hyphens)
-        secretKey = secretKey.Replace(" ", string.Empty).Replace("-", string.Empty);
-        string? name = NewTotpCode.Name;
-
-        // Check if the input is a TOTP URI
-        if (secretKey.StartsWith("otpauth://totp/"))
-        {
-            try
-            {
-                var uri = new Uri(secretKey);
-                var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-
-                // Extract the secret from query parameters
-                secretKey = queryParams["secret"] ?? throw new ArgumentException("Secret not found in URI");
-
-                // If no name was provided, try to get it from the URI
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    // The label is everything after 'totp/' and before '?'
-                    var label = uri.AbsolutePath.TrimStart('/');
-                    // If the label contains ':', take the part after it
-                    name = label.Contains(':') ? label.Split(':')[1] : label;
-
-                    // If there's an issuer in the query params, use it as a prefix
-                    var issuer = queryParams["issuer"];
-                    if (!string.IsNullOrWhiteSpace(issuer))
-                    {
-                        name = $"{issuer}: {name}";
-                    }
-                    NewTotpCode.Name = name;
-                }
-                NewTotpCode.SecretKey = secretKey;
-            }
-            catch (Exception)
-            {
-                GlobalNotificationService.AddErrorMessage("Invalid TOTP URI format. Please check and try again.", true);
-                return;
-            }
+        // Sanitize the secret key by converting from URI to secret key and name.
+        try {
+            var (secretKey, name) = TotpHelper.SanitizeSecretKey(NewTotpCode.SecretKey, NewTotpCode.Name);
+            NewTotpCode.SecretKey = secretKey;
+            NewTotpCode.Name = name;
         }
-
-        try
+        catch (Exception ex)
         {
-            // Validate the secret key by trying to generate a code
-            TotpGenerator.GenerateTotpCode(secretKey);
-        }
-        catch (Exception)
-        {
-            GlobalNotificationService.AddErrorMessage("Invalid secret key. Please check and try again.", true);
+            GlobalNotificationService.AddErrorMessage(ex.Message, true);
             return;
         }
 
         // Create a new TOTP code in memory
         var newTotpCode = NewTotpCode.ToEntity();
-        newTotpCode.Name = name ?? "Authenticator";
+        newTotpCode.Name = NewTotpCode.Name ?? "Authenticator";
 
         // Add to the list
         TotpCodeList.Add(newTotpCode);

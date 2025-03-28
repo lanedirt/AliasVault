@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Databases\AliasClientDb\AliasClientDb.csproj" />
+    <ProjectReference Include="..\..\Utilities\AliasVault.TotpGenerator\AliasVault.TotpGenerator.csproj" />
   </ItemGroup>
 
 </Project>
