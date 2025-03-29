@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="KeePassImporter.cs" company="lanedirt">
+// <copyright file="KeePassXcImporter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -14,12 +14,12 @@ using CsvHelper.Configuration;
 using System.Globalization;
 
 /// <summary>
-/// Imports credentials from KeePass.
+/// Imports credentials from KeePassXC.
 /// </summary>
-public class KeePassImporter
+public class KeePassXcImporter
 {
     /// <summary>
-    /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.
+    /// Imports KeePassXC CSV file and converts contents to list of ImportedCredential model objects.
     /// </summary>
     /// <param name="fileContent">The content of the CSV file.</param>
     /// <returns>The imported list of ImportedCredential objects.</returns>
@@ -29,15 +29,16 @@ public class KeePassImporter
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<KeePassCsvRecord>())
+        await foreach (var record in csv.GetRecordsAsync<KeepassXcCsvRecord>())
         {
             var credential = new ImportedCredential
             {
-                ServiceName = record.Account,
-                ServiceUrl = record.Website,
-                Username = record.LoginName,
+                ServiceName = record.Title,
+                ServiceUrl = record.URL,
+                Username = record.Username,
                 Password = record.Password,
-                Notes = record.Comments
+                TwoFactorSecret = record.TOTP,
+                Notes = record.Notes
             };
 
             credentials.Add(credential);

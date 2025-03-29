@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="KeePassImporter.cs" company="lanedirt">
+// <copyright file="StrongboxImporter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -14,9 +14,9 @@ using CsvHelper.Configuration;
 using System.Globalization;
 
 /// <summary>
-/// Imports credentials from KeePass.
+/// Imports credentials from Strongbox.
 /// </summary>
-public class KeePassImporter
+public class StrongboxImporter
 {
     /// <summary>
     /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.
@@ -29,15 +29,16 @@ public class KeePassImporter
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<KeePassCsvRecord>())
+        await foreach (var record in csv.GetRecordsAsync<StrongboxCsvRecord>())
         {
             var credential = new ImportedCredential
             {
-                ServiceName = record.Account,
-                ServiceUrl = record.Website,
-                Username = record.LoginName,
+                ServiceName = record.Title,
+                ServiceUrl = record.URL,
+                Username = record.Username,
                 Password = record.Password,
-                Notes = record.Comments
+                TwoFactorSecret = record.OTPAuth,
+                Notes = record.Notes
             };
 
             credentials.Add(credential);
