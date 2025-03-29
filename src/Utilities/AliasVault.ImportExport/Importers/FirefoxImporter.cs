@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="OnePasswordImporter.cs" company="lanedirt">
+// <copyright file="FirefoxImporter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -14,12 +14,12 @@ using CsvHelper.Configuration;
 using System.Globalization;
 
 /// <summary>
-/// Imports credentials from 1Password.
+/// Imports credentials from Firefox Password Manager.
 /// </summary>
-public class OnePasswordImporter
+public class FirefoxImporter
 {
     /// <summary>
-    /// Imports 1Password CSV file and converts contents to list of ImportedCredential model objects.
+    /// Imports Firefox CSV file and converts contents to list of ImportedCredential model objects.
     /// </summary>
     /// <param name="fileContent">The content of the CSV file.</param>
     /// <returns>The imported list of ImportedCredential objects.</returns>
@@ -29,16 +29,18 @@ public class OnePasswordImporter
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<OnePasswordCsvRecord>())
+        await foreach (var record in csv.GetRecordsAsync<FirefoxCsvRecord>())
         {
+            // Extract service name from URL, e.g. https://example.com/path -> example.com.
+            var uri = new Uri(record.Url);
+            var serviceName = uri.Host.StartsWith("www.") ? uri.Host[4..] : uri.Host;
+            
             var credential = new ImportedCredential
             {
-                ServiceName = record.Title,
+                ServiceName = serviceName,
                 ServiceUrl = record.Url,
                 Username = record.Username,
-                Password = record.Password,
-                TwoFactorSecret = record.OTPAuth,
-                Notes = record.Notes
+                Password = record.Password
             };
 
             credentials.Add(credential);

@@ -241,4 +241,40 @@ public class ImportExportTests
             Assert.That(facebookCredential.Notes, Is.EqualTo("Facebook comment"));
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from Firefox CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromFirefoxCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.firefox.csv");
+
+        // Act
+        var importedCredentials = await FirefoxImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(3));
+
+        // Test specific entries
+        var exampleCredential = importedCredentials.First(c => c.ServiceName == "example.com");
+        Assert.Multiple(() =>
+        {
+            Assert.That(exampleCredential.ServiceName, Is.EqualTo("example.com"));
+            Assert.That(exampleCredential.ServiceUrl, Is.EqualTo("https://example.com"));
+            Assert.That(exampleCredential.Username, Is.EqualTo("username-example"));
+            Assert.That(exampleCredential.Password, Is.EqualTo("examplepassword"));
+        });
+
+        var youtubeCredential = importedCredentials.First(c => c.ServiceName == "youtube.com");
+        Assert.Multiple(() =>
+        {
+            Assert.That(youtubeCredential.ServiceName, Is.EqualTo("youtube.com"));
+            Assert.That(youtubeCredential.ServiceUrl, Is.EqualTo("https://youtube.com"));
+            Assert.That(youtubeCredential.Username, Is.EqualTo("youtubeusername"));
+            Assert.That(youtubeCredential.Password, Is.EqualTo("youtubepassword"));
+        });
+    }
 }

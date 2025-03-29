@@ -63,6 +63,7 @@
     <ItemGroup>
       <EmbeddedResource Include="TestData\Exports\bitwarden.csv" />
       <EmbeddedResource Include="TestData\Exports\chrome.csv" />
+      <EmbeddedResource Include="TestData\Exports\firefox.csv" />
       <EmbeddedResource Include="TestData\Exports\keepass.kdbx.csv" />
       <EmbeddedResource Include="TestData\Exports\1password_8.csv" />
     </ItemGroup>
