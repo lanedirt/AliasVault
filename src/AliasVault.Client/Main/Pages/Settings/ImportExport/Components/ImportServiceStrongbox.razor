@@ -1,0 +1,21 @@
+@inject ILogger<ImportServiceStrongbox> Logger
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+
+<ImportServiceCard
+    ServiceName="Strongbox"
+    Description="Import passwords from Strongbox"
+    LogoUrl="img/importers/strongbox.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Strongbox vault, you need to export it as a CSV file. You can do this by going to the 'File' menu and selecting 'Export Database' (to CSV).</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+</ImportServiceCard>
+
+@code {
+    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await StrongboxImporter.ImportFromCsvAsync(fileContents);
+    }
+}

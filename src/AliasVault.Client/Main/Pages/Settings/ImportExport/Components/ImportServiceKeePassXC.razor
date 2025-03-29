@@ -1,0 +1,21 @@
+@inject ILogger<ImportServiceKeePassXC> Logger
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+
+<ImportServiceCard
+    ServiceName="KeePassXC"
+    Description="Import passwords from KeePassXC"
+    LogoUrl="img/importers/keepassxc.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your KeePassXC vault, you need to export it as a CSV file. You can do this by going to the 'File' menu and selecting 'Export' (to CSV).</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+</ImportServiceCard>
+
+@code {
+    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await KeePassXcImporter.ImportFromCsvAsync(fileContents);
+    }
+}

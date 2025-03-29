@@ -7,6 +7,8 @@
 
 namespace AliasVault.ImportExport.Models.Imports;
 
+using CsvHelper.Configuration.Attributes;
+
 /// <summary>
 /// Represents a KeePass CSV record that is being imported from a KeePass CSV export file.
 /// </summary>
@@ -15,35 +17,30 @@ public class KeePassCsvRecord
     /// <summary>
     /// Gets or sets the title/service name (e.g., "Facebook", "Gmail").
     /// </summary>
-    public string Title { get; set; } = string.Empty;
+    [Name("Account")]
+    public string Account { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the username.
+    /// Gets or sets the login name.
     /// </summary>
-    public string? Username { get; set; }
-
-    /// <summary>
-    /// Gets or sets the email address.
-    /// </summary>
-    public string? Email { get; set; }
+    [Name("Login Name")]
+    public string? LoginName { get; set; }
 
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
+    [Name("Password")]
     public string? Password { get; set; }
 
     /// <summary>
-    /// Gets or sets the service URL.
+    /// Gets or sets the web site.
     /// </summary>
-    public string? URL { get; set; }
+    [Name("Web Site")]
+    public string? Website { get; set; }
 
     /// <summary>
-    /// Gets or sets the OTP (One-Time Password) authentication secret.
+    /// Gets or sets the comments.
     /// </summary>
-    public string? OTPAuth { get; set; }
-
-    /// <summary>
-    /// Gets or sets any additional notes.
-    /// </summary>
-    public string? Notes { get; set; }
+    [Name("Comments")]
+    public string? Comments { get; set; }
 }

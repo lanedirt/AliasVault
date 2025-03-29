@@ -130,17 +130,17 @@ public class ImportExportTests
     }
 
     /// <summary>
-    /// Test case for importing credentials from KeePass CSV and ensuring all values are present.
+    /// Test case for importing credentials from Strongbox CSV and ensuring all values are present.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    public async Task ImportCredentialsFromKeePassCsv()
+    public async Task ImportCredentialsFromStrongboxCsv()
     {
         // Arrange
-        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepass.kdbx.csv");
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.strongbox.csv");
 
         // Act
-        var importedCredentials = await KeePassImporter.ImportFromCsvAsync(fileContent);
+        var importedCredentials = await StrongboxImporter.ImportFromCsvAsync(fileContent);
 
         // Assert
         Assert.That(importedCredentials, Has.Count.EqualTo(6));
@@ -275,6 +275,84 @@ public class ImportExportTests
             Assert.That(youtubeCredential.ServiceUrl, Is.EqualTo("https://youtube.com"));
             Assert.That(youtubeCredential.Username, Is.EqualTo("youtubeusername"));
             Assert.That(youtubeCredential.Password, Is.EqualTo("youtubepassword"));
+        });
+    }
+
+    /// <summary>
+    /// Test case for importing credentials from KeePass CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromKeePassCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepass.csv");
+
+        // Act
+        var importedCredentials = await KeePassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(2));
+
+        // Test specific entries
+        var sampleEntry = importedCredentials.First(c => c.ServiceName == "Sample Entry");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleEntry.ServiceName, Is.EqualTo("Sample Entry"));
+            Assert.That(sampleEntry.ServiceUrl, Is.EqualTo("https://keepass.info/"));
+            Assert.That(sampleEntry.Username, Is.EqualTo("User Name"));
+            Assert.That(sampleEntry.Password, Is.EqualTo("Password"));
+            Assert.That(sampleEntry.Notes, Is.EqualTo("Notes"));
+        });
+
+        var sampleEntry2 = importedCredentials.First(c => c.ServiceName == "Sample Entry #2");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleEntry2.ServiceName, Is.EqualTo("Sample Entry #2"));
+            Assert.That(sampleEntry2.ServiceUrl, Is.EqualTo("https://keepass.info/help/kb/testform.html"));
+            Assert.That(sampleEntry2.Username, Is.EqualTo("Michael321"));
+            Assert.That(sampleEntry2.Password, Is.EqualTo("12345"));
+            Assert.That(sampleEntry2.Notes, Is.Empty);
+        });
+    }
+
+    /// <summary>
+    /// Test case for importing credentials from KeePassXC CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromKeePassXcCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepassxc.csv");
+
+        // Act
+        var importedCredentials = await KeePassXcImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(2));
+
+        // Test specific entries
+        var sampleEntry = importedCredentials.First(c => c.ServiceName == "Sample Entry");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleEntry.ServiceName, Is.EqualTo("Sample Entry"));
+            Assert.That(sampleEntry.ServiceUrl, Is.EqualTo("https://keepass.info/"));
+            Assert.That(sampleEntry.Username, Is.EqualTo("User Name"));
+            Assert.That(sampleEntry.Password, Is.EqualTo("Password"));
+            Assert.That(sampleEntry.Notes, Is.EqualTo("Notes"));
+            Assert.That(sampleEntry.TwoFactorSecret, Is.Empty);
+        });
+
+        var sampleEntry2 = importedCredentials.First(c => c.ServiceName == "Sample Entry #2");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleEntry2.ServiceName, Is.EqualTo("Sample Entry #2"));
+            Assert.That(sampleEntry2.ServiceUrl, Is.EqualTo("https://keepass.info/help/kb/testform.html"));
+            Assert.That(sampleEntry2.Username, Is.EqualTo("Michael321"));
+            Assert.That(sampleEntry2.Password, Is.EqualTo("12345"));
+            Assert.That(sampleEntry2.Notes, Is.Empty);
+            Assert.That(sampleEntry2.TwoFactorSecret, Is.Empty);
         });
     }
 }
