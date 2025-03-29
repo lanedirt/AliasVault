@@ -203,4 +203,42 @@ public class ImportExportTests
             Assert.That(onePasswordAccount.Notes, Is.EqualTo("You can use this login to sign in to your account on 1password.com."));
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from Chrome CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromChromeCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.chrome.csv");
+
+        // Act
+        var importedCredentials = await ChromeImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(3));
+
+        // Test specific entries
+        var exampleCredential = importedCredentials.First(c => c.ServiceName == "example.com");
+        Assert.Multiple(() =>
+        {
+            Assert.That(exampleCredential.ServiceName, Is.EqualTo("example.com"));
+            Assert.That(exampleCredential.ServiceUrl, Is.EqualTo("https://example.com/"));
+            Assert.That(exampleCredential.Username, Is.EqualTo("usernamegoogle"));
+            Assert.That(exampleCredential.Password, Is.EqualTo("passwordgoogle"));
+            Assert.That(exampleCredential.Notes, Is.EqualTo("Note for example password from Google"));
+        });
+
+        var facebookCredential = importedCredentials.First(c => c.ServiceName == "facebook.com");
+        Assert.Multiple(() =>
+        {
+            Assert.That(facebookCredential.ServiceName, Is.EqualTo("facebook.com"));
+            Assert.That(facebookCredential.ServiceUrl, Is.EqualTo("https://facebook.com/"));
+            Assert.That(facebookCredential.Username, Is.EqualTo("facebookuser"));
+            Assert.That(facebookCredential.Password, Is.EqualTo("facebookpass"));
+            Assert.That(facebookCredential.Notes, Is.EqualTo("Facebook comment"));
+        });
+    }
 }
