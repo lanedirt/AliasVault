@@ -65,6 +65,8 @@
       <EmbeddedResource Include="TestData\Exports\bitwarden.csv" />
       <None Remove="TestData\Exports\keepass.kdbx.csv" />
       <EmbeddedResource Include="TestData\Exports\keepass.kdbx.csv" />
+      <None Remove="TestData\Exports\1password_8.csv" />
+      <EmbeddedResource Include="TestData\Exports\1password_8.csv" />
     </ItemGroup>
 
 </Project>
