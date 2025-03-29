@@ -31,8 +31,6 @@ public class BitwardenImporter
         var credentials = new List<ImportedCredential>();
         await foreach (var record in csv.GetRecordsAsync<BitwardenCsvRecord>())
         {
-            // TODO: OTPAuth should be converted from URL to a secret key during import or during
-            // the actual creation of the imported credential object.
             var credential = new ImportedCredential
             {
                 ServiceName = record.Title,
