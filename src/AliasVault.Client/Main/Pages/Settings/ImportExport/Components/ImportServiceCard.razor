@@ -310,90 +310,21 @@
             return;
         }
 
-        IsImporting = true;
-        ImportError = null;
-        ImportSuccessMessage = null;
-        StateHasChanged();
-
-        // Let UI update to start showing the loading indicator as the save database call below can block the UI thread momentarily.
-        await Task.Delay(50);
+        await InitializeImport();
 
         try
         {
             if (ExtractFavicons)
             {
-                IsExtractingFavicons = true;
-                FaviconExtractionProgress = 0;
-                ExtractedFavicons.Clear();
-                FaviconExtractionCancellation = new CancellationTokenSource();
-                StateHasChanged();
-
-                // Get credentials with URLs
-                var credentialsWithUrls = ImportedCredentials.Where(c => !string.IsNullOrEmpty(c.ServiceUrl)).ToList();
-                TotalFaviconsToExtract = credentialsWithUrls.Count;
-
-                // Extract favicons
-                foreach (var credential in credentialsWithUrls)
+                await ExtractFaviconsForCredentials();
+                if (FaviconExtractionCancellation?.Token.IsCancellationRequested == true)
                 {
-                    if (FaviconExtractionCancellation.Token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    try
-                    {
-                        var apiReturn = await HttpClient.GetFromJsonAsync<FaviconExtractModel>($"v1/Favicon/Extract?url={credential.ServiceUrl!}");
-                        if (apiReturn?.Image is not null)
-                        {
-                            ExtractedFavicons[credential.ServiceUrl!] = apiReturn.Image;
-                        }
-                    }
-                    catch
-                    {
-                        // Ignore favicon extraction errors
-                    }
-
-                    FaviconExtractionProgress++;
-                    StateHasChanged();
-                }
-
-                if (FaviconExtractionCancellation.Token.IsCancellationRequested)
-                {
-                    IsImporting = false;
-                    IsExtractingFavicons = false;
-                    StateHasChanged();
+                    CleanupImport();
                     return;
                 }
             }
 
-            // Convert imported credentials to AliasVault format and insert them to the database.
-            var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
-            foreach (var credential in credentials)
-            {
-                if (!string.IsNullOrEmpty(credential.Service.Url))
-                {
-                    if (ExtractedFavicons.TryGetValue(credential.Service.Url, out var favicon))
-                    {
-                        credential.Service.Logo = favicon;
-                    }
-                }
-                await CredentialService.InsertEntryAsync(credential, false, false);
-
-                // Add small delay to avoid blocking the UI thread.
-                await Task.Delay(2);
-            }
-
-            // Save the database
-            var success = await DbService.SaveDatabaseAsync();
-            if (success)
-            {
-                GlobalNotificationService.AddSuccessMessage($"Successfully imported {ImportedCredentials.Count} credentials.");
-                NavigationManager.NavigateTo("/credentials");
-            }
-            else
-            {
-                ImportError = "Error saving database.";
-            }
+            await ImportCredentialsToDatabase();
         }
         catch (Exception ex)
         {
@@ -401,13 +332,119 @@
         }
         finally
         {
-            IsImporting = false;
-            IsExtractingFavicons = false;
+            CleanupImport();
+        }
+    }
+
+    /// <summary>
+    /// Initializes the import.
+    /// </summary>
+    private async Task InitializeImport()
+    {
+        IsImporting = true;
+        ImportError = null;
+        ImportSuccessMessage = null;
+        StateHasChanged();
+        
+        // Let UI update to start showing the loading indicator
+        await Task.Delay(50);
+    }
+
+    /// <summary>
+    /// Cleans up the import.
+    /// </summary>
+    private void CleanupImport()
+    {
+        IsImporting = false;
+        IsExtractingFavicons = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Extracts favicons for credentials.
+    /// </summary>
+    private async Task ExtractFaviconsForCredentials()
+    {
+        IsExtractingFavicons = true;
+        FaviconExtractionProgress = 0;
+        ExtractedFavicons.Clear();
+        FaviconExtractionCancellation = new CancellationTokenSource();
+        StateHasChanged();
+
+        var credentialsWithUrls = ImportedCredentials.Where(c => !string.IsNullOrEmpty(c.ServiceUrl)).ToList();
+        TotalFaviconsToExtract = credentialsWithUrls.Count;
+
+        foreach (var credential in credentialsWithUrls)
+        {
+            if (FaviconExtractionCancellation.Token.IsCancellationRequested)
+            {
+                break;
+            }
+
+            await ExtractFaviconForCredential(credential);
+            FaviconExtractionProgress++;
             StateHasChanged();
         }
     }
 
-     /// <summary>
+    /// <summary>
+    /// Extracts a favicon for a credential.
+    /// </summary>
+    /// <param name="credential">The credential to extract the favicon for.</param>
+    private async Task ExtractFaviconForCredential(ImportedCredential credential)
+    {
+        try
+        {
+            var apiReturn = await HttpClient.GetFromJsonAsync<FaviconExtractModel>($"v1/Favicon/Extract?url={credential.ServiceUrl!}");
+            if (apiReturn?.Image is not null)
+            {
+                ExtractedFavicons[credential.ServiceUrl!] = apiReturn.Image;
+            }
+        }
+        catch
+        {
+            // Ignore favicon extraction errors
+        }
+    }
+
+    /// <summary>
+    /// Imports the credentials to the database.
+    /// </summary>
+    private async Task ImportCredentialsToDatabase()
+    {
+        var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
+        foreach (var credential in credentials)
+        {
+            await ProcessSingleCredential(credential);
+            await Task.Delay(2); // Small delay to avoid blocking the UI thread
+        }
+
+        var success = await DbService.SaveDatabaseAsync();
+        if (success)
+        {
+            GlobalNotificationService.AddSuccessMessage($"Successfully imported {ImportedCredentials.Count} credentials.");
+            NavigationManager.NavigateTo("/credentials");
+        }
+        else
+        {
+            ImportError = "Error saving database.";
+        }
+    }
+
+    /// <summary>
+    /// Processes a single credential.
+    /// </summary>
+    /// <param name="credential">The credential to process.</param>
+    private async Task ProcessSingleCredential(Credential credential)
+    {
+        if (!string.IsNullOrEmpty(credential.Service.Url) && ExtractedFavicons.TryGetValue(credential.Service.Url, out var favicon))
+        {
+            credential.Service.Logo = favicon;
+        }
+        await CredentialService.InsertEntryAsync(credential, false, false);
+    }
+
+    /// <summary>
     /// Handles the file upload.
     /// </summary>
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
@@ -465,8 +502,11 @@
 
     private int GetFaviconProgressPercentage()
     {
-        if (TotalFaviconsToExtract == 0) return 0;
-        return (int)((FaviconExtractionProgress * 100) / TotalFaviconsToExtract);
+        if (TotalFaviconsToExtract == 0) {
+            return 0;
+        }
+
+        return (FaviconExtractionProgress * 100) / TotalFaviconsToExtract;
     }
 
     private void CancelFaviconExtraction()
