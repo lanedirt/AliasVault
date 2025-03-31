@@ -30,35 +30,15 @@ public static class FaviconExtractor
     /// <returns>Byte array for favicon image.</returns>
     public static async Task<byte[]?> GetFaviconAsync(string url)
     {
-        // Add URL normalization - if no scheme is provided, try with https://
-        if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            url = "https://" + url;
-        }
-
+        url = NormalizeUrl(url);
         Uri uri = new(url);
 
-        // Only allow HTTP and HTTPS schemes and default ports.
-        if (!_allowedSchemes.Contains(uri.Scheme) || !uri.IsDefaultPort)
+        if (!IsValidUri(uri))
         {
             return null;
         }
 
-        using HttpClient client = new(new HttpClientHandler
-        {
-            AllowAutoRedirect = true,
-            MaxAutomaticRedirections = 10,
-        });
-
-        // Set a timeout for the HTTP request to prevent long-running jobs which block the client UI.
-        client.Timeout = TimeSpan.FromSeconds(5);
-
-        // Add headers to mimic a browser.
-        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-        client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-        client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
-        client.DefaultRequestHeaders.Add("Connection", "keep-alive");
-        client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+        using HttpClient client = CreateHttpClient();
 
         HttpResponseMessage response = await client.GetAsync(uri);
         if (!response.IsSuccessStatusCode)
@@ -66,31 +46,86 @@ public static class FaviconExtractor
             return null;
         }
 
+        var faviconNodes = await GetFaviconNodesFromHtml(response, uri);
+        return await TryExtractFaviconFromNodes(faviconNodes, client, uri);
+    }
+
+    /// <summary>
+    /// Normalizes the URL by adding a scheme if it is missing.
+    /// </summary>
+    /// <param name="url">The URL to normalize.</param>
+    /// <returns>The normalized URL.</returns>
+    private static string NormalizeUrl(string url)
+    {
+        if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return "https://" + url;
+        }
+
+        return url;
+    }
+
+    /// <summary>
+    /// Checks if the URI is valid.
+    /// </summary>
+    /// <param name="uri">The URI to check.</param>
+    /// <returns>True if the URI is valid, false otherwise.</returns>
+    private static bool IsValidUri(Uri uri)
+    {
+        return _allowedSchemes.Contains(uri.Scheme) && uri.IsDefaultPort;
+    }
+
+    /// <summary>
+    /// Creates a new HTTP client with default headers.
+    /// </summary>
+    /// <returns>The HTTP client.</returns>
+    private static HttpClient CreateHttpClient()
+    {
+        var client = new HttpClient(new HttpClientHandler
+        {
+            AllowAutoRedirect = true,
+            MaxAutomaticRedirections = 10,
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(5),
+        };
+
+        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+        client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
+        client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+        client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+
+        return client;
+    }
+
+    /// <summary>
+    /// Gets the favicon nodes from the HTML.
+    /// </summary>
+    /// <param name="response">The response to get the favicon nodes from.</param>
+    /// <param name="uri">The URI to get the favicon nodes from.</param>
+    /// <returns>The favicon nodes.</returns>
+    private static async Task<HtmlNodeCollection[]> GetFaviconNodesFromHtml(HttpResponseMessage response, Uri uri)
+    {
         string htmlContent = await response.Content.ReadAsStringAsync();
         HtmlDocument htmlDoc = new();
         htmlDoc.LoadHtml(htmlContent);
 
-        // Find all favicon links in the HTML with priority order
-        var faviconNodes = new[]
-        {
-            // SVG icons
-            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and @type='image/svg+xml']"),
-
-            // Large icons
-            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and (@sizes='192x192' or @sizes='128x128')]"),
-
-            // Apple touch icons
-            htmlDoc.DocumentNode.SelectNodes("//link[@rel='apple-touch-icon' or @rel='apple-touch-icon-precomposed']"),
-
-            // Standard icons
-            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon']"),
-        };
-
-        // Add default favicon.ico as fallback
         var defaultFavicon = new HtmlNode(HtmlNodeType.Element, htmlDoc, 0);
         defaultFavicon.Attributes.Add("href", $"{uri.GetLeftPart(UriPartial.Authority)}/favicon.ico");
-        faviconNodes = faviconNodes.Append(new HtmlNodeCollection(htmlDoc.DocumentNode) { defaultFavicon }).ToArray();
 
+        return
+        [
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and @type='image/svg+xml']"),
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and (@sizes='192x192' or @sizes='128x128')]"),
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='apple-touch-icon' or @rel='apple-touch-icon-precomposed']"),
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon']"),
+            new HtmlNodeCollection(htmlDoc.DocumentNode) { defaultFavicon },
+        ];
+    }
+
+    private static async Task<byte[]?> TryExtractFaviconFromNodes(HtmlNodeCollection[] faviconNodes, HttpClient client, Uri baseUri)
+    {
         foreach (var nodeCollection in faviconNodes)
         {
             if (nodeCollection == null || nodeCollection.Count == 0)
@@ -106,10 +141,9 @@ public static class FaviconExtractor
                     continue;
                 }
 
-                // If the favicon URL is relative, convert it to an absolute URL
                 if (!Uri.IsWellFormedUriString(faviconUrl, UriKind.Absolute))
                 {
-                    faviconUrl = new Uri(uri, faviconUrl).ToString();
+                    faviconUrl = new Uri(baseUri, faviconUrl).ToString();
                 }
 
                 var faviconBytes = await FetchAndProcessFaviconAsync(client, faviconUrl);
@@ -123,6 +157,12 @@ public static class FaviconExtractor
         return null;
     }
 
+    /// <summary>
+    /// Fetches and processes the favicon.
+    /// </summary>
+    /// <param name="client">The HTTP client.</param>
+    /// <param name="url">The URL to fetch the favicon from.</param>
+    /// <returns>The favicon bytes.</returns>
     private static async Task<byte[]?> FetchAndProcessFaviconAsync(HttpClient client, string url)
     {
         try
@@ -164,6 +204,12 @@ public static class FaviconExtractor
         }
     }
 
+    /// <summary>
+    /// Resizes the image to the target width.
+    /// </summary>
+    /// <param name="imageBytes">The image bytes to resize.</param>
+    /// <param name="contentType">The content type of the image.</param>
+    /// <returns>The resized image bytes.</returns>
     private static byte[]? ResizeImageAsync(byte[] imageBytes, string contentType)
     {
         try
