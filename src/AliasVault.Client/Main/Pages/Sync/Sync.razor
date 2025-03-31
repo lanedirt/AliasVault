@@ -3,9 +3,9 @@
 @implements IDisposable
 @using AliasVault.Client.Auth.Pages.Base
 @using AliasVault.Client.Main.Pages.Sync.StatusMessages
-@inject ILocalStorageService LocalStorage
 @inject DbService DbService
 @inject AuthService AuthService
+@inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject ILogger<Sync> Logger
 
@@ -52,7 +52,6 @@
     {
         await base.OnInitializedAsync();
 
-        DbService.GetState().StateChanged += OnDatabaseStateChanged;
         CurrentDbState = DbService.GetState().CurrentState;
 
         // Check that encryption key is set. If not, redirect to unlock screen.
@@ -62,6 +61,7 @@
         }
 
         await CheckAndInitializeDatabase();
+        DbService.GetState().StateChanged += OnDatabaseStateChanged;
     }
 
     private async Task CheckAndInitializeDatabase()
@@ -73,7 +73,7 @@
         }
         else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
         {
-            NavigationManager.NavigateTo("/");
+            await NavigateToHome();
         }
 
         StateHasChanged();
@@ -88,7 +88,7 @@
         }
         else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
         {
-            NavigationManager.NavigateTo("/");
+            await NavigateToHome();
         }
 
         Logger.LogDebug("Database state changed: {NewStatus}", CurrentDbState.Status);
@@ -113,6 +113,32 @@
 
         await CheckAndInitializeDatabase();
         StateHasChanged();
+    }
+
+    private async Task NavigateToHome()
+    {
+        var disallowedUrls = new[] { "/sync", "/unlock", "/user/logout" };
+        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(LoginBase.ReturnUrlKey);
+
+        if (string.IsNullOrEmpty(localStorageReturnUrl))
+        {
+            // Navigate to the default entry page.
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        var trimmedUrl = localStorageReturnUrl.Trim();
+        if (!string.IsNullOrEmpty(trimmedUrl) && !disallowedUrls.Contains(localStorageReturnUrl))
+        {
+            // If an explicit return URL has been configured, redirect to that URL.
+            await LocalStorage.RemoveItemAsync(LoginBase.ReturnUrlKey);
+            NavigationManager.NavigateTo(localStorageReturnUrl);
+        }
+        else
+        {
+            // Navigate to the default entry page.
+            NavigationManager.NavigateTo("/");
+        }
     }
 
     /// <inheritdoc />
