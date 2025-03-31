@@ -140,7 +140,7 @@
     /// </summary>
     private async Task DeleteAccountConfirmed()
     {
-        GlobalLoadingSpinner.Show();
+        GlobalLoadingSpinner.Show("Deleting account...");
         GlobalNotificationService.ClearMessages();
 
         try

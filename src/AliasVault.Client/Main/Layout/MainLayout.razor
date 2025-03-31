@@ -48,13 +48,12 @@
     {
         if (GlobalLoadingService.IsLoading)
         {
-            LoadingIndicator.Show();
+            LoadingIndicator.Show(GlobalLoadingService.LoadingMessage);
         }
         else
         {
             LoadingIndicator.Hide();
         }
-
         StateHasChanged();
     }
 }

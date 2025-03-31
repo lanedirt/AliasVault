@@ -173,7 +173,7 @@ else
     /// </summary>
     private async Task HandleLogin()
     {
-        _loadingIndicator.Show();
+        _loadingIndicator.Show("Logging in...");
         _serverValidationErrors.Clear();
 
         try
@@ -279,7 +279,7 @@ else
     /// </summary>
     private async Task HandleRecoveryCode()
     {
-        _loadingIndicator.Show();
+        _loadingIndicator.Show("Verifying recovery code...");
         _serverValidationErrors.Clear();
 
         try
@@ -337,7 +337,7 @@ else
     /// </summary>
     private async Task Handle2Fa()
     {
-        _loadingIndicator.Show();
+        _loadingIndicator.Show("Verifying 2FA code...");
         _serverValidationErrors.Clear();
 
         try
