@@ -53,7 +53,7 @@
 
     private async Task HandleRegister()
     {
-        _loadingIndicator.Show();
+        _loadingIndicator.Show("Creating account...");
         _serverValidationErrors.Clear();
 
         var (success, errorMessage) = await UserRegistrationService.RegisterUserAsync(_registerModel.Username, _registerModel.Password);

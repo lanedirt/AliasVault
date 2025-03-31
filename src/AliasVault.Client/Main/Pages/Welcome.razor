@@ -181,7 +181,7 @@
 
     private async Task FinishTutorial()
     {
-        GlobalLoadingSpinner.Show();
+        GlobalLoadingSpinner.Show("Finishing tutorial...");
         await DbService.Settings.SetTutorialDoneAsync(true);
         NavigationManager.NavigateTo("credentials");
         GlobalLoadingSpinner.Hide();

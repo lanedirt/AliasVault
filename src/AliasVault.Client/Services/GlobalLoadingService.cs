@@ -13,6 +13,7 @@ namespace AliasVault.Client.Services;
 public sealed class GlobalLoadingService
 {
     private bool _isLoading;
+    private string _loadingMessage = string.Empty;
 
     /// <summary>
     /// Occurs when the loading state changes.
@@ -36,12 +37,37 @@ public sealed class GlobalLoadingService
     }
 
     /// <summary>
+    /// Gets the current loading message.
+    /// </summary>
+    public string LoadingMessage
+    {
+        get => _loadingMessage;
+        private set
+        {
+            if (_loadingMessage != value)
+            {
+                _loadingMessage = value;
+                OnChange?.Invoke();
+            }
+        }
+    }
+
+    /// <summary>
     /// Show the global loading spinner.
     /// </summary>
-    public void Show() => IsLoading = true;
+    /// <param name="message">Optional message to display below the loading spinner.</param>
+    public void Show(string? message = null)
+    {
+        LoadingMessage = message ?? string.Empty;
+        IsLoading = true;
+    }
 
     /// <summary>
     /// Hide the global loading spinner.
     /// </summary>
-    public void Hide() => IsLoading = false;
+    public void Hide()
+    {
+        IsLoading = false;
+        LoadingMessage = string.Empty;
+    }
 }
