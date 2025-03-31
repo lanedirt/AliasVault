@@ -81,40 +81,62 @@
 
                         case ImportStep.Preview:
                             <div class="mb-4">
-                                <p class="mb-4 text-gray-700 dark:text-gray-300">Check if the following detected credentials look correct before continuing:</p>
-                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Username</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        @foreach (var credential in ImportedCredentials.Take(3))
-                                        {
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.ServiceName</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.Username</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@(new string('*', credential.Password?.Length ?? 0))</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                                @if (ImportedCredentials.Count > 3)
+                                @if (DuplicateCredentialsCount > 0)
                                 {
-                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 3) more credentials</p>
+                                    <div class="p-4 mb-4 text-blue-700 bg-blue-100 rounded-lg dark:bg-blue-800/30 dark:text-blue-300" role="alert">
+                                        <p>@DuplicateCredentialsCount duplicate credential(s) were found and will not be imported.</p>
+                                    </div>
+                                }
+                                
+                                @if (ImportedCredentials.Count == 0)
+                                {
+                                    <div class="p-4 mb-4 text-amber-700 bg-amber-100 rounded-lg dark:bg-amber-800/30 dark:text-amber-300" role="alert">
+                                        <p>No new credentials were found to import.</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="mb-4 text-gray-700 dark:text-gray-300">Check if the following detected credentials look correct before continuing:</p>
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead class="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Username</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            @foreach (var credential in ImportedCredentials.Take(3))
+                                            {
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.ServiceName</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@credential.Username</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">@(new string('*', credential.Password?.Length ?? 0))</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    @if (ImportedCredentials.Count > 3)
+                                    {
+                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 3) more credentials</p>
+                                    }
                                 }
                             </div>
-                            <div class="mb-4">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" @bind="ExtractFavicons" class="form-checkbox h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700">
-                                    <span class="ml-2 text-gray-700 dark:text-gray-300">Extract favicons for services with URLs</span>
-                                </label>
-                            </div>
+                            @if (ImportedCredentials.Count > 0)
+                            {
+                                <div class="mb-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" @bind="ExtractFavicons" class="form-checkbox h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                        <span class="ml-2 text-gray-700 dark:text-gray-300">Extract favicons for services with URLs</span>
+                                    </label>
+                                </div>
+                            }
                             <div class="flex justify-end mt-6 space-x-2">
                                 <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
-                                <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                                @if (ImportedCredentials.Count > 0)
+                                {
+                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                                }
                             </div>
                             break;
 
@@ -225,6 +247,8 @@
     private int TotalFaviconsToExtract { get; set; }
     private CancellationTokenSource? FaviconExtractionCancellation { get; set; }
     private Dictionary<string, byte[]> ExtractedFavicons { get; set; } = new();
+
+    private int DuplicateCredentialsCount { get; set; } = 0;
 
     /// <summary>
     /// Sets the imported credentials and continues to the preview step.
@@ -460,13 +484,12 @@
             IsImporting = true;
             StateHasChanged();
 
-            // Add file size validation
-            if (e.File.Size > 10 * 1024 * 1024) // 10MB limit
+            // Limit file size to 10MB
+            if (e.File.Size > 10 * 1024 * 1024)
             {
                 throw new ArgumentException("File size exceeds 10MB limit");
             }
 
-            // Create a new memory stream to hold the file data
             await using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
             using var reader = new StreamReader(stream);
             var fileContents = await reader.ReadToEndAsync();
@@ -477,6 +500,10 @@
             await Task.WhenAll(processingTask, delayTask);
 
             ImportedCredentials = await processingTask;
+            
+            // Detect and remove duplicates before showing the preview
+            await DetectAndRemoveDuplicates();
+            
             CurrentStep = ImportStep.Preview;
         }
         catch (Exception ex)
@@ -489,6 +516,25 @@
             IsImporting = false;
             StateHasChanged();
         }
+    }
+
+    /// <summary>
+    /// Detects and removes duplicates from the import list.
+    /// </summary>
+    private async Task DetectAndRemoveDuplicates()
+    {
+        var existingCredentials = await CredentialService.LoadAllAsync();
+        var duplicates = ImportedCredentials.Where(imported =>
+            existingCredentials.Any(existing =>
+                existing.Service.Name != null && existing.Service.Name.Equals(imported.ServiceName, StringComparison.OrdinalIgnoreCase) &&
+                existing.Username != null && existing.Username.Equals(imported.Username, StringComparison.OrdinalIgnoreCase) &&
+                existing.Passwords.Any(p => p.Value != null && p.Value.Equals(imported.Password, StringComparison.OrdinalIgnoreCase))
+            )).ToList();
+
+        DuplicateCredentialsCount = duplicates.Count;
+        
+        // Remove duplicates from the import list
+        ImportedCredentials = ImportedCredentials.Except(duplicates).ToList();
     }
 
     /// <summary>
