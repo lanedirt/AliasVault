@@ -136,7 +136,7 @@ else
         await AuthStateProvider.GetAuthenticationStateAsync();
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == true) {
-            // Already authenticated, redirect to home page.a
+            // Already authenticated, redirect to home page.
             NavigationManager.NavigateTo("/");
         }
     }
@@ -409,9 +409,10 @@ else
         GlobalNotificationService.ClearMessages();
 
         // Redirect to the page the user was trying to access before if set.
-        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
         if (!string.IsNullOrEmpty(localStorageReturnUrl))
         {
+            await LocalStorage.RemoveItemAsync(ReturnUrlKey);
             NavigationManager.NavigateTo(localStorageReturnUrl);
         }
         else
@@ -432,7 +433,7 @@ else
         {
             // Update the blazor model with the current value.
             _loginModel2Fa.TwoFactorCode = int.Parse(e.Value.ToString()!);
-            
+
             // Submit the form.
             await Handle2Fa();
         }

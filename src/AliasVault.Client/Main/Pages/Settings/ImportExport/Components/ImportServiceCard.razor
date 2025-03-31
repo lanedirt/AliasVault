@@ -1,5 +1,4 @@
 @inject ILogger<ImportServiceCard> Logger
-@inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject DbService DbService
 @inject NavigationManager NavigationManager
@@ -161,11 +160,17 @@
     [Parameter]
     public string LogoUrl { get; set; } = string.Empty;
 
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
     public EventCallback OnImportConfirmed { get; set; }
 
+    /// <summary>
+    ///
+    /// </summary>
     [Parameter]
-    public Func<string, Task<List<ImportedCredential>>> ProcessFileCallback { get; set; } = default!;
+    public Func<string, Task<List<ImportedCredential>>> ProcessFileCallback { get; set; } = null!;
 
     private bool IsModalOpen { get; set; } = false;
     private bool IsImporting { get; set; } = false;
@@ -177,7 +182,7 @@
     /// Child content which is shown in the modal popup. This can contain custom instructions.
     /// </summary>
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment ChildContent { get; set; } = null!;
 
     /// <summary>
     /// The imported credentials.
@@ -232,7 +237,7 @@
     {
         Logger.LogInformation($"File selected: {e.File.Name}");
 
-        if (e.File == null || string.IsNullOrEmpty(e.File.Name))
+        if (string.IsNullOrEmpty(e.File.Name))
         {
             ImportError = $"Please select a valid {ServiceName} export file to import";
             return;
@@ -250,7 +255,7 @@
             }
 
             // Create a new memory stream to hold the file data
-            using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
             using var reader = new StreamReader(stream);
             var fileContents = await reader.ReadToEndAsync();
 
@@ -274,6 +279,9 @@
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual async Task HandleNextStep()
     {
         if (CurrentStep == ImportStep.Preview)
@@ -286,6 +294,9 @@
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual void HandlePreviousStep()
     {
         if (CurrentStep == ImportStep.Preview)

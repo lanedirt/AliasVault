@@ -159,9 +159,10 @@ else
             await AuthService.StoreEncryptionKeyAsync(passwordHash);
 
             // Redirect to the page the user was trying to access before if set.
-            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>("returnUrl");
+            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
             if (!string.IsNullOrEmpty(localStorageReturnUrl))
             {
+                await LocalStorage.RemoveItemAsync(ReturnUrlKey);
                 NavigationManager.NavigateTo(localStorageReturnUrl);
             }
             else
