@@ -491,7 +491,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     {
         // Try to extract favicon from service URL
         var url = credentialObject.Service.Url;
-        if (url != null && !string.IsNullOrEmpty(url) && url.Contains("http"))
+        if (url != null && !string.IsNullOrEmpty(url))
         {
             // Request favicon from service URL via WebApi
             try
