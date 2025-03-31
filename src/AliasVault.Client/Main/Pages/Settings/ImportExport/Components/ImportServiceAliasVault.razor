@@ -13,7 +13,7 @@
 </ImportServiceCard>
 
 @code {
-    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         var importedCredentials = await Task.Run(() =>
         {

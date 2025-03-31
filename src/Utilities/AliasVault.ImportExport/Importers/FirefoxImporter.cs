@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from Firefox Password Manager.
 /// </summary>
-public class FirefoxImporter
+public static class FirefoxImporter
 {
     /// <summary>
     /// Imports Firefox CSV file and converts contents to list of ImportedCredential model objects.

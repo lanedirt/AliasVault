@@ -12,9 +12,9 @@ using AliasVault.ImportExport.Models;
 using AliasVault.TotpGenerator;
 
 /// <summary>
-/// Base class for all importers.
+/// Generic import logic.
 /// </summary>
-public class BaseImporter
+public static class BaseImporter
 {
     /// <summary>
     /// Converts a list of imported credentials to a list of AliasVault credentials.

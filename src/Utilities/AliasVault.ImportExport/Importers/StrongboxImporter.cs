@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from Strongbox.
 /// </summary>
-public class StrongboxImporter
+public static class StrongboxImporter
 {
     /// <summary>
     /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.

@@ -14,7 +14,7 @@
 </ImportServiceCard>
 
 @code {
-    private async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await ChromeImporter.ImportFromCsvAsync(fileContents);
     }
