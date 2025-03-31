@@ -117,7 +117,7 @@ public abstract class MainBase : OwningComponentBase
             }
         }
 
-        // Check if DB is initialized, if not, redirect to setup page.
+        // Check if DB is initialized, if not, redirect to sync page.
         if (!DbService.GetState().CurrentState.IsInitialized())
         {
             var currentRelativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
