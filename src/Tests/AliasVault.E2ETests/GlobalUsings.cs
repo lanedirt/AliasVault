@@ -9,6 +9,5 @@
 global using System.Threading.Tasks;
 global using AliasVault.E2ETests.Infrastructure;
 global using AliasVault.E2ETests.Common;
-global using AliasVault.UnitTests.Common;
 global using NUnit.Framework;
 global using Microsoft.Playwright;
