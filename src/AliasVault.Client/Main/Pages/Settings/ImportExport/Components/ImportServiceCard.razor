@@ -143,31 +143,31 @@
     }
 
     /// <summary>
-    ///
+    /// The name of the service.
     /// </summary>
     [Parameter]
     public string ServiceName { get; set; } = string.Empty;
 
     /// <summary>
-    ///
+    /// The description of the service.
     /// </summary>
     [Parameter]
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
-    ///
+    /// The URL of the logo of the service.
     /// </summary>
     [Parameter]
     public string LogoUrl { get; set; } = string.Empty;
 
     /// <summary>
-    ///
+    /// The event callback for when the import is confirmed.
     /// </summary>
     [Parameter]
     public EventCallback OnImportConfirmed { get; set; }
 
     /// <summary>
-    ///
+    /// The callback for processing the file.
     /// </summary>
     [Parameter]
     public Func<string, Task<List<ImportedCredential>>> ProcessFileCallback { get; set; } = null!;
@@ -211,7 +211,7 @@
     }
 
     /// <summary>
-    ///
+    /// Opens the import modal.
     /// </summary>
     protected virtual void OpenImportModal()
     {
@@ -221,7 +221,7 @@
     }
 
     /// <summary>
-    ///
+    /// Closes the import modal.
     /// </summary>
     protected virtual void CloseModal()
     {
@@ -233,54 +233,8 @@
         StateHasChanged();
     }
 
-    private async Task HandleFileUpload(InputFileChangeEventArgs e)
-    {
-        Logger.LogInformation($"File selected: {e.File.Name}");
-
-        if (string.IsNullOrEmpty(e.File.Name))
-        {
-            ImportError = $"Please select a valid {ServiceName} export file to import";
-            return;
-        }
-
-        try
-        {
-            IsImporting = true;
-            StateHasChanged();
-
-            // Add file size validation
-            if (e.File.Size > 10 * 1024 * 1024) // 10MB limit
-            {
-                throw new Exception("File size exceeds 10MB limit");
-            }
-
-            // Create a new memory stream to hold the file data
-            await using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            using var reader = new StreamReader(stream);
-            var fileContents = await reader.ReadToEndAsync();
-
-            var processingTask = ProcessFileCallback(fileContents);
-            var delayTask = Task.Delay(500);
-
-            await Task.WhenAll(processingTask, delayTask);
-
-            ImportedCredentials = await processingTask;
-            CurrentStep = ImportStep.Preview;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, $"Error processing {ServiceName} export file");
-            ImportError = $"Error processing {ServiceName} export file. Please check the file format and try again.";
-        }
-        finally
-        {
-            IsImporting = false;
-            StateHasChanged();
-        }
-    }
-
     /// <summary>
-    ///
+    /// Handles the next step in the import process.
     /// </summary>
     protected virtual async Task HandleNextStep()
     {
@@ -295,7 +249,7 @@
     }
 
     /// <summary>
-    ///
+    /// Handles the previous step in the import process.
     /// </summary>
     protected virtual void HandlePreviousStep()
     {
@@ -310,7 +264,7 @@
     }
 
     /// <summary>
-    ///
+    /// Handles the modal confirm.
     /// </summary>
     protected virtual async Task HandleModalConfirm()
     {
@@ -352,6 +306,55 @@
         {
             Logger.LogError(ex, "Error importing credentials");
             ImportError = $"Error importing credentials: {ex.Message}";
+        }
+        finally
+        {
+            IsImporting = false;
+            StateHasChanged();
+        }
+    }
+
+     /// <summary>
+    /// Handles the file upload.
+    /// </summary>
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        Logger.LogInformation($"File selected: {e.File.Name}");
+
+        if (string.IsNullOrEmpty(e.File.Name))
+        {
+            ImportError = $"Please select a valid {ServiceName} export file to import";
+            return;
+        }
+
+        try
+        {
+            IsImporting = true;
+            StateHasChanged();
+
+            // Add file size validation
+            if (e.File.Size > 10 * 1024 * 1024) // 10MB limit
+            {
+                throw new Exception("File size exceeds 10MB limit");
+            }
+
+            // Create a new memory stream to hold the file data
+            await using var stream = e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            var fileContents = await reader.ReadToEndAsync();
+
+            var processingTask = ProcessFileCallback(fileContents);
+            var delayTask = Task.Delay(500);
+
+            await Task.WhenAll(processingTask, delayTask);
+
+            ImportedCredentials = await processingTask;
+            CurrentStep = ImportStep.Preview;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error processing {ServiceName} export file");
+            ImportError = $"Error processing {ServiceName} export file. Please check the file format and try again.";
         }
         finally
         {
