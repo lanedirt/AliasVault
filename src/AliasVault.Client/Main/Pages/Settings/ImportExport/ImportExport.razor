@@ -137,6 +137,11 @@ Are you sure you want to continue with the export?";
         }
     }
 
+    /// <summary>
+    /// Creates a filename for the export file based on the current date and username.
+    /// </summary>
+    /// <param name="extension">The extension of the file.</param>
+    /// <returns>The export file name.</returns>
     private async Task<string> GetExportFileName(string extension)
     {
         var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
