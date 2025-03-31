@@ -60,8 +60,7 @@ public class JwtTokenTests : ClientPlaywrightTest
         // Increase the time by 24 hours to make the JWT token expire.
         ApiTimeProvider.AdvanceBy(TimeSpan.FromHours(24));
 
-        // Check if by entering password the JWT token is refreshed and the
-        // unlock page is replaced by the alias listing page.
+        // Login.
         await InputHelper.FillInputFields(new Dictionary<string, string>
         {
             { "password", TestUserPassword },

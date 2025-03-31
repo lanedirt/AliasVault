@@ -1,6 +1,7 @@
 ﻿@page "/sync"
 @layout EmptyLayout
 @implements IDisposable
+@using AliasVault.Client.Auth.Pages.Base
 @using AliasVault.Client.Main.Pages.Sync.StatusMessages
 @inject ILocalStorageService LocalStorage
 @inject DbService DbService
@@ -43,7 +44,6 @@
 
 
 @code {
-    private const string ReturnUrlKey = "returnUrl";
     private DbServiceState.DatabaseState CurrentDbState { get; set; } = new();
     private const int MinimumLoadingTimeMs = 800;
 
@@ -73,7 +73,7 @@
         }
         else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
         {
-            await RedirectBackToReturnUrl();
+            NavigationManager.NavigateTo("/");
         }
 
         StateHasChanged();
@@ -88,7 +88,7 @@
         }
         else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.Ready)
         {
-            await RedirectBackToReturnUrl();
+            NavigationManager.NavigateTo("/");
         }
 
         Logger.LogDebug("Database state changed: {NewStatus}", CurrentDbState.Status);
@@ -113,22 +113,6 @@
 
         await CheckAndInitializeDatabase();
         StateHasChanged();
-    }
-
-    private async Task RedirectBackToReturnUrl()
-    {
-        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
-        var disallowedUrls = new[] { "/sync", "/unlock", "/user/logout" };
-
-        if (!string.IsNullOrEmpty(localStorageReturnUrl) && !disallowedUrls.Contains(localStorageReturnUrl))
-        {
-            await LocalStorage.RemoveItemAsync(ReturnUrlKey);
-            NavigationManager.NavigateTo(localStorageReturnUrl);
-        }
-        else
-        {
-            NavigationManager.NavigateTo("/");
-        }
     }
 
     /// <inheritdoc />

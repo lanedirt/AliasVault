@@ -7,6 +7,7 @@
 
 namespace AliasVault.Client.Main.Pages;
 
+using AliasVault.Client.Auth.Pages.Base;
 using AliasVault.Client.Services;
 using AliasVault.Client.Services.Auth;
 using AliasVault.RazorComponents.Models;
@@ -21,7 +22,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 /// </summary>
 public abstract class MainBase : OwningComponentBase
 {
-    private const string ReturnUrlKey = "returnUrl";
     private bool _parametersInitialSet;
 
     /// <summary>
@@ -120,8 +120,8 @@ public abstract class MainBase : OwningComponentBase
         // Check if DB is initialized, if not, redirect to setup page.
         if (!DbService.GetState().CurrentState.IsInitialized())
         {
-            var currentUrl = NavigationManager.Uri;
-            await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
+            var currentRelativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            await LocalStorage.SetItemAsync(LoginBase.ReturnUrlKey, currentRelativeUrl);
 
             NavigationManager.NavigateTo("/sync");
             while (true)
@@ -148,8 +148,8 @@ public abstract class MainBase : OwningComponentBase
         // Check if DB is initialized, if not, redirect to setup page.
         if (!DbService.GetState().CurrentState.IsInitialized())
         {
-            var currentUrl = NavigationManager.Uri;
-            await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
+            var currentRelativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            await LocalStorage.SetItemAsync(LoginBase.ReturnUrlKey, currentRelativeUrl);
 
             NavigationManager.NavigateTo("/sync");
             while (true)
@@ -203,13 +203,14 @@ public abstract class MainBase : OwningComponentBase
         if (!AuthService.IsEncryptionKeySet())
         {
             // If returnUrl is not set and current URL is not unlock page, set it to the current URL.
-            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(ReturnUrlKey);
+            var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(LoginBase.ReturnUrlKey);
             if (string.IsNullOrEmpty(localStorageReturnUrl))
             {
                 var currentUrl = NavigationManager.Uri;
                 if (!currentUrl.Contains("unlock"))
                 {
-                    await LocalStorage.SetItemAsync(ReturnUrlKey, currentUrl);
+                    var currentRelativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+                    await LocalStorage.SetItemAsync(LoginBase.ReturnUrlKey, currentRelativeUrl);
                 }
             }
 

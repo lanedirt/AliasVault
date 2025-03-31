@@ -1,13 +1,38 @@
 ﻿@page "/"
+@using AliasVault.Client.Auth.Pages.Base
 @inherits MainBase
 
 @code {
+    private const string DefaultRedirectUri = "/credentials";
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        // Redirect to /credentials.
-        NavigationManager.NavigateTo("/credentials");
+        var disallowedUrls = new[] { "/sync", "/unlock", "/user/logout" };
+        var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(LoginBase.ReturnUrlKey);
+
+        if (string.IsNullOrEmpty(localStorageReturnUrl))
+        {
+            // Navigate to the default entry page.
+            NavigationManager.NavigateTo(DefaultRedirectUri);
+            return;
+        }
+
+        var trimmedUrl = localStorageReturnUrl.Trim();
+        if (!string.IsNullOrEmpty(trimmedUrl) && !disallowedUrls.Contains(localStorageReturnUrl))
+        {
+            // If an explicit return URL has been configured, redirect to that URL.
+            await LocalStorage.RemoveItemAsync(LoginBase.ReturnUrlKey);
+            NavigationManager.NavigateTo(localStorageReturnUrl);
+            Console.WriteLine($"Navigating to: {localStorageReturnUrl}");
+        }
+        else
+        {
+            // Navigate to the default entry page.
+            Console.WriteLine("Navigating to default entry page");
+            NavigationManager.NavigateTo(DefaultRedirectUri);
+        }
     }
 }
