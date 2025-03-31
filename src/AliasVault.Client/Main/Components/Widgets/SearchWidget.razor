@@ -39,7 +39,7 @@
     {
         @if (SearchResults.Any())
         {
-            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+            <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
                 @for (int i = 0; i < SearchResults.Count; i++)
                 {
                     var result = SearchResults[i];
@@ -64,7 +64,7 @@
         }
         else
         {
-            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+            <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
                 <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
                     No results found
                 </div>

@@ -1025,6 +1025,10 @@ video {
   width: 100%;
 }
 
+.w-screen {
+  width: 100vw;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -2976,6 +2980,10 @@ video {
     top: -0.5rem;
   }
 
+  .sm\:left-auto {
+    left: auto;
+  }
+
   .sm\:col-span-3 {
     grid-column: span 3 / span 3;
   }
@@ -3002,6 +3010,10 @@ video {
 
   .sm\:w-auto {
     width: auto;
+  }
+
+  .sm\:w-full {
+    width: 100%;
   }
 
   .sm\:grid-cols-2 {
