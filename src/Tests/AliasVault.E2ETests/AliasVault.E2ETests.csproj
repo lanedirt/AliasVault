@@ -53,7 +53,6 @@
       <ProjectReference Include="..\..\Databases\AliasServerDb\AliasServerDb.csproj" />
       <ProjectReference Include="..\..\Utilities\AliasVault.TotpGenerator\AliasVault.TotpGenerator.csproj" />
       <ProjectReference Include="..\AliasVault.IntegrationTests\AliasVault.IntegrationTests.csproj" />
-      <ProjectReference Include="..\AliasVault.UnitTests\AliasVault.UnitTests.csproj" />
       <ProjectReference Include="..\Server\AliasVault.E2ETests.Client.Server\AliasVault.E2ETests.Client.Server.csproj" />
     </ItemGroup>
 
