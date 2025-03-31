@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from Chrome Password Manager.
 /// </summary>
-public class ChromeImporter
+public static class ChromeImporter
 {
     /// <summary>
     /// Imports Chrome CSV file and converts contents to list of ImportedCredential model objects.

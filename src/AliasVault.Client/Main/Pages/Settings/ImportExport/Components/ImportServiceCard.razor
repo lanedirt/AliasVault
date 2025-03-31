@@ -304,7 +304,6 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error importing credentials");
             ImportError = $"Error importing credentials: {ex.Message}";
         }
         finally
@@ -319,8 +318,6 @@
     /// </summary>
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
-        Logger.LogInformation($"File selected: {e.File.Name}");
-
         if (string.IsNullOrEmpty(e.File.Name))
         {
             ImportError = $"Please select a valid {ServiceName} export file to import";
@@ -335,7 +332,7 @@
             // Add file size validation
             if (e.File.Size > 10 * 1024 * 1024) // 10MB limit
             {
-                throw new Exception("File size exceeds 10MB limit");
+                throw new ArgumentException("File size exceeds 10MB limit");
             }
 
             // Create a new memory stream to hold the file data
@@ -353,8 +350,8 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, $"Error processing {ServiceName} export file");
             ImportError = $"Error processing {ServiceName} export file. Please check the file format and try again.";
+            Logger.LogError(ex, "Error processing {ServiceName} export file", ServiceName);
         }
         finally
         {

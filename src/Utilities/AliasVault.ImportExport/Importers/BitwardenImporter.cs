@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from Bitwarden.
 /// </summary>
-public class BitwardenImporter
+public static class BitwardenImporter
 {
     /// <summary>
     /// Imports Bitwarden CSV file and converts contents to list of ImportedCredential model objects.

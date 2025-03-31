@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from 1Password.
 /// </summary>
-public class OnePasswordImporter
+public static class OnePasswordImporter
 {
     /// <summary>
     /// Imports 1Password CSV file and converts contents to list of ImportedCredential model objects.

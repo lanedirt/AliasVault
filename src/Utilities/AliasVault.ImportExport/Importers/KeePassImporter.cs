@@ -16,7 +16,7 @@ using System.Globalization;
 /// <summary>
 /// Imports credentials from KeePass.
 /// </summary>
-public class KeePassImporter
+public static class KeePassImporter
 {
     /// <summary>
     /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.
