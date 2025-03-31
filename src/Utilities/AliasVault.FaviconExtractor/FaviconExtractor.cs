@@ -8,15 +8,19 @@
 namespace AliasVault.FaviconExtractor;
 
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using SkiaSharp;
 
 /// <summary>
 /// Favicon service for extracting favicons from URLs.
 /// </summary>
 public static class FaviconExtractor
 {
+    private const int MaxSizeBytes = 50 * 1024; // 50KB max size before resizing
+    private const int TargetWidth = 96; // Resize target width
     private static readonly string[] _allowedSchemes = { "http", "https" };
 
     /// <summary>
@@ -26,7 +30,13 @@ public static class FaviconExtractor
     /// <returns>Byte array for favicon image.</returns>
     public static async Task<byte[]?> GetFaviconAsync(string url)
     {
-        Uri uri = new Uri(url);
+        // Add URL normalization - if no scheme is provided, try with https://
+        if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            url = "https://" + url;
+        }
+
+        Uri uri = new(url);
 
         // Only allow HTTP and HTTPS schemes and default ports.
         if (!_allowedSchemes.Contains(uri.Scheme) || !uri.IsDefaultPort)
@@ -60,69 +70,134 @@ public static class FaviconExtractor
         HtmlDocument htmlDoc = new();
         htmlDoc.LoadHtml(htmlContent);
 
-        // Find all favicon links in the HTML
-        var faviconNodes = htmlDoc.DocumentNode.SelectNodes("//link[contains(@rel, 'icon')]");
-        if (faviconNodes == null || faviconNodes.Count == 0)
+        // Find all favicon links in the HTML with priority order
+        var faviconNodes = new[]
         {
-            return null;
-        }
+            // SVG icons
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and @type='image/svg+xml']"),
 
-        // Extract favicon URLs and their sizes
-        var favicons = faviconNodes
-            .Select(node => new
+            // Large icons
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and (@sizes='192x192' or @sizes='128x128')]"),
+
+            // Apple touch icons
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='apple-touch-icon' or @rel='apple-touch-icon-precomposed']"),
+
+            // Standard icons
+            htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon']"),
+        };
+
+        // Add default favicon.ico as fallback
+        var defaultFavicon = new HtmlNode(HtmlNodeType.Element, htmlDoc, 0);
+        defaultFavicon.Attributes.Add("href", $"{uri.GetLeftPart(UriPartial.Authority)}/favicon.ico");
+        faviconNodes = faviconNodes.Append(new HtmlNodeCollection(htmlDoc.DocumentNode) { defaultFavicon }).ToArray();
+
+        foreach (var nodeCollection in faviconNodes)
+        {
+            if (nodeCollection == null || nodeCollection.Count == 0)
             {
-                Url = node.GetAttributeValue("href", string.Empty),
-                Size = GetFaviconSize(node.GetAttributeValue("sizes", "0x0")),
-            })
-            .Where(favicon => !string.IsNullOrEmpty(favicon.Url))
-            .OrderByDescending(favicon => favicon.Size)
-            .ToList();
+                continue;
+            }
 
-        if (favicons.Count == 0)
-        {
-            return null;
+            foreach (var node in nodeCollection)
+            {
+                var faviconUrl = node.GetAttributeValue("href", string.Empty);
+                if (string.IsNullOrEmpty(faviconUrl))
+                {
+                    continue;
+                }
+
+                // If the favicon URL is relative, convert it to an absolute URL
+                if (!Uri.IsWellFormedUriString(faviconUrl, UriKind.Absolute))
+                {
+                    faviconUrl = new Uri(uri, faviconUrl).ToString();
+                }
+
+                var faviconBytes = await FetchAndProcessFaviconAsync(client, faviconUrl);
+                if (faviconBytes != null)
+                {
+                    return faviconBytes;
+                }
+            }
         }
 
-        var bestFavicon = favicons[0];
-        var faviconUrl = bestFavicon.Url;
-
-        // If the favicon URL is relative, convert it to an absolute URL
-        if (!Uri.IsWellFormedUriString(faviconUrl, UriKind.Absolute))
-        {
-            var baseUri = new Uri(url);
-            faviconUrl = new Uri(baseUri, faviconUrl).ToString();
-        }
-
-        HttpResponseMessage faviconResponse = await client.GetAsync(faviconUrl);
-        if (!faviconResponse.IsSuccessStatusCode)
-        {
-            return null;
-        }
-
-        byte[] faviconBytes = await faviconResponse.Content.ReadAsByteArrayAsync();
-        return faviconBytes;
+        return null;
     }
 
-    /// <summary>
-    /// Gets the size of a favicon from a size string.
-    /// </summary>
-    /// <param name="size">Size string.</param>
-    /// <returns>Int which represent pixel count of image size.</returns>
-    private static int GetFaviconSize(string size)
+    private static async Task<byte[]?> FetchAndProcessFaviconAsync(HttpClient client, string url)
     {
-        if (string.IsNullOrEmpty(size) || size == "any")
+        try
         {
-            return 0;
-        }
+            var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
 
-        var sizeParts = size.Split('x');
-        if (sizeParts.Length == 2 &&
-            int.TryParse(sizeParts[0], out int width) &&
-            int.TryParse(sizeParts[1], out int height))
+            var contentType = response.Content.Headers.ContentType?.MediaType;
+            if (string.IsNullOrEmpty(contentType) || !contentType.StartsWith("image/"))
+            {
+                return null;
+            }
+
+            var imageBytes = await response.Content.ReadAsByteArrayAsync();
+            if (imageBytes.Length == 0)
+            {
+                return null;
+            }
+
+            // If image is too large, attempt to resize
+            if (imageBytes.Length > MaxSizeBytes)
+            {
+                var resizedBytes = ResizeImageAsync(imageBytes, contentType);
+                if (resizedBytes != null)
+                {
+                    imageBytes = resizedBytes;
+                }
+            }
+
+            // Return only if within size limits
+            return imageBytes.Length <= MaxSizeBytes ? imageBytes : null;
+        }
+        catch
         {
-            return width * height;
+            return null;
         }
+    }
 
-        return 0;
+    private static byte[]? ResizeImageAsync(byte[] imageBytes, string contentType)
+    {
+        try
+        {
+            using var original = SKBitmap.Decode(imageBytes);
+            if (original == null)
+            {
+                return null;
+            }
+
+            var scale = (float)TargetWidth / original.Width;
+            var targetHeight = (int)(original.Height * scale);
+
+            using var resized = original.Resize(new SKImageInfo(TargetWidth, targetHeight), new SKSamplingOptions(SKFilterMode.Linear));
+            if (resized == null)
+            {
+                return null;
+            }
+
+            using var image = SKImage.FromBitmap(resized);
+            var format = contentType switch
+            {
+                "image/png" => SKEncodedImageFormat.Png,
+                "image/jpeg" => SKEncodedImageFormat.Jpeg,
+                "image/gif" => SKEncodedImageFormat.Gif,
+                _ => SKEncodedImageFormat.Png,
+            };
+
+            var data = image.Encode(format, 90);
+            return data?.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
