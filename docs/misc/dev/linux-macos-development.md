@@ -33,17 +33,7 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    cd AliasVault
    ```
 
-2. **Copy pre-commit hook script**
-   {: .note }
-   All commits in this repo are required to contain a reference to a GitHub issue in the format of "your commit message (#123)" where "123" references the GitHub issue number.
-
-   ```bash
-   # Copy the commit-msg hook script
-   cp .github/hooks/commit-msg .git/hooks/commit-msg
-   chmod +x .git/hooks/commit-msg
-   ```
-
-3. **Install dotnet CLI EF Tools**
+2. **Install dotnet CLI EF Tools**
    ```bash
    # Install dotnet EF tools globally
    dotnet tool install --global dotnet-ef
@@ -56,12 +46,12 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    dotnet ef
    ```
 
-4. **Install dev database**
+3. **Install dev database**
    ```bash
    ./install.sh configure-dev-db
    ```
 
-5. **Run Tailwind CSS compiler**
+4. **Run Tailwind CSS compiler**
    ```bash
    # For Admin project
    cd src/AliasVault.Admin
@@ -72,7 +62,7 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    npm run build:client-css
    ```
 
-6. **Install Playwright for E2E tests**
+5. **Install Playwright for E2E tests**
    ```bash
    # Install Playwright CLI
    dotnet tool install --global Microsoft.Playwright.CLI
@@ -81,7 +71,7 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install
    ```
 
-7. **Configure Development Settings**
+6. **Configure Development Settings**
    Create `wwwroot/appsettings.Development.json` in the Client project:
    ```json
    {

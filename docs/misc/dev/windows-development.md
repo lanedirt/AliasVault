@@ -39,18 +39,7 @@ This guide will help you set up AliasVault for development on Windows using WSL 
    git clone https://github.com/lanedirt/AliasVault.git
    cd AliasVault
    ```
-
-2. **Copy pre-commit hook script**
-   {: .note }
-   All commits in this repo are required to contain a reference to a GitHub issue in the format of "your commit message (#123)" where "123" references the GitHub issue number.
-
-   ```bash
-   # Copy the commit-msg hook script
-   cp .github/hooks/commit-msg .git/hooks/commit-msg
-   chmod +x .git/hooks/commit-msg
-   ```
-
-3. **Configure WSL**
+2. **Configure WSL**
    - Open WSL terminal
    - Edit WSL configuration:
      ```bash
@@ -72,7 +61,7 @@ This guide will help you set up AliasVault for development on Windows using WSL 
      wsl --shutdown
      ```
 
-4. **Setup Development Database**
+3. **Setup Development Database**
    - Open a new WSL terminal in the AliasVault directory
    - Run the development database setup:
      ```bash
@@ -84,7 +73,7 @@ This guide will help you set up AliasVault for development on Windows using WSL 
      docker ps | grep postgres-dev
      ```
 
-5. **Run the Application**
+4. **Run the Application**
    - Open the solution in Visual Studio 2022
    - Set WebApi as the startup project
    - Press F5 to run in debug mode
