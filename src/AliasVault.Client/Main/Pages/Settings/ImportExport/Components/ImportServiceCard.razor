@@ -3,8 +3,10 @@
 @inject DbService DbService
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject HttpClient HttpClient
 @using AliasVault.ImportExport.Importers
 @using AliasVault.ImportExport.Models
+@using AliasVault.Shared.Models.WebApi.Favicon
 
 <div @onclick="OpenImportModal" class="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
     <div class="flex items-center">
@@ -104,6 +106,12 @@
                                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">... and @(ImportedCredentials.Count - 3) more credentials</p>
                                 }
                             </div>
+                            <div class="mb-4">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" @bind="ExtractFavicons" class="form-checkbox h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                    <span class="ml-2 text-gray-700 dark:text-gray-300">Extract favicons for services with URLs</span>
+                                </label>
+                            </div>
                             <div class="flex justify-end mt-6 space-x-2">
                                 <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
                                 <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
@@ -114,11 +122,33 @@
                             <div class="max-w-lg mx-auto">
                                 @if (IsImporting)
                                 {
-                                    <LoadingIndicator />
+                                    @if (IsExtractingFavicons)
+                                    {
+                                        <div class="text-center">
+                                            <LoadingIndicator />
+                                            <p class="mt-4 text-gray-700 dark:text-gray-300">Extracting favicons... @(FaviconExtractionProgress)/@(TotalFaviconsToExtract)</p>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4 dark:bg-gray-700">
+                                                <div class="bg-primary-600 h-2.5 rounded-full transition-all duration-300" style="width: @(GetFaviconProgressPercentage())%"></div>
+                                            </div>
+                                            <div class="mt-4">
+                                                <Button OnClick="@CancelFaviconExtraction" Color="secondary">Cancel</Button>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <LoadingIndicator />
+                                    }
                                 }
                                 else {
                                     <div class="mb-4">
                                         <p class="mb-4 text-gray-700 dark:text-gray-300">Are you sure you want to import (@ImportedCredentials.Count) credentials? Note: the import process can take a short while.</p>
+                                        @if (ExtractFavicons)
+                                        {
+                                            <div class="p-4 mb-4 text-amber-700 bg-amber-100 rounded-lg dark:bg-amber-800/30 dark:text-amber-300" role="alert">
+                                                <p>Note: Favicon extraction is enabled. This process can take several minutes depending on the number of credentials with URLs. Please keep the page open.</p>
+                                            </div>
+                                        }
                                     </div>
                                     <div class="flex justify-end mt-6 space-x-2">
                                         <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
@@ -188,6 +218,13 @@
     /// The imported credentials.
     /// </summary>
     private List<ImportedCredential> ImportedCredentials { get; set; } = new();
+
+    private bool ExtractFavicons { get; set; } = true;
+    private bool IsExtractingFavicons { get; set; }
+    private int FaviconExtractionProgress { get; set; }
+    private int TotalFaviconsToExtract { get; set; }
+    private CancellationTokenSource? FaviconExtractionCancellation { get; set; }
+    private Dictionary<string, byte[]> ExtractedFavicons { get; set; } = new();
 
     /// <summary>
     /// Sets the imported credentials and continues to the preview step.
@@ -283,11 +320,67 @@
 
         try
         {
+            if (ExtractFavicons)
+            {
+                IsExtractingFavicons = true;
+                FaviconExtractionProgress = 0;
+                ExtractedFavicons.Clear();
+                FaviconExtractionCancellation = new CancellationTokenSource();
+                StateHasChanged();
+
+                // Get credentials with URLs
+                var credentialsWithUrls = ImportedCredentials.Where(c => !string.IsNullOrEmpty(c.ServiceUrl)).ToList();
+                TotalFaviconsToExtract = credentialsWithUrls.Count;
+
+                // Extract favicons
+                foreach (var credential in credentialsWithUrls)
+                {
+                    if (FaviconExtractionCancellation.Token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    try
+                    {
+                        var apiReturn = await HttpClient.GetFromJsonAsync<FaviconExtractModel>($"v1/Favicon/Extract?url={credential.ServiceUrl!}");
+                        if (apiReturn?.Image is not null)
+                        {
+                            ExtractedFavicons[credential.ServiceUrl!] = apiReturn.Image;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore favicon extraction errors
+                    }
+
+                    FaviconExtractionProgress++;
+                    StateHasChanged();
+                }
+
+                if (FaviconExtractionCancellation.Token.IsCancellationRequested)
+                {
+                    IsImporting = false;
+                    IsExtractingFavicons = false;
+                    StateHasChanged();
+                    return;
+                }
+            }
+
             // Convert imported credentials to AliasVault format and insert them to the database.
             var credentials = BaseImporter.ConvertToCredential(ImportedCredentials);
             foreach (var credential in credentials)
             {
+                if (!string.IsNullOrEmpty(credential.Service.Url))
+                {
+                    if (ExtractedFavicons.TryGetValue(credential.Service.Url, out var favicon))
+                    {
+                        credential.Service.Logo = favicon;
+                    }
+                }
                 await CredentialService.InsertEntryAsync(credential, false, false);
+
+                // Add small delay to avoid blocking the UI thread.
+                await Task.Delay(2);
             }
 
             // Save the database
@@ -309,6 +402,7 @@
         finally
         {
             IsImporting = false;
+            IsExtractingFavicons = false;
             StateHasChanged();
         }
     }
@@ -367,5 +461,18 @@
     private int GetProgressPercentage()
     {
         return (int)CurrentStep * 100 / (Enum.GetValues(typeof(ImportStep)).Length - 1);
+    }
+
+    private int GetFaviconProgressPercentage()
+    {
+        if (TotalFaviconsToExtract == 0) return 0;
+        return (int)((FaviconExtractionProgress * 100) / TotalFaviconsToExtract);
+    }
+
+    private void CancelFaviconExtraction()
+    {
+        FaviconExtractionCancellation?.Cancel();
+        IsExtractingFavicons = false;
+        StateHasChanged();
     }
 }
