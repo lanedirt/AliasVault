@@ -17,6 +17,7 @@ const CredentialDetails: React.FC = () => {
   const dbContext = useDb();
   const [credential, setCredential] = useState<Credential | null>(null);
   const { setIsInitialLoading } = useLoading();
+  const [hasAlias, setHasAlias] = useState<boolean>(false);
 
   /**
    * Check if the current page is an expanded popup.
@@ -69,6 +70,41 @@ const CredentialDetails: React.FC = () => {
     );
   };
 
+  /**
+   * Check if a date is valid and not min value (1900-01-01)
+   */
+  const isValidDate = (date: string | null | undefined): boolean => {
+    /*
+     * TODO: after date field in alias data model is made optional and
+     * all min values have been replaced with null, we can remove this check.
+     */
+    if (!date || date === '0001-01-01 00:00:00') {
+      return false;
+    }
+    
+    const dateObj = new Date(date);
+    return !isNaN(dateObj.getTime());
+  };
+
+  /**
+   * Check if alias has any non-empty fields
+   */
+  const checkHasAlias = (credential: Credential): boolean => {
+    // Return false if credential has no alias
+    if (!credential.Alias) {
+      return false;
+    }
+
+    // Check if any of the alias fields have content
+    const hasFirstName = Boolean(credential.Alias.FirstName?.trim());
+    const hasLastName = Boolean(credential.Alias.LastName?.trim());
+    const hasNickName = Boolean(credential.Alias.NickName?.trim());
+    const hasBirthDate = isValidDate(credential.Alias.BirthDate);
+
+    // Return true if any field has content
+    return hasFirstName || hasLastName || hasNickName || hasBirthDate;
+  };
+
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation
     if (isPopup()) {
@@ -85,6 +121,7 @@ const CredentialDetails: React.FC = () => {
       const result = dbContext.sqliteClient.getCredentialById(id);
       if (result) {
         setCredential(result);
+        setHasAlias(checkHasAlias(result));
         setIsInitialLoading(false);
       } else {
         console.error('Credential not found');
@@ -93,7 +130,7 @@ const CredentialDetails: React.FC = () => {
     } catch (err) {
       console.error('Error loading credential:', err);
     }
-  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading]);
+  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, checkHasAlias]);
 
   if (!credential) {
     return <div>Loading...</div>;
@@ -161,11 +198,13 @@ const CredentialDetails: React.FC = () => {
       <div className="grid gap-6">
         <div className="space-y-4 lg:col-span-2 xl:col-span-1">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Login credentials</h2>
-          <FormInputCopyToClipboard
-            id="email"
-            label="Email"
-            value={credential.Email ?? ''}
-          />
+          {credential.Email && (
+            <FormInputCopyToClipboard
+              id="email"
+              label="Email"
+              value={credential.Email}
+            />
+          )}
           <FormInputCopyToClipboard
             id="username"
             label="Username"
@@ -178,36 +217,46 @@ const CredentialDetails: React.FC = () => {
             type="password"
           />
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Alias</h2>
-            <FormInputCopyToClipboard
-              id="fullName"
-              label="Full Name"
-              value={`${credential.Alias.FirstName} ${credential.Alias.LastName}`}
-            />
-            <FormInputCopyToClipboard
-              id="firstName"
-              label="First Name"
-              value={credential.Alias.FirstName}
-            />
-            <FormInputCopyToClipboard
-              id="lastName"
-              label="Last Name"
-              value={credential.Alias.LastName}
-            />
-            <FormInputCopyToClipboard
-              id="birthDate"
-              label="Birth Date"
-              value={credential.Alias.BirthDate ? new Date(credential.Alias.BirthDate).toISOString().split('T')[0] : ''}
-            />
-            {credential.Alias.NickName && (
-              <FormInputCopyToClipboard
-                id="nickName"
-                label="Nickname"
-                value={credential.Alias.NickName}
-              />
-            )}
-          </div>
+          {hasAlias && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Alias</h2>
+              {(credential.Alias.FirstName || credential.Alias.LastName) && (
+                <FormInputCopyToClipboard
+                  id="fullName"
+                  label="Full Name"
+                  value={[credential.Alias.FirstName, credential.Alias.LastName].filter(Boolean).join(' ')}
+                />
+              )}
+              {credential.Alias.FirstName && (
+                <FormInputCopyToClipboard
+                  id="firstName"
+                  label="First Name"
+                  value={credential.Alias.FirstName}
+                />
+              )}
+              {credential.Alias.LastName && (
+                <FormInputCopyToClipboard
+                  id="lastName"
+                  label="Last Name"
+                  value={credential.Alias.LastName}
+                />
+              )}
+              {isValidDate(credential.Alias.BirthDate) && (
+                <FormInputCopyToClipboard
+                  id="birthDate"
+                  label="Birth Date"
+                  value={new Date(credential.Alias.BirthDate!).toISOString().split('T')[0]}
+                />
+              )}
+              {credential.Alias.NickName && (
+                <FormInputCopyToClipboard
+                  id="nickName"
+                  label="Nickname"
+                  value={credential.Alias.NickName}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {credential.Notes && (
