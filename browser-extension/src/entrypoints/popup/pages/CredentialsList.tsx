@@ -107,8 +107,8 @@ const CredentialsList: React.FC = () => {
   const filteredCredentials = credentials.filter(cred => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      cred.ServiceName.toLowerCase().includes(searchLower) ||
-      cred.Username.toLowerCase().includes(searchLower) ||
+      cred.ServiceName?.toLowerCase().includes(searchLower) ||
+      cred.Username?.toLowerCase().includes(searchLower) ||
       (cred.Email?.toLowerCase().includes(searchLower))
     );
   });
