@@ -41,4 +41,40 @@ describe('FormDetector generic tests', () => {
       expect(form).toBe(false);
     });
   });
+
+  describe('Form with display:none not detected', () => {
+    const htmlFile = 'display-none.html';
+
+    it('should not detect form with display:none', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+      const formDetector = new FormDetector(document);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
+    });
+  });
+
+  describe('Form with visibility:hidden not detected', () => {
+    const htmlFile = 'visibility-hidden.html';
+
+    it('should not detect form with visibility:hidden', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+      const formDetector = new FormDetector(document);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
+    });
+  });
+
+  describe('Form with opacity:0 not detected', () => {
+    const htmlFile = 'opacity-zero.html';
+
+    it('should not detect form with opacity:0', () => {
+      const dom = createTestDom(htmlFile);
+      const document = dom.window.document;
+      const formDetector = new FormDetector(document);
+      const form = formDetector.containsLoginForm();
+      expect(form).toBe(false);
+    });
+  });
 });

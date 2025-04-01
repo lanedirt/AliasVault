@@ -1,0 +1,1224 @@
+<!--
+AWS root user login form that contains no <form> tag which means the <body> tag is used as wrapper to
+search in. There are a lot of hidden forms on this page so this is a good test for the form detector
+to make sure it doesn't detect hidden forms. And also makes sure it can detect the email field which
+does not have a proper label tag.
+-->
+<style>
+    .awsui .awsui-modal-__state-hidden .awsui-modal-dialog, .awsui .awsui-modal-__state-hidden.awsui-modal-container, .awsui .awsui-modal-__state-hidden.awsui-modal-overlay {
+    visibility: hidden;
+    opacity: 0;
+}
+</style>
+<body class="awsui aws-signin-ui" style="margin-top: 30px; margin-right:40px; margin-bottom:20px; margin-left:40px;">
+
+    <script id="awsc-panorama-bundle" type="text/javascript" src="/static/js/panorama-nav-init.js" data-url="/static/js/awsc-panorama.js" data-config="{'appEntity':'aws-signin','flags':{'disableBusinessMetrics':true, 'enableViewMetrics':true, 'enableCustomMetrics': true},'region':'us-east-1','service':'login'}"></script><aliasvault-ui data-wxt-shadow-root=""></aliasvault-ui>
+
+
+<div id="signin-improvements">
+    <div id="signin-improvement-icon">
+        <span id="improvement-icon"></span>
+    </div>
+    <div class="signin-improvements-text-button">
+        <div id="signin-improvements-content">
+            <div id="improvement-title">
+                <h1>Try the new sign in UI</h1>
+            </div>
+            <div id="improvement-description">
+                <p>See our new improved Amazon Web Services  sign in experience before we officially launch.</p>
+            </div>
+        </div>
+        <div class="signin-improvements-button-div">
+            <button id="cloudscape-banner-button-enable" class="cloudscape-banner-button awsui-button awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons aws-signin-button-width-full">
+                <p>Enable new sign in</p>
+            </button>
+        </div>
+    </div>
+    <div id="close-improvements">
+        <span id="close-improvements-icon"></span>
+    </div>
+  </div>
+
+<div id="signin-main-box" class="aws-signin-main-box fixed-width">
+    
+    <div id="logo_container" class="aws-signin-logo-header-box">
+        <h1 id="logo_head" class="background-left">
+            <a id="logo_link" class="aws-signin-text-small" href="https://aws.amazon.com/" rel="noopener noreferrer">Amazon Web Services Login</a>
+        </h1>
+    </div>
+    <div id="main_content" class="main-table">
+        <div id="signin_container" class="aws-signin-float-left">
+            <div id="signin_inner_container" class="aws-signin-login-general-box">
+
+                <div id="error_message" style="display: none; !important">
+                    <div class="awsui-alert-type-error  aws-signin-alert">
+                        <div class="awsui-alert-header awsui-text-big">
+                            <span id="error_title"></span>
+                        </div>
+                        <div>
+                            <span id="error_message_description"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resolver_container" class="signin-container">
+                    <div id="signin_head_box" class="aws-signin-login-header-box">
+                        <b id="signin_head" class="awsui-text-bigger">Sign in</b>
+                    </div>
+                    <div id="aws-signin-general-user-selection">
+                        <div id="aws-signin-general-user-selection-root" class="aws-signin-radio-border aws-signin-radio-selection">
+                            <input type="radio" name="userType" value="rootUser" id="root_user_radio_button" class="aws-signin-radio" checked="">
+                            <label for="rootUser" class="aws-signin-text-bold">Root user</label>
+                            <div class="aws-signin-general-user-selection-paragraph">
+                                <span class="aws-signin-text-small">Account owner that performs tasks requiring unrestricted access. <a href="https://docs.aws.amazon.com/console/signin/root-user-def" target="_blank">Learn more</a></span>
+                            </div>
+                        </div>
+                        <div id="aws-signin-general-user-selection-iam" class="aws-signin-radio-border">
+                            <input type="radio" name="userType" value="iamUser" id="iam_user_radio_button" class="aws-signin-radio">
+                            <label for="iamUser" class="aws-signin-text-bold">IAM user</label>
+                            <div class="aws-signin-general-user-selection-paragraph">
+                               <span class="aws-signin-text-small">User within an account that performs daily tasks. <a href="https://docs.aws.amazon.com/console/signin/iam-user-def" target="_blank">Learn more</a></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-label-box">
+                        <b id="resolving_input_label" class="awsui-text-normal">Root user email address</b>
+                    </div>
+
+                    <div class="aws-signin-general-input-box">
+                        <input id="resolving_input" class="aws-signin-textfield" value="" placeholder="username@example.com" autocorrect="off" autocapitalize="off" type="email">
+                        <div id="resolving_input_alert" style="display:none">
+                            <span id="resolving_account_input_alert_content" class="awsui-text-small aws-signin-color-red"></span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="next_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary aws-signin-button-width-full"><span id="next_button_text" class="aws-signin-color-white">Next</span></button>
+                    </div>
+                    
+                    <div class="aws-signin-text-small">
+                        <span>By continuing, you agree to the <a href="https://aws.amazon.com/agreement/" target="_blank">AWS Customer Agreement</a> or other agreement for AWS services, and the <a href="https://aws.amazon.com/privacy/" target="_blank">Privacy Notice</a>. This site uses essential cookies. See our <a href="https://aws.amazon.com/legal/cookies" target="_blank">Cookie Notice</a> for more information.</span>
+                    </div>
+
+                    
+
+                    <!-- New Account -->
+                    <div id="new_account_container" class="aws-signin-new-account-box">
+                        <div class="signin-break-wrapper">
+                            <span class="aws-signin-color-mid-gray">New to AWS?</span>
+                        </div>
+                        <div class="aws-signin-general-button-box">
+                            <button id="create_aws_account" class="awsui-button awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons aws-signin-button-width-full">Create a new AWS account</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="account_selection" class="signin-container" style="display:none">
+                    <div id="signin_head_box" class="aws-signin-login-header-box">
+                        <b id="signin_head" class="awsui-text-bigger">Account Selection</b>
+                    </div>
+                    <div class="aws-signin-login-header-box">
+                        There are multiple accounts linked to: <b><span id="account_selection_email_label" class="aws-signin-span-word-break"></span></b>
+                    </div>
+                    <div class="aws-signin-login-header-box">
+                        Select an account to continue:
+                    </div>
+                    <div id="account_selection_list"></div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="account_selection_button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary aws-signin-button-width-full">
+                            <span id="next_button_text" class="aws-signin-color-white">Continue with this account</span>
+                        </button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="change_account_link3" class="change_account_link">Sign in to a different account</span>
+                    </div>
+                </div>
+
+                <!-- Root user -->
+                <div id="login_container" class="signin-container" style="display:none">
+                    <div id="root_account_sign_in" class="aws-signin-login-header-box">
+                        <b class="awsui-text-bigger">Root user sign in</b>
+                        <div class="aws-signin-tool-tip" style="bottom:2px;">
+                            <span class="awsui-icon info-circle awsui-icon-has-hover"></span>
+                            <span class="aws-signin-tooltip-text aws-signin-tooltip-size-medium">
+                                            <span>This sign-in page is for AWS account root users that have provided an account email. To sign in using IAM user credentials, choose "Sign in to a different account" below to return to the main sign-in page and enter your account ID or account alias.</span>
+                                        </span>
+                        </div>
+                    </div>
+                    <div id="decoupled_email_container" class="aws-signin-general-input-box">
+                        <b>Email:</b> <span id="email_label" class="aws-signin-span-word-break"></span>
+                        <input id="email" type="hidden">
+                    </div>
+                    <div class="aws-signin-general-label-box">
+                        <div class="aws-signin-general-link-box-no-margin main-table">
+                            <div class="aws-signin-float-left" style="width:40%;"><b>Password</b></div>
+                            <div class="aws-signin-float-right" style="text-align:right; width:58%;">
+                                <span id="root_forgot_password_link">Forgot password?</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <input id="password" type="password" class="aws-signin-textfield" autocorrect="off" autocapitalize="off">
+                        <div id="password_input_alert" class="signin-input-warning" style="display:none">
+                            <span id="password_input_alert_content" class="awsui-text-small aws-signin-color-red"></span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="signin_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span id="signin_button_text" style="color:white; font-weight: bold;">Sign in</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="change_account_link1" class="change_account_link">Sign in to a different account</span>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="create_a_new_account_link">Create a new AWS account</span>
+                    </div>
+                </div>
+
+                <!-- Root user v2 -->
+                <div id="candidate_login_container" class="signin-container" style="display:none">
+                    <div id="root_account_sign_in_v2" class="aws-signin-login-header-box">
+                        <b class="awsui-text-bigger">Root user sign in</b>
+                        <div class="aws-signin-tool-tip" style="bottom:2px;">
+                            <span class="awsui-icon info-circle awsui-icon-has-hover"></span>
+                            <span class="aws-signin-tooltip-text aws-signin-tooltip-size-medium">
+                                <span>This sign-in page is for AWS account root users that have provided an account email. To sign in using IAM user credentials, choose "Sign in to a different account" below to return to the main sign-in page and enter your account ID or account alias.</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div id="candidate_email_container" class="aws-signin-general-input-box">
+                        <b>Email:</b> <span id="candidate_email_label" class="aws-signin-span-word-break"></span>
+                        <input id="candidate_email" type="hidden">
+                    </div>
+                    <div class="aws-signin-general-label-box">
+                        <div class="aws-signin-general-link-box-no-margin main-table">
+                            <div class="aws-signin-float-left" style="width:40%;"><b>Password</b></div>
+                            <div class="aws-signin-float-right" style="text-align:right; width:58%;">
+                                <span id="candidate_root_forgot_password_link">Forgot password?</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <input id="candidate_password" type="password" class="aws-signin-textfield" autocorrect="off" autocapitalize="off">
+                        <div id="candidate_password_input_alert" class="signin-input-warning" style="display:none">
+                            <span id="password_input_alert_content_v2" class="awsui-text-small aws-signin-color-red"></span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="candidate_signin_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span id="candidate_signin_button_text" style="color:white; font-weight: bold;">Sign in</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="candidate_change_account_link" class="change_account_link">Sign in to a different account</span>
+                    </div>
+                </div>
+
+                <!-- Root User v2 MFA -->
+                <div id="candidate_mfa_container" class="signin-container" style="display:none; !important">
+                    <div class="aws-signin-general-header-box">
+                        <b id="mfa_display_header" class="awsui-text-bigger">Multi-factor authentication</b>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <span id="mfa_display_text">Your account is secured using multi-factor authentication (MFA). To finish signing in, turn on or view your MFA device and type the authentication code below.</span>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <b>Email address:</b> <span id="candidate_mfa_email_label" class="aws-signin-span-word-break"></span>
+                    </div>
+                    <div class="aws-signin-general-label-box">
+                        <b>MFA code</b>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <input id="candidate_mfaCode" class="awsui-textfield awsui-textfield-type-text" maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" type="text">
+                        <div id="candidate_mfaCode_input_alert" style="display:none">
+                            <span id="candidate_mfaCode_input_alert_content" class="awsui-text-small aws-signin-color-red">You must provide an MFA code</span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="candidate_mfa_submit_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span id="candidate_mfa_submit_button_text" style="color:white; font-weight: bold;">Submit</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="candidate_troubleshoot_mfa">Troubleshoot MFA</span>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="candidate_cancel_mfa">Cancel</span>
+                    </div>
+                </div>
+
+                <!-- Deactivated User -->
+                <div id="suspended_user_container" class="signin-container" style="display:none; !important">
+
+                    <!-- Old version of suspended error message -->
+                    <div id="old_msg" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph">
+                            <span id="suspended_user_message">Authentication failed because your account has been suspended.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph">
+                            <span id="suspended_user_message1">If you believe your account was suspended due to non-payment of outstanding balance due on your account, you can pay now using the</span>
+                            <a id="suspended_user_billing_payment_hostory_link" href="https://console.aws.amazon.com/billing/home#/paymenthistory">Payments</a>
+                            <span id="suspended_user_message2">to reactivate your account. If you do not pay or provide a payment method to resolve your outstanding balance, your account resources may be terminated.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph">
+                            <span id="suspended_user_message3">If your account was suspended for reasons other than non-payment of outstanding dues, contact AWS customer support</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/contact-us">Contact Us</a>
+                        </div>
+                        <div class="aws-signin-general-paragraph">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Non-payment Suspended -->
+                    <div id="suspended_user_non_payment" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was suspended because of past due charges.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>To reactivate your account, open the Billing and Cost Management console, and go to the</span>
+                            <a id="suspended_user_billing_payment_hostory_link" href="https://console.aws.amazon.com/billing/home#/paymenthistory" rel="noopener noreferrer">
+                                Payments
+                            </a>
+                            <span>page. After you pay all outstanding invoices by credit card, it might take up to 24 hours to reactive your account.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>If your account is suspended for more than 120 days, you can't reopen the account or use it to access any AWS services. In addition, all content in your account is deleted.</span>
+                            <a id="suspended_user_reopen_link" href="https://aws.amazon.com/premiumsupport/knowledge-center/reactivate-suspended-account/" rel="noopener noreferrer">
+                                Learn more about how to reactivate a suspended account.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            If your account isn't reactivated 24 hours after you pay all outstanding invoices, contact
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Fraud Suspended -->
+                    <div id="suspended_user_fraud" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was suspended because your account details couldn't be verified.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>Please check your email inbox as well as your spam folder for any messages from AWS. It's possible that AWS may require some additional information from you to complete the activation process. If you have received such a request, please promptly respond with the requested information. Once received, your account will be reviewed for activation.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            If you don't receive a verification email from AWS or you are experiencing other problems with verifying your account details, contact
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Customer Request Suspended -->
+                    <div id="suspended_user_customer_request" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was closed at your request.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>For 90 days after your account is closed, you can contact AWS Support to reopen it. After that, you can't reopen the account or use it to access any AWS services. In addition, all content in your account is deleted.</span>
+                            <a id="suspended_user_reopen_link" href="https://aws.amazon.com/premiumsupport/knowledge-center/reopen-aws-account/" rel="noopener noreferrer">
+                                Learn more about reopening a closed account.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span>Contact</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Generic Suspended -->
+                    <div id="suspended_user_generic" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was suspended because you have past due charges, or your account details couldn't be verified.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>To check whether you have past due charges, open the Billing and Cost Management console, and go to the</span>
+                            <a id="suspended_user_billing_payment_hostory_link" href="https://console.aws.amazon.com/billing/home#/paymenthistory" rel="noopener noreferrer">
+                                Payments
+                            </a>
+                            <span>page. After you pay all outstanding invoices by credit card, it might take up to 24 hours to reactivate your account.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>If you have any further inquiries or require assistance, please reach out to <a href="https://aws.amazon.com/support" target="_blank">AWS Support</a>. Make sure to mention any troubleshooting steps you have already attempted to help them better understand the issue. If you are unable to sign in to your account, please contact the AWS Account Verification team by using the <a href="https://support.aws.amazon.com/#/contacts/aws-account-verification" target="_blank">AWS Account Verification support form</a>.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span>If your account isn't reactivated 24 hours after you pay all outstanding invoices or there are problems with verifying your account details, contact</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Generic Closed -->
+                    <div id="closed_user_generic" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was suspended because you have past due charges, or your account details couldn't be verified.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>To check whether you have past due charges, open the Billing and Cost Management console, and go to the</span>
+                            <a id="suspended_user_billing_payment_hostory_link" href="https://console.aws.amazon.com/billing/home#/paymenthistory" rel="noopener noreferrer">
+                                Payments
+                            </a>
+                            <span>page. After you pay all outstanding invoices by credit card, it might take up to 24 hours to reactivate your account.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>If you have any further inquiries or require assistance, please reach out to <a href="https://aws.amazon.com/support" target="_blank">AWS Support</a>. Make sure to mention any troubleshooting steps you have already attempted to help them better understand the issue. If you are unable to sign in to your account, please contact the AWS Account Verification team by using the <a href="https://support.aws.amazon.com/#/contacts/aws-account-verification" target="_blank">AWS Account Verification support form</a>.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span>If your account isn't reactivated 24 hours after you pay all outstanding invoices or there are problems with verifying your account details, contact</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Self Closed -->
+                    <div id="closed_user_self_closed" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>You closed your AWS account from the Account and Billing Console.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>For 90 days after your account is closed, you can contact AWS Support to reopen it. After that, you can't reopen the account or use it to access any AWS services. In addition, all content in your account is deleted.</span>
+                            <a id="suspended_user_reopen_link" href="https://aws.amazon.com/premiumsupport/knowledge-center/reopen-aws-account/" rel="noopener noreferrer">
+                                Learn more about reopening a closed account.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span>Contact</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/support" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span id="suspended_user_logout">To logout, click</span>
+                            <a href="/oauth?Action=logout&amp;redirect_uri=aws.amazon.com">here.</a>
+                        </div>
+                    </div>
+
+                    <!-- Generic Terminated -->
+                    <div id="terminated_user_generic" class="deactivated-user">
+                        <div class="aws-signin-general-header-box">
+                            <b id="suspended_user_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-intro">
+                            <span>Your AWS account was permanently closed because it was suspended for more than 90 days.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>You can't reopen this account or use it to access any AWS services. In addition, all content in the account was deleted.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-body">
+                            <span>To create and activate a new account, first sign out of the console and then choose Create a new AWS account from the AWS homepage. You must specify a different email address than the email address that was used for the permanently closed account.</span>
+                        </div>
+                        <div class="aws-signin-general-paragraph msg-footer">
+                            <span>Contact</span>
+                            <a id="suspended_user_customer_support_link" href="https://aws.amazon.com/contact-us/" rel="noopener noreferrer">
+                                AWS Support.
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bookmarked_url_message_container" class="signin-container" style="display:none; !important">
+                    <div class="aws-signin-general-header-box">
+                        <b id="bookmarked_url_message_header" class="awsui-text-bigger">Amazon web service sign in</b>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <span id="bookmarked_url_message1">The bookmarked page is no longer available.</span>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <span id="bookmarked_url_message2">To sign in to the AWS Management Console, go to
+                            <a id="bookmarked_url_message_console_home_link" href="https://console.aws.amazon.com" rel="noopener noreferrer">https://console.aws.amazon.com</a>.
+                        </span>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <span id="bookmarked_url_message3">To complete your AWS account registration, go to
+                            <a id="bookmarked_url_message_signup_link" href="https://portal.aws.amazon.com/gp/aws/developer/registration/index.html?type=resubscribe" rel="noopener noreferrer">AWS Signup</a>.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Multi MFA -->
+                <div id="multi_mfa_container" class="signin-container-1" style="display:none; !important">
+                    <div class="aws-signin-general-header-box">
+                        <b id="multi_mfa_display_header" class="aws-signin-multi-mfa-header-text">Additional verification required</b>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <p id="multi_mfa_display_text" class="aws-signin-multi-mfa-message-text-1">Your account is secured by multi-factor authentication (MFA). Select a method to authenticate with.
+                            <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html" target="_blank" class="awsui-text-normal" rel="noopener noreferrer">Learn more</a>
+                        </p>
+                    </div>
+                    <div id="multi_mfa_webauthn_radio_button_box">
+                        <div class="left-box"><input type="radio" name="multiMfaOption" id="u2f" value="U2F"></div>
+                        <div class="middle-box">
+                            
+                            <img class="aws-signin-iam-multi-mfa-option-img" alt="Passkey / Security key" src="/static/image/passkey_option.png">
+                            
+                        </div>
+                        <div class="right-box">
+                            <div class="right-inner">
+                                <p class="aws-signin-multi-mfa-message-text-bold">Passkey / Security key</p>
+                                <p class="aws-signin-multi-mfa-message-text">Authenticate using your fingerprint, face, or PIN on your mobile device, computer or FIDO2 security key.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="aws-signin-multi-mfa-option-hr">
+                    <div id="multi_mfa_swhw_radio_button_box">
+                        <div class="left-box"><input type="radio" name="multiMfaOption" id="swhw" value="SWHW"></div>
+                        <div class="middle-box"><img class="aws-signin-iam-multi-mfa-option-img" alt="Authenticator app" src="/static/image/authenticator_app.png"></div>
+                        <div class="right-box">
+                            <div class="right-inner">
+                                <p class="aws-signin-multi-mfa-message-text-bold">Authenticator app or a hardware TOTP MFA device</p>
+                                <p class="aws-signin-multi-mfa-message-text">Authenticate using a code generated by a hardware TOTP token or an app installed on your mobile device or computer.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="mfa_checkbox" class="remember-account-checkbox">
+                        <label for="remember_mfa_checkbox" id="remember_mfa_label" class="remember-account-text">
+                            <input type="checkbox" id="remember_mfa_checkbox" class="remember-checkbox">
+                            Remember this method
+                        </label>
+                    </div>
+
+                    <div class="aws-signin-general-button-box">
+                        <button id="multi_mfa_next_button" type="button" class="aws-signin-multi-mfa-button">
+                            <span id="multi_mfa_next_button_text" style="color:white; font-weight: bold;">Next</span>
+                        </button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="cancel_multi_mfa" class="aws-signin-multi-mfa-cancel-text">Cancel</span>
+                    </div>
+                </div>
+
+                <!-- MFA -->
+                <div id="mfa_container" class="signin-container" style="display:none; !important">
+                    <div class="aws-signin-general-header-box">
+                        <b id="mfa_display_header" class="awsui-text-bigger">Multi-factor authentication</b>
+                    </div>
+                    <div class="aws-signin-general-paragraph">
+                        <span id="mfa_display_text">Your account is secured using multi-factor authentication (MFA). To finish signing in, turn on or view your MFA device and type the authentication code below.</span>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <b>Email address:</b> <span id="mfa_email_label" class="aws-signin-span-word-break"></span>
+                    </div>
+                    <div class="aws-signin-general-label-box">
+                        <b>MFA code</b>
+                    </div>
+                    <div class="aws-signin-general-input-box">
+                        <input id="mfaCode" class="awsui-textfield awsui-textfield-type-text" maxlength="6" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false" type="text">
+                        <div id="mfaCode_input_alert" style="display:none">
+                            <span id="mfaCode_input_alert_content" class="awsui-text-small aws-signin-color-red">You must provide an MFA code</span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="mfa_submit_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span id="mfa_submit_button_text" style="color:white; font-weight: bold;">Submit</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="troubleshoot_mfa">Troubleshoot MFA</span>
+                    </div>
+                    <div class="aws-signin-general-link-box" id="swhw_mfa_try_another_mfa_method_box" style="display:none; !important">
+                        <span id="swhw_mfa_try_another_mfa_method">Try another MFA method</span>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="cancel_mfa">Cancel</span>
+                    </div>
+                </div>
+
+                <!-- U2F MFA -->
+                <div id="u2f_container" class="u2f-container" style="display:none; !important">
+                    <div class="u2f-header">
+                        <b id="mfa_display_header" class="awsui-text-bigger">Additional verification required</b>
+                    </div>
+                    <div>
+                        <p id="mfa_display_text" class="awsui-text-normal" style="line-height: 19px;">Your account is protected with a passkey or security key for two-factor authentication.
+                            <!-- The target is set to open the link in a new tab -->
+                            <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_u2f.html?icmpid=docs_iam_console" target="_blank" class="awsui-text-normal" rel="noopener noreferrer">Learn more</a>
+                        </p>
+                    </div>
+                    <div id="u2f_compatible" class="u2f-border">
+                        <div class="u2f-padding">
+                            <div class="u2f-text-padding">
+                                <b class="awsui-text-normal" style="line-height: 19px;">To finish signing in, follow the instructions from your browser.</b>
+                            </div>
+                            <div class="u2f-image-padding">
+                                
+                                <img class="aws-signin-iam-multi-mfa-option-img" alt="Passkey / Security key" src="/static/image/passkey.png">
+                                
+                            </div>
+                            <div>
+                                <span class="u2f_loading">Follow your browser instructions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="u2f_incompatible" class="u2f-incompatible-border">
+                        <div class="mainWarningWithBorder">
+                            <p>Your browser does not support FIDO2 security keys.
+                                <!-- The target is set to open the link in a new tab -->
+                                <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_u2f_supported_configurations.html?icmpid=docs_iam_console" rel="noopener noreferrer">See the list of compatible browsers</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="buttoninput">
+                        <a class="u2f-button" id="troubleshoot_u2f_mfa" alt="Troubleshoot MFA" value="Troubleshoot MFA" style="display:none; !important" rel="noopener noreferrer">
+                            Troubleshoot MFA
+                        </a>
+                        <a class="u2f-button" id="candidate_troubleshoot_u2f_mfa" alt="Troubleshoot MFA" value="Troubleshoot MFA" style="display:none; !important" rel="noopener noreferrer">
+                            Troubleshoot MFA
+                        </a>
+                        <a class="u2f-button" id="u2f_mfa_try_another_mfa_method" style="display:none; !important" rel="noopener noreferrer">
+                            Try another MFA method
+                        </a>
+                        <a class="u2f-button" id="cancel_u2f_mfa" alt="Cancel" value="Cancel" rel="noopener noreferrer">
+                            Cancel
+                        </a>
+                        <a class="u2f-button" id="cancel_candidate_u2f_mfa" alt="Cancel" value="Cancel" rel="noopener noreferrer">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Captcha -->
+                <div id="captcha" data-callback="amsJSCallback" style="display:none"></div>
+                <div id="captcha_container" class="signin-container" style="display:none">
+                    
+                    <div class="aws-signin-general-header-box">
+                        <b class="awsui-text-bigger">Security check</b>
+                    </div>
+                    <div id="image_captcha_div" class="aws-signin-general-input-box" style="border:1px solid black; padding:10px 10px 0px 10px;">
+                        <div class="aws-signin-general-label-box">
+                            <b>Type the characters seen in the image below</b>
+                        </div>
+                        <div id="image_captcha_left_box" class="aws-signin-captcha-box">
+                            <img id="captcha_image" width="200px" height="70px">
+                            <canvas id="captcha_canvas" width="200px" height="70px" hidden=""></canvas>
+                        </div>
+                        <div id="image_captcha_right_box" style="display:inline-block">
+                            <div style="margin-bottom: 5px;">
+                                <button id="switch_to_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Change to audio security check" style="position: relative; bottom:10px; !important">
+                                    <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-audio"></span>
+                                </button>
+                            </div>
+                            <div>
+                                <button id="refresh_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Display new security image" style="position: relative; bottom:10px; !important">
+                                    <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-refresh"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="audio_captcha_div" class="aws-signin-general-input-box" style="border:1px solid black; padding:10px; display:none;">
+                        <div id="audio_captcha_left_box" class="aws-signin-captcha-box">
+                            <div>
+                                <b>Please click "Play Audio" button below to continue</b>
+                            </div>
+                            <div style="margin-top:10px;">
+                                <audio id="audio_captcha" style="display:none"></audio>
+                                <div style="display:inline-block">
+                                    <button id="play_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Play Audio">
+                                        <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-play"></span>
+                                    </button>
+
+                                    <button id="pause_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Pause Audio" style="display:none;">
+                                        <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-pause"></span>
+                                    </button>
+                                </div>
+                                <div style="display:inline-block">
+                                    <button id="replay_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Replay Audio">
+                                        <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-replay"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="audio_captcha_right_box" style="display:inline-block;height: 70px;">
+                            <div style="margin-bottom: 5px;">
+                                <button id="switch_to_image_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Change to visual security check" style="position: relative; bottom:10px; !important">
+                                    <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-text-icon"></span>
+                                </button>
+                            </div>
+                            <div>
+                                <button id="refresh_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Hear new security audio" style="position: relative; bottom:10px; !important">
+                                    <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-refresh"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <input id="captchaToken" type="hidden">
+                    <input id="captchaObfuscationToken" type="hidden">
+                    <input id="captchaEmail" type="hidden">
+                    <div class="aws-signin-general-input-box">
+                        <input class="awsui-textfield awsui-textfield-type-text" maxlength="12" autocomplete="off" autocorrect="off" autocapitalize="off" id="captchaGuess" type="text">
+                        <div id="captchaGuess_input_alert" style="display:none">
+                            <span id="captchaGuess_input_alert_content" class="awsui-text-small aws-signin-color-red">Enter the characters shown above</span>
+                        </div>
+                    </div>
+                    <div class="aws-signin-general-button-box">
+                        <button id="submit_captcha" type="button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons" style="width:100%; !important;">Submit</button>
+                    </div>
+                </div>
+
+                <div id="optional_verification_method_confirmation_container" class="signin-container" style="display:none">
+                    <div id="optional_verification_method_confirmation_head" class="aws-signin-login-header-box">
+                        <b id="optional_verification_method_confirmation_head_title" class="awsui-text-bigger">Verify your email</b>
+                    </div>
+                    <div id="optional_verification_method_confirmation_general_message" class="aws-signin-general-paragraph">
+                        <p id="optional_verification_method_confirmation_paragraph1" class="aws-signin-text-normal" style="margin: 15px 0 15px 0;">The email for your account is not verified.</p>
+                        <p id="optional_verification_method_confirmation_paragraph2" class="aws-signin-text-normal" style="margin: 15px 0 15px 0;">We recommend you verify your email to ensure you receive communications from AWS about account activity and security.</p>
+                    </div>
+                    <div id="optional_verification_method_general_button_box" class="aws-signin-general-button-box">
+                        <button id="optional_verification_method_confirmation_verify_email" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span class="aws-signin-color-white" id="optional_verification_method_confirmation_verify_email_button_text">Verify email</span></button>
+                        <button type="button" class="skip_loading aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary aws-signin-button-disabled"><span class="skip_text aws-signin-spinner-white">Skipping</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="optional_verification_method_confirmation_skip_verification_link">Skip and continue signing in</span>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="optional_verification_method_update_account_email_link">Update account email</span>
+                    </div>
+                </div>
+
+                <!-- OTP -->
+                <div id="otp_container" class="signin-container" style="display:none">
+                    <div id="otp_head" class="aws-signin-login-header-box">
+                        <b id="otp_head_title" class="awsui-text-bigger">Confirm you're you</b>
+                    </div>
+                    <div id="otp_error_message" style="display: none; !important">
+                        <div class="awsui-alert-type-error  aws-signin-alert-otp">
+                            <div class="awsui-alert-header awsui-text-normal">
+                                <b><span id="otp_error_title"></span></b>
+                            </div>
+                            <div>
+                                <span id="otp_error_message_description"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="otp_success_message" style="display: none; !important">
+                        <div class="awsui-alert-type-success  aws-signin-alert-otp">
+                            <div class="awsui-alert-header awsui-text-normal">
+                                <b><span id="otp_success_title"></span></b>
+                            </div>
+                            <div>
+                                <span id="otp_success_message_description"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="otp_general_message" class="aws-signin-general-paragraph">
+                        <span id="otp_general_message_paragraph1" class="aws-signin-text-normal aws-signin-span-word-break"></span>
+                        <b id="otp_general_message_email_address" class="aws-signin-text-normal aws-signin-span-word-break"></b>
+                        <p id="otp_general_message_paragraph2" class="aws-signin-text-normal" style="margin: 15px 0 15px 0;"></p>
+                    </div>
+                    <div id="otp_general_label_box" class="aws-signin-general-label-box">
+                        <b>Verification code</b>
+                    </div>
+
+                    <div id="otp_general_input_box" class="aws-signin-general-input-box">
+                        <input class="awsui-textfield awsui-textfield-type-text" maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="off" id="otpGuess" type="text">
+                    </div>
+                    <div id="otp_general_button_box" class="aws-signin-general-button-box">
+                        <button id="submit_otp" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary" style="width:100%; !important;"><span class="aws-signin-color-white" id="otp_button_text">Verify and continue</span></button>
+                        <button type="button" class="skip_loading aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary aws-signin-button-disabled"><span class="skip_text aws-signin-spinner-white">Skipping</span></button>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="resend_otp_button_text">Resend code</span>
+                    </div>
+                    <div class="aws-signin-general-link-box">
+                        <span id="otp_skip_verification_link">Skip verification</span>
+                    </div>
+                    <div class="signin-break-wrapper aws-signin-general-button-box" style="height: 10px;"></div>
+                    <p>Didn’t get the code?</p>
+                    <ul>
+                        <li>Codes can take up to 5 minutes to arrive.</li>
+                        <li>Check your spam folder.</li>
+                        <li>Still having <a href="https://docs.aws.amazon.com/signin/latest/userguide/how-to-sign-in.html" rel="noopener noreferrer">problems signing in?</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="signin_inner_full_width_container" style="display: none;" class="aws-signin-login-general-box-full-width">
+                <!-- MFA Device Confirm -->
+                <div id="mfa_device_confirm_container" class="signin-container" style="display:none; !important">
+                    <div>
+                        <b class="awsui-text-bigger">Troubleshoot your authentication device</b>
+                    </div>
+                    <hr>
+                    <div id="aws-signin-troubleshoot-mfa-resync" class="aws-signin-troubleshoot-mfa-section">
+                        <div class="aws-signin-troubleshoot-mfa-section-text">
+                            <b class="awsui-text-big">Re-sync with AWS servers</b>
+                            <div class="aws-signin-troubleshoot-mfa-section-message">If your multi-factor authentication (MFA) device appears to be functioning properly, and you are not able to sign in, then the device might be out of sync.</div>
+                        </div>
+                        <div class="aws-signin-troubleshoot-mfa-section-button">
+                            <button id="resync_mfa" type="button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons">Re-sync MFA device</button>
+                        </div>
+                    </div>
+                    <hr id="aws-signin-troubleshoot-mfa-resync-hr" class="aws-signin-troubleshoot-mfa-section-hr">
+                    <div class="aws-signin-troubleshoot-mfa-section">
+                        <div class="aws-signin-troubleshoot-mfa-section-text">
+                            <b class="awsui-text-big">Sign in using alternative factors of authentication</b>
+                            <div class="aws-signin-troubleshoot-mfa-section-message">If your multi-factor authentication (MFA) device is lost, damaged, or not working, you can sign in using alternative factors of authentication. You must verify your identity using the email and phone registered with this account.</div>
+                        </div>
+                        <div class="aws-signin-troubleshoot-mfa-section-button">
+                            <button id="afa_login_button" type="button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons">Sign in using alternative factors</button>
+                        </div>
+                    </div>
+                    <hr class="aws-signin-troubleshoot-mfa-section-hr">
+                    <div class="aws-signin-general-link-box">
+                        <span id="change_account_link2" class="change_account_link">Sign in to a different account</span>
+                    </div>
+                </div>
+
+                <!-- Resync MFA -->
+                <div id="resync_mfa_container" class="signin-container" style="display:none; !important">
+                    <div>
+                        <b class="awsui-text-bigger">Re-sync your device with AWS servers</b>
+                    </div>
+                    <hr>
+                    <div class="aws-signin-resync-mfa-container">
+                        <div class="aws-signin-general-paragraph">
+                            <span>If your multi-factor authentication (MFA) device appears to be functioning properly, and you are not able to sign in, then the device might be out of sync. First try to resync your device using the following instructions.</span>
+                        </div>
+                        <div class="aws-signin-general-label-box">
+                            <b>Turn on or view your device and type the first authentication code.</b>
+                        </div>
+                        <div class="aws-signin-general-input-box">
+                                        <span>
+                                            <input style="width: 50%;" type="text" id="resync_mfa_code1" class="awsui-textfield awsui-textfield-type-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Authentication code #1">
+                                            <div id="resync_mfa_code1_input_alert" style="display:none;">
+                                                <span id="resync_mfa_code1_input_alert_content" class="awsui-text-small" style="color:#CC0000; !important ">You must provide an MFA code</span>
+                                            </div>
+                                        </span>
+                        </div>
+                        <div class="aws-signin-general-label-box">
+                            <b>Wait until the authentication code changes or the display turns off. Then turn on or view your device and type the second authentication code.</b>
+                        </div>
+                        <div class="aws-signin-general-input-box">
+                                        <span>
+                                            <input style="width: 50%;" type="text" id="resync_mfa_code2" class="awsui-textfield awsui-textfield-type-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Authentication code #2">
+                                            <div id="resync_mfa_code2_input_alert" style="display:none;">
+                                                <span id="resync_mfa_code2_input_alert_content" class="awsui-text-small" style="color:#CC0000; !important ">You must provide a second MFA code</span>
+                                            </div>
+                                        </span>
+                        </div>
+                        <div>
+                            <button id="resync_mfa_button" type="button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-primary"><span id="resync_mfa_button_text" style="color:white; font-weight: bold;">Re-sync MFA device</span></button>
+                            <span class="aws-signin-general-link-box" style="margin-left: 10px;">
+                                            <span id="cancel_mfa_resync">Cancel</span>
+                                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="marketing_container" class="aws-signin-display-block" data-slot-id="signin-banner">
+            <a id="marketingimagelink" href="https://aws.amazon.com/events/awsome-day/awsome-day-online/?sc_icampaign=event-awsomeday-2025-q2-global-signin&amp;sc_ichannel=ha&amp;sc_icontent=event-awsomeday-2025-q2&amp;sc_iplace=signin&amp;trkCampaign=awsome-day-online" target="_blank" rel="noopener"><img src="https://d1.awsstatic.com/Digital%20Marketing/sitemerch/sign-in/JP/awsomeday-console%20signin-2025-Q2-EN.5dfaf43a50629c7140885390367b4d7b48889555.jpg" alt="Amazon Web Services Marketing" width="570" height="450"></a>
+        </div>
+    </div>
+
+    
+    
+
+<div id="smallprint" style="margin-top: 30px; margin-bottom:20px;">
+  
+
+  <div class="textinput" style="margin-top: 40px;">
+    
+        <span class="aws-signin-text-small">
+            <script type="text/javascript" nonce="">
+                var currentYear = new Date().getFullYear();
+                document.write('&copy; ' + currentYear + ', Amazon Web Services, Inc. or its affiliates. All rights reserved.');
+            </script>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+        </span>
+    
+
+    
+    <div style="display:inline-block; float:right;">
+        <button id="language_selection_button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-normal" type="button" style="width:115px;">
+            
+            <span>English</span>
+            <span class="aws-signin-arrow-down aws-signin-button-icon aws-signin-icon-right aws-signin-icon"></span>
+        </button>
+        <div class="aws-signin-button-dropup">
+            <ul id="language_drop_up" class="aws-signin-button-dropup-content" style="display:none;">
+                
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="de_DE">
+                        <span class="aws-signin-button-dropup-item-content">Deutsch</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="es_ES">
+                        <span class="aws-signin-button-dropup-item-content">Español</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="fr_FR">
+                        <span class="aws-signin-button-dropup-item-content">Français</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="ja">
+                        <span class="aws-signin-button-dropup-item-content">日本語</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="pt_BR">
+                        <span class="aws-signin-button-dropup-item-content">Português</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="ko_KR">
+                        <span class="aws-signin-button-dropup-item-content">한국어</span>
+                      </li>
+                    
+                
+                    
+                      <li id="footer_span" class="aws-signin-button-dropup-item" data-localestring="zh_CN">
+                        <span class="aws-signin-button-dropup-item-content">中文(简体)</span>
+                      </li>
+                    
+                
+            </ul>
+        </div>
+    </div>
+    
+          <div class="aws-signin-button-dropup-margin" style="display:inline-block; float: right;">
+              <button id="session_selection_button" class="aws-signin-button aws-signin-button-size-normal aws-signin-button-variant-normal" type="button">
+                  <span id="current_session_mode">Multi-session disabled</span>
+                  <span class="aws-signin-arrow-down aws-signin-button-icon aws-signin-icon-right aws-signin-icon"></span>
+              </button>
+              <div class="aws-signin-button-dropup">
+                  <ul id="session_drop_up" class="aws-signin-optin-button-dropup-content" style="display:none;">
+                      
+                      <li class="aws-signin-button-dropup-item" data-optionstring="true">
+                          <span class="aws-signin-button-dropup-item-content">Multi-session enabled</span>
+                      </li>
+                      
+                  </ul>
+              </div>
+          </div>
+      
+    
+    <script nonce="">
+        $(function() {
+            $("#language_selection_button").click(function() {
+                if ($("#language_drop_up").is(':hidden')) {
+                    $("#language_drop_up").show();
+                } else {
+                    $("#language_drop_up").hide();
+                }
+            });
+
+            $("#language_drop_up").on("click", "li", function(e) {
+                var localeString = e.currentTarget.getAttribute('data-localeString');
+                document.cookie= ("noflush_locale=" + localeString + "; domain=.amazon.com");
+                $("#language_drop_up").hide();
+                window.location.reload();
+            });
+        });
+    </script>
+  </div>
+</div>
+    
+</div>
+
+<div id="vpce-error-page" class="signin-container awsui-util-d-n">
+    <div id="vpce-error-top-div">
+        <div id="vpce-error-container">
+            <div id="vpce-error-header">
+                <img src="/static/image/privatelink/privatelink_unauth.svg" alt="PrivateLink unauthenticated">
+            </div>
+            <div>
+                <h1 class="vpce-error-h1">Your account doesn't have permission to use AWS Management Console Private Access</h1>
+                <p class="vpce-error-p">Your corporate network uses AWS Management Console Private Access, which only allows sign-ins from specific authorized accounts.</p>
+                <p class="vpce-error-p">To access this account, sign in from a different network, or contact your administrator for more information.</p>
+                <a class="secondary-button-link" href="/oauth?Action=logout&amp;redirectUri=https://aws.amazon.com/console">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="multi_session_support_container" style="display: none">
+            <div id="multi_session_modal_div" class="awsui-modal-container">
+                <div tabindex="-1" class="awsui-modal-dialog">
+                    <div class="awsui-modal-content">
+                        <!-- Modal Header -->
+                        <div class="awsui-modal-header">
+                            <b>AWS multi-session support</b>
+                            <button id="multi_session_close_button" class="awsui-modal-dismiss-control awsui-button-as-link awsui-icon times"></button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="awsui-modal-body">
+                            <!-- Description -->
+                            <div class="awsui-modal-description">
+                                <p>AWS now supports logging into multiple accounts in the same browser.</p>
+                            </div>
+
+                            <!-- Information Box -->
+                            <div class="awsui-modal-info-box">
+                                <div style="display:flex; align-items:flex-start;">
+                                    <span class="awsui-icon-info" style="color: #0073bb; margin-right: 10px; margin-top: 5px;">ⓘ</span>
+                                    <div>
+                                        <p style="margin-bottom: 10px;">AWS multi-session support uses subdomains to differentiate console sessions. Turning on multi-session support will change the AWS Console URL for this browser.</p>
+                                        <p>Check that you are able to access all subdomains under aws.amazon.com before you enable multi-session support. <a href="https://aws.amazon.com/what-is-aws/">Learn more</a></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p style="margin: 0">You can turn this feature on and off later using the "Multi-session support" option on the page where you sign into the AWS Console.</p>
+                        </div>
+
+                        <!-- Modal Footer with Action Buttons -->
+                        <div class="awsui-modal-footer">
+                            <button id="multi_session_cancel_button" class="awsui-button awsui-button-variant-link">Cancel</button>
+                            <button id="multi_session_turn_on_button" class="awsui-button awsui-button-variant-primary">Turn on multi-session support</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="prism_opt_out_container" class="awsui-modal-__state-hidden awsui-modal-container">
+            <div tabindex="-1" class="awsui-modal-dialog">
+                <div class="awsui-modal-content">
+                    <div class="awsui-modal-header">
+                        <b class="aws-signin-text-bigger">Disable multi-session support</b>
+                        <button class="prism_opt_out_dismiss_button awsui-modal-dismiss-control awsui-button-as-link awsui-icon times"></button>
+                    </div>
+                    <div class="awsui-modal-body">
+                        <div id="prism_opt_out_error_message" style="display: none">
+                            <div class="awsui-alert-has-dismiss awsui-alert-has-header awsui-alert-inside awsui-alert-type-error" style="padding: 15px 5px 20px 40px;" aria-hidden="false" role="alert">
+                                <span class="alert-exclamation-circle awsui-alert-icon awsui-icon awsui-icon-big" style="top: 15px; left: 9px;"></span>
+                                <div class="awsui-alert-header awsui-text-big">
+                                    <span id="prism_opt_out_error_title">There was an error</span>
+                                </div>
+                                <div>
+                                    <span id="prism_opt_out_error_message_description">An unexpected error occurred while fetching active sessions.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="prism_opt_out_content_div">
+                            <div class="aws-signin-general-label-box">
+                                <p id="prism_opt_out_desc" style="display:none">Are you sure you want to disable multi-session support? The following sessions will be logged out.</p>
+                                <p id="prism_opt_out_desc_not_active_sessions" style="display:none">Are you sure you want to disable multi-session support?</p>
+                            </div>
+                            <span id="prism_opt_out_session_list_loading" class="u2f_loading"></span>
+                            <div id="prism_opt_out_session_list" style="display: none"></div>
+                        </div>
+                        <p id="prism_opt_out_footer_desc">If you want to enable multi-session support later, you can do it from the sign-in screen, or the account menu in the Amazon Web Services Console.</p>
+                    </div>
+                    <div class="awsui-modal-footer">
+                        <div id="prism_opt_out_buttons_div">
+                            <button id="prism_opt_out_sign_out_button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons aws-signin-float-right">Sign out and disable multi-session</button>
+                            <button id="prism_opt_out_sign_out_button_not_active_session" style="display:none" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons aws-signin-float-right">Disable multi-session</button>
+                            <button class="prism_opt_out_dismiss_button awsui-button awsui-button-size-normal awsui-button-variant-link awsui-hover-child-icons aws-signin-float-right">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+<div id="password_recovery_container">
+    <div id="modal_div" class="awsui-modal-__state-hidden awsui-modal-container">
+        <div tabindex="-1" class="awsui-modal-dialog" style="max-width:400px; !important">
+            <div class="awsui-modal-content">
+                <div class="awsui-modal-header">
+                    <b class="aws-signin-text-bigger">Password recovery</b>
+                    <button id="password_recovery_dismiss_button" class="awsui-modal-dismiss-control awsui-button-as-link awsui-icon times"></button>
+                </div>
+                <div class="awsui-modal-body" style="max-width:300px; margin:0 auto; !important">
+                    <div id="password_recovery_error_message" style="display: none">
+                        <div class="awsui-alert-has-dismiss awsui-alert-has-header awsui-alert-inside awsui-alert-type-error" style="padding: 15px 5px 20px 40px;" aria-hidden="false" role="alert">
+                            <span class="alert-exclamation-circle awsui-alert-icon awsui-icon awsui-icon-big" style="top: 15px; left: 9px;"></span>
+                            <div class="awsui-alert-header awsui-text-big" region-container="header">
+                                <span id="password_recovery_error_title">There was an error</span>
+                            </div>
+                            <div region-container="content">
+                                <span id="password_recovery_error_message_description">Please try again later.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="password_recovery_email_div">
+                        <div class="aws-signin-general-label-box">
+                            <b>Email address</b>
+                        </div>
+                        <div class="aws-signin-general-input-box">
+                            <input id="password_recovery_email" class="awsui-textfield awsui-textfield-type-text" type="email" style="cursor: default;" disabled="">
+                        </div>
+                    </div>
+
+                    <div id="password_recovery_captcha_div">
+                        
+                            <div id="password_recovery_image_captcha_div" class="aws-signin-general-input-box" style="border:1px solid black; padding:10px 10px 0px 10px;">
+                                <div class="aws-signin-general-label-box">
+                                    <b>Type the characters seen in the image below</b>
+                                </div>
+                                <div id="password_recovery_image_captcha_left_box" class="aws-signin-captcha-box">
+                                    <img id="password_recovery_captcha_image" width="200px" height="70px">
+                                    <canvas id="password_recovery_captcha_canvas" width="200px" height="70px" hidden=""></canvas>
+                                </div>
+                                <div id="password_recovery_image_captcha_right_box" style="display:inline-block">
+                                    <div style="margin-bottom: 5px;">
+                                        <button id="password_recovery_switch_to_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Change to audio security check" style="position: relative; bottom:10px; !important">
+                                            <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-audio"></span>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button id="password_recovery_refresh_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Display new security image" style="position: relative; bottom:10px; !important">
+                                            <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-refresh"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="password_recovery_audio_captcha_div" class="aws-signin-general-input-box" style="border:1px solid black; padding:10px 10px 0px 10px; display:none;">
+                                <div id="password_recovery_audio_captcha_left_box" class="aws-signin-captcha-box">
+                                    <div>
+                                        <b>Please click "Play Audio" button below to continue</b>
+                                    </div>
+                                    <div style="margin-top:10px;">
+                                        <audio id="password_recovery_audio_captcha" style="display:none"></audio>
+                                        <div style="display:inline-block">
+                                            <button id="password_recovery_play_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Play Audio">
+                                                <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-play"></span>
+                                            </button>
+
+                                            <button id="password_recovery_pause_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Pause Audio" style="display:none;">
+                                                <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-pause"></span>
+                                            </button>
+                                        </div>
+                                        <div style="display:inline-block">
+                                            <button id="password_recovery_replay_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Replay Audio">
+                                                <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-replay"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="password_recovery_audio_captcha_right_box" style="display:inline-block;height: 70px;">
+                                    <div style="margin-bottom: 5px;">
+                                        <button id="password_recovery_switch_to_image_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Change to visual security check" style="position: relative; bottom:10px; !important">
+                                            <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-text-icon"></span>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button id="password_recovery_refresh_audio_captcha" class="awsui-button awsui-button-no-text awsui-button-size-normal awsui-button-variant-normal awsui-hover-child-icons" type="button" aria-label="Hear new security audio" style="position: relative; bottom:10px; !important">
+                                            <span class="awsui-button-icon awsui-button-icon-left awsui-icon aws-signin-refresh"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                        <input id="password_recovery_captcha_token" type="hidden">
+                        <div class="aws-signin-general-input-box">
+                            <input class="awsui-textfield awsui-textfield-type-text" maxlength="12" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Enter characters here" id="password_recovery_captcha_guess" type="text">
+                            <div id="password_recovery_captchaGuess_input_alert" style="display:none">
+                                <span id="password_recovery_captchaGuess_input_alert_content" class="awsui-text-small aws-signin-color-red">Enter the characters shown above</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="email_sent_confirmation_div" style="display:none; !important">
+                        <b class="awsui-icon awsui-icon-big alert-check-circle" style="margin-left:-27px; !important">Password email sent</b>
+                        <br>
+                        <span>Instructions have been sent to the email address associated with this Amazon Web Services account. Check that email and follow the instructions to reset your password.</span>
+                    </div>
+                </div>
+                <div class="awsui-modal-footer">
+                    <div id="password_recovery_ok_cancel_div">
+                        <button id="password_recovery_ok_button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons aws-signin-float-right">Send email</button>
+                        <button id="password_recovery_cancel_button" class="awsui-button awsui-button-size-normal awsui-button-variant-link awsui-hover-child-icons aws-signin-float-right">Cancel</button>
+                    </div>
+                    <div id="password_recovery_done_div" style="display:none; !important">
+                        <button id="password_recovery_done_button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons aws-signin-float-right">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="email_nudge_popup_container">
+    <div id="email_nudge_popup_modal_div" class="awsui-modal-__state-hidden awsui-modal-container">
+        <div tabindex="-1" class="awsui-modal-dialog" style="max-width:400px; !important">
+            <div class="awsui-modal-content">
+                <div class="awsui-modal-header">
+                    <b>Email verification required</b>
+                    <button id="email_nudge_popup_dismiss_button" class="awsui-modal-dismiss-control awsui-button-as-link awsui-icon times"></button>
+                </div>
+                <div class="awsui-modal-body" style="max-width:300px; margin:0 auto; !important">
+                    <div id="email_nudge_popup_general_message" class="aws-signin-general-paragraph">
+                        <b>You must verify your email within</b>
+                        <b id="email_nudge_popup_email_verification_enforcement_remaining_days"></b>
+                        <b>days.</b>
+                        <p class="aws-signin-text-normal" style="margin: 15px 0 15px 0;">At that time, you will be required to verify or update your email address before proceeding to the AWS Console.</p>
+                    </div>
+                </div>
+                <div class="awsui-modal-footer">
+                    <div id="email_nudge_popup_options_div">
+                        <button id="email_nudge_popup_verify_email_button" class="awsui-button awsui-button-size-normal awsui-button-variant-primary awsui-hover-child-icons aws-signin-float-right">Verify email</button>
+                        <button id="email_nudge_popup_skip_button" class="awsui-button awsui-button-size-normal awsui-button-variant-link awsui-hover-child-icons aws-signin-float-right">Skip for now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal_background_div" class="awsui-modal-__state-hidden awsui-modal-overlay">
+</div>
+
+<form class="fwcim-form" id="fpr_form" name="fpr_form" data-fwcim-id="2E3A63Ac">
+<input name="metadata1" type="hidden" value="ECdITeCs:TfFPpXwVIaXg3mt1Xz308hL6oul9JBNuQwsvC+cDPxYt1QgfFmXe5O3B/HkbmuiAn043jbUHFMdbuJUMFyvznU2EKKkcsuAGXSman6LfomPVMlHuHYFPkgvtD7UdL8MxuLCsZpNWRdaEUDqLeKN+/j/yfgJ+YzcPJEO2p1jZf/2dIQLUoPJztz3cK+TxkKShGrTSzBqeWFxqF1JBwlHPU3eR1pMPOIXxmfhl2lWgv3SRm2xHgLJlXFI28u5CK6eCdqa3O9GbsLNvUyVVrINtVjKVigbng8VUkD1HJ5yA0dcbphs1p2ztFC6oNznNDXat+tuy0sYR6ytzMwrBDa8APbWn3m6KogEYPznCr+N6wLibUSUf82f7ozOsNMwQKIF1xiF6VyvNLN8C0gpGM/CjDlw/Mpg+nE/JRSZi5z8WcvvTbcFMFHhVnohNYOCovpRv4L+vZ78ZiHsBfuOo/SMcGItog+iGGSiheygjtxOZtXYMMWfSRyPonkCXgNqrlh0dkjNSvaiVYT5LmVJa10Sa89f3ej01HZSiulVhstJL2WR5mJuI541zFRm+toj7adD2hpk0p+7SltWeMUGEUgdaXoFw8WjP6AtM/OKNCi4MXhph/L5mtQmcOqZUbbD5lkYhB6RdjdtrVKWiTfLKV+t1UD4GLH/DAaNGyKY2figxcu0WdjQz1Ka159+N1QEB5IgYxOYaLOgJPcxxTpMUh8y6LGpYj550zgDnv6iPGoUFzbNKSf/gRibbacjlq1OsFcmhWS2d6C8DvuHusNXekNB52wMXa3YYuH8mb5ozNgnCRRBfhAdyVeSjy8pF2cKxOjyIkNV/vNgvcvOEZpXzp29X/KVk4al83/3JAywv4fV4A2c7enT3+lffVjAZOwlxGpc3l6wID60NuG7RBZiYmPIC56t0TiNsSHhpplBRRFu85d2N0deQDvjrcUvb9TyHMgIpFFBlpvsEhvq7SrR4y8deX/CSlEO2JrvMMWlXvUPghaaJNte2F08mz8Myy/WDEgXGuO0eYQJx/ZJlPYNyHer7nlQhKrw5v0uAfmPtfLl4g/xgaBKNkh6u4RJqIF/NW6joEjqyxH8tLLOZjIqJ9hSNToBgdvbC8WFp5+QsyJkmjChkC+RArpZzwhEUJ9ZBbZjC4KjXtP/I3fvmdVv+q5wQ50cGQTSMPNXxOu4utvwmBqAXvMxqXD1HGi9+a3wQ1U1O3ID2uXfHvTOtyRrXeI/WUVz4yzXGW7vHU3A/pr9HwOwlB/PtqSahvJK5lKgOuVzqoaHlXzTl7OGXF8H/f0bL+3AuOzddjCwCQScv9L8TVN9QMT+xcHTA9FTrMvozKjMfwOwXLHbZG04D91QIEQ+xwO3AmfcS4xR/53q1feWlwUvMkzotNrEobMPG6dc="></form>
+<div id="captcha_script"></div>
+
+
+</body>
