@@ -27,7 +27,7 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
       const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
       const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
 
-      // Get root domain (last two parts, e.g., 'aliasvaul.net')
+      // Get root domain (last two parts, e.g., 'aliasvault.net')
       const credRootDomain = credDomainParts.slice(-2).join('.');
       const currentRootDomain = currentDomainParts.slice(-2).join('.');
 

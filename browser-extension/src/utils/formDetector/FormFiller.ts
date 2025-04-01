@@ -34,42 +34,55 @@ export class FormFiller {
    * @param credential The credential to fill the form with.
    */
   private fillBasicFields(credential: Credential): void {
-    if (this.form.usernameField) {
+    if (this.form.usernameField && credential.Username) {
       this.form.usernameField.value = credential.Username;
       this.triggerInputEvents(this.form.usernameField);
     }
 
-    if (this.form.passwordField) {
+    if (this.form.passwordField && credential.Password) {
       this.fillPasswordField(this.form.passwordField, credential.Password);
-      this.triggerInputEvents(this.form.passwordField);
     }
 
-    if (this.form.passwordConfirmField) {
+    if (this.form.passwordConfirmField && credential.Password) {
       this.fillPasswordField(this.form.passwordConfirmField, credential.Password);
-      this.triggerInputEvents(this.form.passwordConfirmField);
     }
 
-    if (this.form.emailField) {
-      this.form.emailField.value = credential.Email;
-      this.triggerInputEvents(this.form.emailField);
+    if (this.form.emailField && (credential.Email || credential.Username)) {
+      if (credential.Email) {
+        this.form.emailField.value = credential.Email;
+        this.triggerInputEvents(this.form.emailField);
+      } else if (credential.Username && !this.form.usernameField) {
+        /*
+         * If current form has no username field AND the credential has a username
+         * then we can assume the username should be used as the email.
+         */
+
+        /*
+         * This applies to the usecase where the AliasVault credential was imported
+         * from a previous password manager that only had username/password fields
+         * or where the user manually created a credential with only a username/password.
+         */
+        this.form.emailField.value = credential.Username;
+        this.triggerInputEvents(this.form.emailField);
+      }
     }
 
-    if (this.form.emailConfirmField) {
+    if (this.form.emailConfirmField && credential.Email) {
       this.form.emailConfirmField.value = credential.Email;
       this.triggerInputEvents(this.form.emailConfirmField);
     }
 
-    if (this.form.fullNameField) {
+    if (this.form.fullNameField && credential.Alias?.FirstName && credential.Alias?.LastName) {
       this.form.fullNameField.value = `${credential.Alias.FirstName} ${credential.Alias.LastName}`;
       this.triggerInputEvents(this.form.fullNameField);
     }
 
-    if (this.form.firstNameField) {
+    if (this.form.firstNameField && credential.Alias?.FirstName) {
       this.form.firstNameField.value = credential.Alias.FirstName;
       this.triggerInputEvents(this.form.firstNameField);
     }
 
-    if (this.form.lastNameField) {
+    if (this.form.lastNameField && credential.Alias?.LastName) {
       this.form.lastNameField.value = credential.Alias.LastName;
       this.triggerInputEvents(this.form.lastNameField);
     }
@@ -85,13 +98,14 @@ export class FormFiller {
   private async fillPasswordField(field: HTMLInputElement, password: string): Promise<void> {
     // Clear the field first
     field.value = '';
-    this.triggerInputEvents(field, false);
+    this.triggerInputEvents(field, true);
 
     // Type each character with a small delay
     for (const char of password) {
       // Append the character to the current value instead of using substring
       field.value += char;
       // Small random delay between 5-15ms to simulate human typing
+      this.triggerInputEvents(field, false);
       await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 5));
     }
 
