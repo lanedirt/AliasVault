@@ -58,6 +58,20 @@ public class PlaywrightInputHelper(IPage page)
     }
 
     /// <summary>
+    /// Generate a random birthdate between 1800 and current year in yyyy-MM-dd format.
+    /// </summary>
+    /// <returns>The random birthdate string.</returns>
+    public static string GenerateRandomBirthdate()
+    {
+        int minYear = 1800;
+        int maxYear = DateTime.Now.Year;
+        int year = Random.Next(minYear, maxYear + 1);
+        int month = Random.Next(1, 13);
+        int day = Random.Next(1, DateTime.DaysInMonth(year, month) + 1);
+        return $"{year:0000}-{month:00}-{day:00}";
+    }
+
+    /// <summary>
     /// Helper method to fill specified input fields on a page with given values.
     /// </summary>
     /// <param name="fieldValues">Dictionary with html element ids and values to input as field value.</param>
@@ -86,11 +100,13 @@ public class PlaywrightInputHelper(IPage page)
     public async Task FillEmptyInputFieldsWithRandom()
     {
         var inputFields = page.Locator("input");
+        var skipIds = new List<string> { "searchWidget" };
         var count = await inputFields.CountAsync();
         for (int i = 0; i < count; i++)
         {
             var input = inputFields.Nth(i);
             var inputType = await input.GetAttributeAsync("type");
+            var inputId = await input.GetAttributeAsync("id");
 
             // If is not empty, skip.
             if (!string.IsNullOrEmpty(await input.InputValueAsync()))
@@ -98,20 +114,36 @@ public class PlaywrightInputHelper(IPage page)
                 continue;
             }
 
-            // If file, skip.
+            // If input type is a file, skip.
             if (inputType == "file")
             {
                 continue;
             }
 
-            // Generate appropriate random data based on input type.
-            string randomData = inputType switch
+            // If skipIds contains the inputId, skip.
+            if (inputId is not null && skipIds.Contains(inputId))
             {
-                "email" => GenerateRandomEmail(),
-                "number" => GenerateRandomNumber(),
-                "password" => GenerateRandomPassword(),
-                _ => GenerateRandomString(), // Default for all other types.
-            };
+                continue;
+            }
+
+            // Generate appropriate random data based on input type.
+            string randomData;
+
+            // Check for birthdate field
+            if (inputId == "birthdate")
+            {
+                randomData = GenerateRandomBirthdate();
+            }
+            else
+            {
+                randomData = inputType switch
+                {
+                    "email" => GenerateRandomEmail(),
+                    "number" => GenerateRandomNumber(),
+                    "password" => GenerateRandomPassword(),
+                    _ => GenerateRandomString(), // Default for all other types.
+                };
+            }
 
             await input.FillAsync(randomData);
         }

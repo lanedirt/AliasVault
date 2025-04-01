@@ -97,6 +97,20 @@
                 "kind": "test",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Browser Extension (Chrome Dev)",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "dev:chrome"],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/browser-extension"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
