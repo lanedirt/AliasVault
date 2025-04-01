@@ -198,8 +198,8 @@
         }
 
         // Check if email has a known SpamOK domain, if not, don't show this component.
-        ShowComponent = IsSpamOkDomain(EmailAddress) || IsAliasVaultDomain(EmailAddress);
-        IsSpamOk = IsSpamOkDomain(EmailAddress);
+        ShowComponent = EmailService.IsAliasVaultSupportedDomain(EmailAddress);
+        IsSpamOk = EmailService.IsSpamOkDomain(EmailAddress);
 
         // Create a single object reference for JS interop
         _dotNetRef = DotNetObjectReference.Create(this);
@@ -252,23 +252,7 @@
             return;
         }
 
-        IsSpamOk = IsSpamOkDomain(EmailAddress);
-    }
-
-    /// <summary>
-    /// Returns true if the email address is from a known SpamOK domain.
-    /// </summary>
-    private bool IsSpamOkDomain(string email)
-    {
-        return Config.PublicEmailDomains.Exists(x => email.EndsWith(x));
-    }
-
-    /// <summary>
-    /// Returns true if the email address is from a known AliasVault domain.
-    /// </summary>
-    private bool IsAliasVaultDomain(string email)
-    {
-        return Config.PrivateEmailDomains.Exists(x => email.EndsWith(x));
+        IsSpamOk = EmailService.IsSpamOkDomain(EmailAddress);
     }
 
     /// <summary>
@@ -299,11 +283,11 @@
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
-        if (IsSpamOkDomain(EmailAddress))
+        if (EmailService.IsSpamOkDomain(EmailAddress))
         {
             await LoadSpamOkEmails(emailPrefix);
         }
-        else if (IsAliasVaultDomain(EmailAddress))
+        else if (EmailService.IsAliasVaultDomain(EmailAddress))
         {
             await LoadAliasVaultEmails();
         }
@@ -324,11 +308,11 @@
         // Get email prefix, which is the part before the @ symbol.
         string emailPrefix = EmailAddress.Split('@')[0];
 
-        if (IsSpamOkDomain(EmailAddress))
+        if (EmailService.IsSpamOkDomain(EmailAddress))
         {
             await ShowSpamOkEmailInModal(emailPrefix, emailId);
         }
-        else if (IsAliasVaultDomain(EmailAddress))
+        else if (EmailService.IsAliasVaultDomain(EmailAddress))
         {
             await ShowAliasVaultEmailInModal(emailId);
         }

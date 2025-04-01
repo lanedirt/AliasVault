@@ -14,9 +14,45 @@ using Microsoft.EntityFrameworkCore;
 /// <summary>
 /// Email service that contains utility methods for handling email functionality such as client-side decryption.
 /// </summary>
-public sealed class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService, ILogger<EmailService> logger)
+/// <param name="dbService">The database service.</param>
+/// <param name="jsInteropService">The JavaScript interop service.</param>
+/// <param name="globalNotificationService">The global notification service.</param>
+/// <param name="logger">The logger.</param>
+/// <param name="config">The configuration.</param>
+public sealed class EmailService(DbService dbService, JsInteropService jsInteropService, GlobalNotificationService globalNotificationService, ILogger<EmailService> logger, Config config)
 {
     private List<EncryptionKey> _encryptionKeys = [];
+
+    /// <summary>
+    /// Returns true if the email address is from a known SpamOK public domain.
+    /// </summary>
+    /// <param name="email">The email address to check.</param>
+    /// <returns>True if the email address is from a known SpamOK public domain, false otherwise.</returns>
+    public bool IsSpamOkDomain(string email)
+    {
+        return config.PublicEmailDomains.Exists(x => email.EndsWith(x));
+    }
+
+    /// <summary>
+    /// Returns true if the email address is from a known AliasVault private domain.
+    /// </summary>
+    /// <param name="email">The email address to check.</param>
+    /// <returns>True if the email address is from a known AliasVault private domain, false otherwise.</returns>
+    public bool IsAliasVaultDomain(string email)
+    {
+        return config.PrivateEmailDomains.Exists(x => email.EndsWith(x));
+    }
+
+    /// <summary>
+    /// Returns true if the email address is from a known AliasVault supported domain
+    /// of which AliasVault is able to show the email content in the client.
+    /// </summary>
+    /// <param name="email">The email address to check.</param>
+    /// <returns>True if the email address is from a known AliasVault supported domain, false otherwise.</returns>
+    public bool IsAliasVaultSupportedDomain(string email)
+    {
+        return IsSpamOkDomain(email) || IsAliasVaultDomain(email);
+    }
 
     /// <summary>
     /// Decrypts a single email using the private key.
