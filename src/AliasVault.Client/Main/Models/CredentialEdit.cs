@@ -59,9 +59,9 @@ public sealed class CredentialEdit
     public Alias Alias { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the Alias BirthDate.
+    /// Gets or sets the Alias BirthDate. Can be empty string or a date in yyyy-MM-dd format.
     /// </summary>
-    [StringDateFormat("yyyy-MM-dd")]
+    [StringDateFormat("yyyy-MM-dd", AllowEmpty = true)]
     public string AliasBirthDate { get; set; } = string.Empty;
 
     /// <summary>
@@ -122,7 +122,7 @@ public sealed class CredentialEdit
                 UpdatedAt = DateTime.UtcNow,
             },
             Alias = credentialCopy.Alias,
-            AliasBirthDate = credentialCopy.Alias.BirthDate.ToString("yyyy-MM-dd"),
+            AliasBirthDate = credentialCopy.Alias.BirthDate == DateTime.MinValue ? string.Empty : credentialCopy.Alias.BirthDate.ToString("yyyy-MM-dd"),
             Attachments = credentialCopy.Attachments.ToList(),
             TotpCodes = credentialCopy.TotpCodes.ToList(),
             CreateDate = credentialCopy.CreatedAt,
@@ -147,10 +147,10 @@ public sealed class CredentialEdit
                 Url = ServiceUrl,
                 Logo = ServiceLogo,
             },
-            Passwords = new List<Password>
-            {
+            Passwords =
+            [
                 Password,
-            },
+            ],
             Alias = Alias,
             Attachments = Attachments,
             TotpCodes = TotpCodes,
