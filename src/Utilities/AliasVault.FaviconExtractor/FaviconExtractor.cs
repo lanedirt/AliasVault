@@ -40,14 +40,14 @@ public static class FaviconExtractor
 
         using HttpClient client = CreateHttpClient();
 
-        HttpResponseMessage response = await client.GetAsync(uri);
-        if (!response.IsSuccessStatusCode)
+        // First attempt
+        var result = await TryGetFaviconAsync(client, uri);
+        if (result != null)
         {
-            return null;
+            return result;
         }
 
-        var faviconNodes = await GetFaviconNodesFromHtml(response, uri);
-        return await TryExtractFaviconFromNodes(faviconNodes, client, uri);
+        return await TryGetFaviconAsync(client, uri);
     }
 
     /// <summary>
@@ -125,6 +125,18 @@ public static class FaviconExtractor
             htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon']"),
             new HtmlNodeCollection(htmlDoc.DocumentNode) { defaultFavicon },
         ];
+    }
+
+    private static async Task<byte[]?> TryGetFaviconAsync(HttpClient client, Uri uri)
+    {
+        HttpResponseMessage response = await client.GetAsync(uri);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var faviconNodes = await GetFaviconNodesFromHtml(response, uri);
+        return await TryExtractFaviconFromNodes(faviconNodes, client, uri);
     }
 
     private static async Task<byte[]?> TryExtractFaviconFromNodes(HtmlNodeCollection[] faviconNodes, HttpClient client, Uri baseUri)
