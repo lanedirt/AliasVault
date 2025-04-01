@@ -7,6 +7,7 @@ import { CombinedFieldPatterns, CombinedGenderOptionPatterns } from "./FieldPatt
 export class FormDetector {
   private readonly document: Document;
   private readonly clickedElement: HTMLElement | null;
+  private readonly visibilityCache: Map<HTMLElement, boolean>;
 
   /**
    * Constructor.
@@ -14,6 +15,86 @@ export class FormDetector {
   public constructor(document: Document, clickedElement?: HTMLElement) {
     this.document = document;
     this.clickedElement = clickedElement ?? null;
+    this.visibilityCache = new Map();
+  }
+
+  /**
+   * Check if an element and all its parents are visible.
+   * This checks for display:none, visibility:hidden, and opacity:0
+   * Uses a cache to avoid redundant checks of the same elements.
+   */
+  private isElementVisible(element: HTMLElement | null): boolean {
+    if (!element) {
+      return false;
+    }
+
+    // Check cache first
+    if (this.visibilityCache.has(element)) {
+      return this.visibilityCache.get(element)!;
+    }
+
+    let current: HTMLElement | null = element;
+    while (current) {
+      try {
+        const style = this.document.defaultView?.getComputedStyle(current);
+        if (!style) {
+          // Cache and return true for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, true);
+            parent = parent.parentElement;
+          }
+          return true;
+        }
+        
+        // Check for display:none
+        if (style.display === 'none') {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+        
+        // Check for visibility:hidden
+        if (style.visibility === 'hidden') {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+        
+        // Check for opacity:0
+        if (parseFloat(style.opacity) === 0) {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+      } catch {
+        // If we can't get computed style, cache and return true for this element and all its parents
+        let parent: HTMLElement | null = current;
+        while (parent) {
+          this.visibilityCache.set(parent, true);
+          parent = parent.parentElement;
+        }
+        return true;
+      }
+
+      current = current.parentElement;
+    }
+
+    // Cache and return true for the original element
+    this.visibilityCache.set(element, true);
+    return true;
   }
 
   /**
@@ -80,10 +161,20 @@ export class FormDetector {
         continue;
       }
 
+      // Skip if element is not visible
+      if (!this.isElementVisible(input)) {
+        continue;
+      }
+
       // Handle both input and select elements
       const type = input.tagName.toLowerCase() === 'select' ? 'select' : input.type.toLowerCase();
       if (!types.includes(type)) {
         continue;
+      }
+
+      // Check for exact type match if types contains email, as that most likely is the email field.
+      if (types.includes('email') && input.type.toLowerCase() === 'email') {
+        return input;
       }
 
       // Collect all text attributes to check
@@ -336,11 +427,11 @@ export class FormDetector {
       ? form.querySelectorAll<HTMLInputElement>('input[type="password"]')
       : this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
 
-    const candidateArray = Array.from(candidates);
+    const visibleCandidates = Array.from(candidates).filter(input => this.isElementVisible(input));
 
     return {
-      primary: candidateArray[0] ?? null,
-      confirm: candidateArray[1] ?? null
+      primary: visibleCandidates[0] ?? null,
+      confirm: visibleCandidates[1] ?? null
     };
   }
 
@@ -349,7 +440,7 @@ export class FormDetector {
    */
   private containsPasswordField(wrapper: HTMLElement): boolean {
     const passwordFields = this.findPasswordField(wrapper as HTMLFormElement | null);
-    if (passwordFields.primary) {
+    if (passwordFields.primary && this.isElementVisible(passwordFields.primary)) {
       return true;
     }
 
@@ -362,7 +453,7 @@ export class FormDetector {
   private containsLikelyUsernameOrEmailField(wrapper: HTMLElement, force: boolean = false): boolean {
     // Check if the form contains an email field.
     const emailFields = this.findEmailField(wrapper as HTMLFormElement | null);
-    if (emailFields.primary) {
+    if (emailFields.primary && this.isElementVisible(emailFields.primary)) {
       const isValid = force || emailFields.primary.getAttribute('autocomplete') !== 'off';
       if (isValid) {
         return true;
@@ -371,7 +462,7 @@ export class FormDetector {
 
     // Check if the form contains a username field.
     const usernameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text'], []);
-    if (usernameField) {
+    if (usernameField && this.isElementVisible(usernameField)) {
       const isValid = force || usernameField.getAttribute('autocomplete') !== 'off';
       if (isValid) {
         return true;
@@ -380,7 +471,7 @@ export class FormDetector {
 
     // Check if the form contains a first name field.
     const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], []);
-    if (firstNameField) {
+    if (firstNameField && this.isElementVisible(firstNameField)) {
       const isValid = force || firstNameField.getAttribute('autocomplete') !== 'off';
       if (isValid) {
         return true;
@@ -389,7 +480,7 @@ export class FormDetector {
 
     // Check if the form contains a last name field.
     const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], []);
-    if (lastNameField) {
+    if (lastNameField && this.isElementVisible(lastNameField)) {
       const isValid = force || lastNameField.getAttribute('autocomplete') !== 'off';
       if (isValid) {
         return true;
