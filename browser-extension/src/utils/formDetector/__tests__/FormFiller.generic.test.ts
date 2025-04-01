@@ -44,6 +44,17 @@ describe('FormFiller', () => {
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.emailConfirmField)).toBe(true);
     });
 
+    it('should use username as email when no email is provided and no username field exists', () => {
+      // Create a credential with an empty email string
+      const credentialWithoutEmail = { ...mockCredential, Email: '' };
+      formFields.usernameField = null;
+
+      formFiller.fillFields(credentialWithoutEmail);
+
+      expect(formFields.emailField?.value).toBe('testuser');
+      expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.emailField)).toBe(true);
+    });
+
     it('should fill password and confirmation fields', async () => {
       formFields.passwordConfirmField = document.createElement('input');
 
