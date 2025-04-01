@@ -256,12 +256,16 @@ export class FormDetector {
       ['text', 'email']
     );
 
-    // Find confirmation email field if primary exists
+    /*
+     * Find confirmation email field if primary exists
+     * and ensure it's not the same as the primary email field.
+     */
     const confirmEmail = primaryEmail
       ? this.findInputField(
         form,
         CombinedFieldPatterns.emailConfirm,
-        ['text', 'email']
+        ['text', 'email'],
+        [primaryEmail]
       )
       : null;
 
