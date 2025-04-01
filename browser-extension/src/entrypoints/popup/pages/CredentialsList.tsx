@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../../../utils/types/Credential';
-import { Buffer } from 'buffer';
 import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
@@ -10,7 +9,7 @@ import ReloadButton from '../components/ReloadButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../../../hooks/useMinDurationLoading';
 import { sendMessage } from 'webext-bridge/popup';
-
+import SqliteClient  from '../../../utils/SqliteClient';
 /**
  * Credentials list page.
  */
@@ -163,7 +162,7 @@ const CredentialsList: React.FC = () => {
                 className="w-full p-2 border dark:border-gray-600 rounded flex items-center bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <img
-                  src={cred.Logo ? `data:image/x-icon;base64,${Buffer.from(cred.Logo).toString('base64')}` : '/assets/images/service-placeholder.webp'}
+                  src={SqliteClient.imgSrcFromBytes(cred.Logo)}
                   alt={cred.ServiceName}
                   className="w-8 h-8 mr-2 flex-shrink-0"
                   onError={(e) => {
