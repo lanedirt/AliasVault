@@ -20,6 +20,11 @@ using System.Globalization;
 public sealed class StringDateFormatAttribute(string format) : ValidationAttribute
 {
     /// <summary>
+    /// Gets or sets a value indicating whether empty strings should be considered valid.
+    /// </summary>
+    public bool AllowEmpty { get; set; } = false;
+
+    /// <summary>
     /// Check if the date string is in the correct format.
     /// </summary>
     /// <param name="value">The field value.</param>
@@ -27,9 +32,17 @@ public sealed class StringDateFormatAttribute(string format) : ValidationAttribu
     /// <returns>ValidationResult.</returns>
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
-        if (value is string dateString && DateTime.TryParseExact(dateString, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+        if (value is string dateString)
         {
-            return ValidationResult.Success!;
+            if (string.IsNullOrWhiteSpace(dateString) && AllowEmpty)
+            {
+                return ValidationResult.Success!;
+            }
+
+            if (DateTime.TryParseExact(dateString, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+            {
+                return ValidationResult.Success!;
+            }
         }
 
         return new ValidationResult($"The date must be in the format {format}.", [validationContext.MemberName!]);
