@@ -188,9 +188,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopImmediatePropagation();
 
     const suggestedName = getSuggestedServiceName(document, window.location);
-    const serviceName = await createEditNamePopup(suggestedName, rootContainer);
+    const result = await createEditNamePopup(suggestedName, rootContainer);
 
-    if (!serviceName) {
+    if (!result) {
       // User cancelled
       return;
     }
@@ -205,71 +205,70 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       const response = await sendMessage('GET_DEFAULT_EMAIL_DOMAIN', {}, 'background') as { domain: string };
       const domain = response.domain;
 
-      // Generate new identity locally
-      const identityGenerator = new IdentityGeneratorEn();
-      const identity = await identityGenerator.generateRandomIdentity();
+      let credential: Credential;
 
-      // Get password settings from background
-      const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
-      
-      // Initialize password generator with the retrieved settings
-      const passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
-      const password = passwordGenerator.generateRandomPassword();
-
-      // Extract favicon from page and get the bytes
-      const faviconBytes = await getFaviconBytes(document);
-
-      /**
-       * Get a valid service URL from the current page.
-       */
-      const getValidServiceUrl = (): string | null => {
-        try {
-          // Check if we're in an iframe with invalid/null source
-          if (window !== window.top && (!window.location.href || window.location.href === 'about:srcdoc')) {
-            return null;
+      if (result.isCustomCredential) {
+        // Create custom credential
+        const faviconBytes = await getFaviconBytes(document);
+        credential = {
+          Id: '',
+          ServiceName: result.serviceName || '',
+          ServiceUrl: getValidServiceUrl(),
+          Email: result.customEmail || '',
+          Logo: faviconBytes || undefined,
+          Username: result.customUsername || '',
+          Password: '', // Will be set by the popup
+          Notes: '',
+          Alias: {
+            FirstName: '',
+            LastName: '',
+            NickName: result.customUsername || '',
+            BirthDate: new Date().toISOString(),
+            Gender: undefined,
+            Email: result.customEmail || ''
           }
+        };
+      } else {
+        // Generate new identity locally
+        const identityGenerator = new IdentityGeneratorEn();
+        const identity = await identityGenerator.generateRandomIdentity();
 
-          const url = new URL(window.location.href);
+        // Get password settings from background
+        const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
+        
+        // Initialize password generator with the retrieved settings
+        const passwordGenerator = new PasswordGenerator({
+          Length: 16,
+          UseUppercase: true,
+          UseLowercase: true,
+          UseNumbers: true,
+          UseSpecialChars: true,
+          UseNonAmbiguousChars: false
+        });
+        const password = passwordGenerator.generateRandomPassword();
 
-          // Validate the domain/origin
-          if (!url.origin || url.origin === 'null' || !url.hostname) {
-            return null;
+        // Extract favicon from page and get the bytes
+        const faviconBytes = await getFaviconBytes(document);
+
+        credential = {
+          Id: '',
+          ServiceName: result.serviceName || '',
+          ServiceUrl: getValidServiceUrl(),
+          Email: `${identity.emailPrefix}@${domain}`,
+          Logo: faviconBytes || undefined,
+          Username: identity.nickName,
+          Password: password,
+          Notes: '',
+          Alias: {
+            FirstName: identity.firstName,
+            LastName: identity.lastName,
+            NickName: identity.nickName,
+            BirthDate: identity.birthDate.toISOString(),
+            Gender: identity.gender,
+            Email: `${identity.emailPrefix}@${domain}`
           }
-
-          // Check for valid protocol (only http/https)
-          if (!(/^https?:$/).exec(url.protocol)) {
-            return null;
-          }
-
-          return url.origin + url.pathname;
-        } catch (error) {
-          console.debug('Error validating service URL:', error);
-          return null;
-        }
-      };
-
-      // Get valid service URL, defaults to empty string if invalid
-      const serviceUrl = getValidServiceUrl() ?? '';
-
-      // Submit new identity to backend to persist in db
-      const credential: Credential = {
-        Id: '',
-        ServiceName: serviceName,
-        ServiceUrl: serviceUrl,
-        Email: `${identity.emailPrefix}@${domain}`,
-        Logo: faviconBytes ? new Uint8Array(faviconBytes) : undefined,
-        Username: identity.nickName,
-        Password: password,
-        Notes: '',
-        Alias: {
-          FirstName: identity.firstName,
-          LastName: identity.lastName,
-          NickName: identity.nickName,
-          BirthDate: identity.birthDate.toISOString(),
-          Gender: identity.gender,
-          Email: `${identity.emailPrefix}@${domain}`
-        }
-      };
+        };
+      }
 
       // Create identity in background.
       await sendMessage('CREATE_IDENTITY', {
@@ -347,6 +346,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   actionContainer.appendChild(createButton);
   actionContainer.appendChild(closeButton);
   popup.appendChild(actionContainer);
+
+  console.log('Autofill actually popup appended:', popup);
 
   /**
    * Handle clicking outside the popup.
@@ -650,7 +651,7 @@ export async function disableAutoShowPopup(): Promise<void> {
 /**
  * Create edit name popup. Part of the "create new alias" flow.
  */
-export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<string | null> {
+export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
@@ -663,20 +664,120 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const popup = document.createElement('div');
     popup.className = 'av-create-popup';
 
+    // Create the main content
     popup.innerHTML = `
-      <h3 class="av-create-popup-title">
-        New alias name
-      </h3>
-      <input
-        type="text"
-        id="service-name-input"
-        data-aliasvault-ignore="true"
-        value="${defaultName}"
-        class="av-create-popup-input"
-      >
-      <div class="av-create-popup-actions">
-        <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
-        <button id="save-btn" class="av-create-popup-save">Create alias</button>
+      <button class="av-create-popup-close">
+        <svg class="av-icon" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="av-create-popup-mode-select">
+        <h3 class="av-create-popup-title">Create New Alias</h3>
+        <div class="av-create-popup-modes">
+          <button class="av-create-popup-mode-btn av-create-popup-mode-random">
+            <div class="av-create-popup-mode-icon">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+              </svg>
+            </div>
+            <div class="av-create-popup-mode-content">
+              <h4>Random Alias</h4>
+              <p>Generate a random identity with random email</p>
+            </div>
+          </button>
+          <button class="av-create-popup-mode-btn av-create-popup-mode-custom">
+            <div class="av-create-popup-mode-icon">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+              </svg>
+            </div>
+            <div class="av-create-popup-mode-content">
+              <h4>Manual Credential</h4>
+              <p>Create a custom username and password</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="av-create-popup-random-mode" style="display: none;">
+        <h3 class="av-create-popup-title">Create Random Alias</h3>
+        <div class="av-create-popup-field-group">
+          <label for="service-name-input">Service Name</label>
+          <input
+            type="text"
+            id="service-name-input"
+            data-aliasvault-ignore="true"
+            value="${defaultName}"
+            class="av-create-popup-input"
+            placeholder="Enter service name"
+          >
+        </div>
+        <div class="av-create-popup-actions">
+          <button id="back-btn" class="av-create-popup-back">Back</button>
+          <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
+          <button id="save-btn" class="av-create-popup-save">Create alias</button>
+        </div>
+      </div>
+
+      <div class="av-create-popup-custom-mode" style="display: none;">
+        <h3 class="av-create-popup-title">Create Manual Credential</h3>
+        <div class="av-create-popup-field-group">
+          <label for="custom-service-name">Service Name</label>
+          <input
+            type="text"
+            id="custom-service-name"
+            data-aliasvault-ignore="true"
+            value="${defaultName}"
+            class="av-create-popup-input"
+            placeholder="Enter service name"
+          >
+        </div>
+        <div class="av-create-popup-field-group">
+          <label for="custom-email">Email</label>
+          <input
+            type="email"
+            id="custom-email"
+            data-aliasvault-ignore="true"
+            class="av-create-popup-input"
+            placeholder="Enter email address"
+          >
+        </div>
+        <div class="av-create-popup-field-group">
+          <label for="custom-username">Username</label>
+          <input
+            type="text"
+            id="custom-username"
+            data-aliasvault-ignore="true"
+            class="av-create-popup-input"
+            placeholder="Enter username"
+          >
+        </div>
+        <div class="av-create-popup-field-group">
+          <label>Generated Password</label>
+          <div class="av-create-popup-password-preview">
+            <input
+              type="text"
+              id="password-preview"
+              data-aliasvault-ignore="true"
+              class="av-create-popup-input"
+              readonly
+            >
+            <button id="regenerate-password" class="av-create-popup-regenerate-btn">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="av-create-popup-actions">
+          <button id="custom-back-btn" class="av-create-popup-back">Back</button>
+          <button id="custom-cancel-btn" class="av-create-popup-cancel">Cancel</button>
+          <button id="custom-save-btn" class="av-create-popup-save">Create credential</button>
+        </div>
       </div>
     `;
 
@@ -688,17 +789,75 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       popup.classList.add('show');
     });
 
-    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
-    const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
+    // Get all the elements
+    const modeSelect = popup.querySelector('.av-create-popup-mode-select') as HTMLElement;
+    const randomMode = popup.querySelector('.av-create-popup-random-mode') as HTMLElement;
+    const customMode = popup.querySelector('.av-create-popup-custom-mode') as HTMLElement;
+    const randomBtn = popup.querySelector('.av-create-popup-mode-random') as HTMLButtonElement;
+    const customBtn = popup.querySelector('.av-create-popup-mode-custom') as HTMLButtonElement;
+    const backBtn = popup.querySelector('#back-btn') as HTMLButtonElement;
+    const customBackBtn = popup.querySelector('#custom-back-btn') as HTMLButtonElement;
     const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
+    const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
+    const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
+    const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
+    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
+    const customInput = popup.querySelector('#custom-service-name') as HTMLInputElement;
+    const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
+    const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
+    const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
+    const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
+    const closeBtn = popup.querySelector('.av-create-popup-close') as HTMLButtonElement;
 
-    // Select input text
-    input.select();
+    // Initialize password generator
+    const passwordGenerator = new PasswordGenerator({
+      Length: 16,
+      UseUppercase: true,
+      UseLowercase: true,
+      UseNumbers: true,
+      UseSpecialChars: true,
+      UseNonAmbiguousChars: false
+    });
+
+    // Function to generate and set password
+    const generatePassword = () => {
+      passwordPreview.value = passwordGenerator.generateRandomPassword();
+    };
+
+    // Generate initial password
+    generatePassword();
+
+    // Handle regenerate button click
+    regenerateBtn.addEventListener('click', generatePassword);
+
+    // Handle mode selection
+    randomBtn.addEventListener('click', () => {
+      modeSelect.style.display = 'none';
+      randomMode.style.display = 'block';
+      input.select();
+    });
+
+    customBtn.addEventListener('click', () => {
+      modeSelect.style.display = 'none';
+      customMode.style.display = 'block';
+      customInput.select();
+    });
+
+    // Handle back buttons
+    backBtn.addEventListener('click', () => {
+      randomMode.style.display = 'none';
+      modeSelect.style.display = 'block';
+    });
+
+    customBackBtn.addEventListener('click', () => {
+      customMode.style.display = 'none';
+      modeSelect.style.display = 'block';
+    });
 
     /**
      * Close the popup.
      */
-    const closePopup = (value: string | null) : void => {
+    const closePopup = (value: { serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string } | null) : void => {
       popup.classList.remove('show');
       setTimeout(() => {
         overlay.remove();
@@ -706,43 +865,90 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       }, 200);
     };
 
-    // Handle save
+    // Handle save buttons
     saveBtn.addEventListener('click', () => {
-      const value = input.value.trim();
-      if (value) {
-        closePopup(value);
+      const serviceName = input.value.trim();
+      if (serviceName) {
+        closePopup({
+          serviceName,
+          isCustomCredential: false
+        });
       }
     });
 
-    // Handle cancel
+    customSaveBtn.addEventListener('click', () => {
+      const serviceName = customInput.value.trim();
+      if (serviceName) {
+        if (!customEmail.value.trim() && !customUsername.value.trim()) {
+          // Show error message
+          const errorMsg = document.createElement('div');
+          errorMsg.className = 'av-create-popup-error';
+          errorMsg.textContent = 'Please fill in either email or username';
+          customMode.insertBefore(errorMsg, customMode.querySelector('.av-create-popup-actions'));
+          setTimeout(() => errorMsg.remove(), 2000);
+          return;
+        }
+        closePopup({
+          serviceName,
+          isCustomCredential: true,
+          customEmail: customEmail.value.trim(),
+          customUsername: customUsername.value.trim()
+        });
+      }
+    });
+
+    // Handle cancel buttons
     cancelBtn.addEventListener('click', () => {
+      closePopup(null);
+    });
+
+    customCancelBtn.addEventListener('click', () => {
       closePopup(null);
     });
 
     // Handle Enter key
     input.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        const value = input.value.trim();
-        if (value) {
-          closePopup(value);
+        const serviceName = input.value.trim();
+        if (serviceName) {
+          closePopup({
+            serviceName,
+            isCustomCredential: false
+          });
         }
       }
+    });
+
+    customInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        const serviceName = customInput.value.trim();
+        if (serviceName) {
+          if (!customEmail.value.trim() && !customUsername.value.trim()) {
+            return;
+          }
+          closePopup({
+            serviceName,
+            isCustomCredential: true,
+            customEmail: customEmail.value.trim(),
+            customUsername: customUsername.value.trim()
+          });
+        }
+      }
+    });
+
+    // Handle close button
+    closeBtn.addEventListener('click', () => {
+      closePopup(null);
     });
 
     // Handle click outside
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
-        // Check if there's any text selected in the input
-        const selectedText = input.value.substring(input.selectionStart ?? 0, input.selectionEnd ?? 0);
-
-        // Only close if no text is selected
-        if (!selectedText) {
-          closePopup(null);
-        }
+        closePopup(null);
       }
     });
   });
-};
+}
 
 /**
  * Open (or refresh) the autofill popup including check if vault is locked.
@@ -765,6 +971,7 @@ export function openAutofillPopup(input: HTMLInputElement, container: HTMLElemen
     const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
 
     if (response.success) {
+      console.log('creating autofill popup...');
       createAutofillPopup(input, response.credentials, container);
     } else {
       createVaultLockedPopup(input, container);
@@ -942,4 +1149,33 @@ function getSuggestedServiceName(document: Document, location: Location): string
   // Fall back to domain name if no meaningful parts found
   const domainParts = location.hostname.replace(/^www\./, '').split('.');
   return domainParts.slice(-2).join('.');
+}
+
+/**
+ * Get a valid service URL from the current page.
+ */
+function getValidServiceUrl(): string {
+  try {
+    // Check if we're in an iframe with invalid/null source
+    if (window !== window.top && (!window.location.href || window.location.href === 'about:srcdoc')) {
+      return '';
+    }
+
+    const url = new URL(window.location.href);
+
+    // Validate the domain/origin
+    if (!url.origin || url.origin === 'null' || !url.hostname) {
+      return '';
+    }
+
+    // Check for valid protocol (only http/https)
+    if (!(/^https?:$/).exec(url.protocol)) {
+      return '';
+    }
+
+    return url.origin + url.pathname;
+  } catch (error) {
+    console.debug('Error validating service URL:', error);
+    return '';
+  }
 }

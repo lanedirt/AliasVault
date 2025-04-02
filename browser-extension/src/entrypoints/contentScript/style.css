@@ -303,6 +303,7 @@ body {
   transform: scale(0.95);
   opacity: 0;
   padding: 24px;
+  padding-top: 16px;
   transition: transform 0.2s ease, opacity 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -313,17 +314,106 @@ body {
 }
 
 .av-create-popup-title {
-  margin: 0 0 16px 0;
-  font-size: 18px;
+  margin: 0 0 24px 0;
+  font-size: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-weight: 600;
   color: #f8f9fa;
+  text-align: center;
+}
+
+.av-create-popup-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  padding: 6px;
+  background: #374151;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+}
+
+.av-create-popup-close:hover {
+  color: #f8f9fa;
+  background: #4b5563;
+}
+
+.av-create-popup-close .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-create-popup-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.av-create-popup-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.av-create-popup-mode-btn:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.av-create-popup-mode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #1f2937;
+  border-radius: 8px;
+  color: #d68338;
+}
+
+.av-create-popup-mode-icon .av-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.av-create-popup-mode-content {
+  flex: 1;
+}
+
+.av-create-popup-mode-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8f9fa;
+}
+
+.av-create-popup-mode-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #9ca3af;
 }
 
 .av-create-popup-input {
   width: 100%;
   padding: 8px 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   border: 1px solid #374151;
   border-radius: 6px;
   background: #374151;
@@ -338,10 +428,101 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Custom Credential UI Styles */
+.av-create-popup-custom-toggle {
+  margin: 16px 0;
+  padding: 0 16px;
+}
+
+.av-create-popup-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.av-create-popup-toggle-text {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.av-create-popup-custom-fields {
+  margin: 16px 0;
+  padding: 0 16px;
+}
+
+.av-create-popup-field-group {
+  margin-bottom: 2px;
+}
+
+.av-create-popup-field-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #eee;
+}
+
+.av-create-popup-password-preview {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.av-create-popup-password-preview input {
+  flex: 1;
+}
+
+.av-create-popup-regenerate-btn {
+  padding: 8px;
+  border: none;
+  background: #374151;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.av-create-popup-regenerate-btn:hover {
+  background: #4b5563;
+  color: #f8f9fa;
+}
+
+.av-create-popup-regenerate-btn .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-create-popup-error {
+  margin-top: 16px;
+  padding: 8px 12px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 4px;
+  font-size: 14px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
 .av-create-popup-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 24px;
+}
+
+.av-create-popup-back {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #374151;
+  background: transparent;
+  color: #f8f9fa;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.av-create-popup-back:hover {
+  background: #374151;
 }
 
 .av-create-popup-cancel {
@@ -416,6 +597,17 @@ body {
   pointer-events: auto;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeOut {
