@@ -664,11 +664,41 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const popup = document.createElement('div');
     popup.className = 'av-create-popup';
 
+    // Define input method base variables
+    const randomIdentityIcon = `
+      <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <circle cx="8" cy="8" r="1"/>
+        <circle cx="16" cy="8" r="1"/>
+        <circle cx="12" cy="12" r="1"/>
+        <circle cx="8" cy="16" r="1"/>
+        <circle cx="16" cy="16" r="1"/>
+      </svg>
+    `;
+    const randomIdentitySubtext = 'Generate a random identity with a random email address accessible in AliasVault.';
+    const randomIdentityTitle = 'Create random alias';
+    const randomIdentityTitleDropdown = 'Random alias';
+    const randomIdentitySubtextDropdown = 'Random identity with random email';
+
+    const manualUsernamePasswordIcon = `
+      <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="7" r="4"/>
+        <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
+      </svg>
+    `;
+    const manualUsernamePasswordSubtext = 'Specify your own email address and username.';
+    const manualUsernamePasswordTitle = 'Create username/password';
+    const manualUsernamePasswordTitleDropdown = 'Username/password';
+    const manualUsernamePasswordSubtextDropdown = 'Manual username and password';
+
     // Create the main content
     popup.innerHTML = `
       <div class="av-create-popup-header">
         <div class="av-create-popup-title-container">
-          <h3 class="av-create-popup-title">Create random alias</h3>
+          <div class="av-create-popup-title-wrapper">
+            ${randomIdentityIcon}
+            <h3 class="av-create-popup-title">${randomIdentityTitle}</h3>
+          </div>
           <button class="av-create-popup-mode-dropdown">
             <svg class="av-icon" viewBox="0 0 24 24">
               <path d="M6 9l6 6 6-6"/>
@@ -677,34 +707,29 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
         </div>
       </div>
 
-      <div class="av-create-popup-help-text">Generate a random identity and AliasVault email address.</div>
-
       <div class="av-create-popup-mode-dropdown-menu" style="display: none;">
         <button class="av-create-popup-mode-option" data-mode="random">
           <div class="av-create-popup-mode-icon">
-            <svg class="av-icon" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-            </svg>
+            ${randomIdentityIcon}
           </div>
           <div class="av-create-popup-mode-content">
-            <h4>Random alias</h4>
-            <p>Random identity with random email</p>
+            <h4>${randomIdentityTitleDropdown}</h4>
+            <p>${randomIdentitySubtextDropdown}</p>
           </div>
         </button>
+
         <button class="av-create-popup-mode-option" data-mode="custom">
           <div class="av-create-popup-mode-icon">
-            <svg class="av-icon" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-            </svg>
+            ${manualUsernamePasswordIcon}
           </div>
           <div class="av-create-popup-mode-content">
-            <h4>Username/password</h4>
-            <p>Manual username and password</p>
+            <h4>${manualUsernamePasswordTitleDropdown}</h4>
+            <p>${manualUsernamePasswordSubtextDropdown}</p>
           </div>
         </button>
       </div>
+
+      <div class="av-create-popup-help-text">${randomIdentitySubtext}</div>
 
       <div class="av-create-popup-mode av-create-popup-random-mode">
         <div class="av-create-popup-field-group">
@@ -795,7 +820,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const customMode = popup.querySelector('.av-create-popup-custom-mode') as HTMLElement;
     const dropdownMenu = popup.querySelector('.av-create-popup-mode-dropdown-menu') as HTMLElement;
     const titleContainer = popup.querySelector('.av-create-popup-title-container') as HTMLElement;
-    const titleElement = popup.querySelector('.av-create-popup-title') as HTMLElement;
     const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
     const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
@@ -874,7 +898,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
     };
 
-    // Make both title container and dropdown button trigger the dropdown
+    // Make title container clickable to trigger the dropdown
     titleContainer.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleDropdown();
@@ -891,14 +915,21 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     dropdownMenu.querySelectorAll('.av-create-popup-mode-option').forEach(option => {
       option.addEventListener('click', () => {
         const mode = (option as HTMLElement).dataset.mode;
+        const titleWrapper = popup.querySelector('.av-create-popup-title-wrapper') as HTMLElement;
         if (mode === 'random') {
-          titleElement.textContent = 'Create random alias';
-          popup.querySelector('.av-create-popup-help-text')!.textContent = 'Generate a random identity and AliasVault email address.';
+          titleWrapper.innerHTML = `
+            ${randomIdentityIcon}
+            <h3 class="av-create-popup-title">${randomIdentityTitle}</h3>
+          `;
+          popup.querySelector('.av-create-popup-help-text')!.textContent = randomIdentitySubtext;
           randomMode.style.display = 'block';
           customMode.style.display = 'none';
         } else if (mode === 'custom') {
-          titleElement.textContent = 'Create username/password';
-          popup.querySelector('.av-create-popup-help-text')!.textContent = 'Create a traditional credential with manual email/username.';
+          titleWrapper.innerHTML = `
+            ${manualUsernamePasswordIcon}
+            <h3 class="av-create-popup-title">${manualUsernamePasswordTitle}</h3>
+          `;
+          popup.querySelector('.av-create-popup-help-text')!.textContent = manualUsernamePasswordSubtext;
           randomMode.style.display = 'none';
           customMode.style.display = 'block';
         }

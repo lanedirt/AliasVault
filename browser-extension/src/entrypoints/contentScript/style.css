@@ -641,15 +641,30 @@ body {
   transition: background-color 0.2s;
 }
 
-.av-create-popup-title-container:hover {
-  background-color: #374151;
+.av-create-popup-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d68338;
 }
 
-.av-create-popup-title {
+.av-create-popup-title-wrapper .av-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.av-create-popup-title-wrapper .av-create-popup-title {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #f8f9fa;
+}
+
+.av-create-popup-title-container:hover {
+  background-color: #374151;
 }
 
 .av-create-popup-mode-dropdown {
