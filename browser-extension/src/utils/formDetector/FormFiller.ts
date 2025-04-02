@@ -47,9 +47,9 @@ export class FormFiller {
       this.fillPasswordField(this.form.passwordConfirmField, credential.Password);
     }
 
-    if (this.form.emailField && (credential.Email || credential.Username)) {
-      if (credential.Email) {
-        this.form.emailField.value = credential.Email;
+    if (this.form.emailField && (credential.Alias?.Email !== undefined || credential.Username !== undefined)) {
+      if (credential.Alias?.Email) {
+        this.form.emailField.value = credential.Alias.Email;
         this.triggerInputEvents(this.form.emailField);
       } else if (credential.Username && !this.form.usernameField) {
         /*
