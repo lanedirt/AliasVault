@@ -2,6 +2,8 @@ import srp from 'secure-remote-password/client'
 import { WebApiService } from '../../../utils/WebApiService';
 import { LoginRequest, LoginResponse } from '../../../utils/types/webapi/Login';
 import { ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse } from '../../../utils/types/webapi/ValidateLogin';
+import BadRequestResponse from '@/utils/types/webapi/BadRequestResponse';
+import { ApiAuthError } from '../../../utils/types/errors/ApiAuthError';
 
 /**
  * Utility class for SRP authentication operations.
@@ -22,9 +24,27 @@ class SrpUtility {
    * Initiate login with server.
    */
   public async initiateLogin(username: string): Promise<LoginResponse> {
-    return this.webApiService.post<LoginRequest, LoginResponse>('Auth/login', {
-      username: username.toLowerCase().trim()
+    const model: LoginRequest = {
+      username: username.toLowerCase().trim(),
+    };
+
+    const response = await this.webApiService.rawFetch('Auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(model),
     });
+
+    // Check if response is a bad request (400)
+    if (response.status === 400) {
+      const badRequestResponse = await response.json() as BadRequestResponse;
+      throw new ApiAuthError(badRequestResponse.title);
+    }
+
+    // For other responses, try to parse as LoginResponse
+    const loginResponse = await response.json() as LoginResponse;
+    return loginResponse;
   }
 
   /**
@@ -51,12 +71,30 @@ class SrpUtility {
       privateKey
     );
 
-    return this.webApiService.post<ValidateLoginRequest, ValidateLoginResponse>('Auth/validate', {
+    const model: ValidateLoginRequest = {
       username: username.toLowerCase().trim(),
       rememberMe: rememberMe,
       clientPublicEphemeral: clientEphemeral.public,
       clientSessionProof: sessionProof.proof,
+    };
+
+    const response = await this.webApiService.rawFetch('Auth/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(model),
     });
+
+    // Check if response is a bad request (400)
+    if (response.status === 400) {
+      const badRequestResponse = await response.json() as BadRequestResponse;
+      throw new ApiAuthError(badRequestResponse.title);
+    }
+
+    // For other responses, try to parse as ValidateLoginResponse
+    const validateLoginResponse = await response.json() as ValidateLoginResponse;
+    return validateLoginResponse;
   }
 
   /**
@@ -83,14 +121,31 @@ class SrpUtility {
       username,
       privateKey
     );
-
-    return this.webApiService.post<ValidateLoginRequest2Fa, ValidateLoginResponse>('Auth/validate-2fa', {
+    const model: ValidateLoginRequest2Fa = {
       username: username.toLowerCase().trim(),
-      rememberMe: rememberMe,
+      rememberMe,
       clientPublicEphemeral: clientEphemeral.public,
       clientSessionProof: sessionProof.proof,
-      code2Fa: code2Fa,
+      code2Fa,
+    };
+
+    const response = await this.webApiService.rawFetch('Auth/validate-2fa', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(model),
     });
+
+    // Check if response is a bad request (400)
+    if (response.status === 400) {
+      const badRequestResponse = await response.json() as BadRequestResponse;
+      throw new ApiAuthError(badRequestResponse.title);
+    }
+
+    // For other responses, try to parse as ValidateLoginResponse
+    const validateLoginResponse = await response.json() as ValidateLoginResponse;
+    return validateLoginResponse;
   }
 }
 

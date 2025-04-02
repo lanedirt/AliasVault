@@ -12,6 +12,8 @@ import { LoginResponse } from '../../../utils/types/webapi/Login';
 import LoginServerInfo from '../components/LoginServerInfo';
 import { AppInfo } from '../../../utils/AppInfo';
 import { storage } from 'wxt/storage';
+import { ApiAuthError } from '../../../utils/types/errors/ApiAuthError';
+
 /**
  * Login page
  */
@@ -108,7 +110,7 @@ const Login: React.FC = () => {
       }
 
       // Try to get latest vault manually providing auth token.
-      const vaultResponseJson = await webApi.fetch<VaultResponse>('Vault', { method: 'GET', headers: {
+      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
@@ -130,8 +132,13 @@ const Login: React.FC = () => {
 
       // Show app.
       hideLoading();
-    } catch {
-      setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
+    } catch (err) {
+      // Show API authentication errors as-is.
+      if (err instanceof ApiAuthError) {
+        setError(err.message);
+      } else {
+        setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
+      }
       hideLoading();
     }
   };
@@ -143,12 +150,18 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
-      throw new Error('Required login data not found');
-    }
-
     try {
       showLoading();
+
+      if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
+        throw new Error('Required login data not found');
+      }
+
+      // Validate that 2FA code is a 6-digit number
+      const code = twoFactorCode.trim();
+      if (!/^\d{6}$/.test(code)) {
+        throw new ApiAuthError('Please enter a valid 6-digit authentication code.');
+      }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
         credentials.username,
@@ -164,7 +177,7 @@ const Login: React.FC = () => {
       }
 
       // Try to get latest vault manually providing auth token.
-      const vaultResponseJson = await webApi.fetch<VaultResponse>('Vault', { method: 'GET', headers: {
+      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
@@ -192,8 +205,13 @@ const Login: React.FC = () => {
       setLoginResponse(null);
       hideLoading();
     } catch (err) {
-      setError('Invalid authentication code. Please try again.');
+      // Show API authentication errors as-is.
       console.error('2FA error:', err);
+      if (err instanceof ApiAuthError) {
+        setError(err.message);
+      } else {
+        setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
+      }
       hideLoading();
     }
   };

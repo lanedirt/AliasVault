@@ -37,15 +37,13 @@ export class WebApiService {
   }
 
   /**
-   * Fetch data from the API.
+   * Fetch data from the API with authentication headers and access token refresh retry.
    */
-  public async fetch<T>(
+  public async authFetch<T>(
     endpoint: string,
     options: RequestInit = {},
     parseJson: boolean = true
   ): Promise<T> {
-    const baseUrl = await this.getBaseUrl();
-    const url = baseUrl + endpoint;
     const headers = new Headers(options.headers ?? {});
 
     // Add authorization header if we have an access token
@@ -54,22 +52,19 @@ export class WebApiService {
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
-    // Add client version header
-    headers.set('X-AliasVault-Client', `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`);
-
     const requestOptions: RequestInit = {
       ...options,
       headers,
     };
 
     try {
-      const response = await fetch(url, requestOptions);
+      const response = await this.rawFetch(endpoint, requestOptions);
 
       if (response.status === 401) {
         const newToken = await this.refreshAccessToken();
         if (newToken) {
           headers.set('Authorization', `Bearer ${newToken}`);
-          const retryResponse = await fetch(url, {
+          const retryResponse = await this.rawFetch(endpoint, {
             ...requestOptions,
             headers,
           });
@@ -97,6 +92,34 @@ export class WebApiService {
   }
 
   /**
+   * Fetch data from the API without authentication headers and without access token refresh retry.
+   */
+  public async rawFetch(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    const baseUrl = await this.getBaseUrl();
+    const url = baseUrl + endpoint;
+    const headers = new Headers(options.headers ?? {});
+  
+    // Add client version header
+    headers.set('X-AliasVault-Client', `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`);
+  
+    const requestOptions: RequestInit = {
+      ...options,
+      headers,
+    };
+  
+    try {
+      const response = await fetch(url, requestOptions);
+      return response;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Refresh the access token.
    */
   private async refreshAccessToken(): Promise<string | null> {
@@ -106,14 +129,11 @@ export class WebApiService {
     }
 
     try {
-      const baseUrl = await this.getBaseUrl();
-
-      const response = await fetch(`${baseUrl}Auth/refresh`, {
+      const response = await this.rawFetch('Auth/refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Ignore-Failure': 'true',
-          'X-AliasVault-Client': `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`,
         },
         body: JSON.stringify({
           token: await this.getAccessToken(),
@@ -138,7 +158,7 @@ export class WebApiService {
    * Issue GET request to the API.
    */
   public async get<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'GET' });
+    return this.authFetch<T>(endpoint, { method: 'GET' });
   }
 
   /**
@@ -146,7 +166,7 @@ export class WebApiService {
    */
   public async downloadBlobAndConvertToBase64(endpoint: string): Promise<string> {
     try {
-      const response = await this.fetch<Response>(endpoint, {
+      const response = await this.authFetch<Response>(endpoint, {
         method: 'GET',
         headers: {
           'Accept': 'application/octet-stream',
@@ -170,7 +190,7 @@ export class WebApiService {
     data: TRequest,
     parseJson: boolean = true
   ): Promise<TResponse> {
-    return this.fetch<TResponse>(endpoint, {
+    return this.authFetch<TResponse>(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -183,7 +203,7 @@ export class WebApiService {
    * Issue PUT request to the API.
    */
   public async put<TRequest, TResponse>(endpoint: string, data: TRequest): Promise<TResponse> {
-    return this.fetch<TResponse>(endpoint, {
+    return this.authFetch<TResponse>(endpoint, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -196,7 +216,7 @@ export class WebApiService {
    * Issue DELETE request to the API.
    */
   public async delete<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'DELETE' }, false);
+    return this.authFetch<T>(endpoint, { method: 'DELETE' }, false);
   }
 
   /**
