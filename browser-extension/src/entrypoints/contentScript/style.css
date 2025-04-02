@@ -302,8 +302,7 @@ body {
   max-width: 90vw;
   transform: scale(0.95);
   opacity: 0;
-  padding: 24px;
-  padding-top: 16px;
+  padding: 16px 24px;
   transition: transform 0.2s ease, opacity 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -314,41 +313,19 @@ body {
 }
 
 .av-create-popup-title {
-  margin: 0 0 24px 0;
-  font-size: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
   color: #f8f9fa;
-  text-align: center;
 }
 
-.av-create-popup-close {
-  position: absolute;
-  right: 16px;
-  top: 16px;
-  padding: 6px;
-  background: #374151;
-  border: none;
-  cursor: pointer;
+.av-create-popup-help-text {
+  margin: 4px 0 0;
+  font-size: 13px;
   color: #9ca3af;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  z-index: 1;
-}
-
-.av-create-popup-close:hover {
-  color: #f8f9fa;
-  background: #4b5563;
-}
-
-.av-create-popup-close .av-icon {
-  width: 16px;
-  height: 16px;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0 16px;
 }
 
 .av-create-popup-modes {
@@ -413,7 +390,6 @@ body {
 .av-create-popup-input {
   width: 100%;
   padding: 8px 12px;
-  margin-bottom: 16px;
   border: 1px solid #374151;
   border-radius: 6px;
   background: #374151;
@@ -453,7 +429,7 @@ body {
 }
 
 .av-create-popup-field-group {
-  margin-bottom: 2px;
+  margin-bottom: 24px;
 }
 
 .av-create-popup-field-group label {
@@ -635,4 +611,134 @@ body {
 @keyframes fadeOut {
   0% { opacity: 1; transform: scale(1.02); }
   100% { opacity: 0; transform: scale(1); }
+}
+
+/* Create Popup Styles */
+.av-create-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.av-create-popup-mode {
+  margin-top: 20px;
+}
+
+.av-create-popup-title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.av-create-popup-title-container:hover {
+  background-color: #374151;
+}
+
+.av-create-popup-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8f9fa;
+}
+
+.av-create-popup-mode-dropdown {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.av-create-popup-mode-dropdown:hover {
+  background-color: #4b5563;
+}
+
+.av-create-popup-mode-dropdown .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-create-popup-mode-dropdown-menu {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  min-width: 280px;
+}
+
+.av-create-popup-mode-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: #1f2937;
+  border-left: 1px solid #374151;
+  border-top: 1px solid #374151;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.av-create-popup-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+  position: relative;
+  z-index: 100;
+}
+
+.av-create-popup-mode-option:hover {
+  background-color: #374151;
+}
+
+.av-create-popup-mode-option .av-create-popup-mode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #374151;
+  border-radius: 8px;
+  color: #d68338;
+}
+
+.av-create-popup-mode-option .av-create-popup-mode-content {
+  flex: 1;
+}
+
+.av-create-popup-mode-option .av-create-popup-mode-content h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8f9fa;
+}
+
+.av-create-popup-mode-option .av-create-popup-mode-content p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
 }

@@ -666,44 +666,47 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
 
     // Create the main content
     popup.innerHTML = `
-      <button class="av-create-popup-close">
-        <svg class="av-icon" viewBox="0 0 24 24">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <div class="av-create-popup-mode-select">
-        <h3 class="av-create-popup-title">Create new alias</h3>
-        <div class="av-create-popup-modes">
-          <button class="av-create-popup-mode-btn av-create-popup-mode-random">
-            <div class="av-create-popup-mode-icon">
-              <svg class="av-icon" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-              </svg>
-            </div>
-            <div class="av-create-popup-mode-content">
-              <h4>Random alias</h4>
-              <p>Generate a random identity with random email</p>
-            </div>
-          </button>
-          <button class="av-create-popup-mode-btn av-create-popup-mode-custom">
-            <div class="av-create-popup-mode-icon">
-              <svg class="av-icon" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-              </svg>
-            </div>
-            <div class="av-create-popup-mode-content">
-              <h4>Username/password</h4>
-              <p>Create a custom username and password</p>
-            </div>
+      <div class="av-create-popup-header">
+        <div class="av-create-popup-title-container">
+          <h3 class="av-create-popup-title">Create random alias</h3>
+          <button class="av-create-popup-mode-dropdown">
+            <svg class="av-icon" viewBox="0 0 24 24">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
           </button>
         </div>
       </div>
 
-      <div class="av-create-popup-random-mode" style="display: none;">
-        <h3 class="av-create-popup-title">Create random alias</h3>
+      <div class="av-create-popup-help-text">Generate a random identity and AliasVault email address.</div>
+
+      <div class="av-create-popup-mode-dropdown-menu" style="display: none;">
+        <button class="av-create-popup-mode-option" data-mode="random">
+          <div class="av-create-popup-mode-icon">
+            <svg class="av-icon" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+            </svg>
+          </div>
+          <div class="av-create-popup-mode-content">
+            <h4>Random alias</h4>
+            <p>Random identity with random email</p>
+          </div>
+        </button>
+        <button class="av-create-popup-mode-option" data-mode="custom">
+          <div class="av-create-popup-mode-icon">
+            <svg class="av-icon" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+            </svg>
+          </div>
+          <div class="av-create-popup-mode-content">
+            <h4>Username/password</h4>
+            <p>Manual username and password</p>
+          </div>
+        </button>
+      </div>
+
+      <div class="av-create-popup-mode av-create-popup-random-mode">
         <div class="av-create-popup-field-group">
           <label for="service-name-input">Service name</label>
           <input
@@ -716,14 +719,12 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           >
         </div>
         <div class="av-create-popup-actions">
-          <button id="back-btn" class="av-create-popup-back">Back</button>
           <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
-          <button id="save-btn" class="av-create-popup-save">Create alias</button>
+          <button id="save-btn" class="av-create-popup-save">Create and save alias</button>
         </div>
       </div>
 
-      <div class="av-create-popup-custom-mode" style="display: none;">
-        <h3 class="av-create-popup-title">Create username/password</h3>
+      <div class="av-create-popup-mode av-create-popup-custom-mode" style="display: none;">
         <div class="av-create-popup-field-group">
           <label for="custom-service-name">Service name</label>
           <input
@@ -773,9 +774,8 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           </div>
         </div>
         <div class="av-create-popup-actions">
-          <button id="custom-back-btn" class="av-create-popup-back">Back</button>
           <button id="custom-cancel-btn" class="av-create-popup-cancel">Cancel</button>
-          <button id="custom-save-btn" class="av-create-popup-save">Create credential</button>
+          <button id="custom-save-btn" class="av-create-popup-save">Create and save credential</button>
         </div>
       </div>
     `;
@@ -789,13 +789,11 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     });
 
     // Get all the elements
-    const modeSelect = popup.querySelector('.av-create-popup-mode-select') as HTMLElement;
     const randomMode = popup.querySelector('.av-create-popup-random-mode') as HTMLElement;
     const customMode = popup.querySelector('.av-create-popup-custom-mode') as HTMLElement;
-    const randomBtn = popup.querySelector('.av-create-popup-mode-random') as HTMLButtonElement;
-    const customBtn = popup.querySelector('.av-create-popup-mode-custom') as HTMLButtonElement;
-    const backBtn = popup.querySelector('#back-btn') as HTMLButtonElement;
-    const customBackBtn = popup.querySelector('#custom-back-btn') as HTMLButtonElement;
+    const dropdownMenu = popup.querySelector('.av-create-popup-mode-dropdown-menu') as HTMLElement;
+    const titleContainer = popup.querySelector('.av-create-popup-title-container') as HTMLElement;
+    const titleElement = popup.querySelector('.av-create-popup-title') as HTMLElement;
     const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
     const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
@@ -806,7 +804,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
     const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
-    const closeBtn = popup.querySelector('.av-create-popup-close') as HTMLButtonElement;
 
     // Initialize password generator
     const passwordGenerator = new PasswordGenerator({
@@ -829,28 +826,41 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);
 
-    // Handle mode selection
-    randomBtn.addEventListener('click', () => {
-      modeSelect.style.display = 'none';
-      randomMode.style.display = 'block';
-      input.select();
+    // Handle mode switching via dropdown
+    const toggleDropdown = () => {
+      dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+    };
+
+    // Make both title container and dropdown button trigger the dropdown
+    titleContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown();
     });
 
-    customBtn.addEventListener('click', () => {
-      modeSelect.style.display = 'none';
-      customMode.style.display = 'block';
-      customInput.select();
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!titleContainer.contains(e.target as Node) && !dropdownMenu.contains(e.target as Node)) {
+        dropdownMenu.style.display = 'none';
+      }
     });
 
-    // Handle back buttons
-    backBtn.addEventListener('click', () => {
-      randomMode.style.display = 'none';
-      modeSelect.style.display = 'block';
-    });
-
-    customBackBtn.addEventListener('click', () => {
-      customMode.style.display = 'none';
-      modeSelect.style.display = 'block';
+    // Handle mode option clicks
+    dropdownMenu.querySelectorAll('.av-create-popup-mode-option').forEach(option => {
+      option.addEventListener('click', () => {
+        const mode = (option as HTMLElement).dataset.mode;
+        if (mode === 'random') {
+          titleElement.textContent = 'Create random alias';
+          popup.querySelector('.av-create-popup-help-text')!.textContent = 'Generate a random identity and AliasVault email address.';
+          randomMode.style.display = 'block';
+          customMode.style.display = 'none';
+        } else if (mode === 'custom') {
+          titleElement.textContent = 'Create username/password';
+          popup.querySelector('.av-create-popup-help-text')!.textContent = 'Create a traditional credential with manual email/username.';
+          randomMode.style.display = 'none';
+          customMode.style.display = 'block';
+        }
+        dropdownMenu.style.display = 'none';
+      });
     });
 
     /**
@@ -965,17 +975,15 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       }
     });
 
-    // Handle close button
-    closeBtn.addEventListener('click', () => {
-      closePopup(null);
-    });
-
     // Handle click outside
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         closePopup(null);
       }
     });
+
+    // Focus the input field
+    input.select();
   });
 }
 
