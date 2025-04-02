@@ -326,6 +326,14 @@ Do you want to proceed with the restoration?")) {
         if (User != null)
         {
             User.Blocked = !User.Blocked;
+
+            // If user is unblocked by the admin, also reset any lockout status, which can be 
+            // automatically triggered by the system when user has entered an incorrect password too many times.
+            if (!User.Blocked) {
+                User.AccessFailedCount = 0;
+                User.LockoutEnd = null;
+            }
+
             await dbContext.SaveChangesAsync();
             await RefreshData();
         }

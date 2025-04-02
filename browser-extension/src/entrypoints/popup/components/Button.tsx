@@ -1,7 +1,7 @@
 import React from 'react';
 
 type ButtonProps = {
-  onClick: () => void;
+  onClick?: () => void;
   children: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'secondary';
