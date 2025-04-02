@@ -99,26 +99,22 @@ export class FormDetector {
 
   /**
    * Detect login forms on the page based on the clicked element.
-   *
-   * @param force - Force the detection of forms, skipping checks such as if the element contains autocomplete="off".
    */
-  public containsLoginForm(force: boolean = false): boolean {
-    if (this.clickedElement) {
-      const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
+  public containsLoginForm(): boolean {
+    const formWrapper = this.clickedElement?.closest('form') ?? this.document.body;
 
-      /**
-       * Sanity check: if form contains more than 150 inputs, don't process as this is likely not a login form.
-       * This is a simple way to prevent processing large forms that are not login forms and making the browser page unresponsive.
-       */
-      const inputCount = formWrapper.querySelectorAll('input').length;
-      if (inputCount > 200) {
-        return false;
-      }
+    /**
+     * Sanity check: if form contains more than 150 inputs, don't process as this is likely not a login form.
+     * This is a simple way to prevent processing large forms that are not login forms and making the browser page unresponsive.
+     */
+    const inputCount = formWrapper.querySelectorAll('input').length;
+    if (inputCount > 200) {
+      return false;
+    }
 
-      // Check if the wrapper contains a password or likely username field before processing.
-      if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper, force)) {
-        return true;
-      }
+    // Check if the wrapper contains a password or likely username field before processing.
+    if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper)) {
+      return true;
     }
 
     return false;
@@ -126,8 +122,6 @@ export class FormDetector {
 
   /**
    * Detect login forms on the page based on the clicked element.
-   *
-   * @param force - Force the detection of forms, skipping checks such as if the element contains autocomplete="off".
    */
   public getForm(): FormFields | null {
     if (!this.clickedElement) {
@@ -454,41 +448,29 @@ export class FormDetector {
   /**
    * Check if a form contains a likely username or email field.
    */
-  private containsLikelyUsernameOrEmailField(wrapper: HTMLElement, force: boolean = false): boolean {
+  private containsLikelyUsernameOrEmailField(wrapper: HTMLElement): boolean {
     // Check if the form contains an email field.
     const emailFields = this.findEmailField(wrapper as HTMLFormElement | null);
     if (emailFields.primary && this.isElementVisible(emailFields.primary)) {
-      const isValid = force || emailFields.primary.getAttribute('autocomplete') !== 'off';
-      if (isValid) {
-        return true;
-      }
+      return true;
     }
 
     // Check if the form contains a username field.
     const usernameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text'], []);
     if (usernameField && this.isElementVisible(usernameField)) {
-      const isValid = force || usernameField.getAttribute('autocomplete') !== 'off';
-      if (isValid) {
-        return true;
-      }
+      return true;
     }
 
     // Check if the form contains a first name field.
     const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], []);
     if (firstNameField && this.isElementVisible(firstNameField)) {
-      const isValid = force || firstNameField.getAttribute('autocomplete') !== 'off';
-      if (isValid) {
-        return true;
-      }
+      return true;
     }
 
     // Check if the form contains a last name field.
     const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], []);
     if (lastNameField && this.isElementVisible(lastNameField)) {
-      const isValid = force || lastNameField.getAttribute('autocomplete') !== 'off';
-      if (isValid) {
-        return true;
-      }
+      return true;
     }
 
     return false;

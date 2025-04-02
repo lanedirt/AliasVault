@@ -68,7 +68,6 @@ describe('FormDetector English tests', () => {
   describe('English email form 1 detection', () => {
     const htmlFile = 'en-email-form1.html';
 
-    // Assert that this test fails, because the autocomplete=off for the specified element.
     testField(FormField.Email, 'P0-0', htmlFile);
   });
 

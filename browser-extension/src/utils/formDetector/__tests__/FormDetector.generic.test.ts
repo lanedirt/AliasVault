@@ -30,15 +30,15 @@ describe('FormDetector generic tests', () => {
     });
   });
 
-  describe('Form with autocomplete="off" not detected', () => {
+  describe('Form with autocomplete="off" still detected', () => {
     const htmlFile = 'autocomplete-off.html';
 
-    it('should not detect form with autocomplete="off" on email field', () => {
+    it('should still detect form with autocomplete="off" on email field', () => {
       const dom = createTestDom(htmlFile);
       const document = dom.window.document;
       const formDetector = new FormDetector(document);
       const form = formDetector.containsLoginForm();
-      expect(form).toBe(false);
+      expect(form).toBe(true);
     });
   });
 
