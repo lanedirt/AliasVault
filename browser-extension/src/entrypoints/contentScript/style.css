@@ -453,14 +453,27 @@ body {
 }
 
 .av-create-popup-field-group {
-  margin-bottom: 2px;
+  margin-bottom: 1rem;
 }
 
 .av-create-popup-field-group label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 0.5rem;
   color: #eee;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.av-create-popup-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444 !important;
+}
+
+.av-create-popup-error-text {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-left: 5px;
 }
 
 .av-create-popup-password-preview {
