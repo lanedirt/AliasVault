@@ -212,25 +212,20 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         const faviconBytes = await getFaviconBytes(document);
         credential = {
           Id: '',
-          ServiceName: result.serviceName || '',
+          ServiceName: result.serviceName ?? '',
           ServiceUrl: getValidServiceUrl(),
-          Email: result.customEmail || '',
-          Logo: faviconBytes || undefined,
-          Username: result.customUsername || '',
-          Password: result.customPassword || '', // Set the generated password
-          Notes: '',
+          Logo: faviconBytes ?? undefined,
+          Username: result.customUsername,
+          Password: result.customPassword ?? '', // Set the generated password
           Alias: {
-            FirstName: '',
-            LastName: '',
-            NickName: result.customUsername || '',
+            NickName: result.customUsername ?? '',
             // TODO: once birthdate is made nullable in datamodel refactor, remove this.
             BirthDate: '0001-01-01 00:00:00',
-            Gender: undefined,
-            Email: result.customEmail || ''
+            Email: result.customEmail ?? ''
           }
         };
       } else {
-        // Generate new identity locally
+        // Generate new identity locally.
         const identityGenerator = new IdentityGeneratorEn();
         const identity = await identityGenerator.generateRandomIdentity();
 
@@ -238,14 +233,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
         
         // Initialize password generator with the retrieved settings
-        const passwordGenerator = new PasswordGenerator({
-          Length: 16,
-          UseUppercase: true,
-          UseLowercase: true,
-          UseNumbers: true,
-          UseSpecialChars: true,
-          UseNonAmbiguousChars: false
-        });
+        const passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
         const password = passwordGenerator.generateRandomPassword();
 
         // Extract favicon from page and get the bytes
@@ -253,13 +241,11 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
         credential = {
           Id: '',
-          ServiceName: result.serviceName || '',
+          ServiceName: result.serviceName ?? '',
           ServiceUrl: getValidServiceUrl(),
-          Email: `${identity.emailPrefix}@${domain}`,
-          Logo: faviconBytes || undefined,
+          Logo: faviconBytes ?? undefined,
           Username: identity.nickName,
           Password: password,
-          Notes: '',
           Alias: {
             FirstName: identity.firstName,
             LastName: identity.lastName,
@@ -347,8 +333,6 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   actionContainer.appendChild(createButton);
   actionContainer.appendChild(closeButton);
   popup.appendChild(actionContainer);
-
-  console.log('Autofill actually popup appended:', popup);
 
   /**
    * Handle clicking outside the popup.
@@ -496,12 +480,15 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
     });
   } else {
     // Otherwise filter based on search term
-    filteredCredentials = uniqueCredentials.filter(cred =>
-      cred.ServiceName?.toLowerCase().includes(searchTerm) ||
-        cred.Username?.toLowerCase().includes(searchTerm) ||
-        cred.Email?.toLowerCase().includes(searchTerm) ||
-        cred.ServiceUrl?.toLowerCase().includes(searchTerm)
-    ).sort((a, b) => {
+    filteredCredentials = uniqueCredentials.filter(cred => {
+      const searchableFields = [
+        cred.ServiceName?.toLowerCase(),
+        cred.Username?.toLowerCase(), 
+        cred.Alias?.Email?.toLowerCase(),
+        cred.ServiceUrl?.toLowerCase()
+      ];
+      return searchableFields.some(field => field?.includes(searchTerm));
+    }).sort((a, b) => {
       // First compare by service name
       const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
       if (serviceNameComparison !== 0) {
@@ -559,9 +546,8 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       }
       if (cred.Username) {
         details.push(cred.Username);
-      }
-      else if (cred.Email) {
-        details.push(cred.Email);
+      } else if (cred.Alias?.Email) {
+        details.push(cred.Alias.Email);
       }
       detailsContainer.textContent = details.join(' · ');
 
@@ -821,8 +807,10 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
     const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
 
-    // Set up default values with placeholder styling
-    const setupDefaultValue = (input: HTMLInputElement) => {
+    /**
+     * Setup default value for input with placeholder styling.
+     */
+    const setupDefaultValue = (input: HTMLInputElement) : void => {
       const defaultValue = input.dataset.defaultValue;
       if (defaultValue) {
         input.value = defaultValue;
@@ -866,8 +854,10 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       UseNonAmbiguousChars: false
     });
 
-    // Function to generate and set password
-    const generatePassword = () => {
+    /**
+     * Generate and set password.
+     */
+    const generatePassword = () : void => {
       passwordPreview.value = passwordGenerator.generateRandomPassword();
     };
 
@@ -877,8 +867,10 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);
 
-    // Handle mode switching via dropdown
-    const toggleDropdown = () => {
+    /**
+     * Toggle dropdown visibility.
+     */
+    const toggleDropdown = () : void => {
       dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
     };
 
@@ -971,14 +963,20 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
             usernameLabel.appendChild(usernameError);
           }
           
-          // Remove error styling when user starts typing
-          const removeError = () => {
+          /**
+           * Remove error styling.
+           */
+          const removeError = () : void => {
             customEmail.classList.remove('av-create-popup-input-error');
             customUsername.classList.remove('av-create-popup-input-error');
             const emailError = emailLabel.querySelector('.av-create-popup-error-text');
             const usernameError = usernameLabel.querySelector('.av-create-popup-error-text');
-            if (emailError) emailError.remove();
-            if (usernameError) usernameError.remove();
+            if (emailError) {
+              emailError.remove();
+            }
+            if (usernameError) {
+              usernameError.remove();
+            }
           };
           
           customEmail.addEventListener('input', removeError, { once: true });
@@ -1047,7 +1045,9 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       }
     });
 
-    // Handle click outside
+    /**
+     * Handle click outside.
+     */
     const handleClickOutside = (event: MouseEvent): void => {
       const target = event.target as Node;
       if (target === overlay) {
@@ -1084,7 +1084,6 @@ export function openAutofillPopup(input: HTMLInputElement, container: HTMLElemen
     const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
 
     if (response.success) {
-      console.log('creating autofill popup...');
       createAutofillPopup(input, response.credentials, container);
     } else {
       createVaultLockedPopup(input, container);

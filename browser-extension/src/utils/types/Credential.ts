@@ -5,16 +5,15 @@ import { Gender } from "../generators/Identity/types/Gender";
  */
 export type Credential = {
     Id: string;
-    Username: string;
+    Username?: string;
     Password: string;
-    Email: string;
     ServiceName: string;
     ServiceUrl?: string;
     Logo?: Uint8Array | number[];
     Notes?: string;
     Alias: {
-        FirstName: string;
-        LastName: string;
+        FirstName?: string;
+        LastName?: string;
         NickName?: string;
         BirthDate: string;
         Gender?: Gender;

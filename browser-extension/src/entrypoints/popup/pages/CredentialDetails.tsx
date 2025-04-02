@@ -94,7 +94,7 @@ const TotpBlock: React.FC<{ credentialId: string }> = ({ credentialId }) => (
  * Render the login credentials block.
  */
 const LoginCredentialsBlock: React.FC<{ credential: Credential }> = ({ credential }) => {
-  const email = credential.Email?.trim();
+  const email = credential.Alias?.Email?.trim();
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
 
@@ -305,10 +305,10 @@ const CredentialDetails: React.FC = () => {
     <div className="space-y-6">
       <HeaderBlock credential={credential} onOpenNewPopup={openInNewPopup} />
       
-      {credential.Email && (
+      {credential.Alias?.Email && (
         <EmailBlock 
-          email={credential.Email} 
-          isSupported={isEmailDomainSupported(credential.Email)} 
+          email={credential.Alias.Email} 
+          isSupported={isEmailDomainSupported(credential.Alias.Email)} 
         />
       )}
       

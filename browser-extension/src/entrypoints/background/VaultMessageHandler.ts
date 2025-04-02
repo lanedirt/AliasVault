@@ -197,13 +197,13 @@ export async function getEmailAddressesForVault(
   const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
 
   const emailAddresses = credentials
-    .filter(cred => cred.Email != null)
-    .map(cred => cred.Email)
+    .filter(cred => cred.Alias?.Email != null)
+    .map(cred => cred.Alias.Email ?? '')
     .filter((email, index, self) => self.indexOf(email) === index);
 
   return emailAddresses.filter(email => {
-    const domain = email.split('@')[1];
-    return privateEmailDomains.includes(domain);
+    const domain = email?.split('@')[1];
+    return domain && privateEmailDomains.includes(domain);
   });
 }
 

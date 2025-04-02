@@ -169,7 +169,6 @@ class SqliteClient {
       Id: row.Id,
       Username: row.Username,
       Password: row.Password,
-      Email: row.Email,
       ServiceName: row.ServiceName,
       ServiceUrl: row.ServiceUrl,
       Logo: row.Logo,
@@ -220,7 +219,6 @@ class SqliteClient {
       Id: row.Id,
       Username: row.Username,
       Password: row.Password,
-      Email: row.Email,
       ServiceName: row.ServiceName,
       ServiceUrl: row.ServiceUrl,
       Logo: row.Logo,
@@ -385,7 +383,7 @@ class SqliteClient {
       const credentialId = crypto.randomUUID().toUpperCase();
       this.executeUpdate(credentialQuery, [
         credentialId,
-        credential.Username,
+        credential.Username ?? null,
         credential.Notes ?? null,
         serviceId,
         aliasId,

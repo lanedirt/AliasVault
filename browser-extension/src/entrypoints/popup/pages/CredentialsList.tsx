@@ -106,11 +106,12 @@ const CredentialsList: React.FC = () => {
   // Add this function to filter credentials
   const filteredCredentials = credentials.filter(cred => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      cred.ServiceName?.toLowerCase().includes(searchLower) ||
-      cred.Username?.toLowerCase().includes(searchLower) ||
-      (cred.Email?.toLowerCase().includes(searchLower))
-    );
+    const searchableFields = [
+      cred.ServiceName?.toLowerCase(),
+      cred.Username?.toLowerCase(),
+      cred.Alias?.Email?.toLowerCase()
+    ];
+    return searchableFields.some(field => field?.includes(searchLower));
   });
 
   if (isLoading) {
