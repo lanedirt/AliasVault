@@ -217,7 +217,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
           Email: result.customEmail || '',
           Logo: faviconBytes || undefined,
           Username: result.customUsername || '',
-          Password: '', // Will be set by the popup
+          Password: result.customPassword || '', // Set the generated password
           Notes: '',
           Alias: {
             FirstName: '',
@@ -651,7 +651,7 @@ export async function disableAutoShowPopup(): Promise<void> {
 /**
  * Create edit name popup. Part of the "create new alias" flow.
  */
-export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string } | null> {
+export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
@@ -763,7 +763,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
               id="password-preview"
               data-aliasvault-ignore="true"
               class="av-create-popup-input"
-              readonly
             >
             <button id="regenerate-password" class="av-create-popup-regenerate-btn">
               <svg class="av-icon" viewBox="0 0 24 24">
@@ -857,7 +856,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     /**
      * Close the popup.
      */
-    const closePopup = (value: { serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string } | null) : void => {
+    const closePopup = (value: { serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null) : void => {
       popup.classList.remove('show');
       setTimeout(() => {
         overlay.remove();
@@ -921,7 +920,8 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           serviceName,
           isCustomCredential: true,
           customEmail: customEmail.value.trim(),
-          customUsername: customUsername.value.trim()
+          customUsername: customUsername.value.trim(),
+          customPassword: passwordPreview.value
         });
       }
     });
