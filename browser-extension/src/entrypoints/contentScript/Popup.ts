@@ -673,7 +673,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
         </svg>
       </button>
       <div class="av-create-popup-mode-select">
-        <h3 class="av-create-popup-title">Create New Alias</h3>
+        <h3 class="av-create-popup-title">Create new alias</h3>
         <div class="av-create-popup-modes">
           <button class="av-create-popup-mode-btn av-create-popup-mode-random">
             <div class="av-create-popup-mode-icon">
@@ -683,7 +683,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
               </svg>
             </div>
             <div class="av-create-popup-mode-content">
-              <h4>Random Alias</h4>
+              <h4>Random alias</h4>
               <p>Generate a random identity with random email</p>
             </div>
           </button>
@@ -695,7 +695,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
               </svg>
             </div>
             <div class="av-create-popup-mode-content">
-              <h4>Manual Credential</h4>
+              <h4>Username/password</h4>
               <p>Create a custom username and password</p>
             </div>
           </button>
@@ -703,9 +703,9 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       </div>
 
       <div class="av-create-popup-random-mode" style="display: none;">
-        <h3 class="av-create-popup-title">Create Random Alias</h3>
+        <h3 class="av-create-popup-title">Create random alias</h3>
         <div class="av-create-popup-field-group">
-          <label for="service-name-input">Service Name</label>
+          <label for="service-name-input">Service name</label>
           <input
             type="text"
             id="service-name-input"
@@ -723,9 +723,9 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       </div>
 
       <div class="av-create-popup-custom-mode" style="display: none;">
-        <h3 class="av-create-popup-title">Create Manual Credential</h3>
+        <h3 class="av-create-popup-title">Create username/password</h3>
         <div class="av-create-popup-field-group">
-          <label for="custom-service-name">Service Name</label>
+          <label for="custom-service-name">Service name</label>
           <input
             type="text"
             id="custom-service-name"
