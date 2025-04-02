@@ -880,12 +880,41 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       const serviceName = customInput.value.trim();
       if (serviceName) {
         if (!customEmail.value.trim() && !customUsername.value.trim()) {
-          // Show error message
-          const errorMsg = document.createElement('div');
-          errorMsg.className = 'av-create-popup-error';
-          errorMsg.textContent = 'Please fill in either email or username';
-          customMode.insertBefore(errorMsg, customMode.querySelector('.av-create-popup-actions'));
-          setTimeout(() => errorMsg.remove(), 2000);
+          // Add error styling to fields
+          customEmail.classList.add('av-create-popup-input-error');
+          customUsername.classList.add('av-create-popup-input-error');
+          
+          // Add error messages after labels
+          const emailLabel = customEmail.previousElementSibling as HTMLLabelElement;
+          const usernameLabel = customUsername.previousElementSibling as HTMLLabelElement;
+          
+          if (!emailLabel.querySelector('.av-create-popup-error-text')) {
+            const emailError = document.createElement('span');
+            emailError.className = 'av-create-popup-error-text';
+            emailError.textContent = 'Enter email and/or username';
+            emailLabel.appendChild(emailError);
+          }
+          
+          if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
+            const usernameError = document.createElement('span');
+            usernameError.className = 'av-create-popup-error-text';
+            usernameError.textContent = 'Enter email and/or username';
+            usernameLabel.appendChild(usernameError);
+          }
+          
+          // Remove error styling when user starts typing
+          const removeError = () => {
+            customEmail.classList.remove('av-create-popup-input-error');
+            customUsername.classList.remove('av-create-popup-input-error');
+            const emailError = emailLabel.querySelector('.av-create-popup-error-text');
+            const usernameError = usernameLabel.querySelector('.av-create-popup-error-text');
+            if (emailError) emailError.remove();
+            if (usernameError) usernameError.remove();
+          };
+          
+          customEmail.addEventListener('input', removeError, { once: true });
+          customUsername.addEventListener('input', removeError, { once: true });
+          
           return;
         }
         closePopup({
