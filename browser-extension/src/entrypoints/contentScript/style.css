@@ -404,6 +404,10 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.av-create-popup-input-default {
+  color: #737373;
+}
+
 /* Custom Credential UI Styles */
 .av-create-popup-custom-toggle {
   margin: 16px 0;
@@ -468,7 +472,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
+  padding: 9px;
   background: #374151;
   border: none;
   border-radius: 4px;

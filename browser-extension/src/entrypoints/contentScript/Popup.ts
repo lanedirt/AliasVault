@@ -223,7 +223,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             FirstName: '',
             LastName: '',
             NickName: result.customUsername || '',
-            BirthDate: new Date().toISOString(),
+            // TODO: once birthdate is made nullable in datamodel refactor, remove this.
+            BirthDate: '0001-01-01 00:00:00',
             Gender: undefined,
             Email: result.customEmail || ''
           }
@@ -551,12 +552,17 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       const detailsContainer = document.createElement('div');
       detailsContainer.className = 'av-service-details';
 
-      // Combine full name (if available) and username
+      // Combine full name (if available) and username or email
       const details = [];
       if (cred.Alias?.FirstName && cred.Alias?.LastName) {
         details.push(`${cred.Alias.FirstName} ${cred.Alias.LastName}`);
       }
-      details.push(cred.Username);
+      if (cred.Username) {
+        details.push(cred.Username);
+      }
+      else if (cred.Email) {
+        details.push(cred.Email);
+      }
       detailsContainer.textContent = details.join(' · ');
 
       credTextContainer.appendChild(serviceName);
@@ -606,6 +612,10 @@ export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
 export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
 export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
 
+// TODO: move these settings to the actual vault when updating the datamodel for roadmap v1.0.
+export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
+export const LAST_CUSTOM_USERNAME_KEY = 'local:aliasvault_last_custom_username';
+
 /**
  * Check if auto-popup is disabled for current site
  */
@@ -654,6 +664,10 @@ export async function disableAutoShowPopup(): Promise<void> {
 export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
+
+  // Load last used values
+  const lastEmail = await storage.getItem(LAST_CUSTOM_EMAIL_KEY) as string || '';
+  const lastUsername = await storage.getItem(LAST_CUSTOM_USERNAME_KEY) as string || '';
 
   return new Promise((resolve) => {
     // Create modal overlay
@@ -744,6 +758,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
             data-aliasvault-ignore="true"
             class="av-create-popup-input"
             placeholder="Enter email address"
+            data-default-value="${lastEmail}"
           >
         </div>
         <div class="av-create-popup-field-group">
@@ -754,6 +769,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
             data-aliasvault-ignore="true"
             class="av-create-popup-input"
             placeholder="Enter username"
+            data-default-value="${lastUsername}"
           >
         </div>
         <div class="av-create-popup-field-group">
@@ -804,6 +820,41 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
     const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
+
+    // Set up default values with placeholder styling
+    const setupDefaultValue = (input: HTMLInputElement) => {
+      const defaultValue = input.dataset.defaultValue;
+      if (defaultValue) {
+        input.value = defaultValue;
+        input.classList.add('av-create-popup-input-default');
+      }
+    };
+
+    setupDefaultValue(customEmail);
+    setupDefaultValue(customUsername);
+
+    // Handle input changes
+    customEmail.addEventListener('input', () => {
+      const value = customEmail.value.trim();
+      if (value) {
+        customEmail.classList.remove('av-create-popup-input-default');
+        storage.setItem(LAST_CUSTOM_EMAIL_KEY, value);
+      } else {
+        customEmail.classList.add('av-create-popup-input-default');
+        storage.setItem(LAST_CUSTOM_EMAIL_KEY, '');
+      }
+    });
+
+    customUsername.addEventListener('input', () => {
+      const value = customUsername.value.trim();
+      if (value) {
+        customUsername.classList.remove('av-create-popup-input-default');
+        storage.setItem(LAST_CUSTOM_USERNAME_KEY, value);
+      } else {
+        customUsername.classList.add('av-create-popup-input-default');
+        storage.setItem(LAST_CUSTOM_USERNAME_KEY, '');
+      }
+    });
 
     // Initialize password generator
     const passwordGenerator = new PasswordGenerator({
@@ -888,7 +939,16 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     customSaveBtn.addEventListener('click', () => {
       const serviceName = customInput.value.trim();
       if (serviceName) {
-        if (!customEmail.value.trim() && !customUsername.value.trim()) {
+        const email = customEmail.value.trim();
+        const username = customUsername.value.trim();
+        const hasDefaultEmail = customEmail.classList.contains('av-create-popup-input-default');
+        const hasDefaultUsername = customUsername.classList.contains('av-create-popup-input-default');
+
+        // If using default values, use the dataset values
+        const finalEmail = hasDefaultEmail ? customEmail.dataset.defaultValue : email;
+        const finalUsername = hasDefaultUsername ? customUsername.dataset.defaultValue : username;
+
+        if (!finalEmail && !finalUsername) {
           // Add error styling to fields
           customEmail.classList.add('av-create-popup-input-error');
           customUsername.classList.add('av-create-popup-input-error');
@@ -926,11 +986,12 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           
           return;
         }
+
         closePopup({
           serviceName,
           isCustomCredential: true,
-          customEmail: customEmail.value.trim(),
-          customUsername: customUsername.value.trim(),
+          customEmail: finalEmail,
+          customUsername: finalUsername,
           customPassword: passwordPreview.value
         });
       }
@@ -962,25 +1023,40 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       if (e.key === 'Enter') {
         const serviceName = customInput.value.trim();
         if (serviceName) {
-          if (!customEmail.value.trim() && !customUsername.value.trim()) {
+          const email = customEmail.value.trim();
+          const username = customUsername.value.trim();
+          const hasDefaultEmail = customEmail.classList.contains('av-create-popup-input-default');
+          const hasDefaultUsername = customUsername.classList.contains('av-create-popup-input-default');
+
+          // If using default values, use the dataset values
+          const finalEmail = hasDefaultEmail ? customEmail.dataset.defaultValue : email;
+          const finalUsername = hasDefaultUsername ? customUsername.dataset.defaultValue : username;
+
+          if (!finalEmail && !finalUsername) {
             return;
           }
+
           closePopup({
             serviceName,
             isCustomCredential: true,
-            customEmail: customEmail.value.trim(),
-            customUsername: customUsername.value.trim()
+            customEmail: finalEmail,
+            customUsername: finalUsername,
+            customPassword: passwordPreview.value
           });
         }
       }
     });
 
     // Handle click outside
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      const target = event.target as Node;
+      if (target === overlay) {
         closePopup(null);
       }
-    });
+    };
+
+    // Use mousedown instead of click to prevent closing when dragging text
+    overlay.addEventListener('mousedown', handleClickOutside);
 
     // Focus the input field
     input.select();
