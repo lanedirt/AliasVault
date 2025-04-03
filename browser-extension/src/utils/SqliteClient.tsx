@@ -266,15 +266,15 @@ class SqliteClient {
 
   /**
    * Get setting from database for a given key.
-   * Returns empty string if setting is not found.
+   * Returns default value (empty string by default) if setting is not found.
    */
-  public getSetting(key: string): string {
+  public getSetting(key: string, defaultValue: string = ''): string {
     const results = this.executeQuery<{ Value: string }>(`SELECT
                 s.Value
             FROM Settings s
             WHERE s.Key = ?`, [key]);
 
-    return results.length > 0 ? results[0].Value : '';
+    return results.length > 0 ? results[0].Value : defaultValue;
   }
 
   /**
@@ -282,6 +282,13 @@ class SqliteClient {
    */
   public getDefaultEmailDomain(): string {
     return this.getSetting('DefaultEmailDomain');
+  }
+
+  /**
+   * Get the default identity language from the database.
+   */
+  public getDefaultIdentityLanguage(): string {
+    return this.getSetting('DefaultIdentityLanguage', 'en');
   }
 
   /**

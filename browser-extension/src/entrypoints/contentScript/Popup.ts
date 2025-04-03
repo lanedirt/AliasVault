@@ -1,7 +1,7 @@
-import { Credential } from '../../utils/types/Credential';
 import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
 import { IdentityGeneratorEn } from '../../utils/generators/Identity/implementations/IdentityGeneratorEn';
+import { IdentityGeneratorNl } from '../../utils/generators/Identity/implementations/IdentityGeneratorNl';
 import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
@@ -9,6 +9,8 @@ import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse
 import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import SqliteClient from '../../utils/SqliteClient';
+import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
+import { StringResponse } from '@/utils/types/messaging/StringResponse';
 
 // TODO: store generic setting constants somewhere else.
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
@@ -224,8 +226,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       await sendMessage('SYNC_VAULT', {}, 'background');
 
       // Retrieve default email domain from background
-      const response = await sendMessage('GET_DEFAULT_EMAIL_DOMAIN', {}, 'background') as { domain: string };
-      const domain = response.domain;
+      const response = await sendMessage('GET_DEFAULT_EMAIL_DOMAIN', {}, 'background') as StringResponse;
+      const domain = response.value;
 
       let credential: Credential;
 
@@ -248,7 +250,17 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         };
       } else {
         // Generate new random identity using identity generator.
-        const identityGenerator = new IdentityGeneratorEn();
+        const identityLanguage = await sendMessage('GET_DEFAULT_IDENTITY_LANGUAGE', {}, 'background') as StringResponse;
+        let identityGenerator: BaseIdentityGenerator;
+        switch (identityLanguage.value) {
+          case 'nl':
+            identityGenerator = new IdentityGeneratorNl();
+            break;
+          case 'en':
+          default:
+            identityGenerator = new IdentityGeneratorEn();
+            break;
+        }
         const identity = await identityGenerator.generateRandomIdentity();
 
         // Get password settings from background
