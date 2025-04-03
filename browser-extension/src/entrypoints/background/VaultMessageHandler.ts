@@ -9,7 +9,7 @@ import { storage } from 'wxt/storage';
 import { BoolResponse as messageBoolResponse } from '../../utils/types/messaging/BoolResponse';
 import { VaultResponse as messageVaultResponse } from '../../utils/types/messaging/VaultResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '../../utils/types/messaging/CredentialsResponse';
-import { DefaultEmailDomainResponse as messageDefaultEmailDomainResponse } from '../../utils/types/messaging/DefaultEmailDomainResponse';
+import { StringResponse as stringResponse } from '../../utils/types/messaging/StringResponse';
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '../../utils/types/messaging/PasswordSettingsResponse';
 
 /**
@@ -211,8 +211,8 @@ export async function getEmailAddressesForVault(
  * Get default email domain for a vault.
  */
 export function handleGetDefaultEmailDomain(
-) : Promise<messageDefaultEmailDomainResponse> {
-  return (async () : Promise<messageDefaultEmailDomainResponse> => {
+) : Promise<stringResponse> {
+  return (async () : Promise<stringResponse> => {
     try {
       const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
       const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];
@@ -233,21 +233,21 @@ export function handleGetDefaultEmailDomain(
 
       // First check if the default domain that is configured in the vault is still valid.
       if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
-        return { success: true, domain: defaultEmailDomain };
+        return { success: true, value: defaultEmailDomain };
       }
 
       // If default domain is not valid, fall back to first available private domain.
       const firstPrivate = privateEmailDomains.find(isValidDomain);
 
       if (firstPrivate) {
-        return { success: true, domain: firstPrivate };
+        return { success: true, value: firstPrivate };
       }
 
       // Return first valid public domain if no private domains are available.
       const firstPublic = publicEmailDomains.find(isValidDomain);
 
       if (firstPublic) {
-        return { success: true, domain: firstPublic };
+        return { success: true, value: firstPublic };
       }
 
       // Return null if no valid domains are found
@@ -257,6 +257,22 @@ export function handleGetDefaultEmailDomain(
       return { success: false, error: 'Failed to get default email domain' };
     }
   })();
+}
+
+/**
+ * Get the default identity language.
+ */
+export async function handleGetDefaultIdentityLanguage(
+) : Promise<stringResponse> {
+  try {
+    const sqliteClient = await createVaultSqliteClient();
+    const settingValue = sqliteClient.getDefaultIdentityLanguage();
+
+    return { success: true, value: settingValue };
+  } catch (error) {
+    console.error('Error getting default identity language:', error);
+    return { success: false, error: 'Failed to get default identity language' };
+  }
 }
 
 /**
