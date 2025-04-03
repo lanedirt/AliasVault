@@ -12,9 +12,6 @@ does not have a proper label tag.
 </style>
 <body class="awsui aws-signin-ui" style="margin-top: 30px; margin-right:40px; margin-bottom:20px; margin-left:40px;">
 
-    <script id="awsc-panorama-bundle" type="text/javascript" src="/static/js/panorama-nav-init.js" data-url="/static/js/awsc-panorama.js" data-config="{'appEntity':'aws-signin','flags':{'disableBusinessMetrics':true, 'enableViewMetrics':true, 'enableCustomMetrics': true},'region':'us-east-1','service':'login'}"></script><aliasvault-ui data-wxt-shadow-root=""></aliasvault-ui>
-
-
 <div id="signin-improvements">
     <div id="signin-improvement-icon">
         <span id="improvement-icon"></span>
@@ -943,26 +940,7 @@ does not have a proper label tag.
                   </ul>
               </div>
           </div>
-      
     
-    <script nonce="">
-        $(function() {
-            $("#language_selection_button").click(function() {
-                if ($("#language_drop_up").is(':hidden')) {
-                    $("#language_drop_up").show();
-                } else {
-                    $("#language_drop_up").hide();
-                }
-            });
-
-            $("#language_drop_up").on("click", "li", function(e) {
-                var localeString = e.currentTarget.getAttribute('data-localeString');
-                document.cookie= ("noflush_locale=" + localeString + "; domain=.amazon.com");
-                $("#language_drop_up").hide();
-                window.location.reload();
-            });
-        });
-    </script>
   </div>
 </div>
     

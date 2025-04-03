@@ -188,11 +188,16 @@ export class FormDetector {
 
       // Check for parent label and table cell structure
       let currentElement = input;
-      for (let i = 0; i < 3; i++) {
-        // Check for parent label
-        const parentLabel = currentElement.closest('label');
-        if (parentLabel) {
-          attributes.push(parentLabel.textContent?.toLowerCase() ?? '');
+      for (let i = 0; i < 5; i++) {
+        // Stop if we have too many child elements (near body)
+        if (currentElement.children.length > 15) {
+          break;
+        }
+
+        // Check for label - search both parent and child elements
+        const childLabel = currentElement.querySelector('label');
+        if (childLabel) {
+          attributes.push(childLabel.textContent?.toLowerCase() ?? '');
           break;
         }
 
@@ -510,14 +515,14 @@ export class FormDetector {
       detectedFields.push(fullNameField);
     }
 
-    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], detectedFields);
-    if (firstNameField) {
-      detectedFields.push(firstNameField);
-    }
-
     const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], detectedFields);
     if (lastNameField) {
       detectedFields.push(lastNameField);
+    }
+
+    const firstNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.firstName, ['text'], detectedFields);
+    if (firstNameField) {
+      detectedFields.push(firstNameField);
     }
 
     const birthdateField = this.findBirthdateFields(wrapper as HTMLFormElement | null, detectedFields);

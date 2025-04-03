@@ -117,7 +117,8 @@ export class FormFiller {
    * @param credential The credential to fill the form with.
    */
   private fillBirthdateFields(credential: Credential): void {
-    if (!credential.Alias.BirthDate) {
+    // TODO: when birth date is made optional in datamodel, we can remove this mindate check here.
+    if (!credential.Alias.BirthDate || credential.Alias.BirthDate === '0001-01-01 00:00:00') {
       return;
     }
 

@@ -42,7 +42,7 @@ export const EnglishFieldPatterns: FieldPatterns = {
   firstName: ['firstname', 'first-name', 'first_name', 'fname', 'name', 'given-name'],
   lastName: ['lastname', 'last-name', 'last_name', 'lname', 'surname', 'family-name'],
   email: ['email', 'mail', 'emailaddress'],
-  emailConfirm: ['confirm', 'verification', 'repeat', 'retype', 'verify'],
+  emailConfirm: ['confirm', 'verification', 'repeat', 'retype', 'verify', 'email2'],
   password: ['password', 'pwd', 'pass'],
   birthdate: ['birthdate', 'birth-date', 'dob', 'date-of-birth'],
   gender: ['gender', 'sex'],

@@ -105,4 +105,14 @@ describe('FormDetector Dutch tests', () => {
     testField(FormField.Password, 'user_password', htmlFile);
     testField(FormField.PasswordConfirm, 'user_password_confirmation', htmlFile);
   });
+
+  describe('Dutch registration form 10 detection', () => {
+    const htmlFile = 'nl-registration-form10.html';
+
+    testField(FormField.Email, 'tbxEmail1', htmlFile);
+    testField(FormField.EmailConfirm, 'tbxEmail2', htmlFile);
+    testField(FormField.FirstName, 'Field645', htmlFile);
+    testField(FormField.LastName, 'Field642', htmlFile);
+    testField(FormField.BirthDate, 'Field675', htmlFile);
+  });
 });
