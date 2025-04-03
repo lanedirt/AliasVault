@@ -36,8 +36,8 @@ export function hidePopupFor(ms: number) : void {
  * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
 export function fillCredential(credential: Credential, input: HTMLInputElement) : void {
-  // Set debounce time to 800ms to prevent the popup from being shown again within 800ms because of autofill events.
-  hidePopupFor(800);
+  // Set debounce time to 300ms to prevent the popup from being shown again within 300ms because of autofill events.
+  hidePopupFor(300);
 
   const formDetector = new FormDetector(document, input);
   const form = formDetector.getForm();
