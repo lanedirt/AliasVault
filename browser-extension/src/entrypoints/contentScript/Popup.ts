@@ -10,10 +10,49 @@ import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import SqliteClient from '../../utils/SqliteClient';
 
+// TODO: store generic setting constants somewhere else.
+export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
+export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
+export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
+
+// TODO: store these settings in the actual vault when updating the datamodel for roadmap v1.0.
+export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
+export const LAST_CUSTOM_USERNAME_KEY = 'local:aliasvault_last_custom_username';
+
 /**
  * WeakMap to store event listeners for popup containers
  */
 let popupListeners = new WeakMap<HTMLElement, EventListener>();
+
+/**
+ * Open (or refresh) the autofill popup including check if vault is locked.
+ */
+export function openAutofillPopup(input: HTMLInputElement, container: HTMLElement) : void {
+  createLoadingPopup(input, '', container);
+
+  /**
+   * Handle the Enter key.
+   */
+  const handleEnterKey = (e: KeyboardEvent) : void => {
+    if (e.key === 'Enter') {
+      removeExistingPopup(container);
+      // Remove the event listener to clean up
+      document.body.removeEventListener('keydown', handleEnterKey);
+    }
+  };
+
+  document.addEventListener('keydown', handleEnterKey);
+
+  (async () : Promise<void> => {
+    const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
+
+    if (response.success) {
+      createAutofillPopup(input, response.credentials, container);
+    } else {
+      createVaultLockedPopup(input, container);
+    }
+  })();
+}
 
 /**
  * Create basic popup with default style.
@@ -58,28 +97,11 @@ export function createLoadingPopup(input: HTMLInputElement, message: string, roo
    * Get the loading wrapper HTML.
    */
   const getLoadingHtml = (message: string): string => `
-  <div class="av-loading-container">
-    <svg class="av-loading-spinner" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10"
-        fill="none"
-        stroke="#e5e7eb"
-        stroke-width="2"
-        stroke-dasharray="30 60"
-        stroke-linecap="round">
-        <animateTransform
-          attributeName="transform"
-          attributeType="XML"
-          type="rotate"
-          from="0 12 12"
-          to="360 12 12"
-          dur="1s"
-          repeatCount="indefinite"
-        />
-      </circle>
-    </svg>
-    <span class="av-loading-text">${message}</span>
-  </div>
-`;
+    <div class="av-loading-container">
+      <div class="av-loading-spinner"></div>
+      <span class="av-loading-text">${message}</span>
+    </div>
+  `;
 
   const popup = createBasePopup(input, rootContainer);
   popup.innerHTML = getLoadingHtml(message);
@@ -135,7 +157,7 @@ export function removeExistingPopup(container: HTMLElement) : void {
 /**
  * Create auto-fill popup
  */
-export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : void {
+export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : void {  
   // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
   input.setAttribute('autocomplete', 'false');
   const popup = createBasePopup(input, rootContainer);
@@ -188,7 +210,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopImmediatePropagation();
 
     const suggestedName = getSuggestedServiceName(document, window.location);
-    const result = await createEditNamePopup(suggestedName, rootContainer);
+    const result = await createAliasCreationPopup(suggestedName, rootContainer);
 
     if (!result) {
       // User cancelled
@@ -208,7 +230,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       let credential: Credential;
 
       if (result.isCustomCredential) {
-        // Create custom credential
+        // Create custom credential with information provided by user in popup.
         const faviconBytes = await getFaviconBytes(document);
         credential = {
           Id: '',
@@ -216,7 +238,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
           ServiceUrl: getValidServiceUrl(),
           Logo: faviconBytes ?? undefined,
           Username: result.customUsername,
-          Password: result.customPassword ?? '', // Set the generated password
+          Password: result.customPassword ?? '',
           Alias: {
             NickName: result.customUsername ?? '',
             // TODO: once birthdate is made nullable in datamodel refactor, remove this.
@@ -225,7 +247,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
           }
         };
       } else {
-        // Generate new identity locally.
+        // Generate new random identity using identity generator.
         const identityGenerator = new IdentityGeneratorEn();
         const identity = await identityGenerator.generateRandomIdentity();
 
@@ -594,14 +616,6 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
   return elements;
 }
 
-export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
-export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
-export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
-
-// TODO: move these settings to the actual vault when updating the datamodel for roadmap v1.0.
-export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
-export const LAST_CUSTOM_USERNAME_KEY = 'local:aliasvault_last_custom_username';
-
 /**
  * Check if auto-popup is disabled for current site
  */
@@ -633,8 +647,6 @@ export async function isAutoShowPopupEnabled(): Promise<boolean> {
 
 /**
  * Disable auto-popup for current site
- * /**
- * Disable auto-show popup for current site.
  */
 export async function disableAutoShowPopup(): Promise<void> {
   const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
@@ -645,15 +657,15 @@ export async function disableAutoShowPopup(): Promise<void> {
 }
 
 /**
- * Create edit name popup. Part of the "create new alias" flow.
+ * Create alias creation popup where user can choose between random alias and custom alias.
  */
-export async function createEditNamePopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
+export async function createAliasCreationPopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
   // Load last used values
-  const lastEmail = await storage.getItem(LAST_CUSTOM_EMAIL_KEY) as string || '';
-  const lastUsername = await storage.getItem(LAST_CUSTOM_USERNAME_KEY) as string || '';
+  const lastEmail = await storage.getItem(LAST_CUSTOM_EMAIL_KEY) as string ?? '';
+  const lastUsername = await storage.getItem(LAST_CUSTOM_USERNAME_KEY) as string ?? '';
 
   return new Promise((resolve) => {
     // Create modal overlay
@@ -737,7 +749,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           <input
             type="text"
             id="service-name-input"
-            data-aliasvault-ignore="true"
             value="${defaultName}"
             class="av-create-popup-input"
             placeholder="Enter service name"
@@ -755,7 +766,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           <input
             type="text"
             id="custom-service-name"
-            data-aliasvault-ignore="true"
             value="${defaultName}"
             class="av-create-popup-input"
             placeholder="Enter service name"
@@ -766,7 +776,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           <input
             type="email"
             id="custom-email"
-            data-aliasvault-ignore="true"
             class="av-create-popup-input"
             placeholder="Enter email address"
             data-default-value="${lastEmail}"
@@ -777,7 +786,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
           <input
             type="text"
             id="custom-username"
-            data-aliasvault-ignore="true"
             class="av-create-popup-input"
             placeholder="Enter username"
             data-default-value="${lastUsername}"
@@ -789,7 +797,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
             <input
               type="text"
               id="password-preview"
-              data-aliasvault-ignore="true"
               class="av-create-popup-input"
             >
             <button id="regenerate-password" class="av-create-popup-regenerate-btn">
@@ -848,7 +855,7 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
     // Handle input changes
     customEmail.addEventListener('input', () => {
       const value = customEmail.value.trim();
-      if (value) {
+      if (value || value === '') {
         customEmail.classList.remove('av-create-popup-input-default');
         storage.setItem(LAST_CUSTOM_EMAIL_KEY, value);
       } else {
@@ -859,23 +866,13 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
 
     customUsername.addEventListener('input', () => {
       const value = customUsername.value.trim();
-      if (value) {
+      if (value || value === '') {
         customUsername.classList.remove('av-create-popup-input-default');
         storage.setItem(LAST_CUSTOM_USERNAME_KEY, value);
       } else {
         customUsername.classList.add('av-create-popup-input-default');
         storage.setItem(LAST_CUSTOM_USERNAME_KEY, '');
       }
-    });
-
-    // Initialize password generator
-    const passwordGenerator = new PasswordGenerator({
-      Length: 16,
-      UseUppercase: true,
-      UseLowercase: true,
-      UseNumbers: true,
-      UseSpecialChars: true,
-      UseNonAmbiguousChars: false
     });
 
     /**
@@ -885,8 +882,14 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
       passwordPreview.value = passwordGenerator.generateRandomPassword();
     };
 
-    // Generate initial password
-    generatePassword();
+    // Get password settings from background
+    let passwordGenerator: PasswordGenerator;
+    sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
+      const passwordSettingsResponse = response as PasswordSettingsResponse;
+      passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
+      // Generate initial password after settings are loaded
+      generatePassword();
+    });
 
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);
@@ -1095,34 +1098,6 @@ export async function createEditNamePopup(defaultName: string, rootContainer: HT
 }
 
 /**
- * Open (or refresh) the autofill popup including check if vault is locked.
- */
-export function openAutofillPopup(input: HTMLInputElement, container: HTMLElement) : void {
-  /**
-   * Handle the Enter key.
-   */
-  const handleEnterKey = (e: KeyboardEvent) : void => {
-    if (e.key === 'Enter') {
-      removeExistingPopup(container);
-      // Remove the event listener to clean up
-      document.body.removeEventListener('keydown', handleEnterKey);
-    }
-  };
-
-  document.addEventListener('keydown', handleEnterKey);
-
-  (async () : Promise<void> => {
-    const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
-
-    if (response.success) {
-      createAutofillPopup(input, response.credentials, container);
-    } else {
-      createVaultLockedPopup(input, container);
-    }
-  })();
-}
-
-/**
  * Get favicon bytes from page and resize if necessary.
  */
 async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
@@ -1130,8 +1105,12 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
   const TARGET_WIDTH = 96; // Resize target width
 
   const faviconLinks = [
-    ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')),
-    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="192x192"], link[rel="icon"][sizes="128x128"]')),
+    ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')), 
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="96x96"]')),
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="128x128"]')),
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="48x48"]')),
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="32x32"]')),
+    ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="192x192"]')),
     ...Array.from(document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="apple-touch-icon-precomposed"]')),
     ...Array.from(document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')),
     { href: `${window.location.origin}/favicon.ico` }

@@ -26,16 +26,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   gap: 8px;
 }
 
 .av-loading-spinner {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: av-loading-spin 1s linear infinite;
+}
+
+@keyframes av-loading-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .av-loading-text {
