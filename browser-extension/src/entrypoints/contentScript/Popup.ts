@@ -962,7 +962,10 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
       }
     });
 
-    customSaveBtn.addEventListener('click', () => {
+    /**
+     * Handle custom save button click.
+     */
+    const handleCustomSave = () : void => {
       const serviceName = customInput.value.trim();
       if (serviceName) {
         const email = customEmail.value.trim();
@@ -1027,7 +1030,23 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
           customPassword: passwordPreview.value
         });
       }
-    });
+    }
+
+    customSaveBtn.addEventListener('click', handleCustomSave);
+
+    /**
+     * Handle custom form input enter key press to submit the form.
+     */
+    const handleCustomEnter = (e: KeyboardEvent) : void => {
+      if (e.key === 'Enter') {
+        handleCustomSave();
+      }
+    };
+
+    customInput.addEventListener('keyup', handleCustomEnter);
+    customEmail.addEventListener('keyup', handleCustomEnter); 
+    customUsername.addEventListener('keyup', handleCustomEnter);
+    passwordPreview.addEventListener('keyup', handleCustomEnter);
 
     // Handle cancel buttons
     cancelBtn.addEventListener('click', () => {
@@ -1046,34 +1065,6 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
           closePopup({
             serviceName,
             isCustomCredential: false
-          });
-        }
-      }
-    });
-
-    customInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
-        const serviceName = customInput.value.trim();
-        if (serviceName) {
-          const email = customEmail.value.trim();
-          const username = customUsername.value.trim();
-          const hasDefaultEmail = customEmail.classList.contains('av-create-popup-input-default');
-          const hasDefaultUsername = customUsername.classList.contains('av-create-popup-input-default');
-
-          // If using default values, use the dataset values
-          const finalEmail = hasDefaultEmail ? customEmail.dataset.defaultValue : email;
-          const finalUsername = hasDefaultUsername ? customUsername.dataset.defaultValue : username;
-
-          if (!finalEmail && !finalUsername) {
-            return;
-          }
-
-          closePopup({
-            serviceName,
-            isCustomCredential: true,
-            customEmail: finalEmail,
-            customUsername: finalUsername,
-            customPassword: passwordPreview.value
           });
         }
       }
