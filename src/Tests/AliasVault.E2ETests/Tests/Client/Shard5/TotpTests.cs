@@ -33,7 +33,7 @@ public class TotpTests : ClientPlaywrightTest
 
         // Open the edit page again by clicking the button that contains the text "Edit"
         await Page.ClickAsync("text=Edit");
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         // Click the "Add TOTP Code" button
         var addButton = Page.Locator("button[id='add-totp-code'], a[id='add-totp-code']");
@@ -51,7 +51,7 @@ public class TotpTests : ClientPlaywrightTest
         await saveButton.ClickAsync();
 
         // Save the credential
-        var submitButton = Page.Locator("text=Save Credentials").First;
+        var submitButton = Page.Locator("text=Save Credential").First;
         await submitButton.ClickAsync();
 
         await WaitForUrlAsync("credentials/**", "Credential updated successfully");
@@ -84,7 +84,7 @@ public class TotpTests : ClientPlaywrightTest
 
         // Open the edit page again by clicking the button that contains the text "Edit"
         await Page.ClickAsync("text=Edit");
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         // Add a TOTP code
         var addButton = Page.Locator("button[id='add-totp-code'], a[id='add-totp-code']");
@@ -96,7 +96,7 @@ public class TotpTests : ClientPlaywrightTest
         await Page.Locator("button[id='save-totp-code']").ClickAsync();
 
         // Save the credential
-        var submitButton = Page.Locator("text=Save Credentials").First;
+        var submitButton = Page.Locator("text=Save Credential").First;
         await submitButton.ClickAsync();
 
         await WaitForUrlAsync("credentials/**", "Credential updated successfully");
@@ -107,7 +107,7 @@ public class TotpTests : ClientPlaywrightTest
 
         // Open the edit page again by clicking the button that contains the text "Edit"
         await Page.ClickAsync("text=Edit");
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         // Click the delete button for the TOTP code
         var deleteButton = Page.Locator("button.delete-totp-code").First;

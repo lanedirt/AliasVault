@@ -183,7 +183,7 @@ public class AttachmentTests : ClientPlaywrightTest
 
         // Click the edit button
         await Page.ClickAsync("text=Edit");
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         // Find and click the delete button for the attachment
         var deleteButton = Page.Locator("button:has-text('Delete')").First;
@@ -194,7 +194,7 @@ public class AttachmentTests : ClientPlaywrightTest
         Assert.That(pageContent, Does.Not.Contain("TestAttachment.txt"), "Deleted attachment name still appears on edit page.");
 
         // Save the credential
-        var saveButton = Page.Locator("text=Save Credentials").First;
+        var saveButton = Page.Locator("text=Save Credential").First;
         await saveButton.ClickAsync();
         await WaitForUrlAsync("credentials/**", "Credential updated successfully");
 
@@ -283,7 +283,7 @@ public class AttachmentTests : ClientPlaywrightTest
 
         // Edit the credential
         await Page.ClickAsync("text=Edit");
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         var attachmentNames = new[] { "Attachment1.txt", "Attachment2.txt", "Attachment3.txt" };
         var fileInput = Page.Locator("input[type='file']");
@@ -305,7 +305,7 @@ public class AttachmentTests : ClientPlaywrightTest
         }
 
         // Save the updated credential
-        var saveButton = Page.Locator("text=Save Credentials").First;
+        var saveButton = Page.Locator("text=Save Credential").First;
         await saveButton.ClickAsync();
         await WaitForUrlAsync("credentials/**", "Credential updated successfully");
 

@@ -213,7 +213,7 @@ public class ClientPlaywrightTest : PlaywrightTest
             await customLogic();
         }
 
-        var submitButton = Page.Locator("text=Save Credentials").First;
+        var submitButton = Page.Locator("text=Save Credential").First;
         await submitButton.ClickAsync();
 
         if (checkForSuccess)
@@ -222,7 +222,7 @@ public class ClientPlaywrightTest : PlaywrightTest
 
             // Check if the credential was created
             var pageContent = await Page.TextContentAsync("body");
-            Assert.That(pageContent, Does.Contain("View credentials entry"), "Credential not created.");
+            Assert.That(pageContent, Does.Contain("View credential"), "Credential not created.");
         }
     }
 
@@ -247,12 +247,12 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Page.ClickAsync("text=Edit");
 
         // Wait for the edit credential page to load.
-        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credentials");
+        await WaitForUrlAsync("credentials/**/edit", "Edit the existing credential");
 
         // Fill all input fields with specified values and remaining empty fields with random data.
         await InputHelper.FillInputFields(formValues);
 
-        var submitButton = Page.Locator("text=Save Credentials").First;
+        var submitButton = Page.Locator("text=Save Credential").First;
         await submitButton.ClickAsync();
         await WaitForUrlAsync("credentials/**", "Credential updated successfully");
 
@@ -281,7 +281,7 @@ public class ClientPlaywrightTest : PlaywrightTest
         await Page.ClickAsync("text=Delete");
 
         // Wait for the delete credential page to load.
-        await WaitForUrlAsync("credentials/**/delete", "You can delete a credentials entry below");
+        await WaitForUrlAsync("credentials/**/delete", "You can delete the credential below");
 
         var submitButton = Page.Locator("text=Yes, I'm sure").First;
         await submitButton.ClickAsync();

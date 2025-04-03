@@ -75,7 +75,7 @@ public class CredentialTests : ClientPlaywrightTest
         var submitButton = Page.Locator("button[id='quickIdentitySubmit']");
         await submitButton.ClickAsync();
 
-        await WaitForUrlAsync("credentials/**", "View credentials entry");
+        await WaitForUrlAsync("credentials/**", "View credential");
 
         // Check that the service name is present in the content.
         var pageContent = await Page.TextContentAsync("body");
@@ -102,7 +102,7 @@ public class CredentialTests : ClientPlaywrightTest
         // Click the edit button.
         var editButton = Page.Locator("text=Edit").First;
         await editButton.ClickAsync();
-        await WaitForUrlAsync("edit", "Save Credentials");
+        await WaitForUrlAsync("edit", "Save Credential");
 
         var serviceNameAfter = "Credential service after";
         await InputHelper.FillInputFields(
@@ -111,7 +111,7 @@ public class CredentialTests : ClientPlaywrightTest
                 { "service-name", serviceNameAfter },
             });
 
-        var submitButton = Page.Locator("text=Save Credentials").First;
+        var submitButton = Page.Locator("text=Save Credential").First;
         await submitButton.ClickAsync();
         await WaitForUrlAsync("credentials/**", "Delete");
 

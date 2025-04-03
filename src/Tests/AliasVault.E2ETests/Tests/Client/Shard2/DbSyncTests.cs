@@ -128,7 +128,7 @@ public class DbSyncTests : ClientPlaywrightTest
             await WaitForUrlAsync("credentials", "Find all of your credentials");
 
             await Page.ClickAsync($"text={serviceName.Key}");
-            await WaitForUrlAsync($"credentials/**", "View credentials entry");
+            await WaitForUrlAsync($"credentials/**", "View credential");
             foreach (var property in serviceName.Value)
             {
                 // Check if any input on the page has the expected value
