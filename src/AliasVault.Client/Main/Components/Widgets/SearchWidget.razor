@@ -4,79 +4,80 @@
 @inject JsInteropService JsInteropService
 @implements IAsyncDisposable
 
-<div class="relative" id="searchWidgetContainer">
-    <input
-        id="searchWidget"
-        type="text"
-        placeholder="Search vault..."
-        autocomplete="off"
-        class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
-        @bind-value="SearchTerm"
-        @oninput="SearchTermChanged"
-        @onfocus="OnFocus"
-        @onblur="OnBlur"
-        @onkeydown="HandleKeyDown"/>
+<ClickOutsideHandler OnClose="OnClose" ContentId="searchWidgetContainer">
+    <div class="relative" id="searchWidgetContainer">
+        <input
+            id="searchWidget"
+            type="text"
+            placeholder="Search vault..."
+            autocomplete="off"
+            class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
+            @bind-value="SearchTerm"
+            @oninput="SearchTermChanged"
+            @onfocus="OnFocus"
+            @onkeydown="HandleKeyDown"/>
 
-    @if (ShowHelpText)
-    {
-        <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
-            @if (string.IsNullOrEmpty(SearchTerm))
-            {
-                <p>Type a term to search for, this can be the service name, description or email address.</p>
-            }
-            else if (SearchTerm.Length == 1)
-            {
-                <p>Please type more chars</p>
-            }
-            else
-            {
-                <p>Searching for "@SearchTerm"</p>
-            }
-        </div>
-    }
-
-    @if (ShowResults)
-    {
-        @if (SearchResults.Any())
+        @if (ShowHelpText)
         {
-            <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
-                @for (int i = 0; i < SearchResults.Count; i++)
+            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
+                @if (string.IsNullOrEmpty(SearchTerm))
                 {
-                    var result = SearchResults[i];
-                    <div
-                        class="search-result @(i == SelectedIndex ? "bg-gray-100 dark:bg-gray-700" : "") px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                        @onclick="() => SelectResult(result)">
-                        <DisplayFavicon FaviconBytes="@result.Service.Logo" Width="24" />
-                        <div class="ml-2">
-                            <div>@result.Service.Name</div>
-                            @if (!string.IsNullOrEmpty(result.Alias.Email))
-                            {
-                                <span class="text-gray-500">(@result.Alias.Email)</span>
-                            }
-                            else if (!string.IsNullOrEmpty(result.Username))
-                            {
-                                <span class="text-gray-500">(@result.Username)</span>
-                            }
-                        </div>
-                    </div>
+                    <p>Type a term to search for, this can be the service name, description or email address.</p>
+                }
+                else if (SearchTerm.Length == 1)
+                {
+                    <p>Please type more chars</p>
+                }
+                else
+                {
+                    <p>Searching for "@SearchTerm"</p>
                 }
             </div>
         }
-        else
+
+        @if (ShowResults && SearchTerm.Length >= 2)
         {
-            <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
-                <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                    No results found
+            @if (SearchResults.Any())
+            {
+                <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                    @for (int i = 0; i < SearchResults.Count; i++)
+                    {
+                        var result = SearchResults[i];
+                        <div
+                            class="search-result @(i == SelectedIndex ? "bg-gray-100 dark:bg-gray-700" : "") px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                            @onclick="() => SelectResult(result)">
+                            <DisplayFavicon FaviconBytes="@result.Service.Logo" Width="24" />
+                            <div class="ml-2">
+                                <div>@result.Service.Name</div>
+                                @if (!string.IsNullOrEmpty(result.Alias.Email))
+                                {
+                                    <span class="text-gray-500">(@result.Alias.Email)</span>
+                                }
+                                else if (!string.IsNullOrEmpty(result.Username))
+                                {
+                                    <span class="text-gray-500">(@result.Username)</span>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                    <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                        No results found
+                    </div>
+                </div>
+            }
         }
-    }
-</div>
+    </div>
+</ClickOutsideHandler>
 
 @code {
     private string SearchTerm { get; set; } = string.Empty;
     private List<Credential> SearchResults { get; set; } = new();
-    private bool ShowResults => SearchTerm.Length >= 2;
+    private bool ShowResults { get; set; }
     private bool ShowHelpText { get; set; }
     private int SelectedIndex { get; set; } = -1;
 
@@ -102,11 +103,13 @@
     private void OnFocus()
     {
         ShowHelpText = true;
+        ShowResults = true;
     }
 
-    private void OnBlur()
+    private void OnClose()
     {
         ShowHelpText = false;
+        ShowResults = false;
     }
 
     private async Task SearchTermChanged(ChangeEventArgs e)
@@ -182,6 +185,7 @@
         SearchTerm = string.Empty;
         SearchResults.Clear();
         StateHasChanged();
+        OnClose();
     }
 
     private async Task FocusSearchField()
