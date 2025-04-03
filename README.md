@@ -116,7 +116,7 @@ Core features that are being worked on:
 - [x] Easy self-hosted installer
 - [x] Browser extensions with autofill feature (Chrome, Firefox, Edge, Safari, Brave)
 - [x] Built-in TOTP authenticator
-- [ ] Import passwords from traditional password managers
+- [x] Import passwords from traditional password managers
 - [ ] iOS and Android native apps
 - [ ] Data model improvements to support reusable identities in combination with aliases
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
