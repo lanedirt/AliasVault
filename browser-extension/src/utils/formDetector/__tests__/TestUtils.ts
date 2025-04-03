@@ -55,27 +55,27 @@ export const testField = (fieldName: FormField, elementId: string, htmlFile: str
 
     // Handle birthdate fields differently
     if (fieldName === FormField.BirthDate) {
-      expect(result.birthdateField.single).toBe(expectedElement);
+      expect(result?.birthdateField.single).toBe(expectedElement);
     } else if (fieldName === FormField.BirthDay) {
-      expect(result.birthdateField.day).toBe(expectedElement);
+      expect(result?.birthdateField.day).toBe(expectedElement);
     } else if (fieldName === FormField.BirthMonth) {
-      expect(result.birthdateField.month).toBe(expectedElement);
+      expect(result?.birthdateField.month).toBe(expectedElement);
     } else if (fieldName === FormField.BirthYear) {
-      expect(result.birthdateField.year).toBe(expectedElement);
+      expect(result?.birthdateField.year).toBe(expectedElement);
     // Handle gender field differently
     } else if (fieldName === FormField.Gender) {
-      expect(result.genderField.field).toBe(expectedElement);
+      expect(result?.genderField.field).toBe(expectedElement);
     } else if (fieldName === FormField.GenderMale) {
-      expect(result.genderField.radioButtons?.male).toBe(expectedElement);
+      expect(result?.genderField.radioButtons?.male).toBe(expectedElement);
     } else if (fieldName === FormField.GenderFemale) {
-      expect(result.genderField.radioButtons?.female).toBe(expectedElement);
+      expect(result?.genderField.radioButtons?.female).toBe(expectedElement);
     } else if (fieldName === FormField.GenderOther) {
-      expect(result.genderField.radioButtons?.other).toBe(expectedElement);
+      expect(result?.genderField.radioButtons?.other).toBe(expectedElement);
     // Handle default fields
     } else {
       const fieldKey = `${fieldName}Field` as keyof typeof result;
-      expect(result[fieldKey]).toBeDefined();
-      expect(result[fieldKey]).toBe(expectedElement);
+      expect(result?.[fieldKey]).toBeDefined();
+      expect(result?.[fieldKey]).toBe(expectedElement);
     }
   });
 };
@@ -86,7 +86,7 @@ export const testField = (fieldName: FormField, elementId: string, htmlFile: str
 export const testBirthdateFormat = (expectedFormat: string, htmlFile: string, focusedElementId: string) : void => {
   it('should detect correct birthdate format', () => {
     const { result } = setupFormTest(htmlFile, focusedElementId);
-    expect(result.birthdateField.format).toBe(expectedFormat);
+    expect(result?.birthdateField.format).toBe(expectedFormat);
   });
 };
 
@@ -179,13 +179,13 @@ export const createMockCredential = (): Credential => ({
   Id: '123',
   Username: 'testuser',
   Password: 'testpass',
-  Email: 'test@example.com',
   ServiceName: 'Test Service',
   Alias: {
     FirstName: 'John',
     LastName: 'Doe',
     BirthDate: '1991-02-03',
-    Gender: Gender.Male
+    Gender: Gender.Male,
+    Email: 'test@example.com',
   }
 });
 

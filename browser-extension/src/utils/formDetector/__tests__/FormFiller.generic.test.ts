@@ -46,7 +46,7 @@ describe('FormFiller', () => {
 
     it('should use username as email when no email is provided and no username field exists', () => {
       // Create a credential with an empty email string
-      const credentialWithoutEmail = { ...mockCredential, Email: '' };
+      const credentialWithoutEmail = { ...mockCredential, Alias: { ...mockCredential.Alias, Email: '' } };
       formFields.usernameField = null;
 
       formFiller.fillFields(credentialWithoutEmail);

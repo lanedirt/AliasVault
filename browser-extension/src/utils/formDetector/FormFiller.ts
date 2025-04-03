@@ -67,8 +67,8 @@ export class FormFiller {
       }
     }
 
-    if (this.form.emailConfirmField && credential.Email) {
-      this.form.emailConfirmField.value = credential.Email;
+    if (this.form.emailConfirmField && credential.Alias?.Email) {
+      this.form.emailConfirmField.value = credential.Alias.Email;
       this.triggerInputEvents(this.form.emailConfirmField);
     }
 
