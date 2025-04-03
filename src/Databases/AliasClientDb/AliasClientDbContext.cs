@@ -7,8 +7,10 @@
 
 namespace AliasClientDb;
 
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
@@ -101,6 +103,18 @@ public class AliasClientDbContext : DbContext
                 }
             }
         }
+
+        // Create a value converter that maps DateTime.MinValue to an empty string and vice versa.
+        // This prevents an empty string in the client DB from causing a fatal exception while loading
+        // Alias objects. TODO: when the birthdate field is made optional in data model, this can probably
+        // be removed. But test the usecase where the birthdate field is empty string (because of browser extension error).
+        var emptyDateTimeConverter = new ValueConverter<DateTime, string>(
+            v => v == DateTime.MinValue ? string.Empty : v.ToString("yyyy-MM-dd HH:mm:ss"),
+            v => string.IsNullOrEmpty(v) ? DateTime.MinValue : DateTime.Parse(v, CultureInfo.InvariantCulture));
+
+        modelBuilder.Entity<Alias>()
+            .Property(e => e.BirthDate)
+            .HasConversion(emptyDateTimeConverter);
 
         // Configure Credential - Alias relationship
         modelBuilder.Entity<Credential>()
