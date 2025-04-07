@@ -56,4 +56,7 @@ The GitHub Actions workflow `Browser Extension Build` will build the browser ext
 2. Upload the Chrome archive to the Chrome Web Store.
 3. Upload the Firefox archive (normal + sources) to the Firefox Add-ons page.
 4. Upload the Edge archive to the Microsoft Edge Add-ons page.
-5. Submit the Safari extension to Apple for review by opening the `browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Distribute App" option.
+5. Submit the Safari extension to Apple for review:
+    1. Navigate to the `browser-extension` directory.
+    2. Build the safari extension locally via `npm run build:safari`, which will output the build files to `dist/safari-mv2`. **Note: it's important to always rebuild, as otherwise stale build files from a previous build might get included in the Safari binary by accident!**
+    3. Open the `browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Archive" and then "Distribute App" option.
