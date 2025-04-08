@@ -111,6 +111,20 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run iOS App",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/mobile-app"
+            }
         }
     ]
 }
