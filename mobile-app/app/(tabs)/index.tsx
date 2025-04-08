@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Platform, Button, View, FlatList, Text } from 'react-native';
 import { NativeModules } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -28,6 +29,10 @@ export default function HomeScreen() {
   useEffect(() => {
     fetchCredentials();
   }, []);
+
+  useFocusEffect(() => {
+    fetchCredentials();
+  });
 
   const handleInsertEntry = async () => {
     // Generate a random credential
