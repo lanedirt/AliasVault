@@ -27,8 +27,8 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
-          <string>com.anonymous.aliasvault</string>
+          <string>aliasvault</string>
+          <string>net.aliasvault.app</string>
         </array>
       </dict>
       <dict>
