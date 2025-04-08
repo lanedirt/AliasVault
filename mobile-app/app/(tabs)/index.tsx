@@ -1,26 +1,60 @@
-import { Image, StyleSheet, Platform, Button, View } from 'react-native';
+import { Image, StyleSheet, Platform, Button, View, FlatList, Text } from 'react-native';
 import { NativeModules } from 'react-native';
+import { useEffect, useState } from 'react';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+interface Credential {
+  username: string;
+  password: string;
+  service: string;
+}
+
 export default function HomeScreen() {
-  const handleInsertEntry = () => {
+  const [credentials, setCredentials] = useState<Credential[]>([]);
+
+  const fetchCredentials = async () => {
+    try {
+      const result = await NativeModules.CredentialManager.getCredentials();
+      setCredentials(result);
+    } catch (error) {
+      console.error('Error fetching credentials:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredentials();
+  }, []);
+
+  const handleInsertEntry = async () => {
     // Generate a random credential
     const randomUsername = `user${Math.floor(Math.random() * 1000)}`;
     const randomPassword = `pass${Math.floor(Math.random() * 1000)}`;
     const randomService = `service${Math.floor(Math.random() * 1000)}`;
     
     // Call native module to add credential
-    NativeModules.CredentialManager.addCredential(randomUsername, randomPassword, randomService);
+    await NativeModules.CredentialManager.addCredential(randomUsername, randomPassword, randomService);
+    // Add a small delay to ensure the operation is complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+    fetchCredentials(); // Refresh the list
   };
 
-  const handleClearVault = () => {
+  const handleClearVault = async () => {
     // Call native module to clear credentials
-    NativeModules.CredentialManager.clearCredentials();
+    await NativeModules.CredentialManager.clearCredentials();
+    setCredentials([]); // Clear the list
   };
+
+  const renderCredential = (item: Credential) => (
+    <ThemedView style={styles.credentialItem} key={`${item.service}-${item.username}`}>
+      <ThemedText type="defaultSemiBold">Service: {item.service}</ThemedText>
+      <ThemedText>Username: {item.username}</ThemedText>
+      <ThemedText>Password: {item.password}</ThemedText>
+    </ThemedView>
+  );
 
   return (
     <ParallaxScrollView
@@ -32,7 +66,7 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">AliasVault</ThemedText>
         <HelloWave />
       </ThemedView>
       
@@ -41,37 +75,12 @@ export default function HomeScreen() {
         <View style={styles.buttonSpacer} />
         <Button title="Clear Vault" onPress={handleClearVault} color="red" />
       </ThemedView>
-      
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+
+      <ThemedView style={styles.credentialsContainer}>
+        <ThemedText type="subtitle">Stored Credentials</ThemedText>
+        <View style={styles.credentialsList}>
+          {credentials.map(renderCredential)}
+        </View>
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -83,16 +92,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   buttonContainer: {
     marginVertical: 16,
     paddingHorizontal: 16,
   },
   buttonSpacer: {
     height: 8,
+  },
+  credentialsContainer: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  credentialsList: {
+    marginTop: 8,
+  },
+  credentialItem: {
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
   reactLogo: {
     height: 178,

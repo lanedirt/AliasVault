@@ -16,6 +16,19 @@ class CredentialManager: NSObject {
   }
   
   @objc
+  func getCredentials(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    let credentials = SharedCredentialStore.shared.getAllCredentials()
+    let credentialDicts = credentials.map { credential in
+      return [
+        "username": credential.username,
+        "password": credential.password,
+        "service": credential.service
+      ]
+    }
+    resolve(credentialDicts)
+  }
+  
+  @objc
   static func requiresMainQueueSetup() -> Bool {
     return false
   }
@@ -23,5 +36,15 @@ class CredentialManager: NSObject {
   @objc
   static func moduleName() -> String! {
     return "CredentialManager"
+  }
+  
+  @objc
+  func constantsToExport() -> [AnyHashable : Any]! {
+    return [:]
+  }
+  
+  @objc
+  func methodsToExport() -> [String]! {
+    return ["addCredential", "clearCredentials", "getCredentials"]
   }
 } 

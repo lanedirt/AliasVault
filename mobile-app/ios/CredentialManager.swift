@@ -14,6 +14,19 @@ class CredentialManager: NSObject {
   func clearCredentials() {
     SharedCredentialStore.shared.clearAllCredentials()
   }
+
+  @objc
+  func getCredentials() -> [[String: String]] {
+    let credentials = SharedCredentialStore.shared.getAllCredentials()
+    let credentialDicts = credentials.map { credential in
+      return [
+        "username": credential.username,
+        "password": credential.password,
+        "service": credential.service
+      ]
+    }
+    return credentialDicts
+  }
   
   @objc
   static func requiresMainQueueSetup() -> Bool {
