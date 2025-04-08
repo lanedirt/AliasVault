@@ -14,6 +14,8 @@
 		96905EF65AED1B983A6B3ABC /* libPods-aliasvault.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		CE2F00E62DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */; };
+		CE2F00E72DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */; };
 		CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */; };
 		CEE9098B2DA548C7008D568F /* autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */; };
@@ -59,6 +61,7 @@
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = aliasvault/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = aliasvault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
 		CEE9097E2DA548C7008D568F /* autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -102,6 +105,7 @@
 		13B07FAE1A68108700A75B9A /* aliasvault */ = {
 			isa = PBXGroup;
 			children = (
+				CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -420,6 +424,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				CE2F00E72DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
 				E8FD7000523F4549908941A2 /* noop-file.swift in Sources */,
 			);
@@ -429,6 +434,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE2F00E62DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

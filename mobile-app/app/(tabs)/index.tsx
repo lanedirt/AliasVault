@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Button, View } from 'react-native';
+import { NativeModules } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -6,6 +7,21 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const handleInsertEntry = () => {
+    // Generate a random credential
+    const randomUsername = `user${Math.floor(Math.random() * 1000)}`;
+    const randomPassword = `pass${Math.floor(Math.random() * 1000)}`;
+    const randomService = `service${Math.floor(Math.random() * 1000)}`;
+    
+    // Call native module to add credential
+    NativeModules.CredentialManager.addCredential(randomUsername, randomPassword, randomService);
+  };
+
+  const handleClearVault = () => {
+    // Call native module to clear credentials
+    NativeModules.CredentialManager.clearCredentials();
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -19,6 +35,13 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
+      
+      <ThemedView style={styles.buttonContainer}>
+        <Button title="Insert Random Entry" onPress={handleInsertEntry} />
+        <View style={styles.buttonSpacer} />
+        <Button title="Clear Vault" onPress={handleClearVault} color="red" />
+      </ThemedView>
+      
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
         <ThemedText>
@@ -63,6 +86,13 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
+  },
+  buttonContainer: {
+    marginVertical: 16,
+    paddingHorizontal: 16,
+  },
+  buttonSpacer: {
+    height: 8,
   },
   reactLogo: {
     height: 178,
