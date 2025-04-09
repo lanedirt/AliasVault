@@ -125,6 +125,20 @@
             "options": {
                 "cwd": "${workspaceFolder}/mobile-app"
             }
+        },
+        {
+            "label": "Run Android App",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:android"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/mobile-app"
+            }
         }
     ]
 }
