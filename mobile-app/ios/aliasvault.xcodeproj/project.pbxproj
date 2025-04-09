@@ -213,9 +213,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* aliasvault */ = {
+		13B07F861A680F5B00A75B9A /* AliasVault */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "aliasvault" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "AliasVault" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
 				B7077E857026DF166CBD9F8D /* [Expo] Configure project */,
@@ -232,7 +232,7 @@
 			dependencies = (
 				CEE9098A2DA548C7008D568F /* PBXTargetDependency */,
 			);
-			name = aliasvault;
+			name = AliasVault;
 			productName = aliasvault;
 			productReference = 13B07F961A680F5B00A75B9A /* aliasvault.app */;
 			productType = "com.apple.product-type.application";
@@ -288,7 +288,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* aliasvault */,
+				13B07F861A680F5B00A75B9A /* AliasVault */,
 				CEE9097D2DA548C7008D568F /* autofill */,
 			);
 		};
@@ -768,7 +768,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "aliasvault" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "AliasVault" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
