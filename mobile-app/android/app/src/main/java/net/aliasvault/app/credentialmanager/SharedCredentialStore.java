@@ -44,6 +44,12 @@ public class SharedCredentialStore {
         void onError(Exception e);
     }
     
+    // Interface for crypto key operations that need biometric auth
+    public interface KeyOperationCallback {
+        void onKeyReady(SecretKey key);
+        void onError(Exception e);
+    }
+    
     private SharedCredentialStore(Context context) {
         this.appContext = context.getApplicationContext();
     }
@@ -60,41 +66,7 @@ public class SharedCredentialStore {
             return cachedEncryptionKey;
         }
         
-        try {
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
-            keyStore.load(null);
-            
-            // Check if the key exists
-            if (keyStore.containsAlias(ENCRYPTION_KEY_ALIAS)) {
-                // Key exists, retrieve it
-                KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(
-                        ENCRYPTION_KEY_ALIAS, null);
-                cachedEncryptionKey = secretKeyEntry.getSecretKey();
-                return cachedEncryptionKey;
-            } else {
-                // Key doesn't exist, create it
-                KeyGenerator keyGenerator = KeyGenerator.getInstance(
-                        KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE);
-                
-                KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(
-                        ENCRYPTION_KEY_ALIAS,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(true)
-                        // This is critical: set validation timeout to prevent requiring auth for each operation
-                        .setUserAuthenticationValidityDurationSeconds(30)
-                        .build();
-                
-                keyGenerator.init(keyGenParameterSpec);
-                cachedEncryptionKey = keyGenerator.generateKey();
-                return cachedEncryptionKey;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting or creating encryption key", e);
-            throw e;
-        }
+        throw new Exception("Biometric authentication required. Use getEncryptionKeyWithBiometricAuth instead.");
     }
     
     private Cipher getCipher() throws Exception {
@@ -103,11 +75,58 @@ public class SharedCredentialStore {
                 + KeyProperties.ENCRYPTION_PADDING_NONE);
     }
     
-    public void encryptWithBiometricAuth(final FragmentActivity activity, final String data, final CryptoOperationCallback callback) {
+    /**
+     * Authenticate user with biometric and get encryption key.
+     * This method will prompt for authentication even if key is already cached.
+     */
+    public void getEncryptionKeyWithBiometricAuth(final FragmentActivity activity, final KeyOperationCallback callback) {
         try {
-            final SecretKey key = getOrCreateEncryptionKey();
+            // First check if the key exists in the keystore
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
+            keyStore.load(null);
+            
+            SecretKey keyToUse;
+            boolean createNewKey = false;
+            
+            if (keyStore.containsAlias(ENCRYPTION_KEY_ALIAS)) {
+                // Key exists, retrieve it but we'll need authentication to use it
+                KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(
+                        ENCRYPTION_KEY_ALIAS, null);
+                keyToUse = secretKeyEntry.getSecretKey();
+            } else {
+                // Key doesn't exist, we'll create it after authentication
+                createNewKey = true;
+                keyToUse = null;
+            }
+            
+            // We'll use the cipher to verify biometric auth works
             final Cipher cipher = getCipher();
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+            
+            if (!createNewKey) {
+                // If we have a key, initialize the cipher with it to verify auth
+                try {
+                    // Get IV from preferences if available for decryption mode
+                    SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+                    String ivString = prefs.getString(CREDENTIALS_KEY + IV_SUFFIX, null);
+                    
+                    if (ivString != null) {
+                        // We have IV, use decrypt mode
+                        byte[] iv = Base64.decode(ivString, Base64.DEFAULT);
+                        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, iv);
+                        cipher.init(Cipher.DECRYPT_MODE, keyToUse, gcmParameterSpec);
+                    } else {
+                        // No IV, use encrypt mode
+                        cipher.init(Cipher.ENCRYPT_MODE, keyToUse);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error initializing cipher for auth check", e);
+                    // If we fail to initialize (likely due to auth being required),
+                    // we'll continue and let the biometric prompt handle it
+                }
+            }
+            
+            final boolean finalCreateNewKey = createNewKey;
+            final SecretKey finalKeyToUse = keyToUse;
             
             // Create biometric prompt
             final Executor executor = Executors.newSingleThreadExecutor();
@@ -115,18 +134,30 @@ public class SharedCredentialStore {
                 @Override
                 public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
                     try {
-                        // Get the authenticated cipher
-                        Cipher authenticatedCipher = result.getCryptoObject().getCipher();
+                        if (finalCreateNewKey) {
+                            // Create a new key since it didn't exist
+                            KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                                    KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE);
+                            
+                            KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(
+                                    ENCRYPTION_KEY_ALIAS,
+                                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                    .setKeySize(256)
+                                    .setUserAuthenticationRequired(true)
+                                    // This is critical: set validation timeout to prevent requiring auth for each operation
+                                    .setUserAuthenticationValidityDurationSeconds(30)
+                                    .build();
+                            
+                            keyGenerator.init(keyGenParameterSpec);
+                            cachedEncryptionKey = keyGenerator.generateKey();
+                        } else {
+                            // Use existing key
+                            cachedEncryptionKey = finalKeyToUse;
+                        }
                         
-                        // Perform encryption
-                        byte[] iv = authenticatedCipher.getIV();
-                        byte[] encryptedBytes = authenticatedCipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-                        
-                        // Store IV in SharedPreferences
-                        SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-                        prefs.edit().putString(CREDENTIALS_KEY + IV_SUFFIX, Base64.encodeToString(iv, Base64.DEFAULT)).apply();
-                        
-                        callback.onSuccess(Base64.encodeToString(encryptedBytes, Base64.DEFAULT));
+                        callback.onKeyReady(cachedEncryptionKey);
                     } catch (Exception e) {
                         callback.onError(e);
                     }
@@ -152,12 +183,16 @@ public class SharedCredentialStore {
                         
                         // Show biometric prompt
                         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                                .setTitle("Authenticate to Secure Credentials")
-                                .setSubtitle("Authentication is required to securely store credentials")
+                                .setTitle("Authenticate to Access Secure Storage")
+                                .setSubtitle("Authentication is required to access your credentials")
                                 .setNegativeButtonText("Cancel")
                                 .build();
                         
-                        biometricPrompt.authenticate(promptInfo, new BiometricPrompt.CryptoObject(cipher));
+                        if (finalCreateNewKey) {
+                            biometricPrompt.authenticate(promptInfo);
+                        } else {
+                            biometricPrompt.authenticate(promptInfo, new BiometricPrompt.CryptoObject(cipher));
+                        }
                     } catch (Exception e) {
                         callback.onError(e);
                     }
@@ -169,11 +204,37 @@ public class SharedCredentialStore {
         }
     }
     
+    public void encryptWithBiometricAuth(final FragmentActivity activity, final String data, final CryptoOperationCallback callback) {
+        getEncryptionKeyWithBiometricAuth(activity, new KeyOperationCallback() {
+            @Override
+            public void onKeyReady(SecretKey key) {
+                try {
+                    final Cipher cipher = getCipher();
+                    cipher.init(Cipher.ENCRYPT_MODE, key);
+                    
+                    // Perform encryption
+                    byte[] iv = cipher.getIV();
+                    byte[] encryptedBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+                    
+                    // Store IV in SharedPreferences
+                    SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+                    prefs.edit().putString(CREDENTIALS_KEY + IV_SUFFIX, Base64.encodeToString(iv, Base64.DEFAULT)).apply();
+                    
+                    callback.onSuccess(Base64.encodeToString(encryptedBytes, Base64.DEFAULT));
+                } catch (Exception e) {
+                    callback.onError(e);
+                }
+            }
+            
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
+    }
+    
     public void decryptWithBiometricAuth(final FragmentActivity activity, final String encryptedData, final CryptoOperationCallback callback) {
         try {
-            final SecretKey key = getOrCreateEncryptionKey();
-            final Cipher cipher = getCipher();
-            
             // Get IV from SharedPreferences
             SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
             String ivString = prefs.getString(CREDENTIALS_KEY + IV_SUFFIX, null);
@@ -182,22 +243,19 @@ public class SharedCredentialStore {
                 return;
             }
             
-            byte[] iv = Base64.decode(ivString, Base64.DEFAULT);
-            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, iv);
-            cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
+            final byte[] iv = Base64.decode(ivString, Base64.DEFAULT);
             
-            // Create biometric prompt
-            final Executor executor = Executors.newSingleThreadExecutor();
-            final BiometricPrompt.AuthenticationCallback authCallback = new BiometricPrompt.AuthenticationCallback() {
+            getEncryptionKeyWithBiometricAuth(activity, new KeyOperationCallback() {
                 @Override
-                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                public void onKeyReady(SecretKey key) {
                     try {
-                        // Get the authenticated cipher
-                        Cipher authenticatedCipher = result.getCryptoObject().getCipher();
+                        Cipher cipher = getCipher();
+                        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, iv);
+                        cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
                         
                         // Perform decryption
                         byte[] encryptedBytes = Base64.decode(encryptedData, Base64.DEFAULT);
-                        byte[] decryptedBytes = authenticatedCipher.doFinal(encryptedBytes);
+                        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
                         String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
                         
                         callback.onSuccess(decryptedData);
@@ -207,37 +265,10 @@ public class SharedCredentialStore {
                 }
                 
                 @Override
-                public void onAuthenticationError(int errorCode, CharSequence errString) {
-                    callback.onError(new Exception("Authentication error: " + errString));
-                }
-                
-                @Override
-                public void onAuthenticationFailed() {
-                    callback.onError(new Exception("Authentication failed"));
-                }
-            };
-            
-            // Show biometric prompt on main thread
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BiometricPrompt biometricPrompt = new BiometricPrompt(activity, executor, authCallback);
-                        
-                        // Show biometric prompt
-                        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                                .setTitle("Authenticate to Access Credentials")
-                                .setSubtitle("Authentication is required to access your credentials")
-                                .setNegativeButtonText("Cancel")
-                                .build();
-                        
-                        biometricPrompt.authenticate(promptInfo, new BiometricPrompt.CryptoObject(cipher));
-                    } catch (Exception e) {
-                        callback.onError(e);
-                    }
+                public void onError(Exception e) {
+                    callback.onError(e);
                 }
             });
-            
         } catch (Exception e) {
             callback.onError(e);
         }
