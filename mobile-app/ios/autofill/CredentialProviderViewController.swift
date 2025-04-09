@@ -9,10 +9,11 @@ import AuthenticationServices
 import UIKit
 
 class CredentialProviderViewController: ASCredentialProviderViewController {
-    private var credentials: [Credential] = []
+    var credentials: [Credential] = []
     private let tableView = UITableView()
     private let addButton = UIButton(type: .system)
     private let loadButton = UIButton(type: .system)
+    private let cancelButton = UIButton(type: .system)
     private let loadingIndicator = UIActivityIndicatorView(style: .large)
     
     override func viewDidLoad() {
@@ -32,6 +33,13 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
+        
+        // Setup Cancel Button
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitleColor(.systemRed, for: .normal)
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        view.addSubview(cancelButton)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
         
         // Setup Loading Indicator
         loadingIndicator.hidesWhenStopped = false
@@ -64,7 +72,11 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            cancelButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            cancelButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            tableView.topAnchor.constraint(equalTo: cancelButton.bottomAnchor, constant: 8),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: loadButton.topAnchor),

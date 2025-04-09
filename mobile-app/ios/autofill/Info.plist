@@ -4,8 +4,8 @@
 <dict>
     <key>NSExtension</key>
     <dict>
-        <key>NSExtensionMainStoryboard</key>
-        <string>MainInterface</string>
+        <key>NSExtensionPrincipalClass</key>
+        <string>$(PRODUCT_MODULE_NAME).CredentialProviderViewController</string>
         <key>NSExtensionPointIdentifier</key>
         <string>com.apple.authentication-services-credential-provider-ui</string>
         <key>NSExtensionAttributes</key>
