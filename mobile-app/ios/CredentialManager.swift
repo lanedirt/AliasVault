@@ -1,5 +1,4 @@
 import Foundation
-import aliasvault
 import React
 
 @objc(CredentialManager)

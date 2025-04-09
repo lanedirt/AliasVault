@@ -15,6 +15,7 @@ prepare_react_native_project!
 
 target 'aliasvault' do
   use_expo_modules!
+  pod 'KeychainAccess', '~> 4.2.2'
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
@@ -63,4 +64,8 @@ target 'aliasvault' do
       end
     end
   end
+end
+
+target 'autofill' do
+  pod 'KeychainAccess', '~> 4.2.2'
 end

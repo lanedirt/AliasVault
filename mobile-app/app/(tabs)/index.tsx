@@ -1,10 +1,7 @@
-import { Image, StyleSheet, Platform, Button, View, FlatList, Text } from 'react-native';
+import { Image, StyleSheet, Platform, Button, View, FlatList, Text, SafeAreaView, AppState } from 'react-native';
 import { NativeModules } from 'react-native';
-import { useEffect, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useState, useEffect, useRef } from 'react';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
@@ -16,8 +13,10 @@ interface Credential {
 
 export default function HomeScreen() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const appState = useRef(AppState.currentState);
 
   const fetchCredentials = async () => {
+    console.log('Fetching credentials called');
     try {
       const result = await NativeModules.CredentialManager.getCredentials();
       setCredentials(result);
@@ -27,12 +26,26 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchCredentials();
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('App has come to the foreground!');
+        fetchCredentials();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
-  useFocusEffect(() => {
+  useEffect(() => {
+    console.log('Fetching credentials in useEffect once on mount');
     fetchCredentials();
-  });
+  }, []);
 
   const handleInsertEntry = async () => {
     // Generate a random credential
@@ -44,10 +57,12 @@ export default function HomeScreen() {
     await NativeModules.CredentialManager.addCredential(randomUsername, randomPassword, randomService);
     // Add a small delay to ensure the operation is complete
     await new Promise(resolve => setTimeout(resolve, 100));
+
+    console.log('Fetching credentials after insert');
     fetchCredentials(); // Refresh the list
   };
 
-  const handleClearVault = async () => {
+  const handleClearCredentials = async () => {
     // Call native module to clear credentials
     await NativeModules.CredentialManager.clearCredentials();
     setCredentials([]); // Clear the list
@@ -62,60 +77,43 @@ export default function HomeScreen() {
   );
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">AliasVault</ThemedText>
-        <HelloWave />
+    <SafeAreaView style={styles.container}>
+      <ThemedView style={styles.content}>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">AliasVault</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.stepContainer}>
+          <ThemedText type="subtitle">Credentials</ThemedText>
+          <Button title="Add Random Credential" onPress={handleInsertEntry} />
+          <Button title="Clear Credentials" onPress={handleClearCredentials} />
+          <FlatList
+            data={credentials}
+            renderItem={({ item }) => renderCredential(item)}
+            keyExtractor={(item) => `${item.service}-${item.username}`}
+          />
+        </ThemedView>
       </ThemedView>
-      
-      <ThemedView style={styles.buttonContainer}>
-        <Button title="Insert Random Entry" onPress={handleInsertEntry} />
-        <View style={styles.buttonSpacer} />
-        <Button title="Clear Vault" onPress={handleClearVault} color="red" />
-      </ThemedView>
-
-      <ThemedView style={styles.credentialsContainer}>
-        <ThemedText type="subtitle">Stored Credentials</ThemedText>
-        <View style={styles.credentialsList}>
-          {credentials.map(renderCredential)}
-        </View>
-      </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginBottom: 16,
   },
-  buttonContainer: {
-    marginVertical: 16,
-    paddingHorizontal: 16,
-  },
-  buttonSpacer: {
-    height: 8,
-  },
-  credentialsContainer: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-  },
-  credentialsList: {
-    marginTop: 8,
-  },
-  credentialItem: {
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+  stepContainer: {
+    flex: 1,
+    gap: 8,
   },
   reactLogo: {
     height: 178,
@@ -123,5 +121,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  credentialItem: {
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 5,
   },
 });

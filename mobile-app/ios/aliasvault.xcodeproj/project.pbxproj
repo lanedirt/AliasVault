@@ -21,6 +21,7 @@
 		CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */; };
 		CEE9098B2DA548C7008D568F /* autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */; };
+		E27FBC0C55B558341BE46CA9 /* libPods-autofill.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */; };
 		E8FD7000523F4549908941A2 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
@@ -55,10 +56,13 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = aliasvault/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = aliasvault/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = aliasvault/main.m; sourceTree = "<group>"; };
+		3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-autofill.debug.xcconfig"; path = "Target Support Files/Pods-autofill/Pods-autofill.debug.xcconfig"; sourceTree = "<group>"; };
+		43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-autofill.release.xcconfig"; path = "Target Support Files/Pods-autofill/Pods-autofill.release.xcconfig"; sourceTree = "<group>"; };
 		58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-aliasvault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C2E3173556A471DD304B334 /* Pods-aliasvault.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-aliasvault.debug.xcconfig"; path = "Target Support Files/Pods-aliasvault/Pods-aliasvault.debug.xcconfig"; sourceTree = "<group>"; };
 		76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "aliasvault/noop-file.swift"; sourceTree = "<group>"; };
 		7A4D352CD337FB3A3BF06240 /* Pods-aliasvault.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-aliasvault.release.xcconfig"; path = "Target Support Files/Pods-aliasvault/Pods-aliasvault.release.xcconfig"; sourceTree = "<group>"; };
+		8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-autofill.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		962DE0FB93C9458BAFEEED60 /* aliasvault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "aliasvault-Bridging-Header.h"; path = "aliasvault/aliasvault-Bridging-Header.h"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = aliasvault/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = aliasvault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -100,6 +104,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */,
+				E27FBC0C55B558341BE46CA9 /* libPods-autofill.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +137,7 @@
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */,
 				CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */,
+				8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -190,6 +196,8 @@
 			children = (
 				6C2E3173556A471DD304B334 /* Pods-aliasvault.debug.xcconfig */,
 				7A4D352CD337FB3A3BF06240 /* Pods-aliasvault.release.xcconfig */,
+				3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */,
+				43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -233,6 +241,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "autofill" */;
 			buildPhases = (
+				4C04864D2A53FF778EC8B6B7 /* [CP] Check Pods Manifest.lock */,
 				CEE9097A2DA548C7008D568F /* Sources */,
 				CEE9097B2DA548C7008D568F /* Frameworks */,
 				CEE9097C2DA548C7008D568F /* Resources */,
@@ -245,8 +254,6 @@
 				CEE909812DA548C7008D568F /* autofill */,
 			);
 			name = autofill;
-			packageProductDependencies = (
-			);
 			productName = autofill;
 			productReference = CEE9097E2DA548C7008D568F /* autofill.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -340,6 +347,28 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-aliasvault-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4C04864D2A53FF778EC8B6B7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-autofill-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -649,6 +678,7 @@
 		};
 		CEE9098D2DA548C7008D568F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -679,6 +709,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.autofill;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -692,6 +723,7 @@
 		};
 		CEE9098E2DA548C7008D568F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -722,6 +754,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.autofill;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
