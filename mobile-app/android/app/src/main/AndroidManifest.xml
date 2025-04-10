@@ -30,5 +30,17 @@
         <data android:scheme="exp+aliasvault"/>
       </intent-filter>
     </activity>
+    <service
+        android:name=".AutofillService"
+        android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.service.autofill.AutofillService" />
+        </intent-filter>
+
+        <meta-data
+            android:name="android.autofill"
+            android:resource="@xml/autofill_service" />
+    </service>
   </application>
 </manifest>

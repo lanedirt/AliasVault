@@ -1,0 +1,3 @@
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="net.aliasvault.app.MainActivity"
+    android:description="@string/autofill_service_description"/>
