@@ -429,33 +429,34 @@ public class SharedCredentialStore {
      * Get all credentials from SharedPreferences with decryption
      */
     public void getAllCredentials(FragmentActivity activity, final CryptoOperationCallback callback) {
-        // First ensure we have the encryption key
+        // First check if credentials exist
+        SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        String encryptedCredentialsJson = prefs.getString(CREDENTIALS_KEY, null);
+        
+        if (encryptedCredentialsJson == null) {
+            // No credentials found, return empty array without triggering biometric authentication
+            Log.d(TAG, "No credentials found, returning empty array without key retrieval");
+            callback.onSuccess(new JSONArray().toString());
+            return;
+        }
+        
+        // Credentials exist, ensure we have the encryption key
         getEncryptionKey(activity, new CryptoOperationCallback() {
             @Override
             public void onSuccess(String result) {
                 try {
                     Log.d(TAG, "Retrieving credentials from SharedPreferences");
-
-                    // Get encrypted credentials from SharedPreferences
-                    SharedPreferences prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-                    String encryptedCredentialsJson = prefs.getString(CREDENTIALS_KEY, null);
-
-                    if (encryptedCredentialsJson == null) {
-                        // No credentials found
-                        callback.onSuccess(new JSONArray().toString());
-                        return;
-                    }
-
+                    
                     // Decrypt credentials
                     String decryptedJson = decryptData(encryptedCredentialsJson);
-
+                    
                     callback.onSuccess(decryptedJson);
                 } catch (Exception e) {
                     Log.e(TAG, "Error retrieving credentials", e);
                     callback.onError(e);
                 }
             }
-
+            
             @Override
             public void onError(Exception e) {
                 Log.e(TAG, "Failed to get encryption key", e);
