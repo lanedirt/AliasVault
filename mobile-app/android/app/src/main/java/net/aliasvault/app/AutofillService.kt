@@ -25,11 +25,10 @@
 package net.aliasvault.app
 import android.app.assist.AssistStructure
 import android.content.Intent
-import android.os.Build
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
+import android.service.autofill.Dataset
 import android.service.autofill.FillCallback
-import android.service.autofill.FillContext
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
 import android.service.autofill.SaveCallback
@@ -39,13 +38,12 @@ import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.fragment.app.FragmentActivity
+import com.facebook.react.bridge.Arguments
 import net.aliasvault.app.credentialmanager.Credential
+import net.aliasvault.app.credentialmanager.CredentialManagerModule
 import net.aliasvault.app.credentialmanager.SharedCredentialStore
+import net.aliasvault.app.credentialmanager.SharedCredentialStore.CryptoOperationCallback
 import org.json.JSONArray
-import android.service.autofill.Dataset
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -83,7 +81,7 @@ class AutofillService : AutofillService() {
         launchActivityForAutofill(fieldFinder, callback)
 
         // Option 2: For immediate filling without authentication (simplified for demo purposes)
-        // createMockAutofillResponse(fieldFinder, callback)
+        //createMockAutofillResponse(fieldFinder, callback)
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
@@ -97,22 +95,88 @@ class AutofillService : AutofillService() {
     }
 
     private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
-        // In a real implementation, you would launch an activity to handle authentication
-        // For now, we'll just show a toast message and return null
-        Toast.makeText(applicationContext, "Authentication required for autofill", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Retrieving credentials for autofill")
 
-        // For this example, we'll use mock response to demonstrate functionality
-        createMockAutofillResponse(fieldFinder, callback)
+        // Get the shared credential store
+        val store = SharedCredentialStore.getInstance(applicationContext)
 
-        // Example of how you might start the activity (commented out)
-        /*
-        val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra("AUTOFILL_REQUEST", true)
-            // Add other data as needed
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // Try to retrieve all credentials from the store
+        store.getAllCredentials(null, object : CryptoOperationCallback {
+            override fun onSuccess(jsonString: String) {
+                try {
+                    val jsonArray = JSONArray(jsonString)
+                    Log.d(TAG, "Retrieved ${jsonArray.length()} credentials")
+
+                    if (jsonArray.length() == 0) {
+                        // No credentials available
+                        Log.d(TAG, "No credentials available")
+                        callback.onSuccess(null)
+                        return
+                    }
+
+                    // Create a response with all credentials
+                    val responseBuilder = FillResponse.Builder()
+
+                    // Add each credential as a dataset
+                    for (i in 0 until jsonArray.length()) {
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val username = jsonObject.getString("username")
+                        val password = jsonObject.getString("password")
+                        val service = jsonObject.getString("service")
+
+                        // Create a credential object
+                        val credential = Credential(username, password, service)
+
+                        // Create a dataset for this credential
+                        addDatasetForCredential(responseBuilder, fieldFinder, credential)
+                    }
+
+                    // Send the response back
+                    callback.onSuccess(responseBuilder.build())
+
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing credentials", e)
+                    callback.onSuccess(null)
+                }
+            }
+
+            override fun onError(e: Exception) {
+                Log.e(TAG, "Error getting credentials", e)
+                callback.onSuccess(null)
+
+                // Fallback to launching the activity for manual selection
+                val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+                    putExtra("AUTOFILL_REQUEST", true)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+        })
+    }
+
+    private fun addDatasetForCredential(
+        responseBuilder: FillResponse.Builder,
+        fieldFinder: FieldFinder,
+        credential: Credential
+    ) {
+        // Create presentation for this credential
+        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
+        presentation.setTextViewText(
+            android.R.id.text1,
+            "AliasVault: ${credential.username} (${credential.service})"
+        )
+
+        val dataSetBuilder = Dataset.Builder(presentation)
+
+        // Add autofill values for all fields
+        for (field in fieldFinder.autofillableFields) {
+            val isPassword = field.second
+            val value = if (isPassword) credential.password else credential.username
+            dataSetBuilder.setValue(field.first, AutofillValue.forText(value))
         }
-        startActivity(intent)
-        */
+
+        // Add this dataset to the response
+        responseBuilder.addDataset(dataSetBuilder.build())
     }
 
     // This method demonstrates what the response would look like if we had credentials
