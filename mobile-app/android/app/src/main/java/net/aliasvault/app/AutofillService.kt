@@ -38,9 +38,7 @@ import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
-import com.facebook.react.bridge.Arguments
 import net.aliasvault.app.credentialmanager.Credential
-import net.aliasvault.app.credentialmanager.CredentialManagerModule
 import net.aliasvault.app.credentialmanager.SharedCredentialStore
 import net.aliasvault.app.credentialmanager.SharedCredentialStore.CryptoOperationCallback
 import org.json.JSONArray
@@ -76,12 +74,7 @@ class AutofillService : AutofillService() {
             return
         }
 
-        // Since we're in a Service, we don't have direct access to a FragmentActivity
-        // Option 1: Launch an activity to authenticate and then fill
         launchActivityForAutofill(fieldFinder, callback)
-
-        // Option 2: For immediate filling without authentication (simplified for demo purposes)
-        //createMockAutofillResponse(fieldFinder, callback)
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
@@ -95,13 +88,14 @@ class AutofillService : AutofillService() {
     }
 
     private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
-        Log.d(TAG, "Retrieving credentials for autofill")
+        Log.d(TAG, "Launching activity for autofill authentication")
 
         // Get the shared credential store
         val store = SharedCredentialStore.getInstance(applicationContext)
 
-        // Try to retrieve all credentials from the store
-        store.getAllCredentials(null, object : CryptoOperationCallback {
+        // Try to retrieve all credentials using the cached key first, which if available
+        // does not require biometric authentication.
+        if (store.tryGetAllCredentialsWithCachedKey(object : CryptoOperationCallback {
             override fun onSuccess(jsonString: String) {
                 try {
                     val jsonArray = JSONArray(jsonString)
@@ -143,17 +137,32 @@ class AutofillService : AutofillService() {
             override fun onError(e: Exception) {
                 Log.e(TAG, "Error getting credentials", e)
                 callback.onSuccess(null)
-
-                // Fallback to launching the activity for manual selection
-                val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
-                    putExtra("AUTOFILL_REQUEST", true)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                startActivity(intent)
             }
-        })
+        })) {
+            // Successfully used cached key - method returns true
+            Log.d(TAG, "Successfully retrieved credentials with cached key")
+        } else {
+            // No cached key available, we need to launch the AliasVault app in order to
+            // load the encryption key from biometric keystore.
+            Log.d(TAG, "No cached key available, launching activity for authentication")
+
+            // Create an intent to launch MainActivity with autofill flags
+            // TODO: detect "AUTOFILL_REQUEST" when app opens to show proper help text to
+            // indicate vault should be unlocked in order for autofill to work. With dismiss
+            // close buttons etc for better UX.
+            val intent = Intent(this, MainActivity::class.java).apply {
+                // Add flags to launch as a new task
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                // Add extra data to indicate this is for autofill
+                putExtra("AUTOFILL_REQUEST", true)
+            }
+
+            // Start the activity
+            startActivity(intent)
+        }
     }
 
+    // Helper method to create a dataset from a credential
     private fun addDatasetForCredential(
         responseBuilder: FillResponse.Builder,
         fieldFinder: FieldFinder,
@@ -177,32 +186,6 @@ class AutofillService : AutofillService() {
 
         // Add this dataset to the response
         responseBuilder.addDataset(dataSetBuilder.build())
-    }
-
-    // This method demonstrates what the response would look like if we had credentials
-    private fun createMockAutofillResponse(fieldFinder: FieldFinder, callback: FillCallback) {
-        // Create a mock credential for demonstration
-        val credential = Credential("demo@example.com", "password123", "Example Service")
-
-        // Build a response with the credential
-        val responseBuilder = FillResponse.Builder()
-
-        // Create a dataset with the credential
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
-        presentation.setTextViewText(android.R.id.text1, "AliasVault: ${credential.service}")
-
-        val dataSetBuilder = Dataset.Builder(presentation)
-
-        // Add autofill values for all fields - fill everything with either username or password
-        // depending on if the field appears to be a password field
-        for (field in fieldFinder.autofillableFields) {
-            val isPassword = field.second
-            val value = if (isPassword) credential.password else credential.username
-            dataSetBuilder.setValue(field.first, AutofillValue.forText(value))
-        }
-
-        responseBuilder.addDataset(dataSetBuilder.build())
-        callback.onSuccess(responseBuilder.build())
     }
 
     private fun parseStructure(structure: AssistStructure, fieldFinder: FieldFinder) {
