@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "aliasvault",
-    "slug": "aliasvault",
+    "name": "AliasVault",
+    "slug": "AliasVault",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

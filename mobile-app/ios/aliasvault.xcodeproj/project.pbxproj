@@ -11,17 +11,19 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		96905EF65AED1B983A6B3ABC /* libPods-aliasvault.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */; };
+		708F336D8B83C9095CC4B07F /* libPods-Autofill.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 10DF5131612F6F971DC28D74 /* libPods-Autofill.a */; };
+		ABF77E25420BBBD13D0438F2 /* libPods-AliasVault.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		CE2F00E62DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */; };
-		CE2F00E72DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */; };
-		CE2F00E92DA5714800A5C16E /* CredentialManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00E82DA5714800A5C16E /* CredentialManager.m */; };
-		CE2F00EB2DA571AC00A5C16E /* CredentialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2F00EA2DA571AC00A5C16E /* CredentialManager.swift */; };
+		CE26D68E2DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */; };
+		CE26D68F2DA7FCD2006DC04D /* CredentialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */; };
+		CE26D6902DA7FCD2006DC04D /* CredentialManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */; };
+		CE26D6912DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */; };
+		CE9A55EA2DA8039F00CB0A4C /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9A55E92DA8039F00CB0A4C /* Credential.swift */; };
+		CE9A55EB2DA8039F00CB0A4C /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9A55E92DA8039F00CB0A4C /* Credential.swift */; };
 		CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */; };
-		CEE9098B2DA548C7008D568F /* autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CEE9098B2DA548C7008D568F /* Autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* Autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */; };
-		E27FBC0C55B558341BE46CA9 /* libPods-autofill.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */; };
 		E8FD7000523F4549908941A2 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CEE9098B2DA548C7008D568F /* autofill.appex in Embed Foundation Extensions */,
+				CEE9098B2DA548C7008D568F /* Autofill.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -50,30 +52,31 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* aliasvault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = aliasvault.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = aliasvault/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = aliasvault/AppDelegate.mm; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = aliasvault/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = aliasvault/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = aliasvault/main.m; sourceTree = "<group>"; };
-		3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-autofill.debug.xcconfig"; path = "Target Support Files/Pods-autofill/Pods-autofill.debug.xcconfig"; sourceTree = "<group>"; };
-		43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-autofill.release.xcconfig"; path = "Target Support Files/Pods-autofill/Pods-autofill.release.xcconfig"; sourceTree = "<group>"; };
-		58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-aliasvault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		6C2E3173556A471DD304B334 /* Pods-aliasvault.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-aliasvault.debug.xcconfig"; path = "Target Support Files/Pods-aliasvault/Pods-aliasvault.debug.xcconfig"; sourceTree = "<group>"; };
-		76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "aliasvault/noop-file.swift"; sourceTree = "<group>"; };
-		7A4D352CD337FB3A3BF06240 /* Pods-aliasvault.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-aliasvault.release.xcconfig"; path = "Target Support Files/Pods-aliasvault/Pods-aliasvault.release.xcconfig"; sourceTree = "<group>"; };
-		8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-autofill.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		962DE0FB93C9458BAFEEED60 /* aliasvault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "aliasvault-Bridging-Header.h"; path = "aliasvault/aliasvault-Bridging-Header.h"; sourceTree = "<group>"; };
-		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = aliasvault/SplashScreen.storyboard; sourceTree = "<group>"; };
-		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = aliasvault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		10DF5131612F6F971DC28D74 /* libPods-Autofill.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Autofill.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* AliasVault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AliasVault.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = AliasVault/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = AliasVault/AppDelegate.mm; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AliasVault/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = AliasVault/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = AliasVault/main.m; sourceTree = "<group>"; };
+		4C838803F3761A9464711581 /* Pods-Autofill.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Autofill.release.xcconfig"; path = "Target Support Files/Pods-Autofill/Pods-Autofill.release.xcconfig"; sourceTree = "<group>"; };
+		51719C00B4C841E70E9F3EAC /* Pods-Autofill.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Autofill.debug.xcconfig"; path = "Target Support Files/Pods-Autofill/Pods-Autofill.debug.xcconfig"; sourceTree = "<group>"; };
+		76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "AliasVault/noop-file.swift"; sourceTree = "<group>"; };
+		962DE0FB93C9458BAFEEED60 /* AliasVault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "AliasVault-Bridging-Header.h"; path = "AliasVault/AliasVault-Bridging-Header.h"; sourceTree = "<group>"; };
+		993CD3C072C0979B8883EA99 /* Pods-AliasVault.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.release.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.release.xcconfig"; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = AliasVault/SplashScreen.storyboard; sourceTree = "<group>"; };
+		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = AliasVault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
-		CE2F00E82DA5714800A5C16E /* CredentialManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CredentialManager.m; sourceTree = "<group>"; };
-		CE2F00EA2DA571AC00A5C16E /* CredentialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialManager.swift; sourceTree = "<group>"; };
-		CEE9097E2DA548C7008D568F /* autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CredentialManager.m; sourceTree = "<group>"; };
+		CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialManager.swift; sourceTree = "<group>"; };
+		CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
+		CE9A55E92DA8039F00CB0A4C /* Credential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credential.swift; sourceTree = "<group>"; };
+		CEE9097E2DA548C7008D568F /* Autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AliasVault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1CF1AE0A32339C16E11AA43 /* Pods-AliasVault.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.debug.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-aliasvault/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-AliasVault/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -82,12 +85,12 @@
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CEE9097D2DA548C7008D568F /* autofill */;
+			target = CEE9097D2DA548C7008D568F /* Autofill */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CEE909812DA548C7008D568F /* autofill */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = autofill; sourceTree = "<group>"; };
+		CEE909812DA548C7008D568F /* Autofill */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Autofill; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,7 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				96905EF65AED1B983A6B3ABC /* libPods-aliasvault.a in Frameworks */,
+				ABF77E25420BBBD13D0438F2 /* libPods-AliasVault.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,40 +107,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */,
-				E27FBC0C55B558341BE46CA9 /* libPods-autofill.a in Frameworks */,
+				708F336D8B83C9095CC4B07F /* libPods-Autofill.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* aliasvault */ = {
+		13B07FAE1A68108700A75B9A /* AliasVault */ = {
 			isa = PBXGroup;
 			children = (
-				CE2F00EA2DA571AC00A5C16E /* CredentialManager.swift */,
-				CE2F00E82DA5714800A5C16E /* CredentialManager.m */,
-				CE2F00E52DA56B6A00A5C16E /* SharedCredentialStore.swift */,
-				BB2F792B24A3F905000567C9 /* Supporting */,
+				962DE0FB93C9458BAFEEED60 /* AliasVault-Bridging-Header.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */,
-				962DE0FB93C9458BAFEEED60 /* aliasvault-Bridging-Header.h */,
 				BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */,
+				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
+				BB2F792B24A3F905000567C9 /* Supporting */,
 			);
-			name = aliasvault;
+			name = AliasVault;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				58EEBF8E8E6FB1BC6CAF49B5 /* libPods-aliasvault.a */,
 				CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */,
-				8EB908A1F1D5DF89C6E9B015 /* libPods-autofill.a */,
+				D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */,
+				10DF5131612F6F971DC28D74 /* libPods-Autofill.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -152,13 +152,14 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* aliasvault */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				CEE909812DA548C7008D568F /* autofill */,
-				83CBBA001A601CBA00E9B192 /* Products */,
-				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				D65327D7A22EEC0BE12398D9 /* Pods */,
+				13B07FAE1A68108700A75B9A /* AliasVault */,
+				CEE909812DA548C7008D568F /* Autofill */,
+				CE26D68A2DA7FCB5006DC04D /* CredentialManager */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				D65327D7A22EEC0BE12398D9 /* Pods */,
+				83CBBA001A601CBA00E9B192 /* Products */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -168,18 +169,18 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* aliasvault.app */,
-				CEE9097E2DA548C7008D568F /* autofill.appex */,
+				13B07F961A680F5B00A75B9A /* AliasVault.app */,
+				CEE9097E2DA548C7008D568F /* Autofill.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		92DBD88DE9BF7D494EA9DA96 /* aliasvault */ = {
+		92DBD88DE9BF7D494EA9DA96 /* AliasVault */ = {
 			isa = PBXGroup;
 			children = (
 				FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */,
 			);
-			name = aliasvault;
+			name = AliasVault;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -188,16 +189,27 @@
 				BB2F792C24A3F905000567C9 /* Expo.plist */,
 			);
 			name = Supporting;
-			path = aliasvault/Supporting;
+			path = AliasVault/Supporting;
+			sourceTree = "<group>";
+		};
+		CE26D68A2DA7FCB5006DC04D /* CredentialManager */ = {
+			isa = PBXGroup;
+			children = (
+				CE9A55E92DA8039F00CB0A4C /* Credential.swift */,
+				CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */,
+				CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */,
+				CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */,
+			);
+			path = CredentialManager;
 			sourceTree = "<group>";
 		};
 		D65327D7A22EEC0BE12398D9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				6C2E3173556A471DD304B334 /* Pods-aliasvault.debug.xcconfig */,
-				7A4D352CD337FB3A3BF06240 /* Pods-aliasvault.release.xcconfig */,
-				3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */,
-				43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */,
+				E1CF1AE0A32339C16E11AA43 /* Pods-AliasVault.debug.xcconfig */,
+				993CD3C072C0979B8883EA99 /* Pods-AliasVault.release.xcconfig */,
+				51719C00B4C841E70E9F3EAC /* Pods-Autofill.debug.xcconfig */,
+				4C838803F3761A9464711581 /* Pods-Autofill.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -205,7 +217,7 @@
 		D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				92DBD88DE9BF7D494EA9DA96 /* aliasvault */,
+				92DBD88DE9BF7D494EA9DA96 /* AliasVault */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -217,15 +229,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "AliasVault" */;
 			buildPhases = (
-				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				17A29CED291BDBE3DC9A5627 /* [CP] Check Pods Manifest.lock */,
 				B7077E857026DF166CBD9F8D /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				D7B509FA3087BEDD6B4253D7 /* [CP] Embed Pods Frameworks */,
 				CEE9098C2DA548C7008D568F /* Embed Foundation Extensions */,
+				B6600CB1095E702A2750C24F /* [CP] Embed Pods Frameworks */,
+				7B76128B654ECDA40F780AEE /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -233,15 +245,15 @@
 				CEE9098A2DA548C7008D568F /* PBXTargetDependency */,
 			);
 			name = AliasVault;
-			productName = aliasvault;
-			productReference = 13B07F961A680F5B00A75B9A /* aliasvault.app */;
+			productName = AliasVault;
+			productReference = 13B07F961A680F5B00A75B9A /* AliasVault.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CEE9097D2DA548C7008D568F /* autofill */ = {
+		CEE9097D2DA548C7008D568F /* Autofill */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "autofill" */;
+			buildConfigurationList = CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "Autofill" */;
 			buildPhases = (
-				4C04864D2A53FF778EC8B6B7 /* [CP] Check Pods Manifest.lock */,
+				5AC5235A462B475C8FA83B5F /* [CP] Check Pods Manifest.lock */,
 				CEE9097A2DA548C7008D568F /* Sources */,
 				CEE9097B2DA548C7008D568F /* Frameworks */,
 				CEE9097C2DA548C7008D568F /* Resources */,
@@ -251,11 +263,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CEE909812DA548C7008D568F /* autofill */,
+				CEE909812DA548C7008D568F /* Autofill */,
 			);
-			name = autofill;
+			name = Autofill;
 			productName = autofill;
-			productReference = CEE9097E2DA548C7008D568F /* autofill.appex */;
+			productReference = CEE9097E2DA548C7008D568F /* Autofill.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -272,10 +284,11 @@
 					};
 					CEE9097D2DA548C7008D568F = {
 						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 1630;
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "aliasvault" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "AliasVault" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -289,7 +302,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* AliasVault */,
-				CEE9097D2DA548C7008D568F /* autofill */,
+				CEE9097D2DA548C7008D568F /* Autofill */,
 			);
 		};
 /* End PBXProject section */
@@ -331,7 +344,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
+		17A29CED291BDBE3DC9A5627 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -346,14 +359,14 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-aliasvault-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-AliasVault-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4C04864D2A53FF778EC8B6B7 /* [CP] Check Pods Manifest.lock */ = {
+		5AC5235A462B475C8FA83B5F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -368,20 +381,20 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-autofill-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-Autofill-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
+		7B76128B654ECDA40F780AEE /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-aliasvault/Pods-aliasvault-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-AliasVault/Pods-AliasVault-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
@@ -410,7 +423,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-aliasvault/Pods-aliasvault-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-AliasVault/Pods-AliasVault-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B6600CB1095E702A2750C24F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-AliasVault/Pods-AliasVault-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-AliasVault/Pods-AliasVault-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B7077E857026DF166CBD9F8D /* [Expo] Configure project */ = {
@@ -430,25 +461,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-aliasvault/expo-configure-project.sh\"\n";
-		};
-		D7B509FA3087BEDD6B4253D7 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-aliasvault/Pods-aliasvault-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-aliasvault/Pods-aliasvault-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-AliasVault/expo-configure-project.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -458,11 +471,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				CE26D68E2DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */,
+				CE26D68F2DA7FCD2006DC04D /* CredentialManager.swift in Sources */,
+				CE26D6902DA7FCD2006DC04D /* CredentialManager.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				CE2F00EB2DA571AC00A5C16E /* CredentialManager.swift in Sources */,
-				CE2F00E92DA5714800A5C16E /* CredentialManager.m in Sources */,
-				CE2F00E72DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
+				CE9A55EA2DA8039F00CB0A4C /* Credential.swift in Sources */,
 				E8FD7000523F4549908941A2 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -471,7 +485,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE2F00E62DA56B6A00A5C16E /* SharedCredentialStore.swift in Sources */,
+				CE9A55EB2DA8039F00CB0A4C /* Credential.swift in Sources */,
+				CE26D6912DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,7 +495,7 @@
 /* Begin PBXTargetDependency section */
 		CEE9098A2DA548C7008D568F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CEE9097D2DA548C7008D568F /* autofill */;
+			target = CEE9097D2DA548C7008D568F /* Autofill */;
 			targetProxy = CEE909892DA548C7008D568F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -488,11 +503,11 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6C2E3173556A471DD304B334 /* Pods-aliasvault.debug.xcconfig */;
+			baseConfigurationReference = E1CF1AE0A32339C16E11AA43 /* Pods-AliasVault.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = aliasvault/aliasvault.entitlements;
+				CODE_SIGN_ENTITLEMENTS = AliasVault/AliasVault.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8PHW4HN3F7;
 				ENABLE_BITCODE = NO;
@@ -500,7 +515,7 @@
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
-				INFOPLIST_FILE = aliasvault/Info.plist;
+				INFOPLIST_FILE = AliasVault/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = AliasVault;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -516,8 +531,8 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app;
-				PRODUCT_NAME = aliasvault;
-				SWIFT_OBJC_BRIDGING_HEADER = "aliasvault/aliasvault-Bridging-Header.h";
+				PRODUCT_NAME = AliasVault;
+				SWIFT_OBJC_BRIDGING_HEADER = "AliasVault/AliasVault-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -527,14 +542,14 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7A4D352CD337FB3A3BF06240 /* Pods-aliasvault.release.xcconfig */;
+			baseConfigurationReference = 993CD3C072C0979B8883EA99 /* Pods-AliasVault.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = aliasvault/aliasvault.entitlements;
+				CODE_SIGN_ENTITLEMENTS = AliasVault/AliasVault.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8PHW4HN3F7;
-				INFOPLIST_FILE = aliasvault/Info.plist;
+				INFOPLIST_FILE = AliasVault/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = AliasVault;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -550,8 +565,8 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app;
-				PRODUCT_NAME = aliasvault;
-				SWIFT_OBJC_BRIDGING_HEADER = "aliasvault/aliasvault-Bridging-Header.h";
+				PRODUCT_NAME = AliasVault;
+				SWIFT_OBJC_BRIDGING_HEADER = "AliasVault/AliasVault-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -678,12 +693,13 @@
 		};
 		CEE9098D2DA548C7008D568F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3AF4FFC0208E24B0BC548155 /* Pods-autofill.debug.xcconfig */;
+			baseConfigurationReference = 51719C00B4C841E70E9F3EAC /* Pods-Autofill.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
@@ -723,12 +739,13 @@
 		};
 		CEE9098E2DA548C7008D568F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43471F4D97BB0D62D2B687AD /* Pods-autofill.release.xcconfig */;
+			baseConfigurationReference = 4C838803F3761A9464711581 /* Pods-Autofill.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
@@ -777,7 +794,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "aliasvault" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "AliasVault" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
@@ -786,7 +803,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "autofill" */ = {
+		CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "Autofill" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CEE9098D2DA548C7008D568F /* Debug */,

@@ -13,7 +13,7 @@ install! 'cocoapods',
 
 prepare_react_native_project!
 
-target 'aliasvault' do
+target 'AliasVault' do
   use_expo_modules!
   pod 'KeychainAccess', '~> 4.2.2'
 
@@ -66,6 +66,6 @@ target 'aliasvault' do
   end
 end
 
-target 'autofill' do
+target 'Autofill' do
   pod 'KeychainAccess', '~> 4.2.2'
 end
