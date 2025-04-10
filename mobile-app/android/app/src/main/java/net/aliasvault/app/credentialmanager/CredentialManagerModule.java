@@ -57,7 +57,7 @@ public class CredentialManagerModule extends ReactContextBaseJavaModule {
                     SharedCredentialStore store = SharedCredentialStore.getInstance(reactContext);
                     Credential credential = new Credential(username, password, service);
                     
-                    store.addCredentialWithBiometricAuth(activity, credential, new SharedCredentialStore.CryptoOperationCallback() {
+                    store.saveCredential(activity, credential, new SharedCredentialStore.CryptoOperationCallback() {
                         @Override
                         public void onSuccess(String result) {
                             promise.resolve(true);
@@ -91,7 +91,7 @@ public class CredentialManagerModule extends ReactContextBaseJavaModule {
                     
                     SharedCredentialStore store = SharedCredentialStore.getInstance(reactContext);
                     
-                    store.getAllCredentialsWithBiometricAuth(activity, new SharedCredentialStore.CryptoOperationCallback() {
+                    store.getAllCredentials(activity, new SharedCredentialStore.CryptoOperationCallback() {
                         @Override
                         public void onSuccess(String jsonString) {
                             try {
@@ -132,7 +132,7 @@ public class CredentialManagerModule extends ReactContextBaseJavaModule {
     public void clearCredentials(final Promise promise) {
         try {
             SharedCredentialStore store = SharedCredentialStore.getInstance(reactContext);
-            store.clearAllCredentials();
+            store.clearAllData();
             promise.resolve(true);
         } catch (Exception e) {
             Log.e(TAG, "Error clearing credentials", e);
