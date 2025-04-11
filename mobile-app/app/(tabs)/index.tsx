@@ -11,7 +11,7 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { useWebApi } from '@/context/WebApiContext';
-
+import { Credential } from '@/utils/types/Credential';
 export default function HomeScreen() {
   const [credentials, setCredentials] = useState({
     username: '',
@@ -99,10 +99,14 @@ export default function HomeScreen() {
         throw new Error('Login failed -- no token returned');
       }
 
+      console.log('validationResponse.token', validationResponse.token);
+
       // Try to get latest vault manually providing auth token.
       const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
+
+      console.log('vaultResponseJson', vaultResponseJson);
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
@@ -112,14 +116,21 @@ export default function HomeScreen() {
         return;
       }
 
+      console.log('vaultResponseJson', vaultResponseJson);
+
       // All is good. Store auth info which is required to make requests to the web API.
       await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
 
+      console.log('auth tokens set');
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
+      console.log('database initialized');
+
       // Set logged in status to true which refreshes the app.
       await authContext.login();
+
+      console.log('logged in');
 
       setIsLoading(false);
     } catch (err) {
@@ -204,7 +215,31 @@ export default function HomeScreen() {
     }
   };
 
-  if (!isAuthenticated) {
+
+  const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !isDatabaseAvailable) {
+      return;
+    }
+
+    const loadCredentials = async () => {
+      setIsLoadingCredentials(true);
+      try {
+        const credentialsList = await dbContext.sqliteClient!.getAllCredentials();
+        console.log('credentialsList', credentialsList);
+        setCredentialsList(credentialsList);
+      } catch (err) {
+        console.error('Error loading credentials:', err);
+      }
+      setIsLoadingCredentials(false);
+    };
+
+    loadCredentials();
+  }, [isAuthenticated, isDatabaseAvailable]);
+  
+  if (!isAuthenticated || !isDatabaseAvailable) {
     return (
       <SafeAreaView style={styles.container}>
         <ThemedView style={styles.content}>
@@ -312,7 +347,25 @@ export default function HomeScreen() {
           <ThemedText type="title">AliasVault</ThemedText>
         </ThemedView>
         <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Logged in</ThemedText>
+          <ThemedText type="subtitle">Your Credentials</ThemedText>
+          {isLoadingCredentials ? (
+            <ActivityIndicator size="large" color="#f97316" />
+          ) : (
+            <FlatList
+              data={credentialsList}
+              keyExtractor={(item) => item.Id}
+              renderItem={({ item }) => (
+                <View style={styles.credentialItem}>
+                  <Text style={styles.serviceName}>{item.ServiceName ?? 'Unknown Service'}</Text>
+                  {item.Username && <Text style={styles.credentialText}>Username: {item.Username}</Text>}
+                  {item.Alias?.Email && <Text style={styles.credentialText}>Email: {item.Alias.Email}</Text>}
+                </View>
+              )}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No credentials found</Text>
+              }
+            />
+          )}
         </ThemedView>
       </ThemedView>
     </SafeAreaView>
@@ -411,5 +464,39 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
     marginTop: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#f97316',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  credentialItem: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  serviceName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  credentialText: {
+    fontSize: 14,
+    color: '#4b5563',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#6b7280',
+    marginTop: 24,
   },
 });
