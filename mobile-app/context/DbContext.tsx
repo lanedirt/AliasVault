@@ -53,10 +53,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
     // Attempt to decrypt the blob.
+    console.log('attempt to decrypt vault');
     const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
       vaultResponse.vault.blob,
       derivedKey
     );
+
+    console.log('decrypted blob', decryptedBlob);
 
     // Initialize the SQLite client.
     const client = new SqliteClient();

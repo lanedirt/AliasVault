@@ -1,4 +1,5 @@
 import argon2 from 'react-native-argon2';
+import AesGcmCrypto from 'react-native-aes-gcm-crypto';
 import { Email } from './types/webapi/Email';
 import { EncryptionKey } from './types/EncryptionKey';
 import { MailboxEmail } from './types/webapi/MailboxEmail';
@@ -61,36 +62,18 @@ class EncryptionUtility {
       return plaintext;
     }
 
-    const key = await crypto.subtle.importKey(
-      "raw",
-      Uint8Array.from(atob(base64Key), c => c.charCodeAt(0)),
-      {
-        name: "AES-GCM",
-        length: 256,
-      },
-      false,
-      ["encrypt"]
-    );
-
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoder = new TextEncoder();
-    const encoded = encoder.encode(plaintext);
-
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      encoded
-    );
-
-    const combined = new Uint8Array(iv.length + ciphertext.byteLength);
-    combined.set(iv, 0);
-    combined.set(new Uint8Array(ciphertext), iv.length);
-
-    return btoa(
-      Array.from(combined)
-        .map(byte => String.fromCharCode(byte))
-        .join('')
-    );
+    try {
+      const result = await AesGcmCrypto.encrypt(plaintext, false, base64Key);
+      // Combine IV, tag, and content into a single string for storage
+      return JSON.stringify({
+        iv: result.iv,
+        tag: result.tag,
+        content: result.content
+      });
+    } catch (error) {
+      console.error('AES-GCM encryption failed:', error);
+      throw error;
+    }
   }
 
   /**
@@ -101,29 +84,28 @@ class EncryptionUtility {
       return base64Ciphertext;
     }
 
-    const key = await crypto.subtle.importKey(
-      "raw",
-      Uint8Array.from(atob(base64Key), c => c.charCodeAt(0)),
-      {
-        name: "AES-GCM",
-        length: 256,
-      },
-      false,
-      ["decrypt"]
-    );
+    try {
+      const ciphertext = Uint8Array.from(atob(base64Ciphertext), c => c.charCodeAt(0));
+      const iv = ciphertext.slice(0, 12);
+      const tag = ciphertext.slice(-16);
+      const content = ciphertext.slice(12, -16);
 
-    const ivAndCiphertext = Uint8Array.from(atob(base64Ciphertext), c => c.charCodeAt(0));
-    const iv = ivAndCiphertext.slice(0, 12);
-    const ciphertext = ivAndCiphertext.slice(12);
+      const contentBase64 = Buffer.from(content).toString('base64');
+      const ivHex = Buffer.from(iv).toString('hex');
+      const tagHex = Buffer.from(tag).toString('hex');
 
-    const decrypted = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      ciphertext
-    );
-
-    const decoder = new TextDecoder();
-    return decoder.decode(decrypted);
+      const decryptedData = await AesGcmCrypto.decrypt(
+        contentBase64,
+        base64Key,
+        ivHex,
+        tagHex,
+        false
+      );
+      return decryptedData;
+    } catch (error) {
+      console.error('AES-GCM decryption failed:', error);
+      throw error;
+    }
   }
 
   /**

@@ -36,6 +36,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.9",
+    "react-native-aes-gcm-crypto": "^0.2.2",
     "react-native-argon2": "^2.0.1",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-get-random-values": "^1.11.0",
