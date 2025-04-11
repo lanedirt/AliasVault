@@ -31,8 +31,15 @@ class SqliteClient {
    */
   public async initializeFromBase64(base64String: string): Promise<void> {
     try {
+      // Ensure SQLite directory exists
+      const sqliteDir = `${FileSystem.documentDirectory}SQLite`;
+      const dirInfo = await FileSystem.getInfoAsync(sqliteDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true });
+      }
+
       // For in-memory database, we need to create a temporary file first
-      const tempFileUri = `${FileSystem.documentDirectory}SQLite/temp.db`;
+      const tempFileUri = `${sqliteDir}/temp.db`;
       console.log('Writing database to temporary file');
       await FileSystem.writeAsStringAsync(tempFileUri, base64String, {
         encoding: FileSystem.EncodingType.Base64,

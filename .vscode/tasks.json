@@ -113,10 +113,38 @@
             }
         },
         {
-            "label": "Run iOS App",
+            "label": "Run debug iOS App (simulator)",
             "type": "shell",
             "command": "npx",
             "args": ["expo", "run:ios"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/mobile-app"
+            }
+        },
+        {
+            "label": "Run debug iOS App (device)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios", "--device"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/mobile-app"
+            }
+        },
+        {
+            "label": "Run release iOS App (device)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios", "--device", "--configuration", "Release"],
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -139,6 +167,6 @@
             "options": {
                 "cwd": "${workspaceFolder}/mobile-app"
             }
-        }
+        },
     ]
 }
