@@ -53,11 +53,16 @@ export class SrpUtility {
     loginResponse: LoginResponse
   ): Promise<ValidateLoginResponse> {
     try {
+      console.log('validateLogin');
       // Generate client ephemeral
       const clientEphemeral = srp.generateEphemeral();
 
+      console.log('clientEphemeral', clientEphemeral);
+
       // Derive private key
       const privateKey = srp.derivePrivateKey(loginResponse.salt, username, passwordHash);
+
+      console.log('privateKey', privateKey);
 
       // Derive session
       const sessionProof = srp.deriveSession(
@@ -68,7 +73,9 @@ export class SrpUtility {
         privateKey
       );
 
-      const response = await this.webApiService.rawFetch('Login/Validate', {
+      console.log('sessionProof', sessionProof);
+
+      const response = await this.webApiService.rawFetch('Auth/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,6 +99,7 @@ export class SrpUtility {
       if (error instanceof ApiAuthError) {
         throw error;
       }
+      console.error('validateLogin error', error);
       throw new ApiAuthError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
     }
   }
@@ -122,7 +130,7 @@ export class SrpUtility {
         privateKey
       );
 
-      const response = await this.webApiService.rawFetch('Login/Validate2Fa', {
+      const response = await this.webApiService.rawFetch('Auth/validate-2fa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

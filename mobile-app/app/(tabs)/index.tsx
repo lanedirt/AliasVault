@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Platform, Button, View, FlatList, Text, SafeAreaView, AppState, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NativeModules } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
+import { Buffer } from 'buffer';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -60,11 +61,15 @@ export default function HomeScreen() {
         loginResponse.encryptionSettings
       );
 
+      console.log('passwordHash', passwordHash);
+
       // Convert uint8 array to uppercase hex string which is expected by the server.
       const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
 
       // Get the derived key as base64 string required for decryption.
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
+
+      console.log('passwordHashString', passwordHashString);
 
       // 2. Validate login with SRP protocol
       const validationResponse = await srpUtil.validateLogin(
@@ -73,6 +78,8 @@ export default function HomeScreen() {
         rememberMe,
         loginResponse
       );
+
+      console.log('validationResponse', validationResponse);
 
       // 3. Handle 2FA if required
       if (validationResponse.requiresTwoFactor) {

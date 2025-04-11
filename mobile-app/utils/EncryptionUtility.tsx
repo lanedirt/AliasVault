@@ -1,4 +1,4 @@
-import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
+import argon2 from 'react-native-argon2';
 import { Email } from './types/webapi/Email';
 import { EncryptionKey } from './types/EncryptionKey';
 import { MailboxEmail } from './types/webapi/MailboxEmail';
@@ -27,18 +27,26 @@ class EncryptionUtility {
         throw new Error('Unsupported encryption type');
       }
 
-      const hash = await argon2.hash({
-        pass: password,
-        salt: salt,
-        time: settings.Iterations,
-        mem: settings.MemorySize,
-        parallelism: settings.DegreeOfParallelism,
-        hashLen: 32,
-        type: 2, // 0 = Argon2d, 1 = Argon2i, 2 = Argon2id
-      });
+      console.log('trying to hash password');
+      const result = await argon2(
+        password,
+        salt,
+        {
+          iterations: settings.Iterations,
+          memory: settings.MemorySize,
+          parallelism: settings.DegreeOfParallelism,
+          hashLength: 32,
+          mode: 'argon2id'
+        }
+      );
+      console.log('result', result);
 
-      // Return bytes
-      return hash.hash;
+      // Convert the hex string to Uint8Array
+      const bytes = new Uint8Array(32);
+      for (let i = 0; i < 32; i++) {
+        bytes[i] = parseInt(result.rawHash.substring(i * 2, i * 2 + 2), 16);
+      }
+      return bytes;
     } catch (error) {
       console.error('Argon2 hashing failed:', error);
       throw error;

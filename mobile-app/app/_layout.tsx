@@ -5,6 +5,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+// Required for certain modules such as secure-remote-password which relies on crypto.getRandomValues
+// and this is not available in react-native without this polyfill
+import 'react-native-get-random-values';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { LoadingProvider } from '@/context/LoadingContext';
