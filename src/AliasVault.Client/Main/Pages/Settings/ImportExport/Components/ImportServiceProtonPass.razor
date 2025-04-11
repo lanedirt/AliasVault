@@ -1,0 +1,21 @@
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@inject ILogger<ImportServiceProtonPass> Logger
+
+<ImportServiceCard
+    ServiceName="Proton Pass"
+    Description="Import passwords from Proton Pass"
+    LogoUrl="img/importers/protonpass.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Proton Pass passwords, you need to export it as a CSV file. You can do this by logging into Proton Pass (web), clicking on the 'Settings' menu > 'Export' > 'File format: CSV'. Then click on 'Export'.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+</ImportServiceCard>
+
+@code {
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await ProtonPassImporter.ImportFromCsvAsync(fileContents);
+    }
+}

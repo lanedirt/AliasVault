@@ -355,4 +355,55 @@ public class ImportExportTests
             Assert.That(sampleEntry2.TwoFactorSecret, Is.Empty);
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from ProtonPass CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromProtonPassCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.protonpass.csv");
+
+        // Act
+        var importedCredentials = await ProtonPassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(4));
+
+        // Test specific entries
+        var testProton1Credential = importedCredentials.First(c => c.ServiceName == "Test proton 1");
+        Assert.Multiple(() =>
+        {
+            Assert.That(testProton1Credential.ServiceName, Is.EqualTo("Test proton 1"));
+            Assert.That(testProton1Credential.ServiceUrl, Is.EqualTo("https://www.website.com/"));
+            Assert.That(testProton1Credential.Username, Is.EqualTo("user1"));
+            Assert.That(testProton1Credential.Password, Is.EqualTo("pass1"));
+            Assert.That(testProton1Credential.TwoFactorSecret, Is.EqualTo("otpauth://totp/Strongbox?secret=PLW4SB3PQ7MKVXY2MXF4NEXS6Y&algorithm=SHA1&digits=6&period=30"));
+        });
+
+        var testProton2Credential = importedCredentials.First(c => c.ServiceName == "Test proton2");
+        Assert.Multiple(() =>
+        {
+            Assert.That(testProton2Credential.ServiceName, Is.EqualTo("Test proton2"));
+            Assert.That(testProton2Credential.Username, Is.EqualTo("testuser2"));
+            Assert.That(testProton2Credential.Password, Is.EqualTo("testpassword2"));
+        });
+
+        var testWithoutPassCredential = importedCredentials.First(c => c.ServiceName == "testwithoutpass");
+        Assert.Multiple(() =>
+        {
+            Assert.That(testWithoutPassCredential.ServiceName, Is.EqualTo("testwithoutpass"));
+            Assert.That(testWithoutPassCredential.Username, Is.EqualTo("testuser"));
+            Assert.That(testWithoutPassCredential.Password, Is.Empty);
+        });
+
+        var testWithEmailCredential = importedCredentials.First(c => c.ServiceName == "Test alias");
+        Assert.Multiple(() =>
+        {
+            Assert.That(testWithEmailCredential.ServiceName, Is.EqualTo("Test alias"));
+            Assert.That(testWithEmailCredential.Email, Is.EqualTo("testalias.gating981@passinbox.com"));
+        });
+    }
 }
