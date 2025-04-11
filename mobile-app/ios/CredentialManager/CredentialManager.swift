@@ -32,16 +32,16 @@ class CredentialManager: NSObject {
                           resolver resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Store the encryption key in the keychain with biometric protection
+            // Store the encryption key in the keychain with biometric or PIN protection
             let context = LAContext()
             var error: NSError?
             
-            guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-                reject("BIOMETRICS_UNAVAILABLE", "Biometrics not available: \(error?.localizedDescription ?? "Unknown error")", error)
+            guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
+                reject("AUTH_UNAVAILABLE", "Authentication not available: \(error?.localizedDescription ?? "Unknown error")", error)
                 return
             }
             
-            // Store the key in the keychain with biometric protection
+            // Store the key in the keychain with authentication protection
             try credentialStore.storeEncryptionKey(base64EncryptionKey)
             resolve(nil)
         } catch {

@@ -94,6 +94,9 @@ class EncryptionUtility {
       const ivHex = Buffer.from(iv).toString('hex');
       const tagHex = Buffer.from(tag).toString('hex');
 
+      console.log('ivHex: ', ivHex);
+      console.log('tagHex: ', tagHex);
+
       const decryptedData = await AesGcmCrypto.decrypt(
         contentBase64,
         base64Key,

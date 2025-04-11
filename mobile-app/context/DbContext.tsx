@@ -3,6 +3,7 @@ import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
+import { NativeModules } from 'react-native';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -21,6 +22,8 @@ const DbContext = createContext<DbContextType | undefined>(undefined);
  * DbProvider to provide the SQLite client to the app that components can use to make database queries.
  */
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const credentialManager = NativeModules.CredentialManager;
+
   /**
    * SQLite client.
    */
@@ -53,17 +56,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
     // Attempt to decrypt the blob.
-    console.log('attempt to decrypt vault');
+    /*console.log('attempt to decrypt vault');
     const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
       vaultResponse.vault.blob,
       derivedKey
-    );
-
-    console.log('decrypted blob', decryptedBlob);
+    );*/
 
     // Initialize the SQLite client.
     const client = new SqliteClient();
-    await client.initializeFromBase64(decryptedBlob);
+    await client.storeEncryptionKey(derivedKey);
+    await client.storeEncryptedDatabase(vaultResponse.vault.blob);
 
     setSqliteClient(client);
     setDbInitialized(true);

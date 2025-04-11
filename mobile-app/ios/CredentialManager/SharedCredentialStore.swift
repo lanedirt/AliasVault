@@ -12,22 +12,51 @@ class SharedCredentialStore {
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
     private var db: Connection?
+    private var encryptionKey: Data?
     
     private init() {}
     
     // MARK: - Encryption Key Management
     
+    private func getEncryptionKey() throws -> Data {
+        if let key = encryptionKey {
+            // print as base64 for debugging
+            print("Key found in memory: \(key.base64EncodedString())")
+            return key
+        }
+        
+        guard let keyData = try? keychain
+            .authenticationPrompt("Authenticate to unlock your vault")
+            .getData(encryptionKeyKey) else {
+            throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+        }
+        
+        encryptionKey = keyData
+        // print as base64 for debugging
+        print("Key found in keychain: \(keyData.base64EncodedString())")
+        return keyData
+    }
+    
     func storeEncryptionKey(_ base64Key: String) throws {
         print("Storing encryption key")
+        
+        // Convert base64 string to bytes
         guard let keyData = Data(base64Encoded: base64Key) else {
             throw NSError(domain: "SharedCredentialStore", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 key"])
+        }
+        
+        // Validate key length (AES-256 requires 32 bytes)
+        guard keyData.count == 32 else {
+            throw NSError(domain: "SharedCredentialStore", code: 7, userInfo: [NSLocalizedDescriptionKey: "Invalid key length. Expected 32 bytes"])
         }
         
         do {
             try keychain
                 .authenticationPrompt("Authenticate to unlock your vault")
                 .set(keyData, key: encryptionKeyKey)
-            print("Key saved in keychain")
+            encryptionKey = keyData
+            // print as base64 for debugging
+            print("Key saved in keychain: \(keyData.base64EncodedString())")
         } catch {
             print("Failed to save key to keychain: \(error)")
             throw error
@@ -42,18 +71,15 @@ class SharedCredentialStore {
     }
     
     func storeEncryptedDatabase(_ base64EncryptedDb: String) throws {
-        guard let encryptedData = Data(base64Encoded: base64EncryptedDb) else {
-            throw NSError(domain: "SharedCredentialStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 data"])
-        }
-        
-        // Store the encrypted database in the app's documents directory
-        try encryptedData.write(to: getEncryptedDbPath())
+        // Store the encrypted database (base64 encoded) in the app's documents directory
+        try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
     }
     
+    // Get the encrypted database as a base64 encoded string
     func getEncryptedDatabase() -> String? {
         do {
-            let encryptedData = try Data(contentsOf: getEncryptedDbPath())
-            return encryptedData.base64EncodedString()
+            // Return the base64 encoded string
+            return try String(contentsOf: getEncryptedDbPath(), encoding: .utf8)
         } catch {
             return nil
         }
@@ -61,30 +87,60 @@ class SharedCredentialStore {
     
     func initializeDatabase() throws {
         // Get the encrypted database
-        guard let base64EncryptedDb = getEncryptedDatabase() else {
+        guard let encryptedDbBase64 = getEncryptedDatabase() else {
             throw NSError(domain: "SharedCredentialStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
         }
         
+        let encryptedDbData = Data(base64Encoded: encryptedDbBase64)!
+
         // Get the encryption key
-        guard let keyData = try? keychain
-            .authenticationPrompt("Authenticate to unlock your vault")
-            .getData(encryptionKeyKey) else {
-            throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+        let encryptionKey = try getEncryptionKey()
+        let decryptedDbBase64 = try decrypt(data: encryptedDbData, key: encryptionKey)
+
+        // The decrypted data is still base64 encoded, so decode it
+        guard let decryptedDbData = Data(base64Encoded: decryptedDbBase64) else {
+            throw NSError(domain: "SharedCredentialStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to decode base64 data after decryption"])
         }
+
+        // Check SQLite header
+        let header = decryptedDbData.prefix(24)
+        let headerString = String(bytes: header, encoding: .ascii) ?? "Non-ascii"
+        print("SQLite header: \(headerString)")
+        print("Header bytes: \(header.map { String(format: "%02x", $0) }.joined(separator: " "))")
         
-        // Convert base64 strings to data
-        guard let encryptedData = Data(base64Encoded: base64EncryptedDb) else {
-            throw NSError(domain: "SharedCredentialStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 data"])
+        // Verify it matches expected SQLite header
+        let expectedHeader = "SQLite format 3\0"
+        if headerString != expectedHeader {
+            print("WARNING: SQLite header does not match expected format!")
         }
+
+        print("decrypted data raw print?")
+        print(decryptedDbData)
+
+        let tag = decryptedDbData.suffix(16)
+        print("tag: \(tag.base64EncodedString())")
+
+        // Create a temporary file for the decrypted database in the same directory as the encrypted one
+        let tempDbPath = FileManager.default.temporaryDirectory.appendingPathComponent("temp_db.sqlite")
+        try decryptedDbData.write(to: tempDbPath)
         
-        // Decrypt the database
-        let decryptedData = try decrypt(data: encryptedData, key: keyData)
+        do {
+            let tempDb = try Connection(tempDbPath.path)
+            let tables = try tempDb.prepare("SELECT name FROM sqlite_master WHERE type='table'")
+            for table in tables {
+                print("Table:", table[0] as? String ?? "Unknown")
+            }
+        } catch {
+            print("Direct DB open error:", error)
+        }
         
         // Create an in-memory database
         db = try Connection(":memory:")
         
         // Import the decrypted database into memory
-        try db?.execute("ATTACH DATABASE '\(decryptedData)' AS source")
+        //try db?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
+        // make query and print it before actually attaching
+        try db?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
         try db?.execute("BEGIN TRANSACTION")
         
         // Copy all tables from source to memory
@@ -97,6 +153,9 @@ class SharedCredentialStore {
         try db?.execute("COMMIT")
         try db?.execute("DETACH DATABASE source")
         
+        // Clean up the temporary file
+        try? FileManager.default.removeItem(at: tempDbPath)
+        
         // Setup database pragmas
         try db?.execute("PRAGMA journal_mode = WAL")
         try db?.execute("PRAGMA synchronous = NORMAL")
@@ -106,6 +165,7 @@ class SharedCredentialStore {
     // MARK: - Encryption/Decryption
     
     private func encrypt(data: Data, key: Data) throws -> Data {
+        // TODO: make sure we encrypt the data the same as decryption works with combined iv/content/tag.
         let key = SymmetricKey(data: key)
         let sealedBox = try AES.GCM.seal(data, using: key)
         return sealedBox.combined!

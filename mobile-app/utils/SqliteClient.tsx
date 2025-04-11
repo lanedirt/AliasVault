@@ -18,9 +18,9 @@ class SqliteClient {
   private credentialManager = NativeModules.CredentialManager;
 
   /**
-   * Initialize the SQLite database from a base64 string
+   * Store the encrypted database via the native code implementation.
    */
-  public async initializeFromBase64(base64String: string): Promise<void> {
+  public async storeEncryptedDatabase(base64String: string): Promise<void> {
     try {
       await this.credentialManager.storeDatabase(base64String);
     } catch (error) {
