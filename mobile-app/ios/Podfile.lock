@@ -2094,6 +2094,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - SocketRocket (0.7.1)
+  - SQLite.swift (0.14.1):
+    - SQLite.swift/standard (= 0.14.1)
+  - SQLite.swift/standard (0.14.1)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2195,6 +2198,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - SQLite.swift (~> 0.14.0)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2202,6 +2206,7 @@ SPEC REPOS:
     - CatCrypto
     - KeychainAccess
     - SocketRocket
+    - SQLite.swift
 
 EXTERNAL SOURCES:
   boost:
@@ -2497,8 +2502,9 @@ SPEC CHECKSUMS:
   RNReanimated: 2e5069649cbab2c946652d3b97589b2ae0526220
   RNScreens: 362f4c861dd155f898908d5035d97b07a3f1a9d1
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+  SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
-PODFILE CHECKSUM: 8289d60f8e8c7cee8b314289b8ec81b6b239f13f
+PODFILE CHECKSUM: 71411f71c96e4b6a3db40174f3834328e5a380b9
 
 COCOAPODS: 1.16.2

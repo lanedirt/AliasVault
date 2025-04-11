@@ -1,5 +1,4 @@
-import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
+import { NativeModules } from 'react-native';
 import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
@@ -12,83 +11,18 @@ const placeholderBase64 = 'UklGRjoEAABXRUJQVlA4IC4EAAAwFwCdASqAAIAAPpFCm0olo6Ihp
 
 type SQLiteBindValue = string | number | null | Uint8Array;
 
-interface SQLiteResult {
-  rows: {
-    length: number;
-    item: (index: number) => any;
-  };
-  rowsAffected: number;
-}
-
 /**
- * Client for interacting with the SQLite database.
+ * Client for interacting with the SQLite database through native code.
  */
 class SqliteClient {
-  private db: SQLite.SQLiteDatabase | null = null;
+  private credentialManager = NativeModules.CredentialManager;
 
   /**
    * Initialize the SQLite database from a base64 string
    */
   public async initializeFromBase64(base64String: string): Promise<void> {
     try {
-      // Ensure SQLite directory exists
-      const sqliteDir = `${FileSystem.documentDirectory}SQLite`;
-      const dirInfo = await FileSystem.getInfoAsync(sqliteDir);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true });
-      }
-      // For in-memory database, we need to create a temporary file first
-      const tempFileUri = `${sqliteDir}/temp.db`;
-      console.log('Writing database to temporary file');
-      
-      // Delete existing file if it exists
-      const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
-      if (fileInfo.exists) {
-        await FileSystem.deleteAsync(tempFileUri);
-      }
-      
-      await FileSystem.writeAsStringAsync(tempFileUri, base64String, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      console.log('Database written to temporary file');
-      console.log('tempFileUri', tempFileUri);
-
-      // Open the database in memory
-      console.log('Opening database from file');
-      this.db = SQLite.openDatabaseSync('temp.db');
-
-      console.log('Database opened from file');
-
-      // TODO: Finish implementation of in-memory database as we don't want to persist the database to the file system.
-
-      // Attach in-memory db
-      /*await this.executeUpdate(`ATTACH DATABASE ':memory:' AS target`);
-      await this.executeUpdate('BEGIN TRANSACTION');
-      
-      console.log('Executing query to get tables');
-
-      // Copy all tables from source to memory
-      const tables = await this.executeQuery<{ name: string }>(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-      );
-
-      console.log('Tables copied');
-      
-      for (const table of tables) {
-        await this.executeUpdate(`CREATE TABLE ${table.name} AS SELECT * FROM target.${table.name}`);
-      }
-      
-      await this.executeUpdate('COMMIT');
-      await this.executeUpdate('DETACH DATABASE source');
-      
-      // Clean up the temporary file
-      await FileSystem.deleteAsync(tempFileUri);*/
-
-      // Setup database pragmas to configure the database.
-      await this.executeUpdate('PRAGMA journal_mode = WAL');
-      await this.executeUpdate('PRAGMA synchronous = NORMAL');
-      await this.executeUpdate('PRAGMA foreign_keys = ON');
+      await this.credentialManager.storeDatabase(base64String);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
       throw error;
@@ -96,21 +30,13 @@ class SqliteClient {
   }
 
   /**
-   * Export the SQLite database to a base64 string
-   * @returns Base64 encoded string of the database
+   * Store the encryption key in the native keychain
    */
-  public async exportToBase64(): Promise<string> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-
+  public async storeEncryptionKey(base64EncryptionKey: string): Promise<void> {
     try {
-      // TODO: Implement database export to base64
-      // This would require reading the database file and converting it to base64
-      console.warn('Database export to base64 not yet implemented');
-      return '';
+      await this.credentialManager.storeEncryptionKey(base64EncryptionKey);
     } catch (error) {
-      console.error('Error exporting SQLite database:', error);
+      console.error('Error storing encryption key:', error);
       throw error;
     }
   }
@@ -119,25 +45,8 @@ class SqliteClient {
    * Execute a SELECT query
    */
   public async executeQuery<T>(query: string, params: SQLiteBindValue[] = []): Promise<T[]> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-
     try {
-      console.log('Executing query:', query);
-
-      // First do query to get all tables
-      const tables = await this.db.getAllAsync(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-      );
-
-      console.log('Tables:', tables);
-
-      const results = await this.db.getAllAsync(
-        query,
-        ...params
-      );
-      console.log('Results:', results);
+      const results = await this.credentialManager.executeQuery(query, params);
       return results as T[];
     } catch (error) {
       console.error('Error executing query:', error);
@@ -149,16 +58,9 @@ class SqliteClient {
    * Execute an INSERT, UPDATE, or DELETE query
    */
   public async executeUpdate(query: string, params: SQLiteBindValue[] = []): Promise<number> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-
     try {
-      const result = await this.db.runAsync(
-        query,
-        ...params
-      );
-      return result.changes;
+      const result = await this.credentialManager.executeUpdate(query, params);
+      return result as number;
     } catch (error) {
       console.error('Error executing update:', error);
       throw error;
@@ -169,10 +71,7 @@ class SqliteClient {
    * Close the database connection and free resources.
    */
   public close(): void {
-    if (this.db) {
-      this.db.closeAsync();
-      this.db = null;
-    }
+    // No-op since the native code handles connection lifecycle
   }
 
   /**
@@ -369,8 +268,8 @@ class SqliteClient {
    * @returns The number of rows modified
    */
   public async createCredential(credential: Credential): Promise<number> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
+    if (!this.credentialManager) {
+      throw new Error('CredentialManager not initialized');
     }
 
     try {
@@ -474,8 +373,8 @@ class SqliteClient {
    * Returns null if no migrations are found.
    */
   public async getDatabaseVersion(): Promise<string | null> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
+    if (!this.credentialManager) {
+      throw new Error('CredentialManager not initialized');
     }
 
     try {
@@ -512,8 +411,8 @@ class SqliteClient {
    * @returns Array of TotpCode objects
    */
   public async getTotpCodesForCredential(credentialId: string): Promise<TotpCode[]> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
+    if (!this.credentialManager) {
+      throw new Error('CredentialManager not initialized');
     }
 
     try {
@@ -643,8 +542,8 @@ class SqliteClient {
    * @returns True if the table exists, false otherwise
    */
   private async tableExists(tableName: string): Promise<boolean> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
+    if (!this.credentialManager) {
+      throw new Error('CredentialManager not initialized');
     }
 
     try {

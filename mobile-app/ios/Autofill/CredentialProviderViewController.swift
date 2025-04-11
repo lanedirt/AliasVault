@@ -42,7 +42,7 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         // Get credentials and return the first one that matches the identity
         do {
-            let credentials = try SharedCredentialStore.shared.getAllCredentials(createKeyIfNeeded: false)
+            let credentials = try SharedCredentialStore.shared.getAllCredentials()
             if let matchingCredential = credentials.first(where: { $0.service == credentialIdentity.serviceIdentifier.identifier }) {
                 let passwordCredential = ASPasswordCredential(
                     user: matchingCredential.username,
