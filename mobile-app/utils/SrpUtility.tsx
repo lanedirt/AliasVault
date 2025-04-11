@@ -2,7 +2,7 @@ import srp from 'secure-remote-password/client';
 import { WebApiService } from '@/utils/WebApiService';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
-import { ValidateLoginResponse } from '@/utils/types/webapi/ValidateLogin';
+import { ValidateLoginRequest2Fa, ValidateLoginResponse } from '@/utils/types/webapi/ValidateLogin';
 import BadRequestResponse from '@/utils/types/webapi/BadRequestResponse';
 
 export class SrpUtility {
@@ -130,18 +130,20 @@ export class SrpUtility {
         privateKey
       );
 
+      const model: ValidateLoginRequest2Fa = {
+        username: username.toLowerCase().trim(),
+        rememberMe,
+        clientPublicEphemeral: clientEphemeral.public,
+        clientSessionProof: sessionProof.proof,
+        code2Fa: twoFactorCode,
+      };
+
       const response = await this.webApiService.rawFetch('Auth/validate-2fa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: username.toLowerCase().trim(),
-          rememberMe,
-          clientPublicEphemeral: clientEphemeral.public,
-          clientSessionProof: sessionProof.proof,
-          twoFactorCode,
-        }),
+        body: JSON.stringify(model),
       });
 
       if (response.status === 400) {

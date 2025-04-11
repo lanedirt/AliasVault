@@ -37,10 +37,16 @@ class SqliteClient {
       if (!dirInfo.exists) {
         await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true });
       }
-
       // For in-memory database, we need to create a temporary file first
       const tempFileUri = `${sqliteDir}/temp.db`;
       console.log('Writing database to temporary file');
+      
+      // Delete existing file if it exists
+      const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
+      if (fileInfo.exists) {
+        await FileSystem.deleteAsync(tempFileUri);
+      }
+      
       await FileSystem.writeAsStringAsync(tempFileUri, base64String, {
         encoding: FileSystem.EncodingType.Base64,
       });
