@@ -11,11 +11,6 @@ class CredentialManager: NSObject {
     }
     
     @objc
-    func requiresMainQueueSetup() -> Bool {
-        return false
-    }
-    
-    @objc
     func storeDatabase(_ base64EncryptedDb: String,
                       resolver resolve: @escaping RCTPromiseResolveBlock,
                       rejecter reject: @escaping RCTPromiseRejectBlock) {
@@ -119,6 +114,31 @@ class CredentialManager: NSObject {
             print("Failed to get credentials: \(error)")
             return [:]
         }
+    }
+
+    @objc
+    func clearVault() {
+        do {
+            try credentialStore.clearVault()
+        } catch {
+            print("Failed to clear vault: \(error)")
+        }
+    }
+
+    @objc
+    func isVaultInitialized(_ resolve: @escaping RCTPromiseResolveBlock,
+                          rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            let isInitialized = try credentialStore.isVaultInitialized()
+            resolve(isInitialized)
+        } catch {
+            reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func requiresMainQueueSetup() -> Bool {
+        return false
     }
     
     @objc

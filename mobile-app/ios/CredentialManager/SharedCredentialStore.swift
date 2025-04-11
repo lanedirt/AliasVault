@@ -15,9 +15,16 @@ class SharedCredentialStore {
     private var encryptionKey: Data?
     
     public init() {}
+
+    // MARK: - Vault Status
+    func isVaultInitialized() -> Bool {
+        // Check if encrypted database file exists
+        let hasDatabase = FileManager.default.fileExists(atPath: getEncryptedDbPath().path)
+        
+        return hasDatabase
+    }
     
     // MARK: - Encryption Key Management
-    
     private func getEncryptionKey() throws -> Data {
         if let key = encryptionKey {
             // print as base64 for debugging
@@ -104,44 +111,14 @@ class SharedCredentialStore {
             throw NSError(domain: "SharedCredentialStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to decode base64 data after decryption"])
         }
 
-        // Check SQLite header
-        let header = decryptedDbData.prefix(24)
-        let headerString = String(bytes: header, encoding: .ascii) ?? "Non-ascii"
-        print("SQLite header: \(headerString)")
-        print("Header bytes: \(header.map { String(format: "%02x", $0) }.joined(separator: " "))")
-        
-        // Verify it matches expected SQLite header
-        let expectedHeader = "SQLite format 3\0"
-        if headerString != expectedHeader {
-            print("WARNING: SQLite header does not match expected format!")
-        }
-
-        print("decrypted data raw print?")
-        print(decryptedDbData)
-
-        let tag = decryptedDbData.suffix(16)
-        print("tag: \(tag.base64EncodedString())")
-
         // Create a temporary file for the decrypted database in the same directory as the encrypted one
         let tempDbPath = FileManager.default.temporaryDirectory.appendingPathComponent("temp_db.sqlite")
         try decryptedDbData.write(to: tempDbPath)
-        
-        do {
-            let tempDb = try Connection(tempDbPath.path)
-            let tables = try tempDb.prepare("SELECT name FROM sqlite_master WHERE type='table'")
-            for table in tables {
-                print("Table:", table[0] as? String ?? "Unknown")
-            }
-        } catch {
-            print("Direct DB open error:", error)
-        }
         
         // Create an in-memory database
         db = try Connection(":memory:")
         
         // Import the decrypted database into memory
-        //try db?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
-        // make query and print it before actually attaching
         try db?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
         try db?.execute("BEGIN TRANSACTION")
         
@@ -255,6 +232,17 @@ class SharedCredentialStore {
         
         // Clear the cached encrypted database
         db = nil
+    }
+
+    // Clears cached and saved encryption key and encrypted database to force re-initialization on next access.
+    func clearVault() {
+        // Remove the encryption key from keychain
+        try? keychain.remove(encryptionKeyKey)
+
+        // Remove the encrypted database from the app's documents directory
+        try? FileManager.default.removeItem(at: getEncryptedDbPath())
+
+        clearCache()
     }
     
     // MARK: - Query Execution

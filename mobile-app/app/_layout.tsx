@@ -14,12 +14,49 @@ import { LoadingProvider } from '@/context/LoadingContext';
 import { DbProvider } from '@/context/DbContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { WebApiProvider } from '@/context/WebApiContext';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import { View, ActivityIndicator } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const authContext = useAuth();
+  const dbContext = useDb();
+
+  // Check if user is authenticated and database is available
+  const isFullyInitialized = authContext.isInitialized && dbContext.dbInitialized;
+  const isAuthenticated = authContext.isLoggedIn;
+  const isDatabaseAvailable = dbContext.dbAvailable;
+  const requireLoginOrUnlock = isFullyInitialized && (!isAuthenticated || !isDatabaseAvailable);
+
+  // Show loading screen while initializing
+  if (!isFullyInitialized) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        {requireLoginOrUnlock ? (
+          <Stack.Screen name="login" />
+        ) : (
+          <Stack.Screen name="(tabs)" />
+        )}
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -35,20 +72,14 @@ export default function RootLayout() {
   }
 
   return (
-  <DbProvider>
-    <AuthProvider>
-      <WebApiProvider>
-        <LoadingProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-          </ThemeProvider>
-        </LoadingProvider>
-      </WebApiProvider>
-    </AuthProvider>
-  </DbProvider>
+    <DbProvider>
+      <AuthProvider>
+        <WebApiProvider>
+          <LoadingProvider>
+            <RootLayoutNav />
+          </LoadingProvider>
+        </WebApiProvider>
+      </AuthProvider>
+    </DbProvider>
   );
 }

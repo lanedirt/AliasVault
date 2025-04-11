@@ -9,7 +9,7 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     await webApi.logout();
-    router.replace('/');
+    router.replace('/login');
   };
 
   return (

@@ -13,21 +13,29 @@ struct CredentialProviderView: View {
                         .progressViewStyle(.circular)
                         .scaleEffect(1.5)
                 } else {
-                    List(viewModel.credentials, id: \.service) { credential in
-                        Button(action: {
-                            viewModel.selectCredential(credential)
-                        }) {
-                            VStack(alignment: .leading) {
-                                Text(credential.service)
-                                    .font(.headline)
-                                Text(credential.username)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                    VStack {
+                        SearchBar(text: $viewModel.searchText)
+                            .padding(.horizontal)
+                            .onChange(of: viewModel.searchText) { _ in
+                                viewModel.filterCredentials()
+                            }
+                        
+                        List(viewModel.filteredCredentials, id: \.service) { credential in
+                            Button(action: {
+                                viewModel.selectCredential(credential)
+                            }) {
+                                VStack(alignment: .leading) {
+                                    Text(credential.service)
+                                        .font(.headline)
+                                    Text(credential.username)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
-                    }
-                    .refreshable {
-                        viewModel.loadCredentials()
+                        .refreshable {
+                            viewModel.loadCredentials()
+                        }
                     }
                 }
             }
@@ -118,8 +126,34 @@ struct AddCredentialView: View {
     }
 }
 
+struct SearchBar: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Search credentials...", text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+    }
+}
+
 class CredentialProviderViewModel: ObservableObject {
     @Published var credentials: [Credential] = []
+    @Published var filteredCredentials: [Credential] = []
+    @Published var searchText = ""
     @Published var isLoading = true
     @Published var showError = false
     @Published var errorMessage = ""
@@ -142,6 +176,7 @@ class CredentialProviderViewModel: ObservableObject {
         do {
             let sharedCredentialStore = SharedCredentialStore()
             credentials = try sharedCredentialStore.getAllCredentials()
+            filteredCredentials = credentials
             
             Task {
                 do {
@@ -155,6 +190,17 @@ class CredentialProviderViewModel: ObservableObject {
             }
         } catch {
             handleError(error)
+        }
+    }
+    
+    func filterCredentials() {
+        if searchText.isEmpty {
+            filteredCredentials = credentials
+        } else {
+            filteredCredentials = credentials.filter { credential in
+                credential.service.localizedCaseInsensitiveContains(searchText) ||
+                credential.username.localizedCaseInsensitiveContains(searchText)
+            }
         }
     }
     

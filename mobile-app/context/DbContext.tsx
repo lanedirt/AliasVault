@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { NativeModules } from 'react-native';
 
 type DbContextType = {
@@ -81,6 +79,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   const checkStoredVault = useCallback(async () => {
+    // Try to do a simple query to see if the database is available.
+    try {
+      const isVaultInitialized = credentialManager.isVaultInitialized();
+      if (isVaultInitialized) {
+        // TODO: sqlclient can be initialized in constructor instead?
+        const client = new SqliteClient();
+        setSqliteClient(client);
+        setDbInitialized(true);
+        setDbAvailable(true);
+      } else {
+        setDbInitialized(true);
+        setDbAvailable(false);
+      }
+    } catch (error) {
+      console.error('Error checking vault initialization:', error);
+      setDbInitialized(true);
+      setDbAvailable(false);
+    }
+   
     /*try {
       const response = await sendMessage('GET_VAULT', {}, 'background') as messageVaultResponse;
       if (response?.vault) {
@@ -103,9 +120,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       setDbAvailable(false);
     }*/
 
-    // TODO: implement actual vault retrieval.
-    setDbInitialized(true);
-    setDbAvailable(false);
   }, []);
 
   /**
@@ -124,6 +138,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setSqliteClient(null);
     setDbInitialized(false);
     // TODO: implement actual vault clearing.
+    credentialManager.clearVault();
   }, []);
 
   const contextValue = useMemo(() => ({
