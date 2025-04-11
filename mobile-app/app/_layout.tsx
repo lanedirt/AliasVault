@@ -7,6 +7,10 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { LoadingProvider } from '@/context/LoadingContext';
+import { DbProvider } from '@/context/DbContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { WebApiProvider } from '@/context/WebApiContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,12 +32,20 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+  <DbProvider>
+    <AuthProvider>
+      <WebApiProvider>
+        <LoadingProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+          </ThemeProvider>
+        </LoadingProvider>
+      </WebApiProvider>
+    </AuthProvider>
+  </DbProvider>
   );
 }
