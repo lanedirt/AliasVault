@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import * as FileSystem from 'expo-file-system';
 import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
@@ -30,25 +31,51 @@ class SqliteClient {
    */
   public async initializeFromBase64(base64String: string): Promise<void> {
     try {
-      // Open the database
-      this.db = SQLite.openDatabaseSync('aliasvault.db');
+      // For in-memory database, we need to create a temporary file first
+      const tempFileUri = `${FileSystem.documentDirectory}SQLite/temp.db`;
+      console.log('Writing database to temporary file');
+      await FileSystem.writeAsStringAsync(tempFileUri, base64String, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-      // Convert base64 to Uint8Array
-      const binaryString = atob(base64String);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      console.log('Database written to temporary file');
+      console.log('tempFileUri', tempFileUri);
+
+      // Open the database in memory
+      console.log('Opening database from file');
+      this.db = SQLite.openDatabaseSync('temp.db');
+
+      console.log('Database opened from file');
+
+      // TODO: Finish implementation of in-memory database as we don't want to persist the database to the file system.
+
+      // Attach in-memory db
+      /*await this.executeUpdate(`ATTACH DATABASE ':memory:' AS target`);
+      await this.executeUpdate('BEGIN TRANSACTION');
+      
+      console.log('Executing query to get tables');
+
+      // Copy all tables from source to memory
+      const tables = await this.executeQuery<{ name: string }>(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      );
+
+      console.log('Tables copied');
+      
+      for (const table of tables) {
+        await this.executeUpdate(`CREATE TABLE ${table.name} AS SELECT * FROM target.${table.name}`);
       }
+      
+      await this.executeUpdate('COMMIT');
+      await this.executeUpdate('DETACH DATABASE source');
+      
+      // Clean up the temporary file
+      await FileSystem.deleteAsync(tempFileUri);*/
 
-      // Import the database
+      // Setup database pragmas to configure the database.
       await this.executeUpdate('PRAGMA journal_mode = WAL');
       await this.executeUpdate('PRAGMA synchronous = NORMAL');
       await this.executeUpdate('PRAGMA foreign_keys = ON');
-      
-      // TODO: Implement database import from bytes
-      // This is a complex operation that would require writing the bytes to a file
-      // and then importing that file into the SQLite database
-      console.warn('Database import from base64 not yet implemented');
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
       throw error;
@@ -84,10 +111,20 @@ class SqliteClient {
     }
 
     try {
-      const results = await this.db!.getAllAsync(
+      console.log('Executing query:', query);
+
+      // First do query to get all tables
+      const tables = await this.db.getAllAsync(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      );
+
+      console.log('Tables:', tables);
+
+      const results = await this.db.getAllAsync(
         query,
         ...params
       );
+      console.log('Results:', results);
       return results as T[];
     } catch (error) {
       console.error('Error executing query:', error);
@@ -104,7 +141,7 @@ class SqliteClient {
     }
 
     try {
-      const result = await this.db!.runAsync(
+      const result = await this.db.runAsync(
         query,
         ...params
       );
