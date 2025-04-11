@@ -62,12 +62,6 @@ export default function HomeScreen() {
     fetchCredentials(); // Refresh the list
   };
 
-  const handleClearCredentials = async () => {
-    // Call native module to clear credentials
-    await NativeModules.CredentialManager.clearCredentials();
-    setCredentials([]); // Clear the list
-  };
-
   const renderCredential = (item: Credential) => (
     <ThemedView style={styles.credentialItem} key={`${item.service}-${item.username}`}>
       <ThemedText type="defaultSemiBold">Service: {item.service}</ThemedText>
@@ -85,7 +79,6 @@ export default function HomeScreen() {
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Credentials</ThemedText>
           <Button title="Add Random Credential" onPress={handleInsertEntry} />
-          <Button title="Clear Credentials" onPress={handleClearCredentials} />
           <FlatList
             data={credentials}
             renderItem={({ item }) => renderCredential(item)}

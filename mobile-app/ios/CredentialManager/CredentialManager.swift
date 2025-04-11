@@ -104,11 +104,6 @@ class CredentialManager: NSObject {
     }
     
     @objc
-    func clearCredentials() {
-        credentialStore.clearAllCredentials()
-    }
-    
-    @objc
     func getCredentials() -> [String: Any] {
         do {
             let credentials = try credentialStore.getAllCredentials()

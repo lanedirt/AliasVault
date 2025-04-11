@@ -14,7 +14,7 @@ class SharedCredentialStore {
     private var db: Connection?
     private var encryptionKey: Data?
     
-    private init() {}
+    public init() {}
     
     // MARK: - Encryption Key Management
     
@@ -66,8 +66,10 @@ class SharedCredentialStore {
     // MARK: - Database Management
     
     private func getEncryptedDbPath() -> URL {
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return documentsDirectory.appendingPathComponent(encryptedDbFileName)
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.net.aliasvault.autofill") else {
+            fatalError("Failed to get shared container URL")
+        }
+        return containerURL.appendingPathComponent(encryptedDbFileName)
     }
     
     func storeEncryptedDatabase(_ base64EncryptedDb: String) throws {
@@ -180,10 +182,17 @@ class SharedCredentialStore {
     // MARK: - Credential Operations
     
     func addCredential(_ credential: Credential) throws {
+        if db == nil {
+            try initializeDatabase()
+        }
+        
+        // After initialization attempt, check if db is still nil
         guard let db = db else {
             throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         
+        // TODO: update this to use the actual database schema.
+        // TODO: having the add logic here means we have duplicate code with the react native implementation.
         let credentials = Table("credentials")
         let id = Expression<String>("id")
         let username = Expression<String>("username")
@@ -203,31 +212,49 @@ class SharedCredentialStore {
     }
     
     func getAllCredentials() throws -> [Credential] {
+        if db == nil {
+            try initializeDatabase()
+        }
+        
+        // After initialization attempt, check if db is still nil
         guard let db = db else {
             throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         
-        let credentials = Table("credentials")
-        let username = Expression<String>("username")
-        let password = Expression<String>("password")
-        let service = Expression<String>("service")
+        let query = """
+            SELECT DISTINCT
+                c.Username,
+                s.Name as ServiceName,
+                p.Value as Password
+            FROM Credentials c
+            LEFT JOIN Services s ON c.ServiceId = s.Id
+            LEFT JOIN Passwords p ON p.CredentialId = c.Id
+            WHERE c.IsDeleted = 0
+            ORDER BY c.CreatedAt DESC
+        """
         
         var result: [Credential] = []
-        for row in try db.prepare(credentials) {
+        for row in try db.prepare(query) {
+            let username = row[0] as? String ?? ""
+            let service = row[1] as? String ?? ""
+            let password = row[2] as? String ?? ""
+            
             result.append(Credential(
-                username: row[username],
-                password: row[password],
-                service: row[service]
+                username: username,
+                password: password,
+                service: service,
             ))
         }
         return result
     }
-    
-    func clearAllCredentials() {
-        guard let db = db else { return }
+
+    // Clears cached encryption key and encrypted database to force re-initialization on next access.
+    func clearCache() {
+        // Clear the cached encryption key
+        encryptionKey = nil
         
-        let credentials = Table("credentials")
-        try? db.run(credentials.delete())
+        // Clear the cached encrypted database
+        db = nil
     }
     
     // MARK: - Query Execution

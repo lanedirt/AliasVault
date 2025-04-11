@@ -140,7 +140,8 @@ class CredentialProviderViewModel: ObservableObject {
         isLoading = true
         
         do {
-            credentials = try SharedCredentialStore.shared.getAllCredentials()
+            let sharedCredentialStore = SharedCredentialStore()
+            credentials = try sharedCredentialStore.getAllCredentials()
             
             Task {
                 do {
@@ -170,7 +171,8 @@ class CredentialProviderViewModel: ObservableObject {
                                   service: newService)
         
         do {
-            try SharedCredentialStore.shared.addCredential(credential)
+            let sharedCredentialStore = SharedCredentialStore()
+            try sharedCredentialStore.addCredential(credential)
             Task {
                 try await CredentialIdentityStore.shared.saveCredentialIdentities([credential])
             }
