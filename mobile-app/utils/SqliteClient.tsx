@@ -106,8 +106,11 @@ class SqliteClient {
     const results = await this.executeQuery(query, [credentialId]);
 
     if (results.length === 0) {
+      console.log('No results found for credential:', credentialId);
       return null;
     }
+
+    console.log('Results found for credential:', results);
 
     // Convert the first row to a Credential object
     const row = results[0] as any;

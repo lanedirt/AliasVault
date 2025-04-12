@@ -1,5 +1,6 @@
-import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, useColorScheme } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
+import { router, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -36,6 +37,11 @@ export default function CredentialsScreen() {
   const isAuthenticated = authContext.isLoggedIn;
   const isDatabaseAvailable = dbContext.dbAvailable;
 
+  const navigateToCredential = (credentialId: string) => {
+    console.log('Navigating to credential:', credentialId);
+    router.push(`/(tabs)/(credentials)/${credentialId}`);
+  };
+
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
       return;
@@ -45,7 +51,6 @@ export default function CredentialsScreen() {
       setIsLoadingCredentials(true);
       try {
         const credentialsList = await dbContext.sqliteClient!.getAllCredentials();
-        console.log('credentialsList', credentialsList);
         setCredentialsList(credentialsList);
       } catch (err) {
         console.error('Error loading credentials:', err);
@@ -58,10 +63,11 @@ export default function CredentialsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ title: "Credentials" }} />
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Credentials</ThemedText>
+      </ThemedView>
       <ThemedView style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Credentials</ThemedText>
-        </ThemedView>
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
             <ActivityIndicator size="large" color="#f97316" />
@@ -70,14 +76,29 @@ export default function CredentialsScreen() {
               data={credentialsList}
               keyExtractor={(item) => item.Id}
               renderItem={({ item }) => (
-                <View style={[styles.credentialItem, dynamicStyles.credentialItem]}>
-                  <Text style={[styles.serviceName, dynamicStyles.serviceName]}>{item.ServiceName ?? 'Unknown Service'}</Text>
-                  {item.Username && <Text style={[styles.credentialText, dynamicStyles.credentialText]}>Username: {item.Username}</Text>}
-                  {item.Alias?.Email && <Text style={[styles.credentialText, dynamicStyles.credentialText]}>Email: {item.Alias.Email}</Text>}
-                </View>
+                <TouchableOpacity
+                  onPress={() => navigateToCredential(item.Id)}
+                  style={[styles.credentialItem, dynamicStyles.credentialItem]}
+                >
+                  <Text style={[styles.serviceName, dynamicStyles.serviceName]}>
+                    {item.ServiceName ?? 'Unknown Service'}
+                  </Text>
+                  {item.Username && (
+                    <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                      Username: {item.Username}
+                    </Text>
+                  )}
+                  {item.Alias?.Email && (
+                    <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                      Email: {item.Alias.Email}
+                    </Text>
+                  )}
+                </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <Text style={[styles.emptyText, dynamicStyles.emptyText]}>No credentials found</Text>
+                <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
+                  No credentials found
+                </Text>
               }
             />
           )}

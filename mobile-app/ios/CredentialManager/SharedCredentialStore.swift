@@ -255,7 +255,7 @@ class SharedCredentialStore {
         let statement = try db.prepare(query)
         var results: [[String: Any]] = []
         
-        for row in statement {
+        for row in try statement.run(params) {
             var rowDict: [String: Any] = [:]
             for (index, column) in statement.columnNames.enumerated() {
                 rowDict[column] = row[index]
