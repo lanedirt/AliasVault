@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router, Stack } from 'expo-router';
 
@@ -11,6 +11,7 @@ import { Credential } from '@/utils/types/Credential';
 export default function CredentialsScreen() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+  const [searchQuery, setSearchQuery] = useState('');
 
   const dynamicStyles = {
     credentialItem: {
@@ -25,6 +26,10 @@ export default function CredentialsScreen() {
     },
     emptyText: {
       color: isDarkMode ? '#9ca3af' : '#6b7280',
+    },
+    searchInput: {
+      backgroundColor: isDarkMode ? '#374151' : '#f3f4f6',
+      color: isDarkMode ? '#f3f4f6' : '#1f2937',
     },
   };
 
@@ -61,6 +66,15 @@ export default function CredentialsScreen() {
     loadCredentials();
   }, [isAuthenticated, isDatabaseAvailable]);
 
+  const filteredCredentials = credentialsList.filter(credential => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      credential.ServiceName?.toLowerCase().includes(searchLower) ||
+      credential.Username?.toLowerCase().includes(searchLower) ||
+      credential.Alias?.Email?.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Credentials" }} />
@@ -68,12 +82,19 @@ export default function CredentialsScreen() {
         <ThemedText type="title">Credentials</ThemedText>
       </ThemedView>
       <ThemedView style={styles.content}>
+        <TextInput
+          style={[styles.searchInput, dynamicStyles.searchInput]}
+          placeholder="Search credentials..."
+          placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
             <ActivityIndicator size="large" color="#f97316" />
           ) : (
             <FlatList
-              data={credentialsList}
+              data={filteredCredentials}
               keyExtractor={(item) => item.Id}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -97,7 +118,7 @@ export default function CredentialsScreen() {
               )}
               ListEmptyComponent={
                 <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
-                  No credentials found
+                  {searchQuery ? 'No matching credentials found' : 'No credentials found'}
                 </Text>
               }
             />
@@ -145,5 +166,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     marginTop: 24,
+  },
+  searchInput: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    fontSize: 16,
   },
 }); 
