@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity, Image, ScrollView, useColorScheme, StyleSheet } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
@@ -26,6 +27,12 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const copyToClipboard = async () => {
     if (value) {
       await Clipboard.setStringAsync(value);
+      Toast.show({
+        type: 'success',
+        text1: 'Copied to clipboard',
+        position: 'bottom',
+        visibilityTime: 2000, // Show for 2 seconds
+      });
     }
   };
 
@@ -64,9 +71,6 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
               </Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>📋</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -96,6 +100,11 @@ export default function CredentialDetailsScreen() {
     };
 
     loadCredential();
+
+    // Cleanup function to hide any visible toasts when navigating away
+    return () => {
+      Toast.hide();
+    };
   }, [id, dbContext.dbAvailable]);
 
   if (isLoading) {
