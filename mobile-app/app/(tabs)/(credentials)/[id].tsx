@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
 import SqliteClient from '@/utils/SqliteClient';
+import { ThemedScrollView } from '@/components/ThemedScrollView';
 
 interface FormInputCopyToClipboardProps {
   label: string;
@@ -91,6 +92,9 @@ export default function CredentialDetailsScreen() {
       
       try {
         const cred = await dbContext.sqliteClient!.getCredentialById(id as string);
+        if (cred?.Alias?.BirthDate) {
+          cred.Alias.BirthDate = new Date(cred.Alias.BirthDate);
+        }
         setCredential(cred);
       } catch (err) {
         console.error('Error loading credential:', err);
@@ -126,7 +130,7 @@ export default function CredentialDetailsScreen() {
   const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
 
   return (
-    <ScrollView style={styles.container}>
+    <ThemedScrollView style={styles.container}>
       <ThemedView style={styles.header}>
         {credential.Logo && (
           <Image
@@ -169,7 +173,7 @@ export default function CredentialDetailsScreen() {
         )}
       </ThemedView>
 
-      {(hasName || credential.Alias?.NickName) && (
+      {(hasName || credential.Alias?.NickName || credential.Alias?.BirthDate) && (
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Alias</ThemedText>
           {hasName && (
@@ -178,10 +182,28 @@ export default function CredentialDetailsScreen() {
               value={fullName}
             />
           )}
+          {credential.Alias?.FirstName && (
+            <FormInputCopyToClipboard
+              label="First Name"
+              value={credential.Alias.FirstName}
+            />
+          )}
+          {credential.Alias?.LastName && (
+            <FormInputCopyToClipboard
+              label="Last Name"
+              value={credential.Alias.LastName}
+            />
+          )}
           {credential.Alias?.NickName && (
             <FormInputCopyToClipboard
               label="Nickname"
               value={credential.Alias.NickName}
+            />
+          )}
+          {credential.Alias?.BirthDate && !isNaN(credential.Alias.BirthDate.getTime()) && credential.Alias.BirthDate.getTime() !== new Date(0).getTime() && (
+            <FormInputCopyToClipboard
+              label="Birth Date"
+              value={credential.Alias.BirthDate.toISOString().split('T')[0]}
             />
           )}
         </ThemedView>
@@ -200,13 +222,14 @@ export default function CredentialDetailsScreen() {
           </View>
         </ThemedView>
       )}
-    </ScrollView>
+    </ThemedScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 80,
   },
   header: {
     flexDirection: 'row',

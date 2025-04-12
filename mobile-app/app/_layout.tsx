@@ -31,7 +31,7 @@ const toastConfig = {
         padding: 12,
         borderRadius: 8,
         marginHorizontal: 16,
-        marginBottom: 64,
+        marginBottom: 70,
         shadowColor: '#000',
         shadowOffset: {
           width: 0,

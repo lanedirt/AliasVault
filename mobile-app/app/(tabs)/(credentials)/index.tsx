@@ -111,6 +111,7 @@ export default function CredentialsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 80,
   },
   content: {
     flex: 1,
