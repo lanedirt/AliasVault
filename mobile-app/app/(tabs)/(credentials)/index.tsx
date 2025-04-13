@@ -78,10 +78,10 @@ export default function CredentialsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Credentials" }} />
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Credentials</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.content}>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">Credentials</ThemedText>
+        </ThemedView>
         <TextInput
           style={[styles.searchInput, dynamicStyles.searchInput]}
           placeholder="Search credentials..."
