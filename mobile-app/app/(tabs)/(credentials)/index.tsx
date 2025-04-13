@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, SafeAreaView, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
@@ -75,8 +76,15 @@ export default function CredentialsScreen() {
     );
   });
 
+  const handleCredentialPress = (credentialId: string) => {
+    Keyboard.dismiss();
+    setTimeout(() => {
+      navigateToCredential(credentialId);
+    }, 100);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedSafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Credentials" }} />
       <ThemedView style={styles.content}>
         <ThemedView style={styles.titleContainer}>
@@ -98,8 +106,9 @@ export default function CredentialsScreen() {
               keyExtractor={(item) => item.Id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  onPress={() => navigateToCredential(item.Id)}
+                  onPress={() => handleCredentialPress(item.Id)}
                   style={[styles.credentialItem, dynamicStyles.credentialItem]}
+                  activeOpacity={0.7}
                 >
                   <Text style={[styles.serviceName, dynamicStyles.serviceName]}>
                     {item.ServiceName ?? 'Unknown Service'}
@@ -125,7 +134,7 @@ export default function CredentialsScreen() {
           )}
         </ThemedView>
       </ThemedView>
-    </SafeAreaView>
+    </ThemedSafeAreaView>
   );
 }
 
