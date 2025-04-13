@@ -78,9 +78,7 @@ export default function CredentialsScreen() {
 
   const handleCredentialPress = (credentialId: string) => {
     Keyboard.dismiss();
-    setTimeout(() => {
-      navigateToCredential(credentialId);
-    }, 100);
+    navigateToCredential(credentialId);
   };
 
   return (
@@ -104,6 +102,7 @@ export default function CredentialsScreen() {
             <FlatList
               data={filteredCredentials}
               keyExtractor={(item) => item.Id}
+              keyboardShouldPersistTaps='handled'
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => handleCredentialPress(item.Id)}
