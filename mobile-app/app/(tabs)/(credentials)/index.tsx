@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router, Stack } from 'expo-router';
 
@@ -8,6 +8,7 @@ import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
+import { CredentialIcon } from '@/components/CredentialIcon';
 
 export default function CredentialsScreen() {
   const colorScheme = useColorScheme();
@@ -109,19 +110,24 @@ export default function CredentialsScreen() {
                   style={[styles.credentialItem, dynamicStyles.credentialItem]}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.serviceName, dynamicStyles.serviceName]}>
-                    {item.ServiceName ?? 'Unknown Service'}
-                  </Text>
-                  {item.Username && (
-                    <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
-                      Username: {item.Username}
-                    </Text>
-                  )}
-                  {item.Alias?.Email && (
-                    <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
-                      Email: {item.Alias.Email}
-                    </Text>
-                  )}
+                  <View style={styles.credentialContent}>
+                    <CredentialIcon logo={item.Logo} style={styles.logo} />
+                    <View style={styles.credentialInfo}>
+                      <Text style={[styles.serviceName, dynamicStyles.serviceName]}>
+                        {item.ServiceName ?? 'Unknown Service'}
+                      </Text>
+                      {item.Username && (
+                        <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                          Username: {item.Username}
+                        </Text>
+                      )}
+                      {item.Alias?.Email && (
+                        <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                          Email: {item.Alias.Email}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
@@ -157,10 +163,23 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   credentialItem: {
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
+  },
+  credentialContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  credentialInfo: {
+    flex: 1,
   },
   serviceName: {
     fontSize: 16,
@@ -181,4 +200,4 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
-}); 
+});

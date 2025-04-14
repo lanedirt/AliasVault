@@ -208,7 +208,7 @@ export default function LoginScreen() {
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">AliasVault</ThemedText>
         </ThemedView>
-        
+
         {error && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
@@ -391,4 +391,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
   },
-}); 
+});

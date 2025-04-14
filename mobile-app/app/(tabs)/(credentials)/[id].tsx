@@ -9,6 +9,7 @@ import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
 import SqliteClient from '@/utils/SqliteClient';
 import { ThemedScrollView } from '@/components/ThemedScrollView';
+import { CredentialIcon } from '@/components/CredentialIcon';
 
 interface FormInputCopyToClipboardProps {
   label: string;
@@ -89,7 +90,7 @@ export default function CredentialDetailsScreen() {
   useEffect(() => {
     const loadCredential = async () => {
       if (!dbContext.dbAvailable || !id) return;
-      
+
       try {
         const cred = await dbContext.sqliteClient!.getCredentialById(id as string);
         if (cred?.Alias?.BirthDate) {
@@ -132,12 +133,7 @@ export default function CredentialDetailsScreen() {
   return (
     <ThemedScrollView style={styles.container}>
       <ThemedView style={styles.header}>
-        {credential.Logo && (
-          <Image
-            source={{ uri: SqliteClient.imgSrcFromBytes(credential.Logo) }}
-            style={styles.logo}
-          />
-        )}
+        <CredentialIcon logo={credential.Logo} style={styles.logo} />
         <View style={styles.headerText}>
           <ThemedText type="title" style={styles.serviceName}>
             {credential.ServiceName}
@@ -292,4 +288,4 @@ const styles = StyleSheet.create({
   notes: {
     fontSize: 14,
   },
-}); 
+});
