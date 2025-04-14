@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
@@ -28,8 +28,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
