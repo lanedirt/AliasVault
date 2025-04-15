@@ -1,5 +1,5 @@
 import { FormFields } from "./types/FormFields";
-import { CombinedFieldPatterns, CombinedGenderOptionPatterns } from "./FieldPatterns";
+import { CombinedFieldPatterns, CombinedGenderOptionPatterns, CombinedStopWords } from "./FieldPatterns";
 
 /**
  * Form detector.
@@ -16,6 +16,150 @@ export class FormDetector {
     this.document = document;
     this.clickedElement = clickedElement ?? null;
     this.visibilityCache = new Map();
+  }
+
+  /**
+   * Detect login forms on the page based on the clicked element.
+   */
+  public containsLoginForm(): boolean {
+    let formWrapper = this.clickedElement?.closest('form, [role="dialog"]') as HTMLElement | null;
+    if (formWrapper?.getAttribute('role') === 'dialog') {
+      // If we hit a dialog, search for form only within the dialog
+      formWrapper = formWrapper.querySelector('form') as HTMLElement | null ?? formWrapper;
+    }
+
+    if (!formWrapper) {
+      // If no form or dialog found, fallback to document.body
+      formWrapper = this.document.body as HTMLElement;
+    }
+
+    /**
+     * Sanity check: if form contains more than 150 inputs, don't process as this is likely not a login form.
+     * This is a simple way to prevent processing large forms that are not login forms and making the browser page unresponsive.
+     */
+    const inputCount = formWrapper.querySelectorAll('input').length;
+    if (inputCount > 200) {
+      return false;
+    }
+
+    // Check if the wrapper contains a password or likely username field before processing.
+    if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Detect login forms on the page based on the clicked element.
+   */
+  public getForm(): FormFields | null {
+    if (!this.clickedElement) {
+      return null;
+    }
+
+    const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
+    return this.detectFormFields(formWrapper);
+  }
+
+  /**
+   * Get suggested service names from the page title and URL.
+   * Returns an array with two suggestions: the primary name and the domain name as an alternative.
+   */
+  public static getSuggestedServiceName(document: Document, location: Location): string[] {
+    const title = document.title;
+    const maxWords = 4;
+    const maxLength = 50;
+
+    /**
+     * We apply a limit to the length and word count of the title to prevent
+     * the service name from being too long or containing too many words which
+     * is not likely to be a good service name.
+     */
+    const validLength = (text: string): boolean => {
+      const validLength = text.length >= 3 && text.length <= maxLength;
+      const validWordCount = text.split(/[\s|\-—/\\]+/).length <= maxWords;
+      return validLength && validWordCount;
+    };
+
+    /**
+     * Filter out common words from prefix/suffix until no more matches found
+     */
+    const getMeaningfulTitleParts = (title: string): string[] => {
+      const words = title.toLowerCase().split(' ').map(word => word.toLowerCase());
+
+      // Strip stopwords from start until no more matches
+      let startIndex = 0;
+      while (startIndex < words.length && CombinedStopWords.has(words[startIndex].toLowerCase())) {
+        startIndex++;
+      }
+
+      // Strip stopwords from end until no more matches
+      let endIndex = words.length - 1;
+      while (endIndex > startIndex && CombinedStopWords.has(words[endIndex].toLowerCase())) {
+        endIndex--;
+      }
+
+      // Return remaining words
+      return words.slice(startIndex, endIndex + 1);
+    };
+
+    /**
+     * Get original case version of meaningful words
+     */
+    const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
+      return text
+        .split(/[\s|]+/)
+        .filter(word => meaningfulParts.includes(word.toLowerCase()))
+        .join(' ');
+    };
+
+    // Domain name suggestion (always included as fallback or first suggestion)
+    const domainSuggestion = location.hostname.replace(/^www\./, '');
+
+    // First try to extract meaningful parts based on the divider
+    const dividerRegex = /[|\-—/\\:]/;
+    const dividerMatch = dividerRegex.exec(title);
+    if (dividerMatch) {
+      const dividerIndex = dividerMatch.index;
+      const beforeDivider = title.substring(0, dividerIndex).trim();
+      const afterDivider = title.substring(dividerIndex + 1).trim();
+
+      // Count meaningful words on each side
+      const beforeWords = getMeaningfulTitleParts(beforeDivider);
+      const afterWords = getMeaningfulTitleParts(afterDivider);
+
+      // Get both parts in original case
+      const beforePart = getOriginalCase(beforeDivider, beforeWords);
+      const afterPart = getOriginalCase(afterDivider, afterWords);
+
+      // Check if both parts are valid
+      const beforeValid = validLength(beforePart);
+      const afterValid = validLength(afterPart);
+
+      // If both parts are valid, return both as suggestions
+      if (beforeValid && afterValid) {
+        return [beforePart, afterPart, domainSuggestion];
+      }
+
+      // If only one part is valid, return it
+      if (beforeValid) {
+        return [beforePart, domainSuggestion];
+      }
+      if (afterValid) {
+        return [afterPart, domainSuggestion];
+      }
+    }
+
+    // If no meaningful parts found after divider, try the full title
+    const meaningfulParts = getMeaningfulTitleParts(title);
+    const serviceName = getOriginalCase(title, meaningfulParts);
+    if (validLength(serviceName)) {
+      return [serviceName, domainSuggestion];
+    }
+
+    // Fall back to domain name
+    return [domainSuggestion];
   }
 
   /**
@@ -95,50 +239,6 @@ export class FormDetector {
     // Cache and return true for the original element
     this.visibilityCache.set(element, true);
     return true;
-  }
-
-  /**
-   * Detect login forms on the page based on the clicked element.
-   */
-  public containsLoginForm(): boolean {
-    let formWrapper = this.clickedElement?.closest('form, [role="dialog"]') as HTMLElement | null;
-    if (formWrapper?.getAttribute('role') === 'dialog') {
-      // If we hit a dialog, search for form only within the dialog
-      formWrapper = formWrapper.querySelector('form') as HTMLElement | null ?? formWrapper;
-    }
-
-    if (!formWrapper) {
-      // If no form or dialog found, fallback to document.body
-      formWrapper = this.document.body as HTMLElement;
-    }
-
-    /**
-     * Sanity check: if form contains more than 150 inputs, don't process as this is likely not a login form.
-     * This is a simple way to prevent processing large forms that are not login forms and making the browser page unresponsive.
-     */
-    const inputCount = formWrapper.querySelectorAll('input').length;
-    if (inputCount > 200) {
-      return false;
-    }
-
-    // Check if the wrapper contains a password or likely username field before processing.
-    if (this.containsPasswordField(formWrapper) || this.containsLikelyUsernameOrEmailField(formWrapper)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Detect login forms on the page based on the clicked element.
-   */
-  public getForm(): FormFields | null {
-    if (!this.clickedElement) {
-      return null;
-    }
-
-    const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
-    return this.detectFormFields(formWrapper);
   }
 
   /**

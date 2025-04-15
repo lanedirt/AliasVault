@@ -6,11 +6,11 @@ import { PasswordGenerator } from '../../utils/generators/Password/PasswordGener
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
-import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import SqliteClient from '../../utils/SqliteClient';
 import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
+import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { Credential } from '@/utils/types/Credential';
 
 // TODO: store generic setting constants somewhere else.
@@ -212,8 +212,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    const suggestedName = getSuggestedServiceName(document, window.location);
-    const result = await createAliasCreationPopup(suggestedName, rootContainer);
+    const suggestedNames = FormDetector.getSuggestedServiceName(document, window.location);
+    const result = await createAliasCreationPopup(suggestedNames, rootContainer);
 
     if (!result) {
       // User cancelled
@@ -660,7 +660,7 @@ export async function disableAutoShowPopup(): Promise<void> {
 /**
  * Create alias creation popup where user can choose between random alias and custom alias.
  */
-export async function createAliasCreationPopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
+export async function createAliasCreationPopup(suggestedNames: string[], rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
@@ -744,17 +744,23 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
       <div class="av-create-popup-help-text">${randomIdentitySubtext}</div>
 
+      <div class="av-create-popup-field-group">
+        <label for="service-name-input">Service name</label>
+        <input
+          type="text"
+          id="service-name-input"
+          value="${suggestedNames[0] ?? ''}"
+          class="av-create-popup-input"
+          placeholder="Enter service name"
+        >
+        ${suggestedNames.length > 1 ? `
+          <div class="av-suggested-names">
+            ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
+          </div>
+        ` : ''}
+      </div>
+
       <div class="av-create-popup-mode av-create-popup-random-mode">
-        <div class="av-create-popup-field-group">
-          <label for="service-name-input">Service name</label>
-          <input
-            type="text"
-            id="service-name-input"
-            value="${defaultName}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-        </div>
         <div class="av-create-popup-actions">
           <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
           <button id="save-btn" class="av-create-popup-save">Create and save alias</button>
@@ -762,16 +768,6 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
       </div>
 
       <div class="av-create-popup-mode av-create-popup-custom-mode" style="display: none;">
-        <div class="av-create-popup-field-group">
-          <label for="custom-service-name">Service name</label>
-          <input
-            type="text"
-            id="custom-service-name"
-            value="${defaultName}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-        </div>
         <div class="av-create-popup-field-group">
           <label for="custom-email">Email</label>
           <input
@@ -839,8 +835,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
     const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
-    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
-    const customInput = popup.querySelector('#custom-service-name') as HTMLInputElement;
+    const inputServiceName = popup.querySelector('#service-name-input') as HTMLInputElement;
     const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
@@ -1028,7 +1023,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
     // Handle save buttons
     saveBtn.addEventListener('click', () => {
-      const serviceName = input.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         closePopup({
           serviceName,
@@ -1041,7 +1036,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
      * Handle custom save button click.
      */
     const handleCustomSave = () : void => {
-      const serviceName = customInput.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         const email = customEmail.value.trim();
         const username = customUsername.value.trim();
@@ -1118,7 +1113,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
       }
     };
 
-    customInput.addEventListener('keyup', handleCustomEnter);
+    inputServiceName.addEventListener('keyup', handleCustomEnter);
     customEmail.addEventListener('keyup', handleCustomEnter);
     customUsername.addEventListener('keyup', handleCustomEnter);
     passwordPreview.addEventListener('keyup', handleCustomEnter);
@@ -1133,9 +1128,9 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     });
 
     // Handle Enter key
-    input.addEventListener('keyup', (e) => {
+    inputServiceName.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        const serviceName = input.value.trim();
+        const serviceName = inputServiceName.value.trim();
         if (serviceName) {
           closePopup({
             serviceName,
@@ -1158,9 +1153,49 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     // Use mousedown instead of click to prevent closing when dragging text
     overlay.addEventListener('mousedown', handleClickOutside);
 
+    /**
+     * Handle suggested name click.
+     */
+    const handleSuggestedNameClick = (e: Event) : void => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('av-suggested-name')) {
+        const name = target.dataset.name;
+        if (name) {
+          // Update input with clicked name
+          inputServiceName.value = name;
+          customUsername.value = name;
+
+          // Update the suggested names section
+          const suggestedNamesContainer = target.closest('.av-suggested-names');
+          if (suggestedNamesContainer) {
+            // Update the suggestions HTML using the helper function
+            suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+          }
+        }
+      }
+    };
+
+    popup.addEventListener('click', handleSuggestedNameClick);
+
     // Focus the input field
-    input.select();
+    inputServiceName.select();
   });
+}
+
+/**
+ * Get suggested names HTML with current input value excluded
+ */
+function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): string {
+  // Filter out the current value and create unique set of remaining suggestions
+  const filteredSuggestions = [...new Set(suggestedNames.filter(n => n !== currentValue))];
+
+  if (filteredSuggestions.length === 0) {
+    return '';
+  }
+
+  return `or ${filteredSuggestions.map((name, index) =>
+    `<span class="av-suggested-name" data-name="${name}">${name}</span>${index < filteredSuggestions.length - 1 ? ', ' : ''}`
+  ).join('')}?`;
 }
 
 /**
@@ -1286,57 +1321,6 @@ export async function dismissVaultLockedPopup(): Promise<void> {
     const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
     await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, threeDaysFromNow);
   }
-}
-
-/**
- * Get a suggested service name from the page title and URL.
- * Attempts to extract meaningful parts while maintaining original capitalization.
- */
-function getSuggestedServiceName(document: Document, location: Location): string {
-  const title = document.title;
-
-  /**
-   * Filter out common words and keep meaningful parts of the title
-   */
-  const getMeaningfulTitleParts = (title: string): string[] => {
-    return title
-      .toLowerCase()
-      .split(/[\s|\-—/\\]+/) // Split on spaces and common dividers
-      .filter(word =>
-        word.length > 1 && // Filter out single characters
-        !CombinedStopWords.has(word.toLowerCase()) // Filter out common words
-      );
-  };
-
-  /**
-   * Get original case version of meaningful words
-   */
-  const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
-    return text
-      .split(/[\s|\-—/\\]+/)
-      .filter(word => meaningfulParts.includes(word.toLowerCase()))
-      .join(' ');
-  };
-
-  // First try to extract meaningful parts after the last divider
-  const dividerRegex = /[|\-—/\\][^|\-—/\\]*$/;
-  const dividerMatch = dividerRegex.exec(title);
-  if (dividerMatch) {
-    const meaningfulParts = getMeaningfulTitleParts(dividerMatch[0]);
-    if (meaningfulParts.length > 0) {
-      return getOriginalCase(dividerMatch[0].trim(), meaningfulParts);
-    }
-  }
-
-  // If no meaningful parts found after divider, try the full title
-  const meaningfulParts = getMeaningfulTitleParts(title);
-  if (meaningfulParts.length > 0) {
-    return getOriginalCase(title, meaningfulParts);
-  }
-
-  // Fall back to domain name if no meaningful parts found
-  const domainParts = location.hostname.replace(/^www\./, '').split('.');
-  return domainParts.slice(-2).join('.');
 }
 
 /**
