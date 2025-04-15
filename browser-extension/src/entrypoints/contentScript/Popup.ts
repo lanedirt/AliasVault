@@ -159,7 +159,7 @@ export function removeExistingPopup(container: HTMLElement) : void {
 /**
  * Create auto-fill popup
  */
-export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : void {  
+export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : void {
   // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
   input.setAttribute('autocomplete', 'false');
   const popup = createBasePopup(input, rootContainer);
@@ -265,7 +265,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 
         // Get password settings from background
         const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
-        
+
         // Initialize password generator with the retrieved settings
         const passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
         const password = passwordGenerator.generateRandomPassword();
@@ -340,7 +340,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   // Create search input.
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
-  searchInput.dataset.aliasvaultIgnore = 'true';
+  searchInput.dataset.avDisable = 'true';
   searchInput.placeholder = 'Search vault...';
   searchInput.className = 'av-search-input';
 
@@ -517,7 +517,7 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
     filteredCredentials = uniqueCredentials.filter(cred => {
       const searchableFields = [
         cred.ServiceName?.toLowerCase(),
-        cred.Username?.toLowerCase(), 
+        cred.Username?.toLowerCase(),
         cred.Alias?.Email?.toLowerCase(),
         cred.ServiceUrl?.toLowerCase()
       ];
@@ -993,25 +993,25 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
           // Add error styling to fields
           customEmail.classList.add('av-create-popup-input-error');
           customUsername.classList.add('av-create-popup-input-error');
-          
+
           // Add error messages after labels
           const emailLabel = customEmail.previousElementSibling as HTMLLabelElement;
           const usernameLabel = customUsername.previousElementSibling as HTMLLabelElement;
-          
+
           if (!emailLabel.querySelector('.av-create-popup-error-text')) {
             const emailError = document.createElement('span');
             emailError.className = 'av-create-popup-error-text';
             emailError.textContent = 'Enter email and/or username';
             emailLabel.appendChild(emailError);
           }
-          
+
           if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
             const usernameError = document.createElement('span');
             usernameError.className = 'av-create-popup-error-text';
             usernameError.textContent = 'Enter email and/or username';
             usernameLabel.appendChild(usernameError);
           }
-          
+
           /**
            * Remove error styling.
            */
@@ -1027,10 +1027,10 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
               usernameError.remove();
             }
           };
-          
+
           customEmail.addEventListener('input', removeError, { once: true });
           customUsername.addEventListener('input', removeError, { once: true });
-          
+
           return;
         }
 
@@ -1056,7 +1056,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     };
 
     customInput.addEventListener('keyup', handleCustomEnter);
-    customEmail.addEventListener('keyup', handleCustomEnter); 
+    customEmail.addEventListener('keyup', handleCustomEnter);
     customUsername.addEventListener('keyup', handleCustomEnter);
     passwordPreview.addEventListener('keyup', handleCustomEnter);
 
@@ -1108,7 +1108,7 @@ async function getFaviconBytes(document: Document): Promise<Uint8Array | null> {
   const TARGET_WIDTH = 96; // Resize target width
 
   const faviconLinks = [
-    ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')), 
+    ...Array.from(document.querySelectorAll('link[rel="icon"][type="image/svg+xml"]')),
     ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="96x96"]')),
     ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="128x128"]')),
     ...Array.from(document.querySelectorAll('link[rel="icon"][sizes="48x48"]')),
