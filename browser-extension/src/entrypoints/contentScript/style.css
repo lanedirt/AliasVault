@@ -455,7 +455,7 @@ body {
 }
 
 .av-create-popup-field-group {
-  margin-bottom: 24px;
+  margin-top: 16px;
 }
 
 .av-create-popup-field-group label {
@@ -655,10 +655,6 @@ body {
   align-items: center;
   justify-content: space-between;
   position: relative;
-}
-
-.av-create-popup-mode {
-  margin-top: 20px;
 }
 
 .av-create-popup-title-container {

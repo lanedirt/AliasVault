@@ -756,22 +756,23 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
       <div class="av-create-popup-help-text">${randomIdentitySubtext}</div>
 
+      <div class="av-create-popup-field-group">
+        <label for="service-name-input">Service name</label>
+        <input
+          type="text"
+          id="service-name-input"
+          value="${suggestedNames[0] ?? ''}"
+          class="av-create-popup-input"
+          placeholder="Enter service name"
+        >
+        ${suggestedNames.length > 1 ? `
+          <div class="av-suggested-names">
+            ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
+          </div>
+        ` : ''}
+      </div>
+
       <div class="av-create-popup-mode av-create-popup-random-mode">
-        <div class="av-create-popup-field-group">
-          <label for="service-name-input">Service name</label>
-          <input
-            type="text"
-            id="service-name-input"
-            value="${suggestedNames[0] ?? ''}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-          ${suggestedNames.length > 1 ? `
-            <div class="av-suggested-names">
-              ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
-            </div>
-          ` : ''}
-        </div>
         <div class="av-create-popup-actions">
           <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
           <button id="save-btn" class="av-create-popup-save">Create and save alias</button>
@@ -779,21 +780,6 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       </div>
 
       <div class="av-create-popup-mode av-create-popup-custom-mode" style="display: none;">
-        <div class="av-create-popup-field-group">
-          <label for="custom-service-name">Service name</label>
-          <input
-            type="text"
-            id="custom-service-name"
-            value="${suggestedNames[0] ?? ''}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-          ${suggestedNames.length > 1 ? `
-            <div class="av-suggested-names">
-              ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
-            </div>
-          ` : ''}
-        </div>
         <div class="av-create-popup-field-group">
           <label for="custom-email">Email</label>
           <input
@@ -861,8 +847,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
     const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
     const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
-    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
-    const customInput = popup.querySelector('#custom-service-name') as HTMLInputElement;
+    const inputServiceName = popup.querySelector('#service-name-input') as HTMLInputElement;
     const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
@@ -1050,7 +1035,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
     // Handle save buttons
     saveBtn.addEventListener('click', () => {
-      const serviceName = input.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         closePopup({
           serviceName,
@@ -1063,7 +1048,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
      * Handle custom save button click.
      */
     const handleCustomSave = () : void => {
-      const serviceName = customInput.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         const email = customEmail.value.trim();
         const username = customUsername.value.trim();
@@ -1140,7 +1125,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       }
     };
 
-    customInput.addEventListener('keyup', handleCustomEnter);
+    inputServiceName.addEventListener('keyup', handleCustomEnter);
     customEmail.addEventListener('keyup', handleCustomEnter);
     customUsername.addEventListener('keyup', handleCustomEnter);
     passwordPreview.addEventListener('keyup', handleCustomEnter);
@@ -1155,9 +1140,9 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
     });
 
     // Handle Enter key
-    input.addEventListener('keyup', (e) => {
+    inputServiceName.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        const serviceName = input.value.trim();
+        const serviceName = inputServiceName.value.trim();
         if (serviceName) {
           closePopup({
             serviceName,
@@ -1180,18 +1165,17 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
     // Use mousedown instead of click to prevent closing when dragging text
     overlay.addEventListener('mousedown', handleClickOutside);
 
-    // Add event listeners for suggested names
-    const handleSuggestedNameClick = (e: Event) => {
+    /**
+     * Handle suggested name click.
+     */
+    const handleSuggestedNameClick = (e: Event) : void => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('av-suggested-name')) {
         const name = target.dataset.name;
         if (name) {
-          // Get current input value
-          const currentValue = input.value;
-
           // Update input with clicked name
-          input.value = name;
-          customInput.value = name;
+          inputServiceName.value = name;
+          customUsername.value = name;
 
           // Update the suggested names section
           const suggestedNamesContainer = target.closest('.av-suggested-names');
@@ -1206,7 +1190,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
     popup.addEventListener('click', handleSuggestedNameClick);
 
     // Focus the input field
-    input.select();
+    inputServiceName.select();
   });
 }
 
