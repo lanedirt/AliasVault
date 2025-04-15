@@ -476,7 +476,8 @@ body {
   width: 100%;
 }
 
-.av-create-popup-regenerate-btn {
+.av-create-popup-regenerate-btn,
+.av-create-popup-visibility-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -490,7 +491,8 @@ body {
   flex-shrink: 0;
 }
 
-.av-create-popup-regenerate-btn:hover {
+.av-create-popup-regenerate-btn:hover,
+.av-create-popup-visibility-btn:hover {
   background-color: #4b5563;
 }
 
@@ -501,6 +503,14 @@ body {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.av-create-popup-visibility-btn .av-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
 }
 
 .av-create-popup-error {

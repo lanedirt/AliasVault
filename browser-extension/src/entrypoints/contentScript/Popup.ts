@@ -810,8 +810,15 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
               type="text"
               id="password-preview"
               class="av-create-popup-input"
+              data-is-generated="true"
             >
-            <button id="regenerate-password" class="av-create-popup-regenerate-btn">
+            <button id="toggle-password-visibility" class="av-create-popup-visibility-btn" title="Toggle password visibility">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <button id="regenerate-password" class="av-create-popup-regenerate-btn" title="Generate new password">
               <svg class="av-icon" viewBox="0 0 24 24">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
@@ -849,6 +856,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
     const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
+    const toggleVisibilityBtn = popup.querySelector('#toggle-password-visibility') as HTMLButtonElement;
 
     /**
      * Setup default value for input with placeholder styling.
@@ -891,7 +899,14 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
      * Generate and set password.
      */
     const generatePassword = () : void => {
+      if (!passwordGenerator) {
+        return;
+      }
+
       passwordPreview.value = passwordGenerator.generateRandomPassword();
+      passwordPreview.type = 'text';
+      passwordPreview.dataset.isGenerated = 'true';
+      updateVisibilityIcon(true);
     };
 
     // Get password settings from background
@@ -905,6 +920,65 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);
+
+    // Add password visibility toggle functionality
+    const passwordInput = popup.querySelector('#password-preview') as HTMLInputElement;
+
+    /**
+     * Toggle password visibility icon
+     */
+    const updateVisibilityIcon = (isVisible: boolean): void => {
+      toggleVisibilityBtn.innerHTML = isVisible ? `
+        <svg class="av-icon" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      ` : `
+        <svg class="av-icon" viewBox="0 0 24 24">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+      `;
+    };
+
+    /**
+     * Toggle password visibility
+     */
+    const togglePasswordVisibility = (): void => {
+      const isVisible = passwordInput.type === 'text';
+      passwordInput.type = isVisible ? 'password' : 'text';
+      updateVisibilityIcon(!isVisible);
+    };
+
+    toggleVisibilityBtn.addEventListener('click', togglePasswordVisibility);
+
+    /**
+     * Handle password input changes
+     */
+    const handlePasswordChange = (e: Event): void => {
+      const target = e.target as HTMLInputElement;
+      const isGenerated = target.dataset.isGenerated === 'true';
+      const isEmpty = target.value.trim().length <= 1;
+
+      // If manually cleared (empty or single char) and was previously generated, switch to password type
+      if (isEmpty && isGenerated) {
+        target.type = 'password';
+        target.dataset.isGenerated = 'false';
+        updateVisibilityIcon(false);
+      }
+    };
+
+    /**
+     * Handle paste events
+     */
+    const handlePasswordPaste = (): void => {
+      passwordInput.dataset.isGenerated = 'false';
+      passwordInput.type = 'password';
+      updateVisibilityIcon(false);
+    };
+
+    passwordInput.addEventListener('input', handlePasswordChange);
+    passwordInput.addEventListener('paste', handlePasswordPaste);
 
     /**
      * Toggle dropdown visibility.
