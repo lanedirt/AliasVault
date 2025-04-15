@@ -105,11 +105,11 @@ The following websites have been known to cause issues in the past (but should b
 
 | Website | Reason |
 | --- | --- |
-| https://www.paprika-shopping.nl/nieuwsbrief/newsletter-register-landing.html | Popup CSS style conflicts |
-| https://bloshing.com/inschrijven-nieuwsbrief | Popup CSS style conflicts |
-| https://gamefaqs.gamespot.com/user | Popup buttons not working |
-| https://news.ycombinator.com/login?goto=news | Popup and client favicon not showing due to SVG format |
-| https://vault.bitwarden.com/#/login | Autofill password not detected (input not long enough), manually typing in works |
-| https://login.microsoftonline.com/ | Password gets reset after autofill |
-| https://mijn.ing.nl/login/ | Autofill doesn't detect input fields and AliasVault autofill icon placement is off |
+| [Paprika Shopping](https://www.paprika-shopping.nl/nieuwsbrief/newsletter-register-landing.html) | Popup CSS style conflicts |
+| [Bloshing](https://bloshing.com/inschrijven-nieuwsbrief) | Popup CSS style conflicts |
+| [GameFAQs](https://gamefaqs.gamespot.com/user) | Popup buttons not working |
+| [Hacker News](https://news.ycombinator.com/login?goto=news) | Popup and client favicon not showing due to SVG format |
+| [Bitwarden](https://vault.bitwarden.com/#/login) | Autofill password not detected (input not long enough), manually typing in works |
+| [Microsoft Online](https://login.microsoftonline.com/) | Password gets reset after autofill |
+| [ING Bank](https://mijn.ing.nl/login/) | Autofill doesn't detect input fields and AliasVault autofill icon placement is off |
 

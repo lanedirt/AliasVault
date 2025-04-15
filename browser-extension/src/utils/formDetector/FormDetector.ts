@@ -1,5 +1,5 @@
 import { FormFields } from "./types/FormFields";
-import { CombinedFieldPatterns, CombinedGenderOptionPatterns } from "./FieldPatterns";
+import { CombinedFieldPatterns, CombinedGenderOptionPatterns, CombinedStopWords } from "./FieldPatterns";
 
 /**
  * Form detector.
@@ -16,85 +16,6 @@ export class FormDetector {
     this.document = document;
     this.clickedElement = clickedElement ?? null;
     this.visibilityCache = new Map();
-  }
-
-  /**
-   * Check if an element and all its parents are visible.
-   * This checks for display:none, visibility:hidden, and opacity:0
-   * Uses a cache to avoid redundant checks of the same elements.
-   */
-  private isElementVisible(element: HTMLElement | null): boolean {
-    if (!element) {
-      return false;
-    }
-
-    // Check cache first
-    if (this.visibilityCache.has(element)) {
-      return this.visibilityCache.get(element)!;
-    }
-
-    let current: HTMLElement | null = element;
-    while (current) {
-      try {
-        const style = this.document.defaultView?.getComputedStyle(current);
-        if (!style) {
-          // Cache and return true for this element and all its parents
-          let parent: HTMLElement | null = current;
-          while (parent) {
-            this.visibilityCache.set(parent, true);
-            parent = parent.parentElement;
-          }
-          return true;
-        }
-        
-        // Check for display:none
-        if (style.display === 'none') {
-          // Cache and return false for this element and all its parents
-          let parent: HTMLElement | null = current;
-          while (parent) {
-            this.visibilityCache.set(parent, false);
-            parent = parent.parentElement;
-          }
-          return false;
-        }
-        
-        // Check for visibility:hidden
-        if (style.visibility === 'hidden') {
-          // Cache and return false for this element and all its parents
-          let parent: HTMLElement | null = current;
-          while (parent) {
-            this.visibilityCache.set(parent, false);
-            parent = parent.parentElement;
-          }
-          return false;
-        }
-        
-        // Check for opacity:0
-        if (parseFloat(style.opacity) === 0) {
-          // Cache and return false for this element and all its parents
-          let parent: HTMLElement | null = current;
-          while (parent) {
-            this.visibilityCache.set(parent, false);
-            parent = parent.parentElement;
-          }
-          return false;
-        }
-      } catch {
-        // If we can't get computed style, cache and return true for this element and all its parents
-        let parent: HTMLElement | null = current;
-        while (parent) {
-          this.visibilityCache.set(parent, true);
-          parent = parent.parentElement;
-        }
-        return true;
-      }
-
-      current = current.parentElement;
-    }
-
-    // Cache and return true for the original element
-    this.visibilityCache.set(element, true);
-    return true;
   }
 
   /**
@@ -130,6 +51,171 @@ export class FormDetector {
 
     const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
     return this.detectFormFields(formWrapper);
+  }
+
+  /**
+   * Get a suggested service name from the page title and URL.
+   * Attempts to extract meaningful parts while maintaining original capitalization.
+   */
+  public static getSuggestedServiceName(document: Document, location: Location): string {
+    const title = document.title;
+    const maxWords = 4;
+    const maxLength = 50;
+
+    /**
+     * We apply a limit to the length and word count of the title to prevent
+     * the service name from being too long or containing too many words which
+     * is not likely to be a good service name.
+     */
+    const validLength = (text: string): boolean => {
+      const validLength = text.length >= 3 && text.length <= maxLength;
+      const validWordCount = text.split(/[\s|\-—/\\]+/).length <= maxWords;
+      return validLength && validWordCount;
+    };
+
+    /**
+     * Filter out common words from prefix/suffix until no more matches found
+     */
+    const getMeaningfulTitleParts = (title: string): string[] => {
+      const words = title.toLowerCase().split(' ').map(word => word.toLowerCase());
+
+      // Strip stopwords from start until no more matches
+      let startIndex = 0;
+      while (startIndex < words.length && CombinedStopWords.has(words[startIndex].toLowerCase())) {
+        startIndex++;
+      }
+
+      // Strip stopwords from end until no more matches
+      let endIndex = words.length - 1;
+      while (endIndex > startIndex && CombinedStopWords.has(words[endIndex].toLowerCase())) {
+        endIndex--;
+      }
+
+      // Return remaining words
+      return words.slice(startIndex, endIndex + 1);
+    };
+
+    /**
+     * Get original case version of meaningful words
+     */
+    const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
+      return text
+        .split(/[\s|]+/)
+        .filter(word => meaningfulParts.includes(word.toLowerCase()))
+        .join(' ');
+    };
+
+    // First try to extract meaningful parts based on the divider
+    const dividerRegex = /[|\-—/\\:]/;
+    const dividerMatch = dividerRegex.exec(title);
+    if (dividerMatch) {
+      const dividerIndex = dividerMatch.index;
+      const beforeDivider = title.substring(0, dividerIndex).trim();
+      const afterDivider = title.substring(dividerIndex + 1).trim();
+
+      // Count meaningful words on each side
+      const beforeWords = getMeaningfulTitleParts(beforeDivider);
+      const afterWords = getMeaningfulTitleParts(afterDivider);
+
+      // Choose the part with fewer meaningful words
+      const chosenPart = beforeWords.length <= afterWords.length ? beforeDivider : afterDivider;
+      const meaningfulParts = getMeaningfulTitleParts(chosenPart);
+
+      const serviceName = getOriginalCase(chosenPart, meaningfulParts);
+      if (validLength(serviceName)) {
+        return serviceName;
+      }
+    }
+
+    // If no meaningful parts found after divider, try the full title
+    const meaningfulParts = getMeaningfulTitleParts(title);
+    const serviceName = getOriginalCase(title, meaningfulParts);
+    if (validLength(serviceName)) {
+      return serviceName;
+    }
+
+    // Fall back to domain name if no meaningful parts found
+    const domainParts = location.hostname.replace(/^www\./, '').split('.');
+    return domainParts.slice(-2).join('.');
+  }
+
+  /**
+   * Check if an element and all its parents are visible.
+   * This checks for display:none, visibility:hidden, and opacity:0
+   * Uses a cache to avoid redundant checks of the same elements.
+   */
+  private isElementVisible(element: HTMLElement | null): boolean {
+    if (!element) {
+      return false;
+    }
+
+    // Check cache first
+    if (this.visibilityCache.has(element)) {
+      return this.visibilityCache.get(element)!;
+    }
+
+    let current: HTMLElement | null = element;
+    while (current) {
+      try {
+        const style = this.document.defaultView?.getComputedStyle(current);
+        if (!style) {
+          // Cache and return true for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, true);
+            parent = parent.parentElement;
+          }
+          return true;
+        }
+
+        // Check for display:none
+        if (style.display === 'none') {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+
+        // Check for visibility:hidden
+        if (style.visibility === 'hidden') {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+
+        // Check for opacity:0
+        if (parseFloat(style.opacity) === 0) {
+          // Cache and return false for this element and all its parents
+          let parent: HTMLElement | null = current;
+          while (parent) {
+            this.visibilityCache.set(parent, false);
+            parent = parent.parentElement;
+          }
+          return false;
+        }
+      } catch {
+        // If we can't get computed style, cache and return true for this element and all its parents
+        let parent: HTMLElement | null = current;
+        while (parent) {
+          this.visibilityCache.set(parent, true);
+          parent = parent.parentElement;
+        }
+        return true;
+      }
+
+      current = current.parentElement;
+    }
+
+    // Cache and return true for the original element
+    this.visibilityCache.set(element, true);
+    return true;
   }
 
   /**

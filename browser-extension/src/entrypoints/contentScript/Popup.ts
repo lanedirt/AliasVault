@@ -6,11 +6,11 @@ import { PasswordGenerator } from '../../utils/generators/Password/PasswordGener
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
-import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import SqliteClient from '../../utils/SqliteClient';
 import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
+import { FormDetector } from '@/utils/formDetector/FormDetector';
 
 // TODO: store generic setting constants somewhere else.
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
@@ -211,7 +211,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    const suggestedName = getSuggestedServiceName(document, window.location);
+    const suggestedName = FormDetector.getSuggestedServiceName(document, window.location);
     const result = await createAliasCreationPopup(suggestedName, rootContainer);
 
     if (!result) {
@@ -1297,57 +1297,6 @@ export async function dismissVaultLockedPopup(): Promise<void> {
     const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
     await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, threeDaysFromNow);
   }
-}
-
-/**
- * Get a suggested service name from the page title and URL.
- * Attempts to extract meaningful parts while maintaining original capitalization.
- */
-function getSuggestedServiceName(document: Document, location: Location): string {
-  const title = document.title;
-
-  /**
-   * Filter out common words and keep meaningful parts of the title
-   */
-  const getMeaningfulTitleParts = (title: string): string[] => {
-    return title
-      .toLowerCase()
-      .split(/[\s|\-—/\\]+/) // Split on spaces and common dividers
-      .filter(word =>
-        word.length > 1 && // Filter out single characters
-        !CombinedStopWords.has(word.toLowerCase()) // Filter out common words
-      );
-  };
-
-  /**
-   * Get original case version of meaningful words
-   */
-  const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
-    return text
-      .split(/[\s|\-—/\\]+/)
-      .filter(word => meaningfulParts.includes(word.toLowerCase()))
-      .join(' ');
-  };
-
-  // First try to extract meaningful parts after the last divider
-  const dividerRegex = /[|\-—/\\][^|\-—/\\]*$/;
-  const dividerMatch = dividerRegex.exec(title);
-  if (dividerMatch) {
-    const meaningfulParts = getMeaningfulTitleParts(dividerMatch[0]);
-    if (meaningfulParts.length > 0) {
-      return getOriginalCase(dividerMatch[0].trim(), meaningfulParts);
-    }
-  }
-
-  // If no meaningful parts found after divider, try the full title
-  const meaningfulParts = getMeaningfulTitleParts(title);
-  if (meaningfulParts.length > 0) {
-    return getOriginalCase(title, meaningfulParts);
-  }
-
-  // Fall back to domain name if no meaningful parts found
-  const domainParts = location.hostname.replace(/^www\./, '').split('.');
-  return domainParts.slice(-2).join('.');
 }
 
 /**
