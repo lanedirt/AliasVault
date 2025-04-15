@@ -13,7 +13,7 @@
     <DataAnnotationsValidator/>
     <div>
         <label asp-for="Input.UserName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
-        <InputTextField id="username" @bind-Value="Input.UserName" placeholder="username" />
+        <InputTextField id="username" @bind-Value="Input.UserName" type="text" placeholder="username" />
         <ValidationMessage For="() => Input.UserName"/>
     </div>
     <div>
