@@ -590,7 +590,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
         `;
 
       // Handle popout click
-      popoutIcon.addEventListener('click', (e) => {
+      addReliableClickHandler(popoutIcon, (e) => {
         e.stopPropagation(); // Prevent credential fill
         sendMessage('OPEN_POPUP_WITH_CREDENTIAL', { credentialId: cred.Id }, 'background');
         removeExistingPopup(rootContainer);
@@ -600,7 +600,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       item.appendChild(popoutIcon);
 
       // Update click handler to only trigger on credentialInfo
-      credentialInfo.addEventListener('click', () => {
+      addReliableClickHandler(credentialInfo, () => {
         fillCredential(cred, input);
         removeExistingPopup(rootContainer);
       });
