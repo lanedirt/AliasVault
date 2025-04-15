@@ -1,6 +1,8 @@
 /* AliasVault Content Script Styles */
 body {
     position: absolute;
+    margin: 0;
+    padding: 0;
 }
 
 /* Base Popup Styles */
