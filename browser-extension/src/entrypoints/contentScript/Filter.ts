@@ -78,7 +78,12 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
 
     // Check page title match
     if (titleWords.length > 0) {
-      hasTitleMatch = titleWords.some(word => cred.ServiceName.toLowerCase().includes(word));
+      const credNameWords = cred.ServiceName.toLowerCase()
+        .split(/\s+/)
+        .filter(word => word.length > 3 && !CombinedStopWords.has(word));
+      hasTitleMatch = titleWords.some(word =>
+        credNameWords.some(credWord => credWord.includes(word))
+      );
     }
 
     // Assign priority based on matches
