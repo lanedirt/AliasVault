@@ -1,0 +1,12 @@
+<!--
+Apple ID login form where the label is a sibling element of the input field without proper label[for] attribute.
+The element here should be detected as an email field.
+-->
+<div>
+    <div class=" form-cell-wrapper form-textbox   ">
+      <input type="text" id="account_name_text_field" can-field="accountName" aria-labelledby="apple_id_field_label" autocorrect="off" autocapitalize="off" aria-required="true" required="required" spellcheck="false" ($focus)="appleIdFocusHandler($element)" ($blur)="appleIdBlurHandler()" class="force-ltr form-textbox-input  form-textbox-entered " autocomplete="false" aria-invalid="false">
+      <span aria-hidden="true" id="apple_id_field_label" class=" form-textbox-label  form-label-flyout">
+        Email or Phone Number
+      </span>
+    </div>
+  </div>

@@ -295,6 +295,17 @@ export class FormDetector {
         }
       }
 
+      // Check for sibling elements with class containing "label"
+      const parent = input.parentElement;
+      if (parent) {
+        const siblings = Array.from(parent.children);
+        for (const sibling of siblings) {
+          if (sibling !== input && Array.from(sibling.classList).some(c => c.toLowerCase().includes('label'))) {
+            attributes.push(sibling.textContent?.toLowerCase() ?? '');
+          }
+        }
+      }
+
       // Check for parent label and table cell structure
       let currentElement = input;
       for (let i = 0; i < 5; i++) {
