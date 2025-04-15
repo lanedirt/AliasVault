@@ -316,27 +316,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   };
 
   // Add click listener with capture and prevent removal.
-  createButton.addEventListener('click', handleCreateClick, {
-    capture: true,
-    passive: false
-  });
-
-  // Backup click handling using mousedown/mouseup if needed.
-  let isMouseDown = false;
-  createButton.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    isMouseDown = true;
-  }, { capture: true });
-
-  createButton.addEventListener('mouseup', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isMouseDown) {
-      handleCreateClick(e);
-    }
-    isMouseDown = false;
-  }, { capture: true });
+  addReliableClickHandler(createButton, handleCreateClick);
 
   // Create search input.
   const searchInput = document.createElement('input');
@@ -359,10 +339,18 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   </svg>
 `;
 
-  closeButton.addEventListener('click', async () => {
+  /**
+   * Handle close button click
+   */
+  const handleCloseClick = async (e: Event) : Promise<void> => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     await disableAutoShowPopup();
     removeExistingPopup(rootContainer);
-  });
+  };
+
+  addReliableClickHandler(closeButton, handleCloseClick);
 
   actionContainer.appendChild(searchInput);
   actionContainer.appendChild(createButton);
@@ -1362,4 +1350,36 @@ function getValidServiceUrl(): string {
     console.debug('Error validating service URL:', error);
     return '';
   }
+}
+
+/**
+ * Add click handler with mousedown/mouseup backup for better click reliability in shadow DOM.
+ *
+ * Some websites due to their design cause the AliasVault autofill to re-trigger when clicking
+ * outside of the input field, which causes the AliasVault popup to close before the click event
+ * is registered. This is a workaround to ensure the click event is always registered.
+ */
+function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => void): void {
+  // Add primary click listener with capture and prevent removal
+  element.addEventListener('click', handler, {
+    capture: true,
+    passive: false
+  });
+
+  // Backup click handling using mousedown/mouseup if needed
+  let isMouseDown = false;
+  element.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isMouseDown = true;
+  }, { capture: true });
+
+  element.addEventListener('mouseup', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMouseDown) {
+      handler(e);
+    }
+    isMouseDown = false;
+  }, { capture: true });
 }

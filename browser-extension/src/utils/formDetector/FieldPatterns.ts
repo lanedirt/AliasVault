@@ -95,7 +95,7 @@ export const EnglishStopWords = new Set([
 
   // Generic descriptors
   'online', 'web', 'digital', 'mobile', 'my', 'personal',
-  'private', 'general', 'default', 'standard',
+  'private', 'general', 'default', 'standard', 'website',
 
   // System/Technical
   'system', 'admin', 'administrator', 'platform', 'portal',

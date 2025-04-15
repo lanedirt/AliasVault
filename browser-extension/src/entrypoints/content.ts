@@ -27,7 +27,7 @@ export default defineContentScript({
       name: 'aliasvault-ui',
       position: 'overlay',
       alignment: 'top-left',
-      zIndex: 1000,
+      zIndex: 2147483646,
       anchor: 'html',
       /**
        * Handle mount.
@@ -48,7 +48,6 @@ export default defineContentScript({
           }
 
           const { isValid, inputElement } = validateInputField(e.target as Element);
-
           if (isValid && inputElement) {
             const formDetector = new FormDetector(document, inputElement);
             if (!formDetector.containsLoginForm()) {

@@ -22,7 +22,16 @@ export class FormDetector {
    * Detect login forms on the page based on the clicked element.
    */
   public containsLoginForm(): boolean {
-    const formWrapper = this.clickedElement?.closest('form') ?? this.document.body;
+    let formWrapper = this.clickedElement?.closest('form, [role="dialog"]') as HTMLElement | null;
+    if (formWrapper?.getAttribute('role') === 'dialog') {
+      // If we hit a dialog, search for form only within the dialog
+      formWrapper = formWrapper.querySelector('form') as HTMLElement | null ?? formWrapper;
+    }
+
+    if (!formWrapper) {
+      // If no form or dialog found, fallback to document.body
+      formWrapper = this.document.body as HTMLElement;
+    }
 
     /**
      * Sanity check: if form contains more than 150 inputs, don't process as this is likely not a login form.
