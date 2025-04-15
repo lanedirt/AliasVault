@@ -11,6 +11,7 @@ import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettin
 import SqliteClient from '../../utils/SqliteClient';
 import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
+import { Credential } from '@/utils/types/Credential';
 
 // TODO: store generic setting constants somewhere else.
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
