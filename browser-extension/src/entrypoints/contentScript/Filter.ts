@@ -1,7 +1,7 @@
 import { CombinedStopWords } from "@/utils/formDetector/FieldPatterns";
 import { Credential } from "../../utils/types/Credential";
 
-interface CredentialWithPriority extends Credential {
+type CredentialWithPriority = Credential & {
   priority: number;
 }
 
@@ -41,11 +41,11 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
   // Prepare page title words for matching
   const titleWords = pageTitle.length > 0
     ? pageTitle.toLowerCase()
-        .split(/\s+/)
-        .filter(word =>
-          word.length > 3 &&
+      .split(/\s+/)
+      .filter(word =>
+        word.length > 3 &&
           !CombinedStopWords.has(word.toLowerCase())
-        )
+      )
     : [];
 
   // Check for base URL matches and page title matches
@@ -101,7 +101,7 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
     new Map(filtered
       .sort((a, b) => a.priority - b.priority)
       .map(cred => [cred.Id, cred]))
-    .values()
+      .values()
   );
   // Show max 3 results
   return uniqueCredentials.slice(0, 3);
