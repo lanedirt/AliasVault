@@ -22,6 +22,28 @@ const CredentialsList: React.FC = () => {
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
 
   /**
+   * Get the display text for a credential, showing username by default,
+   * falling back to email only if username is null/undefined
+   */
+  const getCredentialDisplayText = (cred: Credential): string => {
+    const username = cred.Username ?? '';
+
+    // Show username if available.
+    if (username.length > 0) {
+      return username;
+    }
+
+    // Show email if username is not available.
+    const email = cred.Alias?.Email ?? '';
+    if (email.length > 0) {
+      return email;
+    }
+
+    // Show empty string if neither username nor email is available.
+    return '';
+  };
+
+  /**
    * Loading state with minimum duration for more fluid UX.
    */
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
@@ -173,7 +195,9 @@ const CredentialsList: React.FC = () => {
                 />
                 <div className="text-left">
                   <p className="font-medium text-gray-900 dark:text-white">{cred.ServiceName}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{cred.Username}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {getCredentialDisplayText(cred)}
+                  </p>
                 </div>
               </button>
             </li>
