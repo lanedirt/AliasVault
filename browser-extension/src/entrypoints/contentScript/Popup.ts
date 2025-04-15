@@ -11,6 +11,7 @@ import SqliteClient from '../../utils/SqliteClient';
 import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
+import { Credential } from '@/utils/types/Credential';
 
 // TODO: store generic setting constants somewhere else.
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
@@ -211,8 +212,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    const suggestedName = FormDetector.getSuggestedServiceName(document, window.location);
-    const result = await createAliasCreationPopup(suggestedName, rootContainer);
+    const suggestedNames = FormDetector.getSuggestedServiceName(document, window.location);
+    const result = await createAliasCreationPopup(suggestedNames, rootContainer);
 
     if (!result) {
       // User cancelled
@@ -671,7 +672,7 @@ export async function disableAutoShowPopup(): Promise<void> {
 /**
  * Create alias creation popup where user can choose between random alias and custom alias.
  */
-export async function createAliasCreationPopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
+export async function createAliasCreationPopup(suggestedNames: string[], rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
@@ -761,10 +762,15 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
           <input
             type="text"
             id="service-name-input"
-            value="${defaultName}"
+            value="${suggestedNames[0] ?? ''}"
             class="av-create-popup-input"
             placeholder="Enter service name"
           >
+          ${suggestedNames.length > 1 ? `
+            <div class="av-suggested-names">
+              ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
+            </div>
+          ` : ''}
         </div>
         <div class="av-create-popup-actions">
           <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
@@ -778,10 +784,15 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
           <input
             type="text"
             id="custom-service-name"
-            value="${defaultName}"
+            value="${suggestedNames[0] ?? ''}"
             class="av-create-popup-input"
             placeholder="Enter service name"
           >
+          ${suggestedNames.length > 1 ? `
+            <div class="av-suggested-names">
+              ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
+            </div>
+          ` : ''}
         </div>
         <div class="av-create-popup-field-group">
           <label for="custom-email">Email</label>
@@ -1169,9 +1180,50 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     // Use mousedown instead of click to prevent closing when dragging text
     overlay.addEventListener('mousedown', handleClickOutside);
 
+    // Add event listeners for suggested names
+    const handleSuggestedNameClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('av-suggested-name')) {
+        const name = target.dataset.name;
+        if (name) {
+          // Get current input value
+          const currentValue = input.value;
+
+          // Update input with clicked name
+          input.value = name;
+          customInput.value = name;
+
+          // Update the suggested names section
+          const suggestedNamesContainer = target.closest('.av-suggested-names');
+          if (suggestedNamesContainer) {
+            // Update the suggestions HTML using the helper function
+            suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+          }
+        }
+      }
+    };
+
+    popup.addEventListener('click', handleSuggestedNameClick);
+
     // Focus the input field
     input.select();
   });
+}
+
+/**
+ * Get suggested names HTML with current input value excluded
+ */
+function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): string {
+  // Filter out the current value and create unique set of remaining suggestions
+  const filteredSuggestions = [...new Set(suggestedNames.filter(n => n !== currentValue))];
+
+  if (filteredSuggestions.length === 0) {
+    return '';
+  }
+
+  return `or ${filteredSuggestions.map((name, index) =>
+    `<span class="av-suggested-name" data-name="${name}">${name}</span>${index < filteredSuggestions.length - 1 ? ', ' : ''}`
+  ).join('')}?`;
 }
 
 /**

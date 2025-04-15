@@ -3,75 +3,75 @@ import { createTestDocument } from './TestUtils';
 import { FormDetector } from '../FormDetector';
 
 describe('FormDetector.getSuggestedServiceName (English)', () => {
-  it('should extract service name from title with divider', () => {
+  it('should extract service name from title with divider and include domain', () => {
     const { document, location } = createTestDocument(
       'Welcome to MyBank - Online Banking Platform For You',
       'https://www.mybank.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('MyBank');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['MyBank', 'Banking Platform For You', 'mybank.com']);
   });
 
-  it('should extract service name from title without divider', () => {
+  it('should extract service name from title without divider and include domain', () => {
     const { document, location } = createTestDocument(
       'GitHub: Let\'s build from here',
       'https://github.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('GitHub');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['GitHub', 'Let\'s build from here', 'github.com']);
   });
 
-  it('should handle titles with multiple meaningful words', () => {
+  it('should handle titles with multiple meaningful words and include domain', () => {
     const { document, location } = createTestDocument(
       'Amazon Shopping Cart',
       'https://www.amazon.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('Amazon Shopping');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['Amazon Shopping', 'amazon.com']);
   });
 
-  it('should fall back to domain name when title has no meaningful words', () => {
+  it('should return only domain name when title has no meaningful words', () => {
     const { document, location } = createTestDocument(
       'Home | Welcome',
       'https://www.example.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('example.com');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['example.com']);
   });
 
-  it('should handle titles with special characters', () => {
+  it('should handle titles with special characters and include domain', () => {
     const { document, location } = createTestDocument(
       'Netflix - Watch TV Shows Online, Watch Movies Online',
       'https://www.netflix.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('Netflix');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['Netflix', 'netflix.com']);
   });
 
-  it('should handle titles with multiple dividers', () => {
+  it('should handle titles with multiple dividers and include domain', () => {
     const { document, location } = createTestDocument(
       'Twitter / X - Social Media Platform',
       'https://twitter.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('Twitter');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['Twitter', 'X - Social Media', 'twitter.com']);
   });
 
-  it('should handle empty titles', () => {
+  it('should handle empty titles by returning only domain', () => {
     const { document, location } = createTestDocument(
       '',
       'https://www.example.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('example.com');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['example.com']);
   });
 
-  it('should handle titles with only stop words', () => {
+  it('should handle titles with only stop words by returning only domain', () => {
     const { document, location } = createTestDocument(
       'The and or but',
       'https://www.example.com'
     );
-    const serviceName = FormDetector.getSuggestedServiceName(document, location);
-    expect(serviceName).toBe('example.com');
+    const suggestions = FormDetector.getSuggestedServiceName(document, location);
+    expect(suggestions).toEqual(['example.com']);
   });
 });

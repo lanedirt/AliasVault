@@ -180,7 +180,7 @@ export const DutchStopWords = new Set([
   'vandaag', 'nu', 'huidig', 'recent', 'nieuwste',
 
   // General
-  'je', 'in', 'op', 'de'
+  'je', 'in', 'op', 'de', 'van', 'ons', 'allemaal'
 ]);
 
 /**

@@ -113,6 +113,20 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+.av-suggested-names {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #acacac;
+}
+.av-suggested-name {
+  color: #bababa;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.av-suggested-name:hover {
+  color: #d68338;
+}
+
 .av-service-details {
   font-size: 0.85em;
   white-space: nowrap;

@@ -54,10 +54,10 @@ export class FormDetector {
   }
 
   /**
-   * Get a suggested service name from the page title and URL.
-   * Attempts to extract meaningful parts while maintaining original capitalization.
+   * Get suggested service names from the page title and URL.
+   * Returns an array with two suggestions: the primary name and the domain name as an alternative.
    */
-  public static getSuggestedServiceName(document: Document, location: Location): string {
+  public static getSuggestedServiceName(document: Document, location: Location): string[] {
     const title = document.title;
     const maxWords = 4;
     const maxLength = 50;
@@ -105,6 +105,9 @@ export class FormDetector {
         .join(' ');
     };
 
+    // Domain name suggestion (always included as fallback or first suggestion)
+    const domainSuggestion = location.hostname.replace(/^www\./, '');
+
     // First try to extract meaningful parts based on the divider
     const dividerRegex = /[|\-—/\\:]/;
     const dividerMatch = dividerRegex.exec(title);
@@ -117,13 +120,25 @@ export class FormDetector {
       const beforeWords = getMeaningfulTitleParts(beforeDivider);
       const afterWords = getMeaningfulTitleParts(afterDivider);
 
-      // Choose the part with fewer meaningful words
-      const chosenPart = beforeWords.length <= afterWords.length ? beforeDivider : afterDivider;
-      const meaningfulParts = getMeaningfulTitleParts(chosenPart);
+      // Get both parts in original case
+      const beforePart = getOriginalCase(beforeDivider, beforeWords);
+      const afterPart = getOriginalCase(afterDivider, afterWords);
 
-      const serviceName = getOriginalCase(chosenPart, meaningfulParts);
-      if (validLength(serviceName)) {
-        return serviceName;
+      // Check if both parts are valid
+      const beforeValid = validLength(beforePart);
+      const afterValid = validLength(afterPart);
+
+      // If both parts are valid, return both as suggestions
+      if (beforeValid && afterValid) {
+        return [beforePart, afterPart, domainSuggestion];
+      }
+
+      // If only one part is valid, return it
+      if (beforeValid) {
+        return [beforePart, domainSuggestion];
+      }
+      if (afterValid) {
+        return [afterPart, domainSuggestion];
       }
     }
 
@@ -131,12 +146,11 @@ export class FormDetector {
     const meaningfulParts = getMeaningfulTitleParts(title);
     const serviceName = getOriginalCase(title, meaningfulParts);
     if (validLength(serviceName)) {
-      return serviceName;
+      return [serviceName, domainSuggestion];
     }
 
-    // Fall back to domain name if no meaningful parts found
-    const domainParts = location.hostname.replace(/^www\./, '').split('.');
-    return domainParts.slice(-2).join('.');
+    // Fall back to domain name
+    return [domainSuggestion];
   }
 
   /**
