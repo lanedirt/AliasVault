@@ -1,7 +1,7 @@
 import './contentScript/style.css';
 import { FormDetector } from '../utils/formDetector/FormDetector';
 import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
-import { injectIcon, popupDebounceTimeHasPassed } from './contentScript/Form';
+import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from './contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
 import { BoolResponse as messageBoolResponse } from '../utils/types/messaging/BoolResponse';
 import { defineContentScript } from 'wxt/sandbox';
@@ -25,7 +25,9 @@ export default defineContentScript({
     // Create a shadow root UI for isolation
     const ui = await createShadowRootUi(ctx, {
       name: 'aliasvault-ui',
-      position: 'inline',
+      position: 'overlay',
+      alignment: 'top-left',
+      zIndex: 1000,
       anchor: 'html',
       /**
        * Handle mount.
@@ -40,25 +42,24 @@ export default defineContentScript({
           }
 
           // Check if element itself, html or body has av-disable attribute like av-disable="true"
-          const avDisable = (e.target as HTMLElement).getAttribute('av-disable') ?? document.body?.getAttribute('av-disable') ?? document.documentElement.getAttribute('av-disable');
-          if (avDisable === 'true') {
+          const avDisable = ((e.target as HTMLElement).getAttribute('av-disable') ?? document.body?.getAttribute('av-disable') ?? document.documentElement.getAttribute('av-disable')) === 'true';
+          if (avDisable) {
             return;
           }
 
-          const target = e.target as HTMLInputElement;
-          const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url'];
+          const { isValid, inputElement } = validateInputField(e.target as Element);
 
-          if (target.tagName === 'INPUT' && textInputTypes.includes(target.type) && !target.dataset.aliasvaultIgnore) {
-            const formDetector = new FormDetector(document, target);
+          if (isValid && inputElement) {
+            const formDetector = new FormDetector(document, inputElement);
             if (!formDetector.containsLoginForm()) {
               return;
             }
 
-            injectIcon(target, container);
+            injectIcon(inputElement, container);
 
             // Only show popup if its enabled and debounce time has passed.
             if (await isAutoShowPopupEnabled() && popupDebounceTimeHasPassed()) {
-              openAutofillPopup(target, container);
+              openAutofillPopup(inputElement, container);
             }
           }
         };
@@ -85,19 +86,19 @@ export default defineContentScript({
           }
 
           const target = document.getElementById(elementIdentifier) ?? document.getElementsByName(elementIdentifier)[0];
+          const { isValid, inputElement } = validateInputField(target);
 
-          if (!(target instanceof HTMLInputElement)) {
-            return { success: false, error: 'Target element is not an input field' };
+          if (!isValid || !inputElement) {
+            return { success: false, error: 'Target element is not a supported input field' };
           }
 
-          const formDetector = new FormDetector(document, target);
-
+          const formDetector = new FormDetector(document, inputElement);
           if (!formDetector.containsLoginForm()) {
             return { success: false, error: 'No form found' };
           }
 
-          injectIcon(target, container);
-          openAutofillPopup(target, container);
+          injectIcon(inputElement, container);
+          openAutofillPopup(inputElement, container);
           return { success: true };
         });
       },

@@ -111,3 +111,5 @@ The following websites have been known to cause issues in the past (but should b
 | https://news.ycombinator.com/login?goto=news | Popup and client favicon not showing due to SVG format |
 | https://vault.bitwarden.com/#/login | Autofill password not detected (input not long enough), manually typing in works |
 | https://login.microsoftonline.com/ | Password gets reset after autofill |
+| https://mijn.ing.nl/login/ | Autofill doesn't detect input fields and AliasVault autofill icon placement is off |
+
