@@ -1,5 +1,5 @@
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard, Image } from 'react-native';
-import { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard, Image, RefreshControl } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
 import { router, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -14,6 +14,7 @@ export default function CredentialsScreen() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const dynamicStyles = {
     credentialItem: {
@@ -49,21 +50,49 @@ export default function CredentialsScreen() {
     router.push(`/(tabs)/(credentials)/${credentialId}`);
   };
 
+  const loadCredentials = async () => {
+    setIsLoadingCredentials(true);
+    try {
+      const credentials = await dbContext.sqliteClient!.getAllCredentials();
+      setCredentialsList(credentials);
+    } catch (err) {
+      console.error('Error loading credentials:', err);
+    }
+    setIsLoadingCredentials(false);
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+
+    try {
+      // Record start time
+      const startTime = Date.now();
+
+      // Load data
+      const credentials = await dbContext.sqliteClient!.getAllCredentials();
+
+      // Calculate remaining time needed to reach 350ms minimum
+      const elapsedTime = Date.now() - startTime;
+      const remainingDelay = Math.max(0, 350 - elapsedTime);
+
+      // Only delay if needed to reach minimum 350ms
+      if (remainingDelay > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingDelay));
+      }
+
+      // Update the data
+      setCredentialsList(credentials);
+      setRefreshing(false);
+    } catch (err) {
+      console.error('Error refreshing credentials:', err);
+      setRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
       return;
     }
-
-    const loadCredentials = async () => {
-      setIsLoadingCredentials(true);
-      try {
-        const credentialsList = await dbContext.sqliteClient!.getAllCredentials();
-        setCredentialsList(credentialsList);
-      } catch (err) {
-        console.error('Error loading credentials:', err);
-      }
-      setIsLoadingCredentials(false);
-    };
 
     loadCredentials();
   }, [isAuthenticated, isDatabaseAvailable]);
@@ -104,6 +133,14 @@ export default function CredentialsScreen() {
               data={filteredCredentials}
               keyExtractor={(item) => item.Id}
               keyboardShouldPersistTaps='handled'
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={['#f97316']}
+                  tintColor={isDarkMode ? '#f97316' : '#f97316'}
+                />
+              }
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => handleCredentialPress(item.Id)}
