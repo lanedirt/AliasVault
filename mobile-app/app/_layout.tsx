@@ -116,8 +116,10 @@ function RootLayoutNav() {
         await webApi.logout(statusError);
         return;
       }
-r
+
       // If the vault revision is higher, fetch the latest vault
+      console.log('Vault revision:', statusResponse.vaultRevision);
+      console.log('Current vault revision:', dbContext.vaultRevision);
       if (statusResponse.vaultRevision > dbContext.vaultRevision) {
         const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
@@ -129,7 +131,10 @@ r
           return;
         }
         // Initialize the SQLite context again with the newly retrieved decrypted blob
-        await dbContext.initializeDatabase(vaultResponseJson);
+        // TODO: set encryption key in initializedatabase as separate method to make
+        // it more clean.
+        console.log('Re-initializing database with new vault');
+        await dbContext.initializeDatabase(vaultResponseJson, null);
       }
       else {
         console.log('Vault check finished: Vault revision is the same, no action requiredr');

@@ -7,7 +7,7 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
+  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string | null) => Promise<void>;
   clearDatabase: () => void;
   vaultRevision: number;
   publicEmailDomains: string[];
@@ -128,7 +128,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Clear database and remove from background worker, called when logging out.
    */
   const clearDatabase = useCallback(() : void => {
-    setSqliteClient(null);
     setDbInitialized(false);
     // TODO: implement actual vault clearing.
     credentialManager.clearVault();
