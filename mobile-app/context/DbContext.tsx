@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { NativeModules } from 'react-native';
+import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -9,9 +10,7 @@ type DbContextType = {
   dbAvailable: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string | null) => Promise<void>;
   clearDatabase: () => void;
-  vaultRevision: number;
-  publicEmailDomains: string[];
-  privateEmailDomains: string[];
+  vaultMetadata: VaultMetadata | null;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -38,19 +37,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [dbAvailable, setDbAvailable] = useState(false);
 
   /**
-   * Public email domains.
+   * Vault metadata containing public/private email domains and revision number
    */
-  const [publicEmailDomains, setPublicEmailDomains] = useState<string[]>([]);
-
-  /**
-   * Vault revision.
-   */
-  const [vaultRevision, setVaultRevision] = useState(0);
-
-  /**
-   * Private email domains.
-   */
-  const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
+  const [vaultMetadata, setVaultMetadata] = useState<VaultMetadata | null>(null);
 
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string | null = null) => {
     // If the derived key is provided, store it in the keychain.
@@ -59,60 +48,49 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       await sqliteClient.storeEncryptionKey(derivedKey);
     }
 
-    // Initialize the SQLite client.
-    await sqliteClient.storeEncryptedDatabase(vaultResponse.vault.blob);
+    const metadata: VaultMetadata = {
+      publicEmailDomains: vaultResponse.vault.publicEmailDomainList,
+      privateEmailDomains: vaultResponse.vault.privateEmailDomainList,
+      vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber,
+    };
+
+    // Initialize the SQLite client with both database and metadata
+    await sqliteClient.storeEncryptedDatabase(
+      vaultResponse.vault.blob,
+      metadata
+    );
 
     setDbInitialized(true);
     setDbAvailable(true);
-    setPublicEmailDomains(vaultResponse.vault.publicEmailDomainList);
-    setPrivateEmailDomains(vaultResponse.vault.privateEmailDomainList);
-    setVaultRevision(vaultResponse.vault.currentRevisionNumber);
-
-    /*
-     * Store encrypted vault in background worker.
-     */
-    // TODO: implement actual vault storage.
+    setVaultMetadata(metadata);
   }, []);
 
   const checkStoredVault = useCallback(async () => {
-    // Try to do a simple query to see if the database is available.
     try {
-      const isVaultInitialized = credentialManager.isVaultInitialized();
+      const isVaultInitialized = await credentialManager.isVaultInitialized();
       if (isVaultInitialized) {
-        setDbInitialized(true);
-        setDbAvailable(true);
+        // Get metadata from SQLite client
+        const metadata = await sqliteClient.getVaultMetadata();
+        if (metadata) {
+          setDbInitialized(true);
+          setDbAvailable(true);
+          setVaultMetadata(metadata);
+        } else {
+          setDbInitialized(true);
+          setDbAvailable(false);
+          setVaultMetadata(null);
+        }
       } else {
         setDbInitialized(true);
         setDbAvailable(false);
+        setVaultMetadata(null);
       }
     } catch (error) {
       console.error('Error checking vault initialization:', error);
       setDbInitialized(true);
       setDbAvailable(false);
+      setVaultMetadata(null);
     }
-
-    /*try {
-      const response = await sendMessage('GET_VAULT', {}, 'background') as messageVaultResponse;
-      if (response?.vault) {
-        const client = new SqliteClient();
-        await client.initializeFromBase64(response.vault);
-
-        setSqliteClient(client);
-        setDbInitialized(true);
-        setDbAvailable(true);
-        setPublicEmailDomains(response.publicEmailDomains ?? []);
-        setPrivateEmailDomains(response.privateEmailDomains ?? []);
-        setVaultRevision(response.vaultRevisionNumber ?? 0);
-      } else {
-        setDbInitialized(true);
-        setDbAvailable(false);
-      }
-    } catch (error) {
-      console.error('Error retrieving vault from background:', error);
-      setDbInitialized(true);
-      setDbAvailable(false);
-    }*/
-
   }, []);
 
   /**
@@ -129,6 +107,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const clearDatabase = useCallback(() : void => {
     setDbInitialized(false);
+    setVaultMetadata(null);
     // TODO: implement actual vault clearing.
     credentialManager.clearVault();
   }, []);
@@ -139,10 +118,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     dbAvailable,
     initializeDatabase,
     clearDatabase,
-    vaultRevision,
-    publicEmailDomains,
-    privateEmailDomains
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultRevision, publicEmailDomains, privateEmailDomains]);
+    vaultMetadata
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultMetadata]);
 
   return (
     <DbContext.Provider value={contextValue}>

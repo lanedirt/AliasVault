@@ -3,6 +3,7 @@ import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
 import { PasswordSettings } from './types/PasswordSettings';
+import { VaultMetadata } from './types/messaging/VaultMetadata';
 
 type SQLiteBindValue = string | number | null | Uint8Array;
 
@@ -15,11 +16,35 @@ class SqliteClient {
   /**
    * Store the encrypted database via the native code implementation.
    */
-  public async storeEncryptedDatabase(base64String: string): Promise<void> {
+  async storeEncryptedDatabase(base64EncryptedDb: string, metadata: VaultMetadata): Promise<void> {
     try {
-      await this.credentialManager.storeDatabase(base64String);
+      const metadataJson = JSON.stringify(metadata);
+      await this.credentialManager.storeDatabase(base64EncryptedDb, metadataJson);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieve the vault metadata from native storage
+   * @returns The parsed VaultMetadata object
+   * @throws Error if metadata is not found or cannot be parsed
+   */
+  public async getVaultMetadata(): Promise<VaultMetadata> {
+    try {
+      const metadataJson = await this.credentialManager.getVaultMetadata();
+      if (!metadataJson) {
+        throw new Error('No vault metadata found in native storage');
+      }
+
+      try {
+        return JSON.parse(metadataJson) as VaultMetadata;
+      } catch (parseError) {
+        throw new Error('Failed to parse vault metadata from native storage');
+      }
+    } catch (error) {
+      console.error('Error retrieving vault metadata:', error);
       throw error;
     }
   }

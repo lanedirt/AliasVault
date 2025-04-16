@@ -79,9 +79,17 @@ class SharedCredentialStore {
         return containerURL.appendingPathComponent(encryptedDbFileName)
     }
 
-    func storeEncryptedDatabase(_ base64EncryptedDb: String) throws {
+    // Store the encrypted database (base64 encoded) in the app's documents directory
+    // and metadata in UserDefaults
+    // TODO: refactor metadata save and retrieve calls to separate calls for better clarity throughtout
+    // full call chain?
+    func storeEncryptedDatabase(_ base64EncryptedDb: String, metadata: String) throws {
         // Store the encrypted database (base64 encoded) in the app's documents directory
         try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
+
+        // Store metadata in UserDefaults
+        UserDefaults.standard.set(metadata, forKey: "vault_metadata")
+        UserDefaults.standard.synchronize()
     }
 
     // Get the encrypted database as a base64 encoded string
@@ -92,6 +100,11 @@ class SharedCredentialStore {
         } catch {
             return nil
         }
+    }
+
+    // Get the vault metadata from UserDefaults
+    func getVaultMetadata() -> String? {
+        return UserDefaults.standard.string(forKey: "vault_metadata")
     }
 
     func initializeDatabase() throws {

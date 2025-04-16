@@ -5,23 +5,24 @@ import LocalAuthentication
 @objc(CredentialManager)
 class CredentialManager: NSObject {
     private let credentialStore = SharedCredentialStore.shared
-    
+
     override init() {
         super.init()
     }
-    
+
     @objc
     func storeDatabase(_ base64EncryptedDb: String,
+                      metadata: String,
                       resolver resolve: @escaping RCTPromiseResolveBlock,
                       rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            try credentialStore.storeEncryptedDatabase(base64EncryptedDb)
+            try credentialStore.storeEncryptedDatabase(base64EncryptedDb, metadata: metadata)
             resolve(nil)
         } catch {
             reject("DB_ERROR", "Failed to store database: \(error.localizedDescription)", error)
         }
     }
-    
+
     @objc
     func storeEncryptionKey(_ base64EncryptionKey: String,
                           resolver resolve: @escaping RCTPromiseResolveBlock,
@@ -30,12 +31,12 @@ class CredentialManager: NSObject {
             // Store the encryption key in the keychain with biometric or PIN protection
             let context = LAContext()
             var error: NSError?
-            
+
             guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
                 reject("AUTH_UNAVAILABLE", "Authentication not available: \(error?.localizedDescription ?? "Unknown error")", error)
                 return
             }
-            
+
             // Store the key in the keychain with authentication protection
             try credentialStore.storeEncryptionKey(base64EncryptionKey)
             resolve(nil)
@@ -43,7 +44,7 @@ class CredentialManager: NSObject {
             reject("KEYCHAIN_ERROR", "Failed to store encryption key: \(error.localizedDescription)", error)
         }
     }
-    
+
     @objc
     func executeQuery(_ query: String,
                      params: [Any],
@@ -52,12 +53,12 @@ class CredentialManager: NSObject {
         do {
             // Ensure database is initialized
             try credentialStore.initializeDatabase()
-            
+
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
                 return String(describing: param)
             }
-            
+
             // Execute the query through the credential store
             let results = try credentialStore.executeQuery(query, params: bindingParams)
             resolve(results)
@@ -65,7 +66,7 @@ class CredentialManager: NSObject {
             reject("QUERY_ERROR", "Failed to execute query: \(error.localizedDescription)", error)
         }
     }
-    
+
     @objc
     func executeUpdate(_ query: String,
                       params: [Any],
@@ -74,12 +75,12 @@ class CredentialManager: NSObject {
         do {
             // Ensure database is initialized
             try credentialStore.initializeDatabase()
-            
+
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
                 return String(describing: param)
             }
-            
+
             // Execute the update through the credential store
             let changes = try credentialStore.executeUpdate(query, params: bindingParams)
             resolve(changes)
@@ -87,7 +88,7 @@ class CredentialManager: NSObject {
             reject("UPDATE_ERROR", "Failed to execute update: \(error.localizedDescription)", error)
         }
     }
-    
+
     @objc
     func addCredential(_ username: String, password: String, service: String) {
         do {
@@ -97,7 +98,7 @@ class CredentialManager: NSObject {
             print("Failed to add credential: \(error)")
         }
     }
-    
+
     @objc
     func getCredentials() -> [String: Any] {
         do {
@@ -137,12 +138,23 @@ class CredentialManager: NSObject {
     }
 
     @objc
+    func getVaultMetadata(_ resolve: @escaping RCTPromiseResolveBlock,
+                          rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            let metadata = try credentialStore.getVaultMetadata()
+            resolve(metadata)
+        } catch {
+            reject("METADATA_ERROR", "Failed to get vault metadata: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
     func requiresMainQueueSetup() -> Bool {
         return false
     }
-    
+
     @objc
     static func moduleName() -> String! {
         return "CredentialManager"
     }
-} 
+}

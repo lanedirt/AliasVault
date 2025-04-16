@@ -7,9 +7,11 @@ RCT_EXTERN_METHOD(addCredential:(NSString *)username password:(NSString *)passwo
 RCT_EXTERN_METHOD(getCredentials)
 RCT_EXTERN_METHOD(clearVault)
 RCT_EXTERN_METHOD(isVaultInitialized:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(getVaultMetadata:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
 // New methods for SQLite database operations
 RCT_EXTERN_METHOD(storeDatabase:(NSString *)base64EncryptedDb
+                  metadata:(NSString *)metadata
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
@@ -27,4 +29,5 @@ RCT_EXTERN_METHOD(executeUpdate:(NSString *)query
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-@end 
+
+@end
