@@ -118,9 +118,12 @@ function RootLayoutNav() {
       }
 
       // If the vault revision is higher, fetch the latest vault
+      const vaultMetadata = await dbContext.getVaultMetadata();
+      const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
       console.log('Vault revision:', statusResponse.vaultRevision);
-      console.log('Current vault revision:', dbContext.vaultRevision);
-      if (statusResponse.vaultRevision > dbContext.vaultRevision) {
+      console.log('Current vault revision:', vaultRevisionNumber);
+
+      if (statusResponse.vaultRevision > vaultRevisionNumber) {
         const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson);

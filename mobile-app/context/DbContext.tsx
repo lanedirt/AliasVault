@@ -10,7 +10,7 @@ type DbContextType = {
   dbAvailable: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string | null) => Promise<void>;
   clearDatabase: () => void;
-  vaultMetadata: VaultMetadata | null;
+  getVaultMetadata: () => Promise<VaultMetadata | null>;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -36,11 +36,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [dbAvailable, setDbAvailable] = useState(false);
 
-  /**
-   * Vault metadata containing public/private email domains and revision number
-   */
-  const [vaultMetadata, setVaultMetadata] = useState<VaultMetadata | null>(null);
-
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string | null = null) => {
     // If the derived key is provided, store it in the keychain.
     // Otherwise we assume the encryption key is already stored in the keychain.
@@ -62,7 +57,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     setDbInitialized(true);
     setDbAvailable(true);
-    setVaultMetadata(metadata);
   }, []);
 
   const checkStoredVault = useCallback(async () => {
@@ -74,22 +68,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         if (metadata) {
           setDbInitialized(true);
           setDbAvailable(true);
-          setVaultMetadata(metadata);
         } else {
           setDbInitialized(true);
           setDbAvailable(false);
-          setVaultMetadata(null);
         }
       } else {
         setDbInitialized(true);
         setDbAvailable(false);
-        setVaultMetadata(null);
       }
     } catch (error) {
       console.error('Error checking vault initialization:', error);
       setDbInitialized(true);
       setDbAvailable(false);
-      setVaultMetadata(null);
     }
   }, []);
 
@@ -107,9 +97,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const clearDatabase = useCallback(() : void => {
     setDbInitialized(false);
-    setVaultMetadata(null);
     // TODO: implement actual vault clearing.
     credentialManager.clearVault();
+  }, []);
+
+  /**
+   * Get the current vault metadata directly from SQLite client
+   */
+  const getVaultMetadata = useCallback(async () : Promise<VaultMetadata | null> => {
+    return await sqliteClient.getVaultMetadata();
   }, []);
 
   const contextValue = useMemo(() => ({
@@ -118,8 +114,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     dbAvailable,
     initializeDatabase,
     clearDatabase,
-    vaultMetadata
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, vaultMetadata]);
+    getVaultMetadata
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata]);
 
   return (
     <DbContext.Provider value={contextValue}>
