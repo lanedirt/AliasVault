@@ -7,6 +7,7 @@ type AuthContextType = {
   isInitialized: boolean;
   username: string | null;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
+  initializeAuth: () => Promise<boolean>;
   login: () => Promise<void>;
   logout: (errorMessage?: string) => Promise<void>;
   globalMessage: string | null;
@@ -29,28 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const dbContext = useDb();
 
   /**
-   * Check for tokens in chrome storage on initial load.
-   */
-  useEffect(() => {
-    /**
-     * Initialize the authentication state.
-     */
-    const initializeAuth = async () : Promise<void> => {
-      const accessToken = await AsyncStorage.getItem('accessToken') as string;
-      const refreshToken = await AsyncStorage.getItem('refreshToken') as string;
-      const username = await AsyncStorage.getItem('username') as string;
-      if (accessToken && refreshToken && username) {
-        setUsername(username);
-        setIsLoggedIn(true);
-      }
-      setIsInitialized(true);
-    };
-
-    initializeAuth();
-  }, []);
-
-  /**
-   * Set auth tokens in chrome storage as part of the login process. After db is initialized, the login method should be called as well.
+   * Set auth tokens in storage as part of the login process. After db is initialized, the login method should be called as well.
    */
   const setAuthTokens = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await AsyncStorage.setItem('username', username);
@@ -58,6 +38,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.setItem('refreshToken', refreshToken);
 
     setUsername(username);
+  }, []);
+
+  /**
+   * Initialize the authentication state, called on initial load by _layout.tsx.
+   * @returns boolean indicating whether the user is logged in
+   */
+  const initializeAuth = useCallback(async () : Promise<boolean> => {
+    const accessToken = await AsyncStorage.getItem('accessToken') as string;
+    const refreshToken = await AsyncStorage.getItem('refreshToken') as string;
+    const username = await AsyncStorage.getItem('username') as string;
+    let isAuthenticated = false;
+    if (accessToken && refreshToken && username) {
+      setUsername(username);
+      setIsLoggedIn(true);
+      isAuthenticated = true;
+    }
+    setIsInitialized(true);
+    return isAuthenticated;
   }, []);
 
   /**
@@ -96,12 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoggedIn,
     isInitialized,
     username,
+    initializeAuth,
     setAuthTokens,
     login,
     logout,
     globalMessage,
     clearGlobalMessage,
-  }), [isLoggedIn, isInitialized, username, globalMessage, setAuthTokens, login, logout, clearGlobalMessage]);
+  }), [isLoggedIn, isInitialized, username, globalMessage, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth]);
 
   return (
     <AuthContext.Provider value={contextValue}>

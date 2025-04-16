@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const dbContext = useDb();
 
   /**
-   * Check for tokens in chrome storage on initial load.
+   * Check for tokens in browser local storage on initial load.
    */
   useEffect(() => {
     /**
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Set auth tokens in chrome storage as part of the login process. After db is initialized, the login method should be called as well.
+   * Set auth tokens in browser local storage as part of the login process. After db is initialized, the login method should be called as well.
    */
   const setAuthTokens = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
     await storage.setItem('local:username', username);

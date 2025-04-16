@@ -23,9 +23,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const credentialManager = NativeModules.CredentialManager;
 
   /**
-   * SQLite client.
+   * SQLite client is initialized in constructor as it passes SQL queries to the native module.
    */
-  const [sqliteClient, setSqliteClient] = useState<SqliteClient | null>(null);
+  const sqliteClient = new SqliteClient();
 
   /**
    * Database initialization state. If true, the database has been initialized and the dbAvailable state is correct.
@@ -52,20 +52,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [privateEmailDomains, setPrivateEmailDomains] = useState<string[]>([]);
 
-  const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string) => {
-    // Attempt to decrypt the blob.
-    /*console.log('attempt to decrypt vault');
-    const decryptedBlob = await EncryptionUtility.symmetricDecrypt(
-      vaultResponse.vault.blob,
-      derivedKey
-    );*/
+  const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string | null = null) => {
+    // If the derived key is provided, store it in the keychain.
+    // Otherwise we assume the encryption key is already stored in the keychain.
+    if (derivedKey) {
+      await sqliteClient.storeEncryptionKey(derivedKey);
+    }
 
     // Initialize the SQLite client.
-    const client = new SqliteClient();
-    await client.storeEncryptionKey(derivedKey);
-    await client.storeEncryptedDatabase(vaultResponse.vault.blob);
+    await sqliteClient.storeEncryptedDatabase(vaultResponse.vault.blob);
 
-    setSqliteClient(client);
     setDbInitialized(true);
     setDbAvailable(true);
     setPublicEmailDomains(vaultResponse.vault.publicEmailDomainList);
@@ -83,9 +79,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       const isVaultInitialized = credentialManager.isVaultInitialized();
       if (isVaultInitialized) {
-        // TODO: sqlclient can be initialized in constructor instead?
-        const client = new SqliteClient();
-        setSqliteClient(client);
         setDbInitialized(true);
         setDbAvailable(true);
       } else {
@@ -97,7 +90,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       setDbInitialized(true);
       setDbAvailable(false);
     }
-   
+
     /*try {
       const response = await sendMessage('GET_VAULT', {}, 'background') as messageVaultResponse;
       if (response?.vault) {
