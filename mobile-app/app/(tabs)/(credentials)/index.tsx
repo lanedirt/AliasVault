@@ -9,12 +9,14 @@ import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
 import { CredentialIcon } from '@/components/CredentialIcon';
+import { useVaultSync } from '@/hooks/useVaultSync';
 
 export default function CredentialsScreen() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const { syncVault } = useVaultSync();
 
   const dynamicStyles = {
     credentialItem: {
@@ -68,8 +70,16 @@ export default function CredentialsScreen() {
       // Record start time
       const startTime = Date.now();
 
-      // Load data
-      const credentials = await dbContext.sqliteClient!.getAllCredentials();
+      // Sync vault and load credentials
+      await syncVault({
+        forceCheck: true,
+        onSuccess: async () => {
+          await loadCredentials();
+        },
+        onError: (error) => {
+          console.error('Error syncing vault:', error);
+        }
+      });
 
       // Calculate remaining time needed to reach 350ms minimum
       const elapsedTime = Date.now() - startTime;
@@ -79,15 +89,12 @@ export default function CredentialsScreen() {
       if (remainingDelay > 0) {
         await new Promise(resolve => setTimeout(resolve, remainingDelay));
       }
-
-      // Update the data
-      setCredentialsList(credentials);
-      setRefreshing(false);
     } catch (err) {
       console.error('Error refreshing credentials:', err);
+    } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [syncVault, loadCredentials]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
