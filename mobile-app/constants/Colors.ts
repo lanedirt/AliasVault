@@ -14,13 +14,24 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    headerBackground: '#fff',
+    tabBarBackground: '#fff',
+    primaryButton: '#f97316',
+    secondaryButton: '#6b7280',
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#111827',
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    headerBackground: '#1f2937',
+    tabBarBackground: '#1f2937',
+    primaryButton: '#f97316',
+    secondaryButton: '#6b7280',
   },
-};
+} as const;
+
+// Export the type for TypeScript support
+export type ThemeColors = typeof Colors.light;

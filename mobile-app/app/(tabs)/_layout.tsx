@@ -6,13 +6,12 @@ import { router } from 'expo-router';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colors = useColors();
   const authContext = useAuth();
   const dbContext = useDb();
 
@@ -39,13 +38,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: colors.tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
+            //backgroundColor: colors.tabBarBackground,
           },
           default: {},
         }),

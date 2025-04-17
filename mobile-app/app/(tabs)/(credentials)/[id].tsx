@@ -7,7 +7,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
-import SqliteClient from '@/utils/SqliteClient';
 import { ThemedScrollView } from '@/components/ThemedScrollView';
 import { CredentialIcon } from '@/components/CredentialIcon';
 

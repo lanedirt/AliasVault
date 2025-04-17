@@ -52,7 +52,7 @@ export const useVaultSync = () => {
       if (statusError !== null) {
         console.log('Vault sync error:', statusError);
         await webApi.logout(statusError);
-        onError?.(statusError);
+        onError?.(statusErrorr);
         return false;
       }
 
@@ -60,6 +60,8 @@ export const useVaultSync = () => {
       const vaultMetadata = await dbContext.getVaultMetadata();
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
+      console.log('Vault revision local:', vaultRevisionNumber);
+      console.log('Vault revision server:', statusResponse.vaultRevision);
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
         const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
