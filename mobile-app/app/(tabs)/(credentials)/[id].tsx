@@ -1,82 +1,16 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, TouchableOpacity, Image, ScrollView, useColorScheme, StyleSheet } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
+import { ActivityIndicator, View, Text, useColorScheme, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useDb } from '@/context/DbContext';
-import { Credential } from '@/utils/types/Credential';
 import { ThemedScrollView } from '@/components/ThemedScrollView';
 import { CredentialIcon } from '@/components/CredentialIcon';
-
-interface FormInputCopyToClipboardProps {
-  label: string;
-  value: string | undefined;
-  type?: 'text' | 'password';
-}
-
-const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
-  label,
-  value,
-  type = 'text',
-}) => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
-
-  const copyToClipboard = async () => {
-    if (value) {
-      await Clipboard.setStringAsync(value);
-      Toast.show({
-        type: 'success',
-        text1: 'Copied to clipboard',
-        position: 'bottom',
-        visibilityTime: 2000, // Show for 2 seconds
-      });
-    }
-  };
-
-  const displayValue = type === 'password' && !isPasswordVisible
-    ? '••••••••'
-    : value;
-
-  return (
-    <TouchableOpacity
-      onPress={copyToClipboard}
-      style={[
-        styles.inputContainer,
-        {
-          backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
-          borderColor: isDarkMode ? '#374151' : '#d1d5db',
-        },
-      ]}
-    >
-      <View style={styles.inputContent}>
-        <View>
-          <Text style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#6b7280' }]}>
-            {label}
-          </Text>
-          <Text style={[styles.value, { color: isDarkMode ? '#f3f4f6' : '#1f2937' }]}>
-            {displayValue}
-          </Text>
-        </View>
-        <View style={styles.actions}>
-          {type === 'password' && (
-            <TouchableOpacity
-              onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-              style={styles.iconButton}
-            >
-              <Text style={styles.iconText}>
-                {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+import { useDb } from '@/context/DbContext';
+import { Credential } from '@/utils/types/Credential';
+import { LoginCredentials } from '@/components/credentialDetails/LoginCredentials';
+import { AliasDetails } from '@/components/credentialDetails/AliasDetails';
+import { NotesSection } from '@/components/credentialDetails/NotesSection';
 
 export default function CredentialDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -93,7 +27,13 @@ export default function CredentialDetailsScreen() {
       try {
         const cred = await dbContext.sqliteClient!.getCredentialById(id as string);
         if (cred?.Alias?.BirthDate) {
-          cred.Alias.BirthDate = new Date(cred.Alias.BirthDate);
+          // Convert the string date to a Date object
+          const date = new Date(cred.Alias.BirthDate);
+          if (!isNaN(date.getTime())) {
+            cred.Alias.BirthDate = date;
+          } else {
+            cred.Alias.BirthDate = undefined;
+          }
         }
         setCredential(cred);
       } catch (err) {
@@ -105,7 +45,6 @@ export default function CredentialDetailsScreen() {
 
     loadCredential();
 
-    // Cleanup function to hide any visible toasts when navigating away
     return () => {
       Toast.hide();
     };
@@ -123,12 +62,6 @@ export default function CredentialDetailsScreen() {
     return null;
   }
 
-  const email = credential.Alias?.Email?.trim();
-  const username = credential.Username?.trim();
-  const password = credential.Password?.trim();
-  const hasName = Boolean(credential.Alias?.FirstName?.trim() || credential.Alias?.LastName?.trim());
-  const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
-
   return (
     <ThemedScrollView style={styles.container}>
       <ThemedView style={styles.header}>
@@ -144,79 +77,9 @@ export default function CredentialDetailsScreen() {
           )}
         </View>
       </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Login Credentials</ThemedText>
-        {email && (
-          <FormInputCopyToClipboard
-            label="Email"
-            value={email}
-          />
-        )}
-        {username && (
-          <FormInputCopyToClipboard
-            label="Username"
-            value={username}
-          />
-        )}
-        {password && (
-          <FormInputCopyToClipboard
-            label="Password"
-            value={password}
-            type="password"
-          />
-        )}
-      </ThemedView>
-
-      {(hasName || credential.Alias?.NickName || credential.Alias?.BirthDate) && (
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Alias</ThemedText>
-          {hasName && (
-            <FormInputCopyToClipboard
-              label="Full Name"
-              value={fullName}
-            />
-          )}
-          {credential.Alias?.FirstName && (
-            <FormInputCopyToClipboard
-              label="First Name"
-              value={credential.Alias.FirstName}
-            />
-          )}
-          {credential.Alias?.LastName && (
-            <FormInputCopyToClipboard
-              label="Last Name"
-              value={credential.Alias.LastName}
-            />
-          )}
-          {credential.Alias?.NickName && (
-            <FormInputCopyToClipboard
-              label="Nickname"
-              value={credential.Alias.NickName}
-            />
-          )}
-          {credential.Alias?.BirthDate && !isNaN(credential.Alias.BirthDate.getTime()) && credential.Alias.BirthDate.getTime() !== new Date(0).getTime() && (
-            <FormInputCopyToClipboard
-              label="Birth Date"
-              value={credential.Alias.BirthDate.toISOString().split('T')[0]}
-            />
-          )}
-        </ThemedView>
-      )}
-
-      {credential.Notes && (
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Notes</ThemedText>
-          <View style={[styles.notesContainer, {
-            backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
-            borderColor: isDarkMode ? '#374151' : '#d1d5db',
-          }]}>
-            <Text style={[styles.notes, { color: isDarkMode ? '#f3f4f6' : '#1f2937' }]}>
-              {credential.Notes}
-            </Text>
-          </View>
-        </ThemedView>
-      )}
+      <NotesSection credential={credential} />
+      <LoginCredentials credential={credential} />
+      <AliasDetails credential={credential} />
     </ThemedScrollView>
   );
 }
@@ -224,7 +87,7 @@ export default function CredentialDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 80,
+    marginBottom: 100,
   },
   header: {
     flexDirection: 'row',
@@ -245,46 +108,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   serviceUrl: {
-    fontSize: 14,
-  },
-  section: {
-    padding: 16,
-    gap: 12,
-  },
-  inputContainer: {
-    borderRadius: 8,
-    borderWidth: 1,
-    marginVertical: 4,
-  },
-  inputContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-  },
-  label: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  iconButton: {
-    padding: 8,
-  },
-  iconText: {
-    fontSize: 16,
-  },
-  notesContainer: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  notes: {
     fontSize: 14,
   },
 });
