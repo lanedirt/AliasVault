@@ -89,6 +89,28 @@ export default function CredentialsScreen() {
   const authContext = useAuth();
   const dbContext = useDb();
 
+  /**
+   * Get the display text for a credential, showing username by default,
+   * falling back to email only if username is null/undefined
+   */
+  const getCredentialDisplayText = (cred: Credential): string => {
+    const username = cred.Username ?? '';
+
+    // Show username if available.
+    if (username.length > 0) {
+      return username;
+    }
+
+    // Show email if username is not available.
+    const email = cred.Alias?.Email ?? '';
+    if (email.length > 0) {
+      return email;
+    }
+
+    // Show empty string if neither username nor email is available.
+    return '';
+  };
+
   const isAuthenticated = authContext.isLoggedIn;
   const isDatabaseAvailable = dbContext.dbAvailable;
 
@@ -210,16 +232,9 @@ export default function CredentialsScreen() {
                       <Text style={[styles.serviceName]}>
                         {item.ServiceName ?? 'Unknown Service'}
                       </Text>
-                      {item.Username && (
-                        <Text style={[styles.credentialText]}>
-                          Username: {item.Username}
-                        </Text>
-                      )}
-                      {item.Alias?.Email && (
-                        <Text style={[styles.credentialText]}>
-                          Email: {item.Alias.Email}
-                        </Text>
-                      )}
+                      <Text style={[styles.credentialText]}>
+                        {getCredentialDisplayText(item)}
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
