@@ -19,25 +19,71 @@ export default function CredentialsScreen() {
   const { syncVault } = useVaultSync();
   const colors = useColors();
 
-  const dynamicStyles = {
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      marginBottom: 80,
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+    },
+    stepContainer: {
+      flex: 1,
+      gap: 8,
+    },
     credentialItem: {
-      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-      borderColor: isDarkMode ? '#4b5563' : '#d1d5db',
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 8,
+      borderWidth: 1,
+    },
+    credentialContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    logo: {
+      width: 32,
+      height: 32,
+      borderRadius: 4,
+      marginRight: 12,
+    },
+    credentialInfo: {
+      flex: 1,
     },
     serviceName: {
-      color: isDarkMode ? '#f3f4f6' : '#1f2937',
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 4,
     },
     credentialText: {
-      color: isDarkMode ? '#d1d5db' : '#4b5563',
+      color: colors.textMuted,
+      fontSize: 14,
     },
     emptyText: {
-      color: isDarkMode ? '#9ca3af' : '#6b7280',
+      color: colors.textMuted,
+      textAlign: 'center',
+      fontSize: 16,
+      marginTop: 24,
     },
     searchInput: {
-      backgroundColor: isDarkMode ? '#374151' : '#f3f4f6',
-      color: isDarkMode ? '#f3f4f6' : '#1f2937',
+      backgroundColor: colors.accentBackground,
+      color: colors.text,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+      fontSize: 16,
     },
-  };
+  });
 
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
@@ -127,9 +173,9 @@ export default function CredentialsScreen() {
           <ThemedText type="title">Credentials</ThemedText>
         </ThemedView>
         <TextInput
-          style={[styles.searchInput, dynamicStyles.searchInput]}
+          style={[styles.searchInput]}
           placeholder="Search credentials..."
-          placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
+          placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -152,22 +198,22 @@ export default function CredentialsScreen() {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => handleCredentialPress(item.Id)}
-                  style={[styles.credentialItem, dynamicStyles.credentialItem]}
+                  style={[styles.credentialItem]}
                   activeOpacity={0.7}
                 >
                   <View style={styles.credentialContent}>
                     <CredentialIcon logo={item.Logo} style={styles.logo} />
                     <View style={styles.credentialInfo}>
-                      <Text style={[styles.serviceName, dynamicStyles.serviceName]}>
+                      <Text style={[styles.serviceName]}>
                         {item.ServiceName ?? 'Unknown Service'}
                       </Text>
                       {item.Username && (
-                        <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                        <Text style={[styles.credentialText]}>
                           Username: {item.Username}
                         </Text>
                       )}
                       {item.Alias?.Email && (
-                        <Text style={[styles.credentialText, dynamicStyles.credentialText]}>
+                        <Text style={[styles.credentialText]}>
                           Email: {item.Alias.Email}
                         </Text>
                       )}
@@ -176,7 +222,7 @@ export default function CredentialsScreen() {
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
+                <Text style={[styles.emptyText]}>
                   {searchQuery ? 'No matching credentials found' : 'No credentials found'}
                 </Text>
               }
@@ -187,62 +233,3 @@ export default function CredentialsScreen() {
     </ThemedSafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginBottom: 80,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  stepContainer: {
-    flex: 1,
-    gap: 8,
-  },
-  credentialItem: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-  },
-  credentialContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 32,
-    height: 32,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  credentialInfo: {
-    flex: 1,
-  },
-  serviceName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  credentialText: {
-    fontSize: 14,
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: 16,
-    marginTop: 24,
-  },
-  searchInput: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-});
