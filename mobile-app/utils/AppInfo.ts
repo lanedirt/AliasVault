@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 /**
  * AppInfo class which contains information about the application version
  * and default server URLs.
@@ -23,9 +25,18 @@ export class AppInfo {
    * The client name to use in the X-AliasVault-Client header.
    * Detects the specific browser being used.
    */
-  public static readonly CLIENT_NAME = (() : 'ios' | 'android' => {
-    // TODO: Add support for Android
-    return 'ios';
+  public static readonly CLIENT_NAME = (() : 'ios' | 'android' | 'app' => {
+    const os = Platform.OS;
+
+    if (os === 'ios') {
+      return 'ios';
+    }
+
+    if (os === 'android') {
+      return 'android';
+    }
+
+    return 'app';
   })();
 
   /**
