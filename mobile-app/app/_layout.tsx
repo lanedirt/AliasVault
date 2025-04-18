@@ -51,8 +51,27 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const colors = useColors();
 
+
+  // Create custom themes that extend the default ones.
+  const customDefaultTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.background,
+    },
+  };
+
+  const customDarkTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      primary: colors.primary,
+      background: colors.background,
+    },
+  };
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? customDarkTheme : customDefaultTheme}>
       <Stack screenOptions={{
         headerShown: true,
         animation: 'none',

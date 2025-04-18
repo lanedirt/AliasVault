@@ -1,5 +1,5 @@
-import { StyleSheet, Platform, View, Text, SafeAreaView, AppState, TextInput, TouchableOpacity, ActivityIndicator, useColorScheme } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 
@@ -11,30 +11,108 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { useWebApi } from '@/context/WebApiContext';
+import { useColors } from '@/hooks/useColorScheme';
 
 export default function LoginScreen() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const colors = useColors();
 
-  const dynamicStyles = {
-    input: {
-      borderColor: isDarkMode ? '#4b5563' : '#d1d5db',
-      color: isDarkMode ? '#f3f4f6' : '#1f2937',
-      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: colors.background,
+      flex: 1,
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+    },
+    formContainer: {
+      gap: 16,
+    },
+    errorContainer: {
+      backgroundColor: colors.errorBackground,
+      borderColor: colors.errorBorder,
+      borderWidth: 1,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    errorText: {
+      color: colors.errorText,
+      fontSize: 14,
     },
     label: {
-      color: isDarkMode ? '#f3f4f6' : '#1f2937',
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 4,
+      color: colors.text,
+    },
+    input: {
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      borderColor: colors.accentBorder,
+      color: colors.text,
+      backgroundColor: colors.accentBackground,
+    },
+    buttonContainer: {
+      gap: 8,
+    },
+    button: {
+      padding: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    primaryButton: {
+      backgroundColor: colors.primary,
+    },
+    secondaryButton: {
+      backgroundColor: colors.secondary,
+    },
+    buttonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    rememberMeContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
     checkbox: {
-      borderColor: isDarkMode ? '#4b5563' : '#d1d5db',
+      width: 20,
+      height: 20,
+      borderWidth: 2,
+      borderRadius: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor: colors.accentBorder,
+    },
+    checkboxInner: {
+      width: 12,
+      height: 12,
+      borderRadius: 2,
+    },
+    checkboxChecked: {
+      backgroundColor: colors.primary,
     },
     rememberMeText: {
-      color: isDarkMode ? '#f3f4f6' : '#1f2937',
+      fontSize: 14,
+      color: colors.text,
     },
     noteText: {
-      color: isDarkMode ? '#9ca3af' : '#6b7280',
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 16,
+      color: colors.textMuted,
     },
-  };
+  });
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -49,7 +127,6 @@ export default function LoginScreen() {
   const [passwordHashString, setPasswordHashString] = useState<string | null>(null);
   const [passwordHashBase64, setPasswordHashBase64] = useState<string | null>(null);
 
-  const appState = useRef(AppState.currentState);
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -217,15 +294,15 @@ export default function LoginScreen() {
 
         {twoFactorRequired ? (
           <View style={styles.formContainer}>
-            <Text style={[styles.label, dynamicStyles.label]}>Authentication Code</Text>
+            <Text style={[styles.label]}>Authentication Code</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={twoFactorCode}
               onChangeText={setTwoFactorCode}
               placeholder="Enter 6-digit code"
               keyboardType="numeric"
               maxLength={6}
-              placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
+              placeholderTextColor={colors.textMuted}
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -234,7 +311,7 @@ export default function LoginScreen() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.text} />
                 ) : (
                   <Text style={styles.buttonText}>Verify</Text>
                 )}
@@ -254,38 +331,38 @@ export default function LoginScreen() {
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.noteText, dynamicStyles.noteText]}>
+            <Text style={[styles.noteText]}>
               Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
             </Text>
           </View>
         ) : (
           <View style={styles.formContainer}>
-            <Text style={[styles.label, dynamicStyles.label]}>Username or email</Text>
+            <Text style={[styles.label]}>Username or email</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={credentials.username}
               onChangeText={(text) => setCredentials({ ...credentials, username: text })}
               placeholder="name / name@company.com"
               autoCapitalize="none"
-              placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
+              placeholderTextColor={colors.textMuted}
             />
-            <Text style={[styles.label, dynamicStyles.label]}>Password</Text>
+            <Text style={[styles.label]}>Password</Text>
             <TextInput
-              style={[styles.input, dynamicStyles.input]}
+              style={[styles.input]}
               value={credentials.password}
               onChangeText={(text) => setCredentials({ ...credentials, password: text })}
               placeholder="Enter your password"
               secureTextEntry
-              placeholderTextColor={isDarkMode ? '#9ca3af' : '#6b7280'}
+              placeholderTextColor={colors.textMuted}
             />
             <View style={styles.rememberMeContainer}>
               <TouchableOpacity
-                style={[styles.checkbox, dynamicStyles.checkbox]}
+                style={[styles.checkbox]}
                 onPress={() => setRememberMe(!rememberMe)}
               >
                 <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
               </TouchableOpacity>
-              <Text style={[styles.rememberMeText, dynamicStyles.rememberMeText]}>Remember me</Text>
+              <Text style={[styles.rememberMeText]}>Remember me</Text>
             </View>
             <TouchableOpacity
               style={[styles.button, styles.primaryButton]}
@@ -293,7 +370,7 @@ export default function LoginScreen() {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.text} />
               ) : (
                 <Text style={styles.buttonText}>Login</Text>
               )}
@@ -304,91 +381,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  formContainer: {
-    gap: 16,
-  },
-  errorContainer: {
-    backgroundColor: '#fee2e2',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#dc2626',
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  buttonContainer: {
-    gap: 8,
-  },
-  button: {
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#f97316',
-  },
-  secondaryButton: {
-    backgroundColor: '#6b7280',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  rememberMeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 2,
-  },
-  checkboxChecked: {
-    backgroundColor: '#f97316',
-  },
-  rememberMeText: {
-    fontSize: 14,
-  },
-  noteText: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 16,
-  },
-});

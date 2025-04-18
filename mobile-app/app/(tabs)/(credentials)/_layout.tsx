@@ -1,9 +1,8 @@
-import { Colors } from '@/constants/Colors';
+import { useColors } from '@/hooks/useColorScheme';
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
 
 export default function CredentialsLayout() {
-  const colorScheme = useColorScheme();
+  const colors = useColors();
 
   return (
     <Stack>
@@ -19,9 +18,8 @@ export default function CredentialsLayout() {
           title: 'Credential Details',
           headerShown: true,
           headerStyle: {
-            backgroundColor: Colors[colorScheme ?? 'light'].headerBackground,
+            backgroundColor: colors.headerBackground,
           },
-          headerTintColor: Colors[colorScheme ?? 'light'].text,
         }}
       />
     </Stack>

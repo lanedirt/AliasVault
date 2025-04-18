@@ -12,8 +12,6 @@ import { CredentialIcon } from '@/components/CredentialIcon';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
 export default function CredentialsScreen() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const { syncVault } = useVaultSync();
@@ -171,7 +169,7 @@ export default function CredentialsScreen() {
       <ThemedView style={styles.content}>
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
-            <ActivityIndicator size="large" color={colors.primaryButton} />
+            <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <FlatList
               data={filteredCredentials}
@@ -195,8 +193,8 @@ export default function CredentialsScreen() {
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  colors={[colors.primaryButton]}
-                  tintColor={isDarkMode ? colors.primaryButton : colors.primaryButton}
+                  colors={[colors.primary]}
+                  tintColor={colors.primary}
                 />
               }
               renderItem={({ item }) => (
