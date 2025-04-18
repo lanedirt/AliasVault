@@ -109,7 +109,8 @@ const CredentialsList: React.FC = () => {
     const searchableFields = [
       cred.ServiceName?.toLowerCase(),
       cred.Username?.toLowerCase(),
-      cred.Alias?.Email?.toLowerCase()
+      cred.Alias?.Email?.toLowerCase(),
+      cred.ServiceUrl?.toLowerCase()
     ];
     return searchableFields.some(field => field?.includes(searchLower));
   });

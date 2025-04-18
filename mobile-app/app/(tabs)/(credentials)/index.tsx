@@ -154,7 +154,8 @@ export default function CredentialsScreen() {
     return (
       credential.ServiceName?.toLowerCase().includes(searchLower) ||
       credential.Username?.toLowerCase().includes(searchLower) ||
-      credential.Alias?.Email?.toLowerCase().includes(searchLower)
+      credential.Alias?.Email?.toLowerCase().includes(searchLower) ||
+      credential.ServiceUrl?.toLowerCase().includes(searchLower)
     );
   });
 
