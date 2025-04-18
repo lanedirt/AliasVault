@@ -169,16 +169,6 @@ export default function CredentialsScreen() {
     <ThemedSafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Credentials" }} />
       <ThemedView style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Credentials</ThemedText>
-        </ThemedView>
-        <TextInput
-          style={[styles.searchInput]}
-          placeholder="Search credentials..."
-          placeholderTextColor={colors.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
             <ActivityIndicator size="large" color={colors.primaryButton} />
@@ -187,6 +177,20 @@ export default function CredentialsScreen() {
               data={filteredCredentials}
               keyExtractor={(item) => item.Id}
               keyboardShouldPersistTaps='handled'
+              ListHeaderComponent={
+                <ThemedView>
+                  <ThemedView style={styles.titleContainer}>
+                    <ThemedText type="title">Credentials</ThemedText>
+                  </ThemedView>
+                    <TextInput
+                    style={[styles.searchInput]}
+                    placeholder="Search credentials..."
+                    placeholderTextColor={colors.textMuted}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                  />
+                </ThemedView>
+              }
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
