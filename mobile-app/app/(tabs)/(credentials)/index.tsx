@@ -1,4 +1,4 @@
-import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl } from 'react-native';
+import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl, Platform } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { router, Stack } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
@@ -170,6 +170,14 @@ export default function CredentialsScreen() {
       borderRadius: 8,
       marginBottom: 16,
       fontSize: 16,
+      paddingRight: Platform.OS === 'android' ? 40 : 12,
+    },
+    clearButton: {
+      position: 'absolute',
+      right: 8,
+      top: '50%',
+      transform: [{ translateY: -12 }],
+      padding: 4,
     },
   });
 
@@ -191,13 +199,24 @@ export default function CredentialsScreen() {
                   <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Credentials</ThemedText>
                   </ThemedView>
+                  <ThemedView style={{ position: 'relative' }}>
                     <TextInput
-                    style={[styles.searchInput]}
-                    placeholder="Search credentials..."
-                    placeholderTextColor={colors.textMuted}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  />
+                      style={[styles.searchInput]}
+                      placeholder="Search credentials..."
+                      placeholderTextColor={colors.textMuted}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
+                    />
+                    {Platform.OS === 'android' && searchQuery.length > 0 && (
+                      <TouchableOpacity
+                        style={styles.clearButton}
+                        onPress={() => setSearchQuery('')}
+                      >
+                        <ThemedText style={{ fontSize: 20, color: colors.textMuted }}>×</ThemedText>
+                      </TouchableOpacity>
+                    )}
+                  </ThemedView>
                 </ThemedView>
               }
               refreshControl={
