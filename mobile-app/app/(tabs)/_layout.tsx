@@ -1,14 +1,14 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import React, { useEffect } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
 import { router } from 'expo-router';
-
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
+import emitter from '@/utils/EventEmitter';
 
 export default function TabLayout() {
   const colors = useColors();
@@ -37,6 +37,13 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: (e) => {
+          const targetPathname = (e.target as string).split('-')[0];
+          console.log('Tab pressed in layout, navigating to:', targetPathname);
+          emitter.emit('tabPress', targetPathname);
+        },
+      }}
       screenOptions={{
         tabBarActiveTintColor: colors.tint,
         headerShown: false,
@@ -74,8 +81,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-// Simple icon component since we don't have access to the actual icon library
-const Icon = ({ name, size, color }: { name: string; size: number; color: string }) => (
-  <View style={{ width: size, height: size, backgroundColor: color }} />
-);

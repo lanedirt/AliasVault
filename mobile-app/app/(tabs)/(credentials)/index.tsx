@@ -1,7 +1,7 @@
-import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, Image, RefreshControl } from 'react-native';
-import { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl } from 'react-native';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { router, Stack } from 'expo-router';
-
+import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
@@ -11,55 +11,43 @@ import { Credential } from '@/utils/types/Credential';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
 import { CredentialCard } from '@/components/CredentialCard';
+import emitter from '@/utils/EventEmitter';
 
 export default function CredentialsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const { syncVault } = useVaultSync();
   const colors = useColors();
+  const flatListRef = useRef<FlatList>(null);
+  const navigation = useNavigation();
+  const [isTabFocused, setIsTabFocused] = useState(false);
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      marginBottom: 80,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-    },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 16,
-    },
-    stepContainer: {
-      flex: 1,
-      gap: 8,
-    },
-    credentialItem: {
-      backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 8,
-      borderWidth: 1,
-    },
-    emptyText: {
-      color: colors.textMuted,
-      textAlign: 'center',
-      fontSize: 16,
-      marginTop: 24,
-    },
-    searchInput: {
-      backgroundColor: colors.accentBackground,
-      color: colors.text,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-      fontSize: 16,
-    },
-  });
+  useEffect(() => {
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      setIsTabFocused(true);
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      setIsTabFocused(false);
+    });
+
+    const sub = emitter.addListener('tabPress', (routeName: string) => {
+      console.log('Tab press received:', routeName);
+      if (routeName === '(credentials)' && isTabFocused) {
+        console.log('Tab re-pressed while focused: reset screen');
+        setSearchQuery(''); // Reset search
+        setRefreshing(false); // Reset refreshing
+        // Scroll to top
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return () => {
+      sub.remove();
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
+  }, [isTabFocused]);
 
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
@@ -142,6 +130,49 @@ export default function CredentialsScreen() {
     navigateToCredential(credentialId);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      marginBottom: 80,
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+    },
+    stepContainer: {
+      flex: 1,
+      gap: 8,
+    },
+    credentialItem: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 8,
+      borderWidth: 1,
+    },
+    emptyText: {
+      color: colors.textMuted,
+      textAlign: 'center',
+      fontSize: 16,
+      marginTop: 24,
+    },
+    searchInput: {
+      backgroundColor: colors.accentBackground,
+      color: colors.text,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+      fontSize: 16,
+    },
+  });
+
   return (
     <ThemedSafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Credentials" }} />
@@ -151,6 +182,7 @@ export default function CredentialsScreen() {
             <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <FlatList
+              ref={flatListRef}
               data={filteredCredentials}
               keyExtractor={(item) => item.Id}
               keyboardShouldPersistTaps='handled'
