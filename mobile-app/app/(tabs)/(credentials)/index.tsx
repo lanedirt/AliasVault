@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, useColorScheme, TouchableOpacity, TextInput, Keyboard, Image, RefreshControl } from 'react-native';
+import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, Image, RefreshControl } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { router, Stack } from 'expo-router';
 
@@ -8,9 +8,10 @@ import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
-import { CredentialIcon } from '@/components/CredentialIcon';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
+import { CredentialCard } from '@/components/CredentialCard';
+
 export default function CredentialsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -44,29 +45,6 @@ export default function CredentialsScreen() {
       marginBottom: 8,
       borderWidth: 1,
     },
-    credentialContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    logo: {
-      width: 32,
-      height: 32,
-      borderRadius: 4,
-      marginRight: 12,
-    },
-    credentialInfo: {
-      flex: 1,
-    },
-    serviceName: {
-      color: colors.text,
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 4,
-    },
-    credentialText: {
-      color: colors.textMuted,
-      fontSize: 14,
-    },
     emptyText: {
       color: colors.textMuted,
       textAlign: 'center',
@@ -89,28 +67,6 @@ export default function CredentialsScreen() {
   const authContext = useAuth();
   const dbContext = useDb();
 
-  /**
-   * Get the display text for a credential, showing username by default,
-   * falling back to email only if username is null/undefined
-   */
-  const getCredentialDisplayText = (cred: Credential): string => {
-    const username = cred.Username ?? '';
-
-    // Show username if available.
-    if (username.length > 0) {
-      return username;
-    }
-
-    // Show email if username is not available.
-    const email = cred.Alias?.Email ?? '';
-    if (email.length > 0) {
-      return email;
-    }
-
-    // Show empty string if neither username nor email is available.
-    return '';
-  };
-
   const isAuthenticated = authContext.isLoggedIn;
   const isDatabaseAvailable = dbContext.dbAvailable;
 
@@ -120,14 +76,12 @@ export default function CredentialsScreen() {
   };
 
   const loadCredentials = async () => {
-    setIsLoadingCredentials(true);
     try {
       const credentials = await dbContext.sqliteClient!.getAllCredentials();
       setCredentialsList(credentials);
     } catch (err) {
       console.error('Error loading credentials:', err);
     }
-    setIsLoadingCredentials(false);
   };
 
   const onRefresh = useCallback(async () => {
@@ -141,24 +95,24 @@ export default function CredentialsScreen() {
       await syncVault({
         forceCheck: true,
         onSuccess: async () => {
+          // Calculate remaining time needed to reach minimum duration
+          const elapsedTime = Date.now() - startTime;
+          const remainingDelay = Math.max(0, 350 - elapsedTime);
+
+          // Only delay if needed to reach minimum duration
+          if (remainingDelay > 0) {
+            await new Promise(resolve => setTimeout(resolve, remainingDelay));
+          }
+
           await loadCredentials();
+          setRefreshing(false);
         },
         onError: (error) => {
           console.error('Error syncing vault:', error);
         }
       });
-
-      // Calculate remaining time needed to reach 350ms minimum
-      const elapsedTime = Date.now() - startTime;
-      const remainingDelay = Math.max(0, 350 - elapsedTime);
-
-      // Only delay if needed to reach minimum 350ms
-      if (remainingDelay > 0) {
-        await new Promise(resolve => setTimeout(resolve, remainingDelay));
-      }
     } catch (err) {
       console.error('Error refreshing credentials:', err);
-    } finally {
       setRefreshing(false);
     }
   }, [syncVault, loadCredentials]);
@@ -168,7 +122,9 @@ export default function CredentialsScreen() {
       return;
     }
 
+    setIsLoadingCredentials(true);
     loadCredentials();
+    setIsLoadingCredentials(false);
   }, [isAuthenticated, isDatabaseAvailable]);
 
   const filteredCredentials = credentialsList.filter(credential => {
@@ -226,17 +182,7 @@ export default function CredentialsScreen() {
                   style={[styles.credentialItem]}
                   activeOpacity={0.7}
                 >
-                  <View style={styles.credentialContent}>
-                    <CredentialIcon logo={item.Logo} style={styles.logo} />
-                    <View style={styles.credentialInfo}>
-                      <Text style={[styles.serviceName]}>
-                        {item.ServiceName ?? 'Unknown Service'}
-                      </Text>
-                      <Text style={[styles.credentialText]}>
-                        {getCredentialDisplayText(item)}
-                      </Text>
-                    </View>
-                  </View>
+                  <CredentialCard credential={item} />
                 </TouchableOpacity>
               )}
               ListEmptyComponent={

@@ -1,0 +1,75 @@
+import { StyleSheet, View, Text } from 'react-native';
+import { CredentialIcon } from './CredentialIcon';
+import { useColors } from '@/hooks/useColorScheme';
+import { Credential } from '@/utils/types/Credential';
+
+type CredentialCardProps = {
+  credential: Credential;
+};
+
+
+export function CredentialCard({ credential }: CredentialCardProps) {
+  const colors = useColors();
+
+  /**
+   * Get the display text for a credential, showing username by default,
+   * falling back to email only if username is null/undefined
+   */
+  const getCredentialDisplayText = (cred: Credential): string => {
+    const username = cred.Username ?? '';
+
+    // Show username if available.
+    if (username.length > 0) {
+      return username;
+    }
+
+    // Show email if username is not available.
+    const email = cred.Alias?.Email ?? '';
+    if (email.length > 0) {
+      return email;
+    }
+
+    // Show empty string if neither username nor email is available.
+    return '';
+  };
+
+  const styles = StyleSheet.create({
+    credentialContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    logo: {
+      width: 32,
+      height: 32,
+      borderRadius: 4,
+      marginRight: 12,
+    },
+    credentialInfo: {
+      flex: 1,
+    },
+    serviceName: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+    credentialText: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+  });
+
+  return (
+    <View style={styles.credentialContent}>
+      <CredentialIcon logo={credential.Logo} style={styles.logo} />
+      <View style={styles.credentialInfo}>
+        <Text style={[styles.serviceName]}>
+          {credential.ServiceName ?? 'Unknown Service'}
+        </Text>
+        <Text style={[styles.credentialText]}>
+          {getCredentialDisplayText(credential)}
+        </Text>
+      </View>
+    </View>
+  );
+}
