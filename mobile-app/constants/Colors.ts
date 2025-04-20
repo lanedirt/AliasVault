@@ -3,9 +3,6 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
   light: {
     text: '#11181C',
@@ -16,14 +13,15 @@ export const Colors = {
     errorBackground: '#f8d7da',
     errorBorder: '#f8d7da',
     errorText: '#842029',
-    tint: tintColorLight,
+    tint: '#f49541',
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: '#f49541',
     headerBackground: '#fff',
     tabBarBackground: '#fff',
     primary: '#f97316',
     secondary: '#6b7280',
+    loginHeader: '#f6dfc4',
   },
   dark: {
     text: '#ECEDEE',
@@ -34,14 +32,15 @@ export const Colors = {
     errorBackground: '#3d1a1e',
     errorBorder: '#9c2530',
     errorText: '#fae1e3',
-    tint: tintColorDark,
+    tint: '#f49541',
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: '#f49541',
     headerBackground: '#1f2937',
     tabBarBackground: '#1f2937',
     primary: '#f97316',
     secondary: '#6b7280',
+    loginHeader: '#5c4331',
   },
 } as const;
 

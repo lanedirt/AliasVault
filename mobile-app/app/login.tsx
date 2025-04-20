@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Linking, Animated } from 'react-native';
+import { useState, useEffect } from 'react';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
-import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
@@ -12,18 +13,70 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { useWebApi } from '@/context/WebApiContext';
 import { useColors } from '@/hooks/useColorScheme';
+import Logo from '@/assets/images/logo.svg';
+import { AppInfo } from '@/utils/AppInfo';
+
 
 export default function LoginScreen() {
   const colors = useColors();
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [apiUrl, setApiUrl] = useState<string>(AppInfo.DEFAULT_API_URL);
+
+  const loadApiUrl = async () => {
+    const storedUrl = await AsyncStorage.getItem('apiUrl');
+    if (storedUrl && storedUrl.length > 0) {
+      setApiUrl(storedUrl);
+    } else {
+      setApiUrl(AppInfo.DEFAULT_API_URL);
+    }
+  };
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+    loadApiUrl();
+  }, []);
+
+  // Update URL when returning from settings
+  useFocusEffect(() => {
+    loadApiUrl();
+  });
+
+  const getDisplayUrl = () => {
+    const cleanUrl = apiUrl.replace('https://', '').replace('/api', '');
+    return cleanUrl === 'app.aliasvault.net' ? 'aliasvault.net' : cleanUrl;
+  };
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: colors.background,
       flex: 1,
+      backgroundColor: colors.background,
+    },
+    headerSection: {
+      backgroundColor: colors.loginHeader,
+      paddingTop: 24,
+      paddingBottom: 24,
+      paddingHorizontal: 16,
+      borderBottomLeftRadius: 24,
+      borderBottomRightRadius: 24,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    appName: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.text,
+      textAlign: 'center',
     },
     content: {
       flex: 1,
       padding: 16,
+      backgroundColor: colors.background,
     },
     titleContainer: {
       flexDirection: 'row',
@@ -107,10 +160,27 @@ export default function LoginScreen() {
       color: colors.text,
     },
     noteText: {
-      fontSize: 12,
+      fontSize: 14,
       textAlign: 'center',
       marginTop: 16,
       color: colors.textMuted,
+    },
+    headerContainer: {
+      marginBottom: 24,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    clickableDomain: {
+      color: colors.primary,
+      textDecorationLine: 'underline',
     },
   });
 
@@ -280,11 +350,28 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <SafeAreaView style={{ backgroundColor: colors.loginHeader }}>
+        <Animated.View style={[styles.headerSection, { opacity: fadeAnim }]}>
+          <View style={styles.logoContainer}>
+            <Logo width={80} height={80} />
+            <Text style={styles.appName}>AliasVault</Text>
+          </View>
+        </Animated.View>
+      </SafeAreaView>
       <ThemedView style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">AliasVault</ThemedText>
-        </ThemedView>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Log in</Text>
+          <Text style={styles.headerSubtitle}>
+            Connecting to{' '}
+            <Text
+              style={styles.clickableDomain}
+              onPress={() => router.push('/settings')}
+            >
+              {getDisplayUrl()}
+            </Text>
+          </Text>
+        </View>
 
         {error && (
           <View style={styles.errorContainer}>
@@ -375,9 +462,18 @@ export default function LoginScreen() {
                 <Text style={styles.buttonText}>Login</Text>
               )}
             </TouchableOpacity>
+            <Text style={[styles.noteText]}>
+              No account yet?{' '}
+              <Text
+                style={styles.clickableDomain}
+                onPress={() => Linking.openURL('https://app.aliasvault.net')}
+              >
+                Create new vault
+              </Text>
+            </Text>
           </View>
         )}
       </ThemedView>
-    </SafeAreaView>
+    </View>
   );
 }
