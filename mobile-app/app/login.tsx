@@ -51,140 +51,6 @@ export default function LoginScreen() {
     return cleanUrl === 'app.aliasvault.net' ? 'aliasvault.net' : cleanUrl;
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    headerSection: {
-      backgroundColor: colors.loginHeader,
-      paddingTop: 24,
-      paddingBottom: 24,
-      paddingHorizontal: 16,
-      borderBottomLeftRadius: 24,
-      borderBottomRightRadius: 24,
-    },
-    logoContainer: {
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    appName: {
-      fontSize: 32,
-      fontWeight: 'bold',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: colors.background,
-    },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 16,
-    },
-    formContainer: {
-      gap: 16,
-    },
-    errorContainer: {
-      backgroundColor: colors.errorBackground,
-      borderColor: colors.errorBorder,
-      borderWidth: 1,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-    },
-    errorText: {
-      color: colors.errorText,
-      fontSize: 14,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginBottom: 4,
-      color: colors.text,
-    },
-    input: {
-      borderWidth: 1,
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
-      borderColor: colors.accentBorder,
-      color: colors.text,
-      backgroundColor: colors.accentBackground,
-    },
-    buttonContainer: {
-      gap: 8,
-    },
-    button: {
-      padding: 12,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    primaryButton: {
-      backgroundColor: colors.primary,
-    },
-    secondaryButton: {
-      backgroundColor: colors.secondary,
-    },
-    buttonText: {
-      color: colors.text,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    rememberMeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    checkbox: {
-      width: 20,
-      height: 20,
-      borderWidth: 2,
-      borderRadius: 4,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderColor: colors.accentBorder,
-    },
-    checkboxInner: {
-      width: 12,
-      height: 12,
-      borderRadius: 2,
-    },
-    checkboxChecked: {
-      backgroundColor: colors.primary,
-    },
-    rememberMeText: {
-      fontSize: 14,
-      color: colors.text,
-    },
-    noteText: {
-      fontSize: 14,
-      textAlign: 'center',
-      marginTop: 16,
-      color: colors.textMuted,
-    },
-    headerContainer: {
-      marginBottom: 24,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: colors.text,
-      marginBottom: 4,
-    },
-    headerSubtitle: {
-      fontSize: 14,
-      color: colors.textMuted,
-    },
-    clickableDomain: {
-      color: colors.primary,
-      textDecorationLine: 'underline',
-    },
-  });
-
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -350,6 +216,140 @@ export default function LoginScreen() {
       setIsLoading(false);
     }
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    headerSection: {
+      backgroundColor: colors.loginHeader,
+      paddingTop: 24,
+      paddingBottom: 24,
+      paddingHorizontal: 16,
+      borderBottomLeftRadius: 24,
+      borderBottomRightRadius: 24,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    appName: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.background,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+    },
+    formContainer: {
+      gap: 16,
+    },
+    errorContainer: {
+      backgroundColor: colors.errorBackground,
+      borderColor: colors.errorBorder,
+      borderWidth: 1,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    errorText: {
+      color: colors.errorText,
+      fontSize: 14,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 4,
+      color: colors.text,
+    },
+    input: {
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      borderColor: colors.accentBorder,
+      color: colors.text,
+      backgroundColor: colors.accentBackground,
+    },
+    buttonContainer: {
+      gap: 8,
+    },
+    button: {
+      padding: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    primaryButton: {
+      backgroundColor: colors.primary,
+    },
+    secondaryButton: {
+      backgroundColor: colors.secondary,
+    },
+    buttonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    rememberMeContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderWidth: 2,
+      borderRadius: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor: colors.accentBorder,
+    },
+    checkboxInner: {
+      width: 12,
+      height: 12,
+      borderRadius: 2,
+    },
+    checkboxChecked: {
+      backgroundColor: colors.primary,
+    },
+    rememberMeText: {
+      fontSize: 14,
+      color: colors.text,
+    },
+    noteText: {
+      fontSize: 14,
+      textAlign: 'center',
+      marginTop: 16,
+      color: colors.textMuted,
+    },
+    headerContainer: {
+      marginBottom: 24,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    clickableDomain: {
+      color: colors.primary,
+      textDecorationLine: 'underline',
+    },
+  });
 
   return (
     <View style={styles.container}>

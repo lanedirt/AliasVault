@@ -28,7 +28,6 @@ class EncryptionUtility {
         throw new Error('Unsupported encryption type');
       }
 
-      console.log('trying to hash password');
       const result = await argon2(
         password,
         salt,
@@ -40,7 +39,6 @@ class EncryptionUtility {
           mode: 'argon2id'
         }
       );
-      console.log('result', result);
 
       // Convert the hex string to Uint8Array
       const bytes = new Uint8Array(32);

@@ -12,7 +12,7 @@ export default function InitialLoadingScreen() {
   const { dbInitialized, dbAvailable } = useDb();
   const { syncVault } = useVaultSync();
   const hasInitialized = useRef(false);
-  const [status, setStatus] = useState('Initializing...');
+  const [status, setStatus] = useState('');
 
   const isFullyInitialized = isAuthInitialized && dbInitialized;
   const requireLoginOrUnlock = isFullyInitialized && (!isLoggedIn || !dbAvailable);
@@ -49,7 +49,7 @@ export default function InitialLoadingScreen() {
 
   return (
     <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <LoadingIndicator status={status} />
+      {isLoggedIn && status ? <LoadingIndicator status={status} /> : null}
     </ThemedView>
   );
 }
