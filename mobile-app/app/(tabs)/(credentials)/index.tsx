@@ -13,6 +13,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import { CredentialCard } from '@/components/CredentialCard';
 import { TitleContainer } from '@/components/TitleContainer';
 import emitter from '@/utils/EventEmitter';
+import Toast from 'react-native-toast-message';
 
 export default function CredentialsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,8 +83,7 @@ export default function CredentialsScreen() {
 
       // Sync vault and load credentials
       await syncVault({
-        forceCheck: true,
-        onSuccess: async () => {
+        onSuccess: async (hasNewVault) => {
           // Calculate remaining time needed to reach minimum duration
           const elapsedTime = Date.now() - startTime;
           const remainingDelay = Math.max(0, 350 - elapsedTime);
@@ -95,14 +95,31 @@ export default function CredentialsScreen() {
 
           await loadCredentials();
           setRefreshing(false);
+          Toast.show({
+            type: 'success',
+            text1: hasNewVault ? 'Vault synced successfully' : 'Vault is up-to-date',
+            position: 'top',
+            visibilityTime: 1200,
+          });
         },
         onError: (error) => {
           console.error('Error syncing vault:', error);
-        }
+          setRefreshing(false);
+          Toast.show({
+            type: 'error',
+            text1: 'Vault sync failed',
+            text2: error,
+          });
+        },
       });
     } catch (err) {
       console.error('Error refreshing credentials:', err);
       setRefreshing(false);
+      Toast.show({
+        type: 'error',
+        text1: 'Vault sync failed',
+        text2: err instanceof Error ? err.message : 'Unknown error',
+      });
     }
   }, [syncVault, loadCredentials]);
 

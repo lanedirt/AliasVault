@@ -1,3 +1,4 @@
+import React from 'react';
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Linking, Animated } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Buffer } from 'buffer';
@@ -15,6 +16,7 @@ import { useWebApi } from '@/context/WebApiContext';
 import { useColors } from '@/hooks/useColorScheme';
 import Logo from '@/assets/images/logo.svg';
 import { AppInfo } from '@/utils/AppInfo';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 
 export default function LoginScreen() {
@@ -196,6 +198,7 @@ export default function LoginScreen() {
   const [loginResponse, setLoginResponse] = useState<any>(null);
   const [passwordHashString, setPasswordHashString] = useState<string | null>(null);
   const [passwordHashBase64, setPasswordHashBase64] = useState<string | null>(null);
+  const [loginStatus, setLoginStatus] = useState<string | null>(null);
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -206,6 +209,8 @@ export default function LoginScreen() {
   const handleSubmit = async () => {
     setIsLoading(true);
     setError(null);
+
+    setLoginStatus('Logging in');
 
     try {
       console.log('handleSubmit');
@@ -229,6 +234,7 @@ export default function LoginScreen() {
 
       console.log('passwordHashString', passwordHashString);
 
+      setLoginStatus('Validating credentials');
       const validationResponse = await srpUtil.validateLogin(
         credentials.username,
         passwordHashString,
@@ -244,6 +250,7 @@ export default function LoginScreen() {
         setPasswordHashBase64(passwordHashBase64);
         setTwoFactorRequired(true);
         setIsLoading(false);
+        setLoginStatus(null);
         return;
       }
 
@@ -253,6 +260,7 @@ export default function LoginScreen() {
 
       console.log('validationResponse.token', validationResponse.token);
 
+      setLoginStatus('Syncing vault');
       const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
@@ -264,6 +272,7 @@ export default function LoginScreen() {
         console.error('vaultError', vaultError);
         setError(vaultError);
         setIsLoading(false);
+        setLoginStatus(null);
         return;
       }
 
@@ -277,6 +286,7 @@ export default function LoginScreen() {
       router.replace('/(tabs)');
 
       setIsLoading(false);
+      setLoginStatus(null);
     } catch (err) {
       if (err instanceof ApiAuthError) {
         console.error('ApiAuthError error:', err);
@@ -286,6 +296,7 @@ export default function LoginScreen() {
         setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
       }
       setIsLoading(false);
+      setLoginStatus(null);
     }
   };
 
@@ -360,118 +371,124 @@ export default function LoginScreen() {
         </Animated.View>
       </SafeAreaView>
       <ThemedView style={styles.content}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Log in</Text>
-          <Text style={styles.headerSubtitle}>
-            Connecting to{' '}
-            <Text
-              style={styles.clickableDomain}
-              onPress={() => router.push('/settings')}
-            >
-              {getDisplayUrl()}
-            </Text>
-          </Text>
-        </View>
-
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        {twoFactorRequired ? (
-          <View style={styles.formContainer}>
-            <Text style={[styles.label]}>Authentication Code</Text>
-            <TextInput
-              style={[styles.input]}
-              value={twoFactorCode}
-              onChangeText={setTwoFactorCode}
-              placeholder="Enter 6-digit code"
-              keyboardType="numeric"
-              maxLength={6}
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.primaryButton]}
-                onPress={handleTwoFactorSubmit}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color={colors.text} />
-                ) : (
-                  <Text style={styles.buttonText}>Verify</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.secondaryButton]}
-                onPress={() => {
-                  setCredentials({ username: '', password: '' });
-                  setTwoFactorRequired(false);
-                  setTwoFactorCode('');
-                  setPasswordHashString(null);
-                  setPasswordHashBase64(null);
-                  setLoginResponse(null);
-                  setError(null);
-                }}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.noteText]}>
-              Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
-            </Text>
-          </View>
+        {isLoading ? (
+          <LoadingIndicator status={loginStatus || 'Loading...'} />
         ) : (
-          <View style={styles.formContainer}>
-            <Text style={[styles.label]}>Username or email</Text>
-            <TextInput
-              style={[styles.input]}
-              value={credentials.username}
-              onChangeText={(text) => setCredentials({ ...credentials, username: text })}
-              placeholder="name / name@company.com"
-              autoCapitalize="none"
-              placeholderTextColor={colors.textMuted}
-            />
-            <Text style={[styles.label]}>Password</Text>
-            <TextInput
-              style={[styles.input]}
-              value={credentials.password}
-              onChangeText={(text) => setCredentials({ ...credentials, password: text })}
-              placeholder="Enter your password"
-              secureTextEntry
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.rememberMeContainer}>
-              <TouchableOpacity
-                style={[styles.checkbox]}
-                onPress={() => setRememberMe(!rememberMe)}
-              >
-                <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
-              </TouchableOpacity>
-              <Text style={[styles.rememberMeText]}>Remember me</Text>
-            </View>
-            <TouchableOpacity
-              style={[styles.button, styles.primaryButton]}
-              onPress={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.text} />
-              ) : (
-                <Text style={styles.buttonText}>Login</Text>
-              )}
-            </TouchableOpacity>
-            <Text style={[styles.noteText]}>
-              No account yet?{' '}
-              <Text
-                style={styles.clickableDomain}
-                onPress={() => Linking.openURL('https://app.aliasvault.net')}
-              >
-                Create new vault
+          <>
+            <View style={styles.headerContainer}>
+              <Text style={styles.headerTitle}>Log in</Text>
+              <Text style={styles.headerSubtitle}>
+                Connecting to{' '}
+                <Text
+                  style={styles.clickableDomain}
+                  onPress={() => router.push('/settings')}
+                >
+                  {getDisplayUrl()}
+                </Text>
               </Text>
-            </Text>
-          </View>
+            </View>
+
+            {error && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+
+            {twoFactorRequired ? (
+              <View style={styles.formContainer}>
+                <Text style={[styles.label]}>Authentication Code</Text>
+                <TextInput
+                  style={[styles.input]}
+                  value={twoFactorCode}
+                  onChangeText={setTwoFactorCode}
+                  placeholder="Enter 6-digit code"
+                  keyboardType="numeric"
+                  maxLength={6}
+                  placeholderTextColor={colors.textMuted}
+                />
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.primaryButton]}
+                    onPress={handleTwoFactorSubmit}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator color={colors.text} />
+                    ) : (
+                      <Text style={styles.buttonText}>Verify</Text>
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.button, styles.secondaryButton]}
+                    onPress={() => {
+                      setCredentials({ username: '', password: '' });
+                      setTwoFactorRequired(false);
+                      setTwoFactorCode('');
+                      setPasswordHashString(null);
+                      setPasswordHashBase64(null);
+                      setLoginResponse(null);
+                      setError(null);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={[styles.noteText]}>
+                  Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.formContainer}>
+                <Text style={[styles.label]}>Username or email</Text>
+                <TextInput
+                  style={[styles.input]}
+                  value={credentials.username}
+                  onChangeText={(text) => setCredentials({ ...credentials, username: text })}
+                  placeholder="name / name@company.com"
+                  autoCapitalize="none"
+                  placeholderTextColor={colors.textMuted}
+                />
+                <Text style={[styles.label]}>Password</Text>
+                <TextInput
+                  style={[styles.input]}
+                  value={credentials.password}
+                  onChangeText={(text) => setCredentials({ ...credentials, password: text })}
+                  placeholder="Enter your password"
+                  secureTextEntry
+                  placeholderTextColor={colors.textMuted}
+                />
+                <View style={styles.rememberMeContainer}>
+                  <TouchableOpacity
+                    style={[styles.checkbox]}
+                    onPress={() => setRememberMe(!rememberMe)}
+                  >
+                    <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
+                  </TouchableOpacity>
+                  <Text style={[styles.rememberMeText]}>Remember me</Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.button, styles.primaryButton]}
+                  onPress={handleSubmit}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.text} />
+                  ) : (
+                    <Text style={styles.buttonText}>Login</Text>
+                  )}
+                </TouchableOpacity>
+                <Text style={[styles.noteText]}>
+                  No account yet?{' '}
+                  <Text
+                    style={styles.clickableDomain}
+                    onPress={() => Linking.openURL('https://app.aliasvault.net')}
+                  >
+                    Create new vault
+                  </Text>
+                </Text>
+              </View>
+            )}
+          </>
         )}
       </ThemedView>
     </View>

@@ -19,8 +19,9 @@ export const Colors = {
     tabIconSelected: '#f49541',
     headerBackground: '#fff',
     tabBarBackground: '#fff',
-    primary: '#f97316',
+    primary: '#f49541',
     secondary: '#6b7280',
+    tertiary: '#eabf69',
     loginHeader: '#f6dfc4',
   },
   dark: {
@@ -38,8 +39,9 @@ export const Colors = {
     tabIconSelected: '#f49541',
     headerBackground: '#1f2937',
     tabBarBackground: '#1f2937',
-    primary: '#f97316',
+    primary: '#f49541',
     secondary: '#6b7280',
+    tertiary: '#eabf69',
     loginHeader: '#5c4331',
   },
 } as const;

@@ -1,16 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { ThemedView } from '@/components/ThemedView';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 export default function InitialLoadingScreen() {
   const { isInitialized: isAuthInitialized, isLoggedIn } = useAuth();
   const { dbInitialized, dbAvailable } = useDb();
   const { syncVault } = useVaultSync();
   const hasInitialized = useRef(false);
+  const [status, setStatus] = useState('Initializing...');
 
   const isFullyInitialized = isAuthInitialized && dbInitialized;
   const requireLoginOrUnlock = isFullyInitialized && (!isLoggedIn || !dbAvailable);
@@ -25,7 +27,12 @@ export default function InitialLoadingScreen() {
 
       // Perform initial vault sync
       console.log('Initial vault sync');
-      await syncVault({ forceCheck: true });
+      await syncVault({
+        initialSync: true,
+        onStatus: (message) => {
+          setStatus(message);
+        }
+      });
 
       // Navigate to appropriate screen
       if (requireLoginOrUnlock) {
@@ -42,7 +49,7 @@ export default function InitialLoadingScreen() {
 
   return (
     <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#f97316" />
+      <LoadingIndicator status={status} />
     </ThemedView>
   );
 }
