@@ -19,4 +19,4 @@ declare module 'react-native-argon2' {
   ): Promise<Argon2Result>;
 
   export default argon2;
-} 
+}

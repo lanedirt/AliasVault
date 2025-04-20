@@ -5,7 +5,6 @@ import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-
 import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
@@ -210,16 +209,21 @@ export default function LoginScreen() {
     setIsLoading(true);
     setError(null);
 
+    // Sanity check: if username or password is empty, return
+    if (!credentials.username || !credentials.password) {
+      setError('Username and password are required');
+      setIsLoading(false);
+      return;
+    }
+
     setLoginStatus('Logging in');
 
     try {
-      console.log('handleSubmit');
       authContext.clearGlobalMessage();
 
       const loginResponse = await srpUtil.initiateLogin(credentials.username);
 
-      console.log('loginResponse', loginResponse);
-
+      // Use requestAnimationFrame to ensure UI updates are smooth
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         credentials.password,
         loginResponse.salt,
@@ -227,12 +231,8 @@ export default function LoginScreen() {
         loginResponse.encryptionSettings
       );
 
-      console.log('passwordHash', passwordHash);
-
       const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
-
-      console.log('passwordHashString', passwordHashString);
 
       setLoginStatus('Validating credentials');
       const validationResponse = await srpUtil.validateLogin(
@@ -241,8 +241,6 @@ export default function LoginScreen() {
         rememberMe,
         loginResponse
       );
-
-      console.log('validationResponse', validationResponse);
 
       if (validationResponse.requiresTwoFactor) {
         setLoginResponse(loginResponse);
@@ -258,14 +256,10 @@ export default function LoginScreen() {
         throw new Error('Login failed -- no token returned');
       }
 
-      console.log('validationResponse.token', validationResponse.token);
-
       setLoginStatus('Syncing vault');
       const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
-
-      console.log('vaultResponseJson', vaultResponseJson);
 
       const vaultError = webApi.validateVaultResponse(vaultResponseJson);
       if (vaultError) {
@@ -276,13 +270,10 @@ export default function LoginScreen() {
         return;
       }
 
-      console.log('vaultResponseJson', vaultResponseJson);
-
       await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
       await authContext.login();
 
-      console.log('logged in');
       router.replace('/(tabs)');
 
       setIsLoading(false);
