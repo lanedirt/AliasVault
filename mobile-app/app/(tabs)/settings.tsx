@@ -5,6 +5,7 @@ import { useWebApi } from '@/context/WebApiContext';
 import { router } from 'expo-router';
 import { AppInfo } from '@/utils/AppInfo';
 import { useColors } from '@/hooks/useColorScheme';
+import { TitleContainer } from '@/components/TitleContainer';
 
 export default function SettingsScreen() {
   const webApi = useWebApi();
@@ -22,12 +23,6 @@ export default function SettingsScreen() {
     content: {
       flex: 1,
       padding: 16,
-    },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 16,
     },
     settingsContainer: {
       flex: 1,
@@ -58,9 +53,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ThemedView style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Settings</ThemedText>
-        </ThemedView>
+        <TitleContainer title="Settings" />
         <ThemedView style={styles.settingsContainer}>
           <TouchableOpacity
             style={styles.logoutButton}

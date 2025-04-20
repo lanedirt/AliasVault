@@ -11,6 +11,7 @@ import { Credential } from '@/utils/types/Credential';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
 import { CredentialCard } from '@/components/CredentialCard';
+import { TitleContainer } from '@/components/TitleContainer';
 import emitter from '@/utils/EventEmitter';
 
 export default function CredentialsScreen() {
@@ -139,12 +140,6 @@ export default function CredentialsScreen() {
       flex: 1,
       padding: 16,
     },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 16,
-    },
     stepContainer: {
       flex: 1,
       gap: 8,
@@ -196,9 +191,7 @@ export default function CredentialsScreen() {
               keyboardShouldPersistTaps='handled'
               ListHeaderComponent={
                 <ThemedView>
-                  <ThemedView style={styles.titleContainer}>
-                    <ThemedText type="title">Credentials</ThemedText>
-                  </ThemedView>
+                  <TitleContainer title="Credentials" />
                   <ThemedView style={{ position: 'relative' }}>
                     <TextInput
                       style={[styles.searchInput]}
