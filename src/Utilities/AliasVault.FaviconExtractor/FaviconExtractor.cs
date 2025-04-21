@@ -114,7 +114,7 @@ public static class FaviconExtractor
         var defaultFavicon = new HtmlNode(HtmlNodeType.Element, htmlDoc, 0);
         defaultFavicon.Attributes.Add("href", $"{uri.GetLeftPart(UriPartial.Authority)}/favicon.ico");
 
-        return
+        HtmlNodeCollection?[] nodeArray =
         [
             htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and @type='image/svg+xml']"),
             htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' and @sizes='96x96']"),
@@ -126,6 +126,9 @@ public static class FaviconExtractor
             htmlDoc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon']"),
             new HtmlNodeCollection(htmlDoc.DocumentNode) { defaultFavicon },
         ];
+
+        // Filter node array to only return non-null values and cast to non-nullable array
+        return nodeArray.Where(x => x != null).Cast<HtmlNodeCollection>().ToArray();
     }
 
     private static async Task<byte[]?> TryGetFaviconAsync(HttpClient client, Uri uri)
