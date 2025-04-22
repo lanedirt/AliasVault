@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, useColorScheme, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text, useColorScheme, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -72,9 +72,11 @@ export default function CredentialDetailsScreen() {
             {credential.ServiceName}
           </ThemedText>
           {credential.ServiceUrl && (
-            <Text style={[styles.serviceUrl, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>
-              {credential.ServiceUrl}
-            </Text>
+            <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
+              <Text style={[styles.serviceUrl, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>
+                {credential.ServiceUrl}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       </ThemedView>
