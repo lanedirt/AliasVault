@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { ThemedView } from '@/components/ThemedView';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import { install } from 'react-native-quick-crypto';
 
 export default function InitialLoadingScreen() {
   const { isInitialized: isAuthInitialized, isLoggedIn } = useAuth();
@@ -16,6 +16,10 @@ export default function InitialLoadingScreen() {
 
   const isFullyInitialized = isAuthInitialized && dbInitialized;
   const requireLoginOrUnlock = isFullyInitialized && (!isLoggedIn || !dbAvailable);
+
+  // Install the react-native-quick-crypto library which is used by the EncryptionUtility
+  // which acts as a drop-in replacement for the subtle crypto API.
+  install();
 
   useEffect(() => {
     async function initialize() {

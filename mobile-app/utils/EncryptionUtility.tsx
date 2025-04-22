@@ -113,6 +113,8 @@ class EncryptionUtility {
    * Generates a new RSA key pair for asymmetric encryption
    */
   public static async generateRsaKeyPair(): Promise<{ publicKey: string, privateKey: string }> {
+// TODO: ensure the key pair is generated in the correct format where private key is in expected
+    // JWK format that the WASM app already outputs.
     const keyPair = await crypto.subtle.generateKey(
       {
         name: "RSA-OAEP",
@@ -179,7 +181,8 @@ class EncryptionUtility {
       const cipherBuffer = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
       const plaintextBuffer = await crypto.subtle.decrypt(
         {
-          name: "RSA-OAEP"
+          name: "RSA-OAEP",
+          hash: "SHA-256",
         },
         privateKeyObj,
         cipherBuffer
@@ -188,7 +191,7 @@ class EncryptionUtility {
       return new Uint8Array(plaintextBuffer);
     } catch (error) {
       console.error('RSA decryption failed:', error);
-      throw new Error(`Failed to decrypt: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to decrypt: ${error.message}`);
     }
   }
 
@@ -250,12 +253,20 @@ class EncryptionUtility {
           throw new Error('Encryption key not found');
         }
 
+        console.log('email.encryptedSymmetricKey: ', email.encryptedSymmetricKey);
+        console.log('encryptionKey.PrivateKey: ', encryptionKey.PrivateKey);
+
         // Decrypt symmetric key with asymmetric private key
         const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
           email.encryptedSymmetricKey,
           encryptionKey.PrivateKey
         );
+
+        console.log('Decrypted symmetricKey: ', symmetricKey);
+
         const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
+
+        console.log('Decrypted symmetricKeyBase64: ', symmetricKeyBase64);
 
         // Create a new object to avoid mutating the original
         const decryptedEmail = { ...email };
