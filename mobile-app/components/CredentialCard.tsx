@@ -1,12 +1,12 @@
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { CredentialIcon } from './CredentialIcon';
 import { useColors } from '@/hooks/useColorScheme';
 import { Credential } from '@/utils/types/Credential';
+import { router } from 'expo-router';
 
 type CredentialCardProps = {
   credential: Credential;
 };
-
 
 export function CredentialCard({ credential }: CredentialCardProps) {
   const colors = useColors();
@@ -34,6 +34,14 @@ export function CredentialCard({ credential }: CredentialCardProps) {
   };
 
   const styles = StyleSheet.create({
+    credentialCard: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
+    },
     credentialContent: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -60,16 +68,22 @@ export function CredentialCard({ credential }: CredentialCardProps) {
   });
 
   return (
-    <View style={styles.credentialContent}>
-      <CredentialIcon logo={credential.Logo} style={styles.logo} />
-      <View style={styles.credentialInfo}>
-        <Text style={[styles.serviceName]}>
-          {credential.ServiceName ?? 'Unknown Service'}
-        </Text>
-        <Text style={[styles.credentialText]}>
-          {getCredentialDisplayText(credential)}
-        </Text>
+    <TouchableOpacity
+      style={styles.credentialCard}
+      onPress={() => router.push(`/(tabs)/(credentials)/${credential.Id}`)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.credentialContent}>
+        <CredentialIcon logo={credential.Logo} style={styles.logo} />
+        <View style={styles.credentialInfo}>
+          <Text style={[styles.serviceName]}>
+            {credential.ServiceName ?? 'Unknown Service'}
+          </Text>
+          <Text style={[styles.credentialText]}>
+            {getCredentialDisplayText(credential)}
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

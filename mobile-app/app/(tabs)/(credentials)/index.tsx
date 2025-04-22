@@ -240,13 +240,7 @@ export default function CredentialsScreen() {
                 />
               }
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => handleCredentialPress(item.Id)}
-                  style={[styles.credentialItem]}
-                  activeOpacity={0.7}
-                >
-                  <CredentialCard credential={item} />
-                </TouchableOpacity>
+                <CredentialCard credential={item} />
               )}
               ListEmptyComponent={
                 <Text style={[styles.emptyText]}>

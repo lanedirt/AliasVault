@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { StyleSheet, View, ActivityIndicator, ScrollView } from 'react-native';
+import { router, Stack } from 'expo-router';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { ThemedText } from '@/components/ThemedText';
 import { TitleContainer } from '@/components/TitleContainer';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
 import EncryptionUtility from '@/utils/EncryptionUtility';
+import { useColors } from '@/hooks/useColorScheme';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
+import { EmailCard } from '@/components/EmailCard';
 
 // Simple hook for minimum duration loading state
 const useMinDurationLoading = (initialState: boolean, minDuration: number): [boolean, (newState: boolean) => void] => {
@@ -36,9 +38,9 @@ const useMinDurationLoading = (initialState: boolean, minDuration: number): [boo
 };
 
 export default function EmailsScreen() {
-  const router = useRouter();
   const dbContext = useDb();
   const webApi = useWebApi();
+  const colors = useColors();
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
@@ -141,113 +143,61 @@ export default function EmailsScreen() {
     }
 
     return emails.map((email) => (
-      <TouchableOpacity
-        key={email.id}
-        style={styles.emailCard}
-        onPress={() => router.push(`/emails/${email.id}`)}
-      >
-        <View style={styles.emailHeader}>
-          <ThemedText style={styles.emailSubject} numberOfLines={1}>
-            {email.subject}
-          </ThemedText>
-          <ThemedText style={styles.emailDate}>
-            {formatEmailDate(email.dateSystem)}
-          </ThemedText>
-        </View>
-        <ThemedText style={styles.emailPreview} numberOfLines={2}>
-          {email.messagePreview}
-        </ThemedText>
-      </TouchableOpacity>
+      <EmailCard key={email.id} email={email} />
     ));
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      marginBottom: 80,
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    headerImage: {
+      color: colors.textMuted,
+      bottom: -90,
+      left: -35,
+      position: 'absolute',
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    errorText: {
+      color: colors.errorBackground,
+      textAlign: 'center',
+    },
+    emptyText: {
+      textAlign: 'center',
+      opacity: 0.7,
+      color: colors.textMuted,
+    },
+    refreshIndicator: {
+      position: 'absolute',
+      top: 20,
+      alignSelf: 'center',
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-        headerImage={
-          <IconSymbol
-            size={310}
-            color="#808080"
-            name="envelope.fill"
-            style={styles.headerImage}
-          />
-        }
-      >
-        <TitleContainer title="Emails" />
-        {renderContent()}
-      </ParallaxScrollView>
-      {isRefreshing && (
-        <View style={styles.refreshIndicator}>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
-    </View>
+    <ThemedSafeAreaView style={styles.container}>
+      <Stack.Screen options={{ title: "Emails" }} />
+      <ThemedView style={styles.content}>
+        <ScrollView>
+          <TitleContainer title="Emails" />
+          {renderContent()}
+        </ScrollView>
+        {isRefreshing && (
+          <View style={styles.refreshIndicator}>
+            <ActivityIndicator size="large" />
+          </View>
+        )}
+        </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    color: '#ef4444',
-    textAlign: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  emailCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  emailHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  emailSubject: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  emailDate: {
-    fontSize: 12,
-    opacity: 0.6,
-  },
-  emailPreview: {
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  refreshIndicator: {
-    position: 'absolute',
-    top: 20,
-    alignSelf: 'center',
-  },
-});
