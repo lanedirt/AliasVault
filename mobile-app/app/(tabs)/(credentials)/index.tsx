@@ -14,6 +14,7 @@ import { TitleContainer } from '@/components/TitleContainer';
 import { CollapsibleHeader } from '@/components/CollapsibleHeader';
 import emitter from '@/utils/EventEmitter';
 import Toast from 'react-native-toast-message';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function CredentialsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -172,6 +173,7 @@ export default function CredentialsScreen() {
       marginBottom: 16,
       fontSize: 16,
       paddingRight: Platform.OS === 'android' ? 40 : 12,
+      paddingLeft: 40,
     },
     clearButton: {
       position: 'absolute',
@@ -179,6 +181,13 @@ export default function CredentialsScreen() {
       top: '50%',
       transform: [{ translateY: -12 }],
       padding: 4,
+    },
+    searchIcon: {
+      position: 'absolute',
+      left: 12,
+      top: '50%',
+      transform: [{ translateY: -17 }],
+      zIndex: 1,
     },
   });
 
@@ -211,6 +220,12 @@ export default function CredentialsScreen() {
                 <ThemedView>
                   <TitleContainer title="Credentials" />
                   <ThemedView style={{ position: 'relative' }}>
+                    <MaterialIcons
+                      name="search"
+                      size={20}
+                      color={colors.textMuted}
+                      style={styles.searchIcon}
+                    />
                     <TextInput
                       style={[styles.searchInput]}
                       placeholder="Search credentials..."
