@@ -149,6 +149,30 @@ class CredentialManager: NSObject {
     }
 
     @objc
+    func unlockVault(_ resolve: @escaping RCTPromiseResolveBlock,
+                        rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            // TODO: rename this to unlockvault? so meaning is: initialized means it exists, and unlock means
+            // we're decrypting the encrypted database (that exists) and try to load it into memory. If unlocking
+            // fails, user is redirected to the unlock screen in the react native app.
+            try credentialStore.initializeDatabase()
+            resolve(true)
+        } catch {
+            // Check if the error is related to Face ID or decryption
+            if let nsError = error as NSError? {
+                if nsError.domain == "SharedCredentialStore" {
+                    // These are our known error codes for initialization failures
+                    if nsError.code == 1 || nsError.code == 2 || nsError.code == 10 {
+                        resolve(false)
+                        return
+                    }
+                }
+            }
+            reject("INIT_ERROR", "Failed to unlock vault: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
     func requiresMainQueueSetup() -> Bool {
         return false
     }

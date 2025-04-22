@@ -93,7 +93,7 @@ class SharedCredentialStore {
     }
 
     // Get the encrypted database as a base64 encoded string
-    func getEncryptedDatabase() -> String? {
+    private func getEncryptedDatabase() -> String? {
         do {
             // Return the base64 encoded string
             return try String(contentsOf: getEncryptedDbPath(), encoding: .utf8)
@@ -103,7 +103,7 @@ class SharedCredentialStore {
     }
 
     // Get the vault metadata from UserDefaults
-    func getVaultMetadata() -> String? {
+    public func getVaultMetadata() -> String? {
         return UserDefaults.standard.string(forKey: "vault_metadata")
     }
 

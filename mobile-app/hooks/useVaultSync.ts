@@ -59,7 +59,7 @@ export const useVaultSync = () => {
       onStatus?.('Checking vault updates');
       const statusResponse = await withMinimumDelay(
         () => webApi.getStatus(),
-        700,
+        300,
         initialSync
       );
       const statusError = webApi.validateStatusResponse(statusResponse);
@@ -99,9 +99,11 @@ export const useVaultSync = () => {
       }
 
       console.log('Vault sync finished: No updates needed');
-      onStatus?.('Decrypting vault');
-      await new Promise(resolve => setTimeout(resolve, 300));
-      onSuccess?.(false);
+      await withMinimumDelay(
+        () => Promise.resolve(onSuccess?.(false)),
+        300,
+        initialSync
+      );
       return false;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';

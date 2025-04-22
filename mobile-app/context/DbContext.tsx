@@ -66,13 +66,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // Get metadata from SQLite client
         const metadata = await sqliteClient.getVaultMetadata();
         if (metadata) {
+          console.log('Vault metadata found, setting dbInitialized and dbAvailable to true');
           setDbInitialized(true);
           setDbAvailable(true);
         } else {
+          console.log('Vault metadata not found, setting dbInitialized and dbAvailable to false');
           setDbInitialized(true);
           setDbAvailable(false);
         }
       } else {
+        console.log('Vault not initialized, setting dbInitialized and dbAvailable to false');
         setDbInitialized(true);
         setDbAvailable(false);
       }

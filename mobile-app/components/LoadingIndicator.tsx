@@ -48,6 +48,9 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
       ])
     );
 
+    // Reset dots when status changes
+    setDots('');
+
     const dotsInterval = setInterval(() => {
       setDots(prevDots => {
         if (prevDots.length >= 3) return '';
@@ -61,7 +64,12 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
       animation.stop();
       clearInterval(dotsInterval);
     };
-  }, []);
+  }, [status]);
+
+  // If the status ends with a pipe character (|), don't show any dots
+  // This provides an explicit way to disable the loading dots animation
+  const statusTrimmed = status.endsWith('|') ? status.slice(0, -1) : status;
+  const shouldShowDots = !status.endsWith('|');
 
   const styles = StyleSheet.create({
     container: {
@@ -150,7 +158,10 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
           ]}
         />
       </View>
-      <Text style={styles.statusText}>{status}{dots}</Text>
+      <Text style={styles.statusText}>
+        {statusTrimmed}
+        {shouldShowDots && dots}
+      </Text>
     </View>
   );
 }

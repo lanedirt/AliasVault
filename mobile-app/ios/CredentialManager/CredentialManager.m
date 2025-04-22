@@ -6,8 +6,11 @@ RCT_EXTERN_METHOD(requiresMainQueueSetup)
 RCT_EXTERN_METHOD(addCredential:(NSString *)username password:(NSString *)password service:(NSString *)service)
 RCT_EXTERN_METHOD(getCredentials)
 RCT_EXTERN_METHOD(clearVault)
+// TODO: isvaultinitialized should be renamed to "isVaultExists" or something similar as we're just checking if the file exists.
+// The initializevault actually initializes the vault by decrypting it and loading the DB into memory.
 RCT_EXTERN_METHOD(isVaultInitialized:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getVaultMetadata:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(unlockVault:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
 // New methods for SQLite database operations
 RCT_EXTERN_METHOD(storeDatabase:(NSString *)base64EncryptedDb
