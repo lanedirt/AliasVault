@@ -484,6 +484,63 @@ class SqliteClient {
       return false;
     }
   }
+
+  /**
+   * Get credential by email address
+   * @param email - The email address to look up
+   * @returns Credential object with service details or null if not found
+   */
+  public async getCredentialByEmail(email: string): Promise<Credential | null> {
+    const query = `
+        SELECT DISTINCT
+            c.Id,
+            c.Username,
+            c.Notes,
+            c.ServiceId,
+            s.Name as ServiceName,
+            s.Url as ServiceUrl,
+            s.Logo as Logo,
+            a.FirstName,
+            a.LastName,
+            a.NickName,
+            a.BirthDate,
+            a.Gender,
+            a.Email,
+            p.Value as Password
+        FROM Credentials c
+        LEFT JOIN Services s ON c.ServiceId = s.Id
+        LEFT JOIN Aliases a ON c.AliasId = a.Id
+        LEFT JOIN Passwords p ON p.CredentialId = c.Id
+        WHERE c.IsDeleted = 0
+        AND LOWER(a.Email) = LOWER(?)
+        LIMIT 1`;
+
+    const results = await this.executeQuery(query, [email]);
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    // Convert the first row to a Credential object
+    const row = results[0] as any;
+    return {
+      Id: row.Id,
+      Username: row.Username,
+      Password: row.Password,
+      ServiceName: row.ServiceName,
+      ServiceUrl: row.ServiceUrl,
+      Logo: row.Logo,
+      Notes: row.Notes,
+      Alias: {
+        FirstName: row.FirstName,
+        LastName: row.LastName,
+        NickName: row.NickName,
+        BirthDate: row.BirthDate,
+        Gender: row.Gender,
+        Email: row.Email
+      }
+    };
+  }
 }
 
 export default SqliteClient;
