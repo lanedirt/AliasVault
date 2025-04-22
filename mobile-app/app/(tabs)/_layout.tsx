@@ -63,7 +63,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="emails"
+        name="(emails)"
         options={{
           title: 'Emails',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="envelope.fill" color={color} />,

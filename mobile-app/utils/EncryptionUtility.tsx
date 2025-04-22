@@ -92,9 +92,6 @@ class EncryptionUtility {
       const ivHex = Buffer.from(iv).toString('hex');
       const tagHex = Buffer.from(tag).toString('hex');
 
-      console.log('ivHex: ', ivHex);
-      console.log('tagHex: ', tagHex);
-
       const decryptedData = await AesGcmCrypto.decrypt(
         contentBase64,
         base64Key,
@@ -253,20 +250,13 @@ class EncryptionUtility {
           throw new Error('Encryption key not found');
         }
 
-        console.log('email.encryptedSymmetricKey: ', email.encryptedSymmetricKey);
-        console.log('encryptionKey.PrivateKey: ', encryptionKey.PrivateKey);
-
         // Decrypt symmetric key with asymmetric private key
         const symmetricKey = await EncryptionUtility.decryptWithPrivateKey(
           email.encryptedSymmetricKey,
           encryptionKey.PrivateKey
         );
 
-        console.log('Decrypted symmetricKey: ', symmetricKey);
-
         const symmetricKeyBase64 = Buffer.from(symmetricKey).toString('base64');
-
-        console.log('Decrypted symmetricKeyBase64: ', symmetricKeyBase64);
 
         // Create a new object to avoid mutating the original
         const decryptedEmail = { ...email };
