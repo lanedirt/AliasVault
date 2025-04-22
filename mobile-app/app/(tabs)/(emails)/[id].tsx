@@ -12,6 +12,7 @@ import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import emitter from '@/utils/EventEmitter';
 
 export default function EmailDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -108,7 +109,13 @@ export default function EmailDetailsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Delete the email from the server.
               await webApi.delete(`Email/${id}`);
+
+              // Refresh the emails list in the index screen.
+              emitter.emit('refreshEmails');
+
+              // Go back to the emails list screen.
               router.back();
             } catch (err) {
               setError(err instanceof Error ? err.message : 'Failed to delete email');

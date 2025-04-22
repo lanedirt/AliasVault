@@ -117,6 +117,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
       padding: 16,
       paddingBottom: 0,
     },
+    placeholderText: {
+      color: colors.textMuted,
+      marginBottom: 8,
+    },
     titleContainer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -155,7 +159,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
           <PulseDot />
         </View>
-        <ThemedText>Loading emails...</ThemedText>
+        <ThemedText style={styles.placeholderText}>Loading emails...</ThemedText>
       </ThemedView>
     );
   }
@@ -167,7 +171,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
           <PulseDot />
         </View>
-        <ThemedText>No emails received yet.</ThemedText>
+        <ThemedText style={styles.placeholderText}>No emails received yet.</ThemedText>
       </ThemedView>
     );
   }

@@ -67,10 +67,17 @@ export default function EmailsScreen() {
       }
     });
 
+    // Add listener for email refresh which other components can trigger,
+    // e.g. the email delete event in email details screen.
+    const refreshSub = emitter.addListener('refreshEmails', () => {
+      loadEmails();
+    });
+
     return () => {
       sub.remove();
       unsubscribeFocus();
       unsubscribeBlur();
+      refreshSub.remove();
     };
   }, [isTabFocused]);
 
