@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl, Animated } from 'react-native';
 import { Stack, useNavigation } from 'expo-router';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { ThemedText } from '@/components/ThemedText';
 import { TitleContainer } from '@/components/TitleContainer';
+import { CollapsibleHeader } from '@/components/CollapsibleHeader';
 import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
@@ -43,6 +44,7 @@ export default function EmailsScreen() {
   const webApi = useWebApi();
   const colors = useColors();
   const navigation = useNavigation();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
@@ -198,10 +200,19 @@ export default function EmailsScreen() {
 
   return (
     <ThemedSafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "Emails" }} />
+      <CollapsibleHeader
+        title="Emails"
+        scrollY={scrollY}
+        showNavigationHeader={true}
+      />
       <ThemedView style={styles.content}>
-        <ScrollView
+        <Animated.ScrollView
           ref={scrollViewRef}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
@@ -213,7 +224,7 @@ export default function EmailsScreen() {
         >
           <TitleContainer title="Emails" />
           {renderContent()}
-        </ScrollView>
+        </Animated.ScrollView>
       </ThemedView>
     </ThemedSafeAreaView>
   );

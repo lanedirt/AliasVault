@@ -1,6 +1,5 @@
-import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl, Platform } from 'react-native';
+import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl, Platform, Animated } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { router, Stack } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -12,6 +11,7 @@ import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
 import { CredentialCard } from '@/components/CredentialCard';
 import { TitleContainer } from '@/components/TitleContainer';
+import { CollapsibleHeader } from '@/components/CollapsibleHeader';
 import emitter from '@/utils/EventEmitter';
 import Toast from 'react-native-toast-message';
 
@@ -21,6 +21,7 @@ export default function CredentialsScreen() {
   const { syncVault } = useVaultSync();
   const colors = useColors();
   const flatListRef = useRef<FlatList>(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
   const [isTabFocused, setIsTabFocused] = useState(false);
 
@@ -58,11 +59,6 @@ export default function CredentialsScreen() {
 
   const isAuthenticated = authContext.isLoggedIn;
   const isDatabaseAvailable = dbContext.dbAvailable;
-
-  const navigateToCredential = (credentialId: string) => {
-    console.log('Navigating to credential:', credentialId);
-    router.push(`/(tabs)/(credentials)/${credentialId}`);
-  };
 
   const loadCredentials = async () => {
     try {
@@ -189,17 +185,27 @@ export default function CredentialsScreen() {
 
   return (
     <ThemedSafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "Credentials" }} />
+      <CollapsibleHeader
+        title="Credentials"
+        scrollY={scrollY}
+        showNavigationHeader={true}
+      />
+
       <ThemedView style={styles.content}>
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
             <ActivityIndicator size="large" color={colors.primary} />
           ) : (
-            <FlatList
+            <Animated.FlatList
               ref={flatListRef}
               data={filteredCredentials}
               keyExtractor={(item) => item.Id}
               keyboardShouldPersistTaps='handled'
+              onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                { useNativeDriver: true }
+              )}
+              scrollEventThrottle={16}
               ListHeaderComponent={
                 <ThemedView>
                   <TitleContainer title="Credentials" />
