@@ -64,7 +64,10 @@ export default function CredentialDetailsScreen() {
   }
 
   return (
-    <ThemedScrollView style={styles.container}>
+    <ThemedScrollView style={styles.container}
+    contentContainerStyle={{ paddingBottom: 40 }}
+    scrollIndicatorInsets={{ bottom: 40 }}
+    >
       <ThemedView style={styles.header}>
         <CredentialIcon logo={credential.Logo} style={styles.logo} />
         <View style={styles.headerText}>
@@ -91,13 +94,13 @@ export default function CredentialDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 100,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     gap: 12,
+    marginTop: 6,
   },
   headerText: {
     flex: 1,

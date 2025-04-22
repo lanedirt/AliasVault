@@ -1,6 +1,7 @@
 import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl, Platform, Animated } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
@@ -25,6 +26,13 @@ export default function CredentialsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
   const [isTabFocused, setIsTabFocused] = useState(false);
+  const router = useRouter();
+
+  const headerButtons = [{
+    icon: 'add' as const,
+    position: 'right' as const,
+    onPress: () => router.push('/(modals)/add-credential')
+  }];
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -146,6 +154,8 @@ export default function CredentialsScreen() {
     content: {
       flex: 1,
       padding: 16,
+      paddingTop: 0,
+      marginTop: 36,
     },
     stepContainer: {
       flex: 1,
@@ -197,6 +207,8 @@ export default function CredentialsScreen() {
         title="Credentials"
         scrollY={scrollY}
         showNavigationHeader={true}
+        alwaysVisible={true}
+        headerButtons={headerButtons}
       />
 
       <ThemedView style={styles.content}>
@@ -214,7 +226,7 @@ export default function CredentialsScreen() {
                 { useNativeDriver: true }
               )}
               scrollEventThrottle={16}
-              contentContainerStyle={{ paddingBottom: 40 }}
+              contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
               scrollIndicatorInsets={{ bottom: 40 }}
               ListHeaderComponent={
                 <ThemedView>

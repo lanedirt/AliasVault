@@ -10,7 +10,7 @@ interface TitleContainerProps {
 export function TitleContainer({ title, showLogo = true }: TitleContainerProps) {
   return (
     <View style={styles.titleContainer}>
-      {showLogo && <Logo width={40} height={40} />}
+      {showLogo && <Logo width={40} height={40} style={styles.logo} />}
       <ThemedText type="title">{title}</ThemedText>
     </View>
   );
@@ -22,5 +22,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 16,
+  },
+  logo: {
+    marginBottom: 6,
   },
 });

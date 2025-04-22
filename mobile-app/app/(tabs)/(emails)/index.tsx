@@ -168,6 +168,7 @@ export default function EmailsScreen() {
     content: {
       flex: 1,
       padding: 16,
+      marginTop: 22,
     },
     headerImage: {
       color: colors.textMuted,
@@ -212,7 +213,7 @@ export default function EmailsScreen() {
             { useNativeDriver: true }
           )}
           scrollEventThrottle={16}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
           scrollIndicatorInsets={{ bottom: 40 }}
           refreshControl={
             <RefreshControl
