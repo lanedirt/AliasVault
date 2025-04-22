@@ -392,6 +392,8 @@ export default function LoginScreen() {
                   style={[styles.input]}
                   value={twoFactorCode}
                   onChangeText={setTwoFactorCode}
+                  autoCorrect={false}
+                  autoCapitalize="none"
                   placeholder="Enter 6-digit code"
                   keyboardType="numeric"
                   maxLength={6}
@@ -437,6 +439,7 @@ export default function LoginScreen() {
                   onChangeText={(text) => setCredentials({ ...credentials, username: text })}
                   placeholder="name / name@company.com"
                   autoCapitalize="none"
+                  autoCorrect={false}
                   placeholderTextColor={colors.textMuted}
                 />
                 <Text style={[styles.label]}>Password</Text>
@@ -447,6 +450,8 @@ export default function LoginScreen() {
                   placeholder="Enter your password"
                   secureTextEntry
                   placeholderTextColor={colors.textMuted}
+                  autoCorrect={false}
+                  autoCapitalize="none"
                 />
                 <View style={styles.rememberMeContainer}>
                   <TouchableOpacity

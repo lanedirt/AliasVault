@@ -215,6 +215,8 @@ export default function CredentialsScreen() {
                       placeholder="Search credentials..."
                       placeholderTextColor={colors.textMuted}
                       value={searchQuery}
+                      autoCorrect={false}
+                      autoCapitalize="none"
                       onChangeText={setSearchQuery}
                       clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
                     />
