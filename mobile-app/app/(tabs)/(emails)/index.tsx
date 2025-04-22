@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useNavigation } from 'expo-router';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -12,6 +12,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { EmailCard } from '@/components/EmailCard';
+import emitter from '@/utils/EventEmitter';
 
 // Simple hook for minimum duration loading state
 const useMinDurationLoading = (initialState: boolean, minDuration: number): [boolean, (newState: boolean) => void] => {
@@ -41,10 +42,37 @@ export default function EmailsScreen() {
   const dbContext = useDb();
   const webApi = useWebApi();
   const colors = useColors();
+  const navigation = useNavigation();
+  const scrollViewRef = useRef<ScrollView>(null);
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isTabFocused, setIsTabFocused] = useState(false);
+
+  useEffect(() => {
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      setIsTabFocused(true);
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      setIsTabFocused(false);
+    });
+
+    const sub = emitter.addListener('tabPress', (routeName: string) => {
+      if (routeName === '(emails)' && isTabFocused) {
+        console.log('Emails tab re-pressed while focused: reset screen');
+        // Scroll to top
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      }
+    });
+
+    return () => {
+      sub.remove();
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
+  }, [isTabFocused]);
 
   const loadEmails = useCallback(async () : Promise<void> => {
     try {
@@ -166,6 +194,7 @@ export default function EmailsScreen() {
       <Stack.Screen options={{ title: "Emails" }} />
       <ThemedView style={styles.content}>
         <ScrollView
+          ref={scrollViewRef}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}

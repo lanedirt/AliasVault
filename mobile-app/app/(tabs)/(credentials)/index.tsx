@@ -34,9 +34,8 @@ export default function CredentialsScreen() {
     });
 
     const sub = emitter.addListener('tabPress', (routeName: string) => {
-      console.log('Tab press received:', routeName);
       if (routeName === '(credentials)' && isTabFocused) {
-        console.log('Tab re-pressed while focused: reset screen');
+        console.log('Credentials tab re-pressed while focused: reset screen');
         setSearchQuery(''); // Reset search
         setRefreshing(false); // Reset refreshing
         // Scroll to top
