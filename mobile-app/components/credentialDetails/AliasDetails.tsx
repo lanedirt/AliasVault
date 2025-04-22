@@ -56,6 +56,6 @@ const styles = {
   section: {
     padding: 16,
     paddingBottom: 0,
-    gap: 12,
+    gap: 8,
   },
 };

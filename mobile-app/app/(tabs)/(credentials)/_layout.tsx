@@ -22,6 +22,16 @@ export default function CredentialsLayout() {
           },
         }}
       />
+      <Stack.Screen
+        name="email/[id]"
+        options={{
+          title: 'Email Preview',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: colors.headerBackground,
+          },
+        }}
+      />
     </Stack>
   );
 }

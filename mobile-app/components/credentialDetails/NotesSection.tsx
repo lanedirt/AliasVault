@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   section: {
     padding: 16,
     paddingBottom: 8,
-    gap: 12,
+    gap: 8,
   },
   notesContainer: {
     padding: 12,

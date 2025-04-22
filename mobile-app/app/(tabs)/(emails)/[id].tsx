@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
 import { Email } from '@/utils/types/webapi/Email';
 import { Credential } from '@/utils/types/Credential';
 import { useDb } from '@/context/DbContext';
@@ -297,6 +297,7 @@ export default function EmailDetailsScreen() {
   if (isLoading) {
     return (
       <View style={[styles.centerContainer, isDarkMode ? styles.viewDark : styles.viewLight]}>
+        <Stack.Screen options={{ title: 'Email Details' }} />
         <ActivityIndicator size="large" />
       </View>
     );
@@ -428,6 +429,7 @@ export default function EmailDetailsScreen() {
 
   return (
     <View style={[styles.container, isDarkMode ? styles.viewDark : styles.viewLight]}>
+      <Stack.Screen options={{ title: 'Email Details' }} />
       {metadataView}
       {emailView}
       {email.attachments && email.attachments.length > 0 && (

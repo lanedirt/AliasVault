@@ -11,6 +11,7 @@ import { Credential } from '@/utils/types/Credential';
 import { LoginCredentials } from '@/components/credentialDetails/LoginCredentials';
 import { AliasDetails } from '@/components/credentialDetails/AliasDetails';
 import { NotesSection } from '@/components/credentialDetails/NotesSection';
+import { EmailPreview } from '@/components/credentialDetails/EmailPreview';
 
 export default function CredentialDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -77,6 +78,7 @@ export default function CredentialDetailsScreen() {
           )}
         </View>
       </ThemedView>
+      <EmailPreview email={credential.Alias.Email} />
       <NotesSection credential={credential} />
       <LoginCredentials credential={credential} />
       <AliasDetails credential={credential} />
