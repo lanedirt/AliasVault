@@ -164,7 +164,6 @@ export default function EmailsScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      marginBottom: 80,
     },
     content: {
       flex: 1,
@@ -213,6 +212,8 @@ export default function EmailsScreen() {
             { useNativeDriver: true }
           )}
           scrollEventThrottle={16}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          scrollIndicatorInsets={{ bottom: 40 }}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}

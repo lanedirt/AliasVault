@@ -141,7 +141,6 @@ export default function CredentialsScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      marginBottom: 80,
     },
     content: {
       flex: 1,
@@ -206,6 +205,8 @@ export default function CredentialsScreen() {
                 { useNativeDriver: true }
               )}
               scrollEventThrottle={16}
+              contentContainerStyle={{ paddingBottom: 40 }}
+              scrollIndicatorInsets={{ bottom: 40 }}
               ListHeaderComponent={
                 <ThemedView>
                   <TitleContainer title="Credentials" />
