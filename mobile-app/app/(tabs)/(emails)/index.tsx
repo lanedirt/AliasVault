@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
+import { Stack } from 'expo-router';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -92,29 +92,6 @@ export default function EmailsScreen() {
     setIsRefreshing(false);
   }, [loadEmails]);
 
-  const formatEmailDate = (dateSystem: string): string => {
-    const now = new Date();
-    const emailDate = new Date(dateSystem);
-    const secondsAgo = Math.floor((now.getTime() - emailDate.getTime()) / 1000);
-
-    if (secondsAgo < 60) {
-      return 'just now';
-    } else if (secondsAgo < 3600) {
-      const minutes = Math.floor(secondsAgo / 60);
-      return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`;
-    } else if (secondsAgo < 86400) {
-      const hours = Math.floor(secondsAgo / 3600);
-      return `${hours} ${hours === 1 ? 'hr' : 'hrs'} ago`;
-    } else if (secondsAgo < 172800) {
-      return 'yesterday';
-    } else {
-      return emailDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit'
-      });
-    }
-  };
-
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -188,16 +165,20 @@ export default function EmailsScreen() {
     <ThemedSafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Emails" }} />
       <ThemedView style={styles.content}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          }
+        >
           <TitleContainer title="Emails" />
           {renderContent()}
         </ScrollView>
-        {isRefreshing && (
-          <View style={styles.refreshIndicator}>
-            <ActivityIndicator size="large" />
-          </View>
-        )}
-        </ThemedView>
+      </ThemedView>
     </ThemedSafeAreaView>
   );
 }

@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Keyboard } from 'react-native';
 import { CredentialIcon } from './CredentialIcon';
 import { useColors } from '@/hooks/useColorScheme';
 import { Credential } from '@/utils/types/Credential';
@@ -70,7 +70,10 @@ export function CredentialCard({ credential }: CredentialCardProps) {
   return (
     <TouchableOpacity
       style={styles.credentialCard}
-      onPress={() => router.push(`/(tabs)/(credentials)/${credential.Id}`)}
+      onPress={() => {
+        Keyboard.dismiss();
+        router.push(`/(tabs)/(credentials)/${credential.Id}`);
+      }}
       activeOpacity={0.7}
     >
       <View style={styles.credentialContent}>

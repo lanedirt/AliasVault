@@ -143,11 +143,6 @@ export default function CredentialsScreen() {
     );
   });
 
-  const handleCredentialPress = (credentialId: string) => {
-    Keyboard.dismiss();
-    navigateToCredential(credentialId);
-  };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
