@@ -26,11 +26,55 @@ class SharedCredentialStore {
     private var db: Connection?
     private var encryptionKey: Data?
     private var enabledAuthMethods: AuthMethods = .none
+    private var clearCacheTimer: Timer?
 
     public init() {
         // Load saved auth methods from UserDefaults
         let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
         enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+
+        // Add notification observers
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        clearCacheTimer?.invalidate()
+    }
+
+    @objc private func appDidEnterBackground() {
+        print("App entered background, starting 5-second timer to clear cache")
+        // Start timer to clear cache after 5 seconds
+        clearCacheTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
+            print("5-second background timer fired, clearing cache")
+            self?.clearCache()
+        }
+    }
+
+    @objc private func appWillEnterForeground() {
+        print("App will enter foreground, canceling clear cache timer")
+
+        // Check if timer has elapsed
+        if let timer = clearCacheTimer, timer.fireDate < Date() {
+            print("Timer has elapsed, cache should have been cleared already when app was in background, but clearing it again to be sure")
+            clearCache()
+        }
+
+        // Cancel the timer if app comes back to foreground
+        clearCacheTimer?.invalidate()
+        clearCacheTimer = nil
     }
 
     // MARK: - Auth Methods Management
@@ -64,6 +108,11 @@ class SharedCredentialStore {
         let hasDatabase = FileManager.default.fileExists(atPath: getEncryptedDbPath().path)
 
         return hasDatabase
+    }
+
+    func isVaultUnlocked() -> Bool {
+        // Check if encryption key is in memory
+        return encryptionKey != nil
     }
 
     // MARK: - Encryption Key Management
@@ -233,10 +282,6 @@ class SharedCredentialStore {
     // MARK: - Credential Operations
 
     func addCredential(_ credential: Credential) throws {
-        if db == nil {
-            try initializeDatabase()
-        }
-
         // After initialization attempt, check if db is still nil
         guard let db = db else {
             throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
@@ -263,10 +308,6 @@ class SharedCredentialStore {
     }
 
     func getAllCredentials() throws -> [Credential] {
-        if db == nil {
-            try initializeDatabase()
-        }
-
         // After initialization attempt, check if db is still nil
         guard let db = db else {
             throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
@@ -301,6 +342,7 @@ class SharedCredentialStore {
 
     // Clears cached encryption key and encrypted database to force re-initialization on next access.
     func clearCache() {
+        print("Clearing cache - removing encryption key and decrypted database from memory")
         // Clear the cached encryption key
         encryptionKey = nil
 
@@ -310,6 +352,7 @@ class SharedCredentialStore {
 
     // Clears cached and saved encryption key and encrypted database to force re-initialization on next access.
     func clearVault() {
+        print("Clearing vault - removing all stored data")
         // Remove the encryption key from keychain
         try? keychain.remove(encryptionKeyKey)
 

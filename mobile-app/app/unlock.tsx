@@ -39,6 +39,8 @@ export default function UnlockScreen() {
       // Initialize the database with the provided password
       const loginResponse = await srpUtil.initiateLogin(username);
 
+      console.log('loginResponse', loginResponse);
+
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         password,
         loginResponse.salt,
@@ -54,10 +56,10 @@ export default function UnlockScreen() {
         router.replace('/(tabs)/(credentials)');
       }
       else {
-        Alert.alert('Error', 'Incorrect password. Please try again or use Face ID.');
+        Alert.alert('Error', 'Incorrect password. Please try again.');
       }
     } catch (error) {
-      Alert.alert('Error', 'Incorrect password. Please try again or use Face ID.');
+      Alert.alert('Error', 'Incorrect password. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDb } from './DbContext';
-import { NativeModules } from 'react-native';
+import { NativeModules, AppState } from 'react-native';
+import { router, usePathname } from 'expo-router';
+import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
+
+// Create a navigation reference
+export const navigationRef = React.createRef<NavigationContainerRef<ParamListBase>>();
 
 export type AuthMethod = 'faceid' | 'password';
 
@@ -19,6 +24,10 @@ type AuthContextType = {
   clearGlobalMessage: () => void;
   setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
   getAuthMethodDisplay: () => string;
+  autoLockTimeout: number;
+  setAutoLockTimeout: (timeout: number) => Promise<void>;
+  returnPath: string | null;
+  setReturnPath: (path: string | null) => Promise<void>;
 }
 
 /**
@@ -35,7 +44,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>(['password']);
+  const [autoLockTimeout, setAutoLockTimeoutState] = useState<number>(0);
+  const [returnPath, setReturnPathState] = useState<string | null>(null);
+  const appState = useRef(AppState.currentState);
   const dbContext = useDb();
+  const pathname = usePathname();
 
   /**
    * Check if Face ID is enabled based on enabled auth methods
@@ -158,6 +171,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return enabledAuthMethods.includes('faceid') ? 'Face ID' : 'Password';
   }, [enabledAuthMethods]);
 
+  useEffect(() => {
+    // Load saved settings on mount
+    const loadSettings = async () => {
+      try {
+        const savedTimeout = await AsyncStorage.getItem('autoLockTimeout');
+        if (savedTimeout) {
+          setAutoLockTimeoutState(parseInt(savedTimeout, 10));
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const setAutoLockTimeout = async (timeout: number) => {
+    try {
+      await AsyncStorage.setItem('autoLockTimeout', timeout.toString());
+      setAutoLockTimeoutState(timeout);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
+  };
+
+  const isVaultUnlocked = async () : Promise<boolean> => {
+    try {
+      const isUnlocked = await NativeModules.CredentialManager.isVaultUnlocked();
+      return isUnlocked;
+    } catch (error) {
+      console.error('Failed to check vault status:', error);
+      return false;
+    }
+  };
+
+  const setReturnPath = useCallback(async (path: string | null) => {
+    if (path) {
+      await AsyncStorage.setItem('returnPath', path);
+    } else {
+      await AsyncStorage.removeItem('returnPath');
+    }
+    setReturnPathState(path);
+  }, []);
+
+  // Handle app state changes
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App coming to foreground
+        console.log('App coming to foreground in AuthContext');
+        if (pathname && !pathname.includes('unlock') && !pathname.includes('login')) {
+          try {
+            // Check if vault is unlocked.
+            const isUnlocked = await isVaultUnlocked();
+            if (!isUnlocked) {
+              // Database connection failed, store current path and navigate to unlock flow
+              console.log('Vault is not unlocked anymore, navigating to unlock flow');
+              await setReturnPath(pathname);
+              // Reset navigation to root using Expo Router
+              router.replace('/login');
+            } else {
+              console.log('Vault is still unlocked, staying on current screen');
+            }
+          } catch (error) {
+            // Database query failed, store current path and navigate to unlock flow
+            console.log('Failed to check vault status, navigating to unlock flow:', error);
+            await setReturnPath(pathname);
+            router.replace('/login');
+          }
+        }
+      } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+        // App going to background
+        console.log('App going to background in AuthContext');
+        if (pathname && !pathname.includes('unlock') && !pathname.includes('login')) {
+          await setReturnPath(pathname);
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [pathname, isVaultUnlocked, setReturnPath]);
+
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
@@ -172,7 +270,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplay,
-  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled]);
+    autoLockTimeout,
+    setAutoLockTimeout,
+    returnPath,
+    setReturnPath,
+  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, autoLockTimeout, setAutoLockTimeout, returnPath, setReturnPath]);
 
   return (
     <AuthContext.Provider value={contextValue}>

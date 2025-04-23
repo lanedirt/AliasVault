@@ -9,6 +9,7 @@ RCT_EXTERN_METHOD(clearVault)
 // TODO: isvaultinitialized should be renamed to "isVaultExists" or something similar as we're just checking if the file exists.
 // The initializevault actually initializes the vault by decrypting it and loading the DB into memory.
 RCT_EXTERN_METHOD(isVaultInitialized:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(isVaultUnlocked:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getVaultMetadata:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(unlockVault:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 

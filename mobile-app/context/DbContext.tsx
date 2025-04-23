@@ -12,6 +12,7 @@ type DbContextType = {
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   testDatabaseConnection: (derivedKey: string) => Promise<boolean>;
+  unlockVault: () => Promise<boolean>;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -106,6 +107,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   /**
+   * Unlock the vault in the native module which will decrypt the database using the stored encryption key
+   * and load it into memory.
+   */
+  const unlockVault = useCallback(async () : Promise<boolean> => {
+    return await credentialManager.unlockVault();
+  }, []);
+
+  /**
    * Get the current vault metadata directly from SQLite client
    */
   const getVaultMetadata = useCallback(async () : Promise<VaultMetadata | null> => {
@@ -121,6 +130,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       // Store the encryption key
       await sqliteClient.storeEncryptionKey(derivedKey);
+
+      // Initialize the database
+      await unlockVault();
 
       // Try to get the database version as a simple test query
       const version = await sqliteClient.getDatabaseVersion();
@@ -142,8 +154,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     initializeDatabase,
     clearDatabase,
     getVaultMetadata,
-    testDatabaseConnection
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection]);
+    testDatabaseConnection,
+    unlockVault
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault]);
 
   return (
     <DbContext.Provider value={contextValue}>

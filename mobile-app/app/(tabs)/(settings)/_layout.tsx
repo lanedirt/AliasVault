@@ -22,6 +22,16 @@ export default function SettingsLayout() {
           },
         }}
       />
+      <Stack.Screen
+        name="auto-lock"
+        options={{
+          title: 'Auto-lock Settings',
+          headerBackTitle: 'Settings',
+          headerStyle: {
+            backgroundColor: colors.headerBackground,
+          },
+        }}
+      />
     </Stack>
   );
 }

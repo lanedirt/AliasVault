@@ -68,9 +68,6 @@ class CredentialManager: NSObject {
                      resolver resolve: @escaping RCTPromiseResolveBlock,
                      rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Ensure database is initialized
-            try credentialStore.initializeDatabase()
-
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
                 return String(describing: param)
@@ -90,9 +87,6 @@ class CredentialManager: NSObject {
                       resolver resolve: @escaping RCTPromiseResolveBlock,
                       rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Ensure database is initialized
-            try credentialStore.initializeDatabase()
-
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
                 return String(describing: param)
@@ -152,6 +146,13 @@ class CredentialManager: NSObject {
         } catch {
             reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
         }
+    }
+
+    @objc
+    func isVaultUnlocked(_ resolve: @escaping RCTPromiseResolveBlock,
+                        rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let isUnlocked = try credentialStore.isVaultUnlocked()
+        resolve(isUnlocked)
     }
 
     @objc

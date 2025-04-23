@@ -16,6 +16,7 @@ export default function SettingsScreen() {
   const webApi = useWebApi();
   const colors = useColors();
   const { username, getAuthMethodDisplay } = useAuth();
+  const { autoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -26,6 +27,23 @@ export default function SettingsScreen() {
 
   const handleVaultUnlockPress = () => {
     router.push('/(tabs)/(settings)/vault-unlock');
+  };
+
+  const handleAutoLockPress = () => {
+    router.push('/(tabs)/(settings)/auto-lock');
+  };
+
+  const getAutoLockDisplay = () => {
+    if (autoLockTimeout === 0) return 'Never';
+    if (autoLockTimeout === 60) return '1 minute';
+    if (autoLockTimeout === 300) return '5 minutes';
+    if (autoLockTimeout === 900) return '15 minutes';
+    if (autoLockTimeout === 1800) return '30 minutes';
+    if (autoLockTimeout === 3600) return '1 hour';
+    if (autoLockTimeout === 7200) return '2 hours';
+    if (autoLockTimeout === 14400) return '4 hours';
+    if (autoLockTimeout === 28800) return '8 hours';
+    return 'Never';
   };
 
   const styles = StyleSheet.create({
@@ -165,6 +183,20 @@ export default function SettingsScreen() {
               <View style={[styles.settingItemContent]}>
                 <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
                 <ThemedText style={styles.settingItemValue}>{getAuthMethodDisplay()}</ThemedText>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.settingItem, styles.settingItemContentWithBorder]}
+              onPress={handleAutoLockPress}
+            >
+              <View style={styles.settingItemIcon}>
+                <Ionicons name="timer-outline" size={20} color={colors.text} />
+              </View>
+              <View style={[styles.settingItemContent]}>
+                <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
+                <ThemedText style={styles.settingItemValue}>{getAutoLockDisplay()}</ThemedText>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>
