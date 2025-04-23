@@ -26,8 +26,6 @@ type AuthContextType = {
   getAuthMethodDisplay: () => string;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
-  returnPath: string | null;
-  setReturnPath: (path: string | null) => Promise<void>;
 }
 
 /**
@@ -44,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>(['password']);
-  const [returnPath, setReturnPathState] = useState<string | null>(null);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
   const pathname = usePathname();
@@ -209,46 +206,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const setReturnPath = useCallback(async (path: string | null) => {
-    if (path) {
-      await AsyncStorage.setItem('returnPath', path);
-    } else {
-      await AsyncStorage.removeItem('returnPath');
-    }
-    setReturnPathState(path);
-  }, []);
-
   // Handle app state changes
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         // App coming to foreground
         console.log('App coming to foreground in AuthContext');
-        if (pathname && !pathname.includes('unlock') && !pathname.includes('login')) {
+        if (!pathname?.includes('unlock') && !pathname?.includes('login')) {
           try {
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();
             if (!isUnlocked) {
-              // Database connection failed, store current path and navigate to unlock flow
+              // Database connection failed, navigate to unlock flow
               console.log('Vault is not unlocked anymore, navigating to unlock flow');
-              await setReturnPath(pathname);
-              // Reset navigation to root using Expo Router
               router.replace('/sync');
             } else {
               console.log('Vault is still unlocked, staying on current screen');
             }
           } catch (error) {
-            // Database query failed, store current path and navigate to unlock flow
+            // Database query failed, navigate to unlock flow
             console.log('Failed to check vault status, navigating to unlock flow:', error);
-            await setReturnPath(pathname);
             router.replace('/sync');
           }
-        }
-      } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
-        // App going to background
-        console.log('App going to background in AuthContext');
-        if (pathname && !pathname.includes('unlock') && !pathname.includes('login')) {
-          await setReturnPath(pathname);
         }
       }
       appState.current = nextAppState;
@@ -257,7 +236,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.remove();
     };
-  }, [pathname, isVaultUnlocked, setReturnPath]);
+  }, [isVaultUnlocked]);
 
   const contextValue = useMemo(() => ({
     isLoggedIn,
@@ -275,9 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAuthMethodDisplay,
     getAutoLockTimeout,
     setAutoLockTimeout,
-    returnPath,
-    setReturnPath,
-  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, returnPath, setReturnPath]);
+  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout]);
 
   return (
     <AuthContext.Provider value={contextValue}>

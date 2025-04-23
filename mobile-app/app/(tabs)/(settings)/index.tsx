@@ -78,7 +78,7 @@ export default function SettingsScreen() {
     settingItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
+      paddingVertical: 6,
       paddingHorizontal: 16,
       backgroundColor: colors.accentBackground,
     },
@@ -95,9 +95,10 @@ export default function SettingsScreen() {
       alignItems: 'center',
       paddingVertical: 12,
     },
-    settingItemContentWithBorder: {
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.accentBorder,
+    separator: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.accentBorder,
+      marginLeft: 52, // Icon width (24) + marginRight (12) + paddingHorizontal (16)
     },
     settingItemText: {
       flex: 1,
@@ -194,9 +195,9 @@ export default function SettingsScreen() {
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>
-
+            <View style={styles.separator} />
             <TouchableOpacity
-              style={[styles.settingItem, styles.settingItemContentWithBorder]}
+              style={styles.settingItem}
               onPress={handleAutoLockPress}
             >
               <View style={styles.settingItemIcon}>

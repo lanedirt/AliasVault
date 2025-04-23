@@ -13,7 +13,7 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
 
 export default function UnlockScreen() {
-  const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
+  const { isLoggedIn, username, isFaceIDEnabled, returnPath } = useAuth();
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +52,7 @@ export default function UnlockScreen() {
 
       // Initialize the database with the vault response and password
       if (await testDatabaseConnection(passwordHashBase64)) {
-        // If successful, navigate to credentials
+        // Navigate to credentials
         router.replace('/(tabs)/(credentials)');
       }
       else {

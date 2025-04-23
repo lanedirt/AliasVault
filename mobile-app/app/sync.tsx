@@ -60,7 +60,10 @@ export default function SyncScreen() {
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 1000));
             console.log('FaceID unlock successful, navigating to credentials');
+
+            // Navigate to credentials
             router.replace('/(tabs)/(credentials)');
+
             return;
           }
           else {
