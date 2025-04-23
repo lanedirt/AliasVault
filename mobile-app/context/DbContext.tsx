@@ -57,6 +57,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       metadata
     );
 
+    // Initialize the database in the native module
+    await unlockVault();
+
     setDbInitialized(true);
     setDbAvailable(true);
   }, []);

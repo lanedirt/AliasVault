@@ -89,7 +89,6 @@ export default function LoginScreen() {
 
       const loginResponse = await srpUtil.initiateLogin(credentials.username);
 
-      // Use requestAnimationFrame to ensure UI updates are smooth
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         credentials.password,
         loginResponse.salt,

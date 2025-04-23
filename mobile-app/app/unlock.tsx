@@ -13,7 +13,7 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
 
 export default function UnlockScreen() {
-  const { isLoggedIn, username, isFaceIDEnabled, returnPath } = useAuth();
+  const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
