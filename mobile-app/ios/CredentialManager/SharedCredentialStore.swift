@@ -18,6 +18,8 @@ struct AuthMethods: OptionSet {
 class SharedCredentialStore {
     static let shared = SharedCredentialStore()
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
+        .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
+
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
     private let authMethodsKey = "aliasvault_auth_methods"
@@ -36,6 +38,24 @@ class SharedCredentialStore {
         enabledAuthMethods = methods
         UserDefaults.standard.set(methods.rawValue, forKey: authMethodsKey)
         UserDefaults.standard.synchronize()
+
+        if !enabledAuthMethods.contains(.faceID) {
+            // If Face ID is now disabled, remove the persisted key from keychain if it exists
+            print("Face ID is now disabled, removing key from keychain")
+            try? keychain.remove(encryptionKeyKey)
+        }
+        else {
+            // If Face ID is now enabled, persist the current key from memory into keychain
+            print("Face ID is now enabled, persisting key to keychain")
+            do {
+                if let key = encryptionKey {
+                    try storeEncryptionKey(base64Key: key.base64EncodedString())
+                }
+            } catch {
+                print("Failed to save existing key from memory to keychain: \(error)")
+                throw error
+            }
+        }
     }
 
     // MARK: - Vault Status
@@ -88,17 +108,23 @@ class SharedCredentialStore {
 
         // Store the key in memory
         encryptionKey = keyData
+        print("Stored key in memory")
 
         // Store the key in the keychain if Face ID is enabled
         if enabledAuthMethods.contains(.faceID) {
+            print("Face ID is enabled, storing key in keychain")
             do {
                 try keychain
-                    .authenticationPrompt("Authenticate to unlock your vault")
+                    .authenticationPrompt("Authenticate to save your vault decryption key in the iOS keychain")
                     .set(keyData, key: encryptionKeyKey)
+                print("Key saved to keychain")
             } catch {
                 print("Failed to save key to keychain: \(error)")
                 throw error
             }
+        }
+        else {
+            print("Face ID is disabled, not storing key in keychain")
         }
     }
 

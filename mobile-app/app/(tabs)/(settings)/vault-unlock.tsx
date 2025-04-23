@@ -4,10 +4,11 @@ import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { AuthMethod, useAuth } from '@/context/AuthContext';
 
 export default function VaultUnlockSettingsScreen() {
   const colors = useColors();
+  const [initialized, setInitialized] = useState(false);
   const { setAuthMethods, enabledAuthMethods } = useAuth();
   const [hasFaceID, setHasFaceID] = useState(false);
   const [isFaceIDEnabled, setIsFaceIDEnabled] = useState(false);
@@ -23,15 +24,25 @@ export default function VaultUnlockSettingsScreen() {
     if (enabledAuthMethods.includes('faceid')) {
       setIsFaceIDEnabled(true);
     }
+
+    setInitialized(true);
   }, []);
 
   useEffect(() => {
-    if (isFaceIDEnabled) {
-      setAuthMethods(['faceid', 'password']);
-    } else {
-      setAuthMethods(['password']);
+    if (!initialized) {
+      return;
     }
-  }, [isFaceIDEnabled, setAuthMethods]);
+
+    // Check if there are actually differences between the current and the new auth methods
+    const currentAuthMethods = enabledAuthMethods;
+    const newAuthMethods = isFaceIDEnabled ? ['faceid', 'password'] : ['password'];
+    if (currentAuthMethods.length === newAuthMethods.length && currentAuthMethods.every(method => newAuthMethods.includes(method))) {
+      return;
+    }
+
+    console.log('Updating auth methods to', newAuthMethods);
+    setAuthMethods(newAuthMethods as AuthMethod[]);
+  }, [isFaceIDEnabled, setAuthMethods, enabledAuthMethods, initialized]);
 
   const handleFaceIDToggle = useCallback(async (value: boolean) => {
     if (value && !hasFaceID) {
@@ -117,7 +128,7 @@ export default function VaultUnlockSettingsScreen() {
       >
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
-            Choose how you want to unlock your vault
+            Choose how you want to unlock your vault.
           </ThemedText>
         </View>
 
@@ -134,7 +145,7 @@ export default function VaultUnlockSettingsScreen() {
               />
             </View>
             <ThemedText style={styles.helpText}>
-              Your vault decryption key will be securely stored on your local device in the iOS Keychain and can only be accessed with your face or fingerprint.
+              Your vault decryption key will be securely stored on your local device in the iOS Keychain and can be accessed with your face or fingerprint.
             </ThemedText>
           </View>
 
