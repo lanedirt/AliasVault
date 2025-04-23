@@ -11,7 +11,14 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) => {
   const hasName = Boolean(credential.Alias?.FirstName?.trim() || credential.Alias?.LastName?.trim());
   const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
 
-  if (!hasName && !credential.Alias?.NickName && !credential.Alias?.BirthDate) {
+  const hasValidBirthDate = credential.Alias?.BirthDate ? (() => {
+    const date = new Date(credential.Alias.BirthDate);
+    return !isNaN(date.getTime()) &&
+      date.getFullYear() > 1 &&
+      date.getFullYear() < 9999;
+  })() : false;
+
+  if (!hasName && !credential.Alias?.NickName && !hasValidBirthDate) {
     return null;
   }
 
@@ -42,10 +49,10 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) => {
           value={credential.Alias.NickName}
         />
       )}
-      {credential.Alias?.BirthDate && !isNaN(credential.Alias.BirthDate.getTime()) && credential.Alias.BirthDate.getTime() !== new Date(0).getTime() && (
+      {hasValidBirthDate && (
         <FormInputCopyToClipboard
           label="Birth Date"
-          value={credential.Alias.BirthDate.toISOString().split('T')[0]}
+          value={credential.Alias.BirthDate.split('T')[0]}
         />
       )}
     </ThemedView>

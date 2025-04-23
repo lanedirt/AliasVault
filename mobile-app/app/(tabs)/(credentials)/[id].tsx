@@ -28,15 +28,6 @@ export default function CredentialDetailsScreen() {
 
       try {
         const cred = await dbContext.sqliteClient!.getCredentialById(id as string);
-        if (cred?.Alias?.BirthDate) {
-          // Convert the string date to a Date object
-          const date = new Date(cred.Alias.BirthDate);
-          if (!isNaN(date.getTime())) {
-            cred.Alias.BirthDate = date;
-          } else {
-            cred.Alias.BirthDate = undefined;
-          }
-        }
         setCredential(cred);
       } catch (err) {
         console.error('Error loading credential:', err);
