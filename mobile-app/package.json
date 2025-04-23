@@ -28,6 +28,7 @@
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
     "expo-linking": "~7.0.5",
+    "expo-local-authentication": "~15.0.2",
     "expo-router": "~4.0.20",
     "expo-sharing": "~13.0.1",
     "expo-splash-screen": "~0.29.22",
@@ -37,6 +38,7 @@
     "expo-system-ui": "~4.0.9",
     "expo-web-browser": "~14.0.2",
     "fbemitter": "^3.0.0",
+    "otpauth": "^9.4.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.9",
@@ -52,8 +54,7 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
-    "expo-local-authentication": "~15.0.2"
+    "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

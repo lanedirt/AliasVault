@@ -12,6 +12,7 @@ import { LoginCredentials } from '@/components/credentialDetails/LoginCredential
 import { AliasDetails } from '@/components/credentialDetails/AliasDetails';
 import { NotesSection } from '@/components/credentialDetails/NotesSection';
 import { EmailPreview } from '@/components/credentialDetails/EmailPreview';
+import { TotpSection } from '@/components/credentialDetails/TotpSection';
 
 export default function CredentialDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -84,6 +85,7 @@ export default function CredentialDetailsScreen() {
         </View>
       </ThemedView>
       <EmailPreview email={credential.Alias.Email} />
+      <TotpSection credential={credential} />
       <NotesSection credential={credential} />
       <LoginCredentials credential={credential} />
       <AliasDetails credential={credential} />

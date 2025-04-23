@@ -125,7 +125,6 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      marginBottom: 8,
     },
     title: {
       fontSize: 20,
