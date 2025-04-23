@@ -11,6 +11,7 @@ type DbContextType = {
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string | null) => Promise<void>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
+  testDatabaseConnection: (derivedKey: string) => Promise<boolean>;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -111,14 +112,38 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return await sqliteClient.getVaultMetadata();
   }, []);
 
+  /**
+   * Test if the database is working with the provided (to be stored) encryption key by performing a simple query
+   * @param derivedKey The encryption key to test with
+   * @returns true if the database is working, false otherwise
+   */
+  const testDatabaseConnection = useCallback(async (derivedKey: string): Promise<boolean> => {
+    try {
+      // Store the encryption key
+      await sqliteClient.storeEncryptionKey(derivedKey);
+
+      // Try to get the database version as a simple test query
+      const version = await sqliteClient.getDatabaseVersion();
+
+      if (version && version.length > 0) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }, []);
+
   const contextValue = useMemo(() => ({
     sqliteClient,
     dbInitialized,
     dbAvailable,
     initializeDatabase,
     clearDatabase,
-    getVaultMetadata
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata]);
+    getVaultMetadata,
+    testDatabaseConnection
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection]);
 
   return (
     <DbContext.Provider value={contextValue}>

@@ -1,19 +1,26 @@
 import { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import LoadingIndicator from '@/components/LoadingIndicator';
-import { NativeModules } from 'react-native';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { useColors } from '@/hooks/useColorScheme';
+import Logo from '@/assets/images/logo.svg';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import { SrpUtility } from '@/utils/SrpUtility';
+import { useWebApi } from '@/context/WebApiContext';
 
 export default function UnlockScreen() {
-  const { isLoggedIn } = useAuth();
-  const { initializeDatabase } = useDb();
+  const { isLoggedIn, username } = useAuth();
+  const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const colors = useColors();
+  const webApi = useWebApi();
+  const srpUtil = new SrpUtility(webApi);
+
 
   const handleUnlock = async () => {
     if (!password) {
@@ -23,28 +30,34 @@ export default function UnlockScreen() {
 
     setIsLoading(true);
     try {
-      // Initialize the database with the provided password
-      // We need to get the vault response from the API first
-      const response = await fetch('https://api.aliasvault.net/v1/vault', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch vault');
+      if (!isLoggedIn || !username) {
+        // No username means we're not logged in, redirect to login
+        router.replace('/login');
+        return;
       }
 
-      const vaultResponse: VaultResponse = await response.json();
+      // Initialize the database with the provided password
+      const loginResponse = await srpUtil.initiateLogin(username);
+
+      const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
+        password,
+        loginResponse.salt,
+        loginResponse.encryptionType,
+        loginResponse.encryptionSettings
+      );
+
+      const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 
       // Initialize the database with the vault response and password
-      await initializeDatabase(vaultResponse, password);
-
-      // If successful, navigate to credentials
-      router.replace('/(tabs)/(credentials)');
+      if (await testDatabaseConnection(passwordHashBase64)) {
+        // If successful, navigate to credentials
+        router.replace('/(tabs)/(credentials)');
+      }
+      else {
+        Alert.alert('Error', 'Incorrect password. Please try again or use Face ID.');
+      }
     } catch (error) {
-      Alert.alert('Error', 'Incorrect password. Please try again.');
+      Alert.alert('Error', 'Incorrect password. Please try again or use Face ID.');
     } finally {
       setIsLoading(false);
     }
@@ -53,103 +66,177 @@ export default function UnlockScreen() {
   const handleLogout = async () => {
     // Clear any stored tokens or session data
     // This will be handled by the auth context
+    await webApi.logout();
     router.replace('/login');
   };
 
+  const handleFaceIDRetry = async () => {
+    router.replace('/');
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    keyboardAvoidingView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    content: {
+      width: '100%',
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: 32,
+    },
+    logo: {
+      width: 200,
+      height: 80,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 8,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    avatarContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 16,
+    },
+    avatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      marginRight: 12,
+    },
+    username: {
+      fontSize: 18,
+      textAlign: 'center',
+      opacity: 0.8,
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 16,
+      marginBottom: 24,
+      textAlign: 'center',
+      opacity: 0.7,
+      color: colors.text,
+    },
+    input: {
+      width: '100%',
+      height: 50,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+      fontSize: 16,
+      color: colors.text,
+      backgroundColor: colors.accentBackground,
+    },
+    button: {
+      width: '100%',
+      height: 50,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    faceIdButton: {
+      width: '100%',
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    faceIdButtonText: {
+      color: colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    logoutButton: {
+      width: '100%',
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    logoutButtonText: {
+      color: colors.primary,
+      fontSize: 16,
+    },
+  });
+
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.content}>
-        <ThemedText style={styles.title}>Unlock Vault</ThemedText>
-        <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleUnlock}
-          disabled={isLoading}
+      {isLoading ? (
+        <LoadingIndicator status="Unlocking vault..." />
+      ) : (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
         >
-          <ThemedText style={styles.buttonText}>
-            {isLoading ? 'Unlocking...' : 'Unlock'}
-          </ThemedText>
-        </TouchableOpacity>
+          <View style={styles.content}>
+            <View style={styles.logoContainer}>
+              <Logo style={styles.logo} />
+            </View>
+            <ThemedText style={styles.title}>Unlock Vault</ThemedText>
+            <View style={styles.avatarContainer}>
+              <Image
+                source={require('@/assets/images/avatar.webp')}
+                style={styles.avatar}
+              />
+              <ThemedText style={styles.username}>{username}</ThemedText>
+            </View>
+            <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
 
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-        </TouchableOpacity>
-      </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
 
-      {isLoading && <LoadingIndicator status="Unlocking vault..." />}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleUnlock}
+              disabled={isLoading}
+            >
+              <ThemedText style={styles.buttonText}>
+                {isLoading ? 'Unlocking...' : 'Unlock'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.faceIdButton}
+              onPress={handleFaceIDRetry}
+            >
+              <ThemedText style={styles.faceIdButtonText}>Try Face ID Again</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      )}
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  content: {
-    width: '100%',
-    maxWidth: 400,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 24,
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  button: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  logoutButton: {
-    width: '100%',
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoutButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
-  },
-});
