@@ -43,7 +43,7 @@ export const useVaultSync = () => {
     console.log('syncVault called with initialSync:', initialSync);
 
     try {
-      const isLoggedIn = await authContext.initializeAuth();
+      const { isLoggedIn } = await authContext.initializeAuth();
 
       if (!isLoggedIn) {
         console.log('Vault sync: Not authenticated');

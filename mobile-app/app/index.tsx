@@ -35,7 +35,7 @@ export default function InitialLoadingScreen() {
     hasInitialized.current = true;
 
     async function initialize() {
-      const isLoggedIn = await authContext.initializeAuth();
+      const { isLoggedIn, enabledAuthMethods } = await authContext.initializeAuth();
 
       // If user is not logged in, navigate to login immediately
       if (!isLoggedIn) {
@@ -60,6 +60,13 @@ export default function InitialLoadingScreen() {
         // as we're just checking if the file exists.
         const isInitialized = await NativeModules.CredentialManager.isVaultInitialized();
         if (isInitialized) {
+          const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
+          if (!isFaceIDEnabled) {
+            console.log('FaceID is not enabled, navigating to unlock screen');
+            router.replace('/unlock');
+            return;
+          }
+
           // Attempt to unlock the vault with FaceID.
           setStatus('Unlocking vault|');
           const isUnlocked = await NativeModules.CredentialManager.unlockVault();

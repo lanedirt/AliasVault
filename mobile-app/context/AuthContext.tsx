@@ -1,17 +1,24 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDb } from './DbContext';
+import { NativeModules } from 'react-native';
+
+export type AuthMethod = 'faceid' | 'password';
 
 type AuthContextType = {
   isLoggedIn: boolean;
   isInitialized: boolean;
   username: string | null;
+  enabledAuthMethods: AuthMethod[];
+  isFaceIDEnabled: () => boolean;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
-  initializeAuth: () => Promise<boolean>;
+  initializeAuth: () => Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }>;
   login: () => Promise<void>;
   logout: (errorMessage?: string) => Promise<void>;
   globalMessage: string | null;
   clearGlobalMessage: () => void;
+  setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
+  getAuthMethodDisplay: () => string;
 }
 
 /**
@@ -27,7 +34,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
+  const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>(['password']);
   const dbContext = useDb();
+
+  /**
+   * Check if Face ID is enabled based on enabled auth methods
+   */
+  const isFaceIDEnabled = useCallback(() : boolean => {
+    return enabledAuthMethods.includes('faceid');
+  }, [enabledAuthMethods]);
 
   /**
    * Set auth tokens in storage as part of the login process. After db is initialized, the login method should be called as well.
@@ -42,20 +57,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /**
    * Initialize the authentication state, called on initial load by _layout.tsx.
-   * @returns boolean indicating whether the user is logged in
+   * @returns object containing whether the user is logged in and enabled auth methods
    */
-  const initializeAuth = useCallback(async () : Promise<boolean> => {
+  const initializeAuth = useCallback(async () : Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }> => {
     const accessToken = await AsyncStorage.getItem('accessToken') as string;
     const refreshToken = await AsyncStorage.getItem('refreshToken') as string;
     const username = await AsyncStorage.getItem('username') as string;
+    const savedAuthMethods = await AsyncStorage.getItem('authMethods');
     let isAuthenticated = false;
+    let methods: AuthMethod[] = ['password'];
+
     if (accessToken && refreshToken && username) {
       setUsername(username);
       setIsLoggedIn(true);
       isAuthenticated = true;
+      if (savedAuthMethods) {
+        try {
+          const parsedMethods = JSON.parse(savedAuthMethods) as AuthMethod[];
+          if (Array.isArray(parsedMethods) && parsedMethods.every(method => method === 'faceid' || method === 'password')) {
+            methods = parsedMethods;
+            setEnabledAuthMethods(parsedMethods);
+          }
+        } catch (e) {
+          // If parsing fails, use default
+          setEnabledAuthMethods(['password']);
+        }
+      }
     }
     setIsInitialized(true);
-    return isAuthenticated;
+    return { isLoggedIn: isAuthenticated, enabledAuthMethods: methods };
   }, []);
 
   /**
@@ -72,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.removeItem('username');
     await AsyncStorage.removeItem('accessToken');
     await AsyncStorage.removeItem('refreshToken');
+    await AsyncStorage.removeItem('authMethods');
     dbContext?.clearDatabase();
 
     // Set local storage global message that will be shown on the login page.
@@ -81,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUsername(null);
     setIsLoggedIn(false);
+    setEnabledAuthMethods(['password']);
   }, [dbContext]);
 
   /**
@@ -90,17 +122,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGlobalMessage(null);
   }, []);
 
+  /**
+   * Set the authentication methods and save them to storage
+   */
+  const setAuthMethods = useCallback(async (methods: AuthMethod[]) : Promise<void> => {
+    // Ensure password is always included
+    const methodsToSave = methods.includes('password') ? methods : [...methods, 'password'];
+
+    // Save to AsyncStorage
+    await AsyncStorage.setItem('authMethods', JSON.stringify(methodsToSave));
+
+    // Update iOS credentials manager
+    try {
+      await NativeModules.CredentialManager.setAuthMethods(methodsToSave);
+    } catch (error) {
+      console.error('Failed to update iOS auth methods:', error);
+      // Continue with the update even if iOS update fails
+    }
+
+    // Use a state update function to ensure we're working with the latest state
+    setEnabledAuthMethods(prevMethods => {
+      // Only update if the methods have actually changed
+      if (JSON.stringify(prevMethods) !== JSON.stringify(methodsToSave)) {
+        return methodsToSave as AuthMethod[];
+      }
+      return prevMethods;
+    });
+  }, []);
+
+  /**
+   * Get the display label for the current auth method
+   * Prefers Face ID if enabled, otherwise falls back to Password
+   */
+  const getAuthMethodDisplay = useCallback(() : string => {
+    return enabledAuthMethods.includes('faceid') ? 'Face ID' : 'Password';
+  }, [enabledAuthMethods]);
+
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
     username,
+    enabledAuthMethods,
+    isFaceIDEnabled,
     initializeAuth,
     setAuthTokens,
     login,
     logout,
     globalMessage,
     clearGlobalMessage,
-  }), [isLoggedIn, isInitialized, username, globalMessage, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth]);
+    setAuthMethods,
+    getAuthMethodDisplay,
+  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled]);
 
   return (
     <AuthContext.Provider value={contextValue}>

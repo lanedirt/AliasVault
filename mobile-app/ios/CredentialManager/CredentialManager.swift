@@ -24,21 +24,38 @@ class CredentialManager: NSObject {
     }
 
     @objc
+    func setAuthMethods(_ authMethods: [String],
+                      resolver resolve: @escaping RCTPromiseResolveBlock,
+                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            var methods: AuthMethods = []
+
+            for method in authMethods {
+                switch method.lowercased() {
+                case "faceid":
+                    methods.insert(.faceID)
+                case "password":
+                    methods.insert(.password)
+                default:
+                    reject("INVALID_AUTH_METHOD", "Invalid authentication method: \(method)", nil)
+                    return
+                }
+            }
+
+            try credentialStore.setAuthMethods(methods)
+            resolve(nil)
+        } catch {
+            reject("AUTH_METHOD_ERROR", "Failed to set authentication methods: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
     func storeEncryptionKey(_ base64EncryptionKey: String,
                           resolver resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Store the encryption key in the keychain with biometric or PIN protection
-            let context = LAContext()
-            var error: NSError?
-
-            guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-                reject("AUTH_UNAVAILABLE", "Authentication not available: \(error?.localizedDescription ?? "Unknown error")", error)
-                return
-            }
-
             // Store the key in the keychain with authentication protection
-            try credentialStore.storeEncryptionKey(base64EncryptionKey)
+            try credentialStore.storeEncryptionKey(base64Key: base64EncryptionKey)
             resolve(nil)
         } catch {
             reject("KEYCHAIN_ERROR", "Failed to store encryption key: \(error.localizedDescription)", error)

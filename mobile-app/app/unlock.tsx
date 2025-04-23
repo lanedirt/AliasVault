@@ -13,7 +13,7 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
 
 export default function UnlockScreen() {
-  const { isLoggedIn, username } = useAuth();
+  const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -221,12 +221,14 @@ export default function UnlockScreen() {
               </ThemedText>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.faceIdButton}
-              onPress={handleFaceIDRetry}
-            >
-              <ThemedText style={styles.faceIdButtonText}>Try Face ID Again</ThemedText>
-            </TouchableOpacity>
+            {isFaceIDEnabled() && (
+              <TouchableOpacity
+                style={styles.faceIdButton}
+                onPress={handleFaceIDRetry}
+              >
+                <ThemedText style={styles.faceIdButtonText}>Try Face ID Again</ThemedText>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.logoutButton}

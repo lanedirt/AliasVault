@@ -18,6 +18,10 @@ RCT_EXTERN_METHOD(storeDatabase:(NSString *)base64EncryptedDb
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setAuthMethods:(NSArray *)authMethods
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(storeEncryptionKey:(NSString *)base64EncryptionKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)

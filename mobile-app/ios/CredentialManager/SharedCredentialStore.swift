@@ -5,16 +5,38 @@ import LocalAuthentication
 import CryptoKit
 import CommonCrypto
 
+struct AuthMethods: OptionSet {
+    let rawValue: Int
+
+    static let faceID = AuthMethods(rawValue: 1 << 0)
+    static let password = AuthMethods(rawValue: 1 << 1)
+
+    static let all: AuthMethods = [.faceID, .password]
+    static let none: AuthMethods = []
+}
+
 class SharedCredentialStore {
     static let shared = SharedCredentialStore()
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
-        .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: [.biometryAny])
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
+    private let authMethodsKey = "aliasvault_auth_methods"
     private var db: Connection?
     private var encryptionKey: Data?
+    private var enabledAuthMethods: AuthMethods = .none
 
-    public init() {}
+    public init() {
+        // Load saved auth methods from UserDefaults
+        let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
+        enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+    }
+
+    // MARK: - Auth Methods Management
+    func setAuthMethods(_ methods: AuthMethods) throws {
+        enabledAuthMethods = methods
+        UserDefaults.standard.set(methods.rawValue, forKey: authMethodsKey)
+        UserDefaults.standard.synchronize()
+    }
 
     // MARK: - Vault Status
     func isVaultInitialized() -> Bool {
@@ -27,26 +49,33 @@ class SharedCredentialStore {
     // MARK: - Encryption Key Management
     private func getEncryptionKey() throws -> Data {
         if let key = encryptionKey {
-            // print as base64 for debugging
-            print("Key found in memory: \(key.base64EncodedString())")
             return key
         }
 
-        guard let keyData = try? keychain
-            .authenticationPrompt("Authenticate to unlock your vault")
-            .getData(encryptionKeyKey) else {
-            throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+        // If Face ID is enabled, try to get the key from keychain
+        if enabledAuthMethods.contains(.faceID) {
+            let context = LAContext()
+            var error: NSError?
+
+            guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+                throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
+            }
+
+            guard let keyData = try? keychain
+                .authenticationPrompt("Authenticate to unlock your vault")
+                .getData(encryptionKeyKey) else {
+                throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+            }
+
+            encryptionKey = keyData
+            return keyData
         }
 
-        encryptionKey = keyData
-        // print as base64 for debugging
-        print("Key found in keychain: \(keyData.base64EncodedString())")
-        return keyData
+        // If Face ID is not enabled and we don't have a key in memory, throw an error
+        throw NSError(domain: "SharedCredentialStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "No encryption key found in memory"])
     }
 
-    func storeEncryptionKey(_ base64Key: String) throws {
-        print("Storing encryption key")
-
+    func storeEncryptionKey(base64Key: String) throws {
         // Convert base64 string to bytes
         guard let keyData = Data(base64Encoded: base64Key) else {
             throw NSError(domain: "SharedCredentialStore", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 key"])
@@ -57,16 +86,19 @@ class SharedCredentialStore {
             throw NSError(domain: "SharedCredentialStore", code: 7, userInfo: [NSLocalizedDescriptionKey: "Invalid key length. Expected 32 bytes"])
         }
 
-        do {
-            try keychain
-                .authenticationPrompt("Authenticate to unlock your vault")
-                .set(keyData, key: encryptionKeyKey)
-            encryptionKey = keyData
-            // print as base64 for debugging
-            print("Key saved in keychain: \(keyData.base64EncodedString())")
-        } catch {
-            print("Failed to save key to keychain: \(error)")
-            throw error
+        // Store the key in memory
+        encryptionKey = keyData
+
+        // Store the key in the keychain if Face ID is enabled
+        if enabledAuthMethods.contains(.faceID) {
+            do {
+                try keychain
+                    .authenticationPrompt("Authenticate to unlock your vault")
+                    .set(keyData, key: encryptionKeyKey)
+            } catch {
+                print("Failed to save key to keychain: \(error)")
+                throw error
+            }
         }
     }
 
@@ -107,6 +139,9 @@ class SharedCredentialStore {
         return UserDefaults.standard.string(forKey: "vault_metadata")
     }
 
+    /**
+     * Initialize the database.
+     */
     func initializeDatabase() throws {
         // Get the encrypted database
         guard let encryptedDbBase64 = getEncryptedDatabase() else {
