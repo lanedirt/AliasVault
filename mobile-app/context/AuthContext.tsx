@@ -24,7 +24,7 @@ type AuthContextType = {
   clearGlobalMessage: () => void;
   setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
   getAuthMethodDisplay: () => string;
-  autoLockTimeout: number;
+  getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
   returnPath: string | null;
   setReturnPath: (path: string | null) => Promise<void>;
@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>(['password']);
-  const [autoLockTimeout, setAutoLockTimeoutState] = useState<number>(0);
   const [returnPath, setReturnPathState] = useState<string | null>(null);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
@@ -171,26 +170,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return enabledAuthMethods.includes('faceid') ? 'Face ID' : 'Password';
   }, [enabledAuthMethods]);
 
-  useEffect(() => {
-    // Load saved settings on mount
-    const loadSettings = async () => {
-      try {
-        const savedTimeout = await AsyncStorage.getItem('autoLockTimeout');
-        if (savedTimeout) {
-          setAutoLockTimeoutState(parseInt(savedTimeout, 10));
-        }
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      }
-    };
+  /**
+   * Get the auto-lock timeout from the iOS credentials manager
+   */
+  const getAutoLockTimeout = async () : Promise<number> => {
+    try {
+      const timeout = await NativeModules.CredentialManager.getAutoLockTimeout();
+      return timeout;
+    } catch (error) {
+      console.error('Failed to get auto-lock timeout:', error);
+      return 0;
+    }
+  }
 
-    loadSettings();
-  }, []);
-
+  /**
+   * Set the auto-lock timeout in the iOS credentials manager
+   */
   const setAutoLockTimeout = async (timeout: number) => {
     try {
-      await AsyncStorage.setItem('autoLockTimeout', timeout.toString());
-      setAutoLockTimeoutState(timeout);
+      // Update iOS credentials manager
+      try {
+        await NativeModules.CredentialManager.setAutoLockTimeout(timeout);
+      } catch (error) {
+        console.error('Failed to update iOS auto-lock timeout:', error);
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
     }
@@ -230,7 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.log('Vault is not unlocked anymore, navigating to unlock flow');
               await setReturnPath(pathname);
               // Reset navigation to root using Expo Router
-              router.replace('/login');
+              router.replace('/sync');
             } else {
               console.log('Vault is still unlocked, staying on current screen');
             }
@@ -238,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Database query failed, store current path and navigate to unlock flow
             console.log('Failed to check vault status, navigating to unlock flow:', error);
             await setReturnPath(pathname);
-            router.replace('/login');
+            router.replace('/sync');
           }
         }
       } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
@@ -270,11 +273,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplay,
-    autoLockTimeout,
+    getAutoLockTimeout,
     setAutoLockTimeout,
     returnPath,
     setReturnPath,
-  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, autoLockTimeout, setAutoLockTimeout, returnPath, setReturnPath]);
+  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, returnPath, setReturnPath]);
 
   return (
     <AuthContext.Provider value={contextValue}>

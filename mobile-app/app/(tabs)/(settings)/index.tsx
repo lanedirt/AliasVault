@@ -10,15 +10,36 @@ import { useAuth } from '@/context/AuthContext';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { Ionicons } from '@expo/vector-icons';
 import { CollapsibleHeader } from '@/components/CollapsibleHeader';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export default function SettingsScreen() {
   const webApi = useWebApi();
   const colors = useColors();
   const { username, getAuthMethodDisplay } = useAuth();
-  const { autoLockTimeout } = useAuth();
+  const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
+  const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
+
+  useEffect(() => {
+    const loadAutoLockDisplay = async () => {
+      const autoLockTimeout = await getAutoLockTimeout();
+      let display = 'Never';
+
+      if (autoLockTimeout === 5) display = '5 seconds';
+      else if (autoLockTimeout === 30) display = '30 seconds';
+      else if (autoLockTimeout === 60) display = '1 minute';
+      else if (autoLockTimeout === 900) display = '15 minutes';
+      else if (autoLockTimeout === 1800) display = '30 minutes';
+      else if (autoLockTimeout === 3600) display = '1 hour';
+      else if (autoLockTimeout === 14400) display = '4 hours';
+      else if (autoLockTimeout === 28800) display = '8 hours';
+
+      setAutoLockDisplay(display);
+    };
+
+    loadAutoLockDisplay();
+  }, [getAutoLockTimeout]);
 
   const handleLogout = async () => {
     await webApi.logout();
@@ -31,19 +52,6 @@ export default function SettingsScreen() {
 
   const handleAutoLockPress = () => {
     router.push('/(tabs)/(settings)/auto-lock');
-  };
-
-  const getAutoLockDisplay = () => {
-    if (autoLockTimeout === 0) return 'Never';
-    if (autoLockTimeout === 60) return '1 minute';
-    if (autoLockTimeout === 300) return '5 minutes';
-    if (autoLockTimeout === 900) return '15 minutes';
-    if (autoLockTimeout === 1800) return '30 minutes';
-    if (autoLockTimeout === 3600) return '1 hour';
-    if (autoLockTimeout === 7200) return '2 hours';
-    if (autoLockTimeout === 14400) return '4 hours';
-    if (autoLockTimeout === 28800) return '8 hours';
-    return 'Never';
   };
 
   const styles = StyleSheet.create({
@@ -196,7 +204,7 @@ export default function SettingsScreen() {
               </View>
               <View style={[styles.settingItemContent]}>
                 <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
-                <ThemedText style={styles.settingItemValue}>{getAutoLockDisplay()}</ThemedText>
+                <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>

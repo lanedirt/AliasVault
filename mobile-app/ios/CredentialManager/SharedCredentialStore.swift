@@ -23,15 +23,20 @@ class SharedCredentialStore {
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
     private let authMethodsKey = "aliasvault_auth_methods"
+    private let autoLockTimeoutKey = "aliasvault_auto_lock_timeout"
     private var db: Connection?
     private var encryptionKey: Data?
     private var enabledAuthMethods: AuthMethods = .none
     private var clearCacheTimer: Timer?
+    private var autoLockTimeout: Int = 0
 
     public init() {
         // Load saved auth methods from UserDefaults
         let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
         enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+
+        // Load auto-lock timeout from UserDefaults
+        autoLockTimeout = UserDefaults.standard.integer(forKey: autoLockTimeoutKey)
 
         // Add notification observers
         NotificationCenter.default.addObserver(
@@ -55,11 +60,13 @@ class SharedCredentialStore {
     }
 
     @objc private func appDidEnterBackground() {
-        print("App entered background, starting 5-second timer to clear cache")
-        // Start timer to clear cache after 5 seconds
-        clearCacheTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
-            print("5-second background timer fired, clearing cache")
-            self?.clearCache()
+        print("App entered background, starting auto-lock timer with \(autoLockTimeout) seconds")
+        // Start timer to clear cache after auto-lock timeout
+        if autoLockTimeout > 0 {
+            clearCacheTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(autoLockTimeout), repeats: false) { [weak self] _ in
+                print("Auto-lock timer fired, clearing cache")
+                self?.clearCache()
+            }
         }
     }
 
@@ -432,5 +439,17 @@ class SharedCredentialStore {
                 }
             }
         }
+    }
+
+    // MARK: - Auto Lock Timeout Management
+    func setAutoLockTimeout(_ timeout: Int) {
+        print("Setting auto-lock timeout to \(timeout) seconds")
+        autoLockTimeout = timeout
+        UserDefaults.standard.set(timeout, forKey: autoLockTimeoutKey)
+        UserDefaults.standard.synchronize()
+    }
+
+    func getAutoLockTimeout() -> Int {
+        return autoLockTimeout
     }
 }

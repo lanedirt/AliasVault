@@ -196,6 +196,21 @@ class CredentialManager: NSObject {
     }
 
     @objc
+    func setAutoLockTimeout(_ timeout: Int,
+                          resolver resolve: @escaping RCTPromiseResolveBlock,
+                          rejecter reject: @escaping RCTPromiseRejectBlock) {
+        credentialStore.setAutoLockTimeout(timeout)
+        resolve(nil)
+    }
+
+    @objc
+    func getAutoLockTimeout(_ resolve: @escaping RCTPromiseResolveBlock,
+                          rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let timeout = credentialStore.getAutoLockTimeout()
+        resolve(timeout)
+    }
+
+    @objc
     static func moduleName() -> String! {
         return "CredentialManager"
     }
