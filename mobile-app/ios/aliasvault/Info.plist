@@ -57,7 +57,7 @@
 		<true/>
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
-	<string>AliasVault uses Face ID to store and retrieve your credentials securely on your device.</string>
+	<string>AliasVault uses Face ID to securely store your encryption key, allowing you to access your encrypted data with facial authentication.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

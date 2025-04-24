@@ -4,6 +4,7 @@ import { useDb } from './DbContext';
 import { NativeModules, AppState } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 // Create a navigation reference
 export const navigationRef = React.createRef<NavigationContainerRef<ParamListBase>>();
@@ -14,8 +15,8 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isInitialized: boolean;
   username: string | null;
-  enabledAuthMethods: AuthMethod[];
-  isFaceIDEnabled: () => boolean;
+  getEnabledAuthMethods: () => Promise<AuthMethod[]>;
+  isFaceIDEnabled: () => Promise<boolean>;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
   initializeAuth: () => Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }>;
   login: () => Promise<void>;
@@ -23,7 +24,7 @@ type AuthContextType = {
   globalMessage: string | null;
   clearGlobalMessage: () => void;
   setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
-  getAuthMethodDisplay: () => string;
+  getAuthMethodDisplay: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
 }
@@ -41,22 +42,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
-  const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>(['password']);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
   const pathname = usePathname();
 
   /**
+   * Get enabled auth methods from the native module
+   */
+  const getEnabledAuthMethods = useCallback(async (): Promise<AuthMethod[]> => {
+    try {
+      let methods = await NativeModules.CredentialManager.getAuthMethods() as AuthMethod[];
+      // Check if Face ID is actually available despite being enabled
+      if (methods.includes('faceid')) {
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!isEnrolled) {
+          // Remove Face ID from the list of enabled auth methods
+          methods = methods.filter(method => method !== 'faceid');
+        }
+      }
+      return methods;
+    } catch (error) {
+      console.error('Failed to get enabled auth methods:', error);
+      return ['password'];
+    }
+  }, []);
+
+  /**
    * Check if Face ID is enabled based on enabled auth methods
    */
-  const isFaceIDEnabled = useCallback(() : boolean => {
-    return enabledAuthMethods.includes('faceid');
-  }, [enabledAuthMethods]);
+  const isFaceIDEnabled = useCallback(async (): Promise<boolean> => {
+    const methods = await getEnabledAuthMethods();
+    return methods.includes('faceid');
+  }, [getEnabledAuthMethods]);
 
   /**
    * Set auth tokens in storage as part of the login process. After db is initialized, the login method should be called as well.
    */
-  const setAuthTokens = useCallback(async (username: string, accessToken: string, refreshToken: string) : Promise<void> => {
+  const setAuthTokens = useCallback(async (username: string, accessToken: string, refreshToken: string): Promise<void> => {
     await AsyncStorage.setItem('username', username);
     await AsyncStorage.setItem('accessToken', accessToken);
     await AsyncStorage.setItem('refreshToken', refreshToken);
@@ -68,11 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Initialize the authentication state, called on initial load by _layout.tsx.
    * @returns object containing whether the user is logged in and enabled auth methods
    */
-  const initializeAuth = useCallback(async () : Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }> => {
+  const initializeAuth = useCallback(async (): Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }> => {
     const accessToken = await AsyncStorage.getItem('accessToken') as string;
     const refreshToken = await AsyncStorage.getItem('refreshToken') as string;
     const username = await AsyncStorage.getItem('username') as string;
-    const savedAuthMethods = await AsyncStorage.getItem('authMethods');
     let isAuthenticated = false;
     let methods: AuthMethod[] = ['password'];
 
@@ -80,34 +101,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsername(username);
       setIsLoggedIn(true);
       isAuthenticated = true;
-      if (savedAuthMethods) {
-        try {
-          const parsedMethods = JSON.parse(savedAuthMethods) as AuthMethod[];
-          if (Array.isArray(parsedMethods) && parsedMethods.every(method => method === 'faceid' || method === 'password')) {
-            methods = parsedMethods;
-            setEnabledAuthMethods(parsedMethods);
-          }
-        } catch (e) {
-          // If parsing fails, use default
-          setEnabledAuthMethods(['password']);
-        }
-      }
+      methods = await getEnabledAuthMethods();
     }
     setIsInitialized(true);
     return { isLoggedIn: isAuthenticated, enabledAuthMethods: methods };
-  }, []);
+  }, [getEnabledAuthMethods]);
 
   /**
    * Set logged in status to true which refreshes the app.
    */
-  const login = useCallback(async () : Promise<void> => {
+  const login = useCallback(async (): Promise<void> => {
     setIsLoggedIn(true);
   }, []);
 
   /**
    * Logout the user and clear the auth tokens from chrome storage.
    */
-  const logout = useCallback(async (errorMessage?: string) : Promise<void> => {
+  const logout = useCallback(async (errorMessage?: string): Promise<void> => {
     await AsyncStorage.removeItem('username');
     await AsyncStorage.removeItem('accessToken');
     await AsyncStorage.removeItem('refreshToken');
@@ -121,56 +131,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUsername(null);
     setIsLoggedIn(false);
-    setEnabledAuthMethods(['password']);
   }, [dbContext]);
 
   /**
    * Clear global message (called after displaying the message).
    */
-  const clearGlobalMessage = useCallback(() : void => {
+  const clearGlobalMessage = useCallback((): void => {
     setGlobalMessage(null);
   }, []);
 
   /**
    * Set the authentication methods and save them to storage
    */
-  const setAuthMethods = useCallback(async (methods: AuthMethod[]) : Promise<void> => {
+  const setAuthMethods = useCallback(async (methods: AuthMethod[]): Promise<void> => {
     // Ensure password is always included
     const methodsToSave = methods.includes('password') ? methods : [...methods, 'password'];
-
-    // Save to AsyncStorage
-    await AsyncStorage.setItem('authMethods', JSON.stringify(methodsToSave));
 
     // Update iOS credentials manager
     try {
       await NativeModules.CredentialManager.setAuthMethods(methodsToSave);
     } catch (error) {
       console.error('Failed to update iOS auth methods:', error);
-      // Continue with the update even if iOS update fails
     }
-
-    // Use a state update function to ensure we're working with the latest state
-    setEnabledAuthMethods(prevMethods => {
-      // Only update if the methods have actually changed
-      if (JSON.stringify(prevMethods) !== JSON.stringify(methodsToSave)) {
-        return methodsToSave as AuthMethod[];
-      }
-      return prevMethods;
-    });
   }, []);
 
   /**
    * Get the display label for the current auth method
    * Prefers Face ID if enabled, otherwise falls back to Password
    */
-  const getAuthMethodDisplay = useCallback(() : string => {
-    return enabledAuthMethods.includes('faceid') ? 'Face ID' : 'Password';
-  }, [enabledAuthMethods]);
+  const getAuthMethodDisplay = useCallback(async (): Promise<string> => {
+    const methods = await getEnabledAuthMethods();
+    if (methods.includes('faceid')) {
+      try {
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (isEnrolled) {
+          return 'Face ID';
+        }
+      } catch (error) {
+        console.error('Failed to check Face ID enrollment:', error);
+      }
+    }
+    return 'Password';
+  }, [getEnabledAuthMethods]);
 
   /**
    * Get the auto-lock timeout from the iOS credentials manager
    */
-  const getAutoLockTimeout = async () : Promise<number> => {
+  const getAutoLockTimeout = async (): Promise<number> => {
     try {
       const timeout = await NativeModules.CredentialManager.getAutoLockTimeout();
       return timeout;
@@ -185,18 +192,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const setAutoLockTimeout = async (timeout: number) => {
     try {
-      // Update iOS credentials manager
-      try {
-        await NativeModules.CredentialManager.setAutoLockTimeout(timeout);
-      } catch (error) {
-        console.error('Failed to update iOS auto-lock timeout:', error);
-      }
+      await NativeModules.CredentialManager.setAutoLockTimeout(timeout);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error('Failed to update iOS auto-lock timeout:', error);
     }
   };
 
-  const isVaultUnlocked = async () : Promise<boolean> => {
+  const isVaultUnlocked = async (): Promise<boolean> => {
     try {
       const isUnlocked = await NativeModules.CredentialManager.isVaultUnlocked();
       return isUnlocked;
@@ -242,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoggedIn,
     isInitialized,
     username,
-    enabledAuthMethods,
+    getEnabledAuthMethods,
     isFaceIDEnabled,
     initializeAuth,
     setAuthTokens,
@@ -254,7 +256,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAuthMethodDisplay,
     getAutoLockTimeout,
     setAutoLockTimeout,
-  }), [isLoggedIn, isInitialized, username, globalMessage, enabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout]);
+  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout]);
 
   return (
     <AuthContext.Provider value={contextValue}>
@@ -266,7 +268,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 /**
  * Hook to use the AuthContext
  */
-export const useAuth = () : AuthContextType => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');

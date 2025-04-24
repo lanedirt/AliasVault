@@ -20,23 +20,30 @@ class SharedCredentialStore {
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
         .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
+    private var db: Connection?
+    private var encryptionKey: Data?
+    private var clearCacheTimer: Timer?
+
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
     private let authMethodsKey = "aliasvault_auth_methods"
     private let autoLockTimeoutKey = "aliasvault_auto_lock_timeout"
-    private var db: Connection?
-    private var encryptionKey: Data?
-    private var enabledAuthMethods: AuthMethods = .none
-    private var clearCacheTimer: Timer?
-    private var autoLockTimeout: Int = 0
+
+    // User config with default values
+    private var enabledAuthMethods: AuthMethods = [.password, .faceID] // Default to Face ID and password
+    private var autoLockTimeout: Int = 3600 // Default to 1 hour (3600 seconds)
 
     public init() {
-        // Load saved auth methods from UserDefaults
-        let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
-        enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+        // Load saved auth methods from UserDefaults if they exist
+        if UserDefaults.standard.object(forKey: authMethodsKey) != nil {
+            let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
+            enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+        }
 
-        // Load auto-lock timeout from UserDefaults
-        autoLockTimeout = UserDefaults.standard.integer(forKey: autoLockTimeoutKey)
+        // Load auto-lock timeout from UserDefaults if it exists
+        if UserDefaults.standard.object(forKey: autoLockTimeoutKey) != nil {
+            autoLockTimeout = UserDefaults.standard.integer(forKey: autoLockTimeoutKey)
+        }
 
         // Add notification observers
         NotificationCenter.default.addObserver(
@@ -109,6 +116,21 @@ class SharedCredentialStore {
         }
     }
 
+    func getAuthMethods() -> AuthMethods {
+        return enabledAuthMethods
+    }
+
+    func getAuthMethodsAsStrings() -> [String] {
+        var methods: [String] = []
+        if enabledAuthMethods.contains(.faceID) {
+            methods.append("faceid")
+        }
+        if enabledAuthMethods.contains(.password) {
+            methods.append("password")
+        }
+        return methods
+    }
+
     // MARK: - Vault Status
     func isVaultInitialized() -> Bool {
         // Check if encrypted database file exists
@@ -175,8 +197,10 @@ class SharedCredentialStore {
                     .set(keyData, key: encryptionKeyKey)
                 print("Key saved to keychain")
             } catch {
+                // If storing the key fails, we don't throw an error because it's not critical.
+                // The decryption key will then only be stored in memory which requires the user
+                // to re-authenticate on next app launch. We only print for logging purposes.
                 print("Failed to save key to keychain: \(error)")
-                throw error
             }
         }
         else {

@@ -54,7 +54,6 @@ class CredentialManager: NSObject {
                           resolver resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Store the key in the keychain with authentication protection
             try credentialStore.storeEncryptionKey(base64Key: base64EncryptionKey)
             resolve(nil)
         } catch {
@@ -208,6 +207,26 @@ class CredentialManager: NSObject {
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         let timeout = credentialStore.getAutoLockTimeout()
         resolve(timeout)
+    }
+
+    @objc
+    func getAuthMethods(_ resolve: @escaping RCTPromiseResolveBlock,
+                       rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            let methods = try credentialStore.getAuthMethods()
+            var methodStrings: [String] = []
+
+            if methods.contains(.faceID) {
+                methodStrings.append("faceid")
+            }
+            if methods.contains(.password) {
+                methodStrings.append("password")
+            }
+
+            resolve(methodStrings)
+        } catch {
+            reject("AUTH_METHOD_ERROR", "Failed to get authentication methods: \(error.localizedDescription)", error)
+        }
     }
 
     @objc

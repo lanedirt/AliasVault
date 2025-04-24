@@ -9,40 +9,50 @@ import { AuthMethod, useAuth } from '@/context/AuthContext';
 export default function VaultUnlockSettingsScreen() {
   const colors = useColors();
   const [initialized, setInitialized] = useState(false);
-  const { setAuthMethods, enabledAuthMethods } = useAuth();
+  const { setAuthMethods, getEnabledAuthMethods } = useAuth();
   const [hasFaceID, setHasFaceID] = useState(false);
   const [isFaceIDEnabled, setIsFaceIDEnabled] = useState(false);
+  const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
 
   useEffect(() => {
-    const checkFaceIDAvailability = async () => {
+    const initializeAuth = async () => {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       setHasFaceID(compatible && enrolled);
+
+      const methods = await getEnabledAuthMethods();
+      setEnabledAuthMethods(methods);
+
+      if (methods.includes('faceid') && enrolled) {
+        setIsFaceIDEnabled(true);
+      }
+
+      setInitialized(true);
     };
-    checkFaceIDAvailability();
 
-    if (enabledAuthMethods.includes('faceid')) {
-      setIsFaceIDEnabled(true);
-    }
-
-    setInitialized(true);
-  }, []);
+    initializeAuth();
+  }, [getEnabledAuthMethods]);
 
   useEffect(() => {
     if (!initialized) {
       return;
     }
 
-    // Check if there are actually differences between the current and the new auth methods
-    const currentAuthMethods = enabledAuthMethods;
-    const newAuthMethods = isFaceIDEnabled ? ['faceid', 'password'] : ['password'];
-    if (currentAuthMethods.length === newAuthMethods.length && currentAuthMethods.every(method => newAuthMethods.includes(method))) {
-      return;
-    }
+    const updateAuthMethods = async () => {
+      const currentAuthMethods = await getEnabledAuthMethods();
+      const newAuthMethods = isFaceIDEnabled ? ['faceid', 'password'] : ['password'];
 
-    console.log('Updating auth methods to', newAuthMethods);
-    setAuthMethods(newAuthMethods as AuthMethod[]);
-  }, [isFaceIDEnabled, setAuthMethods, enabledAuthMethods, initialized]);
+      if (currentAuthMethods.length === newAuthMethods.length &&
+          currentAuthMethods.every(method => newAuthMethods.includes(method))) {
+        return;
+      }
+
+      console.log('Updating auth methods to', newAuthMethods);
+      setAuthMethods(newAuthMethods as AuthMethod[]);
+    };
+
+    updateAuthMethods();
+  }, [isFaceIDEnabled, setAuthMethods, getEnabledAuthMethods, initialized]);
 
   const handleFaceIDToggle = useCallback(async (value: boolean) => {
     if (value && !hasFaceID) {

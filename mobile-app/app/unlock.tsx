@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
@@ -17,10 +17,18 @@ export default function UnlockScreen() {
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFaceIDAvailable, setIsFaceIDAvailable] = useState(false);
   const colors = useColors();
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
 
+  useEffect(() => {
+    const checkFaceIDStatus = async () => {
+      const enabled = await isFaceIDEnabled();
+      setIsFaceIDAvailable(enabled);
+    };
+    checkFaceIDStatus();
+  }, [isFaceIDEnabled]);
 
   const handleUnlock = async () => {
     if (!password) {
@@ -223,7 +231,7 @@ export default function UnlockScreen() {
               </ThemedText>
             </TouchableOpacity>
 
-            {isFaceIDEnabled() && (
+            {isFaceIDAvailable && (
               <TouchableOpacity
                 style={styles.faceIdButton}
                 onPress={handleFaceIDRetry}
