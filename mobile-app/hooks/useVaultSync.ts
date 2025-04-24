@@ -93,9 +93,13 @@ export const useVaultSync = () => {
         }
 
         console.log('Re-initializing database with new vault');
-        dbContext.initializeDatabase(vaultResponseJson as VaultResponse, null);
-        onSuccess?.(true);
-        return true;
+        try {
+          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, null);
+          onSuccess?.(true);
+          return true;
+        } catch (err) {
+          throw new Error('Vault could not be decrypted, if problem persists please logout and login again.');
+        }
       }
 
       console.log('Vault sync finished: No updates needed');

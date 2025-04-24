@@ -66,8 +66,15 @@ const CredentialsList: React.FC = () => {
       // Get derived key from background worker
       const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
 
-      // Initialize the SQLite context again with the newly retrieved decrypted blob
-      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+      // Initialize the SQLite context again with the newly retrieved decrypted blob)
+      try {
+        await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+      } catch (err) {
+        // If error occurs during database initialization, it most likely has to do with decryption that
+        // failed. This is most likely due to the user changing their password.
+        // So we logout the user here to force them to re-authenticate.
+        await webApi.logout('Vault could not be decrypted, please re-authenticate.');
+      }
     } catch (err) {
       console.error('Refresh error:', err);
     }
