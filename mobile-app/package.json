@@ -14,6 +14,19 @@
   "jest": {
     "preset": "jest-expo"
   },
+  "codegenConfig": {
+    "name": "NativeCredentialManagerSpec",
+    "type": "modules",
+    "jsSrcsDir": "specs",
+    "android": {
+      "javaPackageName": "com.aliasvault.credentialmanager"
+    },
+    "ios": {
+      "modulesProvider": {
+        "NativeCredentialManager": "RCTCredentialManager"
+      }
+    }
+  },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "^2.1.2",
@@ -54,7 +67,8 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0"
+    "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
+    "expo-modules-core": "~2.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

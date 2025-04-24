@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDb } from './DbContext';
-import { NativeModules, AppState } from 'react-native';
+import { AppState } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
 import * as LocalAuthentication from 'expo-local-authentication';
+import NativeCredentialManager from '../specs/NativeCredentialManager';
 
 // Create a navigation reference
 export const navigationRef = React.createRef<NavigationContainerRef<ParamListBase>>();
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const getEnabledAuthMethods = useCallback(async (): Promise<AuthMethod[]> => {
     try {
-      let methods = await NativeModules.CredentialManager.getAuthMethods() as AuthMethod[];
+      let methods = await NativeCredentialManager.getAuthMethods() as AuthMethod[];
       // Check if Face ID is actually available despite being enabled
       if (methods.includes('faceid')) {
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
@@ -149,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Update iOS credentials manager
     try {
-      await NativeModules.CredentialManager.setAuthMethods(methodsToSave);
+      await NativeCredentialManager.setAuthMethods(methodsToSave);
     } catch (error) {
       console.error('Failed to update iOS auth methods:', error);
     }
@@ -179,8 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const getAutoLockTimeout = async (): Promise<number> => {
     try {
-      const timeout = await NativeModules.CredentialManager.getAutoLockTimeout();
-      return timeout;
+      return await NativeCredentialManager.getAutoLockTimeout();
     } catch (error) {
       console.error('Failed to get auto-lock timeout:', error);
       return 0;
@@ -192,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const setAutoLockTimeout = async (timeout: number) => {
     try {
-      await NativeModules.CredentialManager.setAutoLockTimeout(timeout);
+      await NativeCredentialManager.setAutoLockTimeout(timeout);
     } catch (error) {
       console.error('Failed to update iOS auto-lock timeout:', error);
     }
@@ -200,8 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isVaultUnlocked = async (): Promise<boolean> => {
     try {
-      const isUnlocked = await NativeModules.CredentialManager.isVaultUnlocked();
-      return isUnlocked;
+      return await NativeCredentialManager.isVaultUnlocked();
     } catch (error) {
       console.error('Failed to check vault status:', error);
       return false;

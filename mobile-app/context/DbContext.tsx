@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { NativeModules } from 'react-native';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
+import NativeCredentialManager from '../specs/NativeCredentialManager';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -21,8 +21,6 @@ const DbContext = createContext<DbContextType | undefined>(undefined);
  * DbProvider to provide the SQLite client to the app that components can use to make database queries.
  */
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const credentialManager = NativeModules.CredentialManager;
-
   /**
    * SQLite client is initialized in constructor as it passes SQL queries to the native module.
    */
@@ -66,7 +64,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const checkStoredVault = useCallback(async () => {
     try {
-      const isVaultInitialized = await credentialManager.isVaultInitialized();
+      const isVaultInitialized = await NativeCredentialManager.isVaultInitialized();
       if (isVaultInitialized) {
         // Get metadata from SQLite client
         const metadata = await sqliteClient.getVaultMetadata();
@@ -106,7 +104,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const clearDatabase = useCallback(() : void => {
     setDbInitialized(false);
     // TODO: implement actual vault clearing.
-    credentialManager.clearVault();
+    NativeCredentialManager.clearVault();
   }, []);
 
   /**
@@ -114,7 +112,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * and load it into memory.
    */
   const unlockVault = useCallback(async () : Promise<boolean> => {
-    return await credentialManager.unlockVault();
+    try {
+      await NativeCredentialManager.unlockVault();
+      return true;
+    } catch (error) {
+      console.error('Failed to unlock vault:', error);
+      return false;
+    }
   }, []);
 
   /**

@@ -3,7 +3,7 @@ import SQLite
 import LocalAuthentication
 
 @objc(CredentialManager)
-class CredentialManager: NSObject {
+public class CredentialManager: NSObject {
     private let credentialStore = SharedCredentialStore.shared
 
     override init() {

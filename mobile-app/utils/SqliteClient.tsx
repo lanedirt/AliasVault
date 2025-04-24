@@ -4,6 +4,8 @@ import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
 import { PasswordSettings } from './types/PasswordSettings';
 import { VaultMetadata } from './types/messaging/VaultMetadata';
+import NativeCredentialManager from '../specs/NativeCredentialManager';
+
 
 type SQLiteBindValue = string | number | null | Uint8Array;
 
@@ -11,15 +13,13 @@ type SQLiteBindValue = string | number | null | Uint8Array;
  * Client for interacting with the SQLite database through native code.
  */
 class SqliteClient {
-  private credentialManager = NativeModules.CredentialManager;
-
   /**
    * Store the encrypted database via the native code implementation.
    */
   async storeEncryptedDatabase(base64EncryptedDb: string, metadata: VaultMetadata): Promise<void> {
     try {
       const metadataJson = JSON.stringify(metadata);
-      await this.credentialManager.storeDatabase(base64EncryptedDb, metadataJson);
+      await NativeCredentialManager.storeDatabase(base64EncryptedDb, metadataJson);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
       throw error;
@@ -33,7 +33,7 @@ class SqliteClient {
    */
   public async getVaultMetadata(): Promise<VaultMetadata> {
     try {
-      const metadataJson = await this.credentialManager.getVaultMetadata();
+      const metadataJson = await NativeCredentialManager.getVaultMetadata();
       if (!metadataJson) {
         throw new Error('No vault metadata found in native storage');
       }
@@ -54,7 +54,7 @@ class SqliteClient {
    */
   public async storeEncryptionKey(base64EncryptionKey: string): Promise<void> {
     try {
-      await this.credentialManager.storeEncryptionKey(base64EncryptionKey);
+      await NativeCredentialManager.storeEncryptionKey(base64EncryptionKey);
     } catch (error) {
       console.error('Error storing encryption key:', error);
       throw error;
@@ -66,7 +66,7 @@ class SqliteClient {
    */
   public async executeQuery<T>(query: string, params: SQLiteBindValue[] = []): Promise<T[]> {
     try {
-      const results = await this.credentialManager.executeQuery(query, params);
+      const results = await NativeCredentialManager.executeQuery(query, params);
       return results as T[];
     } catch (error) {
       console.error('Error executing query:', error);
@@ -79,7 +79,7 @@ class SqliteClient {
    */
   public async executeUpdate(query: string, params: SQLiteBindValue[] = []): Promise<number> {
     try {
-      const result = await this.credentialManager.executeUpdate(query, params);
+      const result = await NativeCredentialManager.executeUpdate(query, params);
       return result as number;
     } catch (error) {
       console.error('Error executing update:', error);
@@ -288,10 +288,6 @@ class SqliteClient {
    * @returns The number of rows modified
    */
   public async createCredential(credential: Credential): Promise<number> {
-    if (!this.credentialManager) {
-      throw new Error('CredentialManager not initialized');
-    }
-
     try {
       await this.executeUpdate('BEGIN TRANSACTION');
 
@@ -393,10 +389,6 @@ class SqliteClient {
    * Returns null if no migrations are found.
    */
   public async getDatabaseVersion(): Promise<string | null> {
-    if (!this.credentialManager) {
-      throw new Error('CredentialManager not initialized');
-    }
-
     try {
       // Query the migrations history table for the latest migration
       const results = await this.executeQuery<{ MigrationId: string }>(`
@@ -431,10 +423,6 @@ class SqliteClient {
    * @returns Array of TotpCode objects
    */
   public async getTotpCodesForCredential(credentialId: string): Promise<TotpCode[]> {
-    if (!this.credentialManager) {
-      throw new Error('CredentialManager not initialized');
-    }
-
     try {
       /*
        * Check if TotpCodes table exists (for backward compatibility).
@@ -468,10 +456,6 @@ class SqliteClient {
    * @returns True if the table exists, false otherwise
    */
   private async tableExists(tableName: string): Promise<boolean> {
-    if (!this.credentialManager) {
-      throw new Error('CredentialManager not initialized');
-    }
-
     try {
       const query = `
         SELECT name FROM sqlite_master
