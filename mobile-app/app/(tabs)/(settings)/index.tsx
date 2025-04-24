@@ -20,7 +20,7 @@ export default function SettingsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
-
+  const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
   useEffect(() => {
     const loadAutoLockDisplay = async () => {
       const autoLockTimeout = await getAutoLockTimeout();
@@ -38,8 +38,14 @@ export default function SettingsScreen() {
       setAutoLockDisplay(display);
     };
 
+    const loadAuthMethodDisplay = async () => {
+      const authMethod = await getAuthMethodDisplay();
+      setAuthMethodDisplay(authMethod);
+    };
+
     loadAutoLockDisplay();
-  }, [getAutoLockTimeout]);
+    loadAuthMethodDisplay();
+  }, [getAutoLockTimeout, getAuthMethodDisplay]);
 
   const handleLogout = async () => {
     await webApi.logout();
@@ -191,7 +197,7 @@ export default function SettingsScreen() {
               </View>
               <View style={[styles.settingItemContent]}>
                 <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
-                <ThemedText style={styles.settingItemValue}>{getAuthMethodDisplay()}</ThemedText>
+                <ThemedText style={styles.settingItemValue}>{authMethodDisplay}</ThemedText>
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>
