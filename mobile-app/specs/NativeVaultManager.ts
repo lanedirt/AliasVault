@@ -28,4 +28,4 @@ export interface Spec extends TurboModule {
   getAuthMethods(): Promise<string[]>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('NativeCredentialManager');
+export default TurboModuleRegistry.getEnforcing<Spec>('NativeVaultManager');

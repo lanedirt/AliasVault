@@ -2,8 +2,13 @@ import Foundation
 import SQLite
 import LocalAuthentication
 
-@objc(CredentialManager)
-public class CredentialManager: NSObject {
+/**
+ * This class is used as a bridge to allow React Native to interact with the SharedCredentialStore class.
+ * The SharedCredentialStore class is implemented in Swift and used by both React Native and the native iOS
+ * Autofill extension.
+ */
+@objc(VaultManager)
+public class VaultManager: NSObject {
     private let credentialStore = SharedCredentialStore.shared
 
     override init() {
@@ -231,6 +236,6 @@ public class CredentialManager: NSObject {
 
     @objc
     static func moduleName() -> String! {
-        return "CredentialManager"
+        return "VaultManager"
     }
 }

@@ -1,98 +1,107 @@
 //
-//  RCTNativeCredentialManager.m
+//  RCTNativeVaultManager.m
 //  AliasVault
 //
 //  Created by Leendert de Borst on 24/04/2025.
 //
 
-#import "RCTNativeCredentialManager.h"
+#import "RCTNativeVaultManager.h"
 #import <ExpoModulesCore-Swift.h>
 #import "AliasVault-Swift.h"
 
-@interface RCTNativeCredentialManager () <NativeCredentialManagerSpec>
+@interface RCTNativeVaultManager () <NativeVaultManagerSpec>
 @end
 
-@implementation RCTNativeCredentialManager {
-    CredentialManager *credentialManager;
+/**
+ * This objective-c class is used as a bridge to allow React Native to interact with the CredentialManager class.
+ * The underlying CredentialManager class is implemented in Swift and used by both React Native and the
+ * native iOS Autofill extension.
+ *
+ * This class should implement all methods defined in the specs/NativeVaultManager.ts TurboModule.
+ * When adding a new method, make sure to update the spec .ts file first and then run `pod install` to
+ * update the spec which generates the interface this class implements.
+ */
+@implementation RCTNativeVaultManager {
+    VaultManager *vaultManager;
 }
 
 + (NSString *)moduleName {
-    return @"NativeCredentialManager";
+    return @"NativeVaultManager";
 }
 
 - (id) init {
    if (self = [super init]) {
-    credentialManager = [CredentialManager new];
+    vaultManager = [VaultManager new];
    }
    return self;
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params {
-    return std::make_shared<facebook::react::NativeCredentialManagerSpecJSI>(params);
+    return std::make_shared<facebook::react::NativeVaultManagerSpecJSI>(params);
 }
 
 - (void)addCredential:(NSString *)username password:(NSString *)password service:(NSString *)service resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager addCredential:username password:password service:service];
+    [vaultManager addCredential:username password:password service:service];
 }
 
 - (void)clearVault {
-    [credentialManager clearVault];
+    [vaultManager clearVault];
 }
 
 - (void)executeQuery:(NSString *)query params:(NSArray *)params resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager executeQuery:query params:params resolver:resolve rejecter:reject];
+    [vaultManager executeQuery:query params:params resolver:resolve rejecter:reject];
 }
 
 - (void)executeUpdate:(NSString *)query params:(NSArray *)params resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager executeUpdate:query params:params resolver:resolve rejecter:reject];
+    [vaultManager executeUpdate:query params:params resolver:resolve rejecter:reject];
 }
 
 - (void)getAuthMethods:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager getAuthMethods:resolve rejecter:reject];
+    [vaultManager getAuthMethods:resolve rejecter:reject];
 }
 
 - (void)getAutoLockTimeout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager getAutoLockTimeout:resolve rejecter:reject];
+    [vaultManager getAutoLockTimeout:resolve rejecter:reject];
 }
 
 - (void)getCredentials:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager getCredentials];
+    [vaultManager getCredentials];
 }
 
 - (void)getVaultMetadata:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager getVaultMetadata:resolve rejecter:reject];
+    [vaultManager getVaultMetadata:resolve rejecter:reject];
 }
 
 - (void)isVaultInitialized:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager isVaultInitialized:resolve rejecter:reject];
+    [vaultManager isVaultInitialized:resolve rejecter:reject];
 }
 
 - (void)isVaultUnlocked:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager isVaultUnlocked:resolve rejecter:reject];
+    [vaultManager isVaultUnlocked:resolve rejecter:reject];
 }
 
 - (void)setAuthMethods:(NSArray *)authMethods resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager setAuthMethods:authMethods resolver:resolve rejecter:reject];
+    [vaultManager setAuthMethods:authMethods resolver:resolve rejecter:reject];
 }
 
 - (void)setAutoLockTimeout:(double)timeout resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager setAutoLockTimeout:timeout resolver:resolve rejecter:reject];
+    [vaultManager setAutoLockTimeout:timeout resolver:resolve rejecter:reject];
 }
 
 - (void)storeDatabase:(NSString *)base64EncryptedDb metadata:(NSString *)metadata resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager storeDatabase:base64EncryptedDb metadata:metadata resolver:resolve rejecter:reject];
+    [vaultManager storeDatabase:base64EncryptedDb metadata:metadata resolver:resolve rejecter:reject];
 }
 
 - (void)storeEncryptionKey:(NSString *)base64EncryptionKey resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager storeEncryptionKey:base64EncryptionKey resolver:resolve rejecter:reject];
+    [vaultManager storeEncryptionKey:base64EncryptionKey resolver:resolve rejecter:reject];
 }
 
 - (void)unlockVault:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager unlockVault:resolve rejecter:reject];
+    [vaultManager unlockVault:resolve rejecter:reject];
 }
 
 - (void)clearVault:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [credentialManager clearVault];
+    [vaultManager clearVault];
 }
 
 @end

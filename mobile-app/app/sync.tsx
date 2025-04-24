@@ -5,7 +5,7 @@ import { useVaultSync } from '@/hooks/useVaultSync';
 import { ThemedView } from '@/components/ThemedView';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useDb } from '@/context/DbContext';
-import NativeVaultManager from '../specs/NativeCredentialManager';
+import NativeVaultManager from '../specs/NativeVaultManager';
 
 export default function SyncScreen() {
   const authContext = useAuth();
@@ -43,7 +43,7 @@ export default function SyncScreen() {
 
       // Try to unlock with FaceID
       try {
-        const isInitialized = await NativeCredentialManager.isVaultInitialized();
+        const isInitialized = await NativeVaultManager.isVaultInitialized();
         if (isInitialized) {
           const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
           if (!isFaceIDEnabled) {

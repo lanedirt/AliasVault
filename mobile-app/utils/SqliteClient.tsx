@@ -4,7 +4,7 @@ import { EncryptionKey } from './types/EncryptionKey';
 import { TotpCode } from './types/TotpCode';
 import { PasswordSettings } from './types/PasswordSettings';
 import { VaultMetadata } from './types/messaging/VaultMetadata';
-import NativeCredentialManager from '../specs/NativeCredentialManager';
+import NativeVaultManager from '../specs/NativeVaultManager';
 
 
 type SQLiteBindValue = string | number | null | Uint8Array;
@@ -19,7 +19,7 @@ class SqliteClient {
   async storeEncryptedDatabase(base64EncryptedDb: string, metadata: VaultMetadata): Promise<void> {
     try {
       const metadataJson = JSON.stringify(metadata);
-      await NativeCredentialManager.storeDatabase(base64EncryptedDb, metadataJson);
+      await NativeVaultManager.storeDatabase(base64EncryptedDb, metadataJson);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
       throw error;
@@ -33,7 +33,7 @@ class SqliteClient {
    */
   public async getVaultMetadata(): Promise<VaultMetadata> {
     try {
-      const metadataJson = await NativeCredentialManager.getVaultMetadata();
+      const metadataJson = await NativeVaultManager.getVaultMetadata();
       if (!metadataJson) {
         throw new Error('No vault metadata found in native storage');
       }
@@ -54,7 +54,7 @@ class SqliteClient {
    */
   public async storeEncryptionKey(base64EncryptionKey: string): Promise<void> {
     try {
-      await NativeCredentialManager.storeEncryptionKey(base64EncryptionKey);
+      await NativeVaultManager.storeEncryptionKey(base64EncryptionKey);
     } catch (error) {
       console.error('Error storing encryption key:', error);
       throw error;
@@ -66,7 +66,7 @@ class SqliteClient {
    */
   public async executeQuery<T>(query: string, params: SQLiteBindValue[] = []): Promise<T[]> {
     try {
-      const results = await NativeCredentialManager.executeQuery(query, params);
+      const results = await NativeVaultManager.executeQuery(query, params);
       return results as T[];
     } catch (error) {
       console.error('Error executing query:', error);
@@ -79,7 +79,7 @@ class SqliteClient {
    */
   public async executeUpdate(query: string, params: SQLiteBindValue[] = []): Promise<number> {
     try {
-      const result = await NativeCredentialManager.executeUpdate(query, params);
+      const result = await NativeVaultManager.executeUpdate(query, params);
       return result as number;
     } catch (error) {
       console.error('Error executing update:', error);

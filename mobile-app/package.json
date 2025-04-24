@@ -15,15 +15,15 @@
     "preset": "jest-expo"
   },
   "codegenConfig": {
-    "name": "NativeCredentialManagerSpec",
+    "name": "NativeVaultManagerSpec",
     "type": "modules",
     "jsSrcsDir": "specs",
     "android": {
-      "javaPackageName": "com.aliasvault.credentialmanager"
+      "javaPackageName": "com.aliasvault.nativevaultmanager"
     },
     "ios": {
       "modulesProvider": {
-        "NativeCredentialManager": "RCTCredentialManager"
+        "NativeVaultManager": "RCTNativeVaultManager"
       }
     }
   },

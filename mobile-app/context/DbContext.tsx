@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
-import NativeCredentialManager from '../specs/NativeCredentialManager';
+import NativeVaultManager from '../specs/NativeVaultManager';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -64,7 +64,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const checkStoredVault = useCallback(async () => {
     try {
-      const isVaultInitialized = await NativeCredentialManager.isVaultInitialized();
+      const isVaultInitialized = await NativeVaultManager.isVaultInitialized();
       if (isVaultInitialized) {
         // Get metadata from SQLite client
         const metadata = await sqliteClient.getVaultMetadata();
@@ -104,7 +104,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const clearDatabase = useCallback(() : void => {
     setDbInitialized(false);
     // TODO: implement actual vault clearing.
-    NativeCredentialManager.clearVault();
+    NativeVaultManager.clearVault();
   }, []);
 
   /**
@@ -113,7 +113,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const unlockVault = useCallback(async () : Promise<boolean> => {
     try {
-      await NativeCredentialManager.unlockVault();
+      await NativeVaultManager.unlockVault();
       return true;
     } catch (error) {
       console.error('Failed to unlock vault:', error);

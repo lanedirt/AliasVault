@@ -16,13 +16,12 @@
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		CE26D68E2DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */; };
-		CE26D68F2DA7FCD2006DC04D /* CredentialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */; };
-		CE26D6902DA7FCD2006DC04D /* CredentialManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */; };
+		CE26D68F2DA7FCD2006DC04D /* VaultManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */; };
 		CE26D6912DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */; };
 		CE9A55EA2DA8039F00CB0A4C /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9A55E92DA8039F00CB0A4C /* Credential.swift */; };
 		CE9A55EB2DA8039F00CB0A4C /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9A55E92DA8039F00CB0A4C /* Credential.swift */; };
-		CE9A58FC2DBA982100CB0A4C /* RCTNativeCredentialManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FB2DBA982100CB0A4C /* RCTNativeCredentialManager.mm */; };
-		CE9A5A022DBAAE5000CB0A4C /* RCTNativeCredentialManager.h in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FA2DBA982100CB0A4C /* RCTNativeCredentialManager.h */; };
+		CE9A58FC2DBA982100CB0A4C /* RCTNativeVaultManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */; };
+		CE9A5A022DBAAE5000CB0A4C /* RCTNativeVaultManager.h in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */; };
 		CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */; };
 		CEE9098B2DA548C7008D568F /* Autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* Autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */; };
@@ -69,12 +68,11 @@
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = AliasVault/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = AliasVault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CredentialManager.m; sourceTree = "<group>"; };
-		CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialManager.swift; sourceTree = "<group>"; };
+		CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultManager.swift; sourceTree = "<group>"; };
 		CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
 		CE9A55E92DA8039F00CB0A4C /* Credential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credential.swift; sourceTree = "<group>"; };
-		CE9A58FA2DBA982100CB0A4C /* RCTNativeCredentialManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeCredentialManager.h; sourceTree = "<group>"; };
-		CE9A58FB2DBA982100CB0A4C /* RCTNativeCredentialManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeCredentialManager.mm; sourceTree = "<group>"; };
+		CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeVaultManager.h; sourceTree = "<group>"; };
+		CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeVaultManager.mm; sourceTree = "<group>"; };
 		CEE9097E2DA548C7008D568F /* Autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AliasVault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,7 +165,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				CE9A58F92DBA97D500CB0A4C /* NativeCredentialManager */,
+				CE9A58F92DBA97D500CB0A4C /* NativeVaultManager */,
 				13B07FAE1A68108700A75B9A /* AliasVault */,
 				CEE909812DA548C7008D568F /* Autofill */,
 				CE26D68A2DA7FCB5006DC04D /* CredentialManager */,
@@ -212,20 +210,19 @@
 			isa = PBXGroup;
 			children = (
 				CE9A55E92DA8039F00CB0A4C /* Credential.swift */,
-				CE26D68B2DA7FCD2006DC04D /* CredentialManager.m */,
-				CE26D68C2DA7FCD2006DC04D /* CredentialManager.swift */,
 				CE26D68D2DA7FCD2006DC04D /* SharedCredentialStore.swift */,
 			);
 			path = CredentialManager;
 			sourceTree = "<group>";
 		};
-		CE9A58F92DBA97D500CB0A4C /* NativeCredentialManager */ = {
+		CE9A58F92DBA97D500CB0A4C /* NativeVaultManager */ = {
 			isa = PBXGroup;
 			children = (
-				CE9A58FA2DBA982100CB0A4C /* RCTNativeCredentialManager.h */,
-				CE9A58FB2DBA982100CB0A4C /* RCTNativeCredentialManager.mm */,
+				CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */,
+				CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */,
+				CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */,
 			);
-			path = NativeCredentialManager;
+			path = NativeVaultManager;
 			sourceTree = "<group>";
 		};
 		D65327D7A22EEC0BE12398D9 /* Pods */ = {
@@ -503,13 +500,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE9A5A022DBAAE5000CB0A4C /* RCTNativeCredentialManager.h in Sources */,
+				CE9A5A022DBAAE5000CB0A4C /* RCTNativeVaultManager.h in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				CE26D68E2DA7FCD2006DC04D /* SharedCredentialStore.swift in Sources */,
-				CE26D68F2DA7FCD2006DC04D /* CredentialManager.swift in Sources */,
-				CE26D6902DA7FCD2006DC04D /* CredentialManager.m in Sources */,
+				CE26D68F2DA7FCD2006DC04D /* VaultManager.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				CE9A58FC2DBA982100CB0A4C /* RCTNativeCredentialManager.mm in Sources */,
+				CE9A58FC2DBA982100CB0A4C /* RCTNativeVaultManager.mm in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
 				CE9A55EA2DA8039F00CB0A4C /* Credential.swift in Sources */,
 				E8FD7000523F4549908941A2 /* noop-file.swift in Sources */,
