@@ -12,9 +12,9 @@ class CredentialManager: NSObject {
 
     @objc
     func storeDatabase(_ base64EncryptedDb: String,
-                      metadata: String,
-                      resolver resolve: @escaping RCTPromiseResolveBlock,
-                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+                       metadata: String,
+                       resolver resolve: @escaping RCTPromiseResolveBlock,
+                       rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             try credentialStore.storeEncryptedDatabase(base64EncryptedDb, metadata: metadata)
             resolve(nil)
@@ -25,8 +25,8 @@ class CredentialManager: NSObject {
 
     @objc
     func setAuthMethods(_ authMethods: [String],
-                      resolver resolve: @escaping RCTPromiseResolveBlock,
-                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+                        resolver resolve: @escaping RCTPromiseResolveBlock,
+                        rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             var methods: AuthMethods = []
 
@@ -51,8 +51,8 @@ class CredentialManager: NSObject {
 
     @objc
     func storeEncryptionKey(_ base64EncryptionKey: String,
-                          resolver resolve: @escaping RCTPromiseResolveBlock,
-                          rejecter reject: @escaping RCTPromiseRejectBlock) {
+                            resolver resolve: @escaping RCTPromiseResolveBlock,
+                            rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             try credentialStore.storeEncryptionKey(base64Key: base64EncryptionKey)
             resolve(nil)
@@ -63,9 +63,9 @@ class CredentialManager: NSObject {
 
     @objc
     func executeQuery(_ query: String,
-                     params: [Any],
-                     resolver resolve: @escaping RCTPromiseResolveBlock,
-                     rejecter reject: @escaping RCTPromiseRejectBlock) {
+                      params: [Any],
+                      resolver resolve: @escaping RCTPromiseResolveBlock,
+                      rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
@@ -82,9 +82,9 @@ class CredentialManager: NSObject {
 
     @objc
     func executeUpdate(_ query: String,
-                      params: [Any],
-                      resolver resolve: @escaping RCTPromiseResolveBlock,
-                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+                       params: [Any],
+                       resolver resolve: @escaping RCTPromiseResolveBlock,
+                       rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             // Convert all params to strings
             let bindingParams = params.map { param -> Binding? in
@@ -179,7 +179,7 @@ class CredentialManager: NSObject {
             if let nsError = error as NSError? {
                 if nsError.domain == "SharedCredentialStore" {
                     // These are our known error codes for initialization failures
-                    if nsError.code == 1 || nsError.code == 2 || nsError.code == 10 {
+                    if nsError.code == 1 || nsError.code == 2 || nsError.code == 8 || nsError.code == 10 {
                         resolve(false)
                         return
                     }

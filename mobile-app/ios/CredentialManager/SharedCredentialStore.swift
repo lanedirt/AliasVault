@@ -24,6 +24,7 @@ class SharedCredentialStore {
     private var encryptionKey: Data?
     private var clearCacheTimer: Timer?
 
+    private let vaultMetadataKey = "aliasvault_vault_metadata"
     private let encryptionKeyKey = "aliasvault_encryption_key"
     private let encryptedDbFileName = "encrypted_db.sqlite"
     private let authMethodsKey = "aliasvault_auth_methods"
@@ -98,21 +99,19 @@ class SharedCredentialStore {
         UserDefaults.standard.synchronize()
 
         if !enabledAuthMethods.contains(.faceID) {
-            // If Face ID is now disabled, remove the persisted key from keychain if it exists
-            print("Face ID is now disabled, removing key from keychain")
-            try? keychain.remove(encryptionKeyKey)
-        }
-        else {
-            // If Face ID is now enabled, persist the current key from memory into keychain
-            print("Face ID is now enabled, persisting key to keychain")
+            print("Face ID is now disabled, removing key from keychain immediately")
             do {
-                if let key = encryptionKey {
-                    try storeEncryptionKey(base64Key: key.base64EncodedString())
-                }
+                try keychain
+                    .authenticationPrompt("Authenticate to remove your vault decryption key")
+                    .remove(encryptionKeyKey)
+                print("Successfully removed encryption key from keychain")
             } catch {
-                print("Failed to save existing key from memory to keychain: \(error)")
+                print("Failed to remove encryption key from keychain: \(error)")
                 throw error
             }
+        }
+        else {
+            print("Face ID is now enabled, next time user logs in the key will be persisted in keychain")
         }
     }
 
@@ -159,14 +158,29 @@ class SharedCredentialStore {
                 throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
             }
 
-            guard let keyData = try? keychain
-                .authenticationPrompt("Authenticate to unlock your vault")
-                .getData(encryptionKeyKey) else {
-                throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+            // Get the encryption key from keychain
+            print("Attempting to get encryption key from keychain as Face ID is enabled as an option")
+            do {
+                guard let keyData = try keychain
+                    .authenticationPrompt("Authenticate to unlock your vault")
+                    .getData(encryptionKeyKey) else {
+                    throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+                }
+                encryptionKey = keyData
+                return keyData
+            } catch let keychainError as KeychainAccess.Status {
+                // Handle specific keychain errors
+                switch keychainError {
+                case .itemNotFound:
+                    throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+                case .authFailed:
+                    throw NSError(domain: "SharedCredentialStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication failed"])
+                default:
+                    throw NSError(domain: "SharedCredentialStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Keychain access error: \(keychainError.localizedDescription)"])
+                }
+            } catch {
+                throw NSError(domain: "SharedCredentialStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Unexpected error accessing keychain: \(error.localizedDescription)"])
             }
-
-            encryptionKey = keyData
-            return keyData
         }
 
         // If Face ID is not enabled and we don't have a key in memory, throw an error
@@ -195,16 +209,16 @@ class SharedCredentialStore {
                 try keychain
                     .authenticationPrompt("Authenticate to save your vault decryption key in the iOS keychain")
                     .set(keyData, key: encryptionKeyKey)
-                print("Key saved to keychain")
+                print("Encryption key saved succesfully to keychain")
             } catch {
                 // If storing the key fails, we don't throw an error because it's not critical.
                 // The decryption key will then only be stored in memory which requires the user
                 // to re-authenticate on next app launch. We only print for logging purposes.
-                print("Failed to save key to keychain: \(error)")
+                print("Failed to save encryption key to keychain: \(error)")
             }
         }
         else {
-            print("Face ID is disabled, not storing key in keychain")
+            print("Face ID is disabled, not storing encryption key in keychain")
         }
     }
 
@@ -226,7 +240,7 @@ class SharedCredentialStore {
         try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
 
         // Store metadata in UserDefaults
-        UserDefaults.standard.set(metadata, forKey: "vault_metadata")
+        UserDefaults.standard.set(metadata, forKey: vaultMetadataKey)
         UserDefaults.standard.synchronize()
     }
 
@@ -242,7 +256,7 @@ class SharedCredentialStore {
 
     // Get the vault metadata from UserDefaults
     public func getVaultMetadata() -> String? {
-        return UserDefaults.standard.string(forKey: "vault_metadata")
+        return UserDefaults.standard.string(forKey: vaultMetadataKey)
     }
 
     /**
@@ -374,6 +388,7 @@ class SharedCredentialStore {
     // Clears cached encryption key and encrypted database to force re-initialization on next access.
     func clearCache() {
         print("Clearing cache - removing encryption key and decrypted database from memory")
+
         // Clear the cached encryption key
         encryptionKey = nil
 
@@ -384,11 +399,31 @@ class SharedCredentialStore {
     // Clears cached and saved encryption key and encrypted database to force re-initialization on next access.
     func clearVault() {
         print("Clearing vault - removing all stored data")
-        // Remove the encryption key from keychain
-        try? keychain.remove(encryptionKeyKey)
+
+        // Remove the encryption key from keychain with proper error handling
+        do {
+            try keychain
+                .authenticationPrompt("Authenticate to remove your vault decryption key")
+                .remove(encryptionKeyKey)
+            print("Successfully removed encryption key from keychain")
+        } catch {
+            print("Failed to remove encryption key from keychain: \(error)")
+        }
 
         // Remove the encrypted database from the app's documents directory
-        try? FileManager.default.removeItem(at: getEncryptedDbPath())
+        do {
+            try FileManager.default.removeItem(at: getEncryptedDbPath())
+            print("Successfully removed encrypted database file")
+        } catch {
+            print("Failed to remove encrypted database file: \(error)")
+        }
+
+        // Clear UserDefaults
+        UserDefaults.standard.removeObject(forKey: vaultMetadataKey)
+        UserDefaults.standard.removeObject(forKey: authMethodsKey)
+        UserDefaults.standard.removeObject(forKey: autoLockTimeoutKey)
+        UserDefaults.standard.synchronize()
+        print("Cleared UserDefaults")
 
         clearCache()
     }

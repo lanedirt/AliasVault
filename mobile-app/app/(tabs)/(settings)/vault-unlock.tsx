@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Alert, Platform, Linking, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
@@ -58,11 +58,13 @@ export default function VaultUnlockSettingsScreen() {
     if (value && !hasFaceID) {
       Alert.alert(
         'Face ID Not Available',
-        'Face ID is not set up on this device. Please set up Face ID in your device settings to use this feature.',
+        'Face ID is disabled for AliasVault. In order to use it, please enable it in the iOS app settings first.',
         [
           {
             text: 'Open Settings',
             onPress: () => {
+              setIsFaceIDEnabled(true);
+              setAuthMethods(['faceid', 'password']);
               if (Platform.OS === 'ios') {
                 Linking.openURL('app-settings:');
               }
@@ -71,6 +73,10 @@ export default function VaultUnlockSettingsScreen() {
           {
             text: 'Cancel',
             style: 'cancel',
+            onPress: () => {
+              setIsFaceIDEnabled(false);
+              setAuthMethods(['password']);
+            },
           },
         ]
       );
@@ -143,21 +149,30 @@ export default function VaultUnlockSettingsScreen() {
         </View>
 
         <View style={styles.optionContainer}>
-          <View style={styles.option}>
+          <TouchableOpacity
+            style={styles.option}
+            onPress={() => handleFaceIDToggle(!isFaceIDEnabled)}
+          >
             <View style={styles.optionHeader}>
               <ThemedText style={[styles.optionText, !hasFaceID && styles.disabledText]}>
                 Face ID / Touch ID
               </ThemedText>
-              <Switch
-                value={isFaceIDEnabled}
-                onValueChange={handleFaceIDToggle}
-                disabled={!hasFaceID}
-              />
+              <View pointerEvents="none">
+                <Switch
+                  value={isFaceIDEnabled}
+                  disabled={!hasFaceID}
+                />
+              </View>
             </View>
             <ThemedText style={styles.helpText}>
               Your vault decryption key will be securely stored on your local device in the iOS Keychain and can be accessed with your face or fingerprint.
             </ThemedText>
-          </View>
+            {!hasFaceID && (
+              <ThemedText style={[styles.helpText, { color: colors.errorBorder }]}>
+                Face ID is blocked in iOS settings. Tap to open settings and enable it.
+              </ThemedText>
+            )}
+          </TouchableOpacity>
 
           <View style={styles.option}>
             <View style={styles.optionHeader}>
