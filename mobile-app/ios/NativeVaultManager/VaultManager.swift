@@ -3,13 +3,13 @@ import SQLite
 import LocalAuthentication
 
 /**
- * This class is used as a bridge to allow React Native to interact with the SharedCredentialStore class.
- * The SharedCredentialStore class is implemented in Swift and used by both React Native and the native iOS
+ * This class is used as a bridge to allow React Native to interact with the VaultStore class.
+ * The VaultStore class is implemented in Swift and used by both React Native and the native iOS
  * Autofill extension.
  */
 @objc(VaultManager)
 public class VaultManager: NSObject {
-    private let credentialStore = SharedCredentialStore.shared
+    private let vaultStore = VaultStore.shared
 
     override init() {
         super.init()
@@ -21,7 +21,7 @@ public class VaultManager: NSObject {
                        resolver resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            try credentialStore.storeEncryptedDatabase(base64EncryptedDb, metadata: metadata)
+            try vaultStore.storeEncryptedDatabase(base64EncryptedDb, metadata: metadata)
             resolve(nil)
         } catch {
             reject("DB_ERROR", "Failed to store database: \(error.localizedDescription)", error)
@@ -47,7 +47,7 @@ public class VaultManager: NSObject {
                 }
             }
 
-            try credentialStore.setAuthMethods(methods)
+            try vaultStore.setAuthMethods(methods)
             resolve(nil)
         } catch {
             reject("AUTH_METHOD_ERROR", "Failed to set authentication methods: \(error.localizedDescription)", error)
@@ -59,7 +59,7 @@ public class VaultManager: NSObject {
                             resolver resolve: @escaping RCTPromiseResolveBlock,
                             rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            try credentialStore.storeEncryptionKey(base64Key: base64EncryptionKey)
+            try vaultStore.storeEncryptionKey(base64Key: base64EncryptionKey)
             resolve(nil)
         } catch {
             reject("KEYCHAIN_ERROR", "Failed to store encryption key: \(error.localizedDescription)", error)
@@ -77,8 +77,8 @@ public class VaultManager: NSObject {
                 return String(describing: param)
             }
 
-            // Execute the query through the credential store
-            let results = try credentialStore.executeQuery(query, params: bindingParams)
+            // Execute the query through the vault store
+            let results = try vaultStore.executeQuery(query, params: bindingParams)
             resolve(results)
         } catch {
             reject("QUERY_ERROR", "Failed to execute query: \(error.localizedDescription)", error)
@@ -96,8 +96,8 @@ public class VaultManager: NSObject {
                 return String(describing: param)
             }
 
-            // Execute the update through the credential store
-            let changes = try credentialStore.executeUpdate(query, params: bindingParams)
+            // Execute the update through the vault store
+            let changes = try vaultStore.executeUpdate(query, params: bindingParams)
             resolve(changes)
         } catch {
             reject("UPDATE_ERROR", "Failed to execute update: \(error.localizedDescription)", error)
@@ -108,7 +108,7 @@ public class VaultManager: NSObject {
     func addCredential(_ username: String, password: String, service: String) {
         do {
             let credential = Credential(username: username, password: password, service: service)
-            try credentialStore.addCredential(credential)
+            try vaultStore.addCredential(credential)
         } catch {
             print("Failed to add credential: \(error)")
         }
@@ -117,7 +117,7 @@ public class VaultManager: NSObject {
     @objc
     func getCredentials() -> [String: Any] {
         do {
-            let credentials = try credentialStore.getAllCredentials()
+            let credentials = try vaultStore.getAllCredentials()
             let credentialDicts = credentials.map { credential in
                 return [
                     "username": credential.username,
@@ -135,7 +135,7 @@ public class VaultManager: NSObject {
     @objc
     func clearVault() {
         do {
-            try credentialStore.clearVault()
+            try vaultStore.clearVault()
         } catch {
             print("Failed to clear vault: \(error)")
         }
@@ -145,7 +145,7 @@ public class VaultManager: NSObject {
     func isVaultInitialized(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            let isInitialized = try credentialStore.isVaultInitialized()
+            let isInitialized = try vaultStore.isVaultInitialized()
             resolve(isInitialized)
         } catch {
             reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
@@ -155,7 +155,7 @@ public class VaultManager: NSObject {
     @objc
     func isVaultUnlocked(_ resolve: @escaping RCTPromiseResolveBlock,
                         rejecter reject: @escaping RCTPromiseRejectBlock) {
-        let isUnlocked = try credentialStore.isVaultUnlocked()
+        let isUnlocked = try vaultStore.isVaultUnlocked()
         resolve(isUnlocked)
     }
 
@@ -163,7 +163,7 @@ public class VaultManager: NSObject {
     func getVaultMetadata(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            let metadata = try credentialStore.getVaultMetadata()
+            let metadata = try vaultStore.getVaultMetadata()
             resolve(metadata)
         } catch {
             reject("METADATA_ERROR", "Failed to get vault metadata: \(error.localizedDescription)", error)
@@ -177,12 +177,12 @@ public class VaultManager: NSObject {
             // TODO: rename this to unlockvault? so meaning is: initialized means it exists, and unlock means
             // we're decrypting the encrypted database (that exists) and try to load it into memory. If unlocking
             // fails, user is redirected to the unlock screen in the react native app.
-            try credentialStore.initializeDatabase()
+            try vaultStore.initializeDatabase()
             resolve(true)
         } catch {
             // Check if the error is related to Face ID or decryption
             if let nsError = error as NSError? {
-                if nsError.domain == "SharedCredentialStore" {
+                if nsError.domain == "VaultStore" {
                     // These are our known error codes for initialization failures
                     if nsError.code == 1 || nsError.code == 2 || nsError.code == 8 || nsError.code == 10 {
                         resolve(false)
@@ -203,14 +203,14 @@ public class VaultManager: NSObject {
     func setAutoLockTimeout(_ timeout: Int,
                           resolver resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
-        credentialStore.setAutoLockTimeout(timeout)
+        vaultStore.setAutoLockTimeout(timeout)
         resolve(nil)
     }
 
     @objc
     func getAutoLockTimeout(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
-        let timeout = credentialStore.getAutoLockTimeout()
+        let timeout = vaultStore.getAutoLockTimeout()
         resolve(timeout)
     }
 
@@ -218,7 +218,7 @@ public class VaultManager: NSObject {
     func getAuthMethods(_ resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            let methods = try credentialStore.getAuthMethods()
+            let methods = try vaultStore.getAuthMethods()
             var methodStrings: [String] = []
 
             if methods.contains(.faceID) {

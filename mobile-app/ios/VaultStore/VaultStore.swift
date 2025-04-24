@@ -5,18 +5,15 @@ import LocalAuthentication
 import CryptoKit
 import CommonCrypto
 
-struct AuthMethods: OptionSet {
-    let rawValue: Int
-
-    static let faceID = AuthMethods(rawValue: 1 << 0)
-    static let password = AuthMethods(rawValue: 1 << 1)
-
-    static let all: AuthMethods = [.faceID, .password]
-    static let none: AuthMethods = []
-}
-
-class SharedCredentialStore {
-    static let shared = SharedCredentialStore()
+/**
+ * This class is used to store and retrieve the encrypted AliasVault database and encryption key.
+ * It also handles executing queries against the SQLite database and biometric authentication.
+ *
+ * This class is used by both the iOS Autofill extension and the React Native app and is the lowest
+ * level where all important data is stored and retrieved from.
+ */
+class VaultStore {
+    static let shared = VaultStore()
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
         .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
@@ -155,7 +152,7 @@ class SharedCredentialStore {
             var error: NSError?
 
             guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-                throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
+                throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
             }
 
             // Get the encryption key from keychain
@@ -164,7 +161,7 @@ class SharedCredentialStore {
                 guard let keyData = try keychain
                     .authenticationPrompt("Authenticate to unlock your vault")
                     .getData(encryptionKeyKey) else {
-                    throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+                    throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
                 }
                 encryptionKey = keyData
                 return keyData
@@ -172,30 +169,30 @@ class SharedCredentialStore {
                 // Handle specific keychain errors
                 switch keychainError {
                 case .itemNotFound:
-                    throw NSError(domain: "SharedCredentialStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+                    throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
                 case .authFailed:
-                    throw NSError(domain: "SharedCredentialStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication failed"])
+                    throw NSError(domain: "VaultStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication failed"])
                 default:
-                    throw NSError(domain: "SharedCredentialStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Keychain access error: \(keychainError.localizedDescription)"])
+                    throw NSError(domain: "VaultStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Keychain access error: \(keychainError.localizedDescription)"])
                 }
             } catch {
-                throw NSError(domain: "SharedCredentialStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Unexpected error accessing keychain: \(error.localizedDescription)"])
+                throw NSError(domain: "VaultStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Unexpected error accessing keychain: \(error.localizedDescription)"])
             }
         }
 
         // If Face ID is not enabled and we don't have a key in memory, throw an error
-        throw NSError(domain: "SharedCredentialStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "No encryption key found in memory"])
+        throw NSError(domain: "VaultStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "No encryption key found in memory"])
     }
 
     func storeEncryptionKey(base64Key: String) throws {
         // Convert base64 string to bytes
         guard let keyData = Data(base64Encoded: base64Key) else {
-            throw NSError(domain: "SharedCredentialStore", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 key"])
+            throw NSError(domain: "VaultStore", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 key"])
         }
 
         // Validate key length (AES-256 requires 32 bytes)
         guard keyData.count == 32 else {
-            throw NSError(domain: "SharedCredentialStore", code: 7, userInfo: [NSLocalizedDescriptionKey: "Invalid key length. Expected 32 bytes"])
+            throw NSError(domain: "VaultStore", code: 7, userInfo: [NSLocalizedDescriptionKey: "Invalid key length. Expected 32 bytes"])
         }
 
         // Store the key in memory
@@ -265,7 +262,7 @@ class SharedCredentialStore {
     func initializeDatabase() throws {
         // Get the encrypted database
         guard let encryptedDbBase64 = getEncryptedDatabase() else {
-            throw NSError(domain: "SharedCredentialStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
+            throw NSError(domain: "VaultStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
         }
 
         let encryptedDbData = Data(base64Encoded: encryptedDbBase64)!
@@ -276,7 +273,7 @@ class SharedCredentialStore {
 
         // The decrypted data is still base64 encoded, so decode it
         guard let decryptedDbData = Data(base64Encoded: decryptedDbBase64) else {
-            throw NSError(domain: "SharedCredentialStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to decode base64 data after decryption"])
+            throw NSError(domain: "VaultStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to decode base64 data after decryption"])
         }
 
         // Create a temporary file for the decrypted database in the same directory as the encrypted one
@@ -329,7 +326,7 @@ class SharedCredentialStore {
     func addCredential(_ credential: Credential) throws {
         // After initialization attempt, check if db is still nil
         guard let db = db else {
-            throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
         // TODO: update this to use the actual database schema.
@@ -355,7 +352,7 @@ class SharedCredentialStore {
     func getAllCredentials() throws -> [Credential] {
         // After initialization attempt, check if db is still nil
         guard let db = db else {
-            throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
         let query = """
@@ -432,7 +429,7 @@ class SharedCredentialStore {
 
     func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
         guard let db = db else {
-            throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
         let statement = try db.prepare(query)
@@ -470,7 +467,7 @@ class SharedCredentialStore {
 
     func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
         guard let db = db else {
-            throw NSError(domain: "SharedCredentialStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
         let statement = try db.prepare(query)
@@ -485,7 +482,7 @@ class SharedCredentialStore {
         var error: NSError?
 
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            throw error ?? NSError(domain: "SharedCredentialStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Biometrics not available"])
+            throw error ?? NSError(domain: "VaultStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Biometrics not available"])
         }
 
         return try await withCheckedThrowingContinuation { continuation in

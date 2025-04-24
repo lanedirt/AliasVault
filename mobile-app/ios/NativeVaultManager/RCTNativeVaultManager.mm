@@ -14,8 +14,8 @@
 
 /**
  * This objective-c class is used as a bridge to allow React Native to interact with the CredentialManager class.
- * The underlying CredentialManager class is implemented in Swift and used by both React Native and the
- * native iOS Autofill extension.
+ * The underlying VaultManager class is implemented in Swift and communicates with the VaultStore
+ * that is used by both React Native and the native iOS Autofill extension.
  *
  * This class should implement all methods defined in the specs/NativeVaultManager.ts TurboModule.
  * When adding a new method, make sure to update the spec .ts file first and then run `pod install` to
