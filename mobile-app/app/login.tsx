@@ -71,6 +71,33 @@ export default function LoginScreen() {
 
   const srpUtil = new SrpUtility(webApi);
 
+  /**
+   * Process the vault response by storing the vault and logging in the user.
+   * @param token - The token to use for the vault
+   * @param refreshToken - The refresh token to use for the vault
+   * @param vaultResponseJson - The vault response
+   * @param passwordHashBase64 - The password hash base64
+   */
+  const processVaultResponse = async (
+    token: string,
+    refreshToken: string,
+    vaultResponseJson: any,
+    passwordHashBase64: string
+  ) => {
+    await authContext.setAuthTokens(credentials.username, token, refreshToken);
+    await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+    await authContext.login();
+
+    setTwoFactorRequired(false);
+    setTwoFactorCode('');
+    setPasswordHashString(null);
+    setPasswordHashBase64(null);
+    setLoginResponse(null);
+    setLoginStatus(null);
+    router.replace('/(tabs)');
+    setIsLoading(false);
+  };
+
   const handleSubmit = async () => {
     setIsLoading(true);
     setError(null);
@@ -83,6 +110,7 @@ export default function LoginScreen() {
     }
 
     setLoginStatus('Logging in');
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
       authContext.clearGlobalMessage();
@@ -100,6 +128,7 @@ export default function LoginScreen() {
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 
       setLoginStatus('Validating credentials');
+      await new Promise(resolve => requestAnimationFrame(resolve));
       const validationResponse = await srpUtil.validateLogin(
         credentials.username,
         passwordHashString,
@@ -122,6 +151,7 @@ export default function LoginScreen() {
       }
 
       setLoginStatus('Syncing vault');
+      await new Promise(resolve => requestAnimationFrame(resolve));
       const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
@@ -135,14 +165,12 @@ export default function LoginScreen() {
         return;
       }
 
-      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
-      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-      await authContext.login();
-
-      router.replace('/(tabs)');
-
-      setIsLoading(false);
-      setLoginStatus(null);
+      await processVaultResponse(
+        validationResponse.token.token,
+        validationResponse.token.refreshToken,
+        vaultResponseJson,
+        passwordHashBase64
+      );
     } catch (err) {
       if (err instanceof ApiAuthError) {
         console.error('ApiAuthError error:', err);
@@ -158,7 +186,9 @@ export default function LoginScreen() {
 
   const handleTwoFactorSubmit = async () => {
     setIsLoading(true);
+    setLoginStatus('Verifying authentication code');
     setError(null);
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
       if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
@@ -182,6 +212,8 @@ export default function LoginScreen() {
         throw new Error('Login failed -- no token returned');
       }
 
+      setLoginStatus('Syncing vault');
+      await new Promise(resolve => requestAnimationFrame(resolve));
       const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
@@ -193,17 +225,12 @@ export default function LoginScreen() {
         return;
       }
 
-      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
-      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-      await authContext.login();
-
-      setTwoFactorRequired(false);
-      setTwoFactorCode('');
-      setPasswordHashString(null);
-      setPasswordHashBase64(null);
-      setLoginResponse(null);
-      router.replace('/(tabs)');
-      setIsLoading(false);
+      await processVaultResponse(
+        validationResponse.token.token,
+        validationResponse.token.refreshToken,
+        vaultResponseJson,
+        passwordHashBase64
+      );
     } catch (err) {
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
