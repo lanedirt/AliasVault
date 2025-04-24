@@ -16,6 +16,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import Logo from '@/assets/images/logo.svg';
 import { AppInfo } from '@/utils/AppInfo';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 export default function LoginScreen() {
@@ -298,14 +299,25 @@ export default function LoginScreen() {
       marginBottom: 4,
       color: colors.text,
     },
-    input: {
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '100%',
       borderWidth: 1,
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
       borderColor: colors.accentBorder,
-      color: colors.text,
+      borderRadius: 8,
+      marginBottom: 16,
       backgroundColor: colors.accentBackground,
+    },
+    inputIcon: {
+      padding: 10,
+    },
+    input: {
+      flex: 1,
+      height: 45,
+      paddingHorizontal: 4,
+      fontSize: 16,
+      color: colors.text,
     },
     buttonContainer: {
       gap: 8,
@@ -459,26 +471,42 @@ export default function LoginScreen() {
             ) : (
               <View style={styles.formContainer}>
                 <Text style={[styles.label]}>Username or email</Text>
-                <TextInput
-                  style={[styles.input]}
-                  value={credentials.username}
-                  onChangeText={(text) => setCredentials({ ...credentials, username: text })}
-                  placeholder="name / name@company.com"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  placeholderTextColor={colors.textMuted}
-                />
+                <View style={styles.inputContainer}>
+                  <MaterialIcons
+                    name="person"
+                    size={24}
+                    color={colors.textMuted}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={credentials.username}
+                    onChangeText={(text) => setCredentials({ ...credentials, username: text })}
+                    placeholder="name / name@company.com"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    placeholderTextColor={colors.textMuted}
+                  />
+                </View>
                 <Text style={[styles.label]}>Password</Text>
-                <TextInput
-                  style={[styles.input]}
-                  value={credentials.password}
-                  onChangeText={(text) => setCredentials({ ...credentials, password: text })}
-                  placeholder="Enter your password"
-                  secureTextEntry
-                  placeholderTextColor={colors.textMuted}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                />
+                <View style={styles.inputContainer}>
+                  <MaterialIcons
+                    name="lock"
+                    size={24}
+                    color={colors.textMuted}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={credentials.password}
+                    onChangeText={(text) => setCredentials({ ...credentials, password: text })}
+                    placeholder="Enter your password"
+                    secureTextEntry
+                    placeholderTextColor={colors.textMuted}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                  />
+                </View>
                 <View style={styles.rememberMeContainer}>
                   <TouchableOpacity
                     style={[styles.checkbox]}

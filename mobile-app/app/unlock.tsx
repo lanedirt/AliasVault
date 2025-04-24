@@ -11,6 +11,7 @@ import Logo from '@/assets/images/logo.svg';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function UnlockScreen() {
   const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
@@ -99,7 +100,7 @@ export default function UnlockScreen() {
     },
     logoContainer: {
       alignItems: 'center',
-      marginBottom: 32,
+      marginBottom: 16,
     },
     logo: {
       width: 200,
@@ -108,9 +109,10 @@ export default function UnlockScreen() {
     title: {
       fontSize: 28,
       fontWeight: 'bold',
-      marginBottom: 8,
+      marginBottom: 16,
       textAlign: 'center',
       color: colors.text,
+      paddingTop: 4,
     },
     avatarContainer: {
       flexDirection: 'row',
@@ -137,17 +139,25 @@ export default function UnlockScreen() {
       opacity: 0.7,
       color: colors.text,
     },
-    input: {
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
       width: '100%',
-      height: 50,
       borderWidth: 1,
       borderColor: colors.accentBorder,
       borderRadius: 8,
-      paddingHorizontal: 16,
       marginBottom: 16,
+      backgroundColor: colors.accentBackground,
+    },
+    inputIcon: {
+      padding: 12,
+    },
+    input: {
+      flex: 1,
+      height: 50,
+      paddingHorizontal: 16,
       fontSize: 16,
       color: colors.text,
-      backgroundColor: colors.accentBackground,
     },
     button: {
       width: '100%',
@@ -210,16 +220,24 @@ export default function UnlockScreen() {
             </View>
             <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor={colors.textMuted}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <View style={styles.inputContainer}>
+              <MaterialIcons
+                name="lock"
+                size={24}
+                color={colors.textMuted}
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor={colors.textMuted}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
 
             <TouchableOpacity
               style={styles.button}

@@ -129,7 +129,7 @@ function RootLayoutNav() {
         headerShown: true,
         animation: 'none',
         headerStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: colors.accentBackground,
         },
         headerTintColor: colors.text,
         headerTitleStyle: {
@@ -140,6 +140,7 @@ function RootLayoutNav() {
         <Stack.Screen name="login" options={{ title: 'Login', headerShown: false }} />
         <Stack.Screen name="sync" options={{ headerShown: false }} />
         <Stack.Screen name="unlock" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ title: 'Settings', headerShown: true }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
