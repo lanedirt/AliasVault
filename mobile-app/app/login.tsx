@@ -426,17 +426,25 @@ export default function LoginScreen() {
             {twoFactorRequired ? (
               <View style={styles.formContainer}>
                 <Text style={[styles.label]}>Authentication Code</Text>
-                <TextInput
-                  style={[styles.input]}
-                  value={twoFactorCode}
-                  onChangeText={setTwoFactorCode}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  placeholder="Enter 6-digit code"
-                  keyboardType="numeric"
-                  maxLength={6}
-                  placeholderTextColor={colors.textMuted}
-                />
+                <View style={styles.inputContainer}>
+                  <MaterialIcons
+                    name="security"
+                    size={24}
+                    color={colors.textMuted}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={twoFactorCode}
+                    onChangeText={setTwoFactorCode}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    placeholder="Enter 6-digit code"
+                    keyboardType="numeric"
+                    maxLength={6}
+                    placeholderTextColor={colors.textMuted}
+                  />
+                </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.button, styles.primaryButton]}
