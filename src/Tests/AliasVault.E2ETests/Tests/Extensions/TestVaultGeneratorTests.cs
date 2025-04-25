@@ -1,0 +1,166 @@
+//-----------------------------------------------------------------------
+// <copyright file="TestVaultGeneratorTests.cs" company="lanedirt">
+// Copyright (c) lanedirt. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace AliasVault.E2ETests.Tests.Extensions;
+
+using System.Text;
+using AliasServerDb;
+using AliasVault.Cryptography.Client;
+using Microsoft.EntityFrameworkCore;
+
+/// <summary>
+/// Test class for generating a predetermined test vault that can be exported and used
+/// for unit testing browser extensions and native mobile apps.
+///
+/// This test is designed to be run manually to generate a consistent test vault.
+/// It creates an account with static credentials and populates it with predefined
+/// credential entries. After creation, it pauses to allow manual export of the
+/// encrypted vault file.
+///
+/// Usage:
+/// 1. Run this test manually (not meant for CI/CD)
+/// 2. During the 5-minute pause, export the vault from the UI
+/// 3. Use the exported vault file for unit testing browser extensions, iOS, and Android apps
+///
+/// The exported vault will contain:
+/// - Static test account (username: testvault@example.local, password: aaaaaaaaaa (10 characters))
+/// - 5 predefined credentials with known values.
+/// </summary>
+[Category("ManualTests")]
+[Category("ExtensionTests")]
+[TestFixture]
+public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
+{
+    /// <summary>
+    /// Gets or sets user email (override).
+    /// </summary>
+    protected override string TestUserUsername { get; set; } = "testvault@example.local";
+
+    /// <summary>
+    /// Gets or sets user password (override).
+    /// </summary>
+    protected override string TestUserPassword { get; set; } = "aaaaaaaaaa";
+
+    /// <summary>
+    /// Creates a test vault with predetermined contents for use in unit testing.
+    /// This test should be run manually when you need to generate a new test vault.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task GenerateTestVault()
+    {
+        // Create predefined test credentials
+        var testCredentials = new[]
+        {
+            new Dictionary<string, string>
+            {
+                { "service-name", "Gmail Test Account" },
+                { "username", "test.user@gmail.com" },
+                { "first-name", "Test" },
+                { "last-name", "User" },
+                { "notes", "Test Gmail account for unit testing" },
+            },
+            new Dictionary<string, string>
+            {
+                { "service-name", "GitHub Test" },
+                { "username", "test-github-user" },
+                { "first-name", "Test" },
+                { "last-name", "Developer" },
+                { "notes", "Test GitHub account for unit testing" },
+            },
+            new Dictionary<string, string>
+            {
+                { "service-name", "AWS Test Account" },
+                { "username", "aws.test.user" },
+                { "first-name", "AWS" },
+                { "last-name", "Tester" },
+                { "notes", "Test AWS account for unit testing" },
+            },
+            new Dictionary<string, string>
+            {
+                { "service-name", "Twitter Test" },
+                { "username", "@test_twitter_user" },
+                { "first-name", "Twitter" },
+                { "last-name", "Tester" },
+                { "notes", "Test Twitter account for unit testing" },
+            },
+            new Dictionary<string, string>
+            {
+                { "service-name", "Database Test" },
+                { "username", "db_test_user" },
+                { "first-name", "Database" },
+                { "last-name", "Admin" },
+                { "notes", "Test database account for unit testing" },
+            },
+        };
+
+        // Create each credential entry
+        foreach (var credential in testCredentials)
+        {
+            await CreateCredentialEntry(credential);
+        }
+
+        // Verify all credentials were created
+        await Page.BringToFrontAsync();
+        await NavigateUsingBlazorRouter("credentials");
+        await WaitForUrlAsync("credentials", "Credentials");
+
+        foreach (var credential in testCredentials)
+        {
+            var serviceName = credential["service-name"];
+            await Page.WaitForSelectorAsync($"text={serviceName}");
+            var pageContent = await Page.TextContentAsync("body");
+            Assert.That(pageContent, Does.Contain(serviceName), $"Created credential '{serviceName}' not found in vault");
+        }
+
+        // Get the user's vault from the database
+        var user = await ApiDbContext.AliasVaultUsers
+            .Include(u => u.Vaults)
+            .FirstOrDefaultAsync(u => u.UserName == TestUserUsername);
+
+        if (user == null || !user.Vaults.Any())
+        {
+            throw new Exception("Could not find user or vault in database");
+        }
+
+        var vault = user.Vaults.First();
+
+        // Save the encrypted vault blob to a temp file
+        var tempVaultPath = Path.Combine(Path.GetTempPath(), "test-vault.encrypted.blob");
+        await File.WriteAllTextAsync(tempVaultPath, vault.VaultBlob);
+
+        // Generate the decryption key using the same method as the login page
+        var decryptionKey = await Encryption.DeriveKeyFromPasswordAsync(
+            TestUserPassword,
+            vault.Salt,
+            vault.EncryptionType,
+            vault.EncryptionSettings);
+
+        // Convert the key to base64 which is how its expected by the other test suites.
+        var decryptionKeyBase64 = Convert.ToBase64String(decryptionKey);
+
+        Console.WriteLine("\n=== TEST VAULT GENERATION COMPLETE ===");
+        Console.WriteLine("Test vault has been generated with the following details:");
+        Console.WriteLine($"Account Credentials:");
+        Console.WriteLine($"Email: {TestUserUsername}");
+        Console.WriteLine($"Password: {TestUserPassword}");
+        Console.WriteLine("\nVault Information:");
+        Console.WriteLine($"Encrypted Vault File: {tempVaultPath}");
+        Console.WriteLine($"Vault Salt (Base64): {vault.Salt}");
+        Console.WriteLine($"Encryption Type: {vault.EncryptionType}");
+        Console.WriteLine($"Encryption Settings: {vault.EncryptionSettings}");
+        Console.WriteLine($"Decryption Key (Base64): {decryptionKeyBase64}");
+        Console.WriteLine("\nInstructions:");
+        Console.WriteLine("1. Copy the encrypted vault file from the location above");
+        Console.WriteLine("2. Use the decryption key (Base64) in your unit tests");
+        Console.WriteLine("3. The vault contains 5 test credentials that can be used for verification");
+        Console.WriteLine("\nWaiting 5 minutes before completing the test...\n");
+
+        // Wait 5 minutes to allow manual export of the vault
+        await Task.Delay(TimeSpan.FromMinutes(5));
+    }
+}
