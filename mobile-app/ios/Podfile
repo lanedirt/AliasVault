@@ -72,3 +72,8 @@ target 'Autofill' do
   pod 'KeychainAccess', '~> 4.2.2'
   pod 'SQLite.swift', '~> 0.14.0'
 end
+
+target 'VaultStoreTests' do
+  pod 'KeychainAccess', '~> 4.2.2'
+  pod 'SQLite.swift', '~> 0.14.0'
+end

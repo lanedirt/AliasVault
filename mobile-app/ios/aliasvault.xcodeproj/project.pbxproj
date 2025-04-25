@@ -10,6 +10,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		39FA4A20DA89892B851E57CC /* libPods-VaultStoreTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D9D3E9C5905A36E990CD35FC /* libPods-VaultStoreTests.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		708F336D8B83C9095CC4B07F /* libPods-Autofill.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 10DF5131612F6F971DC28D74 /* libPods-Autofill.a */; };
 		ABF77E25420BBBD13D0438F2 /* libPods-AliasVault.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */; };
@@ -20,9 +21,7 @@
 		CE26D6912DA7FCD2006DC04D /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* VaultStore.swift */; };
 		CE9A58FC2DBA982100CB0A4C /* RCTNativeVaultManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */; };
 		CE9A5A022DBAAE5000CB0A4C /* RCTNativeVaultManager.h in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */; };
-		CE9A5B602DBAE31D00CB0A4C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = CE9A5B5F2DBAE31D00CB0A4C /* README.md */; };
-		CE9A5B612DBAE31D00CB0A4C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = CE9A5B5F2DBAE31D00CB0A4C /* README.md */; };
-		CE9A5B672DBAE42B00CB0A4C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = CE9A5B662DBAE42B00CB0A4C /* README.md */; };
+		CE9A5BB92DBBB5CC00CB0A4C /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68D2DA7FCD2006DC04D /* VaultStore.swift */; };
 		CEE909802DA548C7008D568F /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */; };
 		CEE9098B2DA548C7008D568F /* Autofill.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE9097E2DA548C7008D568F /* Autofill.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */; };
@@ -30,6 +29,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CE9A5BB42DBBB47200CB0A4C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
+			remoteInfo = AliasVault;
+		};
 		CEE909892DA548C7008D568F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -67,23 +73,35 @@
 		962DE0FB93C9458BAFEEED60 /* AliasVault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "AliasVault-Bridging-Header.h"; path = "AliasVault/AliasVault-Bridging-Header.h"; sourceTree = "<group>"; };
 		993CD3C072C0979B8883EA99 /* Pods-AliasVault.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.release.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = AliasVault/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B95F4F05170B99BAA9A6D345 /* Pods-VaultStoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreTests.release.xcconfig"; path = "Target Support Files/Pods-VaultStoreTests/Pods-VaultStoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		BA88D6CB4FD656C7180FE9F7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = AliasVault/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		BF586B84DA605F21F1BA9768 /* Pods-VaultStoreTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreTests.debug.xcconfig"; path = "Target Support Files/Pods-VaultStoreTests/Pods-VaultStoreTests.debug.xcconfig"; sourceTree = "<group>"; };
 		CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultManager.swift; sourceTree = "<group>"; };
 		CE26D68D2DA7FCD2006DC04D /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
 		CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeVaultManager.h; sourceTree = "<group>"; };
 		CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeVaultManager.mm; sourceTree = "<group>"; };
 		CE9A5B5F2DBAE31D00CB0A4C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		CE9A5B662DBAE42B00CB0A4C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		CE9A5BB02DBBB47200CB0A4C /* VaultStoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaultStoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097E2DA548C7008D568F /* Autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AliasVault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9D3E9C5905A36E990CD35FC /* libPods-VaultStoreTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultStoreTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1CF1AE0A32339C16E11AA43 /* Pods-AliasVault.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.debug.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-AliasVault/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CE9A5BBB2DBBB60D00CB0A4C /* Exceptions for "Models" folder in "VaultStoreTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AuthMethods.swift,
+				Credential.swift,
+			);
+			target = CE9A5BAF2DBBB47200CB0A4C /* VaultStoreTests */;
+		};
 		CEE9098F2DA548C7008D568F /* Exceptions for "Autofill" folder in "Autofill" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -97,12 +115,24 @@
 		CE9A5B592DBAE06400CB0A4C /* Models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				CE9A5BBB2DBBB60D00CB0A4C /* Exceptions for "Models" folder in "VaultStoreTests" target */,
 			);
 			explicitFileTypes = {
 			};
 			explicitFolders = (
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		CE9A5BB12DBBB47200CB0A4C /* VaultStoreTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = VaultStoreTests;
 			sourceTree = "<group>";
 		};
 		CEE909812DA548C7008D568F /* Autofill */ = {
@@ -125,6 +155,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABF77E25420BBBD13D0438F2 /* libPods-AliasVault.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE9A5BAD2DBBB47200CB0A4C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39FA4A20DA89892B851E57CC /* libPods-VaultStoreTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +202,7 @@
 				CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */,
 				D3105EF00E7F103157A21E09 /* libPods-AliasVault.a */,
 				10DF5131612F6F971DC28D74 /* libPods-Autofill.a */,
+				D9D3E9C5905A36E990CD35FC /* libPods-VaultStoreTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -183,6 +222,7 @@
 				CEE909812DA548C7008D568F /* Autofill */,
 				CE26D68A2DA7FCB5006DC04D /* VaultStore */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+				CE9A5BB12DBBB47200CB0A4C /* VaultStoreTests */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
@@ -198,6 +238,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* AliasVault.app */,
 				CEE9097E2DA548C7008D568F /* Autofill.appex */,
+				CE9A5BB02DBBB47200CB0A4C /* VaultStoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -247,6 +288,8 @@
 				993CD3C072C0979B8883EA99 /* Pods-AliasVault.release.xcconfig */,
 				51719C00B4C841E70E9F3EAC /* Pods-Autofill.debug.xcconfig */,
 				4C838803F3761A9464711581 /* Pods-Autofill.release.xcconfig */,
+				BF586B84DA605F21F1BA9768 /* Pods-VaultStoreTests.debug.xcconfig */,
+				B95F4F05170B99BAA9A6D345 /* Pods-VaultStoreTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -289,6 +332,28 @@
 			productReference = 13B07F961A680F5B00A75B9A /* AliasVault.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CE9A5BAF2DBBB47200CB0A4C /* VaultStoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CE9A5BB82DBBB47200CB0A4C /* Build configuration list for PBXNativeTarget "VaultStoreTests" */;
+			buildPhases = (
+				58ED77157FCEF8379751AEF2 /* [CP] Check Pods Manifest.lock */,
+				CE9A5BAC2DBBB47200CB0A4C /* Sources */,
+				CE9A5BAD2DBBB47200CB0A4C /* Frameworks */,
+				CE9A5BAE2DBBB47200CB0A4C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CE9A5BB52DBBB47200CB0A4C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CE9A5BB12DBBB47200CB0A4C /* VaultStoreTests */,
+			);
+			name = VaultStoreTests;
+			productName = VaultStoreTests;
+			productReference = CE9A5BB02DBBB47200CB0A4C /* VaultStoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		CEE9097D2DA548C7008D568F /* Autofill */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE909902DA548C7008D568F /* Build configuration list for PBXNativeTarget "Autofill" */;
@@ -323,6 +388,10 @@
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
 					};
+					CE9A5BAF2DBBB47200CB0A4C = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
 					CEE9097D2DA548C7008D568F = {
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
@@ -344,6 +413,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* AliasVault */,
 				CEE9097D2DA548C7008D568F /* Autofill */,
+				CE9A5BAF2DBBB47200CB0A4C /* VaultStoreTests */,
 			);
 		};
 /* End PBXProject section */
@@ -357,6 +427,13 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE9A5BAE2DBBB47200CB0A4C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +478,28 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-AliasVault-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		58ED77157FCEF8379751AEF2 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-VaultStoreTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -530,6 +629,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CE9A5BAC2DBBB47200CB0A4C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE9A5BB92DBBB5CC00CB0A4C /* VaultStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEE9097A2DA548C7008D568F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -541,6 +648,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CE9A5BB52DBBB47200CB0A4C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 13B07F861A680F5B00A75B9A /* AliasVault */;
+			targetProxy = CE9A5BB42DBBB47200CB0A4C /* PBXContainerItemProxy */;
+		};
 		CEE9098A2DA548C7008D568F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CEE9097D2DA548C7008D568F /* Autofill */;
@@ -745,6 +857,79 @@
 			};
 			name = Release;
 		};
+		CE9A5BB62DBBB47200CB0A4C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF586B84DA605F21F1BA9768 /* Pods-VaultStoreTests.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 8PHW4HN3F7;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AliasVault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AliasVault";
+			};
+			name = Debug;
+		};
+		CE9A5BB72DBBB47200CB0A4C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B95F4F05170B99BAA9A6D345 /* Pods-VaultStoreTests.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8PHW4HN3F7;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AliasVault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AliasVault";
+			};
+			name = Release;
+		};
 		CEE9098D2DA548C7008D568F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 51719C00B4C841E70E9F3EAC /* Pods-Autofill.debug.xcconfig */;
@@ -853,6 +1038,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CE9A5BB82DBBB47200CB0A4C /* Build configuration list for PBXNativeTarget "VaultStoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE9A5BB62DBBB47200CB0A4C /* Debug */,
+				CE9A5BB72DBBB47200CB0A4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

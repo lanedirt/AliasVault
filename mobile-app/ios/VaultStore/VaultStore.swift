@@ -12,8 +12,8 @@ import CommonCrypto
  * This class is used by both the iOS Autofill extension and the React Native app and is the lowest
  * level where all important data is stored and retrieved from.
  */
-class VaultStore {
-    static let shared = VaultStore()
+public class VaultStore {
+    public static let shared = VaultStore()
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
         .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
