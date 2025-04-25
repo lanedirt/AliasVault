@@ -258,6 +258,11 @@ class VaultStore {
 
     /**
      * Initialize the database.
+     *
+     * This function will decrypt the encrypted database and import it into an in-memory database.
+     * Note: as part of decryption, executing this function can prompt the user for biometric authentication.
+     *
+     * The in-memory database is used for all queries and updates to the database.
      */
     func initializeDatabase() throws {
         // Get the encrypted database

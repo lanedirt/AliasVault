@@ -4,7 +4,7 @@ import AuthenticationServices
 struct CredentialProviderView: View {
     @ObservedObject var viewModel: CredentialProviderViewModel
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -19,7 +19,7 @@ struct CredentialProviderView: View {
                             .onChange(of: viewModel.searchText) { _ in
                                 viewModel.filterCredentials()
                             }
-                        
+
                         List(viewModel.filteredCredentials, id: \.service) { credential in
                             Button(action: {
                                 viewModel.selectCredential(credential)
@@ -48,7 +48,7 @@ struct CredentialProviderView: View {
                     }
                     .foregroundColor(.red)
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button {
@@ -56,7 +56,7 @@ struct CredentialProviderView: View {
                         } label: {
                             Image(systemName: "arrow.clockwise")
                         }
-                        
+
                         Button("Add") {
                             viewModel.showAddCredential = true
                         }
@@ -88,17 +88,17 @@ struct CredentialProviderView: View {
 struct AddCredentialView: View {
     @ObservedObject var viewModel: CredentialProviderViewModel
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
             Form {
                 TextField("Username", text: $viewModel.newUsername)
                     .textContentType(.username)
                     .autocapitalization(.none)
-                
+
                 SecureField("Password", text: $viewModel.newPassword)
                     .textContentType(.password)
-                
+
                 TextField("Service", text: $viewModel.newService)
                     .textContentType(.URL)
                     .autocapitalization(.none)
@@ -111,14 +111,14 @@ struct AddCredentialView: View {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         viewModel.addCredential()
                         dismiss()
                     }
-                    .disabled(viewModel.newUsername.isEmpty || 
-                            viewModel.newPassword.isEmpty || 
+                    .disabled(viewModel.newUsername.isEmpty ||
+                            viewModel.newPassword.isEmpty ||
                             viewModel.newService.isEmpty)
                 }
             }
@@ -128,16 +128,16 @@ struct AddCredentialView: View {
 
 struct SearchBar: View {
     @Binding var text: String
-    
+
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
-            
+
             TextField("Search credentials...", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .autocapitalization(.none)
-            
+
             if !text.isEmpty {
                 Button(action: {
                     text = ""
@@ -158,26 +158,30 @@ class CredentialProviderViewModel: ObservableObject {
     @Published var showError = false
     @Published var errorMessage = ""
     @Published var showAddCredential = false
-    
+
     // New credential form fields
     @Published var newUsername = ""
     @Published var newPassword = ""
     @Published var newService = ""
-    
+
     private var extensionContext: ASCredentialProviderExtensionContext?
-    
+
     init(extensionContext: ASCredentialProviderExtensionContext? = nil) {
         self.extensionContext = extensionContext
     }
-    
+
     func loadCredentials() {
         isLoading = true
-        
+
         do {
             let vaultStore = VaultStore()
+
+            // Init DB
+            try vaultStore.initializeDatabase()
+
             credentials = try vaultStore.getAllCredentials()
             filteredCredentials = credentials
-            
+
             Task {
                 do {
                     try await CredentialIdentityStore.shared.saveCredentialIdentities(credentials)
@@ -192,7 +196,7 @@ class CredentialProviderViewModel: ObservableObject {
             handleError(error)
         }
     }
-    
+
     func filterCredentials() {
         if searchText.isEmpty {
             filteredCredentials = credentials
@@ -203,19 +207,19 @@ class CredentialProviderViewModel: ObservableObject {
             }
         }
     }
-    
+
     func selectCredential(_ credential: Credential) {
-        let passwordCredential = ASPasswordCredential(user: credential.username, 
+        let passwordCredential = ASPasswordCredential(user: credential.username,
                                                     password: credential.password)
-        extensionContext?.completeRequest(withSelectedCredential: passwordCredential, 
+        extensionContext?.completeRequest(withSelectedCredential: passwordCredential,
                                         completionHandler: nil)
     }
-    
+
     func addCredential() {
         let credential = Credential(username: newUsername,
                                   password: newPassword,
                                   service: newService)
-        
+
         do {
             let vaultStore = VaultStore()
             try vaultStore.addCredential(credential)
@@ -223,7 +227,7 @@ class CredentialProviderViewModel: ObservableObject {
                 try await CredentialIdentityStore.shared.saveCredentialIdentities([credential])
             }
             loadCredentials()
-            
+
             // Reset form
             newUsername = ""
             newPassword = ""
@@ -232,7 +236,7 @@ class CredentialProviderViewModel: ObservableObject {
             handleError(error)
         }
     }
-    
+
     func cancel() {
         guard let context = extensionContext else {
             print("Error: extensionContext is nil")
@@ -241,7 +245,7 @@ class CredentialProviderViewModel: ObservableObject {
         context.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain,
                                                code: ASExtensionError.userCanceled.rawValue))
     }
-    
+
     private func handleError(_ error: Error) {
         DispatchQueue.main.async { [weak self] in
             self?.isLoading = false
@@ -249,4 +253,4 @@ class CredentialProviderViewModel: ObservableObject {
             self?.showError = true
         }
     }
-} 
+}
