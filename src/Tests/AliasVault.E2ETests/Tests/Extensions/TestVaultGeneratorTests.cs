@@ -7,8 +7,7 @@
 
 namespace AliasVault.E2ETests.Tests.Extensions;
 
-using System.Text;
-using AliasServerDb;
+using System.Reflection;
 using AliasVault.Cryptography.Client;
 using Microsoft.EntityFrameworkCore;
 
@@ -127,10 +126,15 @@ public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
             throw new Exception("Could not find user or vault in database");
         }
 
-        var vault = user.Vaults.First();
+        var vault = user.Vaults.OrderByDescending(x => x.RevisionNumber).First();
 
-        // Save the encrypted vault blob to a temp file
-        var tempVaultPath = Path.Combine(Path.GetTempPath(), "test-vault.encrypted.blob");
+        var outputDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+        var vaultOutputDir = Path.Combine(outputDir, "output");
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(vaultOutputDir);
+
+        var tempVaultPath = Path.Combine(vaultOutputDir, "test-vault.encrypted.blob");
         await File.WriteAllTextAsync(tempVaultPath, vault.VaultBlob);
 
         // Generate the decryption key using the same method as the login page
@@ -158,9 +162,5 @@ public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
         Console.WriteLine("1. Copy the encrypted vault file from the location above");
         Console.WriteLine("2. Use the decryption key (Base64) in your unit tests");
         Console.WriteLine("3. The vault contains 5 test credentials that can be used for verification");
-        Console.WriteLine("\nWaiting 5 minutes before completing the test...\n");
-
-        // Wait 5 minutes to allow manual export of the vault
-        await Task.Delay(TimeSpan.FromMinutes(5));
     }
 }
