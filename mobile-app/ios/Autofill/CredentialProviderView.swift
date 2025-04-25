@@ -1,37 +1,65 @@
 import SwiftUI
 import AuthenticationServices
 
+struct ColorConstants {
+    struct Light {
+        static let text = Color(hex: "#11181C")
+        static let textMuted = Color(hex: "#4b5563")
+        static let background = Color(hex: "#ffffff")
+        static let accentBackground = Color(hex: "#fff")
+        static let accentBorder = Color(hex: "#d1d5db")
+        static let primary = Color(hex: "#f49541")
+        static let secondary = Color(hex: "#6b7280")
+        static let icon = Color(hex: "#687076")
+    }
+
+    struct Dark {
+        static let text = Color(hex: "#ECEDEE")
+        static let textMuted = Color(hex: "#9BA1A6")
+        static let background = Color(hex: "#111827")
+        static let accentBackground = Color(hex: "#1f2937")
+        static let accentBorder = Color(hex: "#4b5563")
+        static let primary = Color(hex: "#f49541")
+        static let secondary = Color(hex: "#6b7280")
+        static let icon = Color(hex: "#9BA1A6")
+    }
+}
+
 struct CredentialProviderView: View {
     @ObservedObject var viewModel: CredentialProviderViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         NavigationView {
             ZStack {
+                (colorScheme == .dark ? ColorConstants.Dark.background : ColorConstants.Light.background)
+                    .ignoresSafeArea()
+
                 if viewModel.isLoading {
                     ProgressView("Loading credentials...")
                         .progressViewStyle(.circular)
                         .scaleEffect(1.5)
                 } else {
-                    VStack {
+                    VStack(spacing: 0) {
                         SearchBar(text: $viewModel.searchText)
                             .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(colorScheme == .dark ? ColorConstants.Dark.background : ColorConstants.Light.background)
                             .onChange(of: viewModel.searchText) { _ in
                                 viewModel.filterCredentials()
                             }
 
-                        List(viewModel.filteredCredentials, id: \.service) { credential in
-                            Button(action: {
-                                viewModel.selectCredential(credential)
-                            }) {
-                                VStack(alignment: .leading) {
-                                    Text(credential.service)
-                                        .font(.headline)
-                                    Text(credential.username)
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(viewModel.filteredCredentials, id: \.service) { credential in
+                                    CredentialCard(credential: credential) {
+                                        viewModel.selectCredential(credential)
+                                    }
                                 }
                             }
+                            .padding(.horizontal)
+                            .padding(.top, 8)
                         }
                         .refreshable {
                             viewModel.loadCredentials()
@@ -46,7 +74,7 @@ struct CredentialProviderView: View {
                     Button("Cancel") {
                         viewModel.cancel()
                     }
-                    .foregroundColor(.red)
+                    .foregroundColor(ColorConstants.Light.primary)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -55,11 +83,13 @@ struct CredentialProviderView: View {
                             viewModel.loadCredentials()
                         } label: {
                             Image(systemName: "arrow.clockwise")
+                                .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.icon : ColorConstants.Light.icon)
                         }
 
                         Button("Add") {
                             viewModel.showAddCredential = true
                         }
+                        .foregroundColor(ColorConstants.Light.primary)
                     }
                 }
             }
@@ -74,13 +104,96 @@ struct CredentialProviderView: View {
                 Text(viewModel.errorMessage)
             }
             .task {
-                // wait for .1sec
                 try? await Task.sleep(nanoseconds: 100_000_000)
                 viewModel.loadCredentials()
             }
             .onDisappear {
                 viewModel.cancel()
             }
+        }
+    }
+}
+
+struct ServiceLogoView: View {
+    let logoData: Data?
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Group {
+            if let logoData = logoData {
+                if let image = UIImage(data: logoData) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                } else if let svgString = String(data: logoData, encoding: .utf8),
+                          svgString.contains("<svg") || svgString.contains("<?xml") {
+                    // For SVG, we'll use a placeholder for now since SwiftUI doesn't have built-in SVG support
+                    // In a real implementation, you might want to use a third-party SVG renderer
+                    Circle()
+                        .fill(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.background)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Circle()
+                                .stroke(colorScheme == .dark ? ColorConstants.Dark.accentBorder : ColorConstants.Light.accentBorder, lineWidth: 1)
+                        )
+                } else {
+                    // Fallback for other formats
+                    Circle()
+                        .fill(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.background)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Circle()
+                                .stroke(colorScheme == .dark ? ColorConstants.Dark.accentBorder : ColorConstants.Light.accentBorder, lineWidth: 1)
+                        )
+                }
+            } else {
+                Circle()
+                    .fill(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.background)
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Circle()
+                            .stroke(colorScheme == .dark ? ColorConstants.Dark.accentBorder : ColorConstants.Light.accentBorder, lineWidth: 1)
+                    )
+            }
+        }
+    }
+}
+
+struct CredentialCard: View {
+    let credential: Credential
+    let action: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                // Service logo
+                ServiceLogoView(logoData: credential.service.logo)
+                    .frame(width: 40, height: 40)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(credential.service.name ?? "Unknown Service")
+                        .font(.headline)
+                        .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+
+                    Text(credential.username ?? "No username")
+                        .font(.subheadline)
+                        .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.textMuted : ColorConstants.Light.textMuted)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.icon : ColorConstants.Light.icon)
+            }
+            .padding(16)
+            .background(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.background)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(colorScheme == .dark ? ColorConstants.Dark.accentBorder : ColorConstants.Light.accentBorder, lineWidth: 1)
+            )
+            .cornerRadius(12)
         }
     }
 }
@@ -176,7 +289,7 @@ class CredentialProviderViewModel: ObservableObject {
         do {
             let vaultStore = VaultStore()
 
-            // Init DB
+            // Initialize the DB. Note: this can prompt the user for biometric authentication.
             try vaultStore.initializeDatabase()
 
             credentials = try vaultStore.getAllCredentials()
@@ -202,23 +315,58 @@ class CredentialProviderViewModel: ObservableObject {
             filteredCredentials = credentials
         } else {
             filteredCredentials = credentials.filter { credential in
-                credential.service.localizedCaseInsensitiveContains(searchText) ||
-                credential.username.localizedCaseInsensitiveContains(searchText)
+                (credential.service.name?.localizedCaseInsensitiveContains(searchText) ?? false) ||
+                (credential.username?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
     }
 
     func selectCredential(_ credential: Credential) {
-        let passwordCredential = ASPasswordCredential(user: credential.username,
-                                                    password: credential.password)
+        guard let username = credential.username else {
+            handleError(NSError(domain: "CredentialProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Username is required"]))
+            return
+        }
+
+        // Note: We need to get the password from the Password model
+        // This will need to be updated once we have access to the Password model
+        let passwordCredential = ASPasswordCredential(user: username, password: "")
         extensionContext?.completeRequest(withSelectedCredential: passwordCredential,
                                         completionHandler: nil)
     }
 
     func addCredential() {
-        let credential = Credential(username: newUsername,
-                                  password: newPassword,
-                                  service: newService)
+        // Note: This will need to be updated to create proper Service and Password models
+        // For now, we'll just create a basic credential
+        let service = Service(
+            id: UUID(),
+            name: newService,
+            url: nil,
+            logo: nil,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isDeleted: false
+        )
+        
+        let password = Password(
+            id: UUID(),
+            credentialId: UUID(), 
+            value: newPassword,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isDeleted: false
+        )
+
+        let credential = Credential(
+            id: UUID(),
+            aliasId: UUID(), // This should be provided by the system
+            service: service,
+            username: newUsername,
+            notes: nil,
+            password: password,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isDeleted: false
+        )
 
         do {
             let vaultStore = VaultStore()
@@ -252,5 +400,32 @@ class CredentialProviderViewModel: ObservableObject {
             self?.errorMessage = error.localizedDescription
             self?.showError = true
         }
+    }
+}
+
+// Add Color extension for hex support
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }

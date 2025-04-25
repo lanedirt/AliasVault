@@ -27,6 +27,15 @@ class VaultStore {
     private let authMethodsKey = "aliasvault_auth_methods"
     private let autoLockTimeoutKey = "aliasvault_auto_lock_timeout"
 
+    // Date formatter for parsing SQLite datetime strings
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter
+    }()
+
     // User config with default values
     private var enabledAuthMethods: AuthMethods = [.password, .faceID] // Default to Face ID and password
     private var autoLockTimeout: Int = 3600 // Default to 1 hour (3600 seconds)
@@ -346,9 +355,9 @@ class VaultStore {
 
         try db.run(credentials.insert(
             id <- UUID().uuidString,
-            username <- credential.username,
-            password <- credential.password,
-            service <- credential.service,
+            username <- credential.username ?? "",
+            password <- credential.password?.value ?? "",
+            service <- credential.service.name ?? "",
             createdAt <- Date(),
             updatedAt <- Date()
         ))
@@ -360,30 +369,115 @@ class VaultStore {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
+        print("Executing get all credentials query..")
+
         let query = """
-            SELECT DISTINCT
+            WITH LatestPasswords AS (
+                SELECT
+                    p.Id as password_id,
+                    p.CredentialId,
+                    p.Value,
+                    p.CreatedAt,
+                    p.UpdatedAt,
+                    p.IsDeleted,
+                    ROW_NUMBER() OVER (PARTITION BY p.CredentialId ORDER BY p.CreatedAt DESC) as rn
+                FROM Passwords p
+                WHERE p.IsDeleted = 0
+            )
+            SELECT
+                c.Id,
+                c.AliasId,
                 c.Username,
-                s.Name as ServiceName,
-                p.Value as Password
+                c.Notes,
+                c.CreatedAt,
+                c.UpdatedAt,
+                c.IsDeleted,
+                s.Id as service_id,
+                s.Name as service_name,
+                s.Url as service_url,
+                s.Logo as service_logo,
+                s.CreatedAt as service_created_at,
+                s.UpdatedAt as service_updated_at,
+                s.IsDeleted as service_is_deleted,
+                lp.password_id,
+                lp.Value as password_value,
+                lp.CreatedAt as password_created_at,
+                lp.UpdatedAt as password_updated_at,
+                lp.IsDeleted as password_is_deleted
             FROM Credentials c
-            LEFT JOIN Services s ON c.ServiceId = s.Id
-            LEFT JOIN Passwords p ON p.CredentialId = c.Id
+            LEFT JOIN Services s ON s.Id = c.ServiceId AND s.IsDeleted = 0
+            LEFT JOIN LatestPasswords lp ON lp.CredentialId = c.Id AND lp.rn = 1
             WHERE c.IsDeleted = 0
             ORDER BY c.CreatedAt DESC
         """
 
         var result: [Credential] = []
         for row in try db.prepare(query) {
-            let username = row[0] as? String ?? ""
-            let service = row[1] as? String ?? ""
-            let password = row[2] as? String ?? ""
+            guard let idString = row[0] as? String,
+                  let aliasIdString = row[1] as? String,
+                  let createdAtString = row[4] as? String,
+                  let updatedAtString = row[5] as? String,
+                  let isDeleted = row[6] as? Int,
+                  let createdAt = dateFormatter.date(from: createdAtString),
+                  let updatedAt = dateFormatter.date(from: updatedAtString) else {
+                continue
+            }
 
-            result.append(Credential(
-                username: username,
-                password: password,
+            // Create Service object if service data exists
+            guard let serviceId = row[7] as? String,
+                  let serviceCreatedAtString = row[11] as? String,
+                  let serviceUpdatedAtString = row[12] as? String,
+                  let serviceIsDeleted = row[13] as? Int,
+                  let serviceCreatedAt = dateFormatter.date(from: serviceCreatedAtString),
+                  let serviceUpdatedAt = dateFormatter.date(from: serviceUpdatedAtString) else {
+                continue
+            }
+
+            let service = Service(
+                id: UUID(uuidString: serviceId)!,
+                name: row[8] as? String,
+                url: row[9] as? String,
+                logo: row[10] as? Data,
+                createdAt: serviceCreatedAt,
+                updatedAt: serviceUpdatedAt,
+                isDeleted: serviceIsDeleted == 1
+            )
+
+            // Create Password object if password data exists
+            var password: Password? = nil
+            if let passwordIdString = row[14] as? String,
+               let passwordValue = row[15] as? String,
+               let passwordCreatedAtString = row[16] as? String,
+               let passwordUpdatedAtString = row[17] as? String,
+               let passwordIsDeleted = row[18] as? Int,
+               let passwordCreatedAt = dateFormatter.date(from: passwordCreatedAtString),
+               let passwordUpdatedAt = dateFormatter.date(from: passwordUpdatedAtString) {
+                password = Password(
+                    id: UUID(uuidString: passwordIdString)!,
+                    credentialId: UUID(uuidString: idString)!,
+                    value: passwordValue,
+                    createdAt: passwordCreatedAt,
+                    updatedAt: passwordUpdatedAt,
+                    isDeleted: passwordIsDeleted == 1
+                )
+            }
+
+            let credential = Credential(
+                id: UUID(uuidString: idString)!,
+                aliasId: UUID(uuidString: aliasIdString)!,
                 service: service,
-            ))
+                username: row[2] as? String,
+                notes: row[3] as? String,
+                password: password,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted == 1
+            )
+            result.append(credential)
         }
+
+        print("Found \(result.count) credentials")
+
         return result
     }
 

@@ -8,18 +8,26 @@
 import AuthenticationServices
 import SwiftUI
 
+/**
+ * This class is the main entry point for the autofill extension.
+ * It is responsible for displaying the credential provider view and handling user interactions.
+ *
+ * It also contains interface implementations for ASCredentialProviderViewController that allow
+ * us to provide credentials to native system operations that request credentials (e.g. suggesting
+ * logins in the keyboard).
+ */
 class CredentialProviderViewController: ASCredentialProviderViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         let viewModel = CredentialProviderViewModel(extensionContext: extensionContext)
         let hostingController = UIHostingController(
             rootView: CredentialProviderView(viewModel: viewModel)
         )
-        
+
         addChild(hostingController)
         view.addSubview(hostingController.view)
-        
+
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
@@ -27,18 +35,18 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
             hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
+
         hostingController.didMove(toParent: self)
     }
-    
+
     override func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
         // This is handled in the SwiftUI view's onAppear
     }
-    
+
     override func prepareInterfaceForUserChoosingTextToInsert() {
         // This is handled in the SwiftUI view's onAppear
     }
-    
+
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         // Get credentials and return the first one that matches the identity
         // TODO: how do we handle authentication here? We need Face ID access before we can access credentials..
@@ -47,10 +55,10 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         // autofill the username? Check how this should work functionally.
         do {
             let credentials = try VaultStore.shared.getAllCredentials()
-            if let matchingCredential = credentials.first(where: { $0.service == credentialIdentity.serviceIdentifier.identifier }) {
+            if let matchingCredential = credentials.first(where: { $0.service.name ?? "" == credentialIdentity.serviceIdentifier.identifier }) {
                 let passwordCredential = ASPasswordCredential(
-                    user: matchingCredential.username,
-                    password: matchingCredential.password
+                    user: matchingCredential.username ?? "",
+                    password: matchingCredential.password?.value ?? ""
                 )
                 self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
             } else {

@@ -15,13 +15,13 @@ class CredentialIdentityStore {
     func saveCredentialIdentities(_ credentials: [Credential]) async throws {
         let identities = credentials.map { credential in
             let serviceIdentifier = ASCredentialServiceIdentifier(
-                identifier: credential.service,
+                identifier: credential.service.name ?? "",
                 type: .domain
             )
 
             return ASPasswordCredentialIdentity(
                 serviceIdentifier: serviceIdentifier,
-                user: credential.username,
+                user: credential.username ?? "",
                 // TODO: Use the actual record identifier when implementing the actual vault
                 recordIdentifier: UUID().uuidString
             )
@@ -37,13 +37,13 @@ class CredentialIdentityStore {
     func removeCredentialIdentities(_ credentials: [Credential]) async throws {
         let identities = credentials.map { credential in
             let serviceIdentifier = ASCredentialServiceIdentifier(
-                identifier: credential.service,
+                identifier: credential.service.name ?? "",
                 type: .domain
             )
 
             return ASPasswordCredentialIdentity(
                 serviceIdentifier: serviceIdentifier,
-                user: credential.username,
+                user: credential.username ?? "",
                 // TODO: Use the actual record identifier when implementing the actual vault
                 recordIdentifier: UUID().uuidString
             )
