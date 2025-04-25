@@ -134,7 +134,7 @@ public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
         // Ensure the output directory exists
         Directory.CreateDirectory(vaultOutputDir);
 
-        var tempVaultPath = Path.Combine(vaultOutputDir, "test-vault.encrypted.blob");
+        var tempVaultPath = Path.Combine(vaultOutputDir, "test-encrypted-vault.txt");
         await File.WriteAllTextAsync(tempVaultPath, vault.VaultBlob);
 
         // Generate the decryption key using the same method as the login page

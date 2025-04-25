@@ -2,7 +2,7 @@ import XCTest
 
 class VaultStoreTests: XCTestCase {
     var vaultStore: VaultStore!
-    let testEncryptionKey = "testEncryptionKey1234567890123456789012" // 32 bytes for AES-256
+    let testEncryptionKeyBase64 = "qXcA7cJMA9gN0gfrvlbGL8/iUcay1ihT32N8i33DR/U=" // 32 bytes for AES-256
 
     override func setUp() {
         super.setUp()
@@ -17,7 +17,12 @@ class VaultStoreTests: XCTestCase {
 
     func testDatabaseInitialization() async throws {
         // First, store the encryption key
-        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKey)
+        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
+
+        // Load and store the encrypted database
+        let encryptedDb = try loadTestDatabase()
+        // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
+        try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
 
         // Then try to initialize the database
         try vaultStore.initializeDatabase()
@@ -28,8 +33,13 @@ class VaultStoreTests: XCTestCase {
 
     func testGetAllCredentials() async throws {
         // First, store the encryption key
-        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKey)
+        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
 
+        // Load and store the encrypted database
+        let encryptedDb = try loadTestDatabase()
+        // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
+        try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
+        
         // Initialize the database
         try vaultStore.initializeDatabase()
 
@@ -48,12 +58,15 @@ class VaultStoreTests: XCTestCase {
     }
 
     // Helper method to load test database file
-    private func loadTestDatabase() throws -> Data {
-        // TODO: Add your test database file to the test bundle
-        // and load it here
-        guard let testDbPath = Bundle(for: type(of: self)).path(forResource: "test_db", ofType: "sqlite") else {
-            throw NSError(domain: "VaultStoreTests", code: 1, userInfo: [NSLocalizedDescriptionKey: "Test database file not found"])
+    private func loadTestDatabase() throws -> String {
+        // Look in the root of the test bundle Resources
+        guard let testDbPath = Bundle(for: type(of: self))
+                .path(forResource: "test-encrypted-vault", ofType: "txt")
+        else {
+            throw NSError(domain: "VaultStoreTests",
+                          code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Test database file not found"])
         }
-        return try Data(contentsOf: URL(fileURLWithPath: testDbPath))
+        return try String(contentsOfFile: testDbPath, encoding: .utf8)
     }
 }
