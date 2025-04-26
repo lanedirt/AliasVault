@@ -7,6 +7,7 @@
 
 namespace AliasVault.E2ETests.Tests.Extensions;
 
+using System.Diagnostics;
 using System.Reflection;
 using AliasVault.Cryptography.Client;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +59,7 @@ public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
             new Dictionary<string, string>
             {
                 { "service-name", "Gmail Test Account" },
+                { "service-url", "https://google.com" },
                 { "username", "test.user@gmail.com" },
                 { "first-name", "Test" },
                 { "last-name", "User" },
@@ -159,8 +161,18 @@ public class TestVaultGeneratorTests : BrowserExtensionPlaywrightTest
         Console.WriteLine($"Encryption Settings: {vault.EncryptionSettings}");
         Console.WriteLine($"Decryption Key (Base64): {decryptionKeyBase64}");
         Console.WriteLine("\nInstructions:");
-        Console.WriteLine("1. Copy the encrypted vault file from the location above");
-        Console.WriteLine("2. Use the decryption key (Base64) in your unit tests");
+        Console.WriteLine("1. Copy the updated encrypted vault file from the location above to the test project(s)");
+        Console.WriteLine("2. Copy the updated decryption key (Base64) in the unit tests (it changes each time)");
         Console.WriteLine("3. The vault contains 5 test credentials that can be used for verification");
+
+        // Open file explorer at the output location
+        if (OperatingSystem.IsMacOS())
+        {
+            Process.Start("open", vaultOutputDir);
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            Process.Start("explorer.exe", vaultOutputDir);
+        }
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 
 public struct Credential: Codable {
     public let id: UUID
-    public let aliasId: UUID
+    public let alias: Alias?
     public let service: Service
     public let username: String?
     public let notes: String?
@@ -13,7 +13,7 @@ public struct Credential: Codable {
 
     public init(
         id: UUID,
-        aliasId: UUID,
+        alias: Alias?,
         service: Service,
         username: String?,
         notes: String?,
@@ -23,7 +23,7 @@ public struct Credential: Codable {
         isDeleted: Bool
     ) {
         self.id = id
-        self.aliasId = aliasId
+        self.alias = alias
         self.service = service
         self.username = username
         self.notes = notes
@@ -81,6 +81,43 @@ public struct Password: Codable {
         self.id = id
         self.credentialId = credentialId
         self.value = value
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.isDeleted = isDeleted
+    }
+}
+
+public struct Alias: Codable, Hashable {
+    public let id: UUID
+    public let gender: String?
+    public let firstName: String?
+    public let lastName: String?
+    public let nickName: String?
+    public let birthDate: Date
+    public let email: String?
+    public let createdAt: Date
+    public let updatedAt: Date
+    public let isDeleted: Bool
+
+    public init(
+        id: UUID,
+        gender: String?,
+        firstName: String?,
+        lastName: String?,
+        nickName: String?,
+        birthDate: Date,
+        email: String?,
+        createdAt: Date,
+        updatedAt: Date,
+        isDeleted: Bool
+    ) {
+        self.id = id
+        self.gender = gender
+        self.firstName = firstName
+        self.lastName = lastName
+        self.nickName = nickName
+        self.birthDate = birthDate
+        self.email = email
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.isDeleted = isDeleted

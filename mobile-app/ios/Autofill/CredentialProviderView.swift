@@ -356,9 +356,22 @@ class CredentialProviderViewModel: ObservableObject {
             isDeleted: false
         )
 
+        let alias = Alias(
+            id: UUID(),
+            gender: nil,
+            firstName: nil,
+            lastName: nil,
+            nickName: nil,
+            birthDate: Date(),
+            email: nil,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isDeleted: false
+        )
+
         let credential = Credential(
             id: UUID(),
-            aliasId: UUID(), // This should be provided by the system
+            alias: alias,
             service: service,
             username: newUsername,
             notes: nil,

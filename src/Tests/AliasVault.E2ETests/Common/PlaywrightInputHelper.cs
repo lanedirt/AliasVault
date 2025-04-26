@@ -78,7 +78,7 @@ public class PlaywrightInputHelper(IPage page)
     /// <returns>Async task.</returns>
     public async Task FillInputFields(Dictionary<string, string>? fieldValues = null)
     {
-        var inputFields = page.Locator("input");
+        var inputFields = page.Locator("input, textarea");
         var count = await inputFields.CountAsync();
         for (int i = 0; i < count; i++)
         {

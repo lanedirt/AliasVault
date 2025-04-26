@@ -398,18 +398,28 @@ public class VaultStore {
                 lp.Value as password_value,
                 lp.CreatedAt as password_created_at,
                 lp.UpdatedAt as password_updated_at,
-                lp.IsDeleted as password_is_deleted
+                lp.IsDeleted as password_is_deleted,
+                a.Id as alias_id,
+                a.Gender as alias_gender,
+                a.FirstName as alias_first_name,
+                a.LastName as alias_last_name,
+                a.NickName as alias_nick_name,
+                a.BirthDate as alias_birth_date,
+                a.Email as alias_email,
+                a.CreatedAt as alias_created_at,
+                a.UpdatedAt as alias_updated_at,
+                a.IsDeleted as alias_is_deleted
             FROM Credentials c
             LEFT JOIN Services s ON s.Id = c.ServiceId AND s.IsDeleted = 0
             LEFT JOIN LatestPasswords lp ON lp.CredentialId = c.Id AND lp.rn = 1
+            LEFT JOIN Aliases a ON a.Id = c.AliasId AND a.IsDeleted = 0
             WHERE c.IsDeleted = 0
             ORDER BY c.CreatedAt DESC
         """
 
         var result: [Credential] = []
         for row in try db.prepare(query) {
-            guard let idString = row[0] as? String,
-                let aliasIdString = row[1] as? String else {
+            guard let idString = row[0] as? String else {
                 continue
             }
 
@@ -450,6 +460,32 @@ public class VaultStore {
                 isDeleted: serviceIsDeleted
             )
 
+            var alias: Alias? = nil
+            if let aliasIdString = row[19] as? String,
+                let aliasCreatedAtString = row[26] as? String,
+                let aliasUpdatedAtString = row[27] as? String,
+                let aliasIsDeletedInt64 = row[28] as? Int64,
+                let aliasCreatedAt = parseDateString(aliasCreatedAtString),
+                let aliasUpdatedAt = parseDateString(aliasUpdatedAtString),
+                let aliasBirthDateString = row[24] as? String,
+                let aliasBirthDate = parseDateString(aliasBirthDateString) {
+
+                let aliasIsDeleted = aliasIsDeletedInt64 == 1
+
+                alias = Alias(
+                    id: UUID(uuidString: aliasIdString)!,
+                    gender: row[20] as? String,
+                    firstName: row[21] as? String,
+                    lastName: row[22] as? String,
+                    nickName: row[23] as? String,
+                    birthDate: aliasBirthDate,
+                    email: row[25] as? String,
+                    createdAt: aliasCreatedAt,
+                    updatedAt: aliasUpdatedAt,
+                    isDeleted: aliasIsDeleted
+                )
+            }
+
             var password: Password? = nil
             if let passwordIdString = row[14] as? String,
             let passwordValue = row[15] as? String,
@@ -473,7 +509,7 @@ public class VaultStore {
 
             let credential = Credential(
                 id: UUID(uuidString: idString)!,
-                aliasId: UUID(uuidString: aliasIdString)!,
+                alias: alias,
                 service: service,
                 username: row[2] as? String,
                 notes: row[3] as? String,
