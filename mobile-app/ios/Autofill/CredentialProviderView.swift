@@ -329,7 +329,7 @@ class CredentialProviderViewModel: ObservableObject {
 
         // Note: We need to get the password from the Password model
         // This will need to be updated once we have access to the Password model
-        let passwordCredential = ASPasswordCredential(user: username, password: "")
+        let passwordCredential = ASPasswordCredential(user: username, password: credential.password?.value ?? "")
         extensionContext?.completeRequest(withSelectedCredential: passwordCredential,
                                         completionHandler: nil)
     }
@@ -346,10 +346,10 @@ class CredentialProviderViewModel: ObservableObject {
             updatedAt: Date(),
             isDeleted: false
         )
-        
+
         let password = Password(
             id: UUID(),
-            credentialId: UUID(), 
+            credentialId: UUID(),
             value: newPassword,
             createdAt: Date(),
             updatedAt: Date(),

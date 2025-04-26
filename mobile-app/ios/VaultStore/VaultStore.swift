@@ -151,9 +151,14 @@ public class VaultStore {
             let context = LAContext()
             var error: NSError?
 
-            guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-                throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
-            }
+            #if targetEnvironment(simulator)
+                print("Simulator detected, skipping biometric policy evaluation check and continuing with key retrieval from keychain")
+            #else
+                guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+                    throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face ID not available: \(error?.localizedDescription ?? "Unknown error")"])
+                }
+            #endif
+
 
             // Get the encryption key from keychain
             print("Attempting to get encryption key from keychain as Face ID is enabled as an option")
@@ -578,28 +583,6 @@ public class VaultStore {
         return db.changes
     }
 
-    // MARK: - Biometric Authentication
-
-    func authenticateWithBiometrics() async throws -> Bool {
-        let context = LAContext()
-        var error: NSError?
-
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            throw error ?? NSError(domain: "VaultStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Biometrics not available"])
-        }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                                 localizedReason: "Authenticate to access your credentials") { success, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: success)
-                }
-            }
-        }
-    }
-
     // MARK: - Auto Lock Timeout Management
     func setAutoLockTimeout(_ timeout: Int) {
         print("Setting auto-lock timeout to \(timeout) seconds")
@@ -614,7 +597,7 @@ public class VaultStore {
 
     private func parseDateString(_ dateString: String) -> Date? {
         // Date formatter for parsing SQLite datetime strings
-        var dateFormatter: DateFormatter = {
+        let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
             formatter.locale = Locale(identifier: "en_US_POSIX")
