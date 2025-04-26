@@ -27,15 +27,6 @@ public class VaultStore {
     private let authMethodsKey = "aliasvault_auth_methods"
     private let autoLockTimeoutKey = "aliasvault_auto_lock_timeout"
 
-    // Date formatter for parsing SQLite datetime strings
-    private lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        return formatter
-    }()
-
     // User config with default values
     private var enabledAuthMethods: AuthMethods = [.password, .faceID] // Default to Face ID and password
     private var autoLockTimeout: Int = 3600 // Default to 1 hour (3600 seconds)
@@ -364,7 +355,6 @@ public class VaultStore {
     }
 
     func getAllCredentials() throws -> [Credential] {
-        // After initialization attempt, check if db is still nil
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
@@ -414,24 +404,36 @@ public class VaultStore {
         var result: [Credential] = []
         for row in try db.prepare(query) {
             guard let idString = row[0] as? String,
-                  let aliasIdString = row[1] as? String,
-                  let createdAtString = row[4] as? String,
-                  let updatedAtString = row[5] as? String,
-                  let isDeleted = row[6] as? Int,
-                  let createdAt = dateFormatter.date(from: createdAtString),
-                  let updatedAt = dateFormatter.date(from: updatedAtString) else {
+                let aliasIdString = row[1] as? String else {
                 continue
             }
 
-            // Create Service object if service data exists
-            guard let serviceId = row[7] as? String,
-                  let serviceCreatedAtString = row[11] as? String,
-                  let serviceUpdatedAtString = row[12] as? String,
-                  let serviceIsDeleted = row[13] as? Int,
-                  let serviceCreatedAt = dateFormatter.date(from: serviceCreatedAtString),
-                  let serviceUpdatedAt = dateFormatter.date(from: serviceUpdatedAtString) else {
+            let createdAtString = row[4] as? String
+            let updatedAtString = row[5] as? String
+
+            guard let createdAtString = createdAtString,
+                let updatedAtString = updatedAtString else {
                 continue
             }
+
+            guard let createdAt = parseDateString(createdAtString),
+                let updatedAt = parseDateString(updatedAtString) else {
+                continue
+            }
+
+            guard let isDeletedInt64 = row[6] as? Int64 else { continue }
+            let isDeleted = isDeletedInt64 == 1
+
+            guard let serviceId = row[7] as? String,
+                let serviceCreatedAtString = row[11] as? String,
+                let serviceUpdatedAtString = row[12] as? String,
+                let serviceIsDeletedInt64 = row[13] as? Int64,
+                let serviceCreatedAt = parseDateString(serviceCreatedAtString),
+                let serviceUpdatedAt = parseDateString(serviceUpdatedAtString) else {
+                continue
+            }
+
+            let serviceIsDeleted = serviceIsDeletedInt64 == 1
 
             let service = Service(
                 id: UUID(uuidString: serviceId)!,
@@ -440,25 +442,27 @@ public class VaultStore {
                 logo: row[10] as? Data,
                 createdAt: serviceCreatedAt,
                 updatedAt: serviceUpdatedAt,
-                isDeleted: serviceIsDeleted == 1
+                isDeleted: serviceIsDeleted
             )
 
-            // Create Password object if password data exists
             var password: Password? = nil
             if let passwordIdString = row[14] as? String,
-               let passwordValue = row[15] as? String,
-               let passwordCreatedAtString = row[16] as? String,
-               let passwordUpdatedAtString = row[17] as? String,
-               let passwordIsDeleted = row[18] as? Int,
-               let passwordCreatedAt = dateFormatter.date(from: passwordCreatedAtString),
-               let passwordUpdatedAt = dateFormatter.date(from: passwordUpdatedAtString) {
+            let passwordValue = row[15] as? String,
+            let passwordCreatedAtString = row[16] as? String,
+            let passwordUpdatedAtString = row[17] as? String,
+            let passwordIsDeletedInt64 = row[18] as? Int64,
+            let passwordCreatedAt = parseDateString(passwordCreatedAtString),
+            let passwordUpdatedAt = parseDateString(passwordUpdatedAtString) {
+
+                let passwordIsDeleted = passwordIsDeletedInt64 == 1
+
                 password = Password(
                     id: UUID(uuidString: passwordIdString)!,
                     credentialId: UUID(uuidString: idString)!,
                     value: passwordValue,
                     createdAt: passwordCreatedAt,
                     updatedAt: passwordUpdatedAt,
-                    isDeleted: passwordIsDeleted == 1
+                    isDeleted: passwordIsDeleted
                 )
             }
 
@@ -471,7 +475,7 @@ public class VaultStore {
                 password: password,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                isDeleted: isDeleted == 1
+                isDeleted: isDeleted
             )
             result.append(credential)
         }
@@ -606,5 +610,34 @@ public class VaultStore {
 
     func getAutoLockTimeout() -> Int {
         return autoLockTimeout
+    }
+
+    private func parseDateString(_ dateString: String) -> Date? {
+        // Date formatter for parsing SQLite datetime strings
+        var dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            return formatter
+        }()
+
+        // Try parsing with milliseconds first
+        if let dateWithMillis = dateFormatter.date(from: dateString) {
+            return dateWithMillis
+        }
+
+        // Try without milliseconds
+        let fallbackFormatter = DateFormatter()
+        fallbackFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        fallbackFormatter.locale = Locale(identifier: "en_US_POSIX")
+        fallbackFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+        if let dateWithoutMillis = fallbackFormatter.date(from: dateString) {
+            return dateWithoutMillis
+        }
+
+        // If parsing still fails, return nil or fallback value
+        return nil
     }
 }
