@@ -454,7 +454,7 @@ public class VaultStore {
                 id: UUID(uuidString: serviceId)!,
                 name: row[8] as? String,
                 url: row[9] as? String,
-                logo: row[10] as? Data,
+                logo: (row[10] as? SQLite.Blob).map { Data($0.bytes) },
                 createdAt: serviceCreatedAt,
                 updatedAt: serviceUpdatedAt,
                 isDeleted: serviceIsDeleted
