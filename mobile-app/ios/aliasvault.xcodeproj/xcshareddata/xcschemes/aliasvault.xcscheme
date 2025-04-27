@@ -29,12 +29,13 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "AliasVaultTests.xctest"
-               BlueprintName = "AliasVaultTests"
+               BlueprintIdentifier = "CEE480902DBE86DD00F4A367"
+               BuildableName = "VaultStoreKitTests.xctest"
+               BlueprintName = "VaultStoreKitTests"
                ReferencedContainer = "container:AliasVault.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -43,9 +44,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CE9A5BAF2DBBB47200CB0A4C"
-               BuildableName = "VaultStoreTests.xctest"
-               BlueprintName = "VaultStoreTests"
+               BlueprintIdentifier = "CEE481732DBE8AC800F4A367"
+               BuildableName = "VaultUITests.xctest"
+               BlueprintName = "VaultUITests"
                ReferencedContainer = "container:AliasVault.xcodeproj">
             </BuildableReference>
          </TestableReference>

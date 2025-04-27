@@ -4,6 +4,7 @@ import SQLite
 import LocalAuthentication
 import CryptoKit
 import CommonCrypto
+import VaultModels
 
 /**
  * This class is used to store and retrieve the encrypted AliasVault database and encryption key.
@@ -90,7 +91,7 @@ public class VaultStore {
     }
 
     // MARK: - Auth Methods Management
-    func setAuthMethods(_ methods: AuthMethods) throws {
+    public func setAuthMethods(_ methods: AuthMethods) throws {
         enabledAuthMethods = methods
         UserDefaults.standard.set(methods.rawValue, forKey: authMethodsKey)
         UserDefaults.standard.synchronize()
@@ -112,11 +113,11 @@ public class VaultStore {
         }
     }
 
-    func getAuthMethods() -> AuthMethods {
+    public func getAuthMethods() -> AuthMethods {
         return enabledAuthMethods
     }
 
-    func getAuthMethodsAsStrings() -> [String] {
+    public func getAuthMethodsAsStrings() -> [String] {
         var methods: [String] = []
         if enabledAuthMethods.contains(.faceID) {
             methods.append("faceid")
@@ -128,14 +129,14 @@ public class VaultStore {
     }
 
     // MARK: - Vault Status
-    func isVaultInitialized() -> Bool {
+    public func isVaultInitialized() -> Bool {
         // Check if encrypted database file exists
         let hasDatabase = FileManager.default.fileExists(atPath: getEncryptedDbPath().path)
 
         return hasDatabase
     }
 
-    func isVaultUnlocked() -> Bool {
+    public func isVaultUnlocked() -> Bool {
         // Check if encryption key is in memory
         return encryptionKey != nil
     }
@@ -189,7 +190,7 @@ public class VaultStore {
         throw NSError(domain: "VaultStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "No encryption key found in memory"])
     }
 
-    func storeEncryptionKey(base64Key: String) throws {
+    public func storeEncryptionKey(base64Key: String) throws {
         // Convert base64 string to bytes
         guard let keyData = Data(base64Encoded: base64Key) else {
             throw NSError(domain: "VaultStore", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid base64 key"])
@@ -237,7 +238,7 @@ public class VaultStore {
     // and metadata in UserDefaults
     // TODO: refactor metadata save and retrieve calls to separate calls for better clarity throughtout
     // full call chain?
-    func storeEncryptedDatabase(_ base64EncryptedDb: String, metadata: String) throws {
+    public func storeEncryptedDatabase(_ base64EncryptedDb: String, metadata: String) throws {
         // Store the encrypted database (base64 encoded) in the app's documents directory
         try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
 
@@ -269,7 +270,7 @@ public class VaultStore {
      *
      * The in-memory database is used for all queries and updates to the database.
      */
-    func initializeDatabase() throws {
+    public func initializeDatabase() throws {
         // Get the encrypted database
         guard let encryptedDbBase64 = getEncryptedDatabase() else {
             throw NSError(domain: "VaultStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
@@ -359,7 +360,7 @@ public class VaultStore {
         ))
     }
 
-    func getAllCredentials() throws -> [Credential] {
+    public func getAllCredentials() throws -> [Credential] {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
@@ -527,7 +528,7 @@ public class VaultStore {
     }
 
     // Clears cached encryption key and encrypted database to force re-initialization on next access.
-    func clearCache() {
+    public func clearCache() {
         print("Clearing cache - removing encryption key and decrypted database from memory")
 
         // Clear the cached encryption key
@@ -538,7 +539,7 @@ public class VaultStore {
     }
 
     // Clears cached and saved encryption key and encrypted database to force re-initialization on next access.
-    func clearVault() {
+    public func clearVault() {
         print("Clearing vault - removing all stored data")
 
         // Remove the encryption key from keychain with proper error handling
@@ -571,7 +572,7 @@ public class VaultStore {
 
     // MARK: - Query Execution
 
-    func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
+    public func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
@@ -609,7 +610,7 @@ public class VaultStore {
         return results
     }
 
-    func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
+    public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
@@ -620,14 +621,14 @@ public class VaultStore {
     }
 
     // MARK: - Auto Lock Timeout Management
-    func setAutoLockTimeout(_ timeout: Int) {
+    public func setAutoLockTimeout(_ timeout: Int) {
         print("Setting auto-lock timeout to \(timeout) seconds")
         autoLockTimeout = timeout
         UserDefaults.standard.set(timeout, forKey: autoLockTimeoutKey)
         UserDefaults.standard.synchronize()
     }
 
-    func getAutoLockTimeout() -> Int {
+    public func getAutoLockTimeout() -> Int {
         return autoLockTimeout
     }
 

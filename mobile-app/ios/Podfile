@@ -17,6 +17,7 @@ target 'AliasVault' do
   use_expo_modules!
   pod 'KeychainAccess', '~> 4.2.2'
   pod 'SQLite.swift', '~> 0.14.0'
+  pod 'Macaw', '~> 0.9.7'
   pod 'ExpoModulesCore', :path => '../node_modules/expo-modules-core'
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
@@ -55,6 +56,13 @@ target 'AliasVault' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
+    # Make sure preview works for certain imports like "Macaw", without this SwiftUI preview will fail
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+      end
+    end
+
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results
@@ -74,7 +82,20 @@ target 'Autofill' do
   pod 'Macaw', '~> 0.9.7'
 end
 
-target 'VaultStoreTests' do
+target 'VaultStoreKit' do
   pod 'KeychainAccess', '~> 4.2.2'
   pod 'SQLite.swift', '~> 0.14.0'
+end
+
+target 'VaultStoreKitTests' do
+  pod 'KeychainAccess', '~> 4.2.2'
+  pod 'SQLite.swift', '~> 0.14.0'
+end
+
+target 'VaultUI' do
+  pod 'Macaw', '~> 0.9.7'
+end
+
+target 'VaultUITests' do
+  pod 'Macaw', '~> 0.9.7'
 end

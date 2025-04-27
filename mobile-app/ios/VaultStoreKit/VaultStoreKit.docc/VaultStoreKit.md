@@ -1,6 +1,6 @@
-# VaultStore
+# ``VaultStoreKit``
 
-The VaultStore is the core native iOS module for AliasVault that handles all critical data operations. This module serves as the deepest level of data management in the iOS app, providing secure and efficient access to sensitive information.
+The VaultStoreKit is the core native iOS module for AliasVault that handles all critical data operations. This module serves as the deepest level of data management in the iOS app, providing secure and efficient access to sensitive information.
 
 ## Key Components
 
@@ -19,4 +19,3 @@ The VaultStore is accessed by the React Native layer through Turbo Modules, whic
 ## Integration
 
 The module is designed to be accessed exclusively through the Turbo Module interface, ensuring proper encapsulation of sensitive operations while maintaining the benefits of cross-platform development.
-

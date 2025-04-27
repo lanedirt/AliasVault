@@ -1,6 +1,8 @@
 import Foundation
 import SQLite
 import LocalAuthentication
+import VaultStoreKit
+import VaultModels
 
 /**
  * This class is used as a bridge to allow React Native to interact with the VaultStore class.

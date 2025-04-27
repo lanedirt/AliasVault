@@ -7,6 +7,9 @@
 
 import AuthenticationServices
 import SwiftUI
+import VaultStoreKit
+import VaultUI
+import VaultModels
 
 /**
  * This class is the main entry point for the autofill extension.
@@ -20,11 +23,33 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let viewModel = CredentialProviderViewModel(extensionContext: extensionContext)
-        let hostingController = UIHostingController(
-            rootView: CredentialProviderView(viewModel: viewModel)
+        // Create the ViewModel with INJECTED behaviors
+        let viewModel = CredentialProviderViewModel(
+          loader: {
+              try VaultStore.shared.initializeDatabase()
+              return try VaultStore.shared.getAllCredentials()
+          },
+          selectionHandler: { [weak self] credential in
+              guard let self = self else { return }
+              let passwordCredential = ASPasswordCredential(
+                  user: credential.username ?? "",
+                  password: credential.password?.value ?? ""
+              )
+              self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
+          },
+          cancelHandler: { [weak self] in
+              guard let self = self else { return }
+              self.extensionContext.cancelRequest(withError: NSError(
+                  domain: ASExtensionErrorDomain,
+                  code: ASExtensionError.userCanceled.rawValue
+              ))
+          }
         )
-
+        
+        let hostingController = UIHostingController(
+          rootView: CredentialProviderView(viewModel: viewModel)
+        )
+        
         addChild(hostingController)
         view.addSubview(hostingController.view)
 

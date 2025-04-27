@@ -1,4 +1,5 @@
 import AuthenticationServices
+import VaultModels
 
 /**
  * Native iOS implementation of the CredentialIdentityStore protocol.

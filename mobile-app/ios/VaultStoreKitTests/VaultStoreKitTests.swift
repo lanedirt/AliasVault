@@ -1,6 +1,14 @@
-import XCTest
+//
+//  VaultStoreKitTests.swift
+//  VaultStoreKitTests
+//
+//  Created by Leendert de Borst on 27/04/2025.
+//
 
-class VaultStoreTests: XCTestCase {
+import XCTest
+@testable import VaultStoreKit
+
+final class VaultStoreKitTests: XCTestCase {
     var vaultStore: VaultStore!
     let testEncryptionKeyBase64 = "/9So3C83JLDIfjsF0VQOc4rz1uAFtIseW7yrUuztAD0=" // 32 bytes for AES-256
 
@@ -102,7 +110,7 @@ class VaultStoreTests: XCTestCase {
         guard let testDbPath = Bundle(for: type(of: self))
                 .path(forResource: "test-encrypted-vault", ofType: "txt")
         else {
-            throw NSError(domain: "VaultStoreTests",
+            throw NSError(domain: "VaultStoreKitTests",
                           code: 1,
                           userInfo: [NSLocalizedDescriptionKey: "Test database file not found"])
         }
