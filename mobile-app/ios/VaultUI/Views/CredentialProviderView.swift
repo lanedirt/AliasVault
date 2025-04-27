@@ -215,27 +215,43 @@ struct AddCredentialView: View {
 
 struct SearchBar: View {
     @Binding var text: String
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
+        ZStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+                    .padding(.leading, 8)
 
-            TextField("Search credentials...", text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
+                TextField("Search credentials...", text: $text)
+                    .autocapitalization(.none)
+                    .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+                    .padding(.leading, 4)
+                    .padding(.trailing, 28) // Space for clear button
+            }
+            .padding(8)
+            .padding(.vertical, 2)
+            .background(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.accentBackground)
+            .cornerRadius(8)
 
             if !text.isEmpty {
-                Button(action: {
-                    text = ""
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        text = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+                    }
+                    .padding(.trailing, 8)
                 }
             }
         }
     }
 }
+
+
 
 // MARK: - Preview Helpers
 extension Service {
