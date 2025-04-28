@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDb } from './DbContext';
-import { AppState } from 'react-native';
+import { AppState, Platform, Linking } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -28,7 +28,12 @@ type AuthContextType = {
   getAuthMethodDisplay: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
+  // iOS Autofill methods
+  shouldShowIosAutofillReminder: boolean;
+  markIosAutofillConfigured: () => Promise<void>;
 }
+
+const IOS_AUTOFILL_CONFIGURED_KEY = 'ios_autofill_configured';
 
 /**
  * Auth context.
@@ -43,6 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
+  const [shouldShowIosAutofillReminder, setShouldShowIosAutofillReminder] = useState(false);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
   const pathname = usePathname();
@@ -239,6 +245,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isVaultUnlocked]);
 
+  /**
+   * Load iOS Autofill state from storage
+   */
+  const loadIosAutofillState = useCallback(async () => {
+    if (Platform.OS !== 'ios') {
+      setShouldShowIosAutofillReminder(false);
+      return;
+    }
+
+    const configured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
+    setShouldShowIosAutofillReminder(configured !== 'true');
+  }, []);
+
+  /**
+   * Mark iOS Autofill as configured
+   */
+  const markIosAutofillConfigured = useCallback(async () => {
+    const configured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
+    await AsyncStorage.setItem(IOS_AUTOFILL_CONFIGURED_KEY, configured === 'true' ? 'false' : 'true');
+    setShouldShowIosAutofillReminder(configured !== 'true');
+  }, []);
+
+  // Load iOS Autofill state on mount
+  useEffect(() => {
+    loadIosAutofillState();
+  }, [loadIosAutofillState]);
+
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
@@ -255,7 +288,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAuthMethodDisplay,
     getAutoLockTimeout,
     setAutoLockTimeout,
-  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout]);
+    // iOS Autofill methods
+    shouldShowIosAutofillReminder,
+    markIosAutofillConfigured,
+  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, shouldShowIosAutofillReminder, markIosAutofillConfigured]);
 
   return (
     <AuthContext.Provider value={contextValue}>

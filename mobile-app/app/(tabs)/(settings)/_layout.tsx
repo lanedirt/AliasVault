@@ -13,6 +13,16 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
+        name="ios-autofill"
+        options={{
+          title: 'iOS Autofill',
+          headerBackTitle: 'Settings',
+          headerStyle: {
+            backgroundColor: colors.headerBackground,
+          },
+        }}
+      />
+      <Stack.Screen
         name="vault-unlock"
         options={{
           title: 'Vault Unlock Method',

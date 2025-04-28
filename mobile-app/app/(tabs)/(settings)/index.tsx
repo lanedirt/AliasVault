@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useWebApi } from '@/context/WebApiContext';
@@ -15,12 +15,13 @@ import { useRef, useState, useEffect } from 'react';
 export default function SettingsScreen() {
   const webApi = useWebApi();
   const colors = useColors();
-  const { username, getAuthMethodDisplay } = useAuth();
+  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
+
   useEffect(() => {
     const loadAutoLockDisplay = async () => {
       const autoLockTimeout = await getAutoLockTimeout();
@@ -58,6 +59,10 @@ export default function SettingsScreen() {
 
   const handleAutoLockPress = () => {
     router.push('/(tabs)/(settings)/auto-lock');
+  };
+
+  const handleIosAutofillPress = () => {
+    router.push('/(tabs)/(settings)/ios-autofill');
   };
 
   const styles = StyleSheet.create({
@@ -104,7 +109,7 @@ export default function SettingsScreen() {
     separator: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.accentBorder,
-      marginLeft: 52, // Icon width (24) + marginRight (12) + paddingHorizontal (16)
+      marginLeft: 52,
     },
     settingItemText: {
       flex: 1,
@@ -115,6 +120,22 @@ export default function SettingsScreen() {
       fontSize: 16,
       color: colors.textMuted,
       marginRight: 8,
+    },
+    settingItemBadge: {
+      backgroundColor: colors.primary,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 8,
+    },
+    settingItemBadgeText: {
+      color: '#FFFFFF',
+      fontSize: 10,
+      fontWeight: '600',
+      textAlign: 'center',
+      lineHeight: 16,
     },
     userInfoContainer: {
       flexDirection: 'row',
@@ -188,6 +209,27 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
+            {Platform.OS === 'ios' && (
+              <>
+                <TouchableOpacity
+                  style={styles.settingItem}
+                  onPress={handleIosAutofillPress}
+                >
+                  <View style={styles.settingItemIcon}>
+                    <Ionicons name="key-outline" size={20} color={colors.text} />
+                  </View>
+                  <View style={[styles.settingItemContent]}>
+                    <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
+                    {shouldShowIosAutofillReminder && (
+                      <View style={styles.settingItemBadge}>
+                        <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.separator} />
+              </>
+            )}
             <TouchableOpacity
               style={styles.settingItem}
               onPress={handleVaultUnlockPress}
