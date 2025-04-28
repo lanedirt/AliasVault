@@ -13,6 +13,16 @@ export default function CredentialsLayout() {
         }}
       />
       <Stack.Screen
+        name="add-edit"
+        options={{
+          title: 'Add Credential',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: colors.headerBackground,
+          },
+        }}
+      />
+      <Stack.Screen
         name="[id]"
         options={{
           title: 'Credential Details',

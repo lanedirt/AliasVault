@@ -31,7 +31,7 @@ export default function CredentialsScreen() {
   const headerButtons = [{
     icon: 'add' as const,
     position: 'right' as const,
-    onPress: () => router.push('/(modals)/add-credential')
+    onPress: () => router.push('/(tabs)/(credentials)/add-edit')
   }];
 
   useEffect(() => {
