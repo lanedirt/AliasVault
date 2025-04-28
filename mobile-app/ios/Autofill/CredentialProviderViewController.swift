@@ -33,11 +33,11 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
               await self.registerCredentialIdentities(credentials: credentials)
               return credentials
           },
-          selectionHandler: { [weak self] credential in
+          selectionHandler: { [weak self] identifier, password in
               guard let self = self else { return }
               let passwordCredential = ASPasswordCredential(
-                  user: credential.username ?? "",
-                  password: credential.password?.value ?? ""
+                  user: identifier,
+                  password: password
               )
               self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
           },
@@ -49,13 +49,13 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
               ))
           }
         )
-        
+
         self.viewModel = viewModel
-        
+
         let hostingController = UIHostingController(
           rootView: CredentialProviderView(viewModel: viewModel)
         )
-        
+
         addChild(hostingController)
         view.addSubview(hostingController.view)
 
@@ -87,12 +87,14 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         do {
             let credentials = try VaultStore.shared.getAllCredentials()
-            
+
             if let matchingCredential = credentials.first(where: { credential in
                 return credential.id.uuidString == credentialIdentity.recordIdentifier
             }) {
+                // Use the identifier that matches the credential identity
+                let identifier = credentialIdentity.user
                 let passwordCredential = ASPasswordCredential(
-                    user: matchingCredential.username ?? "",
+                    user: identifier,
                     password: matchingCredential.password?.value ?? ""
                 )
                 self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
@@ -114,7 +116,7 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
             )
         }
     }
-    
+
     /**
      * This registers all known AliasVault credentials into iOS native credential storage, which iOS can then use to suggest autofill credentials when a user
      * focuses an input field on a login form. These suggestions will then be shown above the iOS keyboard, which saves the user one step.

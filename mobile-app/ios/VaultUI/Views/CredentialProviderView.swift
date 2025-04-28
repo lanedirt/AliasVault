@@ -106,6 +106,33 @@ public struct CredentialProviderView: View {
             .sheet(isPresented: $viewModel.showAddCredential) {
                 AddCredentialView(viewModel: viewModel)
             }
+            .actionSheet(isPresented: $viewModel.showSelectionOptions) {
+                guard let credential = viewModel.selectedCredential else {
+                    return ActionSheet(title: Text("Select Login Method"), message: Text("No credential selected."), buttons: [.cancel()])
+                }
+
+                var buttons: [ActionSheet.Button] = []
+
+                if let username = credential.username, !username.isEmpty {
+                    buttons.append(.default(Text("Username: \(username)")) {
+                        viewModel.selectUsernamePassword()
+                    })
+                }
+
+                if let email = credential.alias?.email, !email.isEmpty {
+                    buttons.append(.default(Text("Email: \(email)")) {
+                        viewModel.selectEmailPassword()
+                    })
+                }
+
+                buttons.append(.cancel())
+
+                return ActionSheet(
+                    title: Text("Select Login Method"),
+                    message: Text("Choose how you want to log in"),
+                    buttons: buttons
+                )
+            }
             .alert("Error", isPresented: $viewModel.showError) {
                 Button("OK") {
                     viewModel.dismissError()
@@ -134,18 +161,20 @@ public class CredentialProviderViewModel: ObservableObject {
     @Published var showError = false
     @Published var errorMessage = ""
     @Published var showAddCredential = false
+    @Published var showSelectionOptions = false
+    @Published var selectedCredential: Credential?
 
     @Published var newUsername = ""
     @Published var newPassword = ""
     @Published var newService = ""
 
     private let loader: () async throws -> [Credential]
-    private let selectionHandler: (Credential) -> Void
+    private let selectionHandler: (String, String) -> Void
     private let cancelHandler: () -> Void
 
     public init(
         loader: @escaping () async throws -> [Credential],
-        selectionHandler: @escaping (Credential) -> Void,
+        selectionHandler: @escaping (String, String) -> Void,
         cancelHandler: @escaping () -> Void
     ) {
         self.loader = loader
@@ -245,7 +274,32 @@ public class CredentialProviderViewModel: ObservableObject {
     }
 
     func selectCredential(_ credential: Credential) {
-        selectionHandler(credential)
+        selectedCredential = credential
+
+        // If we only have one option, use it directly
+        let username = credential.username?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = credential.alias?.email?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if (username?.isEmpty ?? true) || (email?.isEmpty ?? true) {
+            let identifier = username?.isEmpty == false ? username! : (email ?? "")
+            selectionHandler(identifier, credential.password?.value ?? "")
+            return
+        }
+
+        // If we have both options, show selection sheet
+        showSelectionOptions = true
+    }
+
+    func selectUsernamePassword() {
+        guard let credential = selectedCredential else { return }
+        selectionHandler(credential.username ?? "", credential.password?.value ?? "")
+        showSelectionOptions = false
+    }
+
+    func selectEmailPassword() {
+        guard let credential = selectedCredential else { return }
+        selectionHandler(credential.alias?.email ?? "", credential.password?.value ?? "")
+        showSelectionOptions = false
     }
 
     func cancel() {
@@ -464,8 +518,8 @@ class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
                 try? await Task.sleep(nanoseconds: 1_000_000_000) // Simulate network delay
                 return previewCredentials
             },
-            selectionHandler: { credential in
-                print("Selected credential: \(credential)")
+            selectionHandler: { identifier, password in
+                print("Selected credential: \(identifier) with password: \(password)")
             },
             cancelHandler: {
                 print("Canceled")
