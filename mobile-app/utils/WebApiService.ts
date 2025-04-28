@@ -101,15 +101,15 @@ export class WebApiService {
     const baseUrl = await this.getBaseUrl();
     const url = baseUrl + endpoint;
     const headers = new Headers(options.headers ?? {});
-  
+
     // Add client version header
     headers.set('X-AliasVault-Client', `${AppInfo.CLIENT_NAME}-${AppInfo.VERSION}`);
-  
+
     const requestOptions: RequestInit = {
       ...options,
       headers,
     };
-  
+
     try {
       const response = await fetch(url, requestOptions);
       return response;

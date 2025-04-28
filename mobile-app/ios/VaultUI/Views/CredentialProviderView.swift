@@ -51,7 +51,10 @@ public struct CredentialProviderView: View {
                                     if !viewModel.isChoosingTextToInsert {
                                         VStack(spacing: 12) {
                                             Button(action: {
-                                                viewModel.showAddCredential = true
+                                                if let url = URL(string: "net.aliasvault.app://addCredential?service=example.com") {
+                                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                                                }
+                                                //viewModel.showAddCredential = true
                                             }) {
                                                 HStack {
                                                     Image(systemName: "plus.circle.fill")
@@ -98,7 +101,10 @@ public struct CredentialProviderView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button("Add") {
-                            viewModel.showAddCredential = true
+                            if let url = URL(string: "net.aliasvault.app://addCredential?service=example.com") {
+                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            }
+                            //viewModel.showAddCredential = true
                         }
                         .foregroundColor(ColorConstants.Light.primary)
                     }
