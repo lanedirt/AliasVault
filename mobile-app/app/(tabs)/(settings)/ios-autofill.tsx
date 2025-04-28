@@ -12,6 +12,7 @@ export default function IosAutofillScreen() {
   const handleConfigurePress = async () => {
     await markIosAutofillConfigured();
     await Linking.openURL('App-Prefs:root');
+    router.back();
   };
 
   const handleAlreadyConfigured = async () => {

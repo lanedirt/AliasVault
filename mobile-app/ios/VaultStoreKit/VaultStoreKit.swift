@@ -278,10 +278,34 @@ public class VaultStore {
 
         let encryptedDbData = Data(base64Encoded: encryptedDbBase64)!
 
-        // Get the encryption key
-        let encryptionKey = try getEncryptionKey()
-        let decryptedDbBase64 = try decrypt(data: encryptedDbData, key: encryptionKey)
+        // First attempt with current encryption key
+        do {
+            let encryptionKey = try getEncryptionKey()
+            let decryptedDbBase64 = try decrypt(data: encryptedDbData, key: encryptionKey)
+            try setupDatabaseWithDecryptedData(decryptedDbBase64)
+        } catch {
+            // If the first attempt fails, clear the cached encryption key and try again.
+            // This can be necessary if the user has changed their password or logged in with
+            // a different account while the autofill extension was still running and had its
+            // previous encryption key cached in memory.
+            print("First decryption attempt failed: \(error)")
 
+            // Clear the cached encryption key and try again
+            encryptionKey = nil
+
+            do {
+                // Second attempt with fresh encryption key
+                let freshEncryptionKey = try getEncryptionKey()
+                let decryptedDbBase64 = try decrypt(data: encryptedDbData, key: freshEncryptionKey)
+                try setupDatabaseWithDecryptedData(decryptedDbBase64)
+            } catch {
+                print("Second decryption attempt failed: \(error)")
+                throw NSError(domain: "VaultStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to decrypt database after retry: \(error.localizedDescription)"])
+            }
+        }
+    }
+
+    private func setupDatabaseWithDecryptedData(_ decryptedDbBase64: Data) throws {
         // The decrypted data is still base64 encoded, so decode it
         guard let decryptedDbData = Data(base64Encoded: decryptedDbBase64) else {
             throw NSError(domain: "VaultStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to decode base64 data after decryption"])
@@ -633,31 +657,52 @@ public class VaultStore {
     }
 
     private func parseDateString(_ dateString: String) -> Date? {
-        // Date formatter for parsing SQLite datetime strings
-        let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = TimeZone(secondsFromGMT: 0)
-            return formatter
-        }()
+        // Static date formatters for performance
+        struct StaticFormatters {
+            static let formatterWithMillis: DateFormatter = {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+                formatter.locale = Locale(identifier: "en_US_POSIX")
+                formatter.timeZone = TimeZone(secondsFromGMT: 0)
+                return formatter
+            }()
 
-        // Try parsing with milliseconds first
-        if let dateWithMillis = dateFormatter.date(from: dateString) {
+            static let formatterWithoutMillis: DateFormatter = {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                formatter.locale = Locale(identifier: "en_US_POSIX")
+                formatter.timeZone = TimeZone(secondsFromGMT: 0)
+                return formatter
+            }()
+
+            static let isoFormatter: ISO8601DateFormatter = {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                formatter.timeZone = TimeZone(secondsFromGMT: 0)
+                return formatter
+            }()
+        }
+
+        let cleanedDateString = dateString.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // If ends with 'Z' or contains timezone, attempt ISO8601 parsing
+        if cleanedDateString.contains("Z") || cleanedDateString.contains("+") || cleanedDateString.contains("-") {
+            if let isoDate = StaticFormatters.isoFormatter.date(from: cleanedDateString) {
+                return isoDate
+            }
+        }
+
+        // Try parsing with milliseconds
+        if let dateWithMillis = StaticFormatters.formatterWithMillis.date(from: cleanedDateString) {
             return dateWithMillis
         }
 
-        // Try without milliseconds
-        let fallbackFormatter = DateFormatter()
-        fallbackFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        fallbackFormatter.locale = Locale(identifier: "en_US_POSIX")
-        fallbackFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-
-        if let dateWithoutMillis = fallbackFormatter.date(from: dateString) {
+        // Try parsing without milliseconds
+        if let dateWithoutMillis = StaticFormatters.formatterWithoutMillis.date(from: cleanedDateString) {
             return dateWithoutMillis
         }
 
-        // If parsing still fails, return nil or fallback value
+        // If parsing still fails, return nil
         return nil
     }
 }

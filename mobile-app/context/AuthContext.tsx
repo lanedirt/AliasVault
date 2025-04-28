@@ -262,9 +262,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Mark iOS Autofill as configured
    */
   const markIosAutofillConfigured = useCallback(async () => {
-    const configured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
-    await AsyncStorage.setItem(IOS_AUTOFILL_CONFIGURED_KEY, configured === 'true' ? 'false' : 'true');
-    setShouldShowIosAutofillReminder(configured !== 'true');
+    await AsyncStorage.setItem(IOS_AUTOFILL_CONFIGURED_KEY, 'true');
+    setShouldShowIosAutofillReminder(false);
   }, []);
 
   // Load iOS Autofill state on mount
