@@ -21,6 +21,7 @@ import VaultModels
  */
 class CredentialProviderViewController: ASCredentialProviderViewController {
     private var viewModel: CredentialProviderViewModel?
+    private var isChoosingTextToInsert = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,11 +36,25 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
           },
           selectionHandler: { [weak self] identifier, password in
               guard let self = self else { return }
-              let passwordCredential = ASPasswordCredential(
-                  user: identifier,
-                  password: password
-              )
-              self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
+              if self.isChoosingTextToInsert {
+                  // For text insertion, insert only the selected text
+                  if #available(iOS 18.0, *) {
+                      self.extensionContext.completeRequest(
+                        withTextToInsert: identifier,
+                        completionHandler: nil
+                      )
+                  } else {
+                      // Fallback on earlier versions: do nothing as this feature
+                      // is not supported and we should not reach this point?
+                  }
+              } else {
+                  // For regular credential selection
+                  let passwordCredential = ASPasswordCredential(
+                      user: identifier,
+                      password: password
+                  )
+                  self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
+              }
           },
           cancelHandler: { [weak self] in
               guard let self = self else { return }
@@ -81,7 +96,8 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     }
 
     override func prepareInterfaceForUserChoosingTextToInsert() {
-        // This is handled in the SwiftUI view's onAppear
+        isChoosingTextToInsert = true
+        viewModel?.isChoosingTextToInsert = true
     }
 
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {

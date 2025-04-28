@@ -48,22 +48,24 @@ public struct CredentialProviderView: View {
                                         .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
                                         .multilineTextAlignment(.center)
 
-                                    VStack(spacing: 12) {
-                                        Button(action: {
-                                            viewModel.showAddCredential = true
-                                        }) {
-                                            HStack {
-                                                Image(systemName: "plus.circle.fill")
-                                                Text("Create New Credential")
+                                    if !viewModel.isChoosingTextToInsert {
+                                        VStack(spacing: 12) {
+                                            Button(action: {
+                                                viewModel.showAddCredential = true
+                                            }) {
+                                                HStack {
+                                                    Image(systemName: "plus.circle.fill")
+                                                    Text("Create New Credential")
+                                                }
+                                                .padding()
+                                                .frame(maxWidth: .infinity)
+                                                .background(ColorConstants.Light.primary)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(8)
                                             }
-                                            .padding()
-                                            .frame(maxWidth: .infinity)
-                                            .background(ColorConstants.Light.primary)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(8)
                                         }
+                                        .padding(.horizontal, 40)
                                     }
-                                    .padding(.horizontal, 40)
                                 }
                                 .padding(.top, 60)
                             } else {
@@ -84,7 +86,7 @@ public struct CredentialProviderView: View {
                     }
                 }
             }
-            .navigationTitle("Select Credential")
+            .navigationTitle(viewModel.isChoosingTextToInsert ? "Select Text to Insert" : "Select Credential")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -93,7 +95,6 @@ public struct CredentialProviderView: View {
                     }
                     .foregroundColor(ColorConstants.Light.primary)
                 }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button("Add") {
@@ -107,29 +108,51 @@ public struct CredentialProviderView: View {
                 AddCredentialView(viewModel: viewModel)
             }
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
+                // Define all text strings
+                
+                
                 guard let credential = viewModel.selectedCredential else {
                     return ActionSheet(title: Text("Select Login Method"), message: Text("No credential selected."), buttons: [.cancel()])
                 }
 
                 var buttons: [ActionSheet.Button] = []
+                
+                if viewModel.isChoosingTextToInsert {
+                    if let username = credential.username, !username.isEmpty {
+                        buttons.append(.default(Text("Username: \(username)")) {
+                            viewModel.selectUsername()
+                        })
+                    }
 
-                if let username = credential.username, !username.isEmpty {
-                    buttons.append(.default(Text("Username: \(username)")) {
-                        viewModel.selectUsernamePassword()
+                    if let email = credential.alias?.email, !email.isEmpty {
+                        buttons.append(.default(Text("Email: \(email)")) {
+                            viewModel.selectEmail()
+                        })
+                    }
+                    
+                    buttons.append(.default(Text("Password")) {
+                        viewModel.selectPassword()
                     })
                 }
+                else {
+                    if let username = credential.username, !username.isEmpty {
+                        buttons.append(.default(Text("Username: \(username)")) {
+                            viewModel.selectUsernamePassword()
+                        })
+                    }
 
-                if let email = credential.alias?.email, !email.isEmpty {
-                    buttons.append(.default(Text("Email: \(email)")) {
-                        viewModel.selectEmailPassword()
-                    })
+                    if let email = credential.alias?.email, !email.isEmpty {
+                        buttons.append(.default(Text("Email: \(email)")) {
+                            viewModel.selectEmailPassword()
+                        })
+                    }
                 }
 
                 buttons.append(.cancel())
 
                 return ActionSheet(
-                    title: Text("Select Login Method"),
-                    message: Text("Choose how you want to log in"),
+                    title: viewModel.isChoosingTextToInsert ? Text("Select Text To Insert") : Text("Select Login Method"),
+                    message: viewModel.isChoosingTextToInsert ? Text("Select the text to insert into the focused input field") : Text("Choose how you want to log in"),
                     buttons: buttons
                 )
             }
@@ -163,6 +186,7 @@ public class CredentialProviderViewModel: ObservableObject {
     @Published var showAddCredential = false
     @Published var showSelectionOptions = false
     @Published var selectedCredential: Credential?
+    @Published public var isChoosingTextToInsert = false
 
     @Published var newUsername = ""
     @Published var newPassword = ""
@@ -276,6 +300,12 @@ public class CredentialProviderViewModel: ObservableObject {
     func selectCredential(_ credential: Credential) {
         selectedCredential = credential
 
+        // If we're in text insertion mode, always show the selection sheet
+        if isChoosingTextToInsert {
+            showSelectionOptions = true
+            return
+        }
+
         // If we only have one option, use it directly
         let username = credential.username?.trimmingCharacters(in: .whitespacesAndNewlines)
         let email = credential.alias?.email?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -288,6 +318,24 @@ public class CredentialProviderViewModel: ObservableObject {
 
         // If we have both options, show selection sheet
         showSelectionOptions = true
+    }
+    
+    func selectUsername() {
+        guard let credential = selectedCredential else { return }
+        selectionHandler(credential.username ?? "", "")
+        showSelectionOptions = false
+    }
+    
+    func selectEmail() {
+        guard let credential = selectedCredential else { return }
+        selectionHandler(credential.alias?.email ?? "", "")
+        showSelectionOptions = false
+    }
+    
+    func selectPassword() {
+        guard let credential = selectedCredential else { return }
+        selectionHandler(credential.password?.value ?? "", "")
+        showSelectionOptions = false
     }
 
     func selectUsernamePassword() {
@@ -464,12 +512,9 @@ extension Credential {
     }
 }
 
+
 // Preview setup
 class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
-    @Published var showSelectionAlert = false
-    @Published var selectedCredentialInfo = ""
-    @Published var showCancelAlert = false
-
     init() {
         let previewCredentials = [
             .preview,
@@ -491,50 +536,48 @@ class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
                 createdAt: Date(),
                 updatedAt: Date(),
                 isDeleted: false
-            ),
-            Credential(
-                id: UUID(),
-                alias: .preview,
-                service: Service(
-                    id: UUID(),
-                    name: "Long name service with a lot of characters",
-                    url: "https://another.com",
-                    logo: nil,
-                    createdAt: Date(),
-                    updatedAt: Date(),
-                    isDeleted: false
-                ),
-                username: "usernameisalsoprettylongjusttoseewhathappens",
-                notes: "Another sample credential",
-                password: .preview,
-                createdAt: Date(),
-                updatedAt: Date(),
-                isDeleted: false
             )
         ]
 
         super.init(
             loader: {
-                try? await Task.sleep(nanoseconds: 1_000_000_000) // Simulate network delay
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
                 return previewCredentials
             },
-            selectionHandler: { identifier, password in
-                print("Selected credential: \(identifier) with password: \(password)")
-            },
-            cancelHandler: {
-                print("Canceled")
-            }
+            selectionHandler: { _, _ in },
+            cancelHandler: {}
         )
 
-        self.credentials = previewCredentials
-        self.filteredCredentials = previewCredentials
-        self.isLoading = false
+        credentials = previewCredentials
+        filteredCredentials = previewCredentials
+        isLoading = false
     }
 }
 
 struct CredentialProviderView_Previews: PreviewProvider {
+    static func makePreview(isChoosing: Bool, showingSelection: Bool, colorScheme: ColorScheme) -> some View {
+        let vm = PreviewCredentialProviderViewModel()
+        vm.isChoosingTextToInsert = isChoosing
+        if showingSelection {
+            vm.selectedCredential = .preview
+            vm.showSelectionOptions = true
+        }
+        return CredentialProviderView(viewModel: vm)
+            .environment(\.colorScheme, colorScheme)
+    }
+
     static var previews: some View {
-        let viewModel = PreviewCredentialProviderViewModel()
-        CredentialProviderView(viewModel: viewModel)
+        Group {
+            makePreview(isChoosing: false, showingSelection: false, colorScheme: .light)
+                .previewDisplayName("Light - Normal")
+            makePreview(isChoosing: false, showingSelection: false, colorScheme: .dark)
+                .previewDisplayName("Dark - Normal")
+            makePreview(isChoosing: true, showingSelection: false, colorScheme: .light)
+                .previewDisplayName("Light - Insert Text Mode")
+            makePreview(isChoosing: true, showingSelection: true, colorScheme: .light)
+                .previewDisplayName("Light - Insert Text Mode Selection")
+            makePreview(isChoosing: false, showingSelection: true, colorScheme: .light)
+                .previewDisplayName("Light - Selection Sheet")
+        }
     }
 }
