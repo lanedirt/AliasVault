@@ -87,7 +87,7 @@
                                         <p>@DuplicateCredentialsCount duplicate credential(s) were found and will not be imported.</p>
                                     </div>
                                 }
-                                
+
                                 @if (ImportedCredentials.Count == 0)
                                 {
                                     <div class="p-4 mb-4 text-amber-700 bg-amber-100 rounded-lg dark:bg-amber-800/30 dark:text-amber-300" role="alert">
@@ -369,7 +369,7 @@
         ImportError = null;
         ImportSuccessMessage = null;
         StateHasChanged();
-        
+
         // Let UI update to start showing the loading indicator
         await Task.Delay(50);
     }
@@ -479,6 +479,12 @@
             return;
         }
 
+        if (e.File.Name.EndsWith(".zip"))
+        {
+            ImportError = $"Please unzip the {ServiceName} export file before importing, please read the instructions below for more information.";
+            return;
+        }
+
         try
         {
             IsImporting = true;
@@ -500,10 +506,10 @@
             await Task.WhenAll(processingTask, delayTask);
 
             ImportedCredentials = await processingTask;
-            
+
             // Detect and remove duplicates before showing the preview
             await DetectAndRemoveDuplicates();
-            
+
             CurrentStep = ImportStep.Preview;
         }
         catch (Exception ex)
@@ -532,7 +538,7 @@
             )).ToList();
 
         DuplicateCredentialsCount = duplicates.Count;
-        
+
         // Remove duplicates from the import list
         ImportedCredentials = ImportedCredentials.Except(duplicates).ToList();
     }

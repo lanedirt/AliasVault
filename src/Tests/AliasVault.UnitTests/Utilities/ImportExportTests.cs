@@ -406,4 +406,52 @@ public class ImportExportTests
             Assert.That(testWithEmailCredential.Email, Is.EqualTo("testalias.gating981@passinbox.com"));
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from Dashlane CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromDashlaneCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.dashlane.csv");
+
+        // Act
+        var importedCredentials = await DashlaneImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(3));
+
+        // Test specific entries
+        var testCredential = importedCredentials.First(c => c.ServiceName == "Test");
+        Assert.Multiple(() =>
+        {
+            Assert.That(testCredential.ServiceName, Is.EqualTo("Test"));
+            Assert.That(testCredential.ServiceUrl, Is.EqualTo("https://Test"));
+            Assert.That(testCredential.Username, Is.EqualTo("Test username"));
+            Assert.That(testCredential.Password, Is.EqualTo("password123"));
+            Assert.That(testCredential.Notes, Is.Null);
+        });
+
+        var googleCredential = importedCredentials.First(c => c.ServiceName == "Google");
+        Assert.Multiple(() =>
+        {
+            Assert.That(googleCredential.ServiceName, Is.EqualTo("Google"));
+            Assert.That(googleCredential.ServiceUrl, Is.EqualTo("https://www.google.com"));
+            Assert.That(googleCredential.Username, Is.EqualTo("googleuser"));
+            Assert.That(googleCredential.Password, Is.EqualTo("googlepassword"));
+            Assert.That(googleCredential.Notes, Is.Null);
+        });
+
+        var localCredential = importedCredentials.First(c => c.ServiceName == "Local");
+        Assert.Multiple(() =>
+        {
+            Assert.That(localCredential.ServiceName, Is.EqualTo("Local"));
+            Assert.That(localCredential.ServiceUrl, Is.EqualTo("https://www.testwebsite.local"));
+            Assert.That(localCredential.Username, Is.EqualTo("testusername"));
+            Assert.That(localCredential.Password, Is.EqualTo("testpassword"));
+            Assert.That(localCredential.Notes, Is.EqualTo("testnote\nAlternative username 1: testusernamealternative"));
+        });
+    }
 }
