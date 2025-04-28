@@ -13,23 +13,20 @@ export function CredentialCard({ credential }: CredentialCardProps) {
 
   /**
    * Get the display text for a credential, showing username by default,
-   * falling back to email only if username is null/undefined
+   * falling back to email only if username is null/undefined/empty
    */
   const getCredentialDisplayText = (cred: Credential): string => {
-    const username = cred.Username ?? '';
-
-    // Show username if available.
-    if (username.length > 0) {
-      return username;
+    // Show username if available
+    if (cred.Username) {
+      return cred.Username;
     }
 
-    // Show email if username is not available.
-    const email = cred.Alias?.Email ?? '';
-    if (email.length > 0) {
-      return email;
+    // Show email if username is not available
+    if (cred.Alias?.Email) {
+      return cred.Alias.Email;
     }
 
-    // Show empty string if neither username nor email is available.
+    // Show empty string if neither username nor email is available
     return '';
   };
 
