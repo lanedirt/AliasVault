@@ -7,7 +7,7 @@ public struct CredentialProviderView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    
+
     public init(viewModel: CredentialProviderViewModel) {
          self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
@@ -33,15 +33,50 @@ public struct CredentialProviderView: View {
                             }
 
                         ScrollView {
-                            LazyVStack(spacing: 8) {
-                                ForEach(viewModel.filteredCredentials, id: \.service) { credential in
-                                    CredentialCard(credential: credential) {
-                                        viewModel.selectCredential(credential)
+                            if viewModel.filteredCredentials.isEmpty {
+                                VStack(spacing: 20) {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+
+                                    Text("No credentials found")
+                                        .font(.headline)
+                                        .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+
+                                    Text("No existing credentials match your search")
+                                        .font(.subheadline)
+                                        .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
+                                        .multilineTextAlignment(.center)
+
+                                    VStack(spacing: 12) {
+                                        Button(action: {
+                                            viewModel.showAddCredential = true
+                                        }) {
+                                            HStack {
+                                                Image(systemName: "plus.circle.fill")
+                                                Text("Create New Credential")
+                                            }
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .background(ColorConstants.Light.primary)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(8)
+                                        }
+                                    }
+                                    .padding(.horizontal, 40)
+                                }
+                                .padding(.top, 60)
+                            } else {
+                                LazyVStack(spacing: 8) {
+                                    ForEach(viewModel.filteredCredentials, id: \.service) { credential in
+                                        CredentialCard(credential: credential) {
+                                            viewModel.selectCredential(credential)
+                                        }
                                     }
                                 }
+                                .padding(.horizontal)
+                                .padding(.top, 8)
                             }
-                            .padding(.horizontal)
-                            .padding(.top, 8)
                         }
                         .refreshable {
                             await viewModel.loadCredentials()
@@ -61,13 +96,6 @@ public struct CredentialProviderView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        Button {
-                            Task { await viewModel.loadCredentials() }
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                                .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.icon : ColorConstants.Light.icon)
-                        }
-
                         Button("Add") {
                             viewModel.showAddCredential = true
                         }
@@ -126,6 +154,12 @@ public class CredentialProviderViewModel: ObservableObject {
     }
 
     @MainActor
+    public func setSearchFilter(_ text: String) {
+        self.searchText = text
+        self.filterCredentials()
+    }
+
+    @MainActor
     func loadCredentials() async {
         isLoading = true
         do {
@@ -140,7 +174,69 @@ public class CredentialProviderViewModel: ObservableObject {
     func filterCredentials() {
         if searchText.isEmpty {
             filteredCredentials = credentials
+            return
+        }
+
+        func extractRootDomain(from urlString: String) -> String? {
+            guard let url = URL(string: urlString), let host = url.host else { return nil }
+            let parts = host.components(separatedBy: ".")
+            return parts.count >= 2 ? parts.suffix(2).joined(separator: ".") : host
+        }
+
+        func extractDomainWithoutExtension(from domain: String) -> String {
+            return domain.components(separatedBy: ".").first ?? domain
+        }
+
+        if let searchUrl = URL(string: searchText), let hostname = searchUrl.host, !hostname.isEmpty {
+            let baseUrl = "\(searchUrl.scheme ?? "https")://\(hostname)"
+            let rootDomain = extractRootDomain(from: searchUrl.absoluteString) ?? hostname
+            let domainWithoutExtension = extractDomainWithoutExtension(from: rootDomain)
+
+            // 1. Exact URL match
+            var matches = credentials.filter { credential in
+                if let serviceUrl = credential.service.url,
+                   let url = URL(string: serviceUrl) {
+                    return url.absoluteString.lowercased() == searchUrl.absoluteString.lowercased()
+                }
+                return false
+            }
+
+            // 2. Base URL match (excluding query/path)
+            if matches.isEmpty {
+                matches = credentials.filter { credential in
+                    if let serviceUrl = credential.service.url,
+                       let url = URL(string: serviceUrl) {
+                        return url.absoluteString.lowercased().hasPrefix(baseUrl.lowercased())
+                    }
+                    return false
+                }
+            }
+
+            // 3. Root domain match (e.g., coolblue.nl)
+            if matches.isEmpty {
+                matches = credentials.filter { credential in
+                    if let serviceUrl = credential.service.url,
+                       let credRootDomain = extractRootDomain(from: serviceUrl) {
+                        return credRootDomain.lowercased() == rootDomain.lowercased()
+                    }
+                    return false
+                }
+            }
+
+            // 4. Domain name part match (e.g., "coolblue" in service name)
+            if matches.isEmpty {
+                matches = credentials.filter { credential in
+                    if let serviceName = credential.service.name?.lowercased() {
+                        return serviceName.contains(domainWithoutExtension.lowercased()) ||
+                               domainWithoutExtension.lowercased().contains(serviceName)
+                    }
+                    return false
+                }
+            }
+
+            filteredCredentials = matches
         } else {
+            // Non-URL fallback: simple text search in service name or username
             filteredCredentials = credentials.filter { credential in
                 (credential.service.name?.localizedCaseInsensitiveContains(searchText) ?? false) ||
                 (credential.username?.localizedCaseInsensitiveContains(searchText) ?? false)
@@ -336,6 +432,25 @@ class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
                     isDeleted: false
                 ),
                 username: "anotheruser",
+                notes: "Another sample credential",
+                password: .preview,
+                createdAt: Date(),
+                updatedAt: Date(),
+                isDeleted: false
+            ),
+            Credential(
+                id: UUID(),
+                alias: .preview,
+                service: Service(
+                    id: UUID(),
+                    name: "Long name service with a lot of characters",
+                    url: "https://another.com",
+                    logo: nil,
+                    createdAt: Date(),
+                    updatedAt: Date(),
+                    isDeleted: false
+                ),
+                username: "usernameisalsoprettylongjusttoseewhathappens",
                 notes: "Another sample credential",
                 password: .preview,
                 createdAt: Date(),

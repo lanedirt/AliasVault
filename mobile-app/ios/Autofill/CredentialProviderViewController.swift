@@ -20,6 +20,8 @@ import VaultModels
  * logins in the keyboard).
  */
 class CredentialProviderViewController: ASCredentialProviderViewController {
+    private var viewModel: CredentialProviderViewModel?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,6 +48,8 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
           }
         )
         
+        self.viewModel = viewModel
+        
         let hostingController = UIHostingController(
           rootView: CredentialProviderView(viewModel: viewModel)
         )
@@ -65,7 +69,13 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     }
 
     override func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
-        // This is handled in the SwiftUI view's onAppear
+        guard let viewModel = self.viewModel else { return }
+
+        // Instead of directly filtering credentials, just set the search text
+        let matchedDomains = serviceIdentifiers.map { $0.identifier.lowercased() }
+        if let firstDomain = matchedDomains.first {
+            viewModel.setSearchFilter(firstDomain)
+        }
     }
 
     override func prepareInterfaceForUserChoosingTextToInsert() {
@@ -73,11 +83,6 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     }
 
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
-        // Get credentials and return the first one that matches the identity
-        // TODO: how do we handle authentication here? We need Face ID access before we can access credentials..
-        // so we probably actually need to have a .shared instance in the autofill extension where after one unlock
-        // it stays unlocked? Or should we cache usernames locally and still require faceid as soon as user tries to
-        // autofill the username? Check how this should work functionally.
         do {
             let credentials = try VaultStore.shared.getAllCredentials()
             if let matchingCredential = credentials.first(where: { $0.service.name ?? "" == credentialIdentity.serviceIdentifier.identifier }) {
