@@ -82,9 +82,9 @@ else
     </h2>
 
     <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
-    <ServerValidationErrors @ref="_serverValidationErrors"/>
 
-    <EditForm Model="_loginModel" OnValidSubmit="HandleLogin" class="mt-8 space-y-6">
+    <EditForm Model="_loginModel" OnValidSubmit="HandleLogin" class="mt-4 space-y-6">
+        <ServerValidationErrors @ref="_serverValidationErrors"/>
         <DataAnnotationsValidator/>
         <div>
             <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
