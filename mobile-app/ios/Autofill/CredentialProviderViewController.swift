@@ -29,7 +29,9 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         let viewModel = CredentialProviderViewModel(
           loader: {
               try VaultStore.shared.initializeDatabase()
-              return try VaultStore.shared.getAllCredentials()
+              let credentials = try VaultStore.shared.getAllCredentials()
+              await self.registerCredentialIdentities(credentials: credentials)
+              return credentials
           },
           selectionHandler: { [weak self] credential in
               guard let self = self else { return }
@@ -85,7 +87,10 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         do {
             let credentials = try VaultStore.shared.getAllCredentials()
-            if let matchingCredential = credentials.first(where: { $0.service.name ?? "" == credentialIdentity.serviceIdentifier.identifier }) {
+            
+            if let matchingCredential = credentials.first(where: { credential in
+                return credential.id.uuidString == credentialIdentity.recordIdentifier
+            }) {
                 let passwordCredential = ASPasswordCredential(
                     user: matchingCredential.username ?? "",
                     password: matchingCredential.password?.value ?? ""
@@ -109,4 +114,16 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
             )
         }
     }
+    
+    /**
+     * This registers all known AliasVault credentials into iOS native credential storage, which iOS can then use to suggest autofill credentials when a user
+     * focuses an input field on a login form. These suggestions will then be shown above the iOS keyboard, which saves the user one step.
+     */
+    private func registerCredentialIdentities(credentials: [Credential]) async {
+       do {
+           try await CredentialIdentityStore.shared.saveCredentialIdentities(credentials)
+       } catch {
+           print("Failed to save credential identities: \(error)")
+       }
+   }
 }
