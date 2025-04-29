@@ -43,7 +43,7 @@ export default function CredentialsScreen() {
       setIsTabFocused(false);
     });
 
-    const sub = emitter.addListener('tabPress', (routeName: string) => {
+    const tabPressSub = emitter.addListener('tabPress', (routeName: string) => {
       if (routeName === 'credentials' && isTabFocused) {
         console.log('Credentials tab re-pressed while focused: reset screen');
         setSearchQuery(''); // Reset search
@@ -53,8 +53,15 @@ export default function CredentialsScreen() {
       }
     });
 
+    // Add listener for credential changes
+    const credentialChangedSub = emitter.addListener('credentialChanged', async () => {
+      console.log('Credential changed, refreshing list');
+      await loadCredentials();
+    });
+
     return () => {
-      sub.remove();
+      tabPressSub.remove();
+      credentialChangedSub.remove();
       unsubscribeFocus();
       unsubscribeBlur();
     };

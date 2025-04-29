@@ -542,6 +542,140 @@ class SqliteClient {
       }
     };
   }
+
+  /**
+   * Update an existing credential with associated entities
+   * @param credential The credential object to update
+   * @returns The number of rows modified
+   */
+  public async updateCredentialById(credential: Credential): Promise<number> {
+    try {
+      await NativeVaultManager.beginTransaction();
+      const currentDateTime = new Date().toISOString()
+        .replace('T', ' ')
+        .replace('Z', '')
+        .substring(0, 23);
+
+      // Get existing credential to compare changes
+      const existingCredential = await this.getCredentialById(credential.Id);
+      if (!existingCredential) {
+        throw new Error('Credential not found');
+      }
+
+      // 1. Update Service
+      // TODO: make Logo update optional, currently not supported as its becoming null.
+      //             Logo = ?,
+
+      const serviceQuery = `
+        UPDATE Services
+        SET Name = ?,
+            Url = ?,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT ServiceId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      /*let logoData = null;
+      try {
+        if (credential.Logo) {
+          if (typeof credential.Logo === 'object' && !ArrayBuffer.isView(credential.Logo)) {
+            const values = Object.values(credential.Logo);
+            logoData = new Uint8Array(values);
+          } else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
+            logoData = new Uint8Array(credential.Logo);
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to convert logo to Uint8Array:', error);
+        logoData = null;
+      }*/
+
+      await this.executeUpdate(serviceQuery, [
+        credential.ServiceName,
+        credential.ServiceUrl ?? null,
+        //logoData,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 2. Update Alias
+      const aliasQuery = `
+        UPDATE Aliases
+        SET FirstName = ?,
+            LastName = ?,
+            NickName = ?,
+            BirthDate = ?,
+            Gender = ?,
+            Email = ?,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT AliasId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      // Only update BirthDate if it's actually different (accounting for format differences)
+      let birthDate = credential.Alias.BirthDate;
+      if (birthDate && existingCredential.Alias.BirthDate) {
+        const newDate = new Date(birthDate);
+        const existingDate = new Date(existingCredential.Alias.BirthDate);
+        if (newDate.getTime() === existingDate.getTime()) {
+          birthDate = existingCredential.Alias.BirthDate;
+        }
+      }
+
+      await this.executeUpdate(aliasQuery, [
+        credential.Alias.FirstName ?? null,
+        credential.Alias.LastName ?? null,
+        credential.Alias.NickName ?? null,
+        birthDate ?? null,
+        credential.Alias.Gender ?? null,
+        credential.Alias.Email ?? null,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 3. Update Credential
+      const credentialQuery = `
+        UPDATE Credentials
+        SET Username = ?,
+            Notes = ?,
+            UpdatedAt = ?
+        WHERE Id = ?`;
+
+      await this.executeUpdate(credentialQuery, [
+        credential.Username ?? null,
+        credential.Notes ?? null,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 4. Update Password if changed
+      if (credential.Password !== existingCredential.Password) {
+        const passwordQuery = `
+          UPDATE Passwords
+          SET Value = ?,
+              UpdatedAt = ?
+          WHERE CredentialId = ?`;
+
+        await this.executeUpdate(passwordQuery, [
+          credential.Password,
+          currentDateTime,
+          credential.Id
+        ]);
+      }
+
+      await NativeVaultManager.commitTransaction();
+      return 1;
+
+    } catch (error) {
+      await NativeVaultManager.rollbackTransaction();
+      console.error('Error updating credential:', error);
+      throw error;
+    }
+  }
 }
 
 export default SqliteClient;

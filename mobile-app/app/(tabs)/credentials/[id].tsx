@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, useColorScheme, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -13,14 +13,42 @@ import { AliasDetails } from '@/components/credentialDetails/AliasDetails';
 import { NotesSection } from '@/components/credentialDetails/NotesSection';
 import { EmailPreview } from '@/components/credentialDetails/EmailPreview';
 import { TotpSection } from '@/components/credentialDetails/TotpSection';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useColors } from '@/hooks/useColorScheme';
+import emitter from '@/utils/EventEmitter';
 
 export default function CredentialDetailsScreen() {
   const { id } = useLocalSearchParams();
   const [credential, setCredential] = useState<Credential | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const dbContext = useDb();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const navigation = useNavigation();
+  const colors = useColors();
+  const router = useRouter();
+
+  // Set header buttons
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={handleEdit}
+            style={{ padding: 10, paddingRight: 0 }}
+          >
+            <MaterialIcons
+                  name="edit"
+                  size={24}
+                  color={colors.primary}
+                />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, credential]);
+
+  const handleEdit = () => {
+    router.push(`/(tabs)/credentials/add-edit?id=${id}`);
+  }
 
   useEffect(() => {
     const loadCredential = async () => {
@@ -38,7 +66,16 @@ export default function CredentialDetailsScreen() {
 
     loadCredential();
 
+    // Add listener for credential changes
+    const credentialChangedSub = emitter.addListener('credentialChanged', async (changedId: string) => {
+      if (changedId === id) {
+        console.log('This credential was changed, refreshing details');
+        await loadCredential();
+      }
+    });
+
     return () => {
+      credentialChangedSub.remove();
       Toast.hide();
     };
   }, [id, dbContext.dbAvailable]);
@@ -68,7 +105,7 @@ export default function CredentialDetailsScreen() {
           </ThemedText>
           {credential.ServiceUrl && (
             <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
-              <Text style={[styles.serviceUrl, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>
+              <Text style={[styles.serviceUrl, { color: colors.primary }]}>
                 {credential.ServiceUrl}
               </Text>
             </TouchableOpacity>

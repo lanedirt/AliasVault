@@ -1,5 +1,5 @@
 import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -10,6 +10,7 @@ import { Credential } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Gender } from "@/utils/generators/Identity/types/Gender";
+import emitter from '@/utils/EventEmitter';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -21,6 +22,7 @@ export default function AddEditCredentialScreen() {
   const [mode, setMode] = useState<CredentialMode>('random');
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const serviceNameInputRef = useRef<TextInput>(null);
   const [credential, setCredential] = useState<Partial<Credential>>({
     Id: "",
     Username: "",
@@ -64,10 +66,10 @@ export default function AddEditCredentialScreen() {
     }
   }
 
-
-  // Set navigation options
+  // Set header buttons
   useEffect(() => {
     navigation.setOptions({
+      title: isEditMode ? 'Edit Credential' : 'Add Credential',
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => router.back()}
@@ -118,8 +120,30 @@ export default function AddEditCredentialScreen() {
         ServiceName: serviceName,
         // ... other form fields
       }));
+
+      // In create mode, autofocus the service name field and select all default text
+      // so user can start renaming the service immediately if they want.
+      if (!isEditMode) {
+        setTimeout(() => {
+          serviceNameInputRef.current?.focus();
+          if (serviceUrl) {
+            // If serviceUrl is provided, select all text
+            serviceNameInputRef.current?.setSelection(0, serviceName.length || 0);
+          }
+        }, 200);
+      }
     }
   }, [serviceUrl]);
+
+  useEffect(() => {
+    // Focus and select text logic
+    if (!isEditMode) {
+      // In create mode, always focus the service name field
+      setTimeout(() => {
+        serviceNameInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isEditMode, serviceUrl]);
 
   const loadExistingCredential = async () => {
     try {
@@ -183,19 +207,33 @@ export default function AddEditCredentialScreen() {
         credentialToSave = generateRandomValues();
       }
 
-      // Always use createCredential since updateCredentialById doesn't exist
-      await dbContext.sqliteClient!.createCredential(credentialToSave);
-      Toast.show({
-        type: 'success',
-        text1: 'Credential saved successfully',
-        position: 'bottom'
-      });
+      if (isEditMode) {
+        // Update existing credential
+        await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
+        Toast.show({
+          type: 'success',
+          text1: 'Credential updated successfully',
+          position: 'bottom'
+        });
+      } else {
+        // Create new credential
+        await dbContext.sqliteClient!.createCredential(credentialToSave);
+        Toast.show({
+          type: 'success',
+          text1: 'Credential created successfully',
+          position: 'bottom'
+        });
+      }
+
+      // Emit an event to notify list and detail views to refresh
+      emitter.emit('credentialChanged', credentialToSave.Id);
+
       router.back();
     } catch (error) {
       console.error('Error saving credential:', error);
       Toast.show({
         type: 'error',
-        text1: 'Failed to save credential',
+        text1: isEditMode ? 'Failed to update credential' : 'Failed to create credential',
         text2: error instanceof Error ? error.message : 'Unknown error',
         position: 'bottom'
       });
@@ -291,8 +329,6 @@ export default function AddEditCredentialScreen() {
     },
   });
 
-  console.log('credential serviceName: ', credential.ServiceName);
-
   return (
     <ThemedSafeAreaView style={styles.container}>
       <ThemedView style={styles.content}>
@@ -321,6 +357,7 @@ export default function AddEditCredentialScreen() {
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>Service Information</ThemedText>
             <TextInput
+              ref={serviceNameInputRef}
               style={styles.input}
               placeholder="Service Name"
               placeholderTextColor={colors.textMuted}
