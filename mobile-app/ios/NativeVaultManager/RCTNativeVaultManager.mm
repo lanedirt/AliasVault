@@ -116,4 +116,16 @@
     [vaultManager clearVault];
 }
 
+- (void)getEncryptedDatabase:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager getEncryptedDatabase:resolve rejecter:reject];
+}
+
+- (void)getCurrentVaultRevisionNumber:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager getCurrentVaultRevisionNumber:resolve rejecter:reject];
+}
+
+- (void)setCurrentVaultRevisionNumber:(double)revisionNumber resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager setCurrentVaultRevisionNumber:revisionNumber resolver:resolve rejecter:reject];
+}
+
 @end

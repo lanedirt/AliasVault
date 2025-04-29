@@ -248,7 +248,7 @@ public class VaultStore {
     }
 
     // Get the encrypted database as a base64 encoded string
-    private func getEncryptedDatabase() -> String? {
+    public func getEncryptedDatabase() -> String? {
         do {
             // Return the base64 encoded string
             return try String(contentsOf: getEncryptedDbPath(), encoding: .utf8)
@@ -257,9 +257,49 @@ public class VaultStore {
         }
     }
 
+    // Get the current vault revision number
+    public func getCurrentVaultRevisionNumber() -> Int {
+        guard let metadata = getVaultMetadataObject() else {
+            return 0
+        }
+        return metadata.vaultRevisionNumber
+    }
+
+    // Set the current vault revision number
+    public func setCurrentVaultRevisionNumber(_ revisionNumber: Int) {
+        var metadata: VaultMetadata
+
+        if let existingMetadata = getVaultMetadataObject() {
+            metadata = existingMetadata
+        } else {
+            metadata = VaultMetadata(
+                publicEmailDomains: [],
+                privateEmailDomains: [],
+                vaultRevisionNumber: revisionNumber
+            )
+        }
+        
+        metadata.vaultRevisionNumber = revisionNumber
+        if let data = try? JSONEncoder().encode(metadata),
+        let jsonString = String(data: data, encoding: .utf8) {
+            UserDefaults.standard.set(jsonString, forKey: vaultMetadataKey)
+            UserDefaults.standard.synchronize()
+        }
+    }
+
     // Get the vault metadata from UserDefaults
     public func getVaultMetadata() -> String? {
         return UserDefaults.standard.string(forKey: vaultMetadataKey)
+    }
+
+    // Helper to decode the JSON metadata into VaultMetadata object
+    private func getVaultMetadataObject() -> VaultMetadata? {
+        guard let jsonString = getVaultMetadata(),
+            let data = jsonString.data(using: .utf8),
+            let metadata = try? JSONDecoder().decode(VaultMetadata.self, from: data) else {
+            return nil
+        }
+        return metadata
     }
 
     /**

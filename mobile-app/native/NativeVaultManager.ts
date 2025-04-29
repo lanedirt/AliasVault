@@ -1,5 +1,5 @@
-import type {TurboModule} from 'react-native';
-import {TurboModuleRegistry} from 'react-native';
+import { TurboModule } from 'react-native';
+import { TurboModuleRegistry } from 'react-native';
 
 export interface Spec extends TurboModule {
   // Basic credential operations

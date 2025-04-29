@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -6,19 +6,29 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
+import { useVaultSync } from '@/hooks/useVaultSync';
 import { Credential } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Gender } from "@/utils/generators/Identity/types/Gender";
 import emitter from '@/utils/EventEmitter';
-
+import NativeVaultManager from '@/specs/NativeVaultManager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/context/AuthContext';
 type CredentialMode = 'random' | 'manual';
+
+interface VaultPostResponse {
+  status: number;
+  newRevisionNumber: number;
+}
 
 export default function AddEditCredentialScreen() {
   const { id, serviceUrl } = useLocalSearchParams<{ id: string, serviceUrl?: string }>();
   const router = useRouter();
   const colors = useColors();
   const dbContext = useDb();
+  const authContext = useAuth();
   const [mode, setMode] = useState<CredentialMode>('random');
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
@@ -39,6 +49,9 @@ export default function AddEditCredentialScreen() {
       Email: ""
     },
   });
+  const [syncStatus, setSyncStatus] = useState<string>('');
+  const webApi = useWebApi();
+  const { syncVault } = useVaultSync();
 
   function extractServiceNameFromUrl(url: string): string {
     try {
@@ -197,38 +210,26 @@ export default function AddEditCredentialScreen() {
   const handleSave = async () => {
     try {
       setIsLoading(true);
+      setSyncStatus('Checking for vault updates...');
 
-      let credentialToSave = credential as Credential;
-
-      // If mode is random, generate random values for all fields before saving.
-      // TODO: replace this with actual identity generator logic.
-      if (mode === 'random') {
-        console.log('Generating random values');
-        credentialToSave = generateRandomValues();
-      }
-
-      if (isEditMode) {
-        // Update existing credential
-        await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
-        Toast.show({
-          type: 'success',
-          text1: 'Credential updated successfully',
-          position: 'bottom'
-        });
-      } else {
-        // Create new credential
-        await dbContext.sqliteClient!.createCredential(credentialToSave);
-        Toast.show({
-          type: 'success',
-          text1: 'Credential created successfully',
-          position: 'bottom'
-        });
-      }
-
-      // Emit an event to notify list and detail views to refresh
-      emitter.emit('credentialChanged', credentialToSave.Id);
-
-      router.back();
+      // First check if there are any vault updates
+      await syncVault({
+        onStatus: (message) => setSyncStatus(message),
+        onSuccess: async (hasNewVault) => {
+          if (hasNewVault) {
+            console.log('Vault was changed, but has now been reloaded so we can continue with the save.');
+          }
+          await handleSaveInner();
+        },
+        onError: (error) => {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to sync vault',
+            text2: error,
+            position: 'bottom'
+          });
+        }
+      });
     } catch (error) {
       console.error('Error saving credential:', error);
       Toast.show({
@@ -239,6 +240,96 @@ export default function AddEditCredentialScreen() {
       });
     } finally {
       setIsLoading(false);
+      setSyncStatus('');
+    }
+  };
+
+  const handleSaveInner = async () => {
+    let credentialToSave = credential as Credential;
+
+    // If mode is random, generate random values for all fields before saving.
+    if (mode === 'random') {
+      console.log('Generating random values');
+      credentialToSave = generateRandomValues();
+    }
+
+    setSyncStatus('Saving changes to vault...');
+
+    if (isEditMode) {
+      // Update existing credential
+      await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
+    } else {
+      // Create new credential
+      await dbContext.sqliteClient!.createCredential(credentialToSave);
+    }
+
+    // Get the current vault revision number
+    const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
+
+    // Get the encrypted database
+    const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
+    if (!encryptedDb) {
+      throw new Error('Failed to get encrypted database');
+    }
+
+    setSyncStatus('Uploading vault to server...');
+
+    // Get email addresses from credentials
+    const credentials = await dbContext.sqliteClient!.getAllCredentials();
+    const emailAddresses = credentials
+      .filter(cred => cred.Alias?.Email != null)
+      .map(cred => cred.Alias!.Email!)
+      .filter((email, index, self) => self.indexOf(email) === index);
+
+    // Get username from the auth context
+    const username = authContext.username;
+    if (!username) {
+      throw new Error('Username not found');
+    }
+
+    // Create vault object for upload
+    const newVault = {
+      blob: encryptedDb,
+      createdAt: new Date().toISOString(),
+      credentialsCount: credentials.length,
+      currentRevisionNumber: currentRevision,
+      emailAddressList: emailAddresses,
+      privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
+      publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
+      encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
+      // TODO: can client be null? double check this.
+      client: '', // Empty on purpose, API will not use this for vault updates
+      updatedAt: new Date().toISOString(),
+      username: username,
+      version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
+    };
+    console.log('New vault current revision number:', currentRevision);
+
+    console.log('Trying to upload vault to server...');
+
+    // Upload to server
+    const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
+
+    console.log('Vault upload response:', response);
+
+    // Check if response is successful
+    if (response.status === 0) {
+      await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
+
+      Toast.show({
+        type: 'success',
+        text1: isEditMode ? 'Credential updated successfully' : 'Credential created successfully',
+        position: 'bottom'
+      });
+
+      // Emit an event to notify list and detail views to refresh
+      emitter.emit('credentialChanged', credentialToSave.Id);
+
+      router.back();
+    } else if (response.status === 1) {
+      throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
+    } else {
+      throw new Error('Failed to upload vault to server');
     }
   };
 
@@ -327,11 +418,36 @@ export default function AddEditCredentialScreen() {
       height: 100,
       textAlignVertical: 'top',
     },
+    loadingOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+    },
+    syncStatus: {
+      marginTop: 16,
+      textAlign: 'center',
+      color: '#fff',
+      fontSize: 16,
+    },
   });
 
   return (
     <ThemedSafeAreaView style={styles.container}>
       <ThemedView style={styles.content}>
+        {(isLoading || syncStatus) && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            {syncStatus && (
+              <ThemedText style={styles.syncStatus}>{syncStatus}</ThemedText>
+            )}
+          </View>
+        )}
         <ScrollView>
           {!isEditMode && (
             <View style={styles.modeSelector}>

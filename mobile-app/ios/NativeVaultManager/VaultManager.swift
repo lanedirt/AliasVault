@@ -169,6 +169,31 @@ public class VaultManager: NSObject {
     }
 
     @objc
+    func getEncryptedDatabase(_ resolve: @escaping RCTPromiseResolveBlock,
+                             rejecter reject: @escaping RCTPromiseRejectBlock) {
+        if let encryptedDb = vaultStore.getEncryptedDatabase() {
+            resolve(encryptedDb)
+        } else {
+            reject("DB_ERROR", "Failed to get encrypted database", nil)
+        }
+    }
+
+    @objc
+    func getCurrentVaultRevisionNumber(_ resolve: @escaping RCTPromiseResolveBlock,
+                                     rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let revisionNumber = vaultStore.getCurrentVaultRevisionNumber()
+        resolve(revisionNumber)
+    }
+
+    @objc
+    func setCurrentVaultRevisionNumber(_ revisionNumber: Int,
+                                     resolver resolve: @escaping RCTPromiseResolveBlock,
+                                     rejecter reject: @escaping RCTPromiseRejectBlock) {
+        vaultStore.setCurrentVaultRevisionNumber(revisionNumber)
+        resolve(nil)
+    }
+
+    @objc
     func isVaultInitialized(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
