@@ -51,10 +51,12 @@ public struct CredentialProviderView: View {
                                     if !viewModel.isChoosingTextToInsert {
                                         VStack(spacing: 12) {
                                             Button(action: {
-                                                if let url = URL(string: "net.aliasvault.app://addCredential?service=example.com") {
-                                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                                                if let serviceUrl = viewModel.serviceUrl {
+                                                    let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                                                    if let url = URL(string: "net.aliasvault.app://credentials/add-edit?serviceUrl=\(encodedUrl)") {
+                                                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                                                    }
                                                 }
-                                                //viewModel.showAddCredential = true
                                             }) {
                                                 HStack {
                                                     Image(systemName: "plus.circle.fill")
@@ -101,10 +103,12 @@ public struct CredentialProviderView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button("Add") {
-                            if let url = URL(string: "net.aliasvault.app://addCredential?service=example.com") {
-                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            if let serviceUrl = viewModel.serviceUrl {
+                                let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                                if let url = URL(string: "net.aliasvault.app://credentials/add-edit?serviceUrl=\(encodedUrl)") {
+                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                                }
                             }
-                            //viewModel.showAddCredential = true
                         }
                         .foregroundColor(ColorConstants.Light.primary)
                     }
@@ -115,14 +119,14 @@ public struct CredentialProviderView: View {
             }
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
                 // Define all text strings
-                
-                
+
+
                 guard let credential = viewModel.selectedCredential else {
                     return ActionSheet(title: Text("Select Login Method"), message: Text("No credential selected."), buttons: [.cancel()])
                 }
 
                 var buttons: [ActionSheet.Button] = []
-                
+
                 if viewModel.isChoosingTextToInsert {
                     if let username = credential.username, !username.isEmpty {
                         buttons.append(.default(Text("Username: \(username)")) {
@@ -135,7 +139,7 @@ public struct CredentialProviderView: View {
                             viewModel.selectEmail()
                         })
                     }
-                    
+
                     buttons.append(.default(Text("Password")) {
                         viewModel.selectPassword()
                     })
@@ -193,6 +197,7 @@ public class CredentialProviderViewModel: ObservableObject {
     @Published var showSelectionOptions = false
     @Published var selectedCredential: Credential?
     @Published public var isChoosingTextToInsert = false
+    @Published public var serviceUrl: String?
 
     @Published var newUsername = ""
     @Published var newPassword = ""
@@ -205,11 +210,16 @@ public class CredentialProviderViewModel: ObservableObject {
     public init(
         loader: @escaping () async throws -> [Credential],
         selectionHandler: @escaping (String, String) -> Void,
-        cancelHandler: @escaping () -> Void
+        cancelHandler: @escaping () -> Void,
+        serviceUrl: String? = nil
     ) {
         self.loader = loader
         self.selectionHandler = selectionHandler
         self.cancelHandler = cancelHandler
+        self.serviceUrl = serviceUrl
+        if let url = serviceUrl {
+            self.searchText = url
+        }
     }
 
     @MainActor
@@ -325,19 +335,19 @@ public class CredentialProviderViewModel: ObservableObject {
         // If we have both options, show selection sheet
         showSelectionOptions = true
     }
-    
+
     func selectUsername() {
         guard let credential = selectedCredential else { return }
         selectionHandler(credential.username ?? "", "")
         showSelectionOptions = false
     }
-    
+
     func selectEmail() {
         guard let credential = selectedCredential else { return }
         selectionHandler(credential.alias?.email ?? "", "")
         showSelectionOptions = false
     }
-    
+
     func selectPassword() {
         guard let credential = selectedCredential else { return }
         selectionHandler(credential.password?.value ?? "", "")
@@ -551,7 +561,8 @@ class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
                 return previewCredentials
             },
             selectionHandler: { _, _ in },
-            cancelHandler: {}
+            cancelHandler: {},
+            serviceUrl: nil
         )
 
         credentials = previewCredentials

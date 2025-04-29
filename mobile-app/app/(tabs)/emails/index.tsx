@@ -62,7 +62,7 @@ export default function EmailsScreen() {
     });
 
     const sub = emitter.addListener('tabPress', (routeName: string) => {
-      if (routeName === '(emails)' && isTabFocused) {
+      if (routeName === 'emails' && isTabFocused) {
         console.log('Emails tab re-pressed while focused: reset screen');
         // Scroll to top
         scrollViewRef.current?.scrollTo({ y: 0, animated: true });

@@ -57,21 +57,21 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="(credentials)"
+        name="credentials"
         options={{
           title: 'Credentials',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="key.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="(emails)"
+        name="emails"
         options={{
           title: 'Emails',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="envelope.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="(settings)"
+        name="settings"
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => (

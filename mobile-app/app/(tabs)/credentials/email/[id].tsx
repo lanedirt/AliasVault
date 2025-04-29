@@ -1,5 +1,5 @@
 import React from 'react';
-import EmailDetailsScreen from '../../(emails)/[id]';
+import EmailDetailsScreen from '../../emails/[id]';
 
 /**
  * CredentialEmailPreviewScreen Component

@@ -31,7 +31,7 @@ export default function CredentialsScreen() {
   const headerButtons = [{
     icon: 'add' as const,
     position: 'right' as const,
-    onPress: () => router.push('/(tabs)/(credentials)/add-edit')
+    onPress: () => router.push('/(tabs)/credentials/add-edit')
   }];
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function CredentialsScreen() {
     });
 
     const sub = emitter.addListener('tabPress', (routeName: string) => {
-      if (routeName === '(credentials)' && isTabFocused) {
+      if (routeName === 'credentials' && isTabFocused) {
         console.log('Credentials tab re-pressed while focused: reset screen');
         setSearchQuery(''); // Reset search
         setRefreshing(false); // Reset refreshing

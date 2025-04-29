@@ -168,7 +168,7 @@ export default function EmailDetailsScreen() {
 
   const handleOpenCredential = () => {
     if (associatedCredential) {
-      router.push(`/(tabs)/(credentials)/${associatedCredential.Id}`);
+      router.push(`/(tabs)/credentials/${associatedCredential.Id}`);
     }
   };
 

@@ -69,7 +69,7 @@ export function CredentialCard({ credential }: CredentialCardProps) {
       style={styles.credentialCard}
       onPress={() => {
         Keyboard.dismiss();
-        router.push(`/(tabs)/(credentials)/${credential.Id}`);
+        router.push(`/(tabs)/credentials/${credential.Id}`);
       }}
       activeOpacity={0.7}
     >

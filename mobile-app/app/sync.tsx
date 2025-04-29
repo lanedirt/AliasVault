@@ -62,7 +62,7 @@ export default function SyncScreen() {
             console.log('FaceID unlock successful, navigating to credentials');
 
             // Navigate to credentials
-            router.replace('/(tabs)/(credentials)');
+            router.replace('/(tabs)/credentials');
 
             return;
           }

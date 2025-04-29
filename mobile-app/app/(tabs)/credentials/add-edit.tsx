@@ -6,15 +6,15 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
-import { Credential, Alias } from '@/utils/types/Credential';
+import { Credential } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-import { Gender } from "../../../utils/generators/Identity/types/Gender";
+import { Gender } from "@/utils/generators/Identity/types/Gender";
 
 type CredentialMode = 'random' | 'manual';
 
 export default function AddEditCredentialScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, serviceUrl } = useLocalSearchParams<{ id: string, serviceUrl?: string }>();
   const router = useRouter();
   const colors = useColors();
   const dbContext = useDb();
@@ -38,33 +38,60 @@ export default function AddEditCredentialScreen() {
     },
   });
 
-    // Set navigation options
-    useEffect(() => {
-      navigation.setOptions({
-        headerLeft: () => (
+  function extractServiceNameFromUrl(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      const hostParts = urlObj.hostname.split('.');
+
+      // Remove common subdomains
+      const commonSubdomains = ['www', 'app', 'login', 'auth', 'account', 'portal'];
+      while (hostParts.length > 2 && commonSubdomains.includes(hostParts[0].toLowerCase())) {
+        hostParts.shift();
+      }
+
+      // For domains like google.com, return Google.com
+      if (hostParts.length <= 2) {
+        const domain = hostParts.join('.');
+        return domain.charAt(0).toUpperCase() + domain.slice(1);
+      }
+
+      // For domains like app.example.com, return Example.com
+      const mainDomain = hostParts.slice(-2).join('.');
+      return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
+    } catch (e) {
+      // If URL parsing fails, return the original URL
+      return url;
+    }
+  }
+
+
+  // Set navigation options
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={{ padding: 10, paddingLeft: 0 }}
+        >
+          <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ padding: 10, paddingLeft: 0 }}
+            onPress={handleSave}
+            style={{ padding: 10, paddingRight: 0 }}
           >
-            <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
+            <MaterialIcons
+                  name="save"
+                  size={24}
+                  color={colors.primary}
+                />
           </TouchableOpacity>
-        ),
-        headerRight: () => (
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity
-              onPress={handleSave}
-              style={{ padding: 10, paddingRight: 0 }}
-            >
-              <MaterialIcons
-                    name="save"
-                    size={24}
-                    color={colors.primary}
-                  />
-            </TouchableOpacity>
-          </View>
-        ),
-      });
-    }, [navigation, credential, mode]);
+        </View>
+      ),
+    });
+  }, [navigation, credential, mode]);
 
   const isEditMode = !!id;
 
@@ -73,6 +100,26 @@ export default function AddEditCredentialScreen() {
       loadExistingCredential();
     }
   }, [id]);
+
+  useEffect(() => {
+    // If serviceUrl is provided, extract the service name from the URL and prefill the form values.
+    // This is used when the user opens the app from a deep link (e.g. from iOS autofill extension).
+    if (serviceUrl) {
+      // Decode the URL-encoded service URL
+      const decodedUrl = decodeURIComponent(serviceUrl);
+
+      // Extract service name from URL
+      const serviceName = extractServiceNameFromUrl(decodedUrl);
+      // Set the form values
+      // Note: You'll need to implement this based on your form state management
+      setCredential(prev => ({
+        ...prev,
+        ServiceUrl: decodedUrl,
+        ServiceName: serviceName,
+        // ... other form fields
+      }));
+    }
+  }, [serviceUrl]);
 
   const loadExistingCredential = async () => {
     try {
@@ -243,6 +290,8 @@ export default function AddEditCredentialScreen() {
       textAlignVertical: 'top',
     },
   });
+
+  console.log('credential serviceName: ', credential.ServiceName);
 
   return (
     <ThemedSafeAreaView style={styles.container}>

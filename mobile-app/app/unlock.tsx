@@ -62,7 +62,7 @@ export default function UnlockScreen() {
       // Initialize the database with the vault response and password
       if (await testDatabaseConnection(passwordHashBase64)) {
         // Navigate to credentials
-        router.replace('/(tabs)/(credentials)');
+        router.replace('/(tabs)/credentials');
       }
       else {
         Alert.alert('Error', 'Incorrect password. Please try again.');

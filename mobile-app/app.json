@@ -5,9 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "AliasVault",
+    "scheme": "net.aliasvault.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "deepLinking": true,
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "net.aliasvault.app"

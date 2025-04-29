@@ -79,7 +79,7 @@ export function EmailCard({ email }: EmailCardProps) {
   return (
     <TouchableOpacity
       style={styles.emailCard}
-      onPress={() => router.push(`/(tabs)/(emails)/${email.id}`)}
+      onPress={() => router.push(`/(tabs)/emails/${email.id}`)}
       activeOpacity={0.7}
     >
       <View style={styles.emailHeader}>

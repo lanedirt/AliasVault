@@ -88,10 +88,16 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
         guard let viewModel = self.viewModel else { return }
 
-        // Instead of directly filtering credentials, just set the search text
         let matchedDomains = serviceIdentifiers.map { $0.identifier.lowercased() }
         if let firstDomain = matchedDomains.first {
+            // Set the search text to the first domain which will auto filter the credentials
+            // to show the most likely credentials first as suggestion.
             viewModel.setSearchFilter(firstDomain)
+
+            // Set the service URL to the first domain which will be used to pass onto the
+            // add credential view when the user taps the "+" button and prefill it with the
+            // domain name.
+            viewModel.serviceUrl = firstDomain
         }
     }
 

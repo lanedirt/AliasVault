@@ -54,15 +54,15 @@ export default function SettingsScreen() {
   };
 
   const handleVaultUnlockPress = () => {
-    router.push('/(tabs)/(settings)/vault-unlock');
+    router.push('/(tabs)/settings/vault-unlock');
   };
 
   const handleAutoLockPress = () => {
-    router.push('/(tabs)/(settings)/auto-lock');
+    router.push('/(tabs)/settings/auto-lock');
   };
 
   const handleIosAutofillPress = () => {
-    router.push('/(tabs)/(settings)/ios-autofill');
+    router.push('/(tabs)/settings/ios-autofill');
   };
 
   const styles = StyleSheet.create({
