@@ -95,7 +95,7 @@ export default function LoginScreen() {
     setPasswordHashBase64(null);
     setLoginResponse(null);
     setLoginStatus(null);
-    router.replace('/(tabs)');
+    router.replace('/(tabs)/credentials');
     setIsLoading(false);
   };
 

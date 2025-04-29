@@ -344,10 +344,25 @@ public class VaultStore {
     // MARK: - Encryption/Decryption
 
     private func encrypt(data: Data, key: Data) throws -> Data {
-        // TODO: make sure we encrypt the data the same as decryption works with combined iv/content/tag.
+        // TODO: check if this works properly and is compatible with the other clients.
+        // If it works, remove the commented out code below.
         let key = SymmetricKey(data: key)
         let sealedBox = try AES.GCM.seal(data, using: key)
         return sealedBox.combined!
+        /*
+        // Generate 12-byte random nonce (IV)
+        let iv = AES.GCM.Nonce()
+
+        // Encrypt with AES-GCM and custom IV
+        let sealedBox = try AES.GCM.seal(data, using: key, nonce: iv)
+
+        // Concatenate: IV (12 bytes) + ciphertext + tag
+        var combined = Data()
+        combined.append(contentsOf: iv) // 12 bytes
+        combined.append(sealedBox.ciphertext)
+        combined.append(sealedBox.tag) // 16 bytes
+
+        return combined*/
     }
 
     private func decrypt(data: Data, key: Data) throws -> Data {
@@ -645,7 +660,47 @@ public class VaultStore {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
+
+        // First commit the transaction
         try db.execute("COMMIT")
+
+        // Get the encryption key
+        let key = try getEncryptionKey()
+
+        // Create a temporary file path
+        let tempDbPath = FileManager.default.temporaryDirectory.appendingPathComponent("temp_db.sqlite")
+
+        // Create the physical empty file, replace any existing file at this path
+        try Data().write(to: tempDbPath)
+
+        // Attach a new empty database file as target
+        try db.attach(.uri(tempDbPath.path, parameters: [.mode(.readWrite)]), as: "target")
+
+        // Copy all tables from memory to target file
+        let tables = try db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        try db.execute("BEGIN TRANSACTION")
+        for table in tables {
+            let tableName = table[0] as! String
+            try db.execute("CREATE TABLE target.\(tableName) AS SELECT * FROM main.\(tableName)")
+        }
+        try db.execute("COMMIT")
+        try db.execute("DETACH DATABASE target")
+
+        // Read the raw contents of the temporary file
+        let rawData = try Data(contentsOf: tempDbPath)
+
+        // Convert rawdata to base64 string
+        let base64String = rawData.base64EncodedString()
+
+        // Encrypt the base64 string
+        let encryptedBase64Data = try encrypt(data: Data(base64String.utf8), key: key)
+        let encryptedBase64String = encryptedBase64Data.base64EncodedString()
+
+        // Persist the encrypted base64 string.
+        try storeEncryptedDatabase(encryptedBase64String, metadata: getVaultMetadata()!)
+
+        // Cleanup
+        try FileManager.default.removeItem(at: tempDbPath)
     }
 
     public func rollbackTransaction() throws {
