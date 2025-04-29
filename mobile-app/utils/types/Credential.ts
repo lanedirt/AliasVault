@@ -11,12 +11,17 @@ export type Credential = {
     ServiceUrl?: string;
     Logo?: Uint8Array | number[];
     Notes?: string;
-    Alias: {
-        FirstName?: string;
-        LastName?: string;
-        NickName?: string;
-        BirthDate: string;
-        Gender?: Gender;
-        Email?: string;
-    };
+    Alias: Alias;
+}
+
+/**
+ * Alias SQLite database type.
+ */
+export type Alias = {
+    FirstName?: string;
+    LastName?: string;
+    NickName?: string;
+    BirthDate: string;
+    Gender?: Gender;
+    Email?: string;
 }

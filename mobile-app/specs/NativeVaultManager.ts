@@ -21,6 +21,9 @@ export interface Spec extends TurboModule {
   // SQL operations
   executeQuery(query: string, params: any[]): Promise<any[]>;
   executeUpdate(query: string, params: any[]): Promise<number>;
+  beginTransaction(): Promise<void>;
+  commitTransaction(): Promise<void>;
+  rollbackTransaction(): Promise<void>;
 
   // Auto-lock settings
   setAutoLockTimeout(timeout: number): Promise<void>;

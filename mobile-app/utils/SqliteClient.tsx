@@ -289,7 +289,7 @@ class SqliteClient {
    */
   public async createCredential(credential: Credential): Promise<number> {
     try {
-      await this.executeUpdate('BEGIN TRANSACTION');
+      await NativeVaultManager.beginTransaction();
 
       // 1. Insert Service
       let logoData = null;
@@ -310,8 +310,8 @@ class SqliteClient {
       }
 
       const serviceQuery = `
-                INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt)
-                VALUES (?, ?, ?, ?, ?, ?)`;
+                INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt, IsDeleted)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`;
       const serviceId = crypto.randomUUID().toUpperCase();
       const currentDateTime = new Date().toISOString()
         .replace('T', ' ')
@@ -323,13 +323,14 @@ class SqliteClient {
         credential.ServiceUrl ?? null,
         logoData,
         currentDateTime,
-        currentDateTime
+        currentDateTime,
+        0
       ]);
 
       // 2. Insert Alias
       const aliasQuery = `
-                INSERT INTO Aliases (Id, FirstName, LastName, NickName, BirthDate, Gender, Email, CreatedAt, UpdatedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                INSERT INTO Aliases (Id, FirstName, LastName, NickName, BirthDate, Gender, Email, CreatedAt, UpdatedAt, IsDeleted)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       const aliasId = crypto.randomUUID().toUpperCase();
       await this.executeUpdate(aliasQuery, [
         aliasId,
@@ -340,13 +341,14 @@ class SqliteClient {
         credential.Alias.Gender ?? null,
         credential.Alias.Email ?? null,
         currentDateTime,
-        currentDateTime
+        currentDateTime,
+        0
       ]);
 
       // 3. Insert Credential
       const credentialQuery = `
-                INSERT INTO Credentials (Id, Username, Notes, ServiceId, AliasId, CreatedAt, UpdatedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                INSERT INTO Credentials (Id, Username, Notes, ServiceId, AliasId, CreatedAt, UpdatedAt, IsDeleted)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
       const credentialId = crypto.randomUUID().toUpperCase();
       await this.executeUpdate(credentialQuery, [
         credentialId,
@@ -355,29 +357,44 @@ class SqliteClient {
         serviceId,
         aliasId,
         currentDateTime,
-        currentDateTime
+        currentDateTime,
+        0
       ]);
 
       // 4. Insert Password
       if (credential.Password) {
         const passwordQuery = `
-                    INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt)
-                    VALUES (?, ?, ?, ?, ?)`;
+                    INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+                    VALUES (?, ?, ?, ?, ?, ?)`;
         const passwordId = crypto.randomUUID().toUpperCase();
         await this.executeUpdate(passwordQuery, [
           passwordId,
           credential.Password,
           credentialId,
           currentDateTime,
-          currentDateTime
+          currentDateTime,
+          0
         ]);
       }
 
-      await this.executeUpdate('COMMIT');
+      await NativeVaultManager.commitTransaction();
+      console.log('Credential created successfully');
+
+      console.log('Credential ID:', credentialId);
+
+      // Can we do select query here to check if the credential was created?
+      const credential2 = await this.getCredentialById(credentialId);
+      if (!credential2) {
+        console.log('Credential could not be retrieved after creation??');
+      }
+      else {
+        console.log('Credential retrieved successfully?');
+      }
+
       return 1;
 
     } catch (error) {
-      await this.executeUpdate('ROLLBACK');
+      await NativeVaultManager.rollbackTransaction();
       console.error('Error creating credential:', error);
       throw error;
     }

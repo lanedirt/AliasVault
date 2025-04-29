@@ -74,9 +74,21 @@ public class VaultManager: NSObject {
                       resolver resolve: @escaping RCTPromiseResolveBlock,
                       rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Convert all params to strings
+            // Parse all params to the correct type
             let bindingParams = params.map { param -> Binding? in
-                return String(describing: param)
+                if param is NSNull {
+                    return nil
+                } else if let value = param as? String {
+                    return value
+                } else if let value = param as? NSNumber {
+                    return "\(value)"
+                } else if let value = param as? Bool {
+                    return value ? "1" : "0"
+                } else if let value = param as? Data {
+                    return value.base64EncodedString()
+                } else {
+                    return String(describing: param)
+                }
             }
 
             // Execute the query through the vault store
@@ -93,9 +105,21 @@ public class VaultManager: NSObject {
                        resolver resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // Convert all params to strings
+            // Parse all params to the correct type
             let bindingParams = params.map { param -> Binding? in
-                return String(describing: param)
+                if param is NSNull {
+                    return nil
+                } else if let value = param as? String {
+                    return value
+                } else if let value = param as? NSNumber {
+                    return "\(value)"
+                } else if let value = param as? Bool {
+                    return value ? "1" : "0"
+                } else if let value = param as? Data {
+                    return value.base64EncodedString()
+                } else {
+                    return String(describing: param)
+                }
             }
 
             // Execute the update through the vault store
@@ -234,6 +258,39 @@ public class VaultManager: NSObject {
             resolve(methodStrings)
         } catch {
             reject("AUTH_METHOD_ERROR", "Failed to get authentication methods: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func beginTransaction(_ resolve: @escaping RCTPromiseResolveBlock,
+                         rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            try vaultStore.beginTransaction()
+            resolve(nil)
+        } catch {
+            reject("TRANSACTION_ERROR", "Failed to begin transaction: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func commitTransaction(_ resolve: @escaping RCTPromiseResolveBlock,
+                         rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            try vaultStore.commitTransaction()
+            resolve(nil)
+        } catch {
+            reject("TRANSACTION_ERROR", "Failed to commit transaction: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func rollbackTransaction(_ resolve: @escaping RCTPromiseResolveBlock,
+                           rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            try vaultStore.rollbackTransaction()
+            resolve(nil)
+        } catch {
+            reject("TRANSACTION_ERROR", "Failed to rollback transaction: \(error.localizedDescription)", error)
         }
     }
 

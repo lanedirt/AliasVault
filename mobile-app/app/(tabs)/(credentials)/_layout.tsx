@@ -1,5 +1,6 @@
 import { useColors } from '@/hooks/useColorScheme';
 import { Stack } from 'expo-router';
+import { Platform } from 'react-native';
 
 export default function CredentialsLayout() {
   const colors = useColors();
@@ -16,10 +17,12 @@ export default function CredentialsLayout() {
         name="add-edit"
         options={{
           title: 'Add Credential',
+          presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           headerShown: true,
           headerStyle: {
             backgroundColor: colors.headerBackground,
           },
+          gestureEnabled: true,
         }}
       />
       <Stack.Screen

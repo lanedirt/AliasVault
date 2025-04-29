@@ -56,6 +56,18 @@
     [vaultManager executeUpdate:query params:params resolver:resolve rejecter:reject];
 }
 
+- (void)beginTransaction:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager beginTransaction:resolve rejecter:reject];
+}
+
+- (void)commitTransaction:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager commitTransaction:resolve rejecter:reject];
+}
+
+- (void)rollbackTransaction:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager rollbackTransaction:resolve rejecter:reject];
+}
+
 - (void)getAuthMethods:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     [vaultManager getAuthMethods:resolve rejecter:reject];
 }

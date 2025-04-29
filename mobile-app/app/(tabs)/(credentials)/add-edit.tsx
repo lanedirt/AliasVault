@@ -1,14 +1,12 @@
 import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
-import { Credential } from '@/utils/types/Credential';
-import { TitleContainer } from '@/components/TitleContainer';
-import { CollapsibleHeader } from '@/components/CollapsibleHeader';
+import { Credential, Alias } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Gender } from "../../../utils/generators/Identity/types/Gender";
@@ -22,7 +20,7 @@ export default function AddEditCredentialScreen() {
   const dbContext = useDb();
   const [mode, setMode] = useState<CredentialMode>('random');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
   const [credential, setCredential] = useState<Partial<Credential>>({
     Id: "",
     Username: "",
@@ -31,14 +29,42 @@ export default function AddEditCredentialScreen() {
     ServiceUrl: "",
     Notes: "",
     Alias: {
-        FirstName: "",
-        LastName: "",
-        NickName: "",
-        BirthDate: "0001-01-01",
-        Gender: Gender.Other,
-        Email: ""
-    }
+      FirstName: "",
+      LastName: "",
+      NickName: "",
+      BirthDate: "0001-01-01",
+      Gender: Gender.Other,
+      Email: ""
+    },
   });
+
+    // Set navigation options
+    useEffect(() => {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ padding: 10, paddingLeft: 0 }}
+          >
+            <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
+          </TouchableOpacity>
+        ),
+        headerRight: () => (
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity
+              onPress={handleSave}
+              style={{ padding: 10, paddingRight: 0 }}
+            >
+              <MaterialIcons
+                    name="save"
+                    size={24}
+                    color={colors.primary}
+                  />
+            </TouchableOpacity>
+          </View>
+        ),
+      });
+    }, [navigation, credential, mode]);
 
   const isEditMode = !!id;
 
@@ -71,31 +97,47 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const generateRandomValues = () => {
+  const generateRandomValues = () : Credential => {
     // Placeholder for random generation - will be replaced with actual generators
     const randomString = (length: number) => Math.random().toString(36).substring(2, length + 2);
 
-    setCredential(prev => ({
-      ...prev,
-      Username: randomString(8),
-      Password: randomString(12),
-      Alias: {
-        ...prev.Alias,
-        Email: `${randomString(8)}@example.com`,
-        FirstName: randomString(6),
-        LastName: randomString(6),
-        NickName: randomString(6),
-        Gender: Math.random() > 0.5 ? Gender.Male : Gender.Female,
-        BirthDate: '0001-01-01 00:00:00'
-      }
-    }));
+    // Get the current credential
+    const updatedCredential = credential;
+
+    // Assign random values to all fields
+    updatedCredential.Username = randomString(8);
+    updatedCredential.Password = randomString(12);
+
+    updatedCredential.Alias = {
+      ...(updatedCredential.Alias ?? {}),
+      Email: `${randomString(8)}@example.com`,
+      FirstName: randomString(6),
+      LastName: randomString(6),
+      NickName: randomString(6),
+      Gender: Math.random() > 0.5 ? Gender.Male : Gender.Female,
+      BirthDate: '0001-01-01 00:00:00',
+    };
+
+    setCredential(updatedCredential);
+
+    return updatedCredential as Credential;
   };
 
   const handleSave = async () => {
     try {
       setIsLoading(true);
+
+      let credentialToSave = credential as Credential;
+
+      // If mode is random, generate random values for all fields before saving.
+      // TODO: replace this with actual identity generator logic.
+      if (mode === 'random') {
+        console.log('Generating random values');
+        credentialToSave = generateRandomValues();
+      }
+
       // Always use createCredential since updateCredentialById doesn't exist
-      await dbContext.sqliteClient!.createCredential(credential as Credential);
+      await dbContext.sqliteClient!.createCredential(credentialToSave);
       Toast.show({
         type: 'success',
         text1: 'Credential saved successfully',
@@ -125,12 +167,6 @@ export default function AddEditCredentialScreen() {
       }
     }));
   };
-
-  const headerButtons = [{
-    icon: 'save' as const,
-    position: 'right' as const,
-    onPress: handleSave
-  }];
 
   const styles = StyleSheet.create({
     container: {
@@ -247,6 +283,9 @@ export default function AddEditCredentialScreen() {
               placeholder="Service URL"
               placeholderTextColor={colors.textMuted}
               value={credential.ServiceUrl}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
               onChangeText={(text) => setCredential(prev => ({ ...prev, ServiceUrl: text }))}
             />
           </View>

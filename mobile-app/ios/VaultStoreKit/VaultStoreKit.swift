@@ -634,6 +634,27 @@ public class VaultStore {
         return results
     }
 
+    public func beginTransaction() throws {
+        guard let db = db else {
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+        try db.execute("BEGIN TRANSACTION")
+    }
+
+    public func commitTransaction() throws {
+        guard let db = db else {
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+        try db.execute("COMMIT")
+    }
+
+    public func rollbackTransaction() throws {
+        guard let db = db else {
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+        try db.execute("ROLLBACK")
+    }
+
     public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
