@@ -17,6 +17,7 @@ import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useAuth } from '@/context/AuthContext';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import * as FileSystem from 'expo-file-system';
+import { AliasVaultToast } from '@/components/Toast';
 type CredentialMode = 'random' | 'manual';
 
 interface VaultPostResponse {
@@ -38,8 +39,8 @@ export default function AddEditCredentialScreen() {
     Id: "",
     Username: "",
     Password: "",
-    ServiceName: "test",
-    ServiceUrl: "https://google.com",
+    ServiceName: "",
+    ServiceUrl: "",
     Notes: "",
     Alias: {
       FirstName: "",
@@ -343,16 +344,25 @@ export default function AddEditCredentialScreen() {
     if (response.status === 0) {
       await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
 
-      Toast.show({
-        type: 'success',
-        text1: isEditMode ? 'Credential updated successfully' : 'Credential created successfully',
-        position: 'bottom'
-      });
-
       // Emit an event to notify list and detail views to refresh
       emitter.emit('credentialChanged', credentialToSave.Id);
 
-      router.back();
+      // If this was created from autofill (serviceUrl param), show confirmation screen
+      if (serviceUrl && !isEditMode) {
+        router.replace('/credentials/autofill-confirmation');
+
+      } else {
+      // Show this toast after 200ms to ensure it appears after this component is navigated away from.
+      setTimeout(() => {
+        Toast.show({
+          type: 'success',
+          text1: isEditMode ? 'Credential updated successfully' : 'Credential created successfully',
+          position: 'bottom'
+          });
+        }, 200);
+
+        router.back();
+      }
     } else if (response.status === 1) {
       throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
     } else {
@@ -606,6 +616,7 @@ export default function AddEditCredentialScreen() {
           )}
         </ScrollView>
       </ThemedView>
+      <AliasVaultToast />
     </ThemedSafeAreaView>
   );
 }
