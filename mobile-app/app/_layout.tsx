@@ -4,102 +4,20 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { View, Text } from 'react-native';
 import 'react-native-reanimated';
 // Required for certain modules such as secure-remote-password which relies on crypto.getRandomValues
 // and this is not available in react-native without this polyfill
 import 'react-native-get-random-values';
-import Toast from 'react-native-toast-message';
 
 import { useColors, useColorScheme } from '@/hooks/useColorScheme';
 import { LoadingProvider } from '@/context/LoadingContext';
 import { DbProvider } from '@/context/DbContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { WebApiProvider } from '@/context/WebApiContext';
+import { AliasVaultToast } from '@/components/Toast';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
-// Configure toast styling
-const toastConfig = {
-  success: (props: any) => (
-    <View
-      style={{
-        backgroundColor: '#f97316', // AliasVault orange
-        padding: 12,
-        borderRadius: 8,
-        marginHorizontal: 16,
-        marginBottom: 70,
-        marginTop: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      }}
-    >
-      <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
-        {props.text1}
-      </Text>
-    </View>
-  ),
-  error: (props: any) => (
-    <View
-      style={{
-        backgroundColor: '#dc2626', // Red
-        padding: 12,
-        borderRadius: 8,
-        marginHorizontal: 16,
-        marginBottom: 70,
-        marginTop: 30,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      }}
-    >
-      <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
-        {props.text1}
-      </Text>
-      {props.text2 && (
-        <Text style={{ color: 'white', fontSize: 12, marginTop: 4 }}>
-          {props.text2}
-        </Text>
-      )}
-    </View>
-  ),
-  info: (props: any) => (
-    <View
-      style={{
-        backgroundColor: '#3b82f6', // Blue
-        padding: 12,
-        borderRadius: 8,
-        marginHorizontal: 16,
-        marginBottom: 70,
-        marginTop: 30,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      }}
-    >
-      <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
-        {props.text1}
-      </Text>
-    </View>
-  ),
-};
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
@@ -145,7 +63,7 @@ function RootLayoutNav() {
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
       <StatusBar style="auto" />
-      <Toast config={toastConfig} />
+      <AliasVaultToast />
     </ThemeProvider>
   );
 }
