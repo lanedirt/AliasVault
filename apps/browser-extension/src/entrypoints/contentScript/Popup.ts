@@ -1,14 +1,13 @@
 import { fillCredential } from './Form';
 import { filterCredentials } from './Filter';
-import { IdentityGeneratorEn } from '../../utils/generators/Identity/implementations/IdentityGeneratorEn';
-import { IdentityGeneratorNl } from '../../utils/generators/Identity/implementations/IdentityGeneratorNl';
-import { PasswordGenerator } from '../../utils/generators/Password/PasswordGenerator';
+import { IdentityGeneratorEn, IdentityGeneratorNl } from '../../utils/shared/identity-generator';
+import { PasswordGenerator } from '../../utils/shared/password-generator';
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
-import SqliteClient from '../../utils/SqliteClient';
-import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
+import { SqliteClient } from '../../utils/SqliteClient';
+import { BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { Credential } from '@/utils/types/Credential';

@@ -12,7 +12,7 @@ const placeholderBase64 = 'UklGRjoEAABXRUJQVlA4IC4EAAAwFwCdASqAAIAAPpFCm0olo6Ihp
 /**
  * Client for interacting with the SQLite database.
  */
-class SqliteClient {
+export class SqliteClient {
   private db: Database | null = null;
 
   /**
@@ -351,7 +351,7 @@ class SqliteClient {
 
       const serviceQuery = `
                 INSERT INTO Services (Id, Name, Url, Logo, CreatedAt, UpdatedAt, IsDeleted)
-                VALUES (?, ?, ?, ?, ?, ?)`;
+                VALUES (?, ?, ?, ?, ?, ?, ?)`;
       const serviceId = crypto.randomUUID().toUpperCase();
       const currentDateTime = new Date().toISOString()
         .replace('T', ' ')

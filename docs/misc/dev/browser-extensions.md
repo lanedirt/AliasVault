@@ -19,7 +19,7 @@ The browser extensions are built using:
 Make sure you have Node.js installed on your host machine, then install the dependencies:
 
 ```bash
-cd browser-extensions/chrome
+cd apps/browser-extension
 npm install
 ```
 

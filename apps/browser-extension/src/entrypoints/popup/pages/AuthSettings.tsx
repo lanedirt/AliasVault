@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppInfo } from '../../../utils/AppInfo';
+import { AppInfo } from '@/utils/AppInfo';
 import { storage } from 'wxt/storage';
 import { GLOBAL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '../../contentScript/Popup';
 

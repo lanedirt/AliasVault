@@ -1,4 +1,4 @@
-import { Gender } from "../generators/Identity/types/Gender";
+import { Gender } from "@/utils/shared/identity-generator";
 
 /**
  * Credential SQLite database type.

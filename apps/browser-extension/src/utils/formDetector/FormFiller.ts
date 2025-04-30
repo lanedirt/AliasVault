@@ -1,7 +1,7 @@
-import { Credential } from "../types/Credential";
-import { FormFields } from "./types/FormFields";
-import { CombinedDateOptionPatterns, CombinedGenderOptionPatterns } from "./FieldPatterns";
-import { Gender } from "../generators/Identity/types/Gender";
+import { Credential } from "@/utils/types/Credential";
+import { FormFields } from "@/utils/formDetector/types/FormFields";
+import { CombinedDateOptionPatterns, CombinedGenderOptionPatterns } from "@/utils/formDetector/FieldPatterns";
+import { Gender } from "@/utils/shared/identity-generator";
 /**
  * Class to fill the fields of a form with the given credential.
  */

@@ -10,7 +10,7 @@ import { Buffer } from 'buffer';
  * - AES-GCM symmetric encryption/decryption
  * - RSA-OAEP asymmetric encryption/decryption
  */
-class EncryptionUtility {
+export class EncryptionUtility {
   /**
    * Derives a key from a password using Argon2id
    */

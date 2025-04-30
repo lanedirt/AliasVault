@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import EncryptionUtility from '../../utils/EncryptionUtility';
-import SqliteClient from '../../utils/SqliteClient';
-import { WebApiService } from '../../utils/WebApiService';
-import { Vault } from '../../utils/types/webapi/Vault';
-import { VaultResponse } from '../../utils/types/webapi/VaultResponse';
-import { VaultPostResponse } from '../../utils/types/webapi/VaultPostResponse';
+import { EncryptionUtility } from '@/utils/EncryptionUtility';
+import { SqliteClient } from '@/utils/SqliteClient';
+import { WebApiService } from '@/utils/WebApiService';
+import { Vault } from '@/utils/types/webapi/Vault';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { VaultPostResponse } from '@/utils/types/webapi/VaultPostResponse';
 import { storage } from 'wxt/storage';
-import { BoolResponse as messageBoolResponse } from '../../utils/types/messaging/BoolResponse';
-import { VaultResponse as messageVaultResponse } from '../../utils/types/messaging/VaultResponse';
-import { CredentialsResponse as messageCredentialsResponse } from '../../utils/types/messaging/CredentialsResponse';
-import { StringResponse as stringResponse } from '../../utils/types/messaging/StringResponse';
+import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
+import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
+import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
+import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '../../utils/types/messaging/PasswordSettingsResponse';
 
 /**
