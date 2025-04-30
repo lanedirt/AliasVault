@@ -7,9 +7,21 @@ type CredentialCardProps = {
   credential: Credential;
 };
 
+/**
+ * CredentialCard component
+ *
+ * This component displays a credential card with a service name, username, and email.
+ * It allows the user to navigate to the credential details page when clicked.
+ *
+ */
 const CredentialCard: React.FC<CredentialCardProps> = ({ credential }) => {
   const navigate = useNavigate();
 
+  /**
+   * Get the display text for the credential
+   * @param cred - The credential to get the display text for
+   * @returns The display text for the credential
+   */
   const getDisplayText = (cred: Credential): string => {
     // Show username if available
     if (cred.Username) {

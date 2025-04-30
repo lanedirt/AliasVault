@@ -12,6 +12,7 @@ export default [
         ignores: [
             "dist/**",
             "node_modules/**",
+            "src/utils/shared/**",
         ]
     },
     js.configs.recommended,

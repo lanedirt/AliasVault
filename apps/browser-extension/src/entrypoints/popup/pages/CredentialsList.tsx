@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDb } from '../context/DbContext';
 import { Credential } from '../../../utils/types/Credential';
-import { useNavigate } from 'react-router-dom';
 import { useLoading } from '../context/LoadingContext';
 import { useWebApi } from '../context/WebApiContext';
 import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
@@ -19,30 +18,7 @@ const CredentialsList: React.FC = () => {
   const webApi = useWebApi();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
-
-  /**
-   * Get the display text for a credential, showing username by default,
-   * falling back to email only if username is null/undefined
-   */
-  const getCredentialDisplayText = (cred: Credential): string => {
-    const username = cred.Username ?? '';
-
-    // Show username if available.
-    if (username.length > 0) {
-      return username;
-    }
-
-    // Show email if username is not available.
-    const email = cred.Alias?.Email ?? '';
-    if (email.length > 0) {
-      return email;
-    }
-
-    // Show empty string if neither username nor email is available.
-    return '';
-  };
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -92,10 +68,12 @@ const CredentialsList: React.FC = () => {
       // Initialize the SQLite context again with the newly retrieved decrypted blob)
       try {
         await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-      } catch (err) {
-        // If error occurs during database initialization, it most likely has to do with decryption that
-        // failed. This is most likely due to the user changing their password.
-        // So we logout the user here to force them to re-authenticate.
+      } catch {
+        /**
+         * If error occurs during database initialization, it most likely has to do with decryption that
+         * failed. This is most likely due to the user changing their password.
+         * So we logout the user here to force them to re-authenticate.
+         */
         await webApi.logout('Vault could not be decrypted, please re-authenticate.');
       }
     } catch (err) {
