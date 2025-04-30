@@ -1,4 +1,4 @@
-import { PasswordSettings } from '../../types/PasswordSettings';
+import { PasswordSettings } from './types/PasswordSettings';
 
 /**
  * Generate a random password.
@@ -231,7 +231,7 @@ export class PasswordGenerator {
       }
 
       let charToRemove = ambChar;
-      
+
       // Handle case conversion for alphabetic characters.
       if (isAlpha) {
         if (charSet === this.lowercaseChars) {

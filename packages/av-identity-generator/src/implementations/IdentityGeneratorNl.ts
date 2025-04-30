@@ -1,4 +1,7 @@
 import { BaseIdentityGenerator } from "./base/BaseIdentityGenerator";
+import maleNames from '../dictionaries/nl/firstnames_male';
+import femaleNames from '../dictionaries/nl/firstnames_female';
+import lastNames from '../dictionaries/nl/lastnames';
 
 /**
  * Identity generator for Dutch language using Dutch word dictionaries.
@@ -8,32 +11,20 @@ export class IdentityGeneratorNl extends BaseIdentityGenerator {
    * Get the male first names.
    */
   protected getFirstNamesMaleJson(): string[] {
-    /*
-     * This is a placeholder for the dictionary-loader to replace with the actual data.
-     * See vite-plugins/dictionary-loader.ts for more information.
-     */
-    return '__FIRSTNAMES_MALE_NL__';
+    return maleNames;
   }
 
   /**
    * Get the female first names.
    */
   protected getFirstNamesFemaleJson(): string[] {
-    /*
-     * This is a placeholder for the dictionary-loader to replace with the actual data.
-     * See vite-plugins/dictionary-loader.ts for more information.
-     */
-    return '__FIRSTNAMES_FEMALE_NL__';
+    return femaleNames;
   }
 
   /**
    * Get the last names.
    */
   protected getLastNamesJson(): string[] {
-    /*
-     * This is a placeholder for the dictionary-loader to replace with the actual data.
-     * See vite-plugins/dictionary-loader.ts for more information.
-     */
-    return '__LASTNAMES_NL__';
+    return lastNames;
   }
 }

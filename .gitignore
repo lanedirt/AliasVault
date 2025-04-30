@@ -394,6 +394,7 @@ install.sh.backup
 
 # Dist files
 packages/**/dist/
+*.tsbuildinfo
 
 # Certificates
 certificates/**/*.crt
