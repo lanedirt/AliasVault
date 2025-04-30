@@ -14,8 +14,9 @@ import Toast from 'react-native-toast-message';
 import { Gender } from "@/utils/generators/Identity/types/Gender";
 import emitter from '@/utils/EventEmitter';
 import NativeVaultManager from '@/specs/NativeVaultManager';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
+import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
+import * as FileSystem from 'expo-file-system';
 type CredentialMode = 'random' | 'manual';
 
 interface VaultPostResponse {
@@ -37,8 +38,8 @@ export default function AddEditCredentialScreen() {
     Id: "",
     Username: "",
     Password: "",
-    ServiceName: "",
-    ServiceUrl: "",
+    ServiceName: "test",
+    ServiceUrl: "https://google.com",
     Notes: "",
     Alias: {
       FirstName: "",
@@ -259,6 +260,30 @@ export default function AddEditCredentialScreen() {
       // Update existing credential
       await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
     } else {
+      // For new credentials, try to extract favicon
+      if (credentialToSave.ServiceUrl) {
+        try {
+          // Set a timeout of 5 seconds for favicon extraction
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
+          );
+
+          const faviconPromise = webApi.get<FaviconExtractModel>('Favicon/Extract?url=' + credentialToSave.ServiceUrl);
+          const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as FaviconExtractModel;
+          if (faviconResponse?.image) {
+            // The WebApi returns a base64 encoded string for the favicon image.
+            // We need to decode it to a Uint8Array before storing it in the service logo.
+            const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
+
+            // Store the favicon in the service logo.
+            credentialToSave.Logo = decodedImage;
+          }
+        } catch (error) {
+          console.log('Favicon extraction failed or timed out:', error);
+          // Continue without favicon
+        }
+      }
+
       // Create new credential
       await dbContext.sqliteClient!.createCredential(credentialToSave);
     }
@@ -275,6 +300,8 @@ export default function AddEditCredentialScreen() {
     setSyncStatus('Uploading vault to server...');
 
     // Get email addresses from credentials
+    // TODO: this gets all email addresses, seemingly even non-aliasvault ones.
+    // Should we filter out non-aliasvault ones?
     const credentials = await dbContext.sqliteClient!.getAllCredentials();
     const emailAddresses = credentials
       .filter(cred => cred.Alias?.Email != null)

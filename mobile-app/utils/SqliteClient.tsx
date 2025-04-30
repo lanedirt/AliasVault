@@ -66,7 +66,18 @@ class SqliteClient {
    */
   public async executeQuery<T>(query: string, params: SQLiteBindValue[] = []): Promise<T[]> {
     try {
-      const results = await NativeVaultManager.executeQuery(query, params);
+      // Convert any Uint8Array parameters to base64 strings as the Native wrapper
+      // communication requires everything to be a string.
+      const convertedParams = params.map(param => {
+        if (param instanceof Uint8Array) {
+          // We prefix the base64 string with "av-base64:" to indicate that it is a base64 encoded Uint8Array.
+          // So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+          return 'av-base64-to-blob:' + Buffer.from(param).toString('base64');
+        }
+        return param;
+      });
+
+      const results = await NativeVaultManager.executeQuery(query, convertedParams);
       return results as T[];
     } catch (error) {
       console.error('Error executing query:', error);
@@ -79,7 +90,18 @@ class SqliteClient {
    */
   public async executeUpdate(query: string, params: SQLiteBindValue[] = []): Promise<number> {
     try {
-      const result = await NativeVaultManager.executeUpdate(query, params);
+      // Convert any Uint8Array parameters to base64 strings as the Native wrapper
+      // communication requires everything to be a string.
+      const convertedParams = params.map(param => {
+        if (param instanceof Uint8Array) {
+          // We prefix the base64 string with "av-base64-to-blob:" to indicate that it is a base64 encoded Uint8Array.
+          // So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+          return 'av-base64-to-blob:' + Buffer.from(param).toString('base64');
+        }
+        return param;
+      });
+
+      const result = await NativeVaultManager.executeUpdate(query, convertedParams);
       return result as number;
     } catch (error) {
       console.error('Error executing update:', error);

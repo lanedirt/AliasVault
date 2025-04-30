@@ -278,7 +278,7 @@ public class VaultStore {
                 vaultRevisionNumber: revisionNumber
             )
         }
-        
+
         metadata.vaultRevisionNumber = revisionNumber
         if let data = try? JSONEncoder().encode(metadata),
         let jsonString = String(data: data, encoding: .utf8) {
@@ -651,9 +651,27 @@ public class VaultStore {
 
     // MARK: - Query Execution
 
+    /**
+     * Execute a SELECT query.
+     */
     public func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+
+        // Loop through all params and convert any base64 strings to SQLite.Blob.
+        // Do this by checking for a statically determined prefix "av-base64:"
+        // and then decoding the base64 string so we're inserting the original binary data.
+        var params = params // Make params mutable
+        for (index, param) in params.enumerated() {
+            if let base64String = param as? String {
+                if base64String.hasPrefix("av-base64-to-blob:") {
+                    let base64 = String(base64String.dropFirst("av-base64-to-blob:".count))
+                    if let data = Data(base64Encoded: base64) {
+                        params[index] = Blob(bytes: [UInt8](data))
+                    }
+                }
+            }
         }
 
         let statement = try db.prepare(query)
@@ -687,6 +705,34 @@ public class VaultStore {
         }
 
         return results
+    }
+
+    /**
+     * Execute an update (INSERT, DELETE) query.
+     */
+    public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
+        guard let db = db else {
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+
+        // Loop through all params and convert any base64 strings to SQLite.Blob.
+        // Do this by checking for a statically determined prefix "av-base64:"
+        // and then decoding the base64 string so we're inserting the original binary data.
+        var params = params // Make params mutable
+        for (index, param) in params.enumerated() {
+            if let base64String = param as? String {
+                if base64String.hasPrefix("av-base64-to-blob:") {
+                    let base64 = String(base64String.dropFirst("av-base64-to-blob:".count))
+                    if let data = Data(base64Encoded: base64) {
+                        params[index] = Blob(bytes: [UInt8](data))
+                    }
+                }
+            }
+        }
+
+        let statement = try db.prepare(query)
+        try statement.run(params)
+        return db.changes
     }
 
     public func beginTransaction() throws {
@@ -748,16 +794,6 @@ public class VaultStore {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         try db.execute("ROLLBACK")
-    }
-
-    public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
-        guard let db = db else {
-            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
-        }
-
-        let statement = try db.prepare(query)
-        try statement.run(params)
-        return db.changes
     }
 
     // MARK: - Auto Lock Timeout Management
