@@ -68,6 +68,8 @@
       <EmbeddedResource Include="TestData\Exports\keepass.csv" />
       <EmbeddedResource Include="TestData\Exports\keepassxc.csv" />
       <EmbeddedResource Include="TestData\Exports\1password_8.csv" />
+      <EmbeddedResource Include="TestData\Exports\protonpass.csv" />
+      <EmbeddedResource Include="TestData\Exports\dashlane.csv" />
     </ItemGroup>
 
 </Project>

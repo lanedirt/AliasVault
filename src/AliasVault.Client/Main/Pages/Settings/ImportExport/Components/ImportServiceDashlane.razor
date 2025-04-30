@@ -1,0 +1,21 @@
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@inject ILogger<ImportServiceBitwarden> Logger
+
+<ImportServiceCard
+    ServiceName="Dashlane"
+    Description="Import passwords from your Dashlane account"
+    LogoUrl="img/importers/dashlane.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Dashlane passwords, you need to export it as a CSV file. You can do this by logging into your Dashlane account, going to the 'Account' > 'Settings' menu and selecting 'Export to CSV'.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Note: the .zip file you download will contain a "credentials.csv" file. You need to unzip the archive first, and then upload the "credentials.csv" CSV file below.</p>
+</ImportServiceCard>
+
+@code {
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await DashlaneImporter.ImportFromCsvAsync(fileContents);
+    }
+}

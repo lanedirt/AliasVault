@@ -6,11 +6,11 @@ import { PasswordGenerator } from '../../utils/generators/Password/PasswordGener
 import { storage } from "wxt/storage";
 import { sendMessage } from "webext-bridge/content-script";
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
-import { CombinedStopWords } from '../../utils/formDetector/FieldPatterns';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import SqliteClient from '../../utils/SqliteClient';
 import { BaseIdentityGenerator } from '@/utils/generators/Identity/implementations/base/BaseIdentityGenerator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
+import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { Credential } from '@/utils/types/Credential';
 
 // TODO: store generic setting constants somewhere else.
@@ -212,8 +212,8 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    const suggestedName = getSuggestedServiceName(document, window.location);
-    const result = await createAliasCreationPopup(suggestedName, rootContainer);
+    const suggestedNames = FormDetector.getSuggestedServiceName(document, window.location);
+    const result = await createAliasCreationPopup(suggestedNames, rootContainer);
 
     if (!result) {
       // User cancelled
@@ -316,32 +316,12 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   };
 
   // Add click listener with capture and prevent removal.
-  createButton.addEventListener('click', handleCreateClick, {
-    capture: true,
-    passive: false
-  });
-
-  // Backup click handling using mousedown/mouseup if needed.
-  let isMouseDown = false;
-  createButton.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    isMouseDown = true;
-  }, { capture: true });
-
-  createButton.addEventListener('mouseup', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isMouseDown) {
-      handleCreateClick(e);
-    }
-    isMouseDown = false;
-  }, { capture: true });
+  addReliableClickHandler(createButton, handleCreateClick);
 
   // Create search input.
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
-  searchInput.dataset.aliasvaultIgnore = 'true';
+  searchInput.dataset.avDisable = 'true';
   searchInput.placeholder = 'Search vault...';
   searchInput.className = 'av-search-input';
 
@@ -359,10 +339,18 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   </svg>
 `;
 
-  closeButton.addEventListener('click', async () => {
+  /**
+   * Handle close button click
+   */
+  const handleCloseClick = async (e: Event) : Promise<void> => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     await disableAutoShowPopup();
     removeExistingPopup(rootContainer);
-  });
+  };
+
+  addReliableClickHandler(closeButton, handleCloseClick);
 
   actionContainer.appendChild(searchInput);
   actionContainer.appendChild(createButton);
@@ -602,7 +590,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
         `;
 
       // Handle popout click
-      popoutIcon.addEventListener('click', (e) => {
+      addReliableClickHandler(popoutIcon, (e) => {
         e.stopPropagation(); // Prevent credential fill
         sendMessage('OPEN_POPUP_WITH_CREDENTIAL', { credentialId: cred.Id }, 'background');
         removeExistingPopup(rootContainer);
@@ -612,7 +600,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       item.appendChild(popoutIcon);
 
       // Update click handler to only trigger on credentialInfo
-      credentialInfo.addEventListener('click', () => {
+      addReliableClickHandler(credentialInfo, () => {
         fillCredential(cred, input);
         removeExistingPopup(rootContainer);
       });
@@ -672,7 +660,7 @@ export async function disableAutoShowPopup(): Promise<void> {
 /**
  * Create alias creation popup where user can choose between random alias and custom alias.
  */
-export async function createAliasCreationPopup(defaultName: string, rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
+export async function createAliasCreationPopup(suggestedNames: string[], rootContainer: HTMLElement): Promise<{ serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null> {
   // Close existing popup
   removeExistingPopup(rootContainer);
 
@@ -756,17 +744,23 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
       <div class="av-create-popup-help-text">${randomIdentitySubtext}</div>
 
+      <div class="av-create-popup-field-group">
+        <label for="service-name-input">Service name</label>
+        <input
+          type="text"
+          id="service-name-input"
+          value="${suggestedNames[0] ?? ''}"
+          class="av-create-popup-input"
+          placeholder="Enter service name"
+        >
+        ${suggestedNames.length > 1 ? `
+          <div class="av-suggested-names">
+            ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
+          </div>
+        ` : ''}
+      </div>
+
       <div class="av-create-popup-mode av-create-popup-random-mode">
-        <div class="av-create-popup-field-group">
-          <label for="service-name-input">Service name</label>
-          <input
-            type="text"
-            id="service-name-input"
-            value="${defaultName}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-        </div>
         <div class="av-create-popup-actions">
           <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
           <button id="save-btn" class="av-create-popup-save">Create and save alias</button>
@@ -774,16 +768,6 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
       </div>
 
       <div class="av-create-popup-mode av-create-popup-custom-mode" style="display: none;">
-        <div class="av-create-popup-field-group">
-          <label for="custom-service-name">Service name</label>
-          <input
-            type="text"
-            id="custom-service-name"
-            value="${defaultName}"
-            class="av-create-popup-input"
-            placeholder="Enter service name"
-          >
-        </div>
         <div class="av-create-popup-field-group">
           <label for="custom-email">Email</label>
           <input
@@ -811,8 +795,15 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
               type="text"
               id="password-preview"
               class="av-create-popup-input"
+              data-is-generated="true"
             >
-            <button id="regenerate-password" class="av-create-popup-regenerate-btn">
+            <button id="toggle-password-visibility" class="av-create-popup-visibility-btn" title="Toggle password visibility">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <button id="regenerate-password" class="av-create-popup-regenerate-btn" title="Generate new password">
               <svg class="av-icon" viewBox="0 0 24 24">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
@@ -844,12 +835,12 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
     const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
     const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
-    const input = popup.querySelector('#service-name-input') as HTMLInputElement;
-    const customInput = popup.querySelector('#custom-service-name') as HTMLInputElement;
+    const inputServiceName = popup.querySelector('#service-name-input') as HTMLInputElement;
     const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
     const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
     const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
     const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
+    const toggleVisibilityBtn = popup.querySelector('#toggle-password-visibility') as HTMLButtonElement;
 
     /**
      * Setup default value for input with placeholder styling.
@@ -892,7 +883,14 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
      * Generate and set password.
      */
     const generatePassword = () : void => {
+      if (!passwordGenerator) {
+        return;
+      }
+
       passwordPreview.value = passwordGenerator.generateRandomPassword();
+      passwordPreview.type = 'text';
+      passwordPreview.dataset.isGenerated = 'true';
+      updateVisibilityIcon(true);
     };
 
     // Get password settings from background
@@ -906,6 +904,65 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);
+
+    // Add password visibility toggle functionality
+    const passwordInput = popup.querySelector('#password-preview') as HTMLInputElement;
+
+    /**
+     * Toggle password visibility icon
+     */
+    const updateVisibilityIcon = (isVisible: boolean): void => {
+      toggleVisibilityBtn.innerHTML = isVisible ? `
+        <svg class="av-icon" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      ` : `
+        <svg class="av-icon" viewBox="0 0 24 24">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+      `;
+    };
+
+    /**
+     * Toggle password visibility
+     */
+    const togglePasswordVisibility = (): void => {
+      const isVisible = passwordInput.type === 'text';
+      passwordInput.type = isVisible ? 'password' : 'text';
+      updateVisibilityIcon(!isVisible);
+    };
+
+    toggleVisibilityBtn.addEventListener('click', togglePasswordVisibility);
+
+    /**
+     * Handle password input changes
+     */
+    const handlePasswordChange = (e: Event): void => {
+      const target = e.target as HTMLInputElement;
+      const isGenerated = target.dataset.isGenerated === 'true';
+      const isEmpty = target.value.trim().length <= 1;
+
+      // If manually cleared (empty or single char) and was previously generated, switch to password type
+      if (isEmpty && isGenerated) {
+        target.type = 'password';
+        target.dataset.isGenerated = 'false';
+        updateVisibilityIcon(false);
+      }
+    };
+
+    /**
+     * Handle paste events
+     */
+    const handlePasswordPaste = (): void => {
+      passwordInput.dataset.isGenerated = 'false';
+      passwordInput.type = 'password';
+      updateVisibilityIcon(false);
+    };
+
+    passwordInput.addEventListener('input', handlePasswordChange);
+    passwordInput.addEventListener('paste', handlePasswordPaste);
 
     /**
      * Toggle dropdown visibility.
@@ -966,7 +1023,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
 
     // Handle save buttons
     saveBtn.addEventListener('click', () => {
-      const serviceName = input.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         closePopup({
           serviceName,
@@ -979,7 +1036,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
      * Handle custom save button click.
      */
     const handleCustomSave = () : void => {
-      const serviceName = customInput.value.trim();
+      const serviceName = inputServiceName.value.trim();
       if (serviceName) {
         const email = customEmail.value.trim();
         const username = customUsername.value.trim();
@@ -1056,7 +1113,7 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
       }
     };
 
-    customInput.addEventListener('keyup', handleCustomEnter);
+    inputServiceName.addEventListener('keyup', handleCustomEnter);
     customEmail.addEventListener('keyup', handleCustomEnter);
     customUsername.addEventListener('keyup', handleCustomEnter);
     passwordPreview.addEventListener('keyup', handleCustomEnter);
@@ -1071,9 +1128,9 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     });
 
     // Handle Enter key
-    input.addEventListener('keyup', (e) => {
+    inputServiceName.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        const serviceName = input.value.trim();
+        const serviceName = inputServiceName.value.trim();
         if (serviceName) {
           closePopup({
             serviceName,
@@ -1096,9 +1153,49 @@ export async function createAliasCreationPopup(defaultName: string, rootContaine
     // Use mousedown instead of click to prevent closing when dragging text
     overlay.addEventListener('mousedown', handleClickOutside);
 
+    /**
+     * Handle suggested name click.
+     */
+    const handleSuggestedNameClick = (e: Event) : void => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('av-suggested-name')) {
+        const name = target.dataset.name;
+        if (name) {
+          // Update input with clicked name
+          inputServiceName.value = name;
+          customUsername.value = name;
+
+          // Update the suggested names section
+          const suggestedNamesContainer = target.closest('.av-suggested-names');
+          if (suggestedNamesContainer) {
+            // Update the suggestions HTML using the helper function
+            suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+          }
+        }
+      }
+    };
+
+    popup.addEventListener('click', handleSuggestedNameClick);
+
     // Focus the input field
-    input.select();
+    inputServiceName.select();
   });
+}
+
+/**
+ * Get suggested names HTML with current input value excluded
+ */
+function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): string {
+  // Filter out the current value and create unique set of remaining suggestions
+  const filteredSuggestions = [...new Set(suggestedNames.filter(n => n !== currentValue))];
+
+  if (filteredSuggestions.length === 0) {
+    return '';
+  }
+
+  return `or ${filteredSuggestions.map((name, index) =>
+    `<span class="av-suggested-name" data-name="${name}">${name}</span>${index < filteredSuggestions.length - 1 ? ', ' : ''}`
+  ).join('')}?`;
 }
 
 /**
@@ -1227,57 +1324,6 @@ export async function dismissVaultLockedPopup(): Promise<void> {
 }
 
 /**
- * Get a suggested service name from the page title and URL.
- * Attempts to extract meaningful parts while maintaining original capitalization.
- */
-function getSuggestedServiceName(document: Document, location: Location): string {
-  const title = document.title;
-
-  /**
-   * Filter out common words and keep meaningful parts of the title
-   */
-  const getMeaningfulTitleParts = (title: string): string[] => {
-    return title
-      .toLowerCase()
-      .split(/[\s|\-—/\\]+/) // Split on spaces and common dividers
-      .filter(word =>
-        word.length > 1 && // Filter out single characters
-        !CombinedStopWords.has(word.toLowerCase()) // Filter out common words
-      );
-  };
-
-  /**
-   * Get original case version of meaningful words
-   */
-  const getOriginalCase = (text: string, meaningfulParts: string[]): string => {
-    return text
-      .split(/[\s|\-—/\\]+/)
-      .filter(word => meaningfulParts.includes(word.toLowerCase()))
-      .join(' ');
-  };
-
-  // First try to extract meaningful parts after the last divider
-  const dividerRegex = /[|\-—/\\][^|\-—/\\]*$/;
-  const dividerMatch = dividerRegex.exec(title);
-  if (dividerMatch) {
-    const meaningfulParts = getMeaningfulTitleParts(dividerMatch[0]);
-    if (meaningfulParts.length > 0) {
-      return getOriginalCase(dividerMatch[0].trim(), meaningfulParts);
-    }
-  }
-
-  // If no meaningful parts found after divider, try the full title
-  const meaningfulParts = getMeaningfulTitleParts(title);
-  if (meaningfulParts.length > 0) {
-    return getOriginalCase(title, meaningfulParts);
-  }
-
-  // Fall back to domain name if no meaningful parts found
-  const domainParts = location.hostname.replace(/^www\./, '').split('.');
-  return domainParts.slice(-2).join('.');
-}
-
-/**
  * Get a valid service URL from the current page.
  */
 function getValidServiceUrl(): string {
@@ -1304,4 +1350,36 @@ function getValidServiceUrl(): string {
     console.debug('Error validating service URL:', error);
     return '';
   }
+}
+
+/**
+ * Add click handler with mousedown/mouseup backup for better click reliability in shadow DOM.
+ *
+ * Some websites due to their design cause the AliasVault autofill to re-trigger when clicking
+ * outside of the input field, which causes the AliasVault popup to close before the click event
+ * is registered. This is a workaround to ensure the click event is always registered.
+ */
+function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => void): void {
+  // Add primary click listener with capture and prevent removal
+  element.addEventListener('click', handler, {
+    capture: true,
+    passive: false
+  });
+
+  // Backup click handling using mousedown/mouseup if needed
+  let isMouseDown = false;
+  element.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isMouseDown = true;
+  }, { capture: true });
+
+  element.addEventListener('mouseup', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMouseDown) {
+      handler(e);
+    }
+    isMouseDown = false;
+  }, { capture: true });
 }

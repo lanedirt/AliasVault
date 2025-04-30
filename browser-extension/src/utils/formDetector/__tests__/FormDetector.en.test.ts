@@ -76,4 +76,11 @@ describe('FormDetector English tests', () => {
 
     testField(FormField.Email, 'resolving_input', htmlFile);
   });
+
+  describe('English login form 2 detection', () => {
+    const htmlFile = 'en-login-form2.html';
+
+    testField(FormField.Email, 'account_name_text_field', htmlFile);
+  });
+
 });

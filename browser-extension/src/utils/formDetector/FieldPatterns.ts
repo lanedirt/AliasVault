@@ -86,7 +86,7 @@ export const EnglishStopWords = new Set([
 
   // Marketing/Promotional
   'free', 'create', 'new', 'your', 'special', 'offer',
-  'deal', 'discount', 'promotion',
+  'deal', 'discount', 'promotion', 'newsletter',
 
   // Common website sections
   'help', 'support', 'contact', 'about', 'faq', 'terms',
@@ -95,14 +95,17 @@ export const EnglishStopWords = new Set([
 
   // Generic descriptors
   'online', 'web', 'digital', 'mobile', 'my', 'personal',
-  'private', 'general', 'default', 'standard',
+  'private', 'general', 'default', 'standard', 'website',
 
   // System/Technical
   'system', 'admin', 'administrator', 'platform', 'portal',
   'gateway', 'api', 'interface', 'console',
 
   // Time-related
-  'today', 'now', 'current', 'latest', 'newest', 'recent'
+  'today', 'now', 'current', 'latest', 'newest', 'recent',
+
+  // General
+  'the', 'and', 'or', 'but', 'to', 'up'
 ]);
 
 /**
@@ -174,7 +177,10 @@ export const DutchStopWords = new Set([
   'interface', 'console',
 
   // Time-related
-  'vandaag', 'nu', 'huidig', 'recent', 'nieuwste'
+  'vandaag', 'nu', 'huidig', 'recent', 'nieuwste',
+
+  // General
+  'je', 'in', 'op', 'de', 'van', 'ons', 'allemaal'
 ]);
 
 /**

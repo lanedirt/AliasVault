@@ -9,8 +9,8 @@ import ReloadButton from '../components/ReloadButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useMinDurationLoading } from '../../../hooks/useMinDurationLoading';
 import { sendMessage } from 'webext-bridge/popup';
-import SqliteClient from '../../../utils/SqliteClient';
 import CredentialCard from '../components/CredentialCard';
+
 /**
  * Credentials list page.
  */
@@ -21,6 +21,28 @@ const CredentialsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
+
+  /**
+   * Get the display text for a credential, showing username by default,
+   * falling back to email only if username is null/undefined
+   */
+  const getCredentialDisplayText = (cred: Credential): string => {
+    const username = cred.Username ?? '';
+
+    // Show username if available.
+    if (username.length > 0) {
+      return username;
+    }
+
+    // Show email if username is not available.
+    const email = cred.Alias?.Email ?? '';
+    if (email.length > 0) {
+      return email;
+    }
+
+    // Show empty string if neither username nor email is available.
+    return '';
+  };
 
   /**
    * Loading state with minimum duration for more fluid UX.

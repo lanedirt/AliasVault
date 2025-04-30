@@ -80,7 +80,7 @@
                                                 }
                                             </td>
                                             <td class="p-4 text-sm font-normal text-gray-500 whitespace-nowrap dark:text-gray-400">
-                                                <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@mail.DateSystem</span>
+                                                <span class="cursor-pointer" @onclick="() => OpenEmail(mail.Id)">@mail.DateSystem.ToString("yyyy-MM-dd")</span>
                                             </td>
                                         </tr>
                                     }
@@ -125,7 +125,7 @@
     public void OnVisibilityChange(bool isVisible)
     {
         _isPageVisible = isVisible;
-        
+
         if (isVisible && DbService.Settings.AutoEmailRefresh)
         {
             // Start polling if visible and auto-refresh is enabled
@@ -136,7 +136,7 @@
             // Stop polling if hidden
             StopPolling();
         }
-        
+
         // If becoming visible, do an immediate refresh
         if (isVisible)
         {
@@ -150,13 +150,13 @@
         if (_pollingCts != null) {
             return;
         }
-            
+
         _pollingCts = new CancellationTokenSource();
-        
+
         // Start polling task
         _ = PollForEmails(_pollingCts.Token);
     }
-    
+
     private void StopPolling()
     {
         if (_pollingCts != null)
@@ -166,7 +166,7 @@
             _pollingCts = null;
         }
     }
-    
+
     private async Task PollForEmails(CancellationToken cancellationToken)
     {
         try
@@ -217,7 +217,7 @@
     {
         // Stop polling
         StopPolling();
-        
+
         // Unregister the visibility callback using the same reference
         if (_dotNetRef != null)
         {

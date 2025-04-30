@@ -41,6 +41,34 @@ export const createTestDom = (htmlFile: string) : JSDOM => {
 };
 
 /**
+ * Creates a test document with the specified title and URL.
+ * This is used for testing service name extraction.
+ */
+export const createTestDocument = (title: string, url: string) : { document: Document, location: Location } => {
+  const dom = createTestDom('empty.html');
+  const document = dom.window.document;
+
+  // Set the title
+  document.title = title;
+
+  // Create a proper Location object
+  const location = {
+    href: url,
+    origin: new URL(url).origin,
+    protocol: new URL(url).protocol,
+    host: new URL(url).host,
+    hostname: new URL(url).hostname,
+    port: new URL(url).port,
+    pathname: new URL(url).pathname,
+    search: new URL(url).search,
+    hash: new URL(url).hash,
+    ancestorOrigins: {} as DOMStringList,
+  } as Location;
+
+  return { document, location };
+};
+
+/**
  * Helper function to test field detection
  */
 export const testField = (fieldName: FormField, elementId: string, htmlFile: string) : void => {
