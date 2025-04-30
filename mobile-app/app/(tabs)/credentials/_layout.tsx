@@ -26,9 +26,9 @@ export default function CredentialsLayout() {
         }}
       />
       <Stack.Screen
-        name="autofill-confirmation"
+        name="autofill-credential-created"
         options={{
-          title: 'Autofill Confirmation',
+          title: 'Credential Created',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           headerShown: true,
           headerStyle: {

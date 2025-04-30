@@ -1,4 +1,4 @@
-import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Keyboard, RefreshControl, Platform, Animated } from 'react-native';
+import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, RefreshControl, Platform, Animated } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';

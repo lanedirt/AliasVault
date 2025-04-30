@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated, ActivityIndicator, Alert, Keyboard } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,32 +7,23 @@ import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import { useVaultSync } from '@/hooks/useVaultSync';
 import { Credential } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Gender } from "@/utils/generators/Identity/types/Gender";
 import emitter from '@/utils/EventEmitter';
-import NativeVaultManager from '@/specs/NativeVaultManager';
-import { useAuth } from '@/context/AuthContext';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
-import * as FileSystem from 'expo-file-system';
 import { AliasVaultToast } from '@/components/Toast';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
 type CredentialMode = 'random' | 'manual';
-
-interface VaultPostResponse {
-  status: number;
-  newRevisionNumber: number;
-}
 
 export default function AddEditCredentialScreen() {
   const { id, serviceUrl } = useLocalSearchParams<{ id: string, serviceUrl?: string }>();
   const router = useRouter();
   const colors = useColors();
   const dbContext = useDb();
-  const authContext = useAuth();
   const [mode, setMode] = useState<CredentialMode>('random');
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
   const navigation = useNavigation();
   const serviceNameInputRef = useRef<TextInput>(null);
   const [credential, setCredential] = useState<Partial<Credential>>({
@@ -51,10 +42,7 @@ export default function AddEditCredentialScreen() {
       Email: ""
     },
   });
-  const [syncStatus, setSyncStatus] = useState<string>('');
   const webApi = useWebApi();
-  const { syncVault } = useVaultSync();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   function extractServiceNameFromUrl(url: string): string {
     try {
@@ -114,56 +102,49 @@ export default function AddEditCredentialScreen() {
   const isEditMode = !!id;
 
   useEffect(() => {
+    let serviceName = "";
+
     if (isEditMode) {
       loadExistingCredential();
     }
-  }, [id]);
+    else {
+      // If serviceUrl is provided, extract the service name from the URL and prefill the form values.
+      // This is used when the user opens the app from a deep link (e.g. from iOS autofill extension).
+      if (serviceUrl) {
+        // Decode the URL-encoded service URL
+        const decodedUrl = decodeURIComponent(serviceUrl);
 
-  useEffect(() => {
-    // If serviceUrl is provided, extract the service name from the URL and prefill the form values.
-    // This is used when the user opens the app from a deep link (e.g. from iOS autofill extension).
-    if (serviceUrl) {
-      // Decode the URL-encoded service URL
-      const decodedUrl = decodeURIComponent(serviceUrl);
+        // Extract service name from URL
+        serviceName = extractServiceNameFromUrl(decodedUrl);
 
-      // Extract service name from URL
-      const serviceName = extractServiceNameFromUrl(decodedUrl);
-      // Set the form values
-      // Note: You'll need to implement this based on your form state management
-      setCredential(prev => ({
-        ...prev,
-        ServiceUrl: decodedUrl,
-        ServiceName: serviceName,
-        // ... other form fields
-      }));
+        // Set the form values
+        // Note: You'll need to implement this based on your form state management
+        setCredential(prev => ({
+          ...prev,
+          ServiceUrl: decodedUrl,
+          ServiceName: serviceName,
+          // ... other form fields
+        }));
+      }
 
       // In create mode, autofocus the service name field and select all default text
       // so user can start renaming the service immediately if they want.
-      if (!isEditMode) {
-        setTimeout(() => {
-          serviceNameInputRef.current?.focus();
-          if (serviceUrl) {
-            // If serviceUrl is provided, select all text
-            serviceNameInputRef.current?.setSelection(0, serviceName.length || 0);
-          }
-        }, 200);
-      }
-    }
-  }, [serviceUrl]);
-
-  useEffect(() => {
-    // Focus and select text logic
-    if (!isEditMode) {
-      // In create mode, always focus the service name field
       setTimeout(() => {
         serviceNameInputRef.current?.focus();
-      }, 100);
+        if (serviceName.length > 0) {
+          // If serviceUrl is provided, select all text
+          serviceNameInputRef.current?.setSelection(0, serviceName.length || 0);
+        }
+      }, 200);
     }
-  }, [isEditMode, serviceUrl]);
+  }, [id, isEditMode, serviceUrl]);
+
+  useEffect(() => {
+
+  }, [serviceUrl]);
 
   const loadExistingCredential = async () => {
     try {
-      setIsLoading(true);
       const existingCredential = await dbContext.sqliteClient!.getCredentialById(id);
       if (existingCredential) {
         setCredential(existingCredential);
@@ -179,8 +160,6 @@ export default function AddEditCredentialScreen() {
         text1: 'Failed to load credential',
         text2: 'Please try again'
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -211,43 +190,8 @@ export default function AddEditCredentialScreen() {
   };
 
   const handleSave = async () => {
-    try {
-      setIsLoading(true);
-      setSyncStatus('Checking for vault updates...');
+    Keyboard.dismiss();
 
-      // First check if there are any vault updates
-      await syncVault({
-        onStatus: (message) => setSyncStatus(message),
-        onSuccess: async (hasNewVault) => {
-          if (hasNewVault) {
-            console.log('Vault was changed, but has now been reloaded so we can continue with the save.');
-          }
-          await handleSaveInner();
-        },
-        onError: (error) => {
-          Toast.show({
-            type: 'error',
-            text1: 'Failed to sync vault',
-            text2: error,
-            position: 'bottom'
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Error saving credential:', error);
-      Toast.show({
-        type: 'error',
-        text1: isEditMode ? 'Failed to update credential' : 'Failed to create credential',
-        text2: error instanceof Error ? error.message : 'Unknown error',
-        position: 'bottom'
-      });
-    } finally {
-      setIsLoading(false);
-      setSyncStatus('');
-    }
-  };
-
-  const handleSaveInner = async () => {
     let credentialToSave = credential as Credential;
 
     // If mode is random, generate random values for all fields before saving.
@@ -256,118 +200,49 @@ export default function AddEditCredentialScreen() {
       credentialToSave = generateRandomValues();
     }
 
-    setSyncStatus('Saving changes to vault...');
+    await executeVaultMutation(async () => {
+      if (isEditMode) {
+        await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
+      } else {
+        // For new credentials, try to extract favicon
+        if (credential.ServiceUrl) {
+          try {
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
+            );
 
-    if (isEditMode) {
-      // Update existing credential
-      await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
-    } else {
-      // For new credentials, try to extract favicon
-      if (credentialToSave.ServiceUrl) {
-        try {
-          // Set a timeout of 5 seconds for favicon extraction
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
-          );
-
-          const faviconPromise = webApi.get<FaviconExtractModel>('Favicon/Extract?url=' + credentialToSave.ServiceUrl);
-          const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as FaviconExtractModel;
-          if (faviconResponse?.image) {
-            // The WebApi returns a base64 encoded string for the favicon image.
-            // We need to decode it to a Uint8Array before storing it in the service logo.
-            const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
-
-            // Store the favicon in the service logo.
-            credentialToSave.Logo = decodedImage;
+            const faviconPromise = webApi.get<FaviconExtractModel>('Favicon/Extract?url=' + credential.ServiceUrl);
+            const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as FaviconExtractModel;
+            if (faviconResponse?.image) {
+              const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
+              credential.Logo = decodedImage;
+            }
+          } catch (error) {
+            console.log('Favicon extraction failed or timed out:', error);
           }
-        } catch (error) {
-          console.log('Favicon extraction failed or timed out:', error);
-          // Continue without favicon
         }
+
+        await dbContext.sqliteClient!.createCredential(credentialToSave);
       }
-
-      // Create new credential
-      await dbContext.sqliteClient!.createCredential(credentialToSave);
-    }
-
-    // Get the current vault revision number
-    const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
-
-    // Get the encrypted database
-    const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
-    if (!encryptedDb) {
-      throw new Error('Failed to get encrypted database');
-    }
-
-    setSyncStatus('Uploading vault to server...');
-
-    // Get email addresses from credentials
-    // TODO: this gets all email addresses, seemingly even non-aliasvault ones.
-    // Should we filter out non-aliasvault ones?
-    const credentials = await dbContext.sqliteClient!.getAllCredentials();
-    const emailAddresses = credentials
-      .filter(cred => cred.Alias?.Email != null)
-      .map(cred => cred.Alias!.Email!)
-      .filter((email, index, self) => self.indexOf(email) === index);
-
-    // Get username from the auth context
-    const username = authContext.username;
-    if (!username) {
-      throw new Error('Username not found');
-    }
-
-    // Create vault object for upload
-    const newVault = {
-      blob: encryptedDb,
-      createdAt: new Date().toISOString(),
-      credentialsCount: credentials.length,
-      currentRevisionNumber: currentRevision,
-      emailAddressList: emailAddresses,
-      privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-      publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-      encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
-      // TODO: can client be null? double check this.
-      client: '', // Empty on purpose, API will not use this for vault updates
-      updatedAt: new Date().toISOString(),
-      username: username,
-      version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
-    };
-    console.log('New vault current revision number:', currentRevision);
-
-    console.log('Trying to upload vault to server...');
-
-    // Upload to server
-    const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
-
-    console.log('Vault upload response:', response);
-
-    // Check if response is successful
-    if (response.status === 0) {
-      await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
 
       // Emit an event to notify list and detail views to refresh
       emitter.emit('credentialChanged', credentialToSave.Id);
+    });
 
-      // If this was created from autofill (serviceUrl param), show confirmation screen
-      if (serviceUrl && !isEditMode) {
-        router.replace('/credentials/autofill-confirmation');
+    // If this was created from autofill (serviceUrl param), show confirmation screen
+    if (serviceUrl && !isEditMode) {
+      router.replace('/credentials/autofill-credential-created');
+    } else {
+      router.back();
 
-      } else {
-      // Show this toast after 200ms to ensure it appears after this component is navigated away from.
+      // Show success toast
       setTimeout(() => {
         Toast.show({
           type: 'success',
           text1: isEditMode ? 'Credential updated successfully' : 'Credential created successfully',
           position: 'bottom'
-          });
-        }, 200);
-
-        router.back();
-      }
-    } else if (response.status === 1) {
-      throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
-    } else {
-      throw new Error('Failed to upload vault to server');
+        });
+      }, 200);
     }
   };
 
@@ -385,6 +260,8 @@ export default function AddEditCredentialScreen() {
   const handleDelete = async () => {
     if (!id) return;
 
+    Keyboard.dismiss();
+
     Alert.alert(
       "Delete Credential",
       "Are you sure you want to delete this credential? This action cannot be undone.",
@@ -397,122 +274,27 @@ export default function AddEditCredentialScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            try {
-              setIsLoading(true);
-              setSyncStatus('Deleting credential...');
 
-              // First check if there are any vault updates
-              await syncVault({
-                onStatus: (message) => setSyncStatus(message),
-                onSuccess: async (hasNewVault) => {
-                  if (hasNewVault) {
-                    console.log('Vault was changed, but has now been reloaded so we can continue with the delete.');
-                  }
-                  await handleDeleteInner();
-                },
-                onError: (error) => {
-                  Toast.show({
-                    type: 'error',
-                    text1: 'Failed to sync vault',
-                    text2: error,
-                    position: 'bottom'
-                  });
-                }
-              });
-            } catch (error) {
-              console.error('Error deleting credential:', error);
+            await executeVaultMutation(async () => {
+              await dbContext.sqliteClient!.deleteCredentialById(id);
+            });
+
+            // Show success toast
+            setTimeout(() => {
               Toast.show({
-                type: 'error',
-                text1: 'Failed to delete credential',
-                text2: error instanceof Error ? error.message : 'Unknown error',
+                type: 'success',
+                text1: 'Credential deleted successfully',
                 position: 'bottom'
               });
-            } finally {
-              setIsLoading(false);
-              setSyncStatus('');
-            }
+            }, 200);
+
+            // Hard navigate back to the credentials list as the credential that was
+            // shown in the previous screen is now deleted.
+            router.replace('/credentials');
           }
         }
       ]
     );
-  };
-
-  const handleDeleteInner = async () => {
-    if (!id) return;
-
-    try {
-      const deletedRows = await dbContext.sqliteClient!.deleteCredentialById(id);
-
-      // Get the current vault revision number
-      const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
-
-      // Get the encrypted database
-      const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
-      if (!encryptedDb) {
-        throw new Error('Failed to get encrypted database');
-      }
-
-      setSyncStatus('Uploading vault to server...');
-
-      // Get email addresses from credentials
-      const credentials = await dbContext.sqliteClient!.getAllCredentials();
-      const emailAddresses = credentials
-        .filter(cred => cred.Alias?.Email != null)
-        .map(cred => cred.Alias!.Email!)
-        .filter((email, index, self) => self.indexOf(email) === index);
-
-      // Get username from the auth context
-      const username = authContext.username;
-      if (!username) {
-        throw new Error('Username not found');
-      }
-
-      // Create vault object for upload
-      const newVault = {
-        blob: encryptedDb,
-        createdAt: new Date().toISOString(),
-        credentialsCount: credentials.length,
-        currentRevisionNumber: currentRevision,
-        emailAddressList: emailAddresses,
-        privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
-        client: '', // Empty on purpose, API will not use this for vault updates
-        updatedAt: new Date().toISOString(),
-        username: username,
-        version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
-      };
-
-      // Upload to server
-      const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
-
-      if (response.status === 0) {
-        await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
-
-        // Emit an event to notify list and detail views to refresh
-        emitter.emit('credentialChanged', id);
-
-        // Show success toast and navigate back
-        setTimeout(() => {
-          Toast.show({
-            type: 'success',
-            text1: 'Credential deleted successfully',
-            position: 'bottom'
-          });
-        }, 200);
-
-        // Hard navigate back to the credentials list as the credential that was
-        // shown in the previous screen is now deleted.
-        router.replace('/credentials');
-      } else if (response.status === 1) {
-        throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
-      } else {
-        throw new Error('Failed to upload vault to server');
-      }
-    } catch (error) {
-      console.error('Error deleting credential:', error);
-      throw error;
-    }
   };
 
   const styles = StyleSheet.create({

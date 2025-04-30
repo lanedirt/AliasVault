@@ -7,7 +7,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect } from 'react';
 
-export default function AutofillConfirmationScreen() {
+export default function AutofillCredentialCreatedScreen() {
   const router = useRouter();
   const colors = useColors();
   const navigation = useNavigation();
@@ -70,10 +70,10 @@ export default function AutofillConfirmationScreen() {
           />
         </View>
 
-        <ThemedText style={styles.title}>Credential Created Successfully!</ThemedText>
+        <ThemedText style={styles.title}>Credential Created!</ThemedText>
 
         <ThemedText style={styles.message}>
-          Your new credential has been created and is now available for password autofill.
+          Your new credential has been added to your vault and is now available for password autofill.
         </ThemedText>
         <ThemedText style={[styles.message, { fontWeight: 'bold', marginTop: 20 }]}>
             Switch back to your browser to continue.
