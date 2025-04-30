@@ -1,9 +1,9 @@
 import srp from 'secure-remote-password/client'
-import { WebApiService } from '../../../utils/WebApiService';
-import { LoginRequest, LoginResponse } from '../../../utils/types/webapi/Login';
-import { ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse } from '../../../utils/types/webapi/ValidateLogin';
+import { WebApiService } from '@/utils/WebApiService';
+import { LoginRequest, LoginResponse } from '@/utils/types/webapi/Login';
+import { ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse } from '@/utils/types/webapi/ValidateLogin';
 import BadRequestResponse from '@/utils/types/webapi/BadRequestResponse';
-import { ApiAuthError } from '../../../utils/types/errors/ApiAuthError';
+import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 
 /**
  * Utility class for SRP authentication operations.
