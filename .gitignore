@@ -392,6 +392,9 @@ install.sh.backup
 # Draw.io diagram temp files
 *.drawio.*
 
+# Dist files
+packages/**/dist/
+
 # Certificates
 certificates/**/*.crt
 certificates/**/*.key
