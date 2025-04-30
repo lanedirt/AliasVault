@@ -1,4 +1,4 @@
-import { UsernameEmailGenerator } from '../../UsernameEmailGenerator';
+import { UsernameEmailGenerator } from '../../utils/UsernameEmailGenerator';
 import { Gender } from '../../types/Gender';
 import { IIdentityGenerator } from '../../interfaces/IIdentityGenerator';
 import { Identity } from '../../types/Identity';

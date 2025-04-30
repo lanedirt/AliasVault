@@ -1,4 +1,4 @@
-import { Identity } from "./types/Identity";
+import { Identity } from "../types/Identity";
 
 /**
  * Generate a username or email prefix.

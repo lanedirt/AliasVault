@@ -1,4 +1,4 @@
-import { PasswordGenerator } from '../PasswordGenerator';
+import { PasswordGenerator } from '../utils/PasswordGenerator';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('PasswordGenerator', () => {
