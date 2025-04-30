@@ -25,9 +25,3 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
-
-# Dictionaries
-# During build these are copied from the ../dictionaries folder because firefox zip requires all files to be in the root of the zip.
-# Therefore this copied folder is not committed to the repo the original folder is already available outside this directory.
-# See vite-plugins/identity-gen-dict-loader.ts for more details.
-dictionaries

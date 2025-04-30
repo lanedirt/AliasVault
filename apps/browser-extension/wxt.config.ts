@@ -1,6 +1,5 @@
 import { defineConfig } from 'wxt';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import identityGenDictLoader from './vite-plugins/identity-gen-dict-loader';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -30,7 +29,6 @@ export default defineConfig({
   outDir: 'dist',
   vite: () => ({
     plugins: [
-      identityGenDictLoader(),
       viteStaticCopy({
         targets: [
           {
