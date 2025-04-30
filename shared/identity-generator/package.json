@@ -1,5 +1,5 @@
 {
-    "name": "@aliasvault/av-identity-generator",
+    "name": "@aliasvault/identity-generator",
     "version": "1.0.0",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
