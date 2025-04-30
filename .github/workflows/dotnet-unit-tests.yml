@@ -32,4 +32,4 @@ jobs:
       run: dotnet build --no-restore
 
     - name: Run unittests
-      run: dotnet test src/Tests/AliasVault.UnitTests --no-build --verbosity normal
+      run: dotnet test apps/server/Tests/AliasVault.UnitTests --no-build --verbosity normal

@@ -37,11 +37,11 @@ jobs:
               run: ./install.sh configure-dev-db start
 
             - name: Ensure browsers are installed
-              run: pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+              run: pwsh apps/server/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
             - name: Run ClientTests with retry (Shard ${{ matrix.shard }})
               uses: nick-fields/retry@v3
               with:
                   timeout_minutes: 60
                   max_attempts: 3
-                  command: dotnet test src/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
+                  command: dotnet test apps/server/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
