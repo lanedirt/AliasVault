@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, Platform, Animated, ActivityIndicator, Alert } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -54,6 +54,7 @@ export default function AddEditCredentialScreen() {
   const [syncStatus, setSyncStatus] = useState<string>('');
   const webApi = useWebApi();
   const { syncVault } = useVaultSync();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   function extractServiceNameFromUrl(url: string): string {
     try {
@@ -381,6 +382,139 @@ export default function AddEditCredentialScreen() {
     }));
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+
+    Alert.alert(
+      "Delete Credential",
+      "Are you sure you want to delete this credential? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              setSyncStatus('Deleting credential...');
+
+              // First check if there are any vault updates
+              await syncVault({
+                onStatus: (message) => setSyncStatus(message),
+                onSuccess: async (hasNewVault) => {
+                  if (hasNewVault) {
+                    console.log('Vault was changed, but has now been reloaded so we can continue with the delete.');
+                  }
+                  await handleDeleteInner();
+                },
+                onError: (error) => {
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Failed to sync vault',
+                    text2: error,
+                    position: 'bottom'
+                  });
+                }
+              });
+            } catch (error) {
+              console.error('Error deleting credential:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Failed to delete credential',
+                text2: error instanceof Error ? error.message : 'Unknown error',
+                position: 'bottom'
+              });
+            } finally {
+              setIsLoading(false);
+              setSyncStatus('');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDeleteInner = async () => {
+    if (!id) return;
+
+    try {
+      const deletedRows = await dbContext.sqliteClient!.deleteCredentialById(id);
+
+      // Get the current vault revision number
+      const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
+
+      // Get the encrypted database
+      const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
+      if (!encryptedDb) {
+        throw new Error('Failed to get encrypted database');
+      }
+
+      setSyncStatus('Uploading vault to server...');
+
+      // Get email addresses from credentials
+      const credentials = await dbContext.sqliteClient!.getAllCredentials();
+      const emailAddresses = credentials
+        .filter(cred => cred.Alias?.Email != null)
+        .map(cred => cred.Alias!.Email!)
+        .filter((email, index, self) => self.indexOf(email) === index);
+
+      // Get username from the auth context
+      const username = authContext.username;
+      if (!username) {
+        throw new Error('Username not found');
+      }
+
+      // Create vault object for upload
+      const newVault = {
+        blob: encryptedDb,
+        createdAt: new Date().toISOString(),
+        credentialsCount: credentials.length,
+        currentRevisionNumber: currentRevision,
+        emailAddressList: emailAddresses,
+        privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
+        publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
+        encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
+        client: '', // Empty on purpose, API will not use this for vault updates
+        updatedAt: new Date().toISOString(),
+        username: username,
+        version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
+      };
+
+      // Upload to server
+      const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
+
+      if (response.status === 0) {
+        await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
+
+        // Emit an event to notify list and detail views to refresh
+        emitter.emit('credentialChanged', id);
+
+        // Show success toast and navigate back
+        setTimeout(() => {
+          Toast.show({
+            type: 'success',
+            text1: 'Credential deleted successfully',
+            position: 'bottom'
+          });
+        }, 200);
+
+        // Hard navigate back to the credentials list as the credential that was
+        // shown in the previous screen is now deleted.
+        router.replace('/credentials');
+      } else if (response.status === 1) {
+        throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
+      } else {
+        throw new Error('Failed to upload vault to server');
+      }
+    } catch (error) {
+      console.error('Error deleting credential:', error);
+      throw error;
+    }
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -471,6 +605,18 @@ export default function AddEditCredentialScreen() {
       textAlign: 'center',
       color: '#fff',
       fontSize: 16,
+    },
+    deleteButton: {
+      padding: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      backgroundColor: colors.errorBackground,
+      borderWidth: 1,
+      borderColor: colors.errorBorder,
+    },
+    deleteButtonText: {
+      color: colors.errorText,
+      fontWeight: '600',
     },
   });
 
@@ -612,6 +758,14 @@ export default function AddEditCredentialScreen() {
                 />
               {/* TODO: Add TOTP management */}
             </View>
+            {isEditMode && (
+              <TouchableOpacity
+                style={[styles.deleteButton]}
+                onPress={handleDelete}
+              >
+                <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
+              </TouchableOpacity>
+            )}
           </>
           )}
         </ScrollView>

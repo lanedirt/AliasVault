@@ -222,6 +222,51 @@ class SqliteClient {
   }
 
   /**
+   * Delete a credential by ID
+   * @param credentialId - The ID of the credential to delete
+   * @returns The number of rows deleted
+   */
+    public async deleteCredentialById(credentialId: string): Promise<number> {
+      const currentDateTime = new Date().toISOString()
+      .replace('T', ' ')
+      .replace('Z', '')
+      .substring(0, 23);
+
+      // Update the credential, alias, and service to be deleted
+      const query = `
+        UPDATE Credentials
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = ?`;
+
+      const aliasQuery = `
+        UPDATE Aliases
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT AliasId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      const serviceQuery = `
+        UPDATE Services
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT ServiceId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      const results = await this.executeUpdate(query, [currentDateTime, credentialId]);
+      await this.executeUpdate(aliasQuery, [currentDateTime, credentialId]);
+      await this.executeUpdate(serviceQuery, [currentDateTime, credentialId]);
+
+      return results;
+  }
+
+  /**
    * Fetch all unique email addresses from all credentials.
    * @returns Array of email addresses.
    */
