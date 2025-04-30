@@ -5,7 +5,12 @@
     "types": "dist/index.d.ts",
     "scripts": {
       "build": "tsup",
-      "clean": "rm -rf dist"
+      "clean": "rm -rf dist",
+      "test": "vitest",
+      "test:coverage": "vitest run --coverage",
+      "lint": "eslint src",
+      "lint:custom": "eslint",
+      "lint:fix": "eslint src --fix"
   },
     "files": [
         "dist"

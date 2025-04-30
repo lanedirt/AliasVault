@@ -8,13 +8,13 @@ PACKAGES_DIR="./"
 
 # Define output targets for each package
 IDENTITY_TARGETS=(
-  "./apps/mobile-app/shared/identity-generator"
-  "./apps/browser-extension/src/shared/identity-generator"
+  #"../apps/mobile-app/shared/identity-generator"
+  "../apps/browser-extension/src/utils/shared/identity-generator"
 )
 
 PASSWORD_TARGETS=(
-  "./apps/mobile-app/shared/password-generator"
-  "./apps/browser-extension/src/shared/password-generator"
+  #"../apps/mobile-app/shared/password-generator"
+  "../apps/browser-extension/src/utils/shared/password-generator"
 )
 
 # Build and distribute a package
@@ -29,7 +29,7 @@ build_and_copy() {
   (cd "$package_path" && npm install && npm run build)
 
   local dist_path="$package_path/dist"
-  local files_to_copy=("index.js" "index.mjs" "index.d.ts")
+  local files_to_copy=("index.js" "index.mjs" "index.d.ts" "index.js.map" "index.mjs" "index.mjs.map")
 
   for target in "${targets[@]}"; do
     echo "📂 Copying $package_name → $target"
@@ -56,7 +56,7 @@ EOF
 }
 
 # Run build + copy for each module
-build_and_copy "av-identity-generator" "${IDENTITY_TARGETS[@]}"
-build_and_copy "av-password-generator" "${PASSWORD_TARGETS[@]}"
+build_and_copy "identity-generator" "${IDENTITY_TARGETS[@]}"
+build_and_copy "password-generator" "${PASSWORD_TARGETS[@]}"
 
 echo "✅ All builds, copies, and readme updates completed."
