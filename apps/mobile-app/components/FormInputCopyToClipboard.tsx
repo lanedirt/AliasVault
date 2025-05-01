@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, useColorScheme, StyleSheet } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useColors } from '@/hooks/useColorScheme';
 
 interface FormInputCopyToClipboardProps {
   label: string;
@@ -15,8 +17,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   type = 'text',
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const colors = useColors();
 
   const copyToClipboard = async () => {
     if (value) {
@@ -34,23 +35,54 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
     ? '••••••••'
     : value;
 
+    const styles = StyleSheet.create({
+      inputContainer: {
+        borderRadius: 8,
+        borderWidth: 1,
+        padding: 12,
+        marginBottom: 12,
+        backgroundColor: colors.accentBackground,
+        borderColor: colors.accentBorder,
+      },
+      inputContent: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      },
+      label: {
+        fontSize: 12,
+        marginBottom: 4,
+        color: colors.textMuted,
+      },
+      value: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.text,
+      },
+      actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+      },
+      iconButton: {
+        padding: 8,
+      },
+      iconText: {
+        fontSize: 20,
+      },
+    });
+
+
   return (
     <TouchableOpacity
       onPress={copyToClipboard}
-      style={[
-        styles.inputContainer,
-        {
-          backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
-          borderColor: isDarkMode ? '#374151' : '#d1d5db',
-        },
-      ]}
+      style={styles.inputContainer}
     >
       <View style={styles.inputContent}>
         <View>
-          <Text style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#6b7280' }]}>
+          <Text style={styles.label}>
             {label}
           </Text>
-          <Text style={[styles.value, { color: isDarkMode ? '#f3f4f6' : '#1f2937' }]}>
+          <Text style={styles.value}>
             {displayValue}
           </Text>
         </View>
@@ -60,9 +92,11 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
               onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               style={styles.iconButton}
             >
-              <Text style={styles.iconText}>
-                {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
-              </Text>
+              <MaterialIcons
+                  name={isPasswordVisible ? "visibility-off" : "visibility"}
+                  size={20}
+                  color={colors.primary}
+                />
             </TouchableOpacity>
           )}
         </View>
@@ -70,37 +104,5 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 12,
-  },
-  inputContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    padding: 8,
-  },
-  iconText: {
-    fontSize: 20,
-  },
-});
 
 export default FormInputCopyToClipboard;

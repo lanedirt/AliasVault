@@ -393,9 +393,9 @@ class SqliteClient {
   /**
    * Create a new credential with associated entities
    * @param credential The credential object to insert
-   * @returns The number of rows modified
+   * @returns The ID of the newly created credential
    */
-  public async createCredential(credential: Credential): Promise<number> {
+  public async createCredential(credential: Credential): Promise<string> {
     try {
       await NativeVaultManager.beginTransaction();
 
@@ -487,7 +487,6 @@ class SqliteClient {
 
       await NativeVaultManager.commitTransaction();
       console.log('Credential created successfully');
-
       console.log('Credential ID:', credentialId);
 
       // Can we do select query here to check if the credential was created?
@@ -499,7 +498,7 @@ class SqliteClient {
         console.log('Credential retrieved successfully?');
       }
 
-      return 1;
+      return credentialId;
 
     } catch (error) {
       await NativeVaultManager.rollbackTransaction();

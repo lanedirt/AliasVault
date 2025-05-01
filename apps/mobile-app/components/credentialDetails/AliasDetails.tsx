@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Credential } from '@/utils/types/Credential';
 import FormInputCopyToClipboard from '@/components/FormInputCopyToClipboard';
+import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
 
 interface AliasDetailsProps {
   credential: Credential;
@@ -11,14 +12,7 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) => {
   const hasName = Boolean(credential.Alias?.FirstName?.trim() || credential.Alias?.LastName?.trim());
   const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
 
-  const hasValidBirthDate = credential.Alias?.BirthDate ? (() => {
-    const date = new Date(credential.Alias.BirthDate);
-    return !isNaN(date.getTime()) &&
-      date.getFullYear() > 1 &&
-      date.getFullYear() < 9999;
-  })() : false;
-
-  if (!hasName && !credential.Alias?.NickName && !hasValidBirthDate) {
+  if (!hasName && !credential.Alias?.NickName && !IdentityHelperUtils.isValidBirthDate(credential.Alias?.BirthDate)) {
     return null;
   }
 
@@ -49,10 +43,10 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) => {
           value={credential.Alias.NickName}
         />
       )}
-      {hasValidBirthDate && (
+      {IdentityHelperUtils.isValidBirthDate(credential.Alias?.BirthDate) && (
         <FormInputCopyToClipboard
           label="Birth Date"
-          value={credential.Alias.BirthDate.split('T')[0]}
+          value={IdentityHelperUtils.normalizeBirthDateForDisplay(credential.Alias.BirthDate)}
         />
       )}
     </ThemedView>

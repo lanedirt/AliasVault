@@ -15,10 +15,8 @@ import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { AliasVaultToast } from '@/components/Toast';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { Gender } from '@/utils/shared/identity-generator';
-import { IdentityGeneratorEn } from '@/utils/shared/identity-generator';
-import { IdentityGeneratorNl } from '@/utils/shared/identity-generator';
+import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
-import { BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -48,6 +46,7 @@ export default function AddEditCredentialScreen() {
     },
   });
   const webApi = useWebApi();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function extractServiceNameFromUrl(url: string): string {
     try {
@@ -152,6 +151,7 @@ export default function AddEditCredentialScreen() {
     try {
       const existingCredential = await dbContext.sqliteClient!.getCredentialById(id);
       if (existingCredential) {
+        existingCredential.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDisplay(existingCredential.Alias.BirthDate);
         setCredential(existingCredential);
         // If credential has custom values, switch to manual mode
         if (existingCredential.Alias?.FirstName || existingCredential.Alias?.LastName) {
@@ -168,9 +168,9 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const generateRandomValues = async () : Promise<Credential> => {
+  const generateRandomAlias = async () : Promise<Credential> => {
     try {
-      console.log('Generating random values');
+      console.log('Generating random alias');
       // Get default identity language and password settings from database
       const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
       const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
@@ -198,11 +198,9 @@ export default function AddEditCredentialScreen() {
       // Create email with domain if available
       const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
 
-      // Assign generated values
+      // Create base updated credential object with common properties
       const updatedCredential: Partial<Credential> = {
         ...credential,
-        Username: identity.nickName,
-        Password: password,
         Alias: {
           ...(credential.Alias ?? {}),
           Email: email,
@@ -210,12 +208,30 @@ export default function AddEditCredentialScreen() {
           LastName: identity.lastName,
           NickName: identity.nickName,
           Gender: identity.gender,
-          BirthDate: identity.birthDate.toISOString(),
+          BirthDate: IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()),
         }
       };
 
-      setCredential(updatedCredential);
+      // In edit mode, preserve existing username and password if they exist
+      if (isEditMode && credential.Username) {
+        // Keep the existing username in edit mode
+        updatedCredential.Username = credential.Username;
+      } else {
+        // Use the newly generated username
+        updatedCredential.Username = identity.nickName;
+      }
 
+      if (isEditMode && credential.Password) {
+        // Keep the existing password in edit mode
+        updatedCredential.Password = credential.Password;
+      } else {
+        // Use the newly generated password
+        updatedCredential.Password = password;
+        // Make password visible when newly generated
+        setIsPasswordVisible(true);
+      }
+
+      setCredential(updatedCredential);
       return updatedCredential as Credential;
     } catch (error) {
       console.error('Error generating random values:', error);
@@ -223,15 +239,81 @@ export default function AddEditCredentialScreen() {
     }
   };
 
+  const generateRandomUsername = async () => {
+    try {
+      // Get default identity language from database
+      const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
+
+      // Initialize identity generator based on language
+      let identityGenerator: BaseIdentityGenerator;
+      switch (identityLanguage) {
+        case 'nl':
+          identityGenerator = new IdentityGeneratorNl();
+          break;
+        case 'en':
+        default:
+          identityGenerator = new IdentityGeneratorEn();
+          break;
+      }
+
+      // Generate random identity
+      const identity = await identityGenerator.generateRandomIdentity();
+
+      // Update only the username
+      setCredential(prev => ({
+        ...prev,
+        Username: identity.nickName
+      }));
+    } catch (error) {
+      console.error('Error generating random username:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to generate username',
+        text2: 'Please try again'
+      });
+    }
+  };
+
+  const generateRandomPassword = async () => {
+    try {
+      // Get password settings from database
+      const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
+
+      // Initialize password generator with settings
+      const passwordGenerator = new PasswordGenerator(passwordSettings);
+      const password = passwordGenerator.generateRandomPassword();
+
+      // Update only the password
+      setCredential(prev => ({
+        ...prev,
+        Password: password
+      }));
+
+      // Make password visible when regenerated
+      setIsPasswordVisible(true);
+    } catch (error) {
+      console.error('Error generating random password:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to generate password',
+        text2: 'Please try again'
+      });
+    }
+  };
+
   const handleSave = async () => {
     Keyboard.dismiss();
 
-    let credentialToSave = credential as Credential;
+    // Deep clone to avoid mutating state
+    let credentialToSave: Credential = JSON.parse(JSON.stringify(credential));
 
-    // If mode is random, generate random values for all fields before saving.
+    // Validate and format birth date
+    credentialToSave.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDb(credentialToSave.Alias.BirthDate);
+
+    // If mode is random, generate random values
     if (mode === 'random') {
       console.log('Generating random values');
-      credentialToSave = await generateRandomValues();
+      credentialToSave = await generateRandomAlias();
     }
 
     await executeVaultMutation(async () => {
@@ -256,7 +338,8 @@ export default function AddEditCredentialScreen() {
           }
         }
 
-        await dbContext.sqliteClient!.createCredential(credentialToSave);
+        const credentialId = await dbContext.sqliteClient!.createCredential(credentialToSave);
+        credentialToSave.Id = credentialId;
       }
 
       // Emit an event to notify list and detail views to refresh
@@ -267,7 +350,13 @@ export default function AddEditCredentialScreen() {
     if (serviceUrl && !isEditMode) {
       router.replace('/credentials/autofill-credential-created');
     } else {
-      router.back();
+      if (isEditMode) {
+        // If editing existing credential, go back to the detail screen via back.
+        router.back();
+      } else {
+        // If creating new credential, go to the newly created credential via push.
+        router.replace(`/credentials/${credentialToSave.Id}`);
+      }
 
       // Show success toast
       setTimeout(() => {
@@ -281,14 +370,25 @@ export default function AddEditCredentialScreen() {
   };
 
   const handleAliasChange = (field: keyof Credential['Alias'], value: string | Gender) => {
-    setCredential(prev => ({
-      ...prev,
-      Alias: {
-        ...prev.Alias,
-        [field]: value,
-        BirthDate: prev.Alias?.BirthDate || "0001-01-01" // Ensure BirthDate is always set
-      }
-    }));
+    if (field === 'BirthDate') {
+      setCredential(prev => ({
+        ...prev,
+        Alias: {
+          ...prev.Alias,
+          BirthDate: value
+        }
+      }));
+    }
+    else {
+      setCredential(prev => ({
+        ...prev,
+        Alias: {
+          ...prev.Alias,
+          [field]: value,
+          BirthDate: prev.Alias?.BirthDate || "0001-01-01" // Ensure BirthDate is always set to satisfy Typescript
+        }
+      }));
+    }
   };
 
   const handleDelete = async () => {
@@ -385,15 +485,18 @@ export default function AddEditCredentialScreen() {
       fontSize: 16,
     },
     generateButton: {
-      backgroundColor: colors.primary,
-      padding: 12,
-      borderRadius: 8,
+      flexDirection: 'row',
       alignItems: 'center',
+      backgroundColor: colors.primary,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
       marginBottom: 16,
     },
     generateButtonText: {
       color: '#fff',
       fontWeight: '600',
+      marginLeft: 6,
     },
     notesInput: {
       backgroundColor: colors.background,
@@ -423,7 +526,7 @@ export default function AddEditCredentialScreen() {
       fontSize: 16,
     },
     deleteButton: {
-      padding: 12,
+      padding: 10,
       borderRadius: 8,
       alignItems: 'center',
       backgroundColor: colors.errorBackground,
@@ -433,6 +536,32 @@ export default function AddEditCredentialScreen() {
     deleteButtonText: {
       color: colors.errorText,
       fontWeight: '600',
+    },
+    inputGroup: {
+      marginBottom: 6,
+    },
+    inputLabel: {
+      fontSize: 12,
+      marginBottom: 4,
+      color: colors.textMuted,
+    },
+    inputWithButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      marginBottom: 12,
+    },
+    inputField: {
+      flex: 1,
+      color: colors.text,
+      padding: 12,
+      fontSize: 16,
+    },
+    inputButton: {
+      padding: 12,
+      borderLeftWidth: 1,
+      borderLeftColor: colors.accentBorder,
     },
   });
 
@@ -470,113 +599,212 @@ export default function AddEditCredentialScreen() {
           )}
 
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Service Information</ThemedText>
-            <TextInput
-              ref={serviceNameInputRef}
-              style={styles.input}
-              placeholder="Service Name"
-              placeholderTextColor={colors.textMuted}
-              value={credential.ServiceName}
-              onChangeText={(text) => setCredential(prev => ({ ...prev, ServiceName: text }))}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Service URL"
-              placeholderTextColor={colors.textMuted}
-              value={credential.ServiceUrl}
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-              onChangeText={(text) => setCredential(prev => ({ ...prev, ServiceUrl: text }))}
-            />
+            <ThemedText style={styles.sectionTitle}>Service</ThemedText>
+
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Service Name</ThemedText>
+              <TextInput
+                ref={serviceNameInputRef}
+                style={styles.input}
+                placeholder="Service Name"
+                placeholderTextColor={colors.textMuted}
+                value={credential.ServiceName}
+                autoCapitalize="none"
+                autoComplete="off"
+                autoCorrect={false}
+                onChangeText={(text) => setCredential(prev => ({ ...prev, ServiceName: text }))}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Service URL</ThemedText>
+              <TextInput
+                style={styles.input}
+                placeholder="Service URL"
+                placeholderTextColor={colors.textMuted}
+                value={credential.ServiceUrl}
+                autoCapitalize="none"
+                autoComplete="off"
+                autoCorrect={false}
+                onChangeText={(text) => setCredential(prev => ({ ...prev, ServiceUrl: text }))}
+              />
+            </View>
           </View>
 
           {(mode === 'manual' || isEditMode) && (
             <>
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Login Credentials</ThemedText>
-              {!isEditMode && (
-                <TouchableOpacity style={styles.generateButton} onPress={generateRandomValues}>
-                  <ThemedText style={styles.generateButtonText}>Generate Random Values</ThemedText>
+              <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
+              <View style={styles.inputGroup}>
+                <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
+                  <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
+                  <ThemedText style={styles.generateButtonText}>Generate New Alias</ThemedText>
                 </TouchableOpacity>
-              )}
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.Email}
-                onChangeText={(text) => handleAliasChange('Email', text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Username"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Username}
-                onChangeText={(text) => setCredential(prev => ({ ...prev, Username: text }))}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Password}
-                onChangeText={(text) => setCredential(prev => ({ ...prev, Password: text }))}
-                secureTextEntry
-              />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Email</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={credential.Alias?.Email}
+                  onChangeText={(text) => handleAliasChange('Email', text)}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Username</ThemedText>
+                <View style={styles.inputWithButton}>
+                  <TextInput
+                    style={styles.inputField}
+                    placeholder="Username"
+                    placeholderTextColor={colors.textMuted}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    autoCorrect={false}
+                    value={credential.Username}
+                    onChangeText={(text) => setCredential(prev => ({ ...prev, Username: text }))}
+                  />
+                  <TouchableOpacity
+                    style={styles.inputButton}
+                    onPress={generateRandomUsername}
+                  >
+                    <MaterialIcons name="refresh" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Password</ThemedText>
+                <View style={styles.inputWithButton}>
+                  <TextInput
+                    style={styles.inputField}
+                    placeholder="Password"
+                    placeholderTextColor={colors.textMuted}
+                    value={credential.Password}
+                    onChangeText={(text) => setCredential(prev => ({ ...prev, Password: text }))}
+                    secureTextEntry={!isPasswordVisible}
+                  />
+                  <TouchableOpacity
+                    style={styles.inputButton}
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  >
+                    <MaterialIcons
+                      name={isPasswordVisible ? "visibility-off" : "visibility"}
+                      size={20}
+                      color={colors.primary}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.inputButton}
+                    onPress={generateRandomPassword}
+                  >
+                    <MaterialIcons name="refresh" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
 
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Alias Information</ThemedText>
-              <TextInput
-                style={styles.input}
-                placeholder="First Name"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.FirstName}
-                onChangeText={(text) => handleAliasChange('FirstName', text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Last Name"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.LastName}
-                onChangeText={(text) => handleAliasChange('LastName', text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Nick Name"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.NickName}
-                onChangeText={(text) => handleAliasChange('NickName', text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Gender"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.Gender}
-                onChangeText={(text) => handleAliasChange('Gender', text === 'Male' ? Gender.Male : Gender.Female)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Birth Date (YYYY-MM-DD)"
-                placeholderTextColor={colors.textMuted}
-                value={credential.Alias?.BirthDate?.split(' ')[0]}
-                onChangeText={(text) => handleAliasChange('BirthDate', text + ' 00:00:00')}
-              />
+              <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>First Name</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="First Name"
+                  placeholderTextColor={colors.textMuted}
+                  value={credential.Alias?.FirstName}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  onChangeText={(text) => handleAliasChange('FirstName', text)}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Last Name</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Last Name"
+                  placeholderTextColor={colors.textMuted}
+                  value={credential.Alias?.LastName}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  onChangeText={(text) => handleAliasChange('LastName', text)}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Nick Name</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nick Name"
+                  placeholderTextColor={colors.textMuted}
+                  value={credential.Alias?.NickName}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  onChangeText={(text) => handleAliasChange('NickName', text)}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Gender</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Gender"
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  value={credential.Alias?.Gender}
+                  onChangeText={(text) => handleAliasChange('Gender', text)}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Birth Date</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Birth Date (YYYY-MM-DD)"
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  value={credential.Alias?.BirthDate}
+                  onChangeText={(text) => handleAliasChange('BirthDate', text)}
+                />
+              </View>
             </View>
+
             <View style={styles.section}>
               <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Notes</ThemedText>
                 <TextInput
                   style={styles.notesInput}
                   placeholder="Notes"
                   placeholderTextColor={colors.textMuted}
                   value={credential.Notes}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
                   onChangeText={(text) => setCredential(prev => ({ ...prev, Notes: text }))}
                   multiline
                 />
+              </View>
               {/* TODO: Add TOTP management */}
             </View>
+
             {isEditMode && (
               <TouchableOpacity
-                style={[styles.deleteButton]}
+                style={styles.deleteButton}
                 onPress={handleDelete}
               >
                 <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>

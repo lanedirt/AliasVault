@@ -114,4 +114,22 @@ declare class IdentityGeneratorNl extends BaseIdentityGenerator {
     protected getLastNamesJson(): string[];
 }
 
-export { BaseIdentityGenerator, Gender, type Identity, IdentityGeneratorEn, IdentityGeneratorNl, UsernameEmailGenerator };
+/**
+ * Helper utilities for identity generation that can be used by multiple client applications.
+ */
+declare class IdentityHelperUtils {
+    /**
+     * Normalize a birth date for display.
+     */
+    static normalizeBirthDateForDisplay(birthDate: string | undefined): string;
+    /**
+     * Normalize a birth date for database.
+     */
+    static normalizeBirthDateForDb(input: string | undefined): string;
+    /**
+     * Check if a birth date is valid.
+     */
+    static isValidBirthDate(input: string | undefined): boolean;
+}
+
+export { BaseIdentityGenerator, Gender, type Identity, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator };

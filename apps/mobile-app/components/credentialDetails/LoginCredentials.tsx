@@ -15,7 +15,7 @@ export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }
 
   return (
     <ThemedView style={styles.section}>
-      <ThemedText type="subtitle">Login Credentials</ThemedText>
+      <ThemedText type="subtitle">Login credentials</ThemedText>
       {email && (
         <FormInputCopyToClipboard
           label="Email"

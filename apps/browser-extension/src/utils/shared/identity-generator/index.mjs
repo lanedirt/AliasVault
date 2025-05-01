@@ -1632,11 +1632,56 @@ var IdentityGeneratorNl = class extends BaseIdentityGenerator {
     return lastnames_default2;
   }
 };
+
+// src/utils/IdentityHelperUtils.ts
+var IdentityHelperUtils = class {
+  /**
+   * Normalize a birth date for display.
+   */
+  static normalizeBirthDateForDisplay(birthDate) {
+    if (!birthDate || birthDate.startsWith("0001-01-01")) {
+      return "";
+    }
+    return birthDate.split("T")[0];
+  }
+  /**
+   * Normalize a birth date for database.
+   */
+  static normalizeBirthDateForDb(input) {
+    if (!input || input.trim() === "") {
+      return "0001-01-01T00:00:00.000Z";
+    }
+    const trimmed = input.trim();
+    const parsedDate = new Date(trimmed);
+    if (isNaN(parsedDate.getTime())) {
+      return "0001-01-01T00:00:00.000Z";
+    }
+    if (trimmed.includes("T")) {
+      return trimmed;
+    }
+    return `${trimmed}T00:00:00.000Z`;
+  }
+  /**
+   * Check if a birth date is valid.
+   */
+  static isValidBirthDate(input) {
+    if (!input || input.trim() === "") {
+      return false;
+    }
+    const date = new Date(input);
+    if (isNaN(date.getTime())) {
+      return false;
+    }
+    const yearValid = date.getFullYear() > 1 && date.getFullYear() < 9999;
+    return yearValid;
+  }
+};
 export {
   BaseIdentityGenerator,
   Gender,
   IdentityGeneratorEn,
   IdentityGeneratorNl,
+  IdentityHelperUtils,
   UsernameEmailGenerator
 };
 //# sourceMappingURL=index.mjs.map
