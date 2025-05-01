@@ -8,13 +8,13 @@ PACKAGES_DIR="./"
 
 # Define output targets for each package
 IDENTITY_TARGETS=(
-  #"../apps/mobile-app/shared/identity-generator"
   "../apps/browser-extension/src/utils/shared/identity-generator"
+  "../apps/mobile-app/utils/shared/identity-generator"
 )
 
 PASSWORD_TARGETS=(
-  #"../apps/mobile-app/shared/password-generator"
   "../apps/browser-extension/src/utils/shared/password-generator"
+  "../apps/mobile-app/utils/shared/password-generator"
 )
 
 # Build and distribute a package
@@ -26,7 +26,7 @@ build_and_copy() {
   local package_path="$PACKAGES_DIR/$package_name"
 
   echo "📦 Building $package_name..."
-  (cd "$package_path" && npm install && npm run build)
+  (cd "$package_path" && npm install && npm run lint && npm run test && npm run build)
 
   local dist_path="$package_path/dist"
   local files_to_copy=("index.js" "index.mjs" "index.d.ts" "index.js.map" "index.mjs" "index.mjs.map")
