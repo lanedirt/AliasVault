@@ -168,5 +168,18 @@
                 "cwd": "${workspaceFolder}/apps/mobile-app"
             }
         },
+        {
+            "label": "Build and watch Docs",
+            "type": "shell",
+            "command": "docker compose up",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/docs"
+            }
+        },
     ]
 }
