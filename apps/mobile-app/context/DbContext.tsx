@@ -162,7 +162,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     clearDatabase,
     getVaultMetadata,
     testDatabaseConnection,
-    unlockVault
+    unlockVault,
   }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault]);
 
   return (

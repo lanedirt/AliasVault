@@ -49,6 +49,54 @@ class SqliteClient {
     }
   }
 
+    /**
+   * Get the default email domain from the vault metadata.
+   * Returns the first valid private domain if available, otherwise the first valid public domain.
+   * Returns null if no valid domains are found.
+   */
+  public async getDefaultEmailDomain(): Promise<string | null> {
+    try {
+      const metadata = await this.getVaultMetadata();
+      if (!metadata) {
+        return null;
+      }
+
+      const { privateEmailDomains, publicEmailDomains } = metadata;
+
+      // Check if a domain is valid (not empty, not 'DISABLED.TLD', and exists in either private or public domains)
+      const isValidDomain = (domain: string): boolean => {
+        return Boolean(domain &&
+               domain !== 'DISABLED.TLD' &&
+               (privateEmailDomains?.includes(domain) || publicEmailDomains?.includes(domain)));
+      };
+
+      // Get the default email domain from vault settings
+      const defaultEmailDomain = await this.getSetting('DefaultEmailDomain');
+
+      // First check if the default domain that is configured in the vault is still valid
+      if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
+        return defaultEmailDomain;
+      }
+
+      // If default domain is not valid, fall back to first available private domain
+      const firstPrivate = privateEmailDomains?.find(isValidDomain);
+      if (firstPrivate) {
+        return firstPrivate;
+      }
+
+      // Return first valid public domain if no private domains are available
+      const firstPublic = publicEmailDomains?.find(isValidDomain);
+      if (firstPublic) {
+        return firstPublic;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting default email domain:', error);
+      return null;
+    }
+  }
+
   /**
    * Store the encryption key in the native keychain
    */
@@ -306,13 +354,6 @@ class SqliteClient {
             WHERE s.Key = ?`, [key]);
 
     return results.length > 0 ? results[0].Value : defaultValue;
-  }
-
-  /**
-   * Get the default email domain from the database.
-   */
-  public async getDefaultEmailDomain(): Promise<string> {
-    return this.getSetting('DefaultEmailDomain');
   }
 
   /**

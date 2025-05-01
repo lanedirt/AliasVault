@@ -10,11 +10,16 @@ import { useWebApi } from '@/context/WebApiContext';
 import { Credential } from '@/utils/types/Credential';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-import { Gender } from "@/utils/generators/Identity/types/Gender";
 import emitter from '@/utils/EventEmitter';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { AliasVaultToast } from '@/components/Toast';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
+import { Gender } from '@/utils/shared/identity-generator';
+import { IdentityGeneratorEn } from '@/utils/shared/identity-generator';
+import { IdentityGeneratorNl } from '@/utils/shared/identity-generator';
+import { PasswordGenerator } from '@/utils/shared/password-generator';
+import { BaseIdentityGenerator } from '@/utils/shared/identity-generator';
+
 type CredentialMode = 'random' | 'manual';
 
 export default function AddEditCredentialScreen() {
@@ -163,30 +168,59 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const generateRandomValues = () : Credential => {
-    // Placeholder for random generation - will be replaced with actual generators
-    const randomString = (length: number) => Math.random().toString(36).substring(2, length + 2);
+  const generateRandomValues = async () : Promise<Credential> => {
+    try {
+      console.log('Generating random values');
+      // Get default identity language and password settings from database
+      const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
+      const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
+      const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
 
-    // Get the current credential
-    const updatedCredential = credential;
+      // Initialize identity generator based on language
+      let identityGenerator: BaseIdentityGenerator;
+      switch (identityLanguage) {
+        case 'nl':
+          identityGenerator = new IdentityGeneratorNl();
+          break;
+        case 'en':
+        default:
+          identityGenerator = new IdentityGeneratorEn();
+          break;
+      }
 
-    // Assign random values to all fields
-    updatedCredential.Username = randomString(8);
-    updatedCredential.Password = randomString(12);
+      // Generate random identity
+      const identity = await identityGenerator.generateRandomIdentity();
 
-    updatedCredential.Alias = {
-      ...(updatedCredential.Alias ?? {}),
-      Email: `${randomString(8)}@example.com`,
-      FirstName: randomString(6),
-      LastName: randomString(6),
-      NickName: randomString(6),
-      Gender: Math.random() > 0.5 ? Gender.Male : Gender.Female,
-      BirthDate: '0001-01-01 00:00:00',
-    };
+      // Initialize password generator with settings
+      const passwordGenerator = new PasswordGenerator(passwordSettings);
+      const password = passwordGenerator.generateRandomPassword();
 
-    setCredential(updatedCredential);
+      // Create email with domain if available
+      const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
 
-    return updatedCredential as Credential;
+      // Assign generated values
+      const updatedCredential: Partial<Credential> = {
+        ...credential,
+        Username: identity.nickName,
+        Password: password,
+        Alias: {
+          ...(credential.Alias ?? {}),
+          Email: email,
+          FirstName: identity.firstName,
+          LastName: identity.lastName,
+          NickName: identity.nickName,
+          Gender: identity.gender,
+          BirthDate: identity.birthDate.toISOString(),
+        }
+      };
+
+      setCredential(updatedCredential);
+
+      return updatedCredential as Credential;
+    } catch (error) {
+      console.error('Error generating random values:', error);
+      throw error;
+    }
   };
 
   const handleSave = async () => {
@@ -197,7 +231,7 @@ export default function AddEditCredentialScreen() {
     // If mode is random, generate random values for all fields before saving.
     if (mode === 'random') {
       console.log('Generating random values');
-      credentialToSave = generateRandomValues();
+      credentialToSave = await generateRandomValues();
     }
 
     await executeVaultMutation(async () => {
