@@ -11,6 +11,8 @@ struct CredentialCard: View {
     let credential: Credential
     let action: () -> Void
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showCopyToast = false
+    @State private var copyToastMessage = ""
 
     var body: some View {
         Button(action: action) {
@@ -44,6 +46,78 @@ struct CredentialCard: View {
             )
             .cornerRadius(8)
         }
+        .contextMenu {
+            Button(action: {
+                if let username = credential.username {
+                    UIPasteboard.general.string = username
+                    copyToastMessage = "Username copied"
+                    showCopyToast = true
+                }
+            }) {
+                Label("Copy Username", systemImage: "person")
+            }
+
+            Button(action: {
+                if let password = credential.password?.value {
+                    UIPasteboard.general.string = password
+                    copyToastMessage = "Password copied"
+                    showCopyToast = true
+                }
+            }) {
+                Label("Copy Password", systemImage: "key")
+            }
+
+            Button(action: {
+                if let email = credential.alias?.email {
+                    UIPasteboard.general.string = email
+                    copyToastMessage = "Email copied"
+                    showCopyToast = true
+                }
+            }) {
+                Label("Copy Email", systemImage: "envelope")
+            }
+
+            Divider()
+
+            Button(action: {
+                if let url = URL(string: "aliasvault://credentials/\(credential.id.uuidString)") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
+                Label("View Details", systemImage: "eye")
+            }
+
+            Button(action: {
+                if let url = URL(string: "aliasvault://credentials/add-edit?id=\(credential.id.uuidString)") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
+                Label("Edit", systemImage: "pencil")
+            }
+        }
+        .overlay(
+            Group {
+                if showCopyToast {
+                    VStack {
+                        Spacer()
+                        Text(copyToastMessage)
+                            .padding()
+                            .background(Color.black.opacity(0.7))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .padding(.bottom, 20)
+                    }
+                    .transition(.opacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showCopyToast = false
+                            }
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 

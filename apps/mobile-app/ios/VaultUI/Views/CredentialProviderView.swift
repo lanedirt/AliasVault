@@ -119,8 +119,6 @@ public struct CredentialProviderView: View {
             }
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
                 // Define all text strings
-
-
                 guard let credential = viewModel.selectedCredential else {
                     return ActionSheet(title: Text("Select Login Method"), message: Text("No credential selected."), buttons: [.cancel()])
                 }
