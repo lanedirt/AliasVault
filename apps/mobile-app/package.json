@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@hookform/resolvers": "^5.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
@@ -42,6 +43,7 @@
     "expo-haptics": "~14.0.1",
     "expo-linking": "~7.0.5",
     "expo-local-authentication": "~15.0.2",
+    "expo-modules-core": "~2.2.3",
     "expo-router": "~4.0.20",
     "expo-sharing": "~13.0.1",
     "expo-splash-screen": "~0.29.24",
@@ -54,6 +56,7 @@
     "otpauth": "^9.4.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-hook-form": "^7.56.1",
     "react-native": "0.76.9",
     "react-native-aes-gcm-crypto": "^0.2.2",
     "react-native-argon2": "^2.0.1",
@@ -68,7 +71,7 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "secure-remote-password": "github:LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
-    "expo-modules-core": "~2.2.3"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -79,6 +82,7 @@
     "@types/react": "~18.3.12",
     "@types/react-test-renderer": "^18.3.0",
     "@types/sql.js": "^1.4.9",
+    "@types/yup": "^0.29.14",
     "jest": "^29.2.1",
     "jest-expo": "~52.0.6",
     "react-native-svg-transformer": "^1.5.0",

@@ -13,6 +13,12 @@ export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
 
+  const hasLoginCredentials = email || username || password;
+
+  if (!hasLoginCredentials) {
+    return null;
+  }
+
   return (
     <ThemedView style={styles.section}>
       <ThemedText type="subtitle">Login credentials</ThemedText>
