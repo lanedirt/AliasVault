@@ -280,7 +280,7 @@ export default function AddEditCredentialScreen() {
         NickName: identity.nickName,
         BirthDate: IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()),
         Gender: identity.gender,
-        Email: identity.emailPrefix
+        Email: email
       }
     };
   };
@@ -369,7 +369,9 @@ export default function AddEditCredentialScreen() {
           onPress: async () => {
 
             await executeVaultMutation(async () => {
+              console.log('Starting delete operation');
               await dbContext.sqliteClient!.deleteCredentialById(id);
+              console.log('Credential deleted successfully');
             });
 
             // Show success toast

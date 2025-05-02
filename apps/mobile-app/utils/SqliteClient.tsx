@@ -274,7 +274,10 @@ class SqliteClient {
    * @param credentialId - The ID of the credential to delete
    * @returns The number of rows deleted
    */
-    public async deleteCredentialById(credentialId: string): Promise<number> {
+  public async deleteCredentialById(credentialId: string): Promise<number> {
+    try {
+      await NativeVaultManager.beginTransaction();
+
       const currentDateTime = new Date().toISOString()
       .replace('T', ' ')
       .replace('Z', '')
@@ -311,7 +314,13 @@ class SqliteClient {
       await this.executeUpdate(aliasQuery, [currentDateTime, credentialId]);
       await this.executeUpdate(serviceQuery, [currentDateTime, credentialId]);
 
+      await NativeVaultManager.commitTransaction();
       return results;
+    } catch (error) {
+      await NativeVaultManager.rollbackTransaction();
+      console.error('Error deleting credential:', error);
+      throw error;
+    }
   }
 
   /**

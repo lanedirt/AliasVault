@@ -5,9 +5,6 @@ import { useWebApi } from '@/context/WebApiContext';
 import { useVaultSync } from './useVaultSync';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 import Toast from 'react-native-toast-message';
-import emitter from '@/utils/EventEmitter';
-import { Credential } from '@/utils/types/Credential';
-import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 
 interface VaultPostResponse {
   status: number;
@@ -81,6 +78,7 @@ export function useVaultMutate() {
     const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
 
     // Get the encrypted database
+    console.log('Getting encrypted database new version');
     const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
     if (!encryptedDb) {
       throw new Error('Failed to get encrypted database');
@@ -132,31 +130,9 @@ export function useVaultMutate() {
     }
   };
 
-  const deleteCredential = useCallback(async (
-    credentialId: string,
-    options: VaultMutationOptions = {}
-  ) => {
-    await executeVaultMutation(async () => {
-      await dbContext.sqliteClient!.deleteCredentialById(credentialId);
-
-      // Emit an event to notify list and detail views to refresh
-      emitter.emit('credentialChanged', credentialId);
-
-      // Show success toast
-      setTimeout(() => {
-        Toast.show({
-          type: 'success',
-          text1: 'Credential deleted successfully',
-          position: 'bottom'
-        });
-      }, 200);
-    }, options);
-  }, [executeVaultMutation, dbContext]);
-
   return {
     executeVaultMutation,
     isLoading,
-    syncStatus,
-    deleteCredential
+    syncStatus
   };
 }
