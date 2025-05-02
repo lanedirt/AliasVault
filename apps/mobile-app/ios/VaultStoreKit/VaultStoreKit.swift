@@ -18,6 +18,8 @@ public class VaultStore {
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
         .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
+    private let userDefaults = UserDefaults(suiteName: "group.net.aliasvault.autofill")!
+
     private var db: Connection?
     private var encryptionKey: Data?
     private var clearCacheTimer: Timer?
@@ -34,14 +36,14 @@ public class VaultStore {
 
     public init() {
         // Load saved auth methods from UserDefaults if they exist
-        if UserDefaults.standard.object(forKey: authMethodsKey) != nil {
-            let savedRawValue = UserDefaults.standard.integer(forKey: authMethodsKey)
+        if userDefaults.object(forKey: authMethodsKey) != nil {
+            let savedRawValue = userDefaults.integer(forKey: authMethodsKey)
             enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
         }
 
         // Load auto-lock timeout from UserDefaults if it exists
-        if UserDefaults.standard.object(forKey: autoLockTimeoutKey) != nil {
-            autoLockTimeout = UserDefaults.standard.integer(forKey: autoLockTimeoutKey)
+        if userDefaults.object(forKey: autoLockTimeoutKey) != nil {
+            autoLockTimeout = userDefaults.integer(forKey: autoLockTimeoutKey)
         }
 
         // Add notification observers
@@ -93,8 +95,8 @@ public class VaultStore {
     // MARK: - Auth Methods Management
     public func setAuthMethods(_ methods: AuthMethods) throws {
         enabledAuthMethods = methods
-        UserDefaults.standard.set(methods.rawValue, forKey: authMethodsKey)
-        UserDefaults.standard.synchronize()
+        userDefaults.set(methods.rawValue, forKey: authMethodsKey)
+        userDefaults.synchronize()
 
         if !enabledAuthMethods.contains(.faceID) {
             print("Face ID is now disabled, removing key from keychain immediately")
@@ -243,8 +245,8 @@ public class VaultStore {
         try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
 
         // Store metadata in UserDefaults
-        UserDefaults.standard.set(metadata, forKey: vaultMetadataKey)
-        UserDefaults.standard.synchronize()
+        userDefaults.set(metadata, forKey: vaultMetadataKey)
+        userDefaults.synchronize()
     }
 
     // Get the encrypted database as a base64 encoded string
@@ -282,14 +284,14 @@ public class VaultStore {
         metadata.vaultRevisionNumber = revisionNumber
         if let data = try? JSONEncoder().encode(metadata),
         let jsonString = String(data: data, encoding: .utf8) {
-            UserDefaults.standard.set(jsonString, forKey: vaultMetadataKey)
-            UserDefaults.standard.synchronize()
+            userDefaults.set(jsonString, forKey: vaultMetadataKey)
+            userDefaults.synchronize()
         }
     }
 
     // Get the vault metadata from UserDefaults
     public func getVaultMetadata() -> String? {
-        return UserDefaults.standard.string(forKey: vaultMetadataKey)
+        return userDefaults.string(forKey: vaultMetadataKey)
     }
 
     // Helper to decode the JSON metadata into VaultMetadata object
@@ -640,10 +642,10 @@ public class VaultStore {
         }
 
         // Clear UserDefaults
-        UserDefaults.standard.removeObject(forKey: vaultMetadataKey)
-        UserDefaults.standard.removeObject(forKey: authMethodsKey)
-        UserDefaults.standard.removeObject(forKey: autoLockTimeoutKey)
-        UserDefaults.standard.synchronize()
+        userDefaults.removeObject(forKey: vaultMetadataKey)
+        userDefaults.removeObject(forKey: authMethodsKey)
+        userDefaults.removeObject(forKey: autoLockTimeoutKey)
+        userDefaults.synchronize()
         print("Cleared UserDefaults")
 
         clearCache()
@@ -800,8 +802,8 @@ public class VaultStore {
     public func setAutoLockTimeout(_ timeout: Int) {
         print("Setting auto-lock timeout to \(timeout) seconds")
         autoLockTimeout = timeout
-        UserDefaults.standard.set(timeout, forKey: autoLockTimeoutKey)
-        UserDefaults.standard.synchronize()
+        userDefaults.set(timeout, forKey: autoLockTimeoutKey)
+        userDefaults.synchronize()
     }
 
     public func getAutoLockTimeout() -> Int {

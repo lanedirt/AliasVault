@@ -28,6 +28,7 @@ type AuthContextType = {
   getAuthMethodDisplay: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
+  getBiometricDisplayName: () => Promise<string>;
   // iOS Autofill methods
   shouldShowIosAutofillReminder: boolean;
   markIosAutofillConfigured: () => Promise<void>;
@@ -163,6 +164,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
+   * Get the appropriate biometric display name based on device capabilities
+   */
+  const getBiometricDisplayName = useCallback(async (): Promise<string> => {
+    try {
+      const hasFaceID = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasFaceID || !enrolled) {
+        return 'Face ID / Touch ID';
+      }
+
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      const hasFaceIDSupport = types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION);
+      const hasTouchIDSupport = types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT);
+
+      if (hasFaceIDSupport) {
+        return 'Face ID';
+      } else if (hasTouchIDSupport) {
+        return 'Touch ID';
+      }
+
+      return 'Face ID / Touch ID';
+    } catch (error) {
+      console.error('Failed to get biometric display name:', error);
+      return 'Face ID / Touch ID';
+    }
+  }, []);
+
+  /**
    * Get the display label for the current auth method
    * Prefers Face ID if enabled, otherwise falls back to Password
    */
@@ -172,14 +202,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
         if (isEnrolled) {
-          return 'Face ID';
+          return await getBiometricDisplayName();
         }
       } catch (error) {
         console.error('Failed to check Face ID enrollment:', error);
       }
     }
     return 'Password';
-  }, [getEnabledAuthMethods]);
+  }, [getEnabledAuthMethods, getBiometricDisplayName]);
 
   /**
    * Get the auto-lock timeout from the iOS credentials manager
@@ -287,10 +317,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAuthMethodDisplay,
     getAutoLockTimeout,
     setAutoLockTimeout,
+    getBiometricDisplayName,
     // iOS Autofill methods
     shouldShowIosAutofillReminder,
     markIosAutofillConfigured,
-  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, shouldShowIosAutofillReminder, markIosAutofillConfigured]);
+  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, getBiometricDisplayName, shouldShowIosAutofillReminder, markIosAutofillConfigured]);
 
   return (
     <AuthContext.Provider value={contextValue}>

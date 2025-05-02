@@ -15,12 +15,13 @@ import { useRef, useState, useEffect } from 'react';
 export default function SettingsScreen() {
   const webApi = useWebApi();
   const colors = useColors();
-  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
+  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder, getBiometricDisplayName } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
+  const [biometricDisplayName, setBiometricDisplayName] = useState<string>('');
 
   useEffect(() => {
     const loadAutoLockDisplay = async () => {
@@ -44,9 +45,15 @@ export default function SettingsScreen() {
       setAuthMethodDisplay(authMethod);
     };
 
+    const loadBiometricDisplayName = async () => {
+      const displayName = await getBiometricDisplayName();
+      setBiometricDisplayName(displayName);
+    };
+
     loadAutoLockDisplay();
     loadAuthMethodDisplay();
-  }, [getAutoLockTimeout, getAuthMethodDisplay]);
+    loadBiometricDisplayName();
+  }, [getAutoLockTimeout, getAuthMethodDisplay, getBiometricDisplayName]);
 
   const handleLogout = async () => {
     await webApi.logout();

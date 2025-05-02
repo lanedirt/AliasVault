@@ -9,10 +9,11 @@ import { AuthMethod, useAuth } from '@/context/AuthContext';
 export default function VaultUnlockSettingsScreen() {
   const colors = useColors();
   const [initialized, setInitialized] = useState(false);
-  const { setAuthMethods, getEnabledAuthMethods } = useAuth();
+  const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayName } = useAuth();
   const [hasFaceID, setHasFaceID] = useState(false);
   const [isFaceIDEnabled, setIsFaceIDEnabled] = useState(false);
-  const [enabledAuthMethods, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
+  const [biometricDisplayName, setBiometricDisplayName] = useState('Face ID / Touch ID');
+  const [_, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -27,11 +28,14 @@ export default function VaultUnlockSettingsScreen() {
         setIsFaceIDEnabled(true);
       }
 
+      const displayName = await getBiometricDisplayName();
+      setBiometricDisplayName(displayName);
+
       setInitialized(true);
     };
 
     initializeAuth();
-  }, [getEnabledAuthMethods]);
+  }, [getEnabledAuthMethods, getBiometricDisplayName]);
 
   useEffect(() => {
     if (!initialized) {
@@ -155,7 +159,7 @@ export default function VaultUnlockSettingsScreen() {
           >
             <View style={styles.optionHeader}>
               <ThemedText style={[styles.optionText, !hasFaceID && styles.disabledText]}>
-                Face ID / Touch ID
+                {biometricDisplayName}
               </ThemedText>
               <View pointerEvents="none">
                 <Switch
@@ -165,11 +169,11 @@ export default function VaultUnlockSettingsScreen() {
               </View>
             </View>
             <ThemedText style={styles.helpText}>
-              Your vault decryption key will be securely stored on your local device in the iOS Keychain and can be accessed with your face or fingerprint.
+              Your vault decryption key will be securely stored on your local device in the iOS Keychain and can be accessed securely with {biometricDisplayName}.
             </ThemedText>
             {!hasFaceID && (
               <ThemedText style={[styles.helpText, { color: colors.errorBorder }]}>
-                Face ID is blocked in iOS settings. Tap to open settings and enable it.
+                {biometricDisplayName} is blocked in iOS settings. Tap to open settings and enable it.
               </ThemedText>
             )}
           </TouchableOpacity>

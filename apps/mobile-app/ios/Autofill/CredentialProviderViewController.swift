@@ -6,6 +6,7 @@
 //
 
 import AuthenticationServices
+import LocalAuthentication
 import SwiftUI
 import VaultStoreKit
 import VaultUI
@@ -26,11 +27,43 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Check if Face ID/Touch ID is enabled
+        let vaultStore = VaultStore()
+
+        let context = LAContext()
+        var authMethod = "Face ID / Touch ID"
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
+            switch context.biometryType {
+            case .faceID:
+                authMethod = "Face ID"
+            case .touchID:
+                authMethod = "Touch ID"
+            default:
+                break
+            }
+        }
+
+        if !vaultStore.getAuthMethods().contains(.faceID) {
+            let alert = UIAlertController(
+                title: "\(authMethod) Required",
+                message: "To use Autofill, please enable \(authMethod) as your vault unlock method in the AliasVault app settings.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext.cancelRequest(withError: NSError(
+                    domain: ASExtensionErrorDomain,
+                    code: ASExtensionError.userCanceled.rawValue
+                ))
+            })
+            present(alert, animated: true)
+            return
+        }
+
         // Create the ViewModel with INJECTED behaviors
         let viewModel = CredentialProviderViewModel(
           loader: {
-              try VaultStore.shared.initializeDatabase()
-              let credentials = try VaultStore.shared.getAllCredentials()
+              try vaultStore.initializeDatabase()
+              let credentials = try vaultStore.getAllCredentials()
               await self.registerCredentialIdentities(credentials: credentials)
               return credentials
           },
@@ -108,7 +141,8 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
 
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         do {
-            let credentials = try VaultStore.shared.getAllCredentials()
+            let vaultStore = VaultStore()
+            let credentials = try vaultStore.getAllCredentials()
 
             if let matchingCredential = credentials.first(where: { credential in
                 return credential.id.uuidString == credentialIdentity.recordIdentifier
