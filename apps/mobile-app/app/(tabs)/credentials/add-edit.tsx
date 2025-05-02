@@ -14,14 +14,12 @@ import emitter from '@/utils/EventEmitter';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { AliasVaultToast } from '@/components/Toast';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
-import { Gender } from '@/utils/shared/identity-generator';
 import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
-import { ValidatedFormField } from '@/components/ValidatedFormField';
+import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/ValidatedFormField';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { credentialSchema } from '@/utils/validationSchema';
-import LoadingIndicator from '@/components/LoadingIndicator';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
 type CredentialMode = 'random' | 'manual';
@@ -34,9 +32,9 @@ export default function AddEditCredentialScreen() {
   const [mode, setMode] = useState<CredentialMode>('random');
   const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
   const navigation = useNavigation();
-  const serviceNameInputRef = useRef<TextInput>(null);
   const webApi = useWebApi();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
 
   const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -58,8 +56,15 @@ export default function AddEditCredentialScreen() {
     }
   });
 
-  const isEditMode = !!id;
+  /**
+   * If we received an ID, we're in edit mode.
+   */
+  const isEditMode = id !== undefined && id.length > 0;
 
+  /**
+   * On mount, load an existing credential if we're in edit mode, or extract the service name from the service URL
+   * if we're in add mode and the service URL is provided (by native autofill component).
+   */
   useEffect(() => {
     if (isEditMode) {
       loadExistingCredential();
@@ -68,9 +73,18 @@ export default function AddEditCredentialScreen() {
       const serviceName = extractServiceNameFromUrl(decodedUrl);
       setValue('ServiceUrl', decodedUrl);
       setValue('ServiceName', serviceName);
+
+      // Focus and select the service name field
+      setTimeout(() => {
+        serviceNameRef.current?.focus();
+        serviceNameRef.current?.selectAll();
+      }, 100);
     }
   }, [id, isEditMode, serviceUrl]);
 
+  /**
+   * Load an existing credential from the database in edit mode.
+   */
   const loadExistingCredential = async () => {
     try {
       const existingCredential = await dbContext.sqliteClient!.getCredentialById(id);
@@ -93,20 +107,37 @@ export default function AddEditCredentialScreen() {
     }
   };
 
+  /**
+   * Submit the form for either creating or updating a credential.
+   * @param {Credential} data - The form data.
+   */
   const onSubmit = async (data: Credential) => {
     Keyboard.dismiss();
 
-    // Deep clone to avoid mutating state
-    let credentialToSave: Credential = JSON.parse(JSON.stringify(data));
+    // If we're creating a new credential and mode is random, generate random values
+    if (!isEditMode && mode === 'random') {
+      await generateRandomAlias();
+    }
+
+    // Assemble the credential to save
+    let credentialToSave = {
+      Id: isEditMode ? id : undefined,
+      Username: watch('Username'),
+      Password: watch('Password'),
+      ServiceName: watch('ServiceName'),
+      ServiceUrl: watch('ServiceUrl'),
+      Alias: {
+        FirstName: watch('Alias.FirstName'),
+        LastName: watch('Alias.LastName'),
+        NickName: watch('Alias.NickName'),
+        BirthDate: watch('Alias.BirthDate'),
+        Gender: watch('Alias.Gender'),
+        Email: watch('Alias.Email')
+      }
+    }
 
     // Convert user birthdate entry format (yyyy-mm-dd) into valid ISO 8601 format for database storage
     credentialToSave.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDb(credentialToSave.Alias.BirthDate);
-
-    // If we're creating a new credential and mode is random, generate random values
-    if (!isEditMode && mode === 'random') {
-      console.log('Generating random values');
-      credentialToSave = await generateRandomAlias();
-    }
 
     await executeVaultMutation(async () => {
       if (isEditMode) {
@@ -212,7 +243,11 @@ export default function AddEditCredentialScreen() {
     });
   }, [navigation, mode]);
 
-  const generateRandomAlias = async (): Promise<Credential> => {
+  /**
+   * Initialize the identity and password generators with settings from user's vault.
+   * @returns {identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator}
+   */
+  const initializeGenerators = async () => {
     // Get default identity language from database
     const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
 
@@ -228,16 +263,20 @@ export default function AddEditCredentialScreen() {
         break;
     }
 
-    // Generate random identity
-    const identity = await identityGenerator.generateRandomIdentity();
-
     // Get password settings from database
     const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
 
     // Initialize password generator with settings
     const passwordGenerator = new PasswordGenerator(passwordSettings);
-    const password = passwordGenerator.generateRandomPassword();
 
+    return { identityGenerator, passwordGenerator };
+  };
+
+  const generateRandomAlias = async (): Promise<void> => {
+    const { identityGenerator, passwordGenerator } = await initializeGenerators();
+
+    const identity = await identityGenerator.generateRandomIdentity();
+    const password = passwordGenerator.generateRandomPassword();
     const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
     const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
 
@@ -248,64 +287,28 @@ export default function AddEditCredentialScreen() {
     setValue('Alias.Gender', identity.gender);
     setValue('Alias.BirthDate', IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()));
 
-     // In edit mode, preserve existing username and password if they exist
-     if (isEditMode && watch('Username')) {
-      // Keep the existing username in edit mode
-      setValue('Username', watch('Username'));
+    // In edit mode, preserve existing username and password if they exist
+    if (isEditMode && watch('Username')) {
+      // Keep the existing username in edit mode, so don't do anything here.
     } else {
       // Use the newly generated username
       setValue('Username', identity.nickName);
     }
 
     if (isEditMode && watch('Password')) {
-      // Keep the existing password in edit mode
-      setValue('Password', watch('Password'));
+      // Keep the existing password in edit mode, so don't do anything here.
     } else {
       // Use the newly generated password
       setValue('Password', password);
       // Make password visible when newly generated
       setIsPasswordVisible(true);
     }
-
-    return {
-      Id: "",
-      Username: identity.emailPrefix,
-      Password: password,
-      ServiceName: watch('ServiceName'),
-      ServiceUrl: watch('ServiceUrl'),
-      Notes: "",
-      Alias: {
-        FirstName: identity.firstName,
-        LastName: identity.lastName,
-        NickName: identity.nickName,
-        BirthDate: IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()),
-        Gender: identity.gender,
-        Email: email
-      }
-    };
   };
 
   const generateRandomUsername = async () => {
     try {
-      // Get default identity language from database
-      const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
-
-      // Initialize identity generator based on language
-      let identityGenerator: BaseIdentityGenerator;
-      switch (identityLanguage) {
-        case 'nl':
-          identityGenerator = new IdentityGeneratorNl();
-          break;
-        case 'en':
-        default:
-          identityGenerator = new IdentityGeneratorEn();
-          break;
-      }
-
-      // Generate random identity
+      const { identityGenerator } = await initializeGenerators();
       const identity = await identityGenerator.generateRandomIdentity();
-
-      // Update only the username
       setValue('Username', identity.nickName);
     } catch (error) {
       console.error('Error generating random username:', error);
@@ -319,17 +322,9 @@ export default function AddEditCredentialScreen() {
 
   const generateRandomPassword = async () => {
     try {
-      // Get password settings from database
-      const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
-
-      // Initialize password generator with settings
-      const passwordGenerator = new PasswordGenerator(passwordSettings);
+      const { passwordGenerator } = await initializeGenerators();
       const password = passwordGenerator.generateRandomPassword();
-
-      // Update only the password
       setValue('Password', password);
-
-      // Make password visible when regenerated
       setIsPasswordVisible(true);
     } catch (error) {
       console.error('Error generating random password:', error);
@@ -341,17 +336,10 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const handleAliasChange = (field: keyof Credential['Alias'], value: string | Gender) => {
-    if (field === 'BirthDate') {
-      setValue('Alias.BirthDate', value);
-    }
-    else {
-      setValue(`Alias.${field}`, value);
-    }
-  };
-
   const handleDelete = async () => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     Keyboard.dismiss();
 
@@ -437,14 +425,6 @@ export default function AddEditCredentialScreen() {
       marginBottom: 16,
       color: colors.text,
     },
-    input: {
-      backgroundColor: colors.background,
-      color: colors.text,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 12,
-      fontSize: 16,
-    },
     generateButton: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -460,22 +440,6 @@ export default function AddEditCredentialScreen() {
       fontWeight: '600',
       marginLeft: 6,
     },
-    notesInput: {
-      backgroundColor: colors.background,
-      color: colors.text,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 12,
-      fontSize: 16,
-      height: 100,
-      textAlignVertical: 'top',
-    },
-    syncStatus: {
-      marginTop: 16,
-      textAlign: 'center',
-      color: '#fff',
-      fontSize: 16,
-    },
     deleteButton: {
       padding: 10,
       borderRadius: 8,
@@ -487,32 +451,6 @@ export default function AddEditCredentialScreen() {
     deleteButtonText: {
       color: colors.errorText,
       fontWeight: '600',
-    },
-    inputGroup: {
-      marginBottom: 6,
-    },
-    inputLabel: {
-      fontSize: 12,
-      marginBottom: 4,
-      color: colors.textMuted,
-    },
-    inputWithButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.background,
-      borderRadius: 8,
-      marginBottom: 12,
-    },
-    inputField: {
-      flex: 1,
-      color: colors.text,
-      padding: 12,
-      fontSize: 16,
-    },
-    inputButton: {
-      padding: 12,
-      borderLeftWidth: 1,
-      borderLeftColor: colors.accentBorder,
     },
   });
 
@@ -547,27 +485,19 @@ export default function AddEditCredentialScreen() {
 
             <View style={styles.section}>
               <ThemedText style={styles.sectionTitle}>Service</ThemedText>
-
               <ValidatedFormField
+                ref={serviceNameRef}
                 control={control}
                 name="ServiceName"
                 label="Service Name"
                 required
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
               />
-
               <ValidatedFormField
                 control={control}
                 name="ServiceUrl"
                 label="Service URL"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
               />
             </View>
-
             {(mode === 'manual' || isEditMode) && (
               <>
               <View style={styles.section}>
@@ -577,9 +507,6 @@ export default function AddEditCredentialScreen() {
                   control={control}
                   name="Username"
                   label="Username"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                   buttons={[
                     {
                       icon: "refresh",
@@ -587,7 +514,6 @@ export default function AddEditCredentialScreen() {
                     }
                   ]}
                 />
-
                 <ValidatedFormField
                   control={control}
                   name="Password"
@@ -604,69 +530,44 @@ export default function AddEditCredentialScreen() {
                     }
                   ]}
                 />
-
                 <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
                   <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
                   <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
                 </TouchableOpacity>
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.Email"
                   label="Email"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
               </View>
 
               <View style={styles.section}>
                 <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.FirstName"
                   label="First Name"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.LastName"
                   label="Last Name"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.NickName"
                   label="Nick Name"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.Gender"
                   label="Gender"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
-
                 <ValidatedFormField
                   control={control}
                   name="Alias.BirthDate"
                   label="Birth Date"
                   placeholder="YYYY-MM-DD"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
               </View>
 
@@ -677,12 +578,9 @@ export default function AddEditCredentialScreen() {
                   control={control}
                   name="Notes"
                   label="Notes"
-                  multiline
+                  multiline={true}
                   numberOfLines={4}
                   textAlignVertical="top"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
                 />
                 {/* TODO: Add TOTP management */}
               </View>

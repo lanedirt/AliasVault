@@ -4,12 +4,13 @@ import * as Yup from 'yup';
  * Credential add/edit form validation schema used by react-hook-form.
  */
 export const credentialSchema = Yup.object().shape({
+  Id: Yup.string().optional(),
   ServiceName: Yup.string().required('Service name is required'),
-  ServiceUrl: Yup.string().url('Invalid URL format').optional(),
+  ServiceUrl: Yup.string().url('Invalid URL format').nullable().notRequired(),
   Alias: Yup.object().shape({
-    FirstName: Yup.string().optional(),
-    LastName: Yup.string().optional(),
-    NickName: Yup.string().optional(),
+    FirstName: Yup.string().nullable().notRequired(),
+    LastName: Yup.string().nullable().notRequired(),
+    NickName: Yup.string().nullable().notRequired(),
     BirthDate: Yup.string()
     .nullable()
     .notRequired()
@@ -21,10 +22,10 @@ export const credentialSchema = Yup.object().shape({
         return /^\d{4}-\d{2}-\d{2}$/.test(value);
       },
     ),
-    Gender: Yup.string().optional(),
-    Email: Yup.string().email('Invalid email format').optional()
+    Gender: Yup.string().nullable().notRequired(),
+    Email: Yup.string().email('Invalid email format').nullable().notRequired()
   }),
-  Username: Yup.string().optional(),
+  Username: Yup.string().nullable().notRequired(),
   Password: Yup.string().nullable().notRequired(),
-  Notes: Yup.string().optional()
+  Notes: Yup.string().nullable().notRequired()
 });

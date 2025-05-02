@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { View, TextInput, TextInputProps, StyleSheet, TouchableOpacity, TouchableHighlight } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
@@ -10,6 +10,11 @@ interface FormFieldButton {
   onPress: () => void;
 }
 
+export interface ValidatedFormFieldRef {
+  focus: () => void;
+  selectAll: () => void;
+}
+
 interface ValidatedFormFieldProps<T extends FieldValues> extends Omit<TextInputProps, 'value' | 'onChangeText'> {
   label: string;
   name: Path<T>;
@@ -18,15 +23,28 @@ interface ValidatedFormFieldProps<T extends FieldValues> extends Omit<TextInputP
   buttons?: FormFieldButton[];
 }
 
-export const ValidatedFormField = <T extends FieldValues>({
+export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFormFieldProps<any>>(({
   label,
   name,
   control,
   required,
   buttons,
   ...props
-}: ValidatedFormFieldProps<T>) => {
+}, ref) => {
   const colors = useColors();
+  const inputRef = React.useRef<TextInput>(null);
+  const currentValue = useRef<string>('');
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      console.log(inputRef.current);
+      inputRef.current?.focus();
+    },
+    selectAll: () => {
+      inputRef.current?.setSelection(0, currentValue.current.length);
+    }
+  }));
+
   const styles = StyleSheet.create({
     container: {
       marginBottom: 16,
@@ -76,15 +94,21 @@ export const ValidatedFormField = <T extends FieldValues>({
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <View style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>{label} {required && <ThemedText style={styles.requiredIndicator}>*</ThemedText>}</ThemedText>
-          <View style={[styles.inputContainer, error ? styles.inputError : null]}>
+      render={({ field: { onChange, value }, fieldState: { error } }) => {
+        currentValue.current = value as string;
+        return (
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.inputLabel}>{label} {required && <ThemedText style={styles.requiredIndicator}>*</ThemedText>}</ThemedText>
+            <View style={[styles.inputContainer, error ? styles.inputError : null]}>
             <TextInput
+              ref={inputRef}
               style={styles.input}
               value={value as string}
               placeholderTextColor={colors.textMuted}
               onChangeText={onChange}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
               {...props}
             />
             {buttons?.map((button, index) => (
@@ -100,7 +124,7 @@ export const ValidatedFormField = <T extends FieldValues>({
           </View>
           {error && <ThemedText style={styles.errorText}>{error.message}</ThemedText>}
         </View>
-      )}
+      )}}
     />
   );
-};
+});
