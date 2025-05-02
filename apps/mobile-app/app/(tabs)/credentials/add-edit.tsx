@@ -21,6 +21,8 @@ import { ValidatedFormField } from '@/components/ValidatedFormField';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { credentialSchema } from '@/utils/validationSchema';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -466,17 +468,6 @@ export default function AddEditCredentialScreen() {
       height: 100,
       textAlignVertical: 'top',
     },
-    loadingOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-    },
     syncStatus: {
       marginTop: 16,
       textAlign: 'center',
@@ -524,120 +515,42 @@ export default function AddEditCredentialScreen() {
   });
 
   return (
-    <ThemedSafeAreaView style={styles.container}>
-      <ThemedView style={styles.content}>
-        {(isLoading || syncStatus) && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            {syncStatus && (
-              <ThemedText style={styles.syncStatus}>{syncStatus}</ThemedText>
+    <>
+      {(isLoading) && (
+        <LoadingOverlay status={syncStatus} />
+      )}
+      <ThemedSafeAreaView style={styles.container}>
+        <ThemedView style={styles.content}>
+          <ScrollView>
+            {!isEditMode && (
+              <View style={styles.modeSelector}>
+                <TouchableOpacity
+                  style={[styles.modeButton, mode === 'random' && styles.modeButtonActive]}
+                  onPress={() => setMode('random')}
+                >
+                  <ThemedText style={[styles.modeButtonText, mode === 'random' && styles.modeButtonTextActive]}>
+                    Random Alias
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modeButton, mode === 'manual' && styles.modeButtonActive]}
+                  onPress={() => setMode('manual')}
+                >
+                  <ThemedText style={[styles.modeButtonText, mode === 'manual' && styles.modeButtonTextActive]}>
+                    Manual
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
             )}
-          </View>
-        )}
-        <ScrollView>
-          {!isEditMode && (
-            <View style={styles.modeSelector}>
-              <TouchableOpacity
-                style={[styles.modeButton, mode === 'random' && styles.modeButtonActive]}
-                onPress={() => setMode('random')}
-              >
-                <ThemedText style={[styles.modeButtonText, mode === 'random' && styles.modeButtonTextActive]}>
-                  Random Alias
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modeButton, mode === 'manual' && styles.modeButtonActive]}
-                onPress={() => setMode('manual')}
-              >
-                <ThemedText style={[styles.modeButtonText, mode === 'manual' && styles.modeButtonTextActive]}>
-                  Manual
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Service</ThemedText>
-
-            <ValidatedFormField
-              control={control}
-              name="ServiceName"
-              label="Service Name"
-              required
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-            />
-
-            <ValidatedFormField
-              control={control}
-              name="ServiceUrl"
-              label="Service URL"
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-            />
-          </View>
-
-          {(mode === 'manual' || isEditMode) && (
-            <>
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
-
-              <ValidatedFormField
-                control={control}
-                name="Username"
-                label="Username"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-                buttons={[
-                  {
-                    icon: "refresh",
-                    onPress: generateRandomUsername
-                  }
-                ]}
-              />
-
-              <ValidatedFormField
-                control={control}
-                name="Password"
-                label="Password"
-                secureTextEntry={!isPasswordVisible}
-                buttons={[
-                  {
-                    icon: isPasswordVisible ? "visibility-off" : "visibility",
-                    onPress: () => setIsPasswordVisible(!isPasswordVisible)
-                  },
-                  {
-                    icon: "refresh",
-                    onPress: generateRandomPassword
-                  }
-                ]}
-              />
-
-              <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
-                <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
-                <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
-              </TouchableOpacity>
-
-              <ValidatedFormField
-                control={control}
-                name="Alias.Email"
-                label="Email"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-              />
-            </View>
 
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
+              <ThemedText style={styles.sectionTitle}>Service</ThemedText>
 
               <ValidatedFormField
                 control={control}
-                name="Alias.FirstName"
-                label="First Name"
+                name="ServiceName"
+                label="Service Name"
+                required
                 autoCapitalize="none"
                 autoComplete="off"
                 autoCorrect={false}
@@ -645,72 +558,147 @@ export default function AddEditCredentialScreen() {
 
               <ValidatedFormField
                 control={control}
-                name="Alias.LastName"
-                label="Last Name"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-              />
-
-              <ValidatedFormField
-                control={control}
-                name="Alias.NickName"
-                label="Nick Name"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-              />
-
-              <ValidatedFormField
-                control={control}
-                name="Alias.Gender"
-                label="Gender"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-              />
-
-              <ValidatedFormField
-                control={control}
-                name="Alias.BirthDate"
-                label="Birth Date"
-                placeholder="YYYY-MM-DD"
+                name="ServiceUrl"
+                label="Service URL"
                 autoCapitalize="none"
                 autoComplete="off"
                 autoCorrect={false}
               />
             </View>
 
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
+            {(mode === 'manual' || isEditMode) && (
+              <>
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
 
-              <ValidatedFormField
-                control={control}
-                name="Notes"
-                label="Notes"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                autoCapitalize="none"
-                autoComplete="off"
-                autoCorrect={false}
-              />
-              {/* TODO: Add TOTP management */}
-            </View>
+                <ValidatedFormField
+                  control={control}
+                  name="Username"
+                  label="Username"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  buttons={[
+                    {
+                      icon: "refresh",
+                      onPress: generateRandomUsername
+                    }
+                  ]}
+                />
 
-            {isEditMode && (
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={handleDelete}
-              >
-                <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
-              </TouchableOpacity>
+                <ValidatedFormField
+                  control={control}
+                  name="Password"
+                  label="Password"
+                  secureTextEntry={!isPasswordVisible}
+                  buttons={[
+                    {
+                      icon: isPasswordVisible ? "visibility-off" : "visibility",
+                      onPress: () => setIsPasswordVisible(!isPasswordVisible)
+                    },
+                    {
+                      icon: "refresh",
+                      onPress: generateRandomPassword
+                    }
+                  ]}
+                />
+
+                <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
+                  <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
+                  <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
+                </TouchableOpacity>
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.Email"
+                  label="Email"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.FirstName"
+                  label="First Name"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.LastName"
+                  label="Last Name"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.NickName"
+                  label="Nick Name"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.Gender"
+                  label="Gender"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+
+                <ValidatedFormField
+                  control={control}
+                  name="Alias.BirthDate"
+                  label="Birth Date"
+                  placeholder="YYYY-MM-DD"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
+
+                <ValidatedFormField
+                  control={control}
+                  name="Notes"
+                  label="Notes"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+                {/* TODO: Add TOTP management */}
+              </View>
+
+              {isEditMode && (
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={handleDelete}
+                >
+                  <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
+                </TouchableOpacity>
+              )}
+            </>
             )}
-          </>
-          )}
-        </ScrollView>
-      </ThemedView>
-      <AliasVaultToast />
-    </ThemedSafeAreaView>
+          </ScrollView>
+        </ThemedView>
+        <AliasVaultToast />
+      </ThemedSafeAreaView>
+    </>
   );
 }

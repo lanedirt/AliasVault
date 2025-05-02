@@ -10,11 +10,11 @@ import 'react-native-reanimated';
 import 'react-native-get-random-values';
 
 import { useColors, useColorScheme } from '@/hooks/useColorScheme';
-import { LoadingProvider } from '@/context/LoadingContext';
 import { DbProvider } from '@/context/DbContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { WebApiProvider } from '@/context/WebApiContext';
 import { AliasVaultToast } from '@/components/Toast';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -87,9 +87,7 @@ export default function RootLayout() {
     <DbProvider>
       <AuthProvider>
         <WebApiProvider>
-          <LoadingProvider>
-            <RootLayoutNav />
-          </LoadingProvider>
+          <RootLayoutNav />
         </WebApiProvider>
       </AuthProvider>
     </DbProvider>

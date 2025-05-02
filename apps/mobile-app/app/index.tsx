@@ -6,5 +6,4 @@ export default function AppIndex() {
   install();
 
   return <Redirect href={'/sync'} />
-
 }
