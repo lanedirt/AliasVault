@@ -23,7 +23,7 @@ class CredentialIdentityStore {
             guard let username = credential.username, !username.isEmpty else {
                 return nil
             }
-            
+
             let effectiveDomain = Self.effectiveDomain(from: host)
 
             return ASPasswordCredentialIdentity(
@@ -43,7 +43,7 @@ class CredentialIdentityStore {
               print("Credential identity store is not enabled.")
               return
         }
-        
+
         do {
             try await store.saveCredentialIdentities(identities)
         } catch {
@@ -65,14 +65,13 @@ class CredentialIdentityStore {
             return ASPasswordCredentialIdentity(
                 serviceIdentifier: serviceIdentifier,
                 user: credential.username ?? "",
-                // TODO: Use the actual record identifier when implementing the actual vault
-                recordIdentifier: UUID().uuidString
+                recordIdentifier: credential.id.uuidString
             )
         }
 
         try await store.removeCredentialIdentities(identities)
     }
-    
+
     private func storeState() async -> ASCredentialIdentityStoreState {
         await withCheckedContinuation { continuation in
             store.getState { state in
@@ -80,7 +79,7 @@ class CredentialIdentityStore {
             }
         }
     }
-    
+
     private static func effectiveDomain(from host: String) -> String {
         let parts = host.split(separator: ".")
         guard parts.count >= 2 else { return host }

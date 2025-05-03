@@ -110,8 +110,8 @@ class EncryptionUtility {
    * Generates a new RSA key pair for asymmetric encryption
    */
   public static async generateRsaKeyPair(): Promise<{ publicKey: string, privateKey: string }> {
-// TODO: ensure the key pair is generated in the correct format where private key is in expected
-    // JWK format that the WASM app already outputs.
+    // TODO: this method is currently unused. When we enable the app to actually generate keys, check if the key pair is
+    // generated in the correct format  where private key is in expected JWK format that the WASM app already outputs.
     const keyPair = await crypto.subtle.generateKey(
       {
         name: "RSA-OAEP",

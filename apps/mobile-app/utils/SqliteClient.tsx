@@ -559,7 +559,7 @@ class SqliteClient {
     try {
       /*
        * Check if TotpCodes table exists (for backward compatibility).
-       * TODO: whenever the browser extension has a minimum client DB version of 1.5.0+,
+       * TODO: whenever the mobile app has a minimum client DB version of 1.5.0+,
        * we can remove this check as the TotpCodes table then is guaranteed to exist.
        */
       if (!await this.tableExists('TotpCodes')) {
@@ -679,13 +679,11 @@ class SqliteClient {
       }
 
       // 1. Update Service
-      // TODO: make Logo update optional, currently not supported as its becoming null.
-      //             Logo = ?,
-
       const serviceQuery = `
         UPDATE Services
         SET Name = ?,
             Url = ?,
+            Logo = COALESCE(?, Logo),
             UpdatedAt = ?
         WHERE Id = (
           SELECT ServiceId
@@ -693,12 +691,14 @@ class SqliteClient {
           WHERE Id = ?
         )`;
 
-      /*let logoData = null;
+      let logoData = null;
       try {
         if (credential.Logo) {
+          // Handle object-like array conversion
           if (typeof credential.Logo === 'object' && !ArrayBuffer.isView(credential.Logo)) {
             const values = Object.values(credential.Logo);
             logoData = new Uint8Array(values);
+          // Handle existing array types
           } else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
             logoData = new Uint8Array(credential.Logo);
           }
@@ -706,12 +706,12 @@ class SqliteClient {
       } catch (error) {
         console.warn('Failed to convert logo to Uint8Array:', error);
         logoData = null;
-      }*/
+      }
 
       await this.executeUpdate(serviceQuery, [
         credential.ServiceName,
         credential.ServiceUrl ?? null,
-        //logoData,
+        logoData,
         currentDateTime,
         credential.Id
       ]);

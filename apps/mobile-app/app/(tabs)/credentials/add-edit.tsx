@@ -120,8 +120,8 @@ export default function AddEditCredentialScreen() {
     }
 
     // Assemble the credential to save
-    let credentialToSave = {
-      Id: isEditMode ? id : undefined,
+    let credentialToSave: Credential = {
+      Id: isEditMode ? id : '',
       Username: watch('Username'),
       Password: watch('Password'),
       ServiceName: watch('ServiceName'),
@@ -139,28 +139,28 @@ export default function AddEditCredentialScreen() {
     // Convert user birthdate entry format (yyyy-mm-dd) into valid ISO 8601 format for database storage
     credentialToSave.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDb(credentialToSave.Alias.BirthDate);
 
+    // Extract favicon from service URL if the credential has one
+    if (credentialToSave.ServiceUrl) {
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
+        );
+
+        const faviconPromise = webApi.get<FaviconExtractModel>('Favicon/Extract?url=' + credentialToSave.ServiceUrl);
+        const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as FaviconExtractModel;
+        if (faviconResponse?.image) {
+          const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
+          credentialToSave.Logo = decodedImage;
+        }
+      } catch (error) {
+        console.log('Favicon extraction failed or timed out:', error);
+      }
+    }
+
     await executeVaultMutation(async () => {
       if (isEditMode) {
         await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
       } else {
-        // For new credentials, try to extract favicon
-        if (credentialToSave.ServiceUrl) {
-          try {
-            const timeoutPromise = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
-            );
-
-            const faviconPromise = webApi.get<FaviconExtractModel>('Favicon/Extract?url=' + credentialToSave.ServiceUrl);
-            const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as FaviconExtractModel;
-            if (faviconResponse?.image) {
-              const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
-              credentialToSave.Logo = decodedImage;
-            }
-          } catch (error) {
-            console.log('Favicon extraction failed or timed out:', error);
-          }
-        }
-
         const credentialId = await dbContext.sqliteClient!.createCredential(credentialToSave);
         credentialToSave.Id = credentialId;
       }
