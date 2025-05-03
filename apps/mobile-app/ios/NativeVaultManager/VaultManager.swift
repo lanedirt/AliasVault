@@ -131,17 +131,6 @@ public class VaultManager: NSObject {
     }
 
     @objc
-    func addCredential(_ username: String, password: String, service: String) {
-        do {
-            // TODO: implement this
-            //let credential = Credential(username: username, password: password, service: service)
-            //try vaultStore.addCredential(credential)
-        } catch {
-            print("Failed to add credential: \(error)")
-        }
-    }
-
-    @objc
     func getCredentials() -> [String: Any] {
         do {
             let credentials = try vaultStore.getAllCredentials()

@@ -3,7 +3,6 @@ import { TurboModuleRegistry } from 'react-native';
 
 export interface Spec extends TurboModule {
   // Basic credential operations
-  addCredential(username: string, password: string, service: string): Promise<void>;
   getCredentials(): Promise<{ credentials: Array<{ username: string; password: string; service: string }> }>;
   clearVault(): Promise<void>;
 

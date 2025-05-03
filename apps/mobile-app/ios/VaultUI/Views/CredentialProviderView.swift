@@ -114,9 +114,6 @@ public struct CredentialProviderView: View {
                     }
                 }
             }
-            .sheet(isPresented: $viewModel.showAddCredential) {
-                AddCredentialView(viewModel: viewModel)
-            }
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
                 // Define all text strings
                 guard let credential = viewModel.selectedCredential else {
@@ -191,7 +188,6 @@ public class CredentialProviderViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var showError = false
     @Published var errorMessage = ""
-    @Published var showAddCredential = false
     @Published var showSelectionOptions = false
     @Published var selectedCredential: Credential?
     @Published public var isChoosingTextToInsert = false
@@ -377,48 +373,6 @@ public class CredentialProviderViewModel: ObservableObject {
             self?.isLoading = false
             self?.errorMessage = error.localizedDescription
             self?.showError = true
-        }
-    }
-}
-
-// MARK: - AddCredentialView
-
-struct AddCredentialView: View {
-    @ObservedObject var viewModel: CredentialProviderViewModel
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Username", text: $viewModel.newUsername)
-                    .textContentType(.username)
-                    .autocapitalization(.none)
-
-                SecureField("Password", text: $viewModel.newPassword)
-                    .textContentType(.password)
-
-                TextField("Service", text: $viewModel.newService)
-                    .textContentType(.URL)
-                    .autocapitalization(.none)
-            }
-            .navigationTitle("Add Credential")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        //viewModel.addCredential()
-                        dismiss()
-                    }
-                    .disabled(viewModel.newUsername.isEmpty ||
-                              viewModel.newPassword.isEmpty ||
-                              viewModel.newService.isEmpty)
-                }
-            }
         }
     }
 }

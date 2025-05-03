@@ -40,10 +40,6 @@
     return std::make_shared<facebook::react::NativeVaultManagerSpecJSI>(params);
 }
 
-- (void)addCredential:(NSString *)username password:(NSString *)password service:(NSString *)service resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [vaultManager addCredential:username password:password service:service];
-}
-
 - (void)clearVault {
     [vaultManager clearVault];
 }

@@ -20,17 +20,17 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-class CredentialManagerModule(private val reactContext: ReactApplicationContext) : 
+class CredentialManagerModule(private val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
-    
+
     companion object {
         private const val TAG = "CredentialManagerModule"
     }
-    
+
     override fun getName(): String {
         return "CredentialManager"
     }
-    
+
     private fun getFragmentActivity(): FragmentActivity? {
         val activity = currentActivity
         return if (activity is FragmentActivity) {
@@ -39,37 +39,7 @@ class CredentialManagerModule(private val reactContext: ReactApplicationContext)
             null
         }
     }
-    
-    @ReactMethod
-    fun addCredential(username: String, password: String, service: String, promise: Promise) {
-        UiThreadUtil.runOnUiThread {
-            try {
-                val activity = getFragmentActivity()
-                if (activity == null) {
-                    promise.reject("ERR_ACTIVITY", "Activity is not available")
-                    return@runOnUiThread
-                }
-                
-                val store = SharedCredentialStore.getInstance(reactContext)
-                val credential = Credential(username, password, service)
-                
-                store.saveCredential(activity, credential, object : SharedCredentialStore.CryptoOperationCallback {
-                    override fun onSuccess(result: String) {
-                        promise.resolve(true)
-                    }
-                    
-                    override fun onError(e: Exception) {
-                        Log.e(TAG, "Error adding credential", e)
-                        promise.reject("ERR_ADD_CREDENTIAL", "Failed to add credential: ${e.message}", e)
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e(TAG, "Error preparing to add credential", e)
-                promise.reject("ERR_ADD_CREDENTIAL", "Failed to prepare adding credential: ${e.message}", e)
-            }
-        }
-    }
-    
+
     @ReactMethod
     fun getCredentials(promise: Promise) {
         UiThreadUtil.runOnUiThread {
@@ -79,15 +49,15 @@ class CredentialManagerModule(private val reactContext: ReactApplicationContext)
                     promise.reject("ERR_ACTIVITY", "Activity is not available")
                     return@runOnUiThread
                 }
-                
+
                 val store = SharedCredentialStore.getInstance(reactContext)
-                
+
                 store.getAllCredentials(activity, object : SharedCredentialStore.CryptoOperationCallback {
                     override fun onSuccess(jsonString: String) {
                         try {
                             val jsonArray = JSONArray(jsonString)
                             val credentialsArray = Arguments.createArray()
-                            
+
                             for (i in 0 until jsonArray.length()) {
                                 val jsonObject = jsonArray.getJSONObject(i)
                                 val credentialMap = Arguments.createMap()
@@ -96,14 +66,14 @@ class CredentialManagerModule(private val reactContext: ReactApplicationContext)
                                 credentialMap.putString("service", jsonObject.getString("service"))
                                 credentialsArray.pushMap(credentialMap)
                             }
-                            
+
                             promise.resolve(credentialsArray)
                         } catch (e: Exception) {
                             Log.e(TAG, "Error parsing credentials", e)
                             promise.reject("ERR_PARSE_CREDENTIALS", "Failed to parse credentials: ${e.message}", e)
                         }
                     }
-                    
+
                     override fun onError(e: Exception) {
                         Log.e(TAG, "Error getting credentials", e)
                         promise.reject("ERR_GET_CREDENTIALS", "Failed to get credentials: ${e.message}", e)
@@ -115,7 +85,7 @@ class CredentialManagerModule(private val reactContext: ReactApplicationContext)
             }
         }
     }
-    
+
     @ReactMethod
     fun clearCredentials(promise: Promise) {
         try {
@@ -127,4 +97,4 @@ class CredentialManagerModule(private val reactContext: ReactApplicationContext)
             promise.reject("ERR_CLEAR_CREDENTIALS", "Failed to clear credentials: ${e.message}", e)
         }
     }
-} 
+}

@@ -414,33 +414,6 @@ public class VaultStore {
     }
 
     // MARK: - Credential Operations
-
-    func addCredential(_ credential: Credential) throws {
-        // After initialization attempt, check if db is still nil
-        guard let db = db else {
-            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
-        }
-
-        // TODO: update this to use the actual database schema.
-        // TODO: having the add logic here means we have duplicate code with the react native implementation.
-        let credentials = Table("credentials")
-        let id = Expression<String>("id")
-        let username = Expression<String>("username")
-        let password = Expression<String>("password")
-        let service = Expression<String>("service")
-        let createdAt = Expression<Date>("created_at")
-        let updatedAt = Expression<Date>("updated_at")
-
-        try db.run(credentials.insert(
-            id <- UUID().uuidString,
-            username <- credential.username ?? "",
-            password <- credential.password?.value ?? "",
-            service <- credential.service.name ?? "",
-            createdAt <- Date(),
-            updatedAt <- Date()
-        ))
-    }
-
     public func getAllCredentials() throws -> [Credential] {
         guard let db = db else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])

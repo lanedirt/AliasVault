@@ -99,11 +99,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [dbInitialized, checkStoredVault]);
 
   /**
-   * Clear database and remove from background worker, called when logging out.
+   * Clear database and remove from native module, called when logging out.
    */
   const clearDatabase = useCallback(() : void => {
     setDbInitialized(false);
-    // TODO: implement actual vault clearing.
     NativeVaultManager.clearVault();
   }, []);
 
