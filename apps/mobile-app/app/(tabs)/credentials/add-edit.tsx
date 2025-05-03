@@ -173,13 +173,13 @@ export default function AddEditCredentialScreen() {
     if (serviceUrl && !isEditMode) {
       router.replace('/credentials/autofill-credential-created');
     } else {
-      if (isEditMode) {
-        // If editing existing credential, go back to the detail screen via back.
-        router.back();
-      } else {
-        // If creating new credential, go to the newly created credential via push.
-        router.replace(`/credentials/${credentialToSave.Id}`);
-      }
+      // First close the modal
+      router.dismiss();
+
+      // Then navigate after a short delay to ensure the modal has closed
+      setTimeout(() => {
+        router.push(`/credentials/${credentialToSave.Id}`);
+      }, 100);
 
       // Show success toast
       setTimeout(() => {
