@@ -1,11 +1,11 @@
 # NativeVaultManager
 
-This folder contains the React Native bridge implementation for iOS, written in Objective-C and Swift. These files serve as the communication layer between the React Native mobile app and the shared `VaultStore` logic.
+This folder contains the React Native bridge implementation for iOS, written in Objective-C and Swift. These files serve as the communication layer between the React Native mobile app and the shared `VaultStoreKit` logic.
 
 ## Purpose
 
 The NativeVaultManager enables:
-- React Native to make calls to the shared VaultStore functionality
+- React Native to make calls to the shared VaultStoreKit class
 - Integration with the native iOS autofill extension
 - Secure communication between the React Native layer and native iOS code
 

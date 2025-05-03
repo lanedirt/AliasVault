@@ -4,7 +4,7 @@ This directory contains the native iOS Autofill extension that enables native pa
 
 ## Architecture
 
-The Autofill extension and the React Native app both access the same `VaultStore`, which serves as a shared data model between the native iOS components and the React Native application. This architecture allows for seamless communication between:
+The Autofill extension and the React Native app both access the same `VaultStoreKit`, which serves as a shared data model between the native iOS components and the React Native application. This architecture allows for seamless communication between:
 
 - Native iOS Autofill functionality
 - React Native application components
