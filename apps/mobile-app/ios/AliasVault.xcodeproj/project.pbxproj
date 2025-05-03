@@ -11,7 +11,6 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2346F6D409ED1FD16C72B7E8 /* libPods-VaultUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0B3C54DA8F7197B28121DCC /* libPods-VaultUITests.a */; };
 		3D1B0279B0714C8FF732D2D3 /* libPods-AliasVault.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E23F2188770B15FCBFEBC57 /* libPods-AliasVault.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		9E8B9B9318C79E9CBB868429 /* libPods-VaultStoreKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D17078F549B652835E3A4AFA /* libPods-VaultStoreKit.a */; };
@@ -172,7 +171,6 @@
 		5C1EA06BE7608888B8DF9CE0 /* Pods-AliasVault.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.debug.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.debug.xcconfig"; sourceTree = "<group>"; };
 		76D5DBE3C1FA4900A7CD27FB /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "AliasVault/noop-file.swift"; sourceTree = "<group>"; };
 		80E31207C11AA9B7984E118D /* Pods-VaultStoreTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreTests.debug.xcconfig"; path = "Target Support Files/Pods-VaultStoreTests/Pods-VaultStoreTests.debug.xcconfig"; sourceTree = "<group>"; };
-		812F8DE869670B2BB1C0F37E /* Pods-VaultUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultUITests.release.xcconfig"; path = "Target Support Files/Pods-VaultUITests/Pods-VaultUITests.release.xcconfig"; sourceTree = "<group>"; };
 		82C6F986E9F08FE1179D0A40 /* Pods-AliasVault.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AliasVault.release.xcconfig"; path = "Target Support Files/Pods-AliasVault/Pods-AliasVault.release.xcconfig"; sourceTree = "<group>"; };
 		83C4F2FD713FB96C56BB0D24 /* Pods-VaultStoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreTests.release.xcconfig"; path = "Target Support Files/Pods-VaultStoreTests/Pods-VaultStoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		962DE0FB93C9458BAFEEED60 /* AliasVault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "AliasVault-Bridging-Header.h"; path = "AliasVault/AliasVault-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -194,17 +192,14 @@
 		CEE480872DBE86DC00F4A367 /* VaultStoreKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VaultStoreKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE480912DBE86DD00F4A367 /* VaultStoreKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaultStoreKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VaultUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEE481742DBE8AC800F4A367 /* VaultUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaultUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VaultModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE483162DBE905000F4A367 /* libMacaw.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libMacaw.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097E2DA548C7008D568F /* Autofill.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Autofill.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE9097F2DA548C7008D568F /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
-		D0B3C54DA8F7197B28121DCC /* libPods-VaultUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D17078F549B652835E3A4AFA /* libPods-VaultStoreKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultStoreKit.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F8E67ADE689A44F7301E9453 /* Pods-Autofill.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Autofill.debug.xcconfig"; path = "Target Support Files/Pods-Autofill/Pods-Autofill.debug.xcconfig"; sourceTree = "<group>"; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-AliasVault/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		FEB765B5E32302EE60803286 /* Pods-VaultUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultUITests.debug.xcconfig"; path = "Target Support Files/Pods-VaultUITests/Pods-VaultUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -320,7 +315,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CEE481752DBE8AC800F4A367 /* VaultUI.framework in Frameworks */,
-				2346F6D409ED1FD16C72B7E8 /* libPods-VaultUITests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +370,6 @@
 				456ACD01FF420AE789429A59 /* libPods-VaultStoreTests.a */,
 				C32D89DCBA51D7C8CDE51DD2 /* libPods-VaultUI.a */,
 				9E9AD944E3A0F270C797F5DD /* libPods-VaultStoreKitTests.a */,
-				D0B3C54DA8F7197B28121DCC /* libPods-VaultUITests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -417,7 +410,6 @@
 				CEE480872DBE86DC00F4A367 /* VaultStoreKit.framework */,
 				CEE480912DBE86DD00F4A367 /* VaultStoreKitTests.xctest */,
 				CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */,
-				CEE481742DBE8AC800F4A367 /* VaultUITests.xctest */,
 				CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */,
 			);
 			name = Products;
@@ -468,8 +460,6 @@
 				1A927300CBD3BFE2B7A3CA37 /* Pods-VaultUI.release.xcconfig */,
 				A9E70CCF7AAA4E05B57CCCC4 /* Pods-VaultStoreKitTests.debug.xcconfig */,
 				B18F3A7E310165C29C8C6DFE /* Pods-VaultStoreKitTests.release.xcconfig */,
-				FEB765B5E32302EE60803286 /* Pods-VaultUITests.debug.xcconfig */,
-				812F8DE869670B2BB1C0F37E /* Pods-VaultUITests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -604,26 +594,6 @@
 			productReference = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		CEE481732DBE8AC800F4A367 /* VaultUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CEE481862DBE8AC800F4A367 /* Build configuration list for PBXNativeTarget "VaultUITests" */;
-			buildPhases = (
-				0F86BBDFB544372DA7C38DE2 /* [CP] Check Pods Manifest.lock */,
-				CEE481702DBE8AC800F4A367 /* Sources */,
-				CEE481712DBE8AC800F4A367 /* Frameworks */,
-				CEE481722DBE8AC800F4A367 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				CEE481772DBE8AC800F4A367 /* PBXTargetDependency */,
-				CEE481792DBE8AC800F4A367 /* PBXTargetDependency */,
-			);
-			name = VaultUITests;
-			productName = VaultUITests;
-			productReference = CEE481742DBE8AC800F4A367 /* VaultUITests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		CEE482A92DBE8EFE00F4A367 /* VaultModels */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEE482C12DBE8EFF00F4A367 /* Build configuration list for PBXNativeTarget "VaultModels" */;
@@ -722,7 +692,6 @@
 				CEE480862DBE86DC00F4A367 /* VaultStoreKit */,
 				CEE480902DBE86DD00F4A367 /* VaultStoreKitTests */,
 				CEE481692DBE8AC800F4A367 /* VaultUI */,
-				CEE481732DBE8AC800F4A367 /* VaultUITests */,
 				CEE482A92DBE8EFE00F4A367 /* VaultModels */,
 			);
 		};
@@ -799,28 +768,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
-		};
-		0F86BBDFB544372DA7C38DE2 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-VaultUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
 		};
 		237430D176B6590F50FD5A12 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1597,73 +1544,6 @@
 			};
 			name = Release;
 		};
-		CEE481832DBE8AC800F4A367 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = FEB765B5E32302EE60803286 /* Pods-VaultUITests.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 8PHW4HN3F7;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AliasVault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AliasVault";
-			};
-			name = Debug;
-		};
-		CEE481842DBE8AC800F4A367 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 812F8DE869670B2BB1C0F37E /* Pods-VaultUITests.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 8PHW4HN3F7;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AliasVault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AliasVault";
-			};
-			name = Release;
-		};
 		CEE482C22DBE8EFF00F4A367 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1896,15 +1776,6 @@
 			buildConfigurations = (
 				CEE481812DBE8AC800F4A367 /* Debug */,
 				CEE481822DBE8AC800F4A367 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CEE481862DBE8AC800F4A367 /* Build configuration list for PBXNativeTarget "VaultUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CEE481832DBE8AC800F4A367 /* Debug */,
-				CEE481842DBE8AC800F4A367 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

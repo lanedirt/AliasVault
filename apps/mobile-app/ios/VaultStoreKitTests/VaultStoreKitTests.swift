@@ -15,6 +15,26 @@ final class VaultStoreKitTests: XCTestCase {
     override func setUp() {
         super.setUp()
         vaultStore = VaultStore.shared
+
+        do {
+            try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
+
+            let encryptedDb = try loadTestDatabase()
+            try vaultStore.storeEncryptedDatabase(encryptedDb)
+
+            let metadata = """
+            {
+                "publicEmailDomains": ["spamok.com", "spamok.nl"],
+                "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
+                "vaultRevisionNumber": 1
+            }
+            """
+            try vaultStore.storeMetadata(metadata)
+
+            try vaultStore.unlockVault()
+        } catch {
+            XCTFail("setUp failed with error: \(error)")
+        }
     }
 
     override func tearDown() {
@@ -24,53 +44,11 @@ final class VaultStoreKitTests: XCTestCase {
     }
 
     func testDatabaseInitialization() async throws {
-        // First, store the encryption key
-        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
-
-        // Load and store the encrypted database
-        let encryptedDb = try loadTestDatabase()
-
-        // Store the database
-        try vaultStore.storeEncryptedDatabase(encryptedDb)
-
-        // Store metadata with example domains
-        let metadata = """
-        {
-            "publicEmailDomains": ["spamok.com", "spamok.nl"],
-            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
-            "vaultRevisionNumber": 1
-        }
-        """
-        try vaultStore.storeMetadata(metadata)
-
-        // Unlock the vault (which loads, decrypts and opens the database in memory)
-        try vaultStore.unlockVault()
-
         // If we get here without throwing, initialization was successful
         XCTAssertTrue(vaultStore.isVaultUnlocked(), "Vault should be unlocked after initialization")
     }
 
     func testGetAllCredentials() async throws {
-        // First, store the encryption key
-        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
-
-        // Load and store the encrypted database
-        let encryptedDb = try loadTestDatabase()
-        try vaultStore.storeEncryptedDatabase(encryptedDb)
-
-        // Store metadata with example domains
-        let metadata = """
-        {
-            "publicEmailDomains": ["spamok.com", "spamok.nl"],
-            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
-            "vaultRevisionNumber": 1
-        }
-        """
-        try vaultStore.storeMetadata(metadata)
-
-        // Unlock the vault (which loads, decrypts and opens the database in memory)
-        try vaultStore.unlockVault()
-
         // Try to get all credentials
         let credentials = try vaultStore.getAllCredentials()
 
@@ -90,26 +68,6 @@ final class VaultStoreKitTests: XCTestCase {
      * the expectedlogo binary data.
      */
     func testGetGmailCredentialDetails() async throws {
-        // First, store the encryption key
-        try vaultStore.storeEncryptionKey(base64Key: testEncryptionKeyBase64)
-
-        // Load and store the encrypted database
-        let encryptedDb = try loadTestDatabase()
-        try vaultStore.storeEncryptedDatabase(encryptedDb)
-
-        // Store metadata with example domains
-        let metadata = """
-        {
-            "publicEmailDomains": ["spamok.com", "spamok.nl"],
-            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
-            "vaultRevisionNumber": 1
-        }
-        """
-        try vaultStore.storeMetadata(metadata)
-
-        // Unlock the vault (which loads, decrypts and opens the database in memory)
-        try vaultStore.unlockVault()
-
         // Get all credentials
         let credentials = try vaultStore.getAllCredentials()
 
@@ -144,6 +102,7 @@ final class VaultStoreKitTests: XCTestCase {
                           code: 1,
                           userInfo: [NSLocalizedDescriptionKey: "Test database file not found"])
         }
+
         return try String(contentsOfFile: testDbPath, encoding: .utf8)
     }
 }
