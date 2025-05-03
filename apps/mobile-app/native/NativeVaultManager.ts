@@ -7,7 +7,7 @@ export interface Spec extends TurboModule {
   clearVault(): Promise<void>;
 
   // Vault state management
-  isVaultInitialized(): Promise<boolean>;
+  hasStoredVault(): Promise<boolean>;
   isVaultUnlocked(): Promise<boolean>;
   getVaultMetadata(): Promise<any>;
   unlockVault(): Promise<boolean>;

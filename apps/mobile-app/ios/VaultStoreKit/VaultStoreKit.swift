@@ -131,7 +131,7 @@ public class VaultStore {
     }
 
     // MARK: - Vault Status
-    public func isVaultInitialized() -> Bool {
+    public func hasStoredVault() -> Bool {
         // Check if encrypted database file exists
         let hasDatabase = FileManager.default.fileExists(atPath: getEncryptedDbPath().path)
 
@@ -238,7 +238,7 @@ public class VaultStore {
 
     // Store the encrypted database (base64 encoded) in the app's documents directory
     // and metadata in UserDefaults
-    // TODO: refactor metadata save and retrieve calls to separate calls for better clarity throughtout
+    // TODO: refactor metadata save and retrieve calls to separate calls for better clarity throughout
     // full call chain?
     public func storeEncryptedDatabase(_ base64EncryptedDb: String, metadata: String) throws {
         // Store the encrypted database (base64 encoded) in the app's documents directory
@@ -305,14 +305,14 @@ public class VaultStore {
     }
 
     /**
-     * Initialize the database.
+     * Unlock the vault.
      *
      * This function will decrypt the encrypted database and import it into an in-memory database.
      * Note: as part of decryption, executing this function can prompt the user for biometric authentication.
      *
      * The in-memory database is used for all queries and updates to the database.
      */
-    public func initializeDatabase() throws {
+    public func unlockVault() throws {
         // Get the encrypted database
         guard let encryptedDbBase64 = getEncryptedDatabase() else {
             throw NSError(domain: "VaultStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
@@ -386,25 +386,9 @@ public class VaultStore {
     // MARK: - Encryption/Decryption
 
     private func encrypt(data: Data, key: Data) throws -> Data {
-        // TODO: check if this works properly and is compatible with the other clients.
-        // If it works, remove the commented out code below.
         let key = SymmetricKey(data: key)
         let sealedBox = try AES.GCM.seal(data, using: key)
         return sealedBox.combined!
-        /*
-        // Generate 12-byte random nonce (IV)
-        let iv = AES.GCM.Nonce()
-
-        // Encrypt with AES-GCM and custom IV
-        let sealedBox = try AES.GCM.seal(data, using: key, nonce: iv)
-
-        // Concatenate: IV (12 bytes) + ciphertext + tag
-        var combined = Data()
-        combined.append(contentsOf: iv) // 12 bytes
-        combined.append(sealedBox.ciphertext)
-        combined.append(sealedBox.tag) // 16 bytes
-
-        return combined*/
     }
 
     private func decrypt(data: Data, key: Data) throws -> Data {

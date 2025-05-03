@@ -43,8 +43,8 @@ export default function SyncScreen() {
 
       // Try to unlock with FaceID
       try {
-        const isInitialized = await NativeVaultManager.isVaultInitialized();
-        if (isInitialized) {
+        const hasStoredVault = await NativeVaultManager.hasStoredVault();
+        if (hasStoredVault) {
           const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
           if (!isFaceIDEnabled) {
             console.log('FaceID is not enabled, navigating to unlock screen');

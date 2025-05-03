@@ -102,15 +102,18 @@ public struct CredentialProviderView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        Button("Add") {
+                        // Make this button show a + icon instead of text
+                        Button(action: {
                             if let serviceUrl = viewModel.serviceUrl {
                                 let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
                                 if let url = URL(string: "net.aliasvault.app://credentials/add-edit?serviceUrl=\(encodedUrl)") {
                                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                                 }
                             }
+                        }) {
+                            Image(systemName: "plus")
+                            .foregroundColor(ColorConstants.Light.primary)
                         }
-                        .foregroundColor(ColorConstants.Light.primary)
                     }
                 }
             }

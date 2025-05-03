@@ -27,9 +27,26 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Check if Face ID/Touch ID is enabled
+        // Check if there is a stored vault. If not, it means the user has not logged in yet and we
+        // should redirect to the main app login screen automatically.
         let vaultStore = VaultStore()
+        if !vaultStore.hasStoredVault() {
+            let alert = UIAlertController(
+                title: "Login Required",
+                message: "To use Autofill, please login to your AliasVault account in the AliasVault app.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext.cancelRequest(withError: NSError(
+                    domain: ASExtensionErrorDomain,
+                    code: ASExtensionError.userCanceled.rawValue
+                ))
+            })
+            present(alert, animated: true)
+            return
+        }
 
+        // Check if Face ID/Touch ID is enabled
         let context = LAContext()
         var authMethod = "Face ID / Touch ID"
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
@@ -62,7 +79,7 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         // Create the ViewModel with INJECTED behaviors
         let viewModel = CredentialProviderViewModel(
           loader: {
-              try vaultStore.initializeDatabase()
+              try vaultStore.unlockVault()
               let credentials = try vaultStore.getAllCredentials()
               await self.registerCredentialIdentities(credentials: credentials)
               return credentials

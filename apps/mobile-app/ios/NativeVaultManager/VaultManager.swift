@@ -183,10 +183,10 @@ public class VaultManager: NSObject {
     }
 
     @objc
-    func isVaultInitialized(_ resolve: @escaping RCTPromiseResolveBlock,
+    func hasStoredVault(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            let isInitialized = try vaultStore.isVaultInitialized()
+            let isInitialized = try vaultStore.hasStoredVault()
             resolve(isInitialized)
         } catch {
             reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
@@ -215,10 +215,7 @@ public class VaultManager: NSObject {
     func unlockVault(_ resolve: @escaping RCTPromiseResolveBlock,
                         rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            // TODO: rename this to unlockvault? so meaning is: initialized means it exists, and unlock means
-            // we're decrypting the encrypted database (that exists) and try to load it into memory. If unlocking
-            // fails, user is redirected to the unlock screen in the react native app.
-            try vaultStore.initializeDatabase()
+            try vaultStore.unlockVault()
             resolve(true)
         } catch {
             // Check if the error is related to Face ID or decryption

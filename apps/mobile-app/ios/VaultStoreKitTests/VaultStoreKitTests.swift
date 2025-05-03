@@ -32,8 +32,8 @@ final class VaultStoreKitTests: XCTestCase {
         // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
         try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
 
-        // Then try to initialize the database
-        try vaultStore.initializeDatabase()
+        // Unlock the vault (which loads, decrypts and opens the database in memory)
+        try vaultStore.unlockVault()
 
         // If we get here without throwing, initialization was successful
         XCTAssertTrue(vaultStore.isVaultUnlocked(), "Vault should be unlocked after initialization")
@@ -48,8 +48,8 @@ final class VaultStoreKitTests: XCTestCase {
         // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
         try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
 
-        // Initialize the database
-        try vaultStore.initializeDatabase()
+        // Unlock the vault (which loads, decrypts and opens the database in memory)
+        try vaultStore.unlockVault()
 
         // Try to get all credentials
         let credentials = try vaultStore.getAllCredentials()
@@ -77,8 +77,8 @@ final class VaultStoreKitTests: XCTestCase {
         let encryptedDb = try loadTestDatabase()
         try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
 
-        // Initialize the database
-        try vaultStore.initializeDatabase()
+        // Unlock the vault (which loads, decrypts and opens the database in memory)
+        try vaultStore.unlockVault()
 
         // Get all credentials
         let credentials = try vaultStore.getAllCredentials()

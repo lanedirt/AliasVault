@@ -64,8 +64,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const checkStoredVault = useCallback(async () => {
     try {
-      const isVaultInitialized = await NativeVaultManager.isVaultInitialized();
-      if (isVaultInitialized) {
+      const hasStoredVault = await NativeVaultManager.hasStoredVault();
+      if (hasStoredVault) {
         // Get metadata from SQLite client
         const metadata = await sqliteClient.getVaultMetadata();
         if (metadata) {
