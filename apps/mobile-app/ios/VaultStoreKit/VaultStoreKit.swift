@@ -237,14 +237,15 @@ public class VaultStore {
     }
 
     // Store the encrypted database (base64 encoded) in the app's documents directory
-    // and metadata in UserDefaults
-    // TODO: refactor metadata save and retrieve calls to separate calls for better clarity throughout
-    // full call chain?
-    public func storeEncryptedDatabase(_ base64EncryptedDb: String, metadata: String) throws {
-        // Store the encrypted database (base64 encoded) in the app's documents directory
+    public func storeEncryptedDatabase(_ base64EncryptedDb: String) throws {
         try base64EncryptedDb.write(to: getEncryptedDbPath(), atomically: true, encoding: .utf8)
+    }
 
-        // Store metadata in UserDefaults
+    // Store metadata in UserDefaults
+    // Metadata is stored in plain text in UserDefaults. The metadata consists of the following:
+    // - public and private email domains
+    // - vault revision number
+    public func storeMetadata(_ metadata: String) throws {
         userDefaults.set(metadata, forKey: vaultMetadataKey)
         userDefaults.synchronize()
     }
@@ -742,7 +743,8 @@ public class VaultStore {
         let encryptedBase64String = encryptedBase64Data.base64EncodedString()
 
         // Persist the encrypted base64 string.
-        try storeEncryptedDatabase(encryptedBase64String, metadata: getVaultMetadata()!)
+        try storeEncryptedDatabase(encryptedBase64String)
+        try storeMetadata(getVaultMetadata()!)
 
         // Cleanup
         try FileManager.default.removeItem(at: tempDbPath)

@@ -96,8 +96,12 @@
     [vaultManager setAutoLockTimeout:timeout resolver:resolve rejecter:reject];
 }
 
-- (void)storeDatabase:(NSString *)base64EncryptedDb metadata:(NSString *)metadata resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [vaultManager storeDatabase:base64EncryptedDb metadata:metadata resolver:resolve rejecter:reject];
+- (void)storeDatabase:(NSString *)base64EncryptedDb resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager storeDatabase:base64EncryptedDb resolver:resolve rejecter:reject];
+}
+
+- (void)storeMetadata:(NSString *)metadata resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager storeMetadata:metadata resolver:resolve rejecter:reject];
 }
 
 - (void)storeEncryptionKey:(NSString *)base64EncryptionKey resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {

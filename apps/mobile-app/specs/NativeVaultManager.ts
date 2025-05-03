@@ -13,7 +13,8 @@ export interface Spec extends TurboModule {
   unlockVault(): Promise<boolean>;
 
   // Database operations
-  storeDatabase(base64EncryptedDb: string, metadata: string): Promise<void>;
+  storeDatabase(base64EncryptedDb: string): Promise<void>;
+  storeMetadata(metadata: string): Promise<void>;
   setAuthMethods(authMethods: string[]): Promise<void>;
   storeEncryptionKey(base64EncryptionKey: string): Promise<void>;
   getEncryptedDatabase(): Promise<string | null>;

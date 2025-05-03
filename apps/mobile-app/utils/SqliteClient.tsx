@@ -16,12 +16,27 @@ class SqliteClient {
   /**
    * Store the encrypted database via the native code implementation.
    */
-  async storeEncryptedDatabase(base64EncryptedDb: string, metadata: VaultMetadata): Promise<void> {
+  async storeEncryptedDatabase(base64EncryptedDb: string): Promise<void> {
     try {
-      const metadataJson = JSON.stringify(metadata);
-      await NativeVaultManager.storeDatabase(base64EncryptedDb, metadataJson);
+      await NativeVaultManager.storeDatabase(base64EncryptedDb);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Store the vault metadata via the native code implementation.
+   *
+   * Metadata is stored in plain text in UserDefaults. The metadata consists of the following:
+   * - public and private email domains
+   * - vault revision number
+   */
+  async storeMetadata(metadata: string): Promise<void> {
+    try {
+      await NativeVaultManager.storeMetadata(metadata);
+    } catch (error) {
+      console.error('Error storing vault metadata:', error);
       throw error;
     }
   }

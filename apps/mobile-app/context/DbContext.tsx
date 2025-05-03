@@ -49,11 +49,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber,
     };
 
-    // Initialize the SQLite client with both database and metadata
-    await sqliteClient.storeEncryptedDatabase(
-      vaultResponse.vault.blob,
-      metadata
-    );
+    // Store the encrypted database and metadata (metadata is stored in plain text in UserDefaults)
+    await sqliteClient.storeEncryptedDatabase(vaultResponse.vault.blob);
+    await sqliteClient.storeMetadata(JSON.stringify(metadata));
 
     // Initialize the database in the native module
     await unlockVault();

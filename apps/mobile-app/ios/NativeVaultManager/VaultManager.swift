@@ -19,14 +19,25 @@ public class VaultManager: NSObject {
 
     @objc
     func storeDatabase(_ base64EncryptedDb: String,
-                       metadata: String,
                        resolver resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            try vaultStore.storeEncryptedDatabase(base64EncryptedDb, metadata: metadata)
+            try vaultStore.storeEncryptedDatabase(base64EncryptedDb)
             resolve(nil)
         } catch {
             reject("DB_ERROR", "Failed to store database: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func storeMetadata(_ metadata: String,
+                      resolver resolve: @escaping RCTPromiseResolveBlock,
+                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            try vaultStore.storeMetadata(metadata)
+            resolve(nil)
+        } catch {
+            reject("METADATA_ERROR", "Failed to store metadata: \(error.localizedDescription)", error)
         }
     }
 

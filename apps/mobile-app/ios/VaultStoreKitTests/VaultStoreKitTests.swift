@@ -29,8 +29,19 @@ final class VaultStoreKitTests: XCTestCase {
 
         // Load and store the encrypted database
         let encryptedDb = try loadTestDatabase()
-        // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
-        try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
+
+        // Store the database
+        try vaultStore.storeEncryptedDatabase(encryptedDb)
+
+        // Store metadata with example domains
+        let metadata = """
+        {
+            "publicEmailDomains": ["spamok.com", "spamok.nl"],
+            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
+            "vaultRevisionNumber": 1
+        }
+        """
+        try vaultStore.storeMetadata(metadata)
 
         // Unlock the vault (which loads, decrypts and opens the database in memory)
         try vaultStore.unlockVault()
@@ -45,8 +56,17 @@ final class VaultStoreKitTests: XCTestCase {
 
         // Load and store the encrypted database
         let encryptedDb = try loadTestDatabase()
-        // TODO: get metadata via vault generation and pass it here so we have all info we need for all tests.
-        try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
+        try vaultStore.storeEncryptedDatabase(encryptedDb)
+
+        // Store metadata with example domains
+        let metadata = """
+        {
+            "publicEmailDomains": ["spamok.com", "spamok.nl"],
+            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
+            "vaultRevisionNumber": 1
+        }
+        """
+        try vaultStore.storeMetadata(metadata)
 
         // Unlock the vault (which loads, decrypts and opens the database in memory)
         try vaultStore.unlockVault()
@@ -75,7 +95,17 @@ final class VaultStoreKitTests: XCTestCase {
 
         // Load and store the encrypted database
         let encryptedDb = try loadTestDatabase()
-        try vaultStore.storeEncryptedDatabase(encryptedDb, metadata: "")
+        try vaultStore.storeEncryptedDatabase(encryptedDb)
+
+        // Store metadata with example domains
+        let metadata = """
+        {
+            "publicEmailDomains": ["spamok.com", "spamok.nl"],
+            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
+            "vaultRevisionNumber": 1
+        }
+        """
+        try vaultStore.storeMetadata(metadata)
 
         // Unlock the vault (which loads, decrypts and opens the database in memory)
         try vaultStore.unlockVault()
