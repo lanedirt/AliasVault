@@ -31,9 +31,13 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   }
 
   const isPublicDomain = async (emailAddress: string): Promise<boolean> => {
-    // TODO: Implement public domain check similar to browser extension
-    // For now, we'll just check if it's a spamok.com domain
-    return emailAddress.toLowerCase().endsWith('@spamok.com');
+    // Get public domains from stored metadata
+    const metadata = await dbContext?.sqliteClient?.getVaultMetadata();
+    if (!metadata) {
+      return false;
+    }
+
+    return metadata.publicEmailDomains.includes(emailAddress.split('@')[1]);
   };
 
   useEffect(() => {
