@@ -4,7 +4,6 @@ import { TurboModuleRegistry } from 'react-native';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Spec extends TurboModule {
   // Basic credential operations
-  getCredentials(): Promise<{ credentials: { username: string; password: string; service: string }[] }>;
   clearVault(): Promise<void>;
 
   // Vault state management

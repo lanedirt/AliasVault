@@ -1,7 +1,8 @@
 import Foundation
 import VaultModels
 
-struct VaultConstants {
+/// Constants used for userDefaults keys and other things.
+public struct VaultConstants {
     static let keychainService = "net.aliasvault.autofill"
     static let keychainAccessGroup = "group.net.aliasvault.autofill"
     static let userDefaultsSuite = "group.net.aliasvault.autofill"
@@ -15,4 +16,3 @@ struct VaultConstants {
     static let defaultAutoLockTimeout: Int = 3600 // 1 hour in seconds
     static let defaultAuthMethods: AuthMethods = [.password, .faceID]
 }
-

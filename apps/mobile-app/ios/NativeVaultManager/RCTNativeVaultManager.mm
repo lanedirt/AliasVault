@@ -72,10 +72,6 @@
     [vaultManager getAutoLockTimeout:resolve rejecter:reject];
 }
 
-- (void)getCredentials:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [vaultManager getCredentials];
-}
-
 - (void)getVaultMetadata:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     [vaultManager getVaultMetadata:resolve rejecter:reject];
 }

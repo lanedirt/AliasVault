@@ -49,8 +49,8 @@ extension VaultStore {
     }
 
     /// Remove the encrypted database from the local filesystem
-    internal func removeEncryptedDatabase() {
-        try? FileManager.default.removeItem(at: getEncryptedDbPath())
+    internal func removeEncryptedDatabase() throws {
+        try FileManager.default.removeItem(at: getEncryptedDbPath())
     }
 
     /// Get the path to the encrypted database file
@@ -70,27 +70,27 @@ extension VaultStore {
         let tempDbPath = FileManager.default.temporaryDirectory.appendingPathComponent("temp_db.sqlite")
         try decryptedDbData.write(to: tempDbPath)
 
-        dbConnection = try Connection(":memory:")
+        self.dbConnection = try Connection(":memory:")
 
-        try dbConnection?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
-        try dbConnection?.execute("BEGIN TRANSACTION")
+        try self.dbConnection?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
+        try self.dbConnection?.execute("BEGIN TRANSACTION")
 
-        let tables = try dbConnection?.prepare("SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        let tables = try self.dbConnection?.prepare("SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         for table in tables! {
             guard let tableName = table[0] as? String else {
                 print("Warning: Unexpected value in table name column")
                 continue
             }
-            try dbConnection?.execute("CREATE TABLE \(tableName) AS SELECT * FROM source.\(tableName)")
+            try self.dbConnection?.execute("CREATE TABLE \(tableName) AS SELECT * FROM source.\(tableName)")
         }
 
-        try dbConnection?.execute("COMMIT")
-        try dbConnection?.execute("DETACH DATABASE source")
+        try self.dbConnection?.execute("COMMIT")
+        try self.dbConnection?.execute("DETACH DATABASE source")
 
         try? FileManager.default.removeItem(at: tempDbPath)
 
-        try dbConnection?.execute("PRAGMA journal_mode = WAL")
-        try dbConnection?.execute("PRAGMA synchronous = NORMAL")
-        try dbConnection?.execute("PRAGMA foreign_keys = ON")
+        try self.dbConnection?.execute("PRAGMA journal_mode = WAL")
+        try self.dbConnection?.execute("PRAGMA synchronous = NORMAL")
+        try self.dbConnection?.execute("PRAGMA foreign_keys = ON")
     }
 }

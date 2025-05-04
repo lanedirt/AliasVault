@@ -15,13 +15,13 @@ extension VaultStore {
             throw NSError(domain: "VaultStore", code: 7, userInfo: [NSLocalizedDescriptionKey: "Invalid key length. Expected 32 bytes"])
         }
 
-        encryptionKey = keyData
+        self.encryptionKey = keyData
         print("Stored key in memory")
 
-        if enabledAuthMethods.contains(.faceID) {
+        if self.enabledAuthMethods.contains(.faceID) {
             print("Face ID is enabled, storing key in keychain")
             do {
-                try keychain
+                try self.keychain
                     .authenticationPrompt("Authenticate to save your vault decryption key in the iOS keychain")
                     .set(keyData, key: VaultConstants.encryptionKeyKey)
                 print("Encryption key saved successfully to keychain")
@@ -35,18 +35,18 @@ extension VaultStore {
 
     /// Encrypt the data using the encryption key
     internal func encrypt(data: Data) throws -> Data {
-        let localEncryptionKey = try getEncryptionKey()
+        let encryptionKey = try getEncryptionKey()
 
-        let key = SymmetricKey(data: localEncryptionKey)
+        let key = SymmetricKey(data: encryptionKey)
         let sealedBox = try AES.GCM.seal(data, using: key)
         return sealedBox.combined!
     }
 
     /// Decrypt the data using the encryption key
     internal func decrypt(data: Data) throws -> Data {
-        let localEncryptionKey = try getEncryptionKey()
+        let encryptionKey = try getEncryptionKey()
 
-        let key = SymmetricKey(data: localEncryptionKey)
+        let key = SymmetricKey(data: encryptionKey)
         let sealedBox = try AES.GCM.SealedBox(combined: data)
         return try AES.GCM.open(sealedBox, using: key)
     }
@@ -55,11 +55,11 @@ extension VaultStore {
     /// This method is meant to only be used internally by the VaultStore class and not
     /// be exposed to the public API or React Native for security reasons.
     internal func getEncryptionKey() throws -> Data {
-        if let key = encryptionKey {
+        if let key = self.encryptionKey {
             return key
         }
 
-        if enabledAuthMethods.contains(.faceID) {
+        if self.enabledAuthMethods.contains(.faceID) {
             let context = LAContext()
             var error: NSError?
 
@@ -73,12 +73,12 @@ extension VaultStore {
 
             print("Attempting to get encryption key from keychain as Face ID is enabled as an option")
             do {
-                guard let keyData = try keychain
+                guard let keyData = try self.keychain
                     .authenticationPrompt("Authenticate to unlock your vault")
                     .getData(VaultConstants.encryptionKeyKey) else {
                     throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
                 }
-                encryptionKey = keyData
+                self.encryptionKey = keyData
                 return keyData
             } catch let keychainError as KeychainAccess.Status {
                 switch keychainError {

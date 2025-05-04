@@ -7,14 +7,14 @@ import VaultModels
 extension VaultStore {
     /// Set the enabled authentication methods for the vault
     public func setAuthMethods(_ methods: AuthMethods) throws {
-        enabledAuthMethods = methods
-        userDefaults.set(methods.rawValue, forKey: VaultConstants.authMethodsKey)
-        userDefaults.synchronize()
+        self.enabledAuthMethods = methods
+        self.userDefaults.set(methods.rawValue, forKey: VaultConstants.authMethodsKey)
+        self.userDefaults.synchronize()
 
-        if !enabledAuthMethods.contains(.faceID) {
+        if !self.enabledAuthMethods.contains(.faceID) {
             print("Face ID is now disabled, removing key from keychain immediately")
             do {
-                try keychain
+                try self.keychain
                     .authenticationPrompt("Authenticate to remove your vault decryption key")
                     .remove(VaultConstants.encryptionKeyKey)
                 print("Successfully removed encryption key from keychain")
@@ -29,16 +29,16 @@ extension VaultStore {
 
     /// Get the enabled authentication methods for the vault
     public func getAuthMethods() -> AuthMethods {
-        return enabledAuthMethods
+        return self.enabledAuthMethods
     }
 
     /// Get the enabled authentication methods for the vault as strings
     public func getAuthMethodsAsStrings() -> [String] {
         var methods: [String] = []
-        if enabledAuthMethods.contains(.faceID) {
+        if self.enabledAuthMethods.contains(.faceID) {
             methods.append("faceid")
         }
-        if enabledAuthMethods.contains(.password) {
+        if self.enabledAuthMethods.contains(.password) {
             methods.append("password")
         }
         return methods

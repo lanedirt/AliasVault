@@ -7,13 +7,14 @@ import VaultModels
  * This class is used to save and remove credential identities from the system.
  * It is used to provide credentials to the system when the user is autocompleting a password.
  */
-class CredentialIdentityStore {
+public class CredentialIdentityStore {
     static let shared = CredentialIdentityStore()
     private let store = ASCredentialIdentityStore.shared
 
     private init() {}
 
-    func saveCredentialIdentities(_ credentials: [Credential]) async throws {
+    /// Save credentials into the native iOS credential store.
+    public func saveCredentialIdentities(_ credentials: [Credential]) async throws {
         let identities: [ASPasswordCredentialIdentity] = credentials.compactMap { credential in
             guard let urlString = credential.service.url,
                   let url = URL(string: urlString),
@@ -51,11 +52,13 @@ class CredentialIdentityStore {
         }
     }
 
-    func removeAllCredentialIdentities() async throws {
+    /// Remove all credentials from iOS credential store.
+    public func removeAllCredentialIdentities() async throws {
         try await store.removeAllCredentialIdentities()
     }
 
-    func removeCredentialIdentities(_ credentials: [Credential]) async throws {
+    /// Remove one or more specific credentials from iOS credential store.
+    public func removeCredentialIdentities(_ credentials: [Credential]) async throws {
         let identities = credentials.map { credential in
             let serviceIdentifier = ASCredentialServiceIdentifier(
                 identifier: credential.service.name ?? "",

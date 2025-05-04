@@ -6,7 +6,7 @@ import VaultModels
 extension VaultStore {
     /// Execute a SELECT query on the database
     public func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -53,7 +53,7 @@ extension VaultStore {
 
     /// Execute an UPDATE, INSERT, or DELETE query on the database (which will modify the database).
     public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -76,7 +76,7 @@ extension VaultStore {
 
     /// Begin a transaction on the database. This is required for all database operations that modify the database.
     public func beginTransaction() throws {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         try dbConnection.execute("BEGIN TRANSACTION")
@@ -85,7 +85,7 @@ extension VaultStore {
     /// Commit a transaction on the database. This is required for all database operations that modify the database.
     /// Committing a transaction will also trigger a persist from the in-memory database to the encrypted database file.
     public func commitTransaction() throws {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -121,7 +121,7 @@ extension VaultStore {
 
     /// Rollback a transaction on the database on error.
     public func rollbackTransaction() throws {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         try dbConnection.execute("ROLLBACK")
@@ -130,7 +130,7 @@ extension VaultStore {
     // swiftlint:disable function_body_length
     /// Get all credentials from the database.
     public func getAllCredentials() throws -> [Credential] {
-        guard let dbConnection = dbConnection else {
+        guard let dbConnection = self.dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -230,7 +230,7 @@ extension VaultStore {
                 isDeleted: serviceIsDeleted
             )
 
-            var alias: Alias? = nil
+            var alias: Alias?
             if let aliasIdString = row[19] as? String,
                 let aliasCreatedAtString = row[26] as? String,
                 let aliasUpdatedAtString = row[27] as? String,

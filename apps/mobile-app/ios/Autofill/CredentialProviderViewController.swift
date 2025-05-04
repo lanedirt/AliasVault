@@ -30,89 +30,24 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         // Check if there is a stored vault. If not, it means the user has not logged in yet and we
         // should redirect to the main app login screen automatically.
         let vaultStore = VaultStore()
-        if !vaultStore.hasEncryptedDatabase {
-            let alert = UIAlertController(
-                title: "Login Required",
-                message: "To use Autofill, please login to your AliasVault account in the AliasVault app.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                self?.extensionContext.cancelRequest(withError: NSError(
-                    domain: ASExtensionErrorDomain,
-                    code: ASExtensionError.userCanceled.rawValue
-                ))
-            })
-            present(alert, animated: true)
+
+        if !sanityChecks(vaultStore: vaultStore) {
+            // Sanity checks failed and dialog has been shown.
+            // Do not open the view so return here.
             return
         }
 
-        // Check if Face ID/Touch ID is enabled
-        let context = LAContext()
-        var authMethod = "Face ID / Touch ID"
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
-            switch context.biometryType {
-            case .faceID:
-                authMethod = "Face ID"
-            case .touchID:
-                authMethod = "Touch ID"
-            default:
-                break
-            }
-        }
-
-        if !vaultStore.getAuthMethods().contains(.faceID) {
-            let alert = UIAlertController(
-                title: "\(authMethod) Required",
-                message: "To use Autofill, please enable \(authMethod) as your vault unlock method in the AliasVault app settings.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                self?.extensionContext.cancelRequest(withError: NSError(
-                    domain: ASExtensionErrorDomain,
-                    code: ASExtensionError.userCanceled.rawValue
-                ))
-            })
-            present(alert, animated: true)
-            return
-        }
-
-        // Create the ViewModel with INJECTED behaviors
+        // Create the ViewModel with injected behaviors
         let viewModel = CredentialProviderViewModel(
-          loader: {
-              try vaultStore.unlockVault()
-              let credentials = try vaultStore.getAllCredentials()
-              await self.registerCredentialIdentities(credentials: credentials)
-              return credentials
-          },
-          selectionHandler: { [weak self] identifier, password in
-              guard let self = self else { return }
-              if self.isChoosingTextToInsert {
-                  // For text insertion, insert only the selected text
-                  if #available(iOS 18.0, *) {
-                      self.extensionContext.completeRequest(
-                        withTextToInsert: identifier,
-                        completionHandler: nil
-                      )
-                  } else {
-                      // Fallback on earlier versions: do nothing as this feature
-                      // is not supported and we should not reach this point?
-                  }
-              } else {
-                  // For regular credential selection
-                  let passwordCredential = ASPasswordCredential(
-                      user: identifier,
-                      password: password
-                  )
-                  self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
-              }
-          },
-          cancelHandler: { [weak self] in
-              guard let self = self else { return }
-              self.extensionContext.cancelRequest(withError: NSError(
-                  domain: ASExtensionErrorDomain,
-                  code: ASExtensionError.userCanceled.rawValue
-              ))
-          }
+            loader: {
+                return try await self.loadCredentials()
+            },
+            selectionHandler: { identifier, password in
+                self.handleCredentialSelection(identifier: identifier, password: password)
+            },
+            cancelHandler: {
+                self.handleCancel()
+            }
         )
 
         self.viewModel = viewModel
@@ -190,10 +125,9 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         }
     }
 
-    /**
-     * This registers all known AliasVault credentials into iOS native credential storage, which iOS can then use to suggest autofill credentials when a user
-     * focuses an input field on a login form. These suggestions will then be shown above the iOS keyboard, which saves the user one step.
-     */
+    /// This registers all known AliasVault credentials into iOS native credential storage, which iOS can then use to
+    /// suggest autofill credentials when a user focuses an input field on a login form. These suggestions will then be s
+    /// hown above the iOS keyboard, which saves the user one step.
     private func registerCredentialIdentities(credentials: [Credential]) async {
        do {
            try await CredentialIdentityStore.shared.saveCredentialIdentities(credentials)
@@ -201,4 +135,100 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
            print("Failed to save credential identities: \(error)")
        }
    }
+
+    /// Run sanity checks on the vault store before opening the autofill view to check things like if user is logged in,
+    /// vault is available etc.
+    /// - Returns
+    ///  true if sanity checks succeeded and view can open
+    ///  false if sanity checks failed and a notice windows has been shown.
+    private func sanityChecks(vaultStore: VaultStore) -> Bool {
+        if !vaultStore.hasEncryptedDatabase {
+            let alert = UIAlertController(
+                title: "Login Required",
+                message: "To use Autofill, please login to your AliasVault account in the AliasVault app.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext.cancelRequest(withError: NSError(
+                    domain: ASExtensionErrorDomain,
+                    code: ASExtensionError.userCanceled.rawValue
+                ))
+            })
+            present(alert, animated: true)
+            return false
+        }
+
+        // Check if Face ID/Touch ID is enabled
+        let context = LAContext()
+        var authMethod = "Face ID / Touch ID"
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
+            switch context.biometryType {
+            case .faceID:
+                authMethod = "Face ID"
+            case .touchID:
+                authMethod = "Touch ID"
+            default:
+                break
+            }
+        }
+
+        if !vaultStore.getAuthMethods().contains(.faceID) {
+            let alert = UIAlertController(
+                title: "\(authMethod) Required",
+                message: "To use Autofill, please enable \(authMethod) as your vault unlock method in the AliasVault app settings.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext.cancelRequest(withError: NSError(
+                    domain: ASExtensionErrorDomain,
+                    code: ASExtensionError.userCanceled.rawValue
+                ))
+            })
+            present(alert, animated: true)
+            return false
+        }
+
+        return true
+    }
+
+    /// Load credentials from the vault store and register them as credential identities
+    /// and then return them to the caller (view model).
+    private func loadCredentials() async throws -> [Credential] {
+        let vaultStore = VaultStore()
+        try vaultStore.unlockVault()
+        let credentials = try vaultStore.getAllCredentials()
+        await self.registerCredentialIdentities(credentials: credentials)
+        return credentials
+    }
+
+    /// Handle autofill view credential selection.
+    private func handleCredentialSelection(identifier: String, password: String) {
+        if isChoosingTextToInsert {
+            // For text insertion, insert only the selected text
+            if #available(iOS 18.0, *) {
+                self.extensionContext.completeRequest(
+                    withTextToInsert: identifier,
+                    completionHandler: nil
+                )
+            } else {
+                // Fallback on earlier versions: do nothing as this feature
+                // is not supported and we should not reach this point?
+            }
+        } else {
+            // For regular credential selection
+            let passwordCredential = ASPasswordCredential(
+                user: identifier,
+                password: password
+            )
+            self.extensionContext.completeRequest(withSelectedCredential: passwordCredential, completionHandler: nil)
+        }
+    }
+
+    /// Handle autofill view cancel action.
+    private func handleCancel() {
+        self.extensionContext.cancelRequest(withError: NSError(
+            domain: ASExtensionErrorDomain,
+            code: ASExtensionError.userCanceled.rawValue
+        ))
+    }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 import AuthenticationServices
 import VaultModels
 
+/// Credential provider view
 public struct CredentialProviderView: View {
     @ObservedObject public var viewModel: CredentialProviderViewModel
 
@@ -18,20 +19,22 @@ public struct CredentialProviderView: View {
                 (colorScheme == .dark ? ColorConstants.Dark.background : ColorConstants.Light.background)
                     .ignoresSafeArea()
 
-                if viewModel.isLoading {
-                    ProgressView("Loading credentials...")
-                        .progressViewStyle(.circular)
-                        .scaleEffect(1.5)
-                } else {
-                    VStack(spacing: 0) {
-                        SearchBar(text: $viewModel.searchText)
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .background(colorScheme == .dark ? ColorConstants.Dark.background : ColorConstants.Light.background)
-                            .onChange(of: viewModel.searchText) { _ in
-                                viewModel.filterCredentials()
-                            }
+                VStack(spacing: 0) {
+                    SearchBarView(text: $viewModel.searchText)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(colorScheme == .dark ? ColorConstants.Dark.background : ColorConstants.Light.background)
+                        .onChange(of: viewModel.searchText) { _ in
+                            viewModel.filterCredentials()
+                        }
 
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView("Loading credentials...")
+                            .progressViewStyle(.circular)
+                            .scaleEffect(1.5)
+                        Spacer()
+                    } else {
                         ScrollView {
                             if viewModel.filteredCredentials.isEmpty {
                                 VStack(spacing: 20) {
@@ -57,7 +60,7 @@ public struct CredentialProviderView: View {
                                                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
                                                     }
                                                 }
-                                            }) {
+                                            }, label: {
                                                 HStack {
                                                     Image(systemName: "plus.circle.fill")
                                                     Text("Create New Credential")
@@ -67,7 +70,7 @@ public struct CredentialProviderView: View {
                                                 .background(ColorConstants.Light.primary)
                                                 .foregroundColor(.white)
                                                 .cornerRadius(8)
-                                            }
+                                            })
                                         }
                                         .padding(.horizontal, 40)
                                     }
@@ -102,7 +105,6 @@ public struct CredentialProviderView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        // Make this button show a + icon instead of text
                         Button(action: {
                             if let serviceUrl = viewModel.serviceUrl {
                                 let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
@@ -110,10 +112,10 @@ public struct CredentialProviderView: View {
                                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                                 }
                             }
-                        }) {
+                        }, label: {
                             Image(systemName: "plus")
                             .foregroundColor(ColorConstants.Light.primary)
-                        }
+                        })
                     }
                 }
             }
@@ -141,8 +143,7 @@ public struct CredentialProviderView: View {
                     buttons.append(.default(Text("Password")) {
                         viewModel.selectPassword()
                     })
-                }
-                else {
+                } else {
                     if let username = credential.username, !username.isEmpty {
                         buttons.append(.default(Text("Username: \(username)")) {
                             viewModel.selectUsernamePassword()
@@ -380,48 +381,6 @@ public class CredentialProviderViewModel: ObservableObject {
     }
 }
 
-// MARK: - SearchBar
-
-struct SearchBar: View {
-    @Binding var text: String
-    @Environment(\.colorScheme) private var colorScheme
-
-    var body: some View {
-        ZStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
-                    .padding(.leading, 8)
-
-                TextField("Search credentials...", text: $text)
-                    .autocapitalization(.none)
-                    .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
-                    .padding(.leading, 4)
-                    .padding(.trailing, 28) // Space for clear button
-            }
-            .padding(8)
-            .padding(.vertical, 2)
-            .background(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.accentBackground)
-            .cornerRadius(8)
-
-            if !text.isEmpty {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        text = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
-                    }
-                    .padding(.trailing, 8)
-                }
-            }
-        }
-    }
-}
-
-
-
 // MARK: - Preview Helpers
 extension Service {
     static var preview: Service {
@@ -483,9 +442,8 @@ extension Credential {
     }
 }
 
-
 // Preview setup
-class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
+public class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
     init() {
         let previewCredentials = [
             .preview,
@@ -526,19 +484,19 @@ class PreviewCredentialProviderViewModel: CredentialProviderViewModel {
     }
 }
 
-struct CredentialProviderView_Previews: PreviewProvider {
+public struct CredentialProviderView_Previews: PreviewProvider {
     static func makePreview(isChoosing: Bool, showingSelection: Bool, colorScheme: ColorScheme) -> some View {
-        let vm = PreviewCredentialProviderViewModel()
-        vm.isChoosingTextToInsert = isChoosing
+        let viewModel = PreviewCredentialProviderViewModel()
+        viewModel.isChoosingTextToInsert = isChoosing
         if showingSelection {
-            vm.selectedCredential = .preview
-            vm.showSelectionOptions = true
+            viewModel.selectedCredential = .preview
+            viewModel.showSelectionOptions = true
         }
-        return CredentialProviderView(viewModel: vm)
+        return CredentialProviderView(viewModel: viewModel)
             .environment(\.colorScheme, colorScheme)
     }
 
-    static var previews: some View {
+    public static var previews: some View {
         Group {
             makePreview(isChoosing: false, showingSelection: false, colorScheme: .light)
                 .previewDisplayName("Light - Normal")

@@ -17,8 +17,7 @@ public class VaultStore {
     public static let shared = VaultStore()
 
     /// The keychain to access the vault's encryption key.
-    internal let keychain = Keychain(service: VaultConstants.keychainService,
-                                  accessGroup: VaultConstants.keychainAccessGroup)
+    internal let keychain = Keychain(service: VaultConstants.keychainService, accessGroup: VaultConstants.keychainAccessGroup)
         .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
     /// The user defaults using the shared container which is accessible by both the React Native
@@ -49,7 +48,7 @@ public class VaultStore {
     /// Deinitialize the VaultStore
     deinit {
         NotificationCenter.default.removeObserver(self)
-        clearCacheTimer?.invalidate()
+        self.clearCacheTimer?.invalidate()
     }
 
     /// Whether the vault is currently unlocked
@@ -60,11 +59,11 @@ public class VaultStore {
     private func loadSavedSettings() {
         if userDefaults.object(forKey: VaultConstants.authMethodsKey) != nil {
             let savedRawValue = userDefaults.integer(forKey: VaultConstants.authMethodsKey)
-            enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+            self.enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
         }
 
         if userDefaults.object(forKey: VaultConstants.autoLockTimeoutKey) != nil {
-            autoLockTimeout = userDefaults.integer(forKey: VaultConstants.autoLockTimeoutKey)
+            self.autoLockTimeout = userDefaults.integer(forKey: VaultConstants.autoLockTimeoutKey)
         }
     }
 
@@ -87,8 +86,8 @@ public class VaultStore {
     // MARK: - Background/Foreground Handling
     @objc private func appDidEnterBackground() {
         print("App entered background, starting auto-lock timer with \(autoLockTimeout) seconds")
-        if autoLockTimeout > 0 {
-            clearCacheTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(autoLockTimeout), repeats: false) { [weak self] _ in
+        if self.autoLockTimeout > 0 {
+            self.clearCacheTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.autoLockTimeout), repeats: false) { [weak self] _ in
                 print("Auto-lock timer fired, clearing cache")
                 self?.clearCache()
             }
@@ -98,12 +97,12 @@ public class VaultStore {
     @objc private func appWillEnterForeground() {
         print("App will enter foreground, canceling clear cache timer")
 
-        if let timer = clearCacheTimer, timer.fireDate < Date() {
+        if let timer = self.clearCacheTimer, timer.fireDate < Date() {
             print("Timer has elapsed, cache should have been cleared already when app was in background, but clearing it again to be sure")
             clearCache()
         }
 
-        clearCacheTimer?.invalidate()
-        clearCacheTimer = nil
+        self.clearCacheTimer?.invalidate()
+        self.clearCacheTimer = nil
     }
 }

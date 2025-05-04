@@ -142,24 +142,6 @@ public class VaultManager: NSObject {
     }
 
     @objc
-    func getCredentials() -> [String: Any] {
-        do {
-            let credentials = try vaultStore.getAllCredentials()
-            let credentialDicts = credentials.map { credential in
-                return [
-                    "username": credential.username,
-                    "password": credential.password,
-                    "service": credential.service
-                ]
-            }
-            return ["credentials": credentialDicts]
-        } catch {
-            print("Failed to get credentials: \(error)")
-            return [:]
-        }
-    }
-
-    @objc
     func clearVault() {
         do {
             try vaultStore.clearVault()
@@ -196,30 +178,22 @@ public class VaultManager: NSObject {
     @objc
     func hasEncryptedDatabase(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
-        do {
-            let isInitialized = try vaultStore.hasEncryptedDatabase
-            resolve(isInitialized)
-        } catch {
-            reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
-        }
+        let isInitialized = vaultStore.hasEncryptedDatabase
+        resolve(isInitialized)
     }
 
     @objc
     func isVaultUnlocked(_ resolve: @escaping RCTPromiseResolveBlock,
                         rejecter reject: @escaping RCTPromiseRejectBlock) {
-        let isUnlocked = try vaultStore.isVaultUnlocked
+        let isUnlocked = vaultStore.isVaultUnlocked
         resolve(isUnlocked)
     }
 
     @objc
     func getVaultMetadata(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
-        do {
-            let metadata = try vaultStore.getVaultMetadata()
-            resolve(metadata)
-        } catch {
-            reject("METADATA_ERROR", "Failed to get vault metadata: \(error.localizedDescription)", error)
-        }
+        let metadata = vaultStore.getVaultMetadata()
+        resolve(metadata)
     }
 
     @objc
@@ -266,21 +240,17 @@ public class VaultManager: NSObject {
     @objc
     func getAuthMethods(_ resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
-        do {
-            let methods = try vaultStore.getAuthMethods()
-            var methodStrings: [String] = []
+        let methods = vaultStore.getAuthMethods()
+        var methodStrings: [String] = []
 
-            if methods.contains(.faceID) {
-                methodStrings.append("faceid")
-            }
-            if methods.contains(.password) {
-                methodStrings.append("password")
-            }
-
-            resolve(methodStrings)
-        } catch {
-            reject("AUTH_METHOD_ERROR", "Failed to get authentication methods: \(error.localizedDescription)", error)
+        if methods.contains(.faceID) {
+            methodStrings.append("faceid")
         }
+        if methods.contains(.password) {
+            methodStrings.append("password")
+        }
+
+        resolve(methodStrings)
     }
 
     @objc

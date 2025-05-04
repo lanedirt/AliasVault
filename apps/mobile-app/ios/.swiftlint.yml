@@ -1,4 +1,3 @@
-# .swiftlint.yml
 included:
   - AliasVault
   - Autofill
@@ -6,49 +5,52 @@ included:
   - VaultStoreKit
   - VaultStoreKitTests
   - VaultUI
+
 excluded:
   - Pods
   - Carthage
 
+# Rules that require 'analyze' mode
+analyzer_rules:
+  - explicit_self
+
 opt_in_rules:
   - explicit_top_level_acl
-  - comment_spacing
   - vertical_whitespace
   - missing_docs
   - file_header
-  - multiline_comment_briefs
   - function_parameter_count
   - redundant_optional_initialization
   - discouraged_optional_boolean
 
 disabled_rules:
   - trailing_whitespace
-  - line_length
 
 # Customize rules
 line_length:
-  warning: 120
-  error: 150
+  warning: 200
+  error: 250
 
-comment_spacing:
-  error: true
+comment_spacing: # fixed invalid configuration
+  severity: error
 
 missing_docs:
   warning: true
-  include:
+  included:
     - public
 
 vertical_whitespace:
   max_empty_lines: 1
 
-explicit_top_level_acl: warning
+explicit_top_level_acl:
+  severity: warning
 
 file_header:
-  required: true
-
-multiline_comment_briefs:
-  warning: true
-
-indentation:
-  indentation_width: 2
-  include_comments: true
+  required: always
+  template: |
+    //
+    //  %file%
+    //  %project%
+    //
+    //  Created by %author% on %date%.
+    //

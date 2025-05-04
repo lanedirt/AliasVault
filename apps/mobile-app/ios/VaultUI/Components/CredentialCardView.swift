@@ -7,14 +7,15 @@
 import SwiftUI
 import VaultModels
 
-struct CredentialCard: View {
+/// Credential card view
+public struct CredentialCard: View {
     let credential: Credential
     let action: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     @State private var showCopyToast = false
     @State private var copyToastMessage = ""
 
-    var body: some View {
+    public var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
                 // Service logo
@@ -46,26 +47,25 @@ struct CredentialCard: View {
             )
             .cornerRadius(8)
         }
-        .contextMenu {
+        .contextMenu(menuItems: {
             Button(action: {
                 if let username = credential.username {
                     UIPasteboard.general.string = username
                     copyToastMessage = "Username copied"
                     showCopyToast = true
                 }
-            }) {
+            }, label: {
                 Label("Copy Username", systemImage: "person")
-            }
-
+            })
             Button(action: {
                 if let password = credential.password?.value {
                     UIPasteboard.general.string = password
                     copyToastMessage = "Password copied"
                     showCopyToast = true
                 }
-            }) {
+            }, label: {
                 Label("Copy Password", systemImage: "key")
-            }
+            })
 
             Button(action: {
                 if let email = credential.alias?.email {
@@ -73,9 +73,9 @@ struct CredentialCard: View {
                     copyToastMessage = "Email copied"
                     showCopyToast = true
                 }
-            }) {
+            }, label: {
                 Label("Copy Email", systemImage: "envelope")
-            }
+            })
 
             Divider()
 
@@ -83,18 +83,18 @@ struct CredentialCard: View {
                 if let url = URL(string: "aliasvault://credentials/\(credential.id.uuidString)") {
                     UIApplication.shared.open(url)
                 }
-            }) {
+            }, label: {
                 Label("View Details", systemImage: "eye")
-            }
+            })
 
             Button(action: {
                 if let url = URL(string: "aliasvault://credentials/add-edit?id=\(credential.id.uuidString)") {
                     UIApplication.shared.open(url)
                 }
-            }) {
+            }, label: {
                 Label("Edit", systemImage: "pencil")
-            }
-        }
+            })
+        })
         .overlay(
             Group {
                 if showCopyToast {
@@ -121,7 +121,8 @@ struct CredentialCard: View {
     }
 }
 
-func usernameOrEmail(credential: Credential) -> String {
+/// Returns username or email depending on if they are not null
+public func usernameOrEmail(credential: Credential) -> String {
     if let username = credential.username, !username.isEmpty {
         return username
     }
@@ -131,7 +132,8 @@ func usernameOrEmail(credential: Credential) -> String {
     return ""
 }
 
-func truncateText(_ text: String?, limit: Int) -> String {
+/// Truncate text to a maximum limit and appends "..." at the end
+public func truncateText(_ text: String?, limit: Int) -> String {
     guard let text = text else { return "" }
     if text.count > limit {
         let index = text.index(text.startIndex, offsetBy: limit)
@@ -183,4 +185,3 @@ func truncateText(_ text: String?, limit: Int) -> String {
         action: {}
     )
 }
-
