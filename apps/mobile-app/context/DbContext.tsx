@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+
+import NativeVaultManager from '@/specs/NativeVaultManager';
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
-import NativeVaultManager from '../specs/NativeVaultManager';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -24,7 +25,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * SQLite client is initialized in constructor as it passes SQL queries to the native module.
    */
-  const sqliteClient = new SqliteClient();
+  const sqliteClient = useMemo(() => new SqliteClient(), []);
 
   /**
    * Database initialization state. If true, the database has been initialized and the dbAvailable state is correct.
@@ -36,9 +37,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const [dbAvailable, setDbAvailable] = useState(false);
 
+  /**
+   * Unlock the vault in the native module which will decrypt the database using the stored encryption key
+   * and load it into memory.
+   */
+  const unlockVault = useCallback(async () : Promise<boolean> => {
+    try {
+      await NativeVaultManager.unlockVault();
+      return true;
+    } catch (error) {
+      console.error('Failed to unlock vault:', error);
+      return false;
+    }
+  }, []);
+
   const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string | null = null) => {
-    // If the derived key is provided, store it in the keychain.
-    // Otherwise we assume the encryption key is already stored in the keychain.
+    /*
+     * If the derived key is provided, store it in the keychain.
+     * Otherwise we assume the encryption key is already stored in the keychain.
+     */
     if (derivedKey) {
       await sqliteClient.storeEncryptionKey(derivedKey);
     }
@@ -58,7 +75,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     setDbInitialized(true);
     setDbAvailable(true);
-  }, []);
+  }, [sqliteClient, unlockVault]);
 
   const checkStoredVault = useCallback(async () => {
     try {
@@ -67,25 +84,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // Get metadata from SQLite client
         const metadata = await sqliteClient.getVaultMetadata();
         if (metadata) {
-          console.log('Vault metadata found, setting dbInitialized and dbAvailable to true');
+          // Vault metadata found, set database initialization state
           setDbInitialized(true);
           setDbAvailable(true);
         } else {
-          console.log('Vault metadata not found, setting dbInitialized and dbAvailable to false');
+          // Vault metadata not found, set database initialization state
           setDbInitialized(true);
           setDbAvailable(false);
         }
       } else {
-        console.log('Vault not initialized, setting dbInitialized and dbAvailable to false');
+        // Vault not initialized, set database initialization state
         setDbInitialized(true);
         setDbAvailable(false);
       }
-    } catch (error) {
-      console.error('Error checking vault initialization:', error);
+    } catch {
+      // Error checking vault initialization, set database initialization state
       setDbInitialized(true);
       setDbAvailable(false);
     }
-  }, []);
+  }, [sqliteClient]);
 
   /**
    * Check if database is initialized and try to retrieve vault from background
@@ -105,25 +122,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   /**
-   * Unlock the vault in the native module which will decrypt the database using the stored encryption key
-   * and load it into memory.
-   */
-  const unlockVault = useCallback(async () : Promise<boolean> => {
-    try {
-      await NativeVaultManager.unlockVault();
-      return true;
-    } catch (error) {
-      console.error('Failed to unlock vault:', error);
-      return false;
-    }
-  }, []);
-
-  /**
    * Get the current vault metadata directly from SQLite client
    */
   const getVaultMetadata = useCallback(async () : Promise<VaultMetadata | null> => {
     return await sqliteClient.getVaultMetadata();
-  }, []);
+  }, [sqliteClient]);
 
   /**
    * Test if the database is working with the provided (to be stored) encryption key by performing a simple query
@@ -146,10 +149,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       return false;
-    } catch (error) {
+    } catch {
+      // Error testing database connection, return false
       return false;
     }
-  }, []);
+  }, [sqliteClient, unlockVault]);
 
   const contextValue = useMemo(() => ({
     sqliteClient,

@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDb } from './DbContext';
-import { AppState, Platform, Linking } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
 import * as LocalAuthentication from 'expo-local-authentication';
-import NativeVaultManager from '../specs/NativeVaultManager';
+
+import { useDb } from '@/context/DbContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 // Create a navigation reference
 export const navigationRef = React.createRef<NavigationContainerRef<ParamListBase>>();
@@ -214,55 +215,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Get the auto-lock timeout from the iOS credentials manager
    */
-  const getAutoLockTimeout = async (): Promise<number> => {
+  const getAutoLockTimeout = useCallback(async (): Promise<number> => {
     try {
       return await NativeVaultManager.getAutoLockTimeout();
     } catch (error) {
       console.error('Failed to get auto-lock timeout:', error);
       return 0;
     }
-  }
+  }, []);
 
   /**
    * Set the auto-lock timeout in the iOS credentials manager
    */
-  const setAutoLockTimeout = async (timeout: number) => {
+  const setAutoLockTimeout = useCallback(async (timeout: number): Promise<void> => {
     try {
       await NativeVaultManager.setAutoLockTimeout(timeout);
     } catch (error) {
       console.error('Failed to update iOS auto-lock timeout:', error);
     }
-  };
+  }, []);
 
-  const isVaultUnlocked = async (): Promise<boolean> => {
+  /**
+   * Check if the vault is unlocked.
+   */
+  const isVaultUnlocked = useCallback(async (): Promise<boolean> => {
     try {
       return await NativeVaultManager.isVaultUnlocked();
     } catch (error) {
       console.error('Failed to check vault status:', error);
       return false;
     }
-  };
+  }, []);
 
   // Handle app state changes
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         // App coming to foreground
-        console.log('App coming to foreground in AuthContext');
         if (!pathname?.includes('unlock') && !pathname?.includes('login')) {
           try {
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();
             if (!isUnlocked) {
               // Database connection failed, navigate to unlock flow
-              console.log('Vault is not unlocked anymore, navigating to unlock flow');
               router.replace('/sync');
             } else {
-              console.log('Vault is still unlocked, staying on current screen');
+              // Vault is still unlocked, staying on current screen
             }
-          } catch (error) {
+          } catch {
             // Database query failed, navigate to unlock flow
-            console.log('Failed to check vault status, navigating to unlock flow:', error);
             router.replace('/sync');
           }
         }
@@ -270,10 +271,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       appState.current = nextAppState;
     });
 
-    return () => {
+    return (): void => {
       subscription.remove();
     };
-  }, [isVaultUnlocked]);
+  }, [isVaultUnlocked, pathname]);
 
   /**
    * Load iOS Autofill state from storage

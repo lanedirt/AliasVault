@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import { useAuth } from '@/context/AuthContext';
 import { WebApiService } from '@/utils/WebApiService';
-import { useAuth } from './AuthContext';
 
 const WebApiContext = createContext<WebApiService | null>(null);
 
