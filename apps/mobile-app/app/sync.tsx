@@ -53,8 +53,8 @@ export default function SyncScreen() : React.ReactNode {
 
       // Try to unlock with FaceID
       try {
-        const hasStoredVault = await NativeVaultManager.hasStoredVault();
-        if (hasStoredVault) {
+        const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
+        if (hasEncryptedDatabase) {
           const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
           if (!isFaceIDEnabled) {
             router.replace('/unlock');

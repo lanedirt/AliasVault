@@ -8,11 +8,11 @@
 import XCTest
 @testable import VaultStoreKit
 
-final class VaultStoreKitTests: XCTestCase {
+final public class VaultStoreKitTests: XCTestCase {
     var vaultStore: VaultStore!
     let testEncryptionKeyBase64 = "/9So3C83JLDIfjsF0VQOc4rz1uAFtIseW7yrUuztAD0=" // 32 bytes for AES-256
 
-    override func setUp() {
+    override public func setUp() {
         super.setUp()
         vaultStore = VaultStore.shared
 
@@ -37,7 +37,7 @@ final class VaultStoreKitTests: XCTestCase {
         }
     }
 
-    override func tearDown() {
+    override public func tearDown() {
         // Clean up after each test
         vaultStore.clearVault()
         super.tearDown()
@@ -45,7 +45,7 @@ final class VaultStoreKitTests: XCTestCase {
 
     func testDatabaseInitialization() async throws {
         // If we get here without throwing, initialization was successful
-        XCTAssertTrue(vaultStore.isVaultUnlocked(), "Vault should be unlocked after initialization")
+        XCTAssertTrue(vaultStore.isVaultUnlocked, "Vault should be unlocked after initialization")
     }
 
     func testGetAllCredentials() async throws {

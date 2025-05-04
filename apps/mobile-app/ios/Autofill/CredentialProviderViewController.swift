@@ -20,17 +20,17 @@ import VaultModels
  * us to provide credentials to native system operations that request credentials (e.g. suggesting
  * logins in the keyboard).
  */
-class CredentialProviderViewController: ASCredentialProviderViewController {
+public class CredentialProviderViewController: ASCredentialProviderViewController {
     private var viewModel: CredentialProviderViewModel?
     private var isChoosingTextToInsert = false
 
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
 
         // Check if there is a stored vault. If not, it means the user has not logged in yet and we
         // should redirect to the main app login screen automatically.
         let vaultStore = VaultStore()
-        if !vaultStore.hasStoredVault() {
+        if !vaultStore.hasEncryptedDatabase {
             let alert = UIAlertController(
                 title: "Login Required",
                 message: "To use Autofill, please login to your AliasVault account in the AliasVault app.",
@@ -135,7 +135,7 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         hostingController.didMove(toParent: self)
     }
 
-    override func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
+    override public func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
         guard let viewModel = self.viewModel else { return }
 
         let matchedDomains = serviceIdentifiers.map { $0.identifier.lowercased() }
@@ -151,12 +151,12 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         }
     }
 
-    override func prepareInterfaceForUserChoosingTextToInsert() {
+    override public func prepareInterfaceForUserChoosingTextToInsert() {
         isChoosingTextToInsert = true
         viewModel?.isChoosingTextToInsert = true
     }
 
-    override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
+    override public func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         do {
             let vaultStore = VaultStore()
             let credentials = try vaultStore.getAllCredentials()

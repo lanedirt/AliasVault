@@ -80,8 +80,8 @@
     [vaultManager getVaultMetadata:resolve rejecter:reject];
 }
 
-- (void)hasStoredVault:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    [vaultManager hasStoredVault:resolve rejecter:reject];
+- (void)hasEncryptedDatabase:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager hasEncryptedDatabase:resolve rejecter:reject];
 }
 
 - (void)isVaultUnlocked:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {

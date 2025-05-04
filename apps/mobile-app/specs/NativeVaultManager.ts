@@ -8,7 +8,6 @@ export interface Spec extends TurboModule {
   clearVault(): Promise<void>;
 
   // Vault state management
-  hasStoredVault(): Promise<boolean>;
   isVaultUnlocked(): Promise<boolean>;
   getVaultMetadata(): Promise<string>;
   unlockVault(): Promise<boolean>;
@@ -18,6 +17,7 @@ export interface Spec extends TurboModule {
   storeMetadata(metadata: string): Promise<void>;
   setAuthMethods(authMethods: string[]): Promise<void>;
   storeEncryptionKey(base64EncryptionKey: string): Promise<void>;
+  hasEncryptedDatabase(): Promise<boolean>;
   getEncryptedDatabase(): Promise<string | null>;
   getCurrentVaultRevisionNumber(): Promise<number>;
   setCurrentVaultRevisionNumber(revisionNumber: number): Promise<void>;

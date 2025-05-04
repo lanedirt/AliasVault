@@ -194,10 +194,10 @@ public class VaultManager: NSObject {
     }
 
     @objc
-    func hasStoredVault(_ resolve: @escaping RCTPromiseResolveBlock,
+    func hasEncryptedDatabase(_ resolve: @escaping RCTPromiseResolveBlock,
                           rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
-            let isInitialized = try vaultStore.hasStoredVault()
+            let isInitialized = try vaultStore.hasEncryptedDatabase
             resolve(isInitialized)
         } catch {
             reject("VAULT_ERROR", "Failed to check vault initialization: \(error.localizedDescription)", error)
@@ -207,7 +207,7 @@ public class VaultManager: NSObject {
     @objc
     func isVaultUnlocked(_ resolve: @escaping RCTPromiseResolveBlock,
                         rejecter reject: @escaping RCTPromiseRejectBlock) {
-        let isUnlocked = try vaultStore.isVaultUnlocked()
+        let isUnlocked = try vaultStore.isVaultUnlocked
         resolve(isUnlocked)
     }
 

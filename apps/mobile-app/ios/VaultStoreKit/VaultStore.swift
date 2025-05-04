@@ -1,0 +1,109 @@
+import Foundation
+import KeychainAccess
+import SQLite
+import LocalAuthentication
+import CryptoKit
+import CommonCrypto
+import VaultModels
+
+/// This class is used to store and retrieve the encrypted AliasVault database and encryption key.
+/// It also handles executing queries against the SQLite database and biometric authentication.
+///
+/// This class is used by both the iOS Autofill extension and the React Native app and is the lowest
+/// level where all important data is stored and retrieved from.
+public class VaultStore {
+    /// A shared instance of the VaultStore class that can be used to access the vault which does
+    /// require re-authentication every time the vault is accessed.
+    public static let shared = VaultStore()
+
+    /// The keychain to access the vault's encryption key.
+    internal let keychain = Keychain(service: VaultConstants.keychainService,
+                                  accessGroup: VaultConstants.keychainAccessGroup)
+        .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
+
+    /// The user defaults using the shared container which is accessible by both the React Native
+    /// app and the iOS Autofill extension.
+    internal let userDefaults = UserDefaults(suiteName: VaultConstants.userDefaultsSuite)!
+
+    /// The enabled authentication methods for the vault.
+    internal var enabledAuthMethods: AuthMethods = VaultConstants.defaultAuthMethods
+
+    /// The auto-lock timeout for the vault.
+    internal var autoLockTimeout: Int = VaultConstants.defaultAutoLockTimeout
+
+    /// The database connection for the decrypted in-memory vault.
+    internal var dbConnection: Connection?
+
+    /// The encryption key for the vault.
+    internal var encryptionKey: Data?
+
+    /// The timer for the auto-lock timeout.
+    private var clearCacheTimer: Timer?
+
+    /// Initialize the VaultStore
+    public init() {
+        loadSavedSettings()
+        setupNotificationObservers()
+    }
+
+    /// Deinitialize the VaultStore
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        clearCacheTimer?.invalidate()
+    }
+
+    /// Whether the vault is currently unlocked
+    public var isVaultUnlocked: Bool {
+        return encryptionKey != nil
+    }
+
+    private func loadSavedSettings() {
+        if userDefaults.object(forKey: VaultConstants.authMethodsKey) != nil {
+            let savedRawValue = userDefaults.integer(forKey: VaultConstants.authMethodsKey)
+            enabledAuthMethods = AuthMethods(rawValue: savedRawValue)
+        }
+
+        if userDefaults.object(forKey: VaultConstants.autoLockTimeoutKey) != nil {
+            autoLockTimeout = userDefaults.integer(forKey: VaultConstants.autoLockTimeoutKey)
+        }
+    }
+
+    private func setupNotificationObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    // MARK: - Background/Foreground Handling
+    @objc private func appDidEnterBackground() {
+        print("App entered background, starting auto-lock timer with \(autoLockTimeout) seconds")
+        if autoLockTimeout > 0 {
+            clearCacheTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(autoLockTimeout), repeats: false) { [weak self] _ in
+                print("Auto-lock timer fired, clearing cache")
+                self?.clearCache()
+            }
+        }
+    }
+
+    @objc private func appWillEnterForeground() {
+        print("App will enter foreground, canceling clear cache timer")
+
+        if let timer = clearCacheTimer, timer.fireDate < Date() {
+            print("Timer has elapsed, cache should have been cleared already when app was in background, but clearing it again to be sure")
+            clearCache()
+        }
+
+        clearCacheTimer?.invalidate()
+        clearCacheTimer = nil
+    }
+}
