@@ -1,10 +1,3 @@
-//
-//  RCTNativeVaultManager.h
-//  AliasVault
-//
-//  Created by Leendert de Borst on 24/04/2025.
-//
-
 #import <Foundation/Foundation.h>
 #import <NativeVaultManagerSpec/NativeVaultManagerSpec.h>
 

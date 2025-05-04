@@ -1,10 +1,3 @@
-//
-//  ServiceLogoView.swift
-//  VaultUI
-//
-//  Created by Leendert de Borst on 27/04/2025.
-//
-
 import SwiftUI
 import Macaw
 

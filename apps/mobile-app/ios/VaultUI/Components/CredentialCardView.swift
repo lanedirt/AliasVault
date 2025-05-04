@@ -1,9 +1,3 @@
-//
-//  CredentialCardView.swift
-//  AliasVault
-//
-//  Created by Leendert de Borst on 27/04/2025.
-//
 import SwiftUI
 import VaultModels
 

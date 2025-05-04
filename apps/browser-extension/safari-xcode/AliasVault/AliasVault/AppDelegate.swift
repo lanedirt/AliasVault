@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  AliasVault
-//
-//  Created by Leendert de Borst on 12/03/2025.
-//
-
 import Cocoa
 
 @main

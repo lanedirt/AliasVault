@@ -1,10 +1,3 @@
-//
-//  SafariWebExtensionHandler.swift
-//  AliasVault Extension
-//
-//  Created by Leendert de Borst on 12/03/2025.
-//
-
 import SafariServices
 import os.log
 

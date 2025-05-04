@@ -1,10 +1,3 @@
-//
-//  CredentialProviderViewController.swift
-//  autofill
-//
-//  Created by Leendert de Borst on 08/04/2025.
-//
-
 import AuthenticationServices
 import LocalAuthentication
 import SwiftUI

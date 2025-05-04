@@ -44,13 +44,3 @@ vertical_whitespace:
 
 explicit_top_level_acl:
   severity: warning
-
-file_header:
-  required: always
-  template: |
-    //
-    //  %file%
-    //  %project%
-    //
-    //  Created by %author% on %date%.
-    //

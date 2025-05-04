@@ -1,10 +1,3 @@
-//
-//  RCTNativeVaultManager.m
-//  AliasVault
-//
-//  Created by Leendert de Borst on 24/04/2025.
-//
-
 #import "RCTNativeVaultManager.h"
 #import <ExpoModulesCore-Swift.h>
 #import "AliasVault-Swift.h"

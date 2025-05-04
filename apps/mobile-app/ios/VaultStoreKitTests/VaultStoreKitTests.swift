@@ -1,10 +1,3 @@
-//
-//  VaultStoreKitTests.swift
-//  VaultStoreKitTests
-//
-//  Created by Leendert de Borst on 27/04/2025.
-//
-
 import XCTest
 @testable import VaultStoreKit
 
