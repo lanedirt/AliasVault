@@ -5,17 +5,17 @@ import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { useColors } from '@/hooks/useColorScheme';
-import { CredentialCard } from '@/components/CredentialCard';
-import { TitleContainer } from '@/components/TitleContainer';
-import { CollapsibleHeader } from '@/components/CollapsibleHeader';
+import { CredentialCard } from '@/components/credentials/CredentialCard';
+import { TitleContainer } from '@/components/ui/TitleContainer';
+import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import emitter from '@/utils/EventEmitter';
 
 /**

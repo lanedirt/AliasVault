@@ -5,8 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useColors } from '@/hooks/useColorScheme';
 import Logo from '@/assets/images/logo.svg';

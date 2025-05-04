@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, useColorScheme, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import { MaterialIcons } from '@expo/vector-icons';
+
 import { useColors } from '@/hooks/useColorScheme';
 
-interface FormInputCopyToClipboardProps {
+type FormInputCopyToClipboardProps = {
   label: string;
   value: string | undefined;
   type?: 'text' | 'password';
 }
 
+/**
+ * Form input copy to clipboard component.
+ */
 const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   label,
   value,
   type = 'text',
-}) => {
+}) : React.ReactNode => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colors = useColors();
 
-  const copyToClipboard = async () => {
+  /**
+   * Copy the value to the clipboard.
+   */
+  const copyToClipboard = async () : Promise<void> => {
     if (value) {
       await Clipboard.setStringAsync(value);
       Toast.show({
@@ -35,42 +42,38 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
     ? '••••••••'
     : value;
 
-    const styles = StyleSheet.create({
-      inputContainer: {
-        borderRadius: 8,
-        borderWidth: 1,
-        padding: 12,
-        marginBottom: 12,
-        backgroundColor: colors.accentBackground,
-        borderColor: colors.accentBorder,
-      },
-      inputContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      },
-      label: {
-        fontSize: 12,
-        marginBottom: 4,
-        color: colors.textMuted,
-      },
-      value: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-      },
-      actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-      },
-      iconButton: {
-        padding: 8,
-      },
-      iconText: {
-        fontSize: 20,
-      },
-    });
-
+  const styles = StyleSheet.create({
+    actions: {
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    iconButton: {
+      padding: 8,
+    },
+    inputContainer: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginBottom: 12,
+      padding: 12,
+    },
+    inputContent: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    label: {
+      color: colors.textMuted,
+      fontSize: 12,
+      marginBottom: 4,
+    },
+    value: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
 
   return (
     <TouchableOpacity
@@ -93,10 +96,10 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
               style={styles.iconButton}
             >
               <MaterialIcons
-                  name={isPasswordVisible ? "visibility-off" : "visibility"}
-                  size={20}
-                  color={colors.primary}
-                />
+                name={isPasswordVisible ? "visibility-off" : "visibility"}
+                size={20}
+                color={colors.primary}
+              />
             </TouchableOpacity>
           )}
         </View>

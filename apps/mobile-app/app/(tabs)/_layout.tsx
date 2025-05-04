@@ -8,7 +8,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import emitter from '@/utils/EventEmitter';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedText } from '@/components/themed/ThemedText';
 
 /**
  * This is the main layout for the app. It is used to navigate between the tabs.

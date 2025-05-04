@@ -1,10 +1,10 @@
 import { StyleSheet, View } from 'react-native';
-import { useColors } from '@/hooks/useColorScheme';
+
 import LoadingIndicator from './LoadingIndicator';
 
-interface LoadingOverlayProps {
+type LoadingOverlayProps = {
   status: string;
-}
+};
 
 /**
  * LoadingOverlay component
@@ -13,19 +13,19 @@ interface LoadingOverlayProps {
  * It is used to indicate that a process is in progress and the user should wait.
  *
  */
-export default function LoadingOverlay({ status }: LoadingOverlayProps) {
-  const colors = useColors();
+export default function LoadingOverlay({ status }: LoadingOverlayProps): React.ReactNode {
+  const backgroundColor = 'rgba(0,0,0,0.5)';
 
   const styles = StyleSheet.create({
     container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: backgroundColor,
+      bottom: 0,
+      justifyContent: 'center',
+      left: 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
       zIndex: 1000,
     },
   });

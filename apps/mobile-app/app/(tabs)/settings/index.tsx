@@ -3,15 +3,15 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useEffect } from 'react';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { useWebApi } from '@/context/WebApiContext';
 import { AppInfo } from '@/utils/AppInfo';
 import { useColors } from '@/hooks/useColorScheme';
-import { TitleContainer } from '@/components/TitleContainer';
+import { TitleContainer } from '@/components/ui/TitleContainer';
 import { useAuth } from '@/context/AuthContext';
-import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
-import { CollapsibleHeader } from '@/components/CollapsibleHeader';
+import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
+import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import avatarImage from '@/assets/images/avatar.webp';
 
 /**

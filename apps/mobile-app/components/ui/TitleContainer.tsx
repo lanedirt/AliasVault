@@ -1,13 +1,17 @@
 import { StyleSheet, View } from 'react-native';
-import { ThemedText } from './ThemedText';
+
+import { ThemedText } from '@/components/themed/ThemedText';
 import Logo from '@/assets/images/logo.svg';
 
-interface TitleContainerProps {
+type TitleContainerProps = {
   title: string;
   showLogo?: boolean;
-}
+};
 
-export function TitleContainer({ title, showLogo = true }: TitleContainerProps) {
+/**
+ * Title container component.
+ */
+export function TitleContainer({ title, showLogo = true }: TitleContainerProps): React.ReactNode {
   return (
     <View style={styles.titleContainer}>
       {showLogo && <Logo width={40} height={40} style={styles.logo} />}
@@ -17,13 +21,13 @@ export function TitleContainer({ title, showLogo = true }: TitleContainerProps) 
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
   logo: {
     marginBottom: 6,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
   },
 });

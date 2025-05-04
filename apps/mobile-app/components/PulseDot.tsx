@@ -1,7 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Animated } from 'react-native';
 
+import { useColors } from '@/hooks/useColorScheme';
+
+/**
+ * Pulsing dot component.
+ */
 export const PulseDot: React.FC = () => {
+  const colors = useColors();
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -22,17 +28,17 @@ export const PulseDot: React.FC = () => {
 
     pulseAnimation.start();
 
-    return () => {
+    return (): void => {
       pulseAnimation.stop();
     };
-  }, []);
+  }, [pulseAnim, colors]);
 
   const styles = StyleSheet.create({
     refreshDot: {
-      width: 8,
-      height: 8,
+      backgroundColor: colors.greenBackground,
       borderRadius: 4,
-      backgroundColor: '#22c55e', // green-500
+      height: 8,
+      width: 8,
     },
   });
 

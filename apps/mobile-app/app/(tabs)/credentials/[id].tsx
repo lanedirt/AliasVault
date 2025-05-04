@@ -4,10 +4,10 @@ import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking } 
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedScrollView } from '@/components/ThemedScrollView';
-import { CredentialIcon } from '@/components/CredentialIcon';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
 import { LoginCredentials } from '@/components/credentialDetails/LoginCredentials';

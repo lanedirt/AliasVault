@@ -1,20 +1,24 @@
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleProp, ViewStyle } from 'react-native';
+
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ThemedSafeAreaViewProps = {
   lightColor?: string;
   darkColor?: string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
 };
 
+/**
+ * Themed safe area view component.
+ */
 export function ThemedSafeAreaView({
   lightColor,
   darkColor,
   style,
   children,
   ...otherProps
-}: ThemedSafeAreaViewProps) {
+}: ThemedSafeAreaViewProps): React.ReactNode {
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 
   return (
@@ -25,4 +29,4 @@ export function ThemedSafeAreaView({
       {children}
     </SafeAreaView>
   );
-} 
+}

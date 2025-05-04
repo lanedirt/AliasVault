@@ -9,7 +9,7 @@ import { Email } from '@/utils/types/webapi/Email';
 import { Credential } from '@/utils/types/Credential';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedText } from '@/components/themed/ThemedText';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';

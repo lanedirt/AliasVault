@@ -3,9 +3,9 @@ import { useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useCallback, useEffect } from 'react';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 
 /**

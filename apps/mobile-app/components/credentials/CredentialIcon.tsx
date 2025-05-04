@@ -1,16 +1,28 @@
-import { Image, ImageStyle, StyleSheet } from 'react-native';
 import { Buffer } from 'buffer';
+
+import { Image, ImageStyle, StyleSheet } from 'react-native';
 import { SvgUri } from 'react-native-svg';
 
+import servicePlaceholder from '@/assets/images/service-placeholder.webp';
+
+/**
+ * Credential icon props.
+ */
 type CredentialIconProps = {
   logo?: Uint8Array | number[] | string | null;
   style?: ImageStyle;
 };
 
-export function CredentialIcon({ logo, style }: CredentialIconProps) {
-  const getLogoSource = (logoData: Uint8Array | number[] | string | null | undefined) => {
+/**
+ * Credential icon component.
+ */
+export function CredentialIcon({ logo, style }: CredentialIconProps) : React.ReactNode {
+  /**
+   * Get the logo source.
+   */
+  const getLogoSource = (logoData: Uint8Array | number[] | string | null | undefined) : { type: 'image' | 'svg', source: string | number } => {
     if (!logoData) {
-      return { type: 'image', source: require('@/assets/images/service-placeholder.webp') };
+      return { type: 'image', source: servicePlaceholder };
     }
 
     try {
@@ -33,23 +45,25 @@ export function CredentialIcon({ logo, style }: CredentialIconProps) {
       };
     } catch (error) {
       console.error('Error converting logo:', error);
-      return { type: 'image', source: require('@/assets/images/service-placeholder.webp') };
+      return { type: 'image', source: servicePlaceholder };
     }
   };
 
   const logoSource = getLogoSource(logo);
 
   if (logoSource.type === 'svg') {
-    // SVGs are not supported in React Native Image component,
-    // so we use SvgUri from react-native-svg.
+    /*
+     * SVGs are not supported in React Native Image component,
+     * so we use SvgUri from react-native-svg.
+     */
     return (
       <SvgUri
-        uri={logoSource.source}
+        uri={logoSource.source as string}
         width={Number(style?.width ?? styles.logo.width)}
         height={Number(style?.height ?? styles.logo.height)}
         style={{
           borderRadius: styles.logo.borderRadius,
-          ...(style as any),
+          ...(style as ImageStyle),
         }}
       />
     );
@@ -59,7 +73,7 @@ export function CredentialIcon({ logo, style }: CredentialIconProps) {
     <Image
       source={typeof logoSource.source === 'string' ? { uri: logoSource.source } : logoSource.source}
       style={[styles.logo, style]}
-      defaultSource={require('@/assets/images/service-placeholder.webp')}
+      defaultSource={servicePlaceholder}
     />
   );
 }
@@ -85,22 +99,37 @@ function detectMimeTypeFromBase64(base64: string): string {
  * Detect MIME type from file signature (magic numbers)
  */
 function detectMimeType(bytes: Uint8Array): string {
+  /**
+   * Check if the file is an SVG.
+   */
   const isSvg = (): boolean => {
     const header = new TextDecoder().decode(bytes.slice(0, 5)).toLowerCase();
     return header.includes('<?xml') || header.includes('<svg');
   };
 
+  /**
+   * Check if the file is an ICO.
+   */
   const isIco = (): boolean => {
     return bytes[0] === 0x00 && bytes[1] === 0x00 && bytes[2] === 0x01 && bytes[3] === 0x00;
   };
 
+  /**
+   * Check if the file is a PNG.
+   */
   const isPng = (): boolean => {
     return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
   };
 
-  if (isSvg()) return 'image/svg+xml';
-  if (isIco()) return 'image/x-icon';
-  if (isPng()) return 'image/png';
+  if (isSvg()) {
+    return 'image/svg+xml';
+  }
+  if (isIco()) {
+    return 'image/x-icon';
+  }
+  if (isPng()) {
+    return 'image/png';
+  }
 
   return 'image/x-icon';
 }
@@ -128,8 +157,8 @@ function toUint8Array(buffer: Uint8Array | number[] | {[key: number]: number}): 
 
 const styles = StyleSheet.create({
   logo: {
-    width: 32,
-    height: 32,
     borderRadius: 4,
+    height: 32,
+    width: 32,
   },
 });

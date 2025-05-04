@@ -1,7 +1,7 @@
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { Credential } from '@/utils/types/Credential';
-import FormInputCopyToClipboard from '@/components/FormInputCopyToClipboard';
+import FormInputCopyToClipboard from '@/components/form/FormInputCopyToClipboard';
 import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
 
 type AliasDetailsProps = {

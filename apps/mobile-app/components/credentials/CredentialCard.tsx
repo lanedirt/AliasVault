@@ -1,14 +1,18 @@
 import { StyleSheet, View, Text, TouchableOpacity, Keyboard } from 'react-native';
-import { CredentialIcon } from './CredentialIcon';
+import { router } from 'expo-router';
+
+import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useColors } from '@/hooks/useColorScheme';
 import { Credential } from '@/utils/types/Credential';
-import { router } from 'expo-router';
 
 type CredentialCardProps = {
   credential: Credential;
 };
 
-export function CredentialCard({ credential }: CredentialCardProps) {
+/**
+ * Credential card component.
+ */
+export function CredentialCard({ credential }: CredentialCardProps) : React.ReactNode {
   const colors = useColors();
 
   /**
@@ -33,34 +37,34 @@ export function CredentialCard({ credential }: CredentialCardProps) {
   const styles = StyleSheet.create({
     credentialCard: {
       backgroundColor: colors.accentBackground,
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 8,
-      borderWidth: 1,
       borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginBottom: 8,
+      padding: 12,
     },
     credentialContent: {
-      flexDirection: 'row',
       alignItems: 'center',
-    },
-    logo: {
-      width: 32,
-      height: 32,
-      borderRadius: 4,
-      marginRight: 12,
+      flexDirection: 'row',
     },
     credentialInfo: {
       flex: 1,
+    },
+    credentialText: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+    logo: {
+      borderRadius: 4,
+      height: 32,
+      marginRight: 12,
+      width: 32,
     },
     serviceName: {
       color: colors.text,
       fontSize: 16,
       fontWeight: '600',
       marginBottom: 4,
-    },
-    credentialText: {
-      color: colors.textMuted,
-      fontSize: 14,
     },
   });
 
@@ -76,10 +80,10 @@ export function CredentialCard({ credential }: CredentialCardProps) {
       <View style={styles.credentialContent}>
         <CredentialIcon logo={credential.Logo} style={styles.logo} />
         <View style={styles.credentialInfo}>
-          <Text style={[styles.serviceName]}>
+          <Text style={styles.serviceName}>
             {credential.ServiceName ?? 'Unknown Service'}
           </Text>
-          <Text style={[styles.credentialText]}>
+          <Text style={styles.credentialText}>
             {getCredentialDisplayText(credential)}
           </Text>
         </View>

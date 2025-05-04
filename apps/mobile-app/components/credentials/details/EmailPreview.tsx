@@ -10,8 +10,8 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
 import { AppInfo } from '@/utils/AppInfo';
 import { PulseDot } from '@/components/PulseDot';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 
 type EmailPreviewProps = {
   email: string | undefined;

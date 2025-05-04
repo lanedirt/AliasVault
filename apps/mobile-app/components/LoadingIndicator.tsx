@@ -1,21 +1,29 @@
 import { StyleSheet, View, Text, Animated } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+
 import { useColors } from '@/hooks/useColorScheme';
 
-interface LoadingIndicatorProps {
+type LoadingIndicatorProps = {
   status: string;
-}
+};
 
-export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
+/**
+ * Loading indicator component.
+ */
+export default function LoadingIndicator({ status }: LoadingIndicatorProps): React.ReactNode {
   const colors = useColors();
   const dot1Anim = useRef(new Animated.Value(0)).current;
   const dot2Anim = useRef(new Animated.Value(0)).current;
   const dot3Anim = useRef(new Animated.Value(0)).current;
   const dot4Anim = useRef(new Animated.Value(0)).current;
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
   const [dots, setDots] = useState('');
 
   useEffect(() => {
-    const createPulseAnimation = (anim: Animated.Value) => {
+    /**
+     * Create the pulse animation.
+     */
+    const createPulseAnimation = (anim: Animated.Value): Animated.CompositeAnimation => {
       return Animated.sequence([
         Animated.timing(anim, {
           toValue: 1,
@@ -30,7 +38,12 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
       ]);
     };
 
-    const animation = Animated.loop(
+    // Stop any previous animation
+    if (animationRef.current) {
+      animationRef.current.stop();
+    }
+
+    const newAnimation = Animated.loop(
       Animated.parallel([
         createPulseAnimation(dot1Anim),
         Animated.sequence([
@@ -48,64 +61,74 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps) {
       ])
     );
 
+    animationRef.current = newAnimation;
+    newAnimation.start();
+
     // Reset dots when status changes
     setDots('');
 
     const dotsInterval = setInterval(() => {
       setDots(prevDots => {
-        if (prevDots.length >= 3) return '';
+        if (prevDots.length >= 3) {
+          return '';
+        }
         return prevDots + '.';
       });
     }, 400);
 
-    animation.start();
-
-    return () => {
-      animation.stop();
+    return (): void => {
+      if (animationRef.current) {
+        animationRef.current.stop();
+      }
       clearInterval(dotsInterval);
     };
-  }, [status]);
+  }, [status, dot1Anim, dot2Anim, dot3Anim, dot4Anim]);
 
-  // If the status ends with a pipe character (|), don't show any dots
-  // This provides an explicit way to disable the loading dots animation
+  /*
+   * If the status ends with a pipe character (|), don't show any dots
+   * This provides an explicit way to disable the loading dots animation
+   */
   const statusTrimmed = status.endsWith('|') ? status.slice(0, -1) : status;
   const shouldShowDots = !status.endsWith('|');
 
+  const backgroundColor = 'transparent';
+  const shadowColor = '#000';
+
   const styles = StyleSheet.create({
     container: {
+      alignItems: 'center',
       flex: 1,
       justifyContent: 'center',
-      alignItems: 'center',
       padding: 20,
     },
+    dot: {
+      backgroundColor: colors.tertiary,
+      borderRadius: 4,
+      height: 8,
+      width: 8,
+    },
     dotsContainer: {
-      flexDirection: 'row',
-      backgroundColor: 'transparent',
+      backgroundColor: backgroundColor,
+      borderColor: colors.tertiary,
       borderRadius: 20,
+      borderWidth: 5,
+      elevation: 1,
+      flexDirection: 'row',
+      gap: 10,
       padding: 12,
       paddingHorizontal: 24,
-      gap: 10,
-      borderWidth: 5,
-      borderColor: colors.tertiary,
-      shadowColor: '#000',
+      shadowColor: shadowColor,
       shadowOffset: {
         width: 0,
         height: 1,
       },
       shadowOpacity: 0.05,
       shadowRadius: 2,
-      elevation: 1,
-    },
-    dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: colors.tertiary,
     },
     statusText: {
-      marginTop: 16,
-      fontSize: 16,
       color: colors.text,
+      fontSize: 16,
+      marginTop: 16,
       textAlign: 'center',
     },
   });

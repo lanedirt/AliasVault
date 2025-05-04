@@ -1,8 +1,9 @@
-import { View, Text, useColorScheme, StyleSheet, Linking, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Linking, Pressable } from 'react-native';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { Credential } from '@/utils/types/Credential';
+import { useColors } from '@/hooks/useColorScheme';
 
 type NotesSectionProps = {
   credential: Credential;
@@ -60,8 +61,7 @@ const splitTextAndUrls = (text: string): { type: 'text' | 'url', content: string
  * Notes section component.
  */
 export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : React.ReactNode => {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const colors = useColors();
 
   if (!credential.Notes) {
     return null;
@@ -76,14 +76,35 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
     Linking.openURL(url);
   };
 
+  const styles = StyleSheet.create({
+    link: {
+      color: colors.primary,
+      fontSize: 14,
+      textDecorationLine: 'underline',
+    },
+    notes: {
+      color: colors.text,
+      fontSize: 14,
+    },
+    notesContainer: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      padding: 12,
+    },
+    section: {
+      gap: 8,
+      padding: 16,
+      paddingBottom: 8,
+    },
+  });
+
   return (
     <ThemedView style={styles.section}>
       <ThemedText type="subtitle">Notes</ThemedText>
-      <View style={[styles.notesContainer, {
-        backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
-        borderColor: isDarkMode ? '#374151' : '#d1d5db',
-      }]}>
-        <Text style={[styles.notes, { color: isDarkMode ? '#f3f4f6' : '#1f2937' }]}>
+      <View style={styles.notesContainer}>
+        <Text style={styles.notes}>
           {parts.map((part, index) => {
             if (part.type === 'url') {
               return (
@@ -91,7 +112,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
                   key={index}
                   onPress={() => handleLinkPress(part.url!)}
                 >
-                  <Text style={[styles.link, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>
+                  <Text style={styles.link}>
                     {part.content}
                   </Text>
                 </Pressable>
@@ -108,23 +129,3 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
     </ThemedView>
   );
 };
-
-const styles = StyleSheet.create({
-  link: {
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-  notes: {
-    fontSize: 14,
-  },
-  notesContainer: {
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 12,
-  },
-  section: {
-    gap: 8,
-    padding: 16,
-    paddingBottom: 8,
-  },
-});

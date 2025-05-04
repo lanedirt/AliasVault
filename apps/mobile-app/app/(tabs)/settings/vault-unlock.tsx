@@ -2,8 +2,8 @@ import { StyleSheet, View, ScrollView, Alert, Platform, Linking, Switch, Touchab
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useCallback } from 'react';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { AuthMethod, useAuth } from '@/context/AuthContext';
 

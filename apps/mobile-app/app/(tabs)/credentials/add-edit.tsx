@@ -6,9 +6,9 @@ import Toast from 'react-native-toast-message';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -19,7 +19,7 @@ import { AliasVaultToast } from '@/components/Toast';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
-import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/ValidatedFormField';
+import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import { credentialSchema } from '@/utils/validationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 

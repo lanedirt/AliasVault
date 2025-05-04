@@ -24,6 +24,7 @@ export const Colors = {
     secondary: '#6b7280',
     tertiary: '#eabf69',
     loginHeader: '#f6dfc4',
+    greenBackground: '#22c55e',
   },
   dark: {
     white: '#ffffff',
@@ -46,6 +47,7 @@ export const Colors = {
     secondary: '#6b7280',
     tertiary: '#eabf69',
     loginHeader: '#5c4331',
+    greenBackground: '#22c55e',
   },
 } as const;
 

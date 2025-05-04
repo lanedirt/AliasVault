@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColors } from '@/hooks/useColorScheme';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { AppInfo } from '@/utils/AppInfo';
 
 type ApiOption = {

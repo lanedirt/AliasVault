@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import * as OTPAuth from 'otpauth';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { Credential } from '@/utils/types/Credential';
 import { TotpCode } from '@/utils/types/TotpCode';
 import { useDb } from '@/context/DbContext';
+import { useColors } from '@/hooks/useColorScheme';
 
 type TotpSectionProps = {
   credential: Credential;
@@ -20,8 +21,7 @@ type TotpSectionProps = {
 export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.ReactNode => {
   const [totpCodes, setTotpCodes] = useState<TotpCode[]>([]);
   const [currentCodes, setCurrentCodes] = useState<Record<string, string>>({});
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const colors = useColors();
   const dbContext = useDb();
 
   /**
@@ -134,6 +134,53 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
     return null;
   }
 
+  const styles = StyleSheet.create({
+    code: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      letterSpacing: 2,
+    },
+    codeContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    container: {
+      marginTop: 16,
+      padding: 16,
+    },
+    content: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginTop: 8,
+      padding: 12,
+    },
+    label: {
+      fontSize: 12,
+      marginBottom: 4,
+    },
+    progressBar: {
+      backgroundColor: colors.primary,
+      borderRadius: 2,
+      height: 4,
+      overflow: 'hidden',
+      width: 40,
+    },
+    progressFill: {
+      backgroundColor: colors.secondary,
+      height: '100%',
+    },
+    timer: {
+      fontSize: 12,
+      marginBottom: 4,
+    },
+    timerContainer: {
+      alignItems: 'flex-end',
+    },
+  });
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle">
@@ -142,26 +189,20 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
       {totpCodes.map(totpCode => (
         <TouchableOpacity
           key={totpCode.Id}
-          style={[
-            styles.content,
-            {
-              backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
-              borderColor: isDarkMode ? '#374151' : '#d1d5db',
-            }
-          ]}
+          style={styles.content}
           onPress={() => copyToClipboard(currentCodes[totpCode.Id])}
         >
           <View style={styles.codeContainer}>
             <View>
-              <ThemedText style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#6b7280' }]}>
+              <ThemedText style={styles.label}>
                 TOTP Code
               </ThemedText>
-              <ThemedText style={[styles.code, { color: isDarkMode ? '#f3f4f6' : '#1f2937' }]}>
+              <ThemedText style={styles.code}>
                 {currentCodes[totpCode.Id]}
               </ThemedText>
             </View>
             <View style={styles.timerContainer}>
-              <ThemedText style={[styles.timer, { color: isDarkMode ? '#9ca3af' : '#6b7280' }]}>
+              <ThemedText style={styles.timer}>
                 {getRemainingSeconds()}s
               </ThemedText>
               <View style={styles.progressBar}>
@@ -179,48 +220,3 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
     </ThemedView>
   );
 };
-
-const styles = StyleSheet.create({
-  code: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  codeContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  container: {
-    marginTop: 16,
-    padding: 16,
-  },
-  content: {
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 8,
-    padding: 12,
-  },
-  label: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  progressBar: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderRadius: 2,
-    height: 4,
-    overflow: 'hidden',
-    width: 40,
-  },
-  progressFill: {
-    backgroundColor: '#007AFF',
-    height: '100%',
-  },
-  timer: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  timerContainer: {
-    alignItems: 'flex-end',
-  },
-});

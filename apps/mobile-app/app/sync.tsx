@@ -6,7 +6,7 @@ import NativeVaultManager from '../specs/NativeVaultManager';
 
 import { useAuth } from '@/context/AuthContext';
 import { useVaultSync } from '@/hooks/useVaultSync';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedView } from '@/components/themed/ThemedView';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useDb } from '@/context/DbContext';
 

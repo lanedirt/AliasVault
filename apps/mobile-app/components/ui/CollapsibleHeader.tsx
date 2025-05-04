@@ -1,17 +1,18 @@
 import React from 'react';
 import { StyleSheet, Platform, Animated, TouchableOpacity } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { useColors } from '@/hooks/useColorScheme';
-import { ThemedText } from './ThemedText';
+import { Stack } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-interface HeaderButton {
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useColors } from '@/hooks/useColorScheme';
+
+type HeaderButton = {
   icon: keyof typeof MaterialIcons.glyphMap;
   onPress: () => void;
   position: 'left' | 'right';
 }
 
-interface CollapsibleHeaderProps {
+type CollapsibleHeaderProps = {
   title: string;
   scrollY: Animated.Value;
   showNavigationHeader?: boolean;
@@ -19,13 +20,16 @@ interface CollapsibleHeaderProps {
   headerButtons?: HeaderButton[];
 }
 
+/**
+ * Collapsible header component.
+ */
 export function CollapsibleHeader({
   title,
   scrollY,
   showNavigationHeader = false,
   alwaysVisible = false,
   headerButtons = []
-}: CollapsibleHeaderProps) {
+}: CollapsibleHeaderProps) : React.ReactNode {
   const colors = useColors();
 
   // Calculate header opacity based on scroll position and transform
@@ -54,46 +58,49 @@ export function CollapsibleHeader({
 
   const styles = StyleSheet.create({
     floatingHeader: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: Platform.OS === 'ios' ? 100 : 64,
-      flexDirection: 'row',
       alignItems: 'flex-end',
+      flexDirection: 'row',
+      height: Platform.OS === 'ios' ? 100 : 64,
       justifyContent: 'center',
+      left: 0,
       paddingBottom: Platform.OS === 'ios' ? 12 : 16,
-      zIndex: 100,
       paddingTop: Platform.OS === 'ios' ? 60 : 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
+      zIndex: 100,
     },
     floatingTitle: {
-      fontSize: Platform.OS === 'ios' ? 20 : 17,
-      fontWeight: '600',
       color: colors.text,
       flex: 1,
-      textAlign: 'center',
+      fontSize: Platform.OS === 'ios' ? 20 : 17,
+      fontWeight: '600',
       marginHorizontal: 50,
       marginTop: 5,
+      textAlign: 'center',
+    },
+    floatingTitleContainer: {
+      flex: 1,
+    },
+    headerBorder: {
+      backgroundColor: colors.accentBorder,
+      bottom: 0,
+      height: 1,
+      left: 0,
+      position: 'absolute',
+      right: 0,
     },
     headerButton: {
-      position: 'absolute',
       bottom: Platform.OS === 'ios' ? 6 : 16,
       color: colors.primary,
       padding: 4,
+      position: 'absolute',
     },
     leftButton: {
       left: 16,
     },
     rightButton: {
       right: 16,
-    },
-    headerBorder: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 1,
-      backgroundColor: colors.accentBorder,
     },
   });
 
@@ -117,7 +124,10 @@ export function CollapsibleHeader({
           }
         ]}
       >
-        <Animated.View style={{ flex: 1, opacity: alwaysVisible ? titleOpacity : headerOpacity }}>
+        <Animated.View style={[
+          styles.floatingTitleContainer,
+          { opacity: alwaysVisible ? titleOpacity : headerOpacity },
+        ]}>
           <ThemedText style={styles.floatingTitle}>{title}</ThemedText>
         </Animated.View>
 

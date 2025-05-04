@@ -1,8 +1,16 @@
 import { View, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+type ToastProps = {
+  text1: string;
+  text2?: string;
+};
+
 export const toastConfig = {
-  success: (props: any) => (
+  /**
+   * Success toast.
+   */
+  success: (props: ToastProps): React.ReactNode => (
     <View
       style={{
         backgroundColor: '#f97316', // AliasVault orange
@@ -26,7 +34,10 @@ export const toastConfig = {
       </Text>
     </View>
   ),
-  error: (props: any) => (
+  /**
+   * Error toast.
+   */
+  error: (props: ToastProps): React.ReactNode => (
     <View
       style={{
         backgroundColor: '#dc2626', // Red
@@ -55,7 +66,10 @@ export const toastConfig = {
       )}
     </View>
   ),
-  info: (props: any) => (
+  /**
+   * Info toast.
+   */
+  info: (props: ToastProps): React.ReactNode => (
     <View
       style={{
         backgroundColor: '#3b82f6', // Blue
@@ -81,6 +95,9 @@ export const toastConfig = {
   ),
 };
 
-export const AliasVaultToast = () => {
+/**
+ * AliasVault toast component.
+ */
+export const AliasVaultToast = (): React.ReactNode => {
   return <Toast config={toastConfig} />;
 };

@@ -1,16 +1,23 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { useColors } from '@/hooks/useColorScheme';
-import { ThemedText } from './ThemedText';
-import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { router } from 'expo-router';
+
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useColors } from '@/hooks/useColorScheme';
+import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 
 type EmailCardProps = {
   email: MailboxEmail;
 };
 
-export function EmailCard({ email }: EmailCardProps) {
+/**
+ * Email card component.
+ */
+export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
   const colors = useColors();
 
+  /**
+   * Format the email date.
+   */
   const formatEmailDate = (dateSystem: string): string => {
     const now = new Date();
     const emailDate = new Date(dateSystem);
@@ -37,11 +44,12 @@ export function EmailCard({ email }: EmailCardProps) {
   const styles = StyleSheet.create({
     emailCard: {
       backgroundColor: colors.accentBackground,
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 12,
-      borderWidth: 1,
       borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      elevation: 3,
+      marginBottom: 12,
+      padding: 12,
       shadowColor: colors.text,
       shadowOffset: {
         width: 0,
@@ -49,30 +57,29 @@ export function EmailCard({ email }: EmailCardProps) {
       },
       shadowOpacity: 0.1,
       shadowRadius: 3,
-      elevation: 3,
+    },
+    emailDate: {
+      color: colors.textMuted,
+      fontSize: 12,
+      opacity: 0.6,
     },
     emailHeader: {
+      alignItems: 'flex-start',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'flex-start',
       marginBottom: 8,
     },
+    emailPreview: {
+      color: colors.text,
+      fontSize: 14,
+      opacity: 0.8,
+    },
     emailSubject: {
+      color: colors.text,
       flex: 1,
       fontSize: 16,
       fontWeight: 'bold',
       marginRight: 8,
-      color: colors.text,
-    },
-    emailDate: {
-      fontSize: 12,
-      opacity: 0.6,
-      color: colors.textMuted,
-    },
-    emailPreview: {
-      fontSize: 14,
-      opacity: 0.8,
-      color: colors.text,
     },
   });
 
