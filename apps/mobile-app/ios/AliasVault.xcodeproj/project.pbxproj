@@ -29,7 +29,6 @@
 		CEE4809D2DBE86DD00F4A367 /* VaultStoreKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CEE480872DBE86DC00F4A367 /* VaultStoreKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CEE480AC2DBE88AB00F4A367 /* VaultStoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE480872DBE86DC00F4A367 /* VaultStoreKit.framework */; };
 		CEE480AD2DBE88AB00F4A367 /* VaultStoreKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CEE480872DBE86DC00F4A367 /* VaultStoreKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		CEE481752DBE8AC800F4A367 /* VaultUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; };
 		CEE4817F2DBE8AC800F4A367 /* VaultUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; };
 		CEE481802DBE8AC800F4A367 /* VaultUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CEE482BF2DBE8EFF00F4A367 /* VaultModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */; };
@@ -77,20 +76,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = CEE480862DBE86DC00F4A367;
 			remoteInfo = VaultStoreKit;
-		};
-		CEE481762DBE8AC800F4A367 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CEE481692DBE8AC800F4A367;
-			remoteInfo = VaultUI;
-		};
-		CEE481782DBE8AC800F4A367 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = AliasVault;
 		};
 		CEE4817D2DBE8AC800F4A367 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -307,14 +292,6 @@
 			files = (
 				CEE482CB2DBE8F2B00F4A367 /* VaultModels.framework in Frameworks */,
 				1381C2F6D317F2404928BA59 /* libPods-VaultUI.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CEE481712DBE8AC800F4A367 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CEE481752DBE8AC800F4A367 /* VaultUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -730,13 +707,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CEE481722DBE8AC800F4A367 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CEE482A82DBE8EFE00F4A367 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -998,13 +968,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CEE481702DBE8AC800F4A367 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CEE482A62DBE8EFE00F4A367 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1046,16 +1009,6 @@
 			isa = PBXTargetDependency;
 			target = CEE480862DBE86DC00F4A367 /* VaultStoreKit */;
 			targetProxy = CEE480AE2DBE88AB00F4A367 /* PBXContainerItemProxy */;
-		};
-		CEE481772DBE8AC800F4A367 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CEE481692DBE8AC800F4A367 /* VaultUI */;
-			targetProxy = CEE481762DBE8AC800F4A367 /* PBXContainerItemProxy */;
-		};
-		CEE481792DBE8AC800F4A367 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* AliasVault */;
-			targetProxy = CEE481782DBE8AC800F4A367 /* PBXContainerItemProxy */;
 		};
 		CEE4817E2DBE8AC800F4A367 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

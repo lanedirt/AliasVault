@@ -1,15 +1,18 @@
-import type {TurboModule} from 'react-native';
-import {TurboModuleRegistry} from 'react-native';
+import type { TurboModule } from 'react-native';
+import { TurboModuleRegistry } from 'react-native';
 
+import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Spec extends TurboModule {
   // Basic credential operations
-  getCredentials(): Promise<{ credentials: Array<{ username: string; password: string; service: string }> }>;
+  getCredentials(): Promise<{ credentials: { username: string; password: string; service: string }[] }>;
   clearVault(): Promise<void>;
 
   // Vault state management
   hasStoredVault(): Promise<boolean>;
   isVaultUnlocked(): Promise<boolean>;
-  getVaultMetadata(): Promise<any>;
+  getVaultMetadata(): Promise<VaultMetadata>;
   unlockVault(): Promise<boolean>;
 
   // Database operations
@@ -22,8 +25,8 @@ export interface Spec extends TurboModule {
   setCurrentVaultRevisionNumber(revisionNumber: number): Promise<void>;
 
   // SQL operations
-  executeQuery(query: string, params: any[]): Promise<any[]>;
-  executeUpdate(query: string, params: any[]): Promise<number>;
+  executeQuery(query: string, params: string[]): Promise<string[]>;
+  executeUpdate(query: string, params: string[]): Promise<number>;
   beginTransaction(): Promise<void>;
   commitTransaction(): Promise<void>;
   rollbackTransaction(): Promise<void>;
