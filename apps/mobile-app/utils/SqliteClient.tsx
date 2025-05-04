@@ -1,11 +1,9 @@
-import { NativeModules } from 'react-native';
-import { Credential } from './types/Credential';
-import { EncryptionKey } from './types/EncryptionKey';
-import { TotpCode } from './types/TotpCode';
-import { PasswordSettings } from './types/PasswordSettings';
-import { VaultMetadata } from './types/messaging/VaultMetadata';
-import NativeVaultManager from '../specs/NativeVaultManager';
-
+import NativeVaultManager from '@/specs/NativeVaultManager';
+import { Credential } from '@/utils/types/Credential';
+import { EncryptionKey } from '@/utils/types/EncryptionKey';
+import { TotpCode } from '@/utils/types/TotpCode';
+import { PasswordSettings } from '@/utils/types/PasswordSettings';
+import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
 
 type SQLiteBindValue = string | number | null | Uint8Array;
 
@@ -16,7 +14,7 @@ class SqliteClient {
   /**
    * Store the encrypted database via the native code implementation.
    */
-  async storeEncryptedDatabase(base64EncryptedDb: string): Promise<void> {
+  public async storeEncryptedDatabase(base64EncryptedDb: string): Promise<void> {
     try {
       await NativeVaultManager.storeDatabase(base64EncryptedDb);
     } catch (error) {
@@ -32,7 +30,7 @@ class SqliteClient {
    * - public and private email domains
    * - vault revision number
    */
-  async storeMetadata(metadata: string): Promise<void> {
+  public async storeMetadata(metadata: string): Promise<void> {
     try {
       await NativeVaultManager.storeMetadata(metadata);
     } catch (error) {
@@ -55,7 +53,7 @@ class SqliteClient {
 
       try {
         return JSON.parse(metadataJson) as VaultMetadata;
-      } catch (parseError) {
+      } catch {
         throw new Error('Failed to parse vault metadata from native storage');
       }
     } catch (error) {
@@ -64,7 +62,7 @@ class SqliteClient {
     }
   }
 
-    /**
+  /**
    * Get the default email domain from the vault metadata.
    * Returns the first valid private domain if available, otherwise the first valid public domain.
    * Returns null if no valid domains are found.
@@ -78,7 +76,9 @@ class SqliteClient {
 
       const { privateEmailDomains, publicEmailDomains } = metadata;
 
-      // Check if a domain is valid (not empty, not 'DISABLED.TLD', and exists in either private or public domains)
+      /**
+       * Check if a domain is valid (not empty, not 'DISABLED.TLD', and exists in either private or public domains)
+       */
       const isValidDomain = (domain: string): boolean => {
         return Boolean(domain &&
                domain !== 'DISABLED.TLD' &&
@@ -129,12 +129,16 @@ class SqliteClient {
    */
   public async executeQuery<T>(query: string, params: SQLiteBindValue[] = []): Promise<T[]> {
     try {
-      // Convert any Uint8Array parameters to base64 strings as the Native wrapper
-      // communication requires everything to be a string.
+      /*
+       * Convert any Uint8Array parameters to base64 strings as the Native wrapper
+       * communication requires everything to be a string.
+       */
       const convertedParams = params.map(param => {
         if (param instanceof Uint8Array) {
-          // We prefix the base64 string with "av-base64:" to indicate that it is a base64 encoded Uint8Array.
-          // So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+          /*
+           * We prefix the base64 string with "av-base64:" to indicate that it is a base64 encoded Uint8Array.
+           * So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+           */
           return 'av-base64-to-blob:' + Buffer.from(param).toString('base64');
         }
         return param;
@@ -153,12 +157,16 @@ class SqliteClient {
    */
   public async executeUpdate(query: string, params: SQLiteBindValue[] = []): Promise<number> {
     try {
-      // Convert any Uint8Array parameters to base64 strings as the Native wrapper
-      // communication requires everything to be a string.
+      /*
+       * Convert any Uint8Array parameters to base64 strings as the Native wrapper
+       * communication requires everything to be a string.
+       */
       const convertedParams = params.map(param => {
         if (param instanceof Uint8Array) {
-          // We prefix the base64 string with "av-base64-to-blob:" to indicate that it is a base64 encoded Uint8Array.
-          // So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+          /*
+           * We prefix the base64 string with "av-base64-to-blob:" to indicate that it is a base64 encoded Uint8Array.
+           * So the receiving end knows that it should convert this value back to a Uint8Array before using it in the query.
+           */
           return 'av-base64-to-blob:' + Buffer.from(param).toString('base64');
         }
         return param;
@@ -215,6 +223,7 @@ class SqliteClient {
     }
 
     // Convert the first row to a Credential object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const row = results[0] as any;
     return {
       Id: row.Id,
@@ -263,6 +272,7 @@ class SqliteClient {
             WHERE c.IsDeleted = 0
             ORDER BY c.CreatedAt DESC`;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = await this.executeQuery<any>(query);
 
     return results.map((row) => ({
@@ -294,9 +304,9 @@ class SqliteClient {
       await NativeVaultManager.beginTransaction();
 
       const currentDateTime = new Date().toISOString()
-      .replace('T', ' ')
-      .replace('Z', '')
-      .substring(0, 23);
+        .replace('T', ' ')
+        .replace('Z', '')
+        .substring(0, 23);
 
       // Update the credential, alias, and service to be deleted
       const query = `
@@ -353,6 +363,7 @@ class SqliteClient {
 
     const results = await this.executeQuery(query);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return results.map((row: any) => row.Email);
   }
 
@@ -510,18 +521,6 @@ class SqliteClient {
       }
 
       await NativeVaultManager.commitTransaction();
-      console.log('Credential created successfully');
-      console.log('Credential ID:', credentialId);
-
-      // Can we do select query here to check if the credential was created?
-      const credential2 = await this.getCredentialById(credentialId);
-      if (!credential2) {
-        console.log('Credential could not be retrieved after creation??');
-      }
-      else {
-        console.log('Credential retrieved successfully?');
-      }
-
       return credentialId;
 
     } catch (error) {
@@ -654,6 +653,7 @@ class SqliteClient {
     }
 
     // Convert the first row to a Credential object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const row = results[0] as any;
     return {
       Id: row.Id,

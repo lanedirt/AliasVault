@@ -7,11 +7,11 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
 
 type FormFieldButton = {
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   onPress: () => void;
 }
 
-type ValidatedFormFieldRef = {
+export type ValidatedFormFieldRef = {
   focus: () => void;
   selectAll: () => void;
 }
@@ -27,7 +27,7 @@ type ValidatedFormFieldProps<T extends FieldValues> = Omit<TextInputProps, 'valu
 /**
  * Validated form field component.
  */
-export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFormFieldProps<any>>(({
+const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedFormFieldProps<FieldValues>>(({
   label,
   name,
   control,
@@ -44,7 +44,6 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
      * Focus the input.
      */
     focus: (): void => {
-      console.log(inputRef.current);
       inputRef.current?.focus();
     },
     /**
@@ -55,17 +54,16 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
     }
   }));
 
+  const colorRed = 'red';
+
   const styles = StyleSheet.create({
     button: {
       borderLeftColor: colors.accentBorder,
       borderLeftWidth: 1,
       padding: 10,
     },
-    container: {
-      marginBottom: 16,
-    },
     errorText: {
-      color: 'red',
+      color: colorRed,
       fontSize: 12,
       marginTop: 4,
     },
@@ -84,7 +82,7 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
       flexDirection: 'row',
     },
     inputError: {
-      borderColor: 'red',
+      borderColor: colorRed,
     },
     inputGroup: {
       marginBottom: 6,
@@ -95,7 +93,7 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
       marginBottom: 4,
     },
     requiredIndicator: {
-      color: 'red',
+      color: colorRed,
       marginLeft: 4,
     },
   });
@@ -128,7 +126,7 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
                   onPress={button.onPress}
                   underlayColor={colors.accentBackground}
                 >
-                  <MaterialIcons name={button.icon as any} size={20} color={colors.primary} />
+                  <MaterialIcons name={button.icon} size={20} color={colors.primary} />
                 </TouchableHighlight>
               ))}
             </View>
@@ -139,3 +137,7 @@ export const ValidatedFormField = forwardRef<ValidatedFormFieldRef, ValidatedFor
     />
   );
 });
+
+ValidatedFormFieldComponent.displayName = 'ValidatedFormField';
+
+export const ValidatedFormField = ValidatedFormFieldComponent as <T extends FieldValues>(props: ValidatedFormFieldProps<T> & { ref?: React.Ref<ValidatedFormFieldRef> }) => JSX.Element;

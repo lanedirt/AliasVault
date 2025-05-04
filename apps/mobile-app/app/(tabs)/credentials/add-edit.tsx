@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView, Alert, Keyboard } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, ScrollView } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -34,11 +34,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const colors = useColors();
   const dbContext = useDb();
   const [mode, setMode] = useState<CredentialMode>('random');
-  const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
+  const { executeVaultMutation, syncStatus } = useVaultMutate();
   const navigation = useNavigation();
   const webApi = useWebApi();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -183,6 +184,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const onSubmit = useCallback(async (data: Credential) : Promise<void> => {
     Keyboard.dismiss();
 
+    setIsLoading(true);
+
     // If we're creating a new credential and mode is random, generate random values
     if (!isEditMode && mode === 'random') {
       await generateRandomAlias();
@@ -258,6 +261,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
           position: 'bottom'
         });
       }, 200);
+
+      setIsLoading(false);
     }
   }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi]);
 
@@ -494,7 +499,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       )}
       <ThemedSafeAreaView style={styles.container}>
         <ThemedView style={styles.content}>
-          <ScrollView>
+          <ScrollView
+          >
             {!isEditMode && (
               <View style={styles.modeSelector}>
                 <TouchableOpacity

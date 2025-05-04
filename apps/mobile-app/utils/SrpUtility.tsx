@@ -1,14 +1,21 @@
 import srp from 'secure-remote-password/client';
+
 import { WebApiService } from '@/utils/WebApiService';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { ValidateLoginRequest2Fa, ValidateLoginResponse } from '@/utils/types/webapi/ValidateLogin';
 import BadRequestResponse from '@/utils/types/webapi/BadRequestResponse';
 
+/**
+ * Utility class for SRP login and validation operations.
+ */
 export class SrpUtility {
   private webApiService: WebApiService;
 
-  constructor(webApiService: WebApiService) {
+  /**
+   * Constructor
+   */
+  public constructor(webApiService: WebApiService) {
     this.webApiService = webApiService;
   }
 

@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useCallback } from 'react';
 
@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { AuthMethod, useAuth } from '@/context/AuthContext';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Vault unlock settings screen.
@@ -147,20 +148,11 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 16,
     },
-    scrollContent: {
-      paddingBottom: 40,
-    },
-    scrollView: {
-      flex: 1,
-    },
   });
 
   return (
     <ThemedSafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
             Choose how you want to unlock your vault.
@@ -206,7 +198,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
             </ThemedText>
           </View>
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     </ThemedSafeAreaView>
   );
 }

@@ -1,9 +1,11 @@
+import { Buffer } from 'buffer';
+
 import argon2 from 'react-native-argon2';
 import AesGcmCrypto from 'react-native-aes-gcm-crypto';
+
 import { Email } from './types/webapi/Email';
 import { EncryptionKey } from './types/EncryptionKey';
 import { MailboxEmail } from './types/webapi/MailboxEmail';
-import { Buffer } from 'buffer';
 
 /**
  * Utility class for encryption operations including:
@@ -110,8 +112,10 @@ class EncryptionUtility {
    * Generates a new RSA key pair for asymmetric encryption
    */
   public static async generateRsaKeyPair(): Promise<{ publicKey: string, privateKey: string }> {
-    // TODO: this method is currently unused. When we enable the app to actually generate keys, check if the key pair is
-    // generated in the correct format  where private key is in expected JWK format that the WASM app already outputs.
+    /*
+     * TODO: this method is currently unused. When we enable the app to actually generate keys, check if the key pair is
+     * generated in the correct format  where private key is in expected JWK format that the WASM app already outputs.
+     */
     const keyPair = await crypto.subtle.generateKey(
       {
         name: "RSA-OAEP",
@@ -179,7 +183,6 @@ class EncryptionUtility {
       const plaintextBuffer = await crypto.subtle.decrypt(
         {
           name: "RSA-OAEP",
-          hash: "SHA-256",
         },
         privateKeyObj,
         cipherBuffer
@@ -188,7 +191,7 @@ class EncryptionUtility {
       return new Uint8Array(plaintextBuffer);
     } catch (error) {
       console.error('RSA decryption failed:', error);
-      throw new Error(`Failed to decrypt: ${error.message}`);
+      throw new Error(`Failed to decrypt: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
