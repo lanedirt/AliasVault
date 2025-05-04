@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,6 +18,7 @@
 		B2E3CEC9AABDA3497BFE65B7 /* libPods-VaultStoreKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9AD944E3A0F270C797F5DD /* libPods-VaultStoreKitTests.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		CE26D68F2DA7FCD2006DC04D /* VaultManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */; };
+		CE3AE2B12DC7ACDE00E7745E /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = CE3AE2B02DC7ACD700E7745E /* .swiftlint.yml */; };
 		CE48FCEC2DBE939A00E5E3D6 /* VaultModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */; };
 		CE48FD372DBE95EB00E5E3D6 /* VaultModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */; };
 		CE48FD632DBEA3B800E5E3D6 /* VaultUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; };
@@ -171,6 +172,7 @@
 		C32D89DCBA51D7C8CDE51DD2 /* libPods-VaultUI.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultUI.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C87FA54AAFE121325F22CDDE /* Pods-PreviewHost.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PreviewHost.debug.xcconfig"; path = "Target Support Files/Pods-PreviewHost/Pods-PreviewHost.debug.xcconfig"; sourceTree = "<group>"; };
 		CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultManager.swift; sourceTree = "<group>"; };
+		CE3AE2B02DC7ACD700E7745E /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeVaultManager.h; sourceTree = "<group>"; };
 		CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeVaultManager.mm; sourceTree = "<group>"; };
 		CE9A5B662DBAE42B00CB0A4C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -188,7 +190,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CEE9098F2DA548C7008D568F /* Exceptions for "Autofill" folder in "Autofill" target */ = {
+		CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -198,62 +200,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CEE480882DBE86DC00F4A367 /* VaultStoreKit */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultStoreKit;
-			sourceTree = "<group>";
-		};
-		CEE480972DBE86DD00F4A367 /* VaultStoreKitTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultStoreKitTests;
-			sourceTree = "<group>";
-		};
-		CEE4816B2DBE8AC800F4A367 /* VaultUI */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultUI;
-			sourceTree = "<group>";
-		};
-		CEE482AB2DBE8EFE00F4A367 /* VaultModels */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultModels;
-			sourceTree = "<group>";
-		};
-		CEE909812DA548C7008D568F /* Autofill */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CEE9098F2DA548C7008D568F /* Exceptions for "Autofill" folder in "Autofill" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Autofill;
-			sourceTree = "<group>";
-		};
+		CEE480882DBE86DC00F4A367 /* VaultStoreKit */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultStoreKit; sourceTree = "<group>"; };
+		CEE480972DBE86DD00F4A367 /* VaultStoreKitTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultStoreKitTests; sourceTree = "<group>"; };
+		CEE4816B2DBE8AC800F4A367 /* VaultUI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultUI; sourceTree = "<group>"; };
+		CEE482AB2DBE8EFE00F4A367 /* VaultModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultModels; sourceTree = "<group>"; };
+		CEE909812DA548C7008D568F /* Autofill */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Autofill; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -361,6 +312,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				CE3AE2B02DC7ACD700E7745E /* .swiftlint.yml */,
 				CE9A58F92DBA97D500CB0A4C /* NativeVaultManager */,
 				13B07FAE1A68108700A75B9A /* AliasVault */,
 				CEE909812DA548C7008D568F /* Autofill */,
@@ -558,6 +510,7 @@
 				CEE481662DBE8AC800F4A367 /* Sources */,
 				CEE481672DBE8AC800F4A367 /* Frameworks */,
 				CEE481682DBE8AC800F4A367 /* Resources */,
+				CE3AE2AF2DC7ACC100E7745E /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -638,10 +591,6 @@
 					CEE481692DBE8AC800F4A367 = {
 						CreatedOnToolsVersion = 16.3;
 					};
-					CEE481732DBE8AC800F4A367 = {
-						CreatedOnToolsVersion = 16.3;
-						TestTargetID = 13B07F861A680F5B00A75B9A;
-					};
 					CEE482A92DBE8EFE00F4A367 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -718,6 +667,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE3AE2B12DC7ACDE00E7745E /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -885,6 +835,31 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		CE3AE2AF2DC7ACC100E7745E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.swiftlint.yml",
+				"$(SRCROOT)/**/.swiftlint.yml",
+				"$(SRCROOT)/AliasVault",
+				"$(SRCROOT)/Autofill",
+				"$(SRCROOT)/VaultStoreKit",
+				"$(SRCROOT)/VaultStoreKitTests",
+				"$(SRCROOT)/VaultUI",
+				"$(SRCROOT)/VaultModels",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${PODS_ROOT}/SwiftLint/swiftlint\" --config \"${SRCROOT}/.swiftlint.yml\"\n";
 		};
 		F09C43BBB1E788B0094C9F0D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1155,10 +1130,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -1213,10 +1185,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
