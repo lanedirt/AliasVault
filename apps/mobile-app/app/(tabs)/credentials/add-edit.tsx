@@ -198,6 +198,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       Password: data.Password,
       ServiceName: data.ServiceName,
       ServiceUrl: data.ServiceUrl,
+      Notes: data.Notes,
       Alias: {
         FirstName: data.Alias.FirstName,
         LastName: data.Alias.LastName,
