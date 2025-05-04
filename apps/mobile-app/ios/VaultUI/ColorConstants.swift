@@ -1,6 +1,8 @@
 import SwiftUI
 
+/// Color constants for the app
 public struct ColorConstants {
+    /// Light mode colors
     public struct Light {
         static let text = SwiftUI.Color(hex: "#11181C")
         static let textMuted = SwiftUI.Color(hex: "#4b5563")
@@ -12,6 +14,7 @@ public struct ColorConstants {
         static let icon = SwiftUI.Color(hex: "#687076")
     }
 
+    /// Dark mode colors
     public struct Dark {
         static let text = SwiftUI.Color(hex: "#ECEDEE")
         static let textMuted = SwiftUI.Color(hex: "#9BA1A6")
@@ -30,19 +33,19 @@ extension SwiftUI.Color {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
+        let colorA, colorR, colorG, colorB: UInt64
         switch hex.count {
-        case 3: (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default: (a, r, g, b) = (255, 0, 0, 0)
+        case 3: (colorA, colorR, colorG, colorB) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: (colorA, colorR, colorG, colorB) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: (colorA, colorR, colorG, colorB) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default: (colorA, colorR, colorG, colorB) = (255, 0, 0, 0)
         }
         self.init(
             .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
+            red: Double(colorR) / 255,
+            green: Double(colorG) / 255,
+            blue: Double(colorB) / 255,
+            opacity: Double(colorA) / 255
         )
     }
 }

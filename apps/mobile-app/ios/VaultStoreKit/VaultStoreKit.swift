@@ -6,13 +6,11 @@ import CryptoKit
 import CommonCrypto
 import VaultModels
 
-/**
- * This class is used to store and retrieve the encrypted AliasVault database and encryption key.
- * It also handles executing queries against the SQLite database and biometric authentication.
- *
- * This class is used by both the iOS Autofill extension and the React Native app and is the lowest
- * level where all important data is stored and retrieved from.
- */
+/// This class is used to store and retrieve the encrypted AliasVault database and encryption key.
+/// It also handles executing queries against the SQLite database and biometric authentication.
+///
+/// This class is used by both the iOS Autofill extension and the React Native app and is the lowest
+/// level where all important data is stored and retrieved from.
 public class VaultStore {
     public static let shared = VaultStore()
     private let keychain = Keychain(service: "net.aliasvault.autofill", accessGroup: "group.net.aliasvault.autofill")
@@ -20,7 +18,7 @@ public class VaultStore {
 
     private let userDefaults = UserDefaults(suiteName: "group.net.aliasvault.autofill")!
 
-    private var db: Connection?
+    private var dbConnection: Connection?
     private var encryptionKey: Data?
     private var clearCacheTimer: Timer?
 
@@ -109,8 +107,7 @@ public class VaultStore {
                 print("Failed to remove encryption key from keychain: \(error)")
                 throw error
             }
-        }
-        else {
+        } else {
             print("Face ID is now enabled, next time user logs in the key will be persisted in keychain")
         }
     }
@@ -359,29 +356,29 @@ public class VaultStore {
         try decryptedDbData.write(to: tempDbPath)
 
         // Create an in-memory database
-        db = try Connection(":memory:")
+        dbConnection = try Connection(":memory:")
 
         // Import the decrypted database into memory
-        try db?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
-        try db?.execute("BEGIN TRANSACTION")
+        try dbConnection?.attach(.uri(tempDbPath.path, parameters: [.mode(.readOnly)]), as: "source")
+        try dbConnection?.execute("BEGIN TRANSACTION")
 
         // Copy all tables from source to memory
-        let tables = try db?.prepare("SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        let tables = try dbConnection?.prepare("SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         for table in tables! {
             let tableName = table[0] as! String
-            try db?.execute("CREATE TABLE \(tableName) AS SELECT * FROM source.\(tableName)")
+            try dbConnection?.execute("CREATE TABLE \(tableName) AS SELECT * FROM source.\(tableName)")
         }
 
-        try db?.execute("COMMIT")
-        try db?.execute("DETACH DATABASE source")
+        try dbConnection?.execute("COMMIT")
+        try dbConnection?.execute("DETACH DATABASE source")
 
         // Clean up the temporary file
         try? FileManager.default.removeItem(at: tempDbPath)
 
         // Setup database pragmas
-        try db?.execute("PRAGMA journal_mode = WAL")
-        try db?.execute("PRAGMA synchronous = NORMAL")
-        try db?.execute("PRAGMA foreign_keys = ON")
+        try dbConnection?.execute("PRAGMA journal_mode = WAL")
+        try dbConnection?.execute("PRAGMA synchronous = NORMAL")
+        try dbConnection?.execute("PRAGMA foreign_keys = ON")
     }
 
     // MARK: - Encryption/Decryption
@@ -400,7 +397,7 @@ public class VaultStore {
 
     // MARK: - Credential Operations
     public func getAllCredentials() throws -> [Credential] {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -458,7 +455,7 @@ public class VaultStore {
         """
 
         var result: [Credential] = []
-        for row in try db.prepare(query) {
+        for row in try dbConnection.prepare(query) {
             guard let idString = row[0] as? String else {
                 continue
             }
@@ -471,8 +468,8 @@ public class VaultStore {
                 continue
             }
 
-            guard let createdAt = parseDateString(createdAtString),
-                let updatedAt = parseDateString(updatedAtString) else {
+            guard let createdAt = DateHelper.parseDateString(createdAtString),
+                let updatedAt = DateHelper.parseDateString(updatedAtString) else {
                 continue
             }
 
@@ -483,8 +480,8 @@ public class VaultStore {
                 let serviceCreatedAtString = row[11] as? String,
                 let serviceUpdatedAtString = row[12] as? String,
                 let serviceIsDeletedInt64 = row[13] as? Int64,
-                let serviceCreatedAt = parseDateString(serviceCreatedAtString),
-                let serviceUpdatedAt = parseDateString(serviceUpdatedAtString) else {
+                let serviceCreatedAt = DateHelper.parseDateString(serviceCreatedAtString),
+                let serviceUpdatedAt = DateHelper.parseDateString(serviceUpdatedAtString) else {
                 continue
             }
 
@@ -505,10 +502,10 @@ public class VaultStore {
                 let aliasCreatedAtString = row[26] as? String,
                 let aliasUpdatedAtString = row[27] as? String,
                 let aliasIsDeletedInt64 = row[28] as? Int64,
-                let aliasCreatedAt = parseDateString(aliasCreatedAtString),
-                let aliasUpdatedAt = parseDateString(aliasUpdatedAtString),
+               let aliasCreatedAt = DateHelper.parseDateString(aliasCreatedAtString),
+               let aliasUpdatedAt = DateHelper.parseDateString(aliasUpdatedAtString),
                 let aliasBirthDateString = row[24] as? String,
-                let aliasBirthDate = parseDateString(aliasBirthDateString) {
+               let aliasBirthDate = DateHelper.parseDateString(aliasBirthDateString) {
 
                 let aliasIsDeleted = aliasIsDeletedInt64 == 1
 
@@ -532,8 +529,8 @@ public class VaultStore {
             let passwordCreatedAtString = row[16] as? String,
             let passwordUpdatedAtString = row[17] as? String,
             let passwordIsDeletedInt64 = row[18] as? Int64,
-            let passwordCreatedAt = parseDateString(passwordCreatedAtString),
-            let passwordUpdatedAt = parseDateString(passwordUpdatedAtString) {
+            let passwordCreatedAt = DateHelper.parseDateString(passwordCreatedAtString),
+            let passwordUpdatedAt = DateHelper.parseDateString(passwordUpdatedAtString) {
 
                 let passwordIsDeleted = passwordIsDeletedInt64 == 1
 
@@ -566,18 +563,18 @@ public class VaultStore {
         return result
     }
 
-    // Clears cached encryption key and encrypted database to force re-initialization on next access.
+    /// Clears cached encryption key and decrypted database to force re-initialization on next access.
     public func clearCache() {
         print("Clearing cache - removing encryption key and decrypted database from memory")
 
         // Clear the cached encryption key
         encryptionKey = nil
 
-        // Clear the cached encrypted database
-        db = nil
+        // Clear the in-memory (decrypted) database
+        dbConnection = nil
     }
 
-    // Clears cached and saved encryption key and encrypted database to force re-initialization on next access.
+    /// Clears cached and saved encryption key and encrypted database, called during explicit logout.
     public func clearVault() {
         print("Clearing vault - removing all stored data")
 
@@ -615,7 +612,7 @@ public class VaultStore {
      * Execute a SELECT query.
      */
     public func executeQuery(_ query: String, params: [Binding?]) throws -> [[String: Any]] {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -634,7 +631,7 @@ public class VaultStore {
             }
         }
 
-        let statement = try db.prepare(query)
+        let statement = try dbConnection.prepare(query)
         var results: [[String: Any]] = []
 
         for row in try statement.run(params) {
@@ -647,8 +644,6 @@ public class VaultStore {
                     // Convert SQLite blob to base64 string for React Native bridge
                     let binaryData = Data(data.bytes)
                     rowDict[column] = binaryData.base64EncodedString()
-                case let date as Date:
-                    rowDict[column] = date
                 case let number as Int64:
                     rowDict[column] = number
                 case let number as Double:
@@ -671,7 +666,7 @@ public class VaultStore {
      * Execute an update (INSERT, DELETE) query.
      */
     public func executeUpdate(_ query: String, params: [Binding?]) throws -> Int {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
@@ -690,25 +685,25 @@ public class VaultStore {
             }
         }
 
-        let statement = try db.prepare(query)
+        let statement = try dbConnection.prepare(query)
         try statement.run(params)
-        return db.changes
+        return dbConnection.changes
     }
 
     public func beginTransaction() throws {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
-        try db.execute("BEGIN TRANSACTION")
+        try dbConnection.execute("BEGIN TRANSACTION")
     }
 
     public func commitTransaction() throws {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
 
         // First commit the transaction
-        try db.execute("COMMIT")
+        try dbConnection.execute("COMMIT")
 
         // Get the encryption key
         let key = try getEncryptionKey()
@@ -720,17 +715,17 @@ public class VaultStore {
         try Data().write(to: tempDbPath)
 
         // Attach a new empty database file as target
-        try db.attach(.uri(tempDbPath.path, parameters: [.mode(.readWrite)]), as: "target")
+        try dbConnection.attach(.uri(tempDbPath.path, parameters: [.mode(.readWrite)]), as: "target")
 
         // Copy all tables from memory to target file
-        let tables = try db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
-        try db.execute("BEGIN TRANSACTION")
+        let tables = try dbConnection.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        try dbConnection.execute("BEGIN TRANSACTION")
         for table in tables {
             let tableName = table[0] as! String
-            try db.execute("CREATE TABLE target.\(tableName) AS SELECT * FROM main.\(tableName)")
+            try dbConnection.execute("CREATE TABLE target.\(tableName) AS SELECT * FROM main.\(tableName)")
         }
-        try db.execute("COMMIT")
-        try db.execute("DETACH DATABASE target")
+        try dbConnection.execute("COMMIT")
+        try dbConnection.execute("DETACH DATABASE target")
 
         // Read the raw contents of the temporary file
         let rawData = try Data(contentsOf: tempDbPath)
@@ -751,10 +746,10 @@ public class VaultStore {
     }
 
     public func rollbackTransaction() throws {
-        guard let db = db else {
+        guard let dbConnection = dbConnection else {
             throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
-        try db.execute("ROLLBACK")
+        try dbConnection.execute("ROLLBACK")
     }
 
     // MARK: - Auto Lock Timeout Management
@@ -767,55 +762,5 @@ public class VaultStore {
 
     public func getAutoLockTimeout() -> Int {
         return autoLockTimeout
-    }
-
-    private func parseDateString(_ dateString: String) -> Date? {
-        // Static date formatters for performance
-        struct StaticFormatters {
-            static let formatterWithMillis: DateFormatter = {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
-                formatter.locale = Locale(identifier: "en_US_POSIX")
-                formatter.timeZone = TimeZone(secondsFromGMT: 0)
-                return formatter
-            }()
-
-            static let formatterWithoutMillis: DateFormatter = {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                formatter.locale = Locale(identifier: "en_US_POSIX")
-                formatter.timeZone = TimeZone(secondsFromGMT: 0)
-                return formatter
-            }()
-
-            static let isoFormatter: ISO8601DateFormatter = {
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                formatter.timeZone = TimeZone(secondsFromGMT: 0)
-                return formatter
-            }()
-        }
-
-        let cleanedDateString = dateString.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // If ends with 'Z' or contains timezone, attempt ISO8601 parsing
-        if cleanedDateString.contains("Z") || cleanedDateString.contains("+") || cleanedDateString.contains("-") {
-            if let isoDate = StaticFormatters.isoFormatter.date(from: cleanedDateString) {
-                return isoDate
-            }
-        }
-
-        // Try parsing with milliseconds
-        if let dateWithMillis = StaticFormatters.formatterWithMillis.date(from: cleanedDateString) {
-            return dateWithMillis
-        }
-
-        // Try parsing without milliseconds
-        if let dateWithoutMillis = StaticFormatters.formatterWithoutMillis.date(from: cleanedDateString) {
-            return dateWithoutMillis
-        }
-
-        // If parsing still fails, return nil
-        return nil
     }
 }
