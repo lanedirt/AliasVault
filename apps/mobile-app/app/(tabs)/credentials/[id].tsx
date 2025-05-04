@@ -10,11 +10,11 @@ import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
-import { LoginCredentials } from '@/components/credentialDetails/LoginCredentials';
-import { AliasDetails } from '@/components/credentialDetails/AliasDetails';
-import { NotesSection } from '@/components/credentialDetails/NotesSection';
-import { EmailPreview } from '@/components/credentialDetails/EmailPreview';
-import { TotpSection } from '@/components/credentialDetails/TotpSection';
+import { LoginCredentials } from '@/components/credentials/details/LoginCredentials';
+import { AliasDetails } from '@/components/credentials/details/AliasDetails';
+import { NotesSection } from '@/components/credentials/details/NotesSection';
+import { EmailPreview } from '@/components/credentials/details/EmailPreview';
+import { TotpSection } from '@/components/credentials/details/TotpSection';
 import { useColors } from '@/hooks/useColorScheme';
 import emitter from '@/utils/EventEmitter';
 
@@ -107,10 +107,7 @@ export default function CredentialDetailsScreen() : React.ReactNode {
   }
 
   return (
-    <ThemedScrollView style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      scrollIndicatorInsets={{ bottom: 40 }}
-    >
+    <ThemedScrollView>
       <ThemedView style={styles.header}>
         <CredentialIcon logo={credential.Logo} style={styles.logo} />
         <View style={styles.headerText}>
@@ -136,12 +133,6 @@ export default function CredentialDetailsScreen() : React.ReactNode {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 40,
-  },
   header: {
     alignItems: 'center',
     flexDirection: 'row',

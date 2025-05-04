@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 
@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Auto-lock screen.
@@ -65,12 +66,6 @@ export default function AutoLockScreen() : React.ReactNode {
       flex: 1,
       fontSize: 16,
     },
-    scrollContent: {
-      paddingBottom: 40,
-    },
-    scrollView: {
-      flex: 1,
-    },
     selectedIcon: {
       color: colors.primary,
       marginLeft: 8,
@@ -79,10 +74,7 @@ export default function AutoLockScreen() : React.ReactNode {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
             Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
@@ -103,7 +95,7 @@ export default function AutoLockScreen() : React.ReactNode {
             )}
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </ThemedScrollView>
     </ThemedView>
   );
 }

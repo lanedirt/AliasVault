@@ -26,7 +26,7 @@ export function useVaultMutate() : {
   syncStatus: string;
   } {
   const [isLoading, setIsLoading] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
+  const [syncStatus, setSyncStatus] = useState('Syncing vault');
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -39,7 +39,7 @@ export function useVaultMutate() : {
     operation: () => Promise<void>,
     options: VaultMutationOptions
   ) : Promise<void> => {
-    setSyncStatus('Saving changes to vault...');
+    setSyncStatus('Saving changes to vault');
 
     // Execute the provided operation (e.g. create/update/delete credential)
     await operation();
@@ -53,7 +53,7 @@ export function useVaultMutate() : {
       throw new Error('Failed to get encrypted database');
     }
 
-    setSyncStatus('Uploading vault to server...');
+    setSyncStatus('Uploading vault to server');
 
     // Get email addresses from credentials
     const credentials = await dbContext.sqliteClient!.getAllCredentials();
@@ -103,7 +103,7 @@ export function useVaultMutate() : {
   ) => {
     try {
       setIsLoading(true);
-      setSyncStatus('Checking for vault updates...');
+      setSyncStatus('Checking for vault updates');
 
       await syncVault({
         /**

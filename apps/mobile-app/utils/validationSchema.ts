@@ -12,16 +12,18 @@ export const credentialSchema = Yup.object().shape({
     LastName: Yup.string().nullable().notRequired(),
     NickName: Yup.string().nullable().notRequired(),
     BirthDate: Yup.string()
-    .nullable()
-    .notRequired()
-    .test(
-      'is-valid-date-format',
-      'Date must be in YYYY-MM-DD format',
-      value => {
-        if (!value) return true; // allow empty
-        return /^\d{4}-\d{2}-\d{2}$/.test(value);
-      },
-    ),
+      .nullable()
+      .notRequired()
+      .test(
+        'is-valid-date-format',
+        'Date must be in YYYY-MM-DD format',
+        value => {
+          if (!value) {
+            return true;
+          } // allow empty
+          return /^\d{4}-\d{2}-\d{2}$/.test(value);
+        },
+      ),
     Gender: Yup.string().nullable().notRequired(),
     Email: Yup.string().email('Invalid email format').nullable().notRequired()
   }),

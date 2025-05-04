@@ -194,7 +194,6 @@ export class EncryptionUtility {
       const plaintextBuffer = await crypto.subtle.decrypt(
         {
           name: "RSA-OAEP",
-          hash: "SHA-256",
         },
         privateKeyObj,
         cipherBuffer
@@ -203,7 +202,7 @@ export class EncryptionUtility {
       return new Uint8Array(plaintextBuffer);
     } catch (error) {
       console.error('RSA decryption failed:', error);
-      throw new Error(`Failed to decrypt: ${error.message}`);
+      throw new Error(`Failed to decrypt: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

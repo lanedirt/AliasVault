@@ -1,10 +1,11 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * iOS autofill screen.
@@ -71,12 +72,6 @@ export default function IosAutofillScreen() : React.ReactNode {
       fontWeight: '600',
       marginBottom: 8,
     },
-    scrollContent: {
-      paddingBottom: 40,
-    },
-    scrollView: {
-      flex: 1,
-    },
     secondaryButton: {
       alignItems: 'center',
       backgroundColor: colors.accentBackground,
@@ -99,10 +94,7 @@ export default function IosAutofillScreen() : React.ReactNode {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
             You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
@@ -150,7 +142,7 @@ export default function IosAutofillScreen() : React.ReactNode {
             Note: You&apos;ll need to authenticate with Face ID/Touch ID or your device passcode when using autofill.
           </ThemedText>
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     </ThemedView>
   );
 }

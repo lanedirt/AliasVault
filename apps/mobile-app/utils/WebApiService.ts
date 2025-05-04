@@ -1,7 +1,8 @@
-import { AppInfo } from "./AppInfo";
-import { StatusResponse } from "./types/webapi/StatusResponse";
-import { VaultResponse } from "./types/webapi/VaultResponse";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { AppInfo } from '@/utils/AppInfo';
+import { StatusResponse } from '@/utils/types/webapi/StatusResponse';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 
 type RequestInit = globalThis.RequestInit;
 

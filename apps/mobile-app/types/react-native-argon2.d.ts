@@ -1,4 +1,5 @@
 declare module 'react-native-argon2' {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   interface Argon2Options {
     iterations?: number;
     memory?: number;
@@ -7,6 +8,7 @@ declare module 'react-native-argon2' {
     mode?: 'argon2i' | 'argon2d' | 'argon2id';
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   interface Argon2Result {
     encodedHash: string;
     rawHash: string;

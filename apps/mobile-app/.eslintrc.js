@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  ignorePatterns: ["dist/**", "node_modules/**", "utils/shared/**"],
+  ignorePatterns: ["dist/**", "node_modules/**", "utils/shared/**", "expo-env.d.ts", "*.js"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaFeatures: { jsx: true },

@@ -63,7 +63,12 @@ export function CredentialIcon({ logo, style }: CredentialIconProps) : React.Rea
         height={Number(style?.height ?? styles.logo.height)}
         style={{
           borderRadius: styles.logo.borderRadius,
-          ...(style as ImageStyle),
+          width: Number(style?.width ?? styles.logo.width),
+          height: Number(style?.height ?? styles.logo.height),
+          marginLeft: Number(style?.marginLeft ?? 0),
+          marginRight: Number(style?.marginRight ?? 0),
+          marginTop: Number(style?.marginTop ?? 0),
+          marginBottom: Number(style?.marginBottom ?? 0),
         }}
       />
     );
