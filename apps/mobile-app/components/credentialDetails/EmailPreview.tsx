@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { router } from 'expo-router';
+
 import { useWebApi } from '@/context/WebApiContext';
 import { useDb } from '@/context/DbContext';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import { ThemedText } from '../ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
-import { router } from 'expo-router';
-import { ThemedView } from '../ThemedView';
 import { AppInfo } from '@/utils/AppInfo';
 import { PulseDot } from '@/components/PulseDot';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 
 type EmailPreviewProps = {
   email: string | undefined;
 };
 
-export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
+/**
+ * Email preview component.
+ */
+export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.ReactNode => {
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
@@ -25,12 +29,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   const dbContext = useDb();
   const colors = useColors();
 
-  // Sanity check: if no email is provided, don't render anything.
-  if (!email) {
-    return null;
-  }
-
-  const isPublicDomain = async (emailAddress: string): Promise<boolean> => {
+  /**
+   * Check if the email is a public domain.
+   */
+  const isPublicDomain = useCallback(async (emailAddress: string): Promise<boolean> => {
     // Get public domains from stored metadata
     const metadata = await dbContext?.sqliteClient?.getVaultMetadata();
     if (!metadata) {
@@ -38,11 +40,18 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     }
 
     return metadata.publicEmailDomains.includes(emailAddress.split('@')[1]);
-  };
+  }, [dbContext]);
 
   useEffect(() => {
-    const loadEmails = async () => {
+    /**
+     * Load the emails.
+     */
+    const loadEmails = async () : Promise<void> => {
       try {
+        if (!email) {
+          return;
+        }
+
         const isPublic = await isPublicDomain(email);
         setIsSpamOk(isPublic);
 
@@ -70,7 +79,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           setEmails(latestMails);
         } else {
           // For private domains, use existing encrypted email logic
-          if (!dbContext?.sqliteClient) return;
+          if (!dbContext?.sqliteClient) {
+            return;
+          }
 
           // Get all encryption keys
           const encryptionKeys = await dbContext.sqliteClient.getAllEncryptionKeys();
@@ -113,47 +124,52 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     loadEmails();
     // Set up auto-refresh interval
     const interval = setInterval(loadEmails, 2000);
-    return () => clearInterval(interval);
-  }, [email, loading, webApi, dbContext]);
+    return () : void => clearInterval(interval);
+  }, [email, loading, webApi, dbContext, isPublicDomain]);
 
   const styles = StyleSheet.create({
-    section: {
-      padding: 16,
-      paddingBottom: 0,
+    date: {
+      color: colors.textMuted,
+      fontSize: 12,
+      opacity: 0.7,
+    },
+    emailItem: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginBottom: 12,
+      padding: 12,
     },
     placeholderText: {
       color: colors.textMuted,
       marginBottom: 8,
     },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: colors.text,
-    },
-    emailItem: {
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 12,
-      borderWidth: 1,
-      borderColor: colors.accentBorder,
-      backgroundColor: colors.accentBackground,
+    section: {
+      padding: 16,
+      paddingBottom: 0,
     },
     subject: {
-      fontSize: 16,
       color: colors.text,
+      fontSize: 16,
       fontWeight: 'bold',
     },
-    date: {
-      fontSize: 12,
-      opacity: 0.7,
-      color: colors.textMuted,
+    title: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    titleContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 8,
     },
   });
+
+  // Sanity check: if no email is provided, don't render anything.
+  if (!email) {
+    return null;
+  }
 
   if (loading) {
     return (

@@ -4,12 +4,15 @@ import { Credential } from '@/utils/types/Credential';
 import FormInputCopyToClipboard from '@/components/FormInputCopyToClipboard';
 import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
 
-interface AliasDetailsProps {
+type AliasDetailsProps = {
   credential: Credential;
-}
+};
 
-export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) => {
-  const hasName = Boolean(credential.Alias?.FirstName?.trim() || credential.Alias?.LastName?.trim());
+/**
+ * Alias details component.
+ */
+export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) : React.ReactNode => {
+  const hasName = Boolean(credential.Alias?.FirstName?.trim() ?? credential.Alias?.LastName?.trim());
   const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
 
   if (!hasName && !credential.Alias?.NickName && !IdentityHelperUtils.isValidBirthDate(credential.Alias?.BirthDate)) {

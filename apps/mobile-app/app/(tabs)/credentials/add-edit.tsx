@@ -1,6 +1,11 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Keyboard } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Alert, Keyboard } from 'react-native';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
+import { Resolver, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
@@ -8,8 +13,6 @@ import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { Credential } from '@/utils/types/Credential';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Toast from 'react-native-toast-message';
 import emitter from '@/utils/EventEmitter';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { AliasVaultToast } from '@/components/Toast';
@@ -17,14 +20,15 @@ import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/ValidatedFormField';
-import { Resolver, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { credentialSchema } from '@/utils/validationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
 type CredentialMode = 'random' | 'manual';
 
-export default function AddEditCredentialScreen() {
+/**
+ * Add or edit a credential screen.
+ */
+export default function AddEditCredentialScreen() : React.ReactNode {
   const { id, serviceUrl } = useLocalSearchParams<{ id: string, serviceUrl?: string }>();
   const router = useRouter();
   const colors = useColors();
@@ -36,7 +40,7 @@ export default function AddEditCredentialScreen() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
 
-  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<Credential>({
+  const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
     defaultValues: {
       Id: "",
@@ -62,30 +66,9 @@ export default function AddEditCredentialScreen() {
   const isEditMode = id !== undefined && id.length > 0;
 
   /**
-   * On mount, load an existing credential if we're in edit mode, or extract the service name from the service URL
-   * if we're in add mode and the service URL is provided (by native autofill component).
-   */
-  useEffect(() => {
-    if (isEditMode) {
-      loadExistingCredential();
-    } else if (serviceUrl) {
-      const decodedUrl = decodeURIComponent(serviceUrl);
-      const serviceName = extractServiceNameFromUrl(decodedUrl);
-      setValue('ServiceUrl', decodedUrl);
-      setValue('ServiceName', serviceName);
-
-      // Focus and select the service name field
-      setTimeout(() => {
-        serviceNameRef.current?.focus();
-        serviceNameRef.current?.selectAll();
-      }, 100);
-    }
-  }, [id, isEditMode, serviceUrl]);
-
-  /**
    * Load an existing credential from the database in edit mode.
    */
-  const loadExistingCredential = async () => {
+  const loadExistingCredential = useCallback(async () : Promise<void> => {
     try {
       const existingCredential = await dbContext.sqliteClient!.getCredentialById(id);
       if (existingCredential) {
@@ -105,13 +88,99 @@ export default function AddEditCredentialScreen() {
         text2: 'Please try again'
       });
     }
-  };
+  }, [id, dbContext.sqliteClient, setValue]);
+
+  /**
+   * On mount, load an existing credential if we're in edit mode, or extract the service name from the service URL
+   * if we're in add mode and the service URL is provided (by native autofill component).
+   */
+  useEffect(() => {
+    if (isEditMode) {
+      loadExistingCredential();
+    } else if (serviceUrl) {
+      const decodedUrl = decodeURIComponent(serviceUrl);
+      const serviceName = extractServiceNameFromUrl(decodedUrl);
+      setValue('ServiceUrl', decodedUrl);
+      setValue('ServiceName', serviceName);
+
+      // Focus and select the service name field
+      setTimeout(() => {
+        serviceNameRef.current?.focus();
+        serviceNameRef.current?.selectAll();
+      }, 100);
+    }
+  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue]);
+
+  /**
+   * Initialize the identity and password generators with settings from user's vault.
+   * @returns {identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator}
+   */
+  const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator }> => {
+    // Get default identity language from database
+    const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
+
+    // Initialize identity generator based on language
+    let identityGenerator: BaseIdentityGenerator;
+    switch (identityLanguage) {
+      case 'nl':
+        identityGenerator = new IdentityGeneratorNl();
+        break;
+      case 'en':
+      default:
+        identityGenerator = new IdentityGeneratorEn();
+        break;
+    }
+
+    // Get password settings from database
+    const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
+
+    // Initialize password generator with settings
+    const passwordGenerator = new PasswordGenerator(passwordSettings);
+
+    return { identityGenerator, passwordGenerator };
+  }, [dbContext.sqliteClient]);
+
+  /**
+   * Generate a random alias and password.
+   */
+  const generateRandomAlias = useCallback(async (): Promise<void> => {
+    const { identityGenerator, passwordGenerator } = await initializeGenerators();
+
+    const identity = await identityGenerator.generateRandomIdentity();
+    const password = passwordGenerator.generateRandomPassword();
+    const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
+    const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
+
+    setValue('Alias.Email', email);
+    setValue('Alias.FirstName', identity.firstName);
+    setValue('Alias.LastName', identity.lastName);
+    setValue('Alias.NickName', identity.nickName);
+    setValue('Alias.Gender', identity.gender);
+    setValue('Alias.BirthDate', IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()));
+
+    // In edit mode, preserve existing username and password if they exist
+    if (isEditMode && watch('Username')) {
+      // Keep the existing username in edit mode, so don't do anything here.
+    } else {
+      // Use the newly generated username
+      setValue('Username', identity.nickName);
+    }
+
+    if (isEditMode && watch('Password')) {
+      // Keep the existing password in edit mode, so don't do anything here.
+    } else {
+      // Use the newly generated password
+      setValue('Password', password);
+      // Make password visible when newly generated
+      setIsPasswordVisible(true);
+    }
+  }, [isEditMode, watch, setValue, setIsPasswordVisible, initializeGenerators, dbContext.sqliteClient]);
 
   /**
    * Submit the form for either creating or updating a credential.
    * @param {Credential} data - The form data.
    */
-  const onSubmit = async (data: Credential) => {
+  const onSubmit = useCallback(async (data: Credential) : Promise<void> => {
     Keyboard.dismiss();
 
     // If we're creating a new credential and mode is random, generate random values
@@ -120,19 +189,19 @@ export default function AddEditCredentialScreen() {
     }
 
     // Assemble the credential to save
-    let credentialToSave: Credential = {
+    const credentialToSave: Credential = {
       Id: isEditMode ? id : '',
-      Username: watch('Username'),
-      Password: watch('Password'),
-      ServiceName: watch('ServiceName'),
-      ServiceUrl: watch('ServiceUrl'),
+      Username: data.Username,
+      Password: data.Password,
+      ServiceName: data.ServiceName,
+      ServiceUrl: data.ServiceUrl,
       Alias: {
-        FirstName: watch('Alias.FirstName'),
-        LastName: watch('Alias.LastName'),
-        NickName: watch('Alias.NickName'),
-        BirthDate: watch('Alias.BirthDate'),
-        Gender: watch('Alias.Gender'),
-        Email: watch('Alias.Email')
+        FirstName: data.Alias.FirstName,
+        LastName: data.Alias.LastName,
+        NickName: data.Alias.NickName,
+        BirthDate: data.Alias.BirthDate,
+        Gender: data.Alias.Gender,
+        Email: data.Alias.Email
       }
     }
 
@@ -152,8 +221,8 @@ export default function AddEditCredentialScreen() {
           const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image as string, 'base64'));
           credentialToSave.Logo = decodedImage;
         }
-      } catch (error) {
-        console.log('Favicon extraction failed or timed out:', error);
+      } catch {
+        // Favicon extraction failed or timed out, this is not a critical error so we can ignore it.
       }
     }
 
@@ -190,8 +259,11 @@ export default function AddEditCredentialScreen() {
         });
       }, 200);
     }
-  };
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi]);
 
+  /**
+   * Extract the service name from the service URL.
+   */
   function extractServiceNameFromUrl(url: string): string {
     try {
       const urlObj = new URL(url);
@@ -212,100 +284,16 @@ export default function AddEditCredentialScreen() {
       // For domains like app.example.com, return Example.com
       const mainDomain = hostParts.slice(-2).join('.');
       return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
-    } catch (e) {
+    } catch {
       // If URL parsing fails, return the original URL
       return url;
     }
   }
 
-  // Set header buttons
-  useEffect(() => {
-    navigation.setOptions({
-      title: isEditMode ? 'Edit Credential' : 'Add Credential',
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ padding: 10, paddingLeft: 0 }}
-        >
-          <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity
-            onPress={handleSubmit(onSubmit)}
-            style={{ padding: 10, paddingRight: 0 }}
-          >
-            <MaterialIcons name="save" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-      ),
-    });
-  }, [navigation, mode]);
-
   /**
-   * Initialize the identity and password generators with settings from user's vault.
-   * @returns {identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator}
+   * Generate a random username.
    */
-  const initializeGenerators = async () => {
-    // Get default identity language from database
-    const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
-
-    // Initialize identity generator based on language
-    let identityGenerator: BaseIdentityGenerator;
-    switch (identityLanguage) {
-      case 'nl':
-        identityGenerator = new IdentityGeneratorNl();
-        break;
-      case 'en':
-      default:
-        identityGenerator = new IdentityGeneratorEn();
-        break;
-    }
-
-    // Get password settings from database
-    const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
-
-    // Initialize password generator with settings
-    const passwordGenerator = new PasswordGenerator(passwordSettings);
-
-    return { identityGenerator, passwordGenerator };
-  };
-
-  const generateRandomAlias = async (): Promise<void> => {
-    const { identityGenerator, passwordGenerator } = await initializeGenerators();
-
-    const identity = await identityGenerator.generateRandomIdentity();
-    const password = passwordGenerator.generateRandomPassword();
-    const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
-    const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
-
-    setValue('Alias.Email', email);
-    setValue('Alias.FirstName', identity.firstName);
-    setValue('Alias.LastName', identity.lastName);
-    setValue('Alias.NickName', identity.nickName);
-    setValue('Alias.Gender', identity.gender);
-    setValue('Alias.BirthDate', IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()));
-
-    // In edit mode, preserve existing username and password if they exist
-    if (isEditMode && watch('Username')) {
-      // Keep the existing username in edit mode, so don't do anything here.
-    } else {
-      // Use the newly generated username
-      setValue('Username', identity.nickName);
-    }
-
-    if (isEditMode && watch('Password')) {
-      // Keep the existing password in edit mode, so don't do anything here.
-    } else {
-      // Use the newly generated password
-      setValue('Password', password);
-      // Make password visible when newly generated
-      setIsPasswordVisible(true);
-    }
-  };
-
-  const generateRandomUsername = async () => {
+  const generateRandomUsername = async () : Promise<void> => {
     try {
       const { identityGenerator } = await initializeGenerators();
       const identity = await identityGenerator.generateRandomIdentity();
@@ -320,7 +308,10 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const generateRandomPassword = async () => {
+  /**
+   * Generate a random password.
+   */
+  const generateRandomPassword = async () : Promise<void> => {
     try {
       const { passwordGenerator } = await initializeGenerators();
       const password = passwordGenerator.generateRandomPassword();
@@ -336,7 +327,10 @@ export default function AddEditCredentialScreen() {
     }
   };
 
-  const handleDelete = async () => {
+  /**
+   * Handle the delete button press.
+   */
+  const handleDelete = async () : Promise<void> => {
     if (!id) {
       return;
     }
@@ -354,12 +348,12 @@ export default function AddEditCredentialScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: async () => {
-
+          /**
+           * Delete the credential.
+           */
+          onPress: async () : Promise<void> => {
             await executeVaultMutation(async () => {
-              console.log('Starting delete operation');
               await dbContext.sqliteClient!.deleteCredentialById(id);
-              console.log('Credential deleted successfully');
             });
 
             // Show success toast
@@ -371,8 +365,10 @@ export default function AddEditCredentialScreen() {
               });
             }, 200);
 
-            // Hard navigate back to the credentials list as the credential that was
-            // shown in the previous screen is now deleted.
+            /*
+             * Hard navigate back to the credentials list as the credential that was
+             * shown in the previous screen is now deleted.
+             */
             router.replace('/credentials');
           }
         }
@@ -386,22 +382,50 @@ export default function AddEditCredentialScreen() {
     },
     content: {
       flex: 1,
+      marginTop: 36,
       padding: 16,
       paddingTop: 0,
-      marginTop: 36,
     },
-    modeSelector: {
-      flexDirection: 'row',
-      marginBottom: 16,
-      backgroundColor: colors.accentBackground,
+    deleteButton: {
+      alignItems: 'center',
+      backgroundColor: colors.errorBackground,
+      borderColor: colors.errorBorder,
       borderRadius: 8,
-      padding: 4,
+      borderWidth: 1,
+      padding: 10,
+    },
+    deleteButtonText: {
+      color: colors.errorText,
+      fontWeight: '600',
+    },
+    generateButton: {
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      flexDirection: 'row',
+      marginBottom: 8,
+      marginTop: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    generateButtonText: {
+      color: colors.primarySurfaceText,
+      fontWeight: '600',
+      marginLeft: 6,
+    },
+    headerLeftButton: {
+      padding: 10,
+      paddingLeft: 0,
+    },
+    headerRightButton: {
+      padding: 10,
+      paddingRight: 0,
     },
     modeButton: {
-      flex: 1,
-      padding: 12,
       alignItems: 'center',
       borderRadius: 6,
+      flex: 1,
+      padding: 12,
     },
     modeButtonActive: {
       backgroundColor: colors.primary,
@@ -411,48 +435,57 @@ export default function AddEditCredentialScreen() {
       fontWeight: '600',
     },
     modeButtonTextActive: {
-      color: '#fff',
+      color: colors.primarySurfaceText,
     },
-    section: {
-      marginBottom: 24,
+    modeSelector: {
       backgroundColor: colors.accentBackground,
       borderRadius: 8,
+      flexDirection: 'row',
+      marginBottom: 16,
+      padding: 4,
+    },
+    section: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      marginBottom: 24,
       padding: 16,
     },
     sectionTitle: {
+      color: colors.text,
       fontSize: 18,
       fontWeight: '600',
       marginBottom: 16,
-      color: colors.text,
-    },
-    generateButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.primary,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      marginBottom: 8,
-      marginTop: 16,
-    },
-    generateButtonText: {
-      color: '#fff',
-      fontWeight: '600',
-      marginLeft: 6,
-    },
-    deleteButton: {
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      backgroundColor: colors.errorBackground,
-      borderWidth: 1,
-      borderColor: colors.errorBorder,
-    },
-    deleteButtonText: {
-      color: colors.errorText,
-      fontWeight: '600',
     },
   });
+
+  // Set header buttons
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEditMode ? 'Edit Credential' : 'Add Credential',
+      /**
+       * Header left button.
+       */
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.headerLeftButton}
+        >
+          <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
+        </TouchableOpacity>
+      ),
+      /**
+       * Header right button.
+       */
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleSubmit(onSubmit)}
+          style={styles.headerRightButton}
+        >
+          <MaterialIcons name="save" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerRightButton]);
 
   return (
     <>
@@ -500,100 +533,103 @@ export default function AddEditCredentialScreen() {
             </View>
             {(mode === 'manual' || isEditMode) && (
               <>
-              <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
+                <View style={styles.section}>
+                  <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
 
-                <ValidatedFormField
-                  control={control}
-                  name="Username"
-                  label="Username"
-                  buttons={[
-                    {
-                      icon: "refresh",
-                      onPress: generateRandomUsername
-                    }
-                  ]}
-                />
-                <ValidatedFormField
-                  control={control}
-                  name="Password"
-                  label="Password"
-                  secureTextEntry={!isPasswordVisible}
-                  buttons={[
-                    {
-                      icon: isPasswordVisible ? "visibility-off" : "visibility",
-                      onPress: () => setIsPasswordVisible(!isPasswordVisible)
-                    },
-                    {
-                      icon: "refresh",
-                      onPress: generateRandomPassword
-                    }
-                  ]}
-                />
-                <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
-                  <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
-                  <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
-                </TouchableOpacity>
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.Email"
-                  label="Email"
-                />
-              </View>
+                  <ValidatedFormField
+                    control={control}
+                    name="Username"
+                    label="Username"
+                    buttons={[
+                      {
+                        icon: "refresh",
+                        onPress: generateRandomUsername
+                      }
+                    ]}
+                  />
+                  <ValidatedFormField
+                    control={control}
+                    name="Password"
+                    label="Password"
+                    secureTextEntry={!isPasswordVisible}
+                    buttons={[
+                      {
+                        icon: isPasswordVisible ? "visibility-off" : "visibility",
+                        /**
+                         * Toggle the visibility of the password.
+                         */
+                        onPress: () => setIsPasswordVisible(!isPasswordVisible)
+                      },
+                      {
+                        icon: "refresh",
+                        onPress: generateRandomPassword
+                      }
+                    ]}
+                  />
+                  <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
+                    <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
+                    <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
+                  </TouchableOpacity>
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.Email"
+                    label="Email"
+                  />
+                </View>
 
-              <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.FirstName"
-                  label="First Name"
-                />
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.LastName"
-                  label="Last Name"
-                />
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.NickName"
-                  label="Nick Name"
-                />
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.Gender"
-                  label="Gender"
-                />
-                <ValidatedFormField
-                  control={control}
-                  name="Alias.BirthDate"
-                  label="Birth Date"
-                  placeholder="YYYY-MM-DD"
-                />
-              </View>
+                <View style={styles.section}>
+                  <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.FirstName"
+                    label="First Name"
+                  />
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.LastName"
+                    label="Last Name"
+                  />
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.NickName"
+                    label="Nick Name"
+                  />
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.Gender"
+                    label="Gender"
+                  />
+                  <ValidatedFormField
+                    control={control}
+                    name="Alias.BirthDate"
+                    label="Birth Date"
+                    placeholder="YYYY-MM-DD"
+                  />
+                </View>
 
-              <View style={styles.section}>
-                <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
+                <View style={styles.section}>
+                  <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
 
-                <ValidatedFormField
-                  control={control}
-                  name="Notes"
-                  label="Notes"
-                  multiline={true}
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-                {/* TODO: Add TOTP management */}
-              </View>
+                  <ValidatedFormField
+                    control={control}
+                    name="Notes"
+                    label="Notes"
+                    multiline={true}
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                  />
+                  {/* TODO: Add TOTP management */}
+                </View>
 
-              {isEditMode && (
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={handleDelete}
-                >
-                  <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
-                </TouchableOpacity>
-              )}
-            </>
+                {isEditMode && (
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={handleDelete}
+                  >
+                    <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
+                  </TouchableOpacity>
+                )}
+              </>
             )}
           </ScrollView>
         </ThemedView>

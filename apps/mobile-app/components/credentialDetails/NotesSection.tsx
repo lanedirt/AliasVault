@@ -1,19 +1,20 @@
 import { View, Text, useColorScheme, StyleSheet, Linking, Pressable } from 'react-native';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Credential } from '@/utils/types/Credential';
 
-interface NotesSectionProps {
+type NotesSectionProps = {
   credential: Credential;
-}
+};
 
 /**
  * Split text into parts, separating URLs from regular text to make them clickable.
  */
-const splitTextAndUrls = (text: string): Array<{ type: 'text' | 'url', content: string, url?: string }> => {
+const splitTextAndUrls = (text: string): { type: 'text' | 'url', content: string, url?: string }[] => {
   const urlPattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/g;
 
-  const parts: Array<{ type: 'text' | 'url', content: string, url?: string }> = [];
+  const parts: { type: 'text' | 'url', content: string, url?: string }[] = [];
   let lastIndex = 0;
   let match;
 
@@ -55,7 +56,10 @@ const splitTextAndUrls = (text: string): Array<{ type: 'text' | 'url', content: 
   return parts;
 };
 
-export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) => {
+/**
+ * Notes section component.
+ */
+export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : React.ReactNode => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -65,7 +69,10 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) => {
 
   const parts = splitTextAndUrls(credential.Notes);
 
-  const handleLinkPress = (url: string) => {
+  /**
+   * Handle the link press.
+   */
+  const handleLinkPress = (url: string) : void => {
     Linking.openURL(url);
   };
 
@@ -103,21 +110,21 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) => {
 };
 
 const styles = StyleSheet.create({
-  section: {
-    padding: 16,
-    paddingBottom: 8,
-    gap: 8,
-  },
-  notesContainer: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
+  link: {
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
   notes: {
     fontSize: 14,
   },
-  link: {
-    fontSize: 14,
-    textDecorationLine: 'underline',
+  notesContainer: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
+  },
+  section: {
+    gap: 8,
+    padding: 16,
+    paddingBottom: 8,
   },
 });

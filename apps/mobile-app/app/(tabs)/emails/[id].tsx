@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
+import { WebView } from 'react-native-webview';
+import * as FileSystem from 'expo-file-system';
+import { Ionicons } from '@expo/vector-icons';
+
 import { Email } from '@/utils/types/webapi/Email';
 import { Credential } from '@/utils/types/Credential';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { ThemedText } from '@/components/ThemedText';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import WebView from 'react-native-webview';
-import * as FileSystem from 'expo-file-system';
-import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import emitter from '@/utils/EventEmitter';
 
-export default function EmailDetailsScreen() {
+/**
+ * Email details screen.
+ */
+export default function EmailDetailsScreen() : React.ReactNode {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const navigation = useNavigation();
@@ -29,37 +33,10 @@ export default function EmailDetailsScreen() {
   const isDarkMode = useColorScheme() === 'dark';
   const [associatedCredential, setAssociatedCredential] = useState<Credential | null>(null);
 
-  useEffect(() => {
-    loadEmail();
-  }, [id]);
-
-  // Set navigation options
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity
-            onPress={() => setHtmlView(!isHtmlView)}
-            style={{ padding: 10, paddingRight: 0 }}
-          >
-            <Ionicons
-              name={isHtmlView ? 'text-outline' : 'document-outline'}
-              size={22}
-              color="#FFA500"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleDelete}
-            style={{ padding: 10, paddingRight: 0 }}
-          >
-            <Ionicons name="trash-outline" size={22} color="#FF0000" />
-          </TouchableOpacity>
-        </View>
-      ),
-    });
-  }, [isHtmlView, navigation]);
-
-  const loadEmail = async () => {
+  /**
+   * Load the email.
+   */
+  const loadEmail = useCallback(async () : Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -93,9 +70,16 @@ export default function EmailDetailsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dbContext.sqliteClient, id, webApi]);
 
-  const handleDelete = async () => {
+  useEffect(() => {
+    loadEmail();
+  }, [id, loadEmail]);
+
+  /**
+   * Handle the delete button press.
+   */
+  const handleDelete = useCallback(async () : Promise<void> => {
     Alert.alert(
       'Delete Email',
       'Are you sure you want to delete this email? This action is permanent and cannot be undone.',
@@ -107,7 +91,10 @@ export default function EmailDetailsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
+          /**
+           * Handle the delete button press.
+           */
+          onPress: async () : Promise<void> => {
             try {
               // Delete the email from the server.
               await webApi.delete(`Email/${id}`);
@@ -124,9 +111,12 @@ export default function EmailDetailsScreen() {
         },
       ]
     );
-  };
+  }, [id, router, webApi]);
 
-  const handleDownloadAttachment = async (attachment: Email['attachments'][0]) => {
+  /**
+   * Handle the download attachment button press.
+   */
+  const handleDownloadAttachment = async (attachment: Email['attachments'][0]) : Promise<void> => {
     try {
       const base64EncryptedAttachment = await webApi.downloadBlobAndConvertToBase64(
         `Email/${id}/attachments/${attachment.id}`
@@ -166,108 +156,134 @@ export default function EmailDetailsScreen() {
     }
   };
 
-  const handleOpenCredential = () => {
+  /**
+   * Handle the open credential button press.
+   */
+  const handleOpenCredential = () : void => {
     if (associatedCredential) {
       router.push(`/(tabs)/credentials/${associatedCredential.Id}`);
     }
   };
 
   const styles = StyleSheet.create({
+    attachment: {
+      alignItems: 'center',
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      flexDirection: 'row',
+      marginBottom: 8,
+      padding: 12,
+    },
+    attachmentName: {
+      color: colors.textMuted,
+      fontSize: 14,
+      marginLeft: 8,
+    },
+    attachments: {
+      borderTopColor: colors.accentBorder,
+      borderTopWidth: 1,
+      padding: 16,
+    },
+    attachmentsTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 12,
+    },
+    centerContainer: {
+      alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+    },
     container: {
       flex: 1,
     },
-    viewLight: {
-      backgroundColor: colors.background,
+    divider: {
+      backgroundColor: colors.accentBorder,
+      height: 1,
+      marginVertical: 2,
     },
-    viewDark: {
-      backgroundColor: colors.background,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
+    emptyText: {
+      color: colors.textMuted,
+      opacity: 0.7,
+      textAlign: 'center',
     },
     errorText: {
       color: colors.errorBackground,
       textAlign: 'center',
     },
-    emptyText: {
-      textAlign: 'center',
-      opacity: 0.7,
-      color: colors.textMuted,
+    headerRightButton: {
+      padding: 10,
+      paddingRight: 0,
     },
-    topBox: {
-      backgroundColor: colors.background,
+    headerRightContainer: {
       flexDirection: 'row',
-      alignSelf: 'flex-start',
-      padding: 2,
-    },
-    subjectContainer: {
-      paddingBottom: 8,
-      paddingTop: 8,
-      paddingLeft: 5,
-      width: '90%',
-    },
-    metadataIcon: {
-      width: 30,
-      paddingTop: 6,
     },
     metadataContainer: {
       padding: 2,
+    },
+    metadataCredential: {
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    metadataCredentialIcon: {
+      marginRight: 4,
+    },
+    metadataHeading: {
+      color: colors.text,
+      fontSize: 13,
+      fontWeight: 'bold',
+      marginBottom: 0,
+      marginTop: 0,
+      paddingBottom: 0,
+      paddingTop: 0,
+    },
+    metadataIcon: {
+      paddingTop: 6,
+      width: 30,
+    },
+    metadataLabel: {
+      paddingBottom: 4,
+      paddingLeft: 5,
+      paddingTop: 4,
+      width: 60,
     },
     metadataRow: {
       flexDirection: 'row',
       justifyContent: 'flex-start',
       padding: 2,
     },
-    metadataLabel: {
-      paddingBottom: 4,
-      paddingTop: 4,
-      paddingLeft: 5,
-      width: 60,
+    metadataText: {
+      color: colors.text,
+      fontSize: 13,
+      marginBottom: 0,
+      marginTop: 0,
+      paddingBottom: 0,
+      paddingTop: 0,
     },
     metadataValue: {
+      flex: 1,
       paddingBottom: 4,
-      paddingTop: 4,
       paddingLeft: 5,
-      flex: 1,
-    },
-    metadataHeading: {
-      fontWeight: 'bold',
-      marginTop: 0,
-      paddingTop: 0,
-      marginBottom: 0,
-      paddingBottom: 0,
-      fontSize: 13,
-      color: colors.text,
-    },
-    metadataText: {
-      marginTop: 0,
-      marginBottom: 0,
-      paddingTop: 0,
-      paddingBottom: 0,
-      fontSize: 13,
-      color: colors.text,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: colors.accentBorder,
-      marginVertical: 2,
-    },
-    subject: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      textAlign: 'center',
-      color: colors.text,
-    },
-    webView: {
-      flex: 1,
+      paddingTop: 4,
     },
     plainText: {
       flex: 1,
-      padding: 16,
       fontSize: 15,
+      padding: 16,
+    },
+    subject: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    subjectContainer: {
+      paddingBottom: 8,
+      paddingLeft: 5,
+      paddingTop: 8,
+      width: '90%',
     },
     textDark: {
       color: colors.text,
@@ -275,31 +291,51 @@ export default function EmailDetailsScreen() {
     textLight: {
       color: colors.text,
     },
-    attachments: {
-      padding: 16,
-      borderTopWidth: 1,
-      borderTopColor: colors.accentBorder,
-    },
-    attachmentsTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 12,
-      color: colors.text,
-    },
-    attachment: {
+    topBox: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.background,
       flexDirection: 'row',
-      alignItems: 'center',
-      padding: 12,
-      backgroundColor: colors.accentBackground,
-      borderRadius: 8,
-      marginBottom: 8,
+      padding: 2,
     },
-    attachmentName: {
-      marginLeft: 8,
-      fontSize: 14,
-      color: colors.textMuted,
+    viewDark: {
+      backgroundColor: colors.background,
+    },
+    viewLight: {
+      backgroundColor: colors.background,
+    },
+    webView: {
+      flex: 1,
     },
   });
+
+  // Set navigation options
+  useEffect(() => {
+    navigation.setOptions({
+      /**
+       * Header right button.
+       */
+      headerRight: () => (
+        <View style={styles.headerRightContainer}>
+          <TouchableOpacity
+            onPress={() => setHtmlView(!isHtmlView)}
+            style={styles.headerRightButton}
+          >
+            <Ionicons
+              name={isHtmlView ? 'text-outline' : 'document-outline'}
+              size={22}
+              color="#FFA500"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDelete}
+            style={styles.headerRightButton}
+          >
+            <Ionicons name="trash-outline" size={22} color="#FF0000" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [isHtmlView, navigation, handleDelete, styles.headerRightButton, styles.headerRightContainer]);
 
   if (isLoading) {
     return (
@@ -351,15 +387,15 @@ export default function EmailDetailsScreen() {
             <View style={styles.metadataValue}>
               <ThemedText style={styles.metadataText}>{email.subject}</ThemedText>
               {associatedCredential && (
-              <>
-                <TouchableOpacity onPress={handleOpenCredential} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <IconSymbol size={16} name="key.fill" color={colors.primary} style={{ marginRight: 4 }} />
-                  <ThemedText style={[styles.metadataText, { color: colors.primary }]}>
-                    {associatedCredential.ServiceName}
-                  </ThemedText>
-                </TouchableOpacity>
-              </>
-            )}
+                <>
+                  <TouchableOpacity onPress={handleOpenCredential} style={styles.metadataCredential}>
+                    <IconSymbol size={16} name="key.fill" color={colors.primary} style={styles.metadataCredentialIcon} />
+                    <ThemedText style={[styles.metadataText, { color: colors.primary }]}>
+                      {associatedCredential.ServiceName}
+                    </ThemedText>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
             <View style={styles.metadataIcon}>
               <Ionicons name="chevron-up-outline" size={22} color={isDarkMode ? '#eee' : '#000'} />

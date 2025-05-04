@@ -1,5 +1,6 @@
 import React from 'react';
-import EmailDetailsScreen from '../../emails/[id]';
+
+import EmailDetailsScreen from '@/app/(tabs)/emails/[id]';
 
 /**
  * CredentialEmailPreviewScreen Component
@@ -13,6 +14,6 @@ import EmailDetailsScreen from '../../emails/[id]';
  * - Maintains UI consistency by reusing the same email details view
  * - Provides a better user experience by keeping context within the credentials flow
  */
-export default function CredentialEmailPreviewScreen() {
+export default function CredentialEmailPreviewScreen() : React.ReactNode {
   return <EmailDetailsScreen />;
 }

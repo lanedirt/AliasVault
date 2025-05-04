@@ -1,63 +1,79 @@
-import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useCallback, useEffect } from 'react';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useEffect } from 'react';
 
-export default function AutofillCredentialCreatedScreen() {
+/**
+ * Autofill credential created screen.
+ */
+export default function AutofillCredentialCreatedScreen() : React.ReactNode {
   const router = useRouter();
   const colors = useColors();
   const navigation = useNavigation();
 
-    // Set header buttons
-    useEffect(() => {
-        navigation.setOptions({
-          headerRight: () => (
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity
-                onPress={handleStayInApp}
-                style={{ padding: 10, paddingRight: 0 }}
-              >
-                <ThemedText style={{ color: colors.primary }}>Dismiss</ThemedText>
-              </TouchableOpacity>
-            </View>
-          ),
-        });
-      }, [navigation]);
-
-  const handleStayInApp = () => {
+  /**
+   * Handle the stay in app button press.
+   */
+  const handleStayInApp = useCallback(() => {
     router.back();
-  };
+  }, [router]);
 
   const styles = StyleSheet.create({
+    boldMessage: {
+      fontWeight: 'bold',
+      marginTop: 20,
+    },
     container: {
       flex: 1,
     },
     content: {
-      flex: 1,
-      padding: 20,
       alignItems: 'center',
+      flex: 1,
       justifyContent: 'center',
+      padding: 20,
+    },
+    headerRightButton: {
+      padding: 10,
+      paddingRight: 0,
     },
     iconContainer: {
       marginBottom: 30,
     },
+    message: {
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 30,
+      textAlign: 'center',
+    },
     title: {
       fontSize: 24,
       fontWeight: 'bold',
-      textAlign: 'center',
       marginBottom: 20,
-    },
-    message: {
-      fontSize: 16,
       textAlign: 'center',
-      marginBottom: 30,
-      lineHeight: 24,
     },
   });
+
+  // Set header buttons
+  useEffect(() => {
+    navigation.setOptions({
+      /**
+       * Header right button.
+       */
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleStayInApp}
+          style={styles.headerRightButton}
+        >
+          <ThemedText style={{ color: colors.primary }}>Dismiss</ThemedText>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, colors.primary, styles.headerRightButton, handleStayInApp]);
 
   return (
     <ThemedSafeAreaView style={styles.container}>
@@ -75,7 +91,7 @@ export default function AutofillCredentialCreatedScreen() {
         <ThemedText style={styles.message}>
           Your new credential has been added to your vault and is now available for password autofill.
         </ThemedText>
-        <ThemedText style={[styles.message, { fontWeight: 'bold', marginTop: 20 }]}>
+        <ThemedText style={[styles.message, styles.boldMessage]}>
             Switch back to your browser to continue.
         </ThemedText>
       </ThemedView>

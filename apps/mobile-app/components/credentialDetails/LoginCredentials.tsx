@@ -1,19 +1,21 @@
-import { View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Credential } from '@/utils/types/Credential';
 import FormInputCopyToClipboard from '@/components/FormInputCopyToClipboard';
 
-interface LoginCredentialsProps {
+type LoginCredentialsProps = {
   credential: Credential;
-}
+};
 
-export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }) => {
+/**
+ * Login credentials component.
+ */
+export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }) : React.ReactNode => {
   const email = credential.Alias?.Email?.trim();
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
 
-  const hasLoginCredentials = email || username || password;
+  const hasLoginCredentials = email ?? username ?? password;
 
   if (!hasLoginCredentials) {
     return null;

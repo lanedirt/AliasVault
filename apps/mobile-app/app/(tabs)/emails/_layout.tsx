@@ -1,7 +1,11 @@
-import { useColors } from '@/hooks/useColorScheme';
 import { Stack } from 'expo-router';
 
-export default function EmailsLayout() {
+import { useColors } from '@/hooks/useColorScheme';
+
+/**
+ * Emails layout.
+ */
+export default function EmailsLayout() : React.ReactNode {
   const colors = useColors();
 
   return (

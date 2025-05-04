@@ -2,6 +2,9 @@ import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextIn
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import Toast from 'react-native-toast-message';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
@@ -14,10 +17,11 @@ import { CredentialCard } from '@/components/CredentialCard';
 import { TitleContainer } from '@/components/TitleContainer';
 import { CollapsibleHeader } from '@/components/CollapsibleHeader';
 import emitter from '@/utils/EventEmitter';
-import Toast from 'react-native-toast-message';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-export default function CredentialsScreen() {
+/**
+ * Credentials screen.
+ */
+export default function CredentialsScreen() : React.ReactNode {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const { syncVault } = useVaultSync();
@@ -27,11 +31,39 @@ export default function CredentialsScreen() {
   const navigation = useNavigation();
   const [isTabFocused, setIsTabFocused] = useState(false);
   const router = useRouter();
+  const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
+
+  const authContext = useAuth();
+  const dbContext = useDb();
+
+  const isAuthenticated = authContext.isLoggedIn;
+  const isDatabaseAvailable = dbContext.dbAvailable;
+
+  /**
+   * Load credentials.
+   */
+  const loadCredentials = useCallback(async () : Promise<void> => {
+    try {
+      const credentials = await dbContext.sqliteClient!.getAllCredentials();
+      setCredentialsList(credentials);
+    } catch (err) {
+      // Error loading credentials, show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'Error loading credentials',
+        text2: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+  }, [dbContext.sqliteClient]);
 
   const headerButtons = [{
     icon: 'add' as const,
     position: 'right' as const,
-    onPress: () => router.push('/(tabs)/credentials/add-edit')
+    /**
+     * Add credential.
+     */
+    onPress: () : void => router.push('/(tabs)/credentials/add-edit')
   }];
 
   useEffect(() => {
@@ -45,7 +77,6 @@ export default function CredentialsScreen() {
 
     const tabPressSub = emitter.addListener('tabPress', (routeName: string) => {
       if (routeName === 'credentials' && isTabFocused) {
-        console.log('Credentials tab re-pressed while focused: reset screen');
         setSearchQuery(''); // Reset search
         setRefreshing(false); // Reset refreshing
         // Scroll to top
@@ -55,35 +86,16 @@ export default function CredentialsScreen() {
 
     // Add listener for credential changes
     const credentialChangedSub = emitter.addListener('credentialChanged', async () => {
-      console.log('Credential changed, refreshing list');
       await loadCredentials();
     });
 
-    return () => {
+    return () : void => {
       tabPressSub.remove();
       credentialChangedSub.remove();
       unsubscribeFocus();
       unsubscribeBlur();
     };
-  }, [isTabFocused]);
-
-  const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
-  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
-
-  const authContext = useAuth();
-  const dbContext = useDb();
-
-  const isAuthenticated = authContext.isLoggedIn;
-  const isDatabaseAvailable = dbContext.dbAvailable;
-
-  const loadCredentials = async () => {
-    try {
-      const credentials = await dbContext.sqliteClient!.getAllCredentials();
-      setCredentialsList(credentials);
-    } catch (err) {
-      console.error('Error loading credentials:', err);
-    }
-  };
+  }, [isTabFocused, loadCredentials, navigation]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -94,6 +106,9 @@ export default function CredentialsScreen() {
 
       // Sync vault and load credentials
       await syncVault({
+        /**
+         * On success.
+         */
         onSuccess: async (hasNewVault) => {
           // Calculate remaining time needed to reach minimum duration
           const elapsedTime = Date.now() - startTime;
@@ -113,6 +128,9 @@ export default function CredentialsScreen() {
             visibilityTime: 1200,
           });
         },
+        /**
+         * On error.
+         */
         onError: (error) => {
           console.error('Error syncing vault:', error);
           setRefreshing(false);
@@ -142,69 +160,73 @@ export default function CredentialsScreen() {
     setIsLoadingCredentials(true);
     loadCredentials();
     setIsLoadingCredentials(false);
-  }, [isAuthenticated, isDatabaseAvailable]);
+  }, [isAuthenticated, isDatabaseAvailable, loadCredentials]);
 
   const filteredCredentials = credentialsList.filter(credential => {
     const searchLower = searchQuery.toLowerCase();
+
     return (
-      credential.ServiceName?.toLowerCase().includes(searchLower) ||
-      credential.Username?.toLowerCase().includes(searchLower) ||
-      credential.Alias?.Email?.toLowerCase().includes(searchLower) ||
+      credential.ServiceName?.toLowerCase().includes(searchLower) ??
+      credential.Username?.toLowerCase().includes(searchLower) ??
+      credential.Alias?.Email?.toLowerCase().includes(searchLower) ??
       credential.ServiceUrl?.toLowerCase().includes(searchLower)
     );
   });
 
   const styles = StyleSheet.create({
+    clearButton: {
+      padding: 4,
+      position: 'absolute',
+      right: 8,
+      top: '50%',
+      transform: [{ translateY: -12 }],
+    },
+    clearButtonText: {
+      color: colors.textMuted,
+      fontSize: 20,
+    },
     container: {
       flex: 1,
     },
     content: {
       flex: 1,
+      marginTop: 36,
       padding: 16,
       paddingTop: 0,
-      marginTop: 36,
+    },
+    contentContainer: {
+      paddingBottom: 40,
+      paddingTop: 4,
+    },
+    emptyText: {
+      color: colors.textMuted,
+      fontSize: 16,
+      marginTop: 24,
+      textAlign: 'center',
+    },
+    searchContainer: {
+      position: 'relative',
+    },
+    searchIcon: {
+      left: 12,
+      position: 'absolute',
+      top: '50%',
+      transform: [{ translateY: -17 }],
+      zIndex: 1,
+    },
+    searchInput: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      color: colors.text,
+      fontSize: 16,
+      marginBottom: 16,
+      padding: 12,
+      paddingLeft: 40,
+      paddingRight: Platform.OS === 'android' ? 40 : 12,
     },
     stepContainer: {
       flex: 1,
       gap: 8,
-    },
-    credentialItem: {
-      backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 8,
-      borderWidth: 1,
-    },
-    emptyText: {
-      color: colors.textMuted,
-      textAlign: 'center',
-      fontSize: 16,
-      marginTop: 24,
-    },
-    searchInput: {
-      backgroundColor: colors.accentBackground,
-      color: colors.text,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-      fontSize: 16,
-      paddingRight: Platform.OS === 'android' ? 40 : 12,
-      paddingLeft: 40,
-    },
-    clearButton: {
-      position: 'absolute',
-      right: 8,
-      top: '50%',
-      transform: [{ translateY: -12 }],
-      padding: 4,
-    },
-    searchIcon: {
-      position: 'absolute',
-      left: 12,
-      top: '50%',
-      transform: [{ translateY: -17 }],
-      zIndex: 1,
     },
   });
 
@@ -233,12 +255,12 @@ export default function CredentialsScreen() {
                 { useNativeDriver: true }
               )}
               scrollEventThrottle={16}
-              contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
+              contentContainerStyle={styles.contentContainer}
               scrollIndicatorInsets={{ bottom: 40 }}
               ListHeaderComponent={
                 <ThemedView>
                   <TitleContainer title="Credentials" />
-                  <ThemedView style={{ position: 'relative' }}>
+                  <ThemedView style={styles.searchContainer}>
                     <MaterialIcons
                       name="search"
                       size={20}
@@ -246,7 +268,7 @@ export default function CredentialsScreen() {
                       style={styles.searchIcon}
                     />
                     <TextInput
-                      style={[styles.searchInput]}
+                      style={styles.searchInput}
                       placeholder="Search credentials..."
                       placeholderTextColor={colors.textMuted}
                       value={searchQuery}
@@ -260,7 +282,7 @@ export default function CredentialsScreen() {
                         style={styles.clearButton}
                         onPress={() => setSearchQuery('')}
                       >
-                        <ThemedText style={{ fontSize: 20, color: colors.textMuted }}>×</ThemedText>
+                        <ThemedText style={styles.clearButtonText}>×</ThemedText>
                       </TouchableOpacity>
                     )}
                   </ThemedView>
@@ -278,7 +300,7 @@ export default function CredentialsScreen() {
                 <CredentialCard credential={item} />
               )}
               ListEmptyComponent={
-                <Text style={[styles.emptyText]}>
+                <Text style={styles.emptyText}>
                   {searchQuery ? 'No matching credentials found' : 'No credentials found'}
                 </Text>
               }

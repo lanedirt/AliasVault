@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { ThemedView } from '@/components/ThemedView';
@@ -11,9 +13,12 @@ import Logo from '@/assets/images/logo.svg';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
-import { MaterialIcons } from '@expo/vector-icons';
+import avatarImage from '@/assets/images/avatar.webp';
 
-export default function UnlockScreen() {
+/**
+ * Unlock screen.
+ */
+export default function UnlockScreen() : React.ReactNode {
   const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
@@ -24,14 +29,20 @@ export default function UnlockScreen() {
   const srpUtil = new SrpUtility(webApi);
 
   useEffect(() => {
-    const checkFaceIDStatus = async () => {
+    /**
+     * Check the face ID status.
+     */
+    const checkFaceIDStatus = async () : Promise<void> => {
       const enabled = await isFaceIDEnabled();
       setIsFaceIDAvailable(enabled);
     };
     checkFaceIDStatus();
   }, [isFaceIDEnabled]);
 
-  const handleUnlock = async () => {
+  /**
+   * Handle the unlock.
+   */
+  const handleUnlock = async () : Promise<void> => {
     if (!password) {
       Alert.alert('Error', 'Please enter your password');
       return;
@@ -48,8 +59,6 @@ export default function UnlockScreen() {
       // Initialize the database with the provided password
       const loginResponse = await srpUtil.initiateLogin(username);
 
-      console.log('loginResponse', loginResponse);
-
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         password,
         loginResponse.salt,
@@ -63,137 +72,144 @@ export default function UnlockScreen() {
       if (await testDatabaseConnection(passwordHashBase64)) {
         // Navigate to credentials
         router.replace('/(tabs)/credentials');
-      }
-      else {
+      } else {
         Alert.alert('Error', 'Incorrect password. Please try again.');
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Incorrect password. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    // Clear any stored tokens or session data
-    // This will be handled by the auth context
+  /**
+   * Handle the logout.
+   */
+  const handleLogout = async () : Promise<void> => {
+    /*
+     * Clear any stored tokens or session data
+     * This will be handled by the auth context
+     */
     await webApi.logout();
     router.replace('/login');
   };
 
-  const handleFaceIDRetry = async () => {
+  /**
+   * Handle the face ID retry.
+   */
+  const handleFaceIDRetry = async () : Promise<void> => {
     router.replace('/');
   };
 
   const styles = StyleSheet.create({
+    avatar: {
+      borderRadius: 20,
+      height: 40,
+      marginRight: 12,
+      width: 40,
+    },
+    avatarContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginBottom: 16,
+    },
+    button: {
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      height: 50,
+      justifyContent: 'center',
+      marginBottom: 16,
+      width: '100%',
+    },
+    buttonText: {
+      color: colors.primarySurfaceText,
+      fontSize: 16,
+      fontWeight: '600',
+    },
     container: {
       flex: 1,
-    },
-    keyboardAvoidingView: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
     },
     content: {
       width: '100%',
     },
-    logoContainer: {
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    logo: {
-      width: 200,
-      height: 80,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      marginBottom: 16,
-      textAlign: 'center',
-      color: colors.text,
-      paddingTop: 4,
-    },
-    avatarContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 16,
-    },
-    avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      marginRight: 12,
-    },
-    username: {
-      fontSize: 18,
-      textAlign: 'center',
-      opacity: 0.8,
-      color: colors.text,
-    },
-    subtitle: {
-      fontSize: 16,
-      marginBottom: 24,
-      textAlign: 'center',
-      opacity: 0.7,
-      color: colors.text,
-    },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      width: '100%',
-      borderWidth: 1,
-      borderColor: colors.accentBorder,
-      borderRadius: 8,
-      marginBottom: 16,
-      backgroundColor: colors.accentBackground,
-    },
-    inputIcon: {
-      padding: 12,
-    },
-    input: {
-      flex: 1,
-      height: 50,
-      paddingHorizontal: 16,
-      fontSize: 16,
-      color: colors.text,
-    },
-    button: {
-      width: '100%',
-      height: 50,
-      backgroundColor: colors.primary,
-      borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    buttonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: '600',
-    },
     faceIdButton: {
-      width: '100%',
+      alignItems: 'center',
       height: 50,
       justifyContent: 'center',
-      alignItems: 'center',
       marginBottom: 16,
+      width: '100%',
     },
     faceIdButtonText: {
       color: colors.primary,
       fontSize: 16,
       fontWeight: '600',
     },
-    logoutButton: {
+    input: {
+      color: colors.text,
+      flex: 1,
+      fontSize: 16,
+      height: 50,
+      paddingHorizontal: 16,
+    },
+    inputContainer: {
+      alignItems: 'center',
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      flexDirection: 'row',
+      marginBottom: 16,
       width: '100%',
+    },
+    inputIcon: {
+      padding: 12,
+    },
+    keyboardAvoidingView: {
+      alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+    },
+    logo: {
+      height: 80,
+      width: 200,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    logoutButton: {
+      alignItems: 'center',
       height: 50,
       justifyContent: 'center',
-      alignItems: 'center',
+      width: '100%',
     },
     logoutButtonText: {
       color: colors.primary,
       fontSize: 16,
+    },
+    subtitle: {
+      color: colors.text,
+      fontSize: 16,
+      marginBottom: 24,
+      opacity: 0.7,
+      textAlign: 'center',
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 16,
+      paddingTop: 4,
+      textAlign: 'center',
+    },
+    username: {
+      color: colors.text,
+      fontSize: 18,
+      opacity: 0.8,
+      textAlign: 'center',
     },
   });
 
@@ -213,7 +229,7 @@ export default function UnlockScreen() {
             <ThemedText style={styles.title}>Unlock Vault</ThemedText>
             <View style={styles.avatarContainer}>
               <Image
-                source={require('@/assets/images/avatar.webp')}
+                source={avatarImage}
                 style={styles.avatar}
               />
               <ThemedText style={styles.username}>{username}</ThemedText>

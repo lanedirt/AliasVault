@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Pressable, useColorScheme, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
+import * as OTPAuth from 'otpauth';
+import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-toast-message';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Credential } from '@/utils/types/Credential';
 import { TotpCode } from '@/utils/types/TotpCode';
-import * as OTPAuth from 'otpauth';
-import * as Clipboard from 'expo-clipboard';
 import { useDb } from '@/context/DbContext';
-import Toast from 'react-native-toast-message';
 
 type TotpSectionProps = {
   credential: Credential;
 };
 
-export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
+/**
+ * Totp section component.
+ */
+export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.ReactNode => {
   const [totpCodes, setTotpCodes] = useState<TotpCode[]>([]);
   const [currentCodes, setCurrentCodes] = useState<Record<string, string>>({});
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const dbContext = useDb();
 
+  /**
+   * Get the remaining seconds.
+   */
   const getRemainingSeconds = (step = 30): number => {
     const totp = new OTPAuth.TOTP({
       secret: 'dummy',
@@ -30,11 +37,17 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
     return totp.period - (Math.floor(Date.now() / 1000) % totp.period);
   };
 
+  /**
+   * Get the remaining percentage.
+   */
   const getRemainingPercentage = (): number => {
     const remaining = getRemainingSeconds();
     return Math.floor(((30.0 - remaining) / 30.0) * 100);
   };
 
+  /**
+   * Generate the totp code.
+   */
   const generateTotpCode = (secretKey: string): string => {
     try {
       const totp = new OTPAuth.TOTP({
@@ -50,6 +63,9 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
     }
   };
 
+  /**
+   * Copy the totp code to the clipboard.
+   */
   const copyToClipboard = async (code: string): Promise<void> => {
     try {
       await Clipboard.setStringAsync(code);
@@ -65,7 +81,10 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
   };
 
   useEffect(() => {
-    const loadTotpCodes = async () => {
+    /**
+     * Load the totp codes.
+     */
+    const loadTotpCodes = async () : Promise<void> => {
       if (!dbContext?.sqliteClient) {
         return;
       }
@@ -82,6 +101,9 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
   }, [credential.Id, dbContext?.sqliteClient]);
 
   useEffect(() => {
+    /**
+     * Update the totp codes.
+     */
     const updateTotpCodes = (prevCodes: Record<string, string>): Record<string, string> => {
       const newCodes: Record<string, string> = {};
       totpCodes.forEach(code => {
@@ -105,7 +127,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
       setCurrentCodes(updateTotpCodes);
     }, 1000);
 
-    return () => clearInterval(intervalId);
+    return () : void => clearInterval(intervalId);
   }, [totpCodes]);
 
   if (totpCodes.length === 0) {
@@ -159,46 +181,46 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    marginTop: 16,
-  },
-  content: {
-    marginTop: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 12,
-  },
-  codeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
   code: {
     fontSize: 24,
     fontWeight: 'bold',
     letterSpacing: 2,
   },
-  timerContainer: {
-    alignItems: 'flex-end',
+  codeContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  container: {
+    marginTop: 16,
+    padding: 16,
+  },
+  content: {
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 8,
+    padding: 12,
+  },
+  label: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  progressBar: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 2,
+    height: 4,
+    overflow: 'hidden',
+    width: 40,
+  },
+  progressFill: {
+    backgroundColor: '#007AFF',
+    height: '100%',
   },
   timer: {
     fontSize: 12,
     marginBottom: 4,
   },
-  progressBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#007AFF',
+  timerContainer: {
+    alignItems: 'flex-end',
   },
 });

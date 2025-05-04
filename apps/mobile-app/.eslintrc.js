@@ -42,6 +42,9 @@ module.exports = {
       version: "detect",
     },
     "import/ignore": ["node_modules/react-native/index\\.js"],
+    'react-native/components': {
+      Text: ['ThemedText'],
+    },
   },
   rules: {
     // TypeScript
@@ -144,5 +147,12 @@ module.exports = {
     "no-console": ["error", { allow: ["warn", "error", "info", "debug"] }],
     "spaced-comment": ["error", "always"],
     "multiline-comment-style": ["error", "starred-block"],
+
+    // TODO: this line is added to prevent "Raw text (×) cannot be used outside of a <Text> tag" errors.
+    // When adding proper i18n multilingual enforcement checks, the following line should be removed
+    'react-native/no-raw-text': 'off',
+
+    // Disable prop-types rule because we're using TypeScript for type-checking
+    'react/prop-types': 'off',
   },
 };

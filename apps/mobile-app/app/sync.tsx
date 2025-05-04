@@ -1,13 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
+import { StyleSheet } from 'react-native';
+
+import NativeVaultManager from '../specs/NativeVaultManager';
+
 import { useAuth } from '@/context/AuthContext';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { ThemedView } from '@/components/ThemedView';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useDb } from '@/context/DbContext';
-import NativeVaultManager from '../specs/NativeVaultManager';
 
-export default function SyncScreen() {
+/**
+ * Sync screen which will redirect to the login screen if the user is not logged in
+ * or to the credentials screen if the user is logged in.
+ */
+export default function SyncScreen() : React.ReactNode {
   const authContext = useAuth();
   const dbContext = useDb();
   const { syncVault } = useVaultSync();
@@ -16,26 +23,29 @@ export default function SyncScreen() {
 
   useEffect(() => {
     if (hasInitialized.current) {
-        return;
-      }
+      return;
+    }
 
-      hasInitialized.current = true;
+    hasInitialized.current = true;
 
-
-    async function initialize() {
+    /**
+     * Initialize the app.
+     */
+    const initialize = async () : Promise<void> => {
       const { isLoggedIn, enabledAuthMethods } = await authContext.initializeAuth();
 
       // If user is not logged in, navigate to login immediately
       if (!isLoggedIn) {
-        console.log('User not logged in, navigating to login');
         router.replace('/login');
         return;
       }
 
       // Perform initial vault sync
-      console.log('Initial vault sync');
       await syncVault({
         initialSync: true,
+        /**
+         * Handle the status update.
+         */
         onStatus: (message) => {
           setStatus(message);
         }
@@ -47,7 +57,6 @@ export default function SyncScreen() {
         if (hasStoredVault) {
           const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
           if (!isFaceIDEnabled) {
-            console.log('FaceID is not enabled, navigating to unlock screen');
             router.replace('/unlock');
             return;
           }
@@ -59,45 +68,52 @@ export default function SyncScreen() {
             await new Promise(resolve => setTimeout(resolve, 1000));
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('FaceID unlock successful, navigating to credentials');
 
             // Navigate to credentials
             router.replace('/(tabs)/credentials');
 
             return;
-          }
-          else {
-            console.log('FaceID unlock failed, navigating to unlock screen');
+          } else {
             router.replace('/unlock');
           }
-        }
-        else {
-          // Vault is not initialized which means the database does not exist or decryption key is missing
-          // from device's keychain. Navigate to the unlock screen.
-          console.log('Vault is not initialized (db file does not exist), navigating to unlock screen');
+        } else {
+          /*
+           * Vault is not initialized which means the database does not exist or decryption key is missing
+           * from device's keychain. Navigate to the unlock screen.
+           */
           router.replace('/unlock');
           return;
         }
-      } catch (error) {
-        console.log('FaceID unlock failed:', error);
-        // If FaceID fails (too many attempts, manual cancel, etc.)
-        // navigate to unlock screen
+      } catch {
+        /*
+         * If FaceID fails (too many attempts, manual cancel, etc.)
+         * navigate to unlock screen
+         */
         router.replace('/unlock');
         return;
       }
 
-      // If we get here, something went wrong with the FaceID unlock
-      // Navigate to unlock screen as a fallback
-      console.log('FaceID unlock failed, navigating to unlock screen');
+      /*
+       * If we get here, something went wrong with the FaceID unlock
+       * Navigate to unlock screen as a fallback
+       */
       router.replace('/unlock');
     }
 
     initialize();
-  }, [syncVault]);
+  }, [syncVault, authContext, dbContext]);
 
   return (
-    <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ThemedView style={styles.container}>
       {status ? <LoadingIndicator status={status} /> : null}
     </ThemedView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+});

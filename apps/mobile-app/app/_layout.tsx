@@ -4,9 +4,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+
 import 'react-native-reanimated';
-// Required for certain modules such as secure-remote-password which relies on crypto.getRandomValues
-// and this is not available in react-native without this polyfill
+/*
+ * Required for certain modules such as secure-remote-password which relies on crypto.getRandomValues
+ * and this is not available in react-native without this polyfill
+ */
 import 'react-native-get-random-values';
 
 import { useColors, useColorScheme } from '@/hooks/useColorScheme';
@@ -14,12 +17,15 @@ import { DbProvider } from '@/context/DbContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { WebApiProvider } from '@/context/WebApiContext';
 import { AliasVaultToast } from '@/components/Toast';
-import LoadingIndicator from '@/components/LoadingIndicator';
+import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function RootLayoutNav() {
+/**
+ * Root layout navigation.
+ */
+function RootLayoutNav() : React.ReactNode {
   const colorScheme = useColorScheme();
   const colors = useColors();
 
@@ -68,9 +74,12 @@ function RootLayoutNav() {
   );
 }
 
-export default function RootLayout() {
+/**
+ * Root layout.
+ */
+export default function RootLayout() : React.ReactNode {
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: SpaceMono,
   });
 
   useEffect(() => {

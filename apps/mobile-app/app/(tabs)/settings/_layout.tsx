@@ -1,7 +1,11 @@
 import { Stack } from 'expo-router';
+
 import { useColors } from '@/hooks/useColorScheme';
 
-export default function SettingsLayout() {
+/**
+ * Settings layout.
+ */
+export default function SettingsLayout() : React.ReactNode {
   const colors = useColors();
 
   return (

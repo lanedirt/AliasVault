@@ -1,8 +1,12 @@
-import { useColors } from '@/hooks/useColorScheme';
 import { Stack } from 'expo-router';
 import { Platform } from 'react-native';
 
-export default function CredentialsLayout() {
+import { useColors } from '@/hooks/useColorScheme';
+
+/**
+ * Credentials layout.
+ */
+export default function CredentialsLayout() : React.ReactNode {
   const colors = useColors();
 
   return (

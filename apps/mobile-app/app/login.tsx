@@ -1,10 +1,12 @@
-import React from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Linking, Animated } from 'react-native';
-import { useState, useEffect } from 'react';
 import { Buffer } from 'buffer';
+
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Linking, Animated } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
+
 import { ThemedView } from '@/components/ThemedView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
@@ -16,15 +18,21 @@ import { useColors } from '@/hooks/useColorScheme';
 import Logo from '@/assets/images/logo.svg';
 import { AppInfo } from '@/utils/AppInfo';
 import LoadingIndicator from '@/components/LoadingIndicator';
-import { MaterialIcons } from '@expo/vector-icons';
+import { LoginResponse } from '@/utils/types/webapi/Login';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 
-
-export default function LoginScreen() {
+/**
+ * Login screen.
+ */
+export default function LoginScreen() : React.ReactNode {
   const colors = useColors();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [apiUrl, setApiUrl] = useState<string>(AppInfo.DEFAULT_API_URL);
 
-  const loadApiUrl = async () => {
+  /**
+   * Load the API URL.
+   */
+  const loadApiUrl = async () : Promise<void> => {
     const storedUrl = await AsyncStorage.getItem('apiUrl');
     if (storedUrl && storedUrl.length > 0) {
       setApiUrl(storedUrl);
@@ -40,14 +48,17 @@ export default function LoginScreen() {
       useNativeDriver: true,
     }).start();
     loadApiUrl();
-  }, []);
+  }, [fadeAnim]);
 
   // Update URL when returning from settings
   useFocusEffect(() => {
     loadApiUrl();
   });
 
-  const getDisplayUrl = () => {
+  /**
+   * Get the display URL.
+   */
+  const getDisplayUrl = () : string => {
     const cleanUrl = apiUrl.replace('https://', '').replace('/api', '');
     return cleanUrl === 'app.aliasvault.net' ? 'aliasvault.net' : cleanUrl;
   };
@@ -61,7 +72,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
-  const [loginResponse, setLoginResponse] = useState<any>(null);
+  const [loginResponse, setLoginResponse] = useState<LoginResponse | null>(null);
   const [passwordHashString, setPasswordHashString] = useState<string | null>(null);
   const [passwordHashBase64, setPasswordHashBase64] = useState<string | null>(null);
   const [loginStatus, setLoginStatus] = useState<string | null>(null);
@@ -82,9 +93,9 @@ export default function LoginScreen() {
   const processVaultResponse = async (
     token: string,
     refreshToken: string,
-    vaultResponseJson: any,
+    vaultResponseJson: VaultResponse,
     passwordHashBase64: string
-  ) => {
+  ) : Promise<void> => {
     await authContext.setAuthTokens(credentials.username, token, refreshToken);
     await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
     await authContext.login();
@@ -99,7 +110,10 @@ export default function LoginScreen() {
     setIsLoading(false);
   };
 
-  const handleSubmit = async () => {
+  /**
+   * Handle the submit.
+   */
+  const handleSubmit = async () : Promise<void> => {
     setIsLoading(true);
     setError(null);
 
@@ -153,7 +167,7 @@ export default function LoginScreen() {
 
       setLoginStatus('Syncing vault');
       await new Promise(resolve => requestAnimationFrame(resolve));
-      const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
+      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
@@ -185,7 +199,10 @@ export default function LoginScreen() {
     }
   };
 
-  const handleTwoFactorSubmit = async () => {
+  /**
+   * Handle the two factor submit.
+   */
+  const handleTwoFactorSubmit = async () : Promise<void> => {
     setIsLoading(true);
     setLoginStatus('Verifying authentication code');
     setError(null);
@@ -215,7 +232,7 @@ export default function LoginScreen() {
 
       setLoginStatus('Syncing vault');
       await new Promise(resolve => requestAnimationFrame(resolve));
-      const vaultResponseJson = await webApi.authFetch<any>('Vault', { method: 'GET', headers: {
+      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
@@ -245,147 +262,141 @@ export default function LoginScreen() {
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    headerSection: {
-      backgroundColor: colors.loginHeader,
-      paddingTop: 24,
-      paddingBottom: 24,
-      paddingHorizontal: 16,
-      borderBottomLeftRadius: 24,
-      borderBottomRightRadius: 24,
-    },
-    logoContainer: {
-      alignItems: 'center',
-      marginBottom: 8,
-    },
     appName: {
+      color: colors.text,
       fontSize: 32,
       fontWeight: 'bold',
-      color: colors.text,
       textAlign: 'center',
     },
-    content: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: colors.background,
-    },
-    titleContainer: {
-      flexDirection: 'row',
+    button: {
       alignItems: 'center',
-      gap: 8,
-      marginBottom: 16,
-    },
-    formContainer: {
-      gap: 16,
-    },
-    errorContainer: {
-      backgroundColor: colors.errorBackground,
-      borderColor: colors.errorBorder,
-      borderWidth: 1,
+      borderRadius: 8,
       padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-    },
-    errorText: {
-      color: colors.errorText,
-      fontSize: 14,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginBottom: 4,
-      color: colors.text,
-    },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      width: '100%',
-      borderWidth: 1,
-      borderColor: colors.accentBorder,
-      borderRadius: 8,
-      marginBottom: 16,
-      backgroundColor: colors.accentBackground,
-    },
-    inputIcon: {
-      padding: 10,
-    },
-    input: {
-      flex: 1,
-      height: 45,
-      paddingHorizontal: 4,
-      fontSize: 16,
-      color: colors.text,
     },
     buttonContainer: {
       gap: 8,
-    },
-    button: {
-      padding: 12,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    primaryButton: {
-      backgroundColor: colors.primary,
-    },
-    secondaryButton: {
-      backgroundColor: colors.secondary,
     },
     buttonText: {
       color: colors.text,
       fontSize: 16,
       fontWeight: '600',
     },
-    rememberMeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
     checkbox: {
-      width: 20,
-      height: 20,
-      borderWidth: 2,
-      borderRadius: 4,
-      justifyContent: 'center',
       alignItems: 'center',
       borderColor: colors.accentBorder,
-    },
-    checkboxInner: {
-      width: 12,
-      height: 12,
-      borderRadius: 2,
+      borderRadius: 4,
+      borderWidth: 2,
+      height: 20,
+      justifyContent: 'center',
+      width: 20,
     },
     checkboxChecked: {
       backgroundColor: colors.primary,
     },
-    rememberMeText: {
-      fontSize: 14,
-      color: colors.text,
-    },
-    noteText: {
-      fontSize: 14,
-      textAlign: 'center',
-      marginTop: 16,
-      color: colors.textMuted,
-    },
-    headerContainer: {
-      marginBottom: 24,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: colors.text,
-      marginBottom: 4,
-    },
-    headerSubtitle: {
-      fontSize: 14,
-      color: colors.textMuted,
+    checkboxInner: {
+      borderRadius: 2,
+      height: 12,
+      width: 12,
     },
     clickableDomain: {
       color: colors.primary,
       textDecorationLine: 'underline',
+    },
+    container: {
+      backgroundColor: colors.background,
+      flex: 1,
+    },
+    content: {
+      backgroundColor: colors.background,
+      flex: 1,
+      padding: 16,
+    },
+    errorContainer: {
+      backgroundColor: colors.errorBackground,
+      borderColor: colors.errorBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginBottom: 16,
+      padding: 12,
+    },
+    errorText: {
+      color: colors.errorText,
+      fontSize: 14,
+    },
+    formContainer: {
+      gap: 16,
+    },
+    headerContainer: {
+      marginBottom: 24,
+    },
+    headerSection: {
+      backgroundColor: colors.loginHeader,
+      borderBottomLeftRadius: 24,
+      borderBottomRightRadius: 24,
+      paddingBottom: 24,
+      paddingHorizontal: 16,
+      paddingTop: 24,
+    },
+    headerSubtitle: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+    headerTitle: {
+      color: colors.text,
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 4,
+    },
+    input: {
+      color: colors.text,
+      flex: 1,
+      fontSize: 16,
+      height: 45,
+      paddingHorizontal: 4,
+    },
+    inputContainer: {
+      alignItems: 'center',
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      flexDirection: 'row',
+      marginBottom: 16,
+      width: '100%',
+    },
+    inputIcon: {
+      padding: 10,
+    },
+    label: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    noteText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      marginTop: 16,
+      textAlign: 'center',
+    },
+    primaryButton: {
+      backgroundColor: colors.primary,
+    },
+    rememberMeContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 8,
+    },
+    rememberMeText: {
+      color: colors.text,
+      fontSize: 14,
+    },
+    secondaryButton: {
+      backgroundColor: colors.secondary,
     },
   });
 
@@ -401,7 +412,7 @@ export default function LoginScreen() {
       </SafeAreaView>
       <ThemedView style={styles.content}>
         {isLoading ? (
-          <LoadingIndicator status={loginStatus || 'Loading...'} />
+          <LoadingIndicator status={loginStatus ?? 'Loading...'} />
         ) : (
           <>
             <View style={styles.headerContainer}>
@@ -425,7 +436,7 @@ export default function LoginScreen() {
 
             {twoFactorRequired ? (
               <View style={styles.formContainer}>
-                <Text style={[styles.label]}>Authentication Code</Text>
+                <Text style={styles.label}>Authentication Code</Text>
                 <View style={styles.inputContainer}>
                   <MaterialIcons
                     name="security"
@@ -472,13 +483,13 @@ export default function LoginScreen() {
                     <Text style={styles.buttonText}>Cancel</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={[styles.noteText]}>
-                  Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
+                <Text style={styles.noteText}>
+                  Note: if you don&apos;t have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
                 </Text>
               </View>
             ) : (
               <View style={styles.formContainer}>
-                <Text style={[styles.label]}>Username or email</Text>
+                <Text style={styles.label}>Username or email</Text>
                 <View style={styles.inputContainer}>
                   <MaterialIcons
                     name="person"
@@ -496,7 +507,7 @@ export default function LoginScreen() {
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>
-                <Text style={[styles.label]}>Password</Text>
+                <Text style={styles.label}>Password</Text>
                 <View style={styles.inputContainer}>
                   <MaterialIcons
                     name="lock"
@@ -517,12 +528,12 @@ export default function LoginScreen() {
                 </View>
                 <View style={styles.rememberMeContainer}>
                   <TouchableOpacity
-                    style={[styles.checkbox]}
+                    style={styles.checkbox}
                     onPress={() => setRememberMe(!rememberMe)}
                   >
                     <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
                   </TouchableOpacity>
-                  <Text style={[styles.rememberMeText]}>Remember me</Text>
+                  <Text style={styles.rememberMeText}>Remember me</Text>
                 </View>
                 <TouchableOpacity
                   style={[styles.button, styles.primaryButton]}
@@ -535,7 +546,7 @@ export default function LoginScreen() {
                     <Text style={styles.buttonText}>Login</Text>
                   )}
                 </TouchableOpacity>
-                <Text style={[styles.noteText]}>
+                <Text style={styles.noteText}>
                   No account yet?{' '}
                   <Text
                     style={styles.clickableDomain}

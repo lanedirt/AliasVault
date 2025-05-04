@@ -1,12 +1,16 @@
 import { StyleSheet, View, ScrollView, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { useState, useEffect, useCallback } from 'react';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedSafeAreaView } from '@/components/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AuthMethod, useAuth } from '@/context/AuthContext';
 
-export default function VaultUnlockSettingsScreen() {
+/**
+ * Vault unlock settings screen.
+ */
+export default function VaultUnlockSettingsScreen() : React.ReactNode {
   const colors = useColors();
   const [initialized, setInitialized] = useState(false);
   const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayName } = useAuth();
@@ -16,7 +20,10 @@ export default function VaultUnlockSettingsScreen() {
   const [_, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
 
   useEffect(() => {
-    const initializeAuth = async () => {
+    /**
+     * Initialize the auth methods.
+     */
+    const initializeAuth = async () : Promise<void> => {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       setHasFaceID(compatible && enrolled);
@@ -42,7 +49,10 @@ export default function VaultUnlockSettingsScreen() {
       return;
     }
 
-    const updateAuthMethods = async () => {
+    /**
+     * Update the auth methods.
+     */
+    const updateAuthMethods = async () : Promise<void> => {
       const currentAuthMethods = await getEnabledAuthMethods();
       const newAuthMethods = isFaceIDEnabled ? ['faceid', 'password'] : ['password'];
 
@@ -51,14 +61,13 @@ export default function VaultUnlockSettingsScreen() {
         return;
       }
 
-      console.log('Updating auth methods to', newAuthMethods);
       setAuthMethods(newAuthMethods as AuthMethod[]);
     };
 
     updateAuthMethods();
   }, [isFaceIDEnabled, setAuthMethods, getEnabledAuthMethods, initialized]);
 
-  const handleFaceIDToggle = useCallback(async (value: boolean) => {
+  const handleFaceIDToggle = useCallback(async (value: boolean) : Promise<void> => {
     if (value && !hasFaceID) {
       Alert.alert(
         'Face ID Not Available',
@@ -66,7 +75,10 @@ export default function VaultUnlockSettingsScreen() {
         [
           {
             text: 'Open Settings',
-            onPress: () => {
+            /**
+             * Handle the open settings press.
+             */
+            onPress: () : void => {
               setIsFaceIDEnabled(true);
               setAuthMethods(['faceid', 'password']);
               if (Platform.OS === 'ios') {
@@ -77,7 +89,10 @@ export default function VaultUnlockSettingsScreen() {
           {
             text: 'Cancel',
             style: 'cancel',
-            onPress: () => {
+            /**
+             * Handle the cancel press.
+             */
+            onPress: () : void => {
               setIsFaceIDEnabled(false);
               setAuthMethods(['password']);
             },
@@ -89,56 +104,56 @@ export default function VaultUnlockSettingsScreen() {
 
     setIsFaceIDEnabled(value);
     setAuthMethods(value ? ['faceid', 'password'] : ['password']);
-  }, [hasFaceID]);
+  }, [hasFaceID, setAuthMethods]);
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = StyleSheet.create({
     container: {
       flex: 1,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    scrollContent: {
-      paddingBottom: 40,
-    },
-    header: {
-      padding: 16,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.accentBorder,
-    },
-    headerText: {
-      fontSize: 13,
-      color: colors.textMuted,
-    },
-    optionContainer: {
-      backgroundColor: colors.background,
-    },
-    option: {
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.accentBorder,
-    },
-    optionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 4,
-    },
-    optionText: {
-      fontSize: 16,
-      color: colors.text,
-    },
-    helpText: {
-      fontSize: 13,
-      color: colors.textMuted,
-      marginTop: 4,
     },
     disabledText: {
       color: colors.textMuted,
       opacity: 0.5,
     },
-  }), [colors]);
+    header: {
+      borderBottomColor: colors.accentBorder,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      padding: 16,
+    },
+    headerText: {
+      color: colors.textMuted,
+      fontSize: 13,
+    },
+    helpText: {
+      color: colors.textMuted,
+      fontSize: 13,
+      marginTop: 4,
+    },
+    option: {
+      borderBottomColor: colors.accentBorder,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    optionContainer: {
+      backgroundColor: colors.background,
+    },
+    optionHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 4,
+    },
+    optionText: {
+      color: colors.text,
+      fontSize: 16,
+    },
+    scrollContent: {
+      paddingBottom: 40,
+    },
+    scrollView: {
+      flex: 1,
+    },
+  });
 
   return (
     <ThemedSafeAreaView style={styles.container}>

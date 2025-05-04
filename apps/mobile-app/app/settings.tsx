@@ -1,9 +1,9 @@
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useColors } from '@/hooks/useColorScheme';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useColors } from '@/hooks/useColorScheme';
+import { ThemedView } from '@/components/ThemedView';
 import { AppInfo } from '@/utils/AppInfo';
 
 type ApiOption = {
@@ -16,7 +16,10 @@ const DEFAULT_OPTIONS: ApiOption[] = [
   { label: 'Self-hosted', value: 'custom' }
 ];
 
-export default function SettingsScreen() {
+/**
+ * Settings screen (for logged out users).
+ */
+export default function SettingsScreen() : React.ReactNode {
   const colors = useColors();
   const [selectedOption, setSelectedOption] = useState<string>(DEFAULT_OPTIONS[0].value);
   const [customUrl, setCustomUrl] = useState<string>('');
@@ -26,7 +29,10 @@ export default function SettingsScreen() {
     loadStoredSettings();
   }, []);
 
-  const loadStoredSettings = async () => {
+  /**
+   * Load the stored settings.
+   */
+  const loadStoredSettings = async () : Promise<void> => {
     try {
       const apiUrl = await AsyncStorage.getItem('apiUrl');
       const matchingOption = DEFAULT_OPTIONS.find(opt => opt.value === apiUrl);
@@ -44,7 +50,10 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleOptionChange = async (value: string) => {
+  /**
+   * Handle the option change.
+   */
+  const handleOptionChange = async (value: string) : Promise<void> => {
     setSelectedOption(value);
     if (value !== 'custom') {
       await AsyncStorage.setItem('apiUrl', value);
@@ -52,7 +61,10 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleCustomUrlChange = async (value: string) => {
+  /**
+   * Handle the custom URL change.
+   */
+  const handleCustomUrlChange = async (value: string) : Promise<void> => {
     setCustomUrl(value);
     await AsyncStorage.setItem('apiUrl', value);
   };
@@ -66,41 +78,30 @@ export default function SettingsScreen() {
       flex: 1,
       padding: 16,
     },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 24,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: colors.text,
-    },
     formContainer: {
       gap: 16,
     },
+    input: {
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      color: colors.text,
+      fontSize: 16,
+      padding: 12,
+    },
     label: {
+      color: colors.text,
       fontSize: 14,
       fontWeight: '600',
       marginBottom: 8,
-      color: colors.text,
-    },
-    input: {
-      borderWidth: 1,
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
-      borderColor: colors.accentBorder,
-      color: colors.text,
-      backgroundColor: colors.accentBackground,
     },
     optionButton: {
-      padding: 12,
+      borderColor: colors.accentBorder,
       borderRadius: 8,
       borderWidth: 1,
-      borderColor: colors.accentBorder,
       marginBottom: 8,
+      padding: 12,
     },
     optionButtonSelected: {
       backgroundColor: colors.primary,
@@ -113,10 +114,21 @@ export default function SettingsScreen() {
     optionButtonTextSelected: {
       color: colors.text,
     },
+    title: {
+      color: colors.text,
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
+    titleContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 24,
+    },
     versionText: {
-      textAlign: 'center',
       color: colors.textMuted,
       marginTop: 24,
+      textAlign: 'center',
     },
   });
 
