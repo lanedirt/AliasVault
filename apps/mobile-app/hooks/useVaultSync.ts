@@ -1,11 +1,14 @@
 import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 
-// Utility function to ensure a minimum time has elapsed for an operation
+/**
+ * Utility function to ensure a minimum time has elapsed for an operation
+ */
 const withMinimumDelay = async <T>(
   operation: () => Promise<T>,
   minDelayMs: number,
@@ -26,31 +29,33 @@ const withMinimumDelay = async <T>(
   return result;
 };
 
-interface VaultSyncOptions {
+type VaultSyncOptions = {
   initialSync?: boolean;
   onSuccess?: (hasNewVault: boolean) => void;
   onError?: (error: string) => void;
   onStatus?: (message: string) => void;
 }
 
-export const useVaultSync = () => {
+/**
+ * Hook to sync the vault with the server.
+ */
+export const useVaultSync = () : {
+  syncVault: (options?: VaultSyncOptions) => Promise<boolean>;
+} => {
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
 
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
     const { initialSync = false, onSuccess, onError, onStatus } = options;
-    console.log('syncVault called with initialSync:', initialSync);
 
     try {
       const { isLoggedIn } = await authContext.initializeAuth();
 
       if (!isLoggedIn) {
-        console.log('Vault sync: Not authenticated');
+        // Not authenticated, return false immediately
         return false;
       }
-
-      console.log('Checking vault updates');
 
       // Update last check time
       await AsyncStorage.setItem('lastVaultCheck', Date.now().toString());
@@ -64,7 +69,6 @@ export const useVaultSync = () => {
       );
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
-        console.log('Vault sync error:', statusError);
         await webApi.logout(statusError);
         onError?.(statusError);
         return false;
@@ -74,8 +78,6 @@ export const useVaultSync = () => {
       const vaultMetadata = await dbContext.getVaultMetadata();
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
-      console.log('Vault revision local:', vaultRevisionNumber);
-      console.log('Vault revision server:', statusResponse.vaultRevision);
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
         onStatus?.('Syncing updated vault');
         const vaultResponseJson = await withMinimumDelay(
@@ -86,23 +88,21 @@ export const useVaultSync = () => {
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
         if (vaultError) {
-          console.log('Vault sync error:', vaultError);
           await webApi.logout(vaultError);
           onError?.(vaultError);
           return false;
         }
 
-        console.log('Re-initializing database with new vault');
         try {
           await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, null);
           onSuccess?.(true);
           return true;
-        } catch (err) {
+        } catch {
+          // Vault could not be decrypted, throw an error
           throw new Error('Vault could not be decrypted, if problem persists please logout and login again.');
         }
       }
 
-      console.log('Vault sync finished: No updates needed');
       await withMinimumDelay(
         () => Promise.resolve(onSuccess?.(false)),
         300,

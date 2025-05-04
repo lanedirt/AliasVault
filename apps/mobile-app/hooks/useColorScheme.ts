@@ -1,7 +1,8 @@
 import { Appearance } from 'react-native';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import _ from 'lodash';
-import { Colors } from '@/constants/Colors';
+
+import { Colors, ThemeColors } from '@/constants/Colors';
 
 export type ColorSchemeName = 'light' | 'dark';
 
@@ -14,36 +15,39 @@ export type ColorSchemeName = 'light' | 'dark';
  *
  * @returns The color scheme of the device.
  */
-export const useColorScheme = (delay = 150) => {
-  const [colorScheme, setColorScheme] = React.useState<ColorSchemeName>(
+export const useColorScheme = (delay = 150): ColorSchemeName => {
+  const [colorScheme, setColorScheme] = useState<ColorSchemeName>(
     Appearance.getColorScheme() as ColorSchemeName
   );
-  const onColorSchemeChange = React.useCallback(
-    _.throttle(
+
+  useEffect(() => {
+    const throttledHandler = _.throttle(
       (preferences: { colorScheme: string | null | undefined }) => {
         if (preferences.colorScheme) {
           setColorScheme(preferences.colorScheme as ColorSchemeName);
         }
       },
       delay,
-      {
-        leading: false,
-      }
-    ),
-    []
-  );
-  React.useEffect(() => {
-    const subscription = Appearance.addChangeListener(onColorSchemeChange);
-    return () => {
-      onColorSchemeChange.cancel();
+      { leading: false }
+    );
+
+    const subscription = Appearance.addChangeListener(throttledHandler);
+
+    return () : void => {
+      throttledHandler.cancel();
       subscription.remove();
     };
-  }, []);
+  }, [delay]);
+
   return colorScheme;
 };
 
-// Simple hook that returns the current theme's colors
-export const useColors = () => {
+/**
+ * Get the colors for the current theme.
+ *
+ * @returns The colors for the current theme.
+ */
+export const useColors = () : ThemeColors => {
   const colorScheme = useColorScheme();
-  return Colors[colorScheme ?? 'light'];
+  return Colors[colorScheme ?? 'light'] as ThemeColors;
 };

@@ -1,22 +1,30 @@
 import { useCallback, useState } from 'react';
+import Toast from 'react-native-toast-message';
+
+import { useVaultSync } from '@/hooks/useVaultSync';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import { useVaultSync } from './useVaultSync';
 import NativeVaultManager from '@/specs/NativeVaultManager';
-import Toast from 'react-native-toast-message';
 
-interface VaultPostResponse {
+type VaultPostResponse = {
   status: number;
   newRevisionNumber: number;
 }
 
-interface VaultMutationOptions {
+type VaultMutationOptions = {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
-export function useVaultMutate() {
+/**
+ * Hook to execute a vault mutation.
+ */
+export function useVaultMutate() : {
+  executeVaultMutation: (operation: () => Promise<void>, options?: VaultMutationOptions) => Promise<void>;
+  isLoading: boolean;
+  syncStatus: string;
+  } {
   const [isLoading, setIsLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState('');
   const authContext = useAuth();
@@ -24,51 +32,13 @@ export function useVaultMutate() {
   const webApi = useWebApi();
   const { syncVault } = useVaultSync();
 
-  const executeVaultMutation = useCallback(async (
-    operation: () => Promise<void>,
-    options: VaultMutationOptions = {}
-  ) => {
-    try {
-      setIsLoading(true);
-      setSyncStatus('Checking for vault updates...');
-
-      await syncVault({
-        onStatus: (message) => setSyncStatus(message),
-        onSuccess: async (hasNewVault) => {
-          if (hasNewVault) {
-            console.log('Vault was changed, but has now been reloaded so we can continue with the operation.');
-          }
-          await executeOperation(operation, options);
-        },
-        onError: (error) => {
-          Toast.show({
-            type: 'error',
-            text1: 'Failed to sync vault',
-            text2: error,
-            position: 'bottom'
-          });
-          options.onError?.(new Error(error));
-        }
-      });
-    } catch (error) {
-      console.error('Error during vault mutation:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Operation failed',
-        text2: error instanceof Error ? error.message : 'Unknown error',
-        position: 'bottom'
-      });
-      options.onError?.(error instanceof Error ? error : new Error('Unknown error'));
-    } finally {
-      setIsLoading(false);
-      setSyncStatus('');
-    }
-  }, [syncVault]);
-
-  const executeOperation = async (
+  /**
+   * Execute the provided operation (e.g. create/update/delete credential)
+   */
+  const executeOperation = useCallback(async (
     operation: () => Promise<void>,
     options: VaultMutationOptions
-  ) => {
+  ) : Promise<void> => {
     setSyncStatus('Saving changes to vault...');
 
     // Execute the provided operation (e.g. create/update/delete credential)
@@ -78,7 +48,6 @@ export function useVaultMutate() {
     const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
 
     // Get the encrypted database
-    console.log('Getting encrypted database new version');
     const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
     if (!encryptedDb) {
       throw new Error('Failed to get encrypted database');
@@ -118,8 +87,6 @@ export function useVaultMutate() {
     // Upload to server
     const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
 
-    console.log('Vault upload response:', response);
-
     if (response.status === 0) {
       await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
       options.onSuccess?.();
@@ -128,7 +95,58 @@ export function useVaultMutate() {
     } else {
       throw new Error('Failed to upload vault to server');
     }
-  };
+  }, [dbContext, authContext, webApi]);
+
+  const executeVaultMutation = useCallback(async (
+    operation: () => Promise<void>,
+    options: VaultMutationOptions = {}
+  ) => {
+    try {
+      setIsLoading(true);
+      setSyncStatus('Checking for vault updates...');
+
+      await syncVault({
+        /**
+         * Update the sync status
+         */
+        onStatus: (message) => setSyncStatus(message),
+        /**
+         * Execute the operation if the vault has been updated
+         */
+        onSuccess: async (hasNewVault) => {
+          if (hasNewVault) {
+            // Vault was changed, but has now been reloaded so we can continue with the operation.
+          }
+
+          await executeOperation(operation, options);
+        },
+        /**
+         * Handle errors
+         */
+        onError: (error) => {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to sync vault',
+            text2: error,
+            position: 'bottom'
+          });
+          options.onError?.(new Error(error));
+        }
+      });
+    } catch (error) {
+      console.error('Error during vault mutation:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Operation failed',
+        text2: error instanceof Error ? error.message : 'Unknown error',
+        position: 'bottom'
+      });
+      options.onError?.(error instanceof Error ? error : new Error('Unknown error'));
+    } finally {
+      setIsLoading(false);
+      setSyncStatus('');
+    }
+  }, [syncVault, executeOperation]);
 
   return {
     executeVaultMutation,
