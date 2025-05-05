@@ -42,3 +42,6 @@ app-example
 # to check them in as it's not needed for the applications to actually run.
 *.js.map
 *.mjs.map
+
+# Test output files
+coverage
