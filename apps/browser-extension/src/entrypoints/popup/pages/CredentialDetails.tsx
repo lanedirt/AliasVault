@@ -65,17 +65,6 @@ const CredentialDetails: React.FC = () => {
     );
   };
 
-  /**
-   * Check if a date is valid.
-   */
-  const isValidDate = useCallback((date: string | null | undefined): boolean => {
-    if (!date || date === '0001-01-01 00:00:00') {
-      return false;
-    }
-    const dateObj = new Date(date);
-    return !isNaN(dateObj.getTime());
-  }, []);
-
   useEffect(() => {
     if (isPopup()) {
       window.history.replaceState({}, '', `popup.html#/credentials`);
@@ -116,10 +105,7 @@ const CredentialDetails: React.FC = () => {
       <NotesBlock notes={credential.Notes} />
       <TotpBlock credentialId={credential.Id} />
       <LoginCredentialsBlock credential={credential} />
-      <AliasBlock
-        credential={credential}
-        isValidDate={isValidDate}
-      />
+      <AliasBlock credential={credential} />
     </div>
   );
 };

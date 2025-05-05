@@ -1642,7 +1642,7 @@ var IdentityHelperUtils = class {
     if (!birthDate || birthDate.startsWith("0001-01-01")) {
       return "";
     }
-    return birthDate.split("T")[0];
+    return birthDate.split(/[T ]/)[0];
   }
   /**
    * Normalize a birth date for database.
@@ -1651,15 +1651,17 @@ var IdentityHelperUtils = class {
     if (!input || input.trim() === "") {
       return "0001-01-01T00:00:00.000Z";
     }
-    const trimmed = input.trim();
+    const trimmed = input.trim().replace(" ", "T");
+    const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T ]?(\d{2}):?(\d{2}):?(\d{2})?$/);
+    if (match) {
+      const [_, y, m, d, h = "00", mi = "00", s = "00"] = match;
+      return `${y}-${m}-${d}T${h}:${mi}:${s}.000Z`;
+    }
     const parsedDate = new Date(trimmed);
-    if (isNaN(parsedDate.getTime())) {
-      return "0001-01-01T00:00:00.000Z";
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString();
     }
-    if (trimmed.includes("T")) {
-      return trimmed;
-    }
-    return `${trimmed}T00:00:00.000Z`;
+    return "0001-01-01T00:00:00.000Z";
   }
   /**
    * Check if a birth date is valid.

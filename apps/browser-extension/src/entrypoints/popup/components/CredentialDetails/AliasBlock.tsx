@@ -1,20 +1,20 @@
 import React from 'react';
-import { Credential } from '../../../../utils/types/Credential';
-import { FormInputCopyToClipboard } from '../../components/FormInputCopyToClipboard';
+import { Credential } from '@/utils/types/Credential';
+import { FormInputCopyToClipboard } from '@/entrypoints/popup/components/FormInputCopyToClipboard';
+import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
 
 type AliasBlockProps = {
   credential: Credential;
-  isValidDate: (date: string | null | undefined) => boolean;
 }
 
 /**
  * Render the alias block.
  */
-const AliasBlock: React.FC<AliasBlockProps> = ({ credential, isValidDate }) => {
+const AliasBlock: React.FC<AliasBlockProps> = ({ credential }) => {
   const hasFirstName = Boolean(credential.Alias?.FirstName?.trim());
   const hasLastName = Boolean(credential.Alias?.LastName?.trim());
   const hasNickName = Boolean(credential.Alias?.NickName?.trim());
-  const hasBirthDate = isValidDate(credential.Alias?.BirthDate);
+  const hasBirthDate = IdentityHelperUtils.isValidBirthDate(credential.Alias?.BirthDate);
 
   if (!hasFirstName && !hasLastName && !hasNickName && !hasBirthDate) {
     return null;
@@ -48,7 +48,7 @@ const AliasBlock: React.FC<AliasBlockProps> = ({ credential, isValidDate }) => {
         <FormInputCopyToClipboard
           id="birthDate"
           label="Birth Date"
-          value={new Date(credential.Alias?.BirthDate).toISOString().split('T')[0]}
+          value={IdentityHelperUtils.normalizeBirthDateForDisplay(credential.Alias?.BirthDate)}
         />
       )}
       {hasNickName && (

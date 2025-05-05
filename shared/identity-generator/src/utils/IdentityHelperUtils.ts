@@ -10,7 +10,8 @@ export class IdentityHelperUtils {
       return '';
     }
 
-    return birthDate.split('T')[0]; // Strip time
+    // Handle both space and T separators
+    return birthDate.split(/[T ]/)[0]; // Strip time
   }
 
   /**
@@ -21,21 +22,22 @@ export class IdentityHelperUtils {
       return '0001-01-01T00:00:00.000Z';
     }
 
-    const trimmed = input.trim();
+    const trimmed = input.trim().replace(' ', 'T');
 
-    // Try to parse the date
+    // Check if the format is valid ISO-like string manually, to support pre-1970 dates
+    const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T ]?(\d{2}):?(\d{2}):?(\d{2})?$/);
+    if (match) {
+      const [_, y, m, d, h = '00', mi = '00', s = '00'] = match;
+      return `${y}-${m}-${d}T${h}:${mi}:${s}.000Z`;
+    }
+
+    // Fall back to native Date parsing only if ISO conversion not needed
     const parsedDate = new Date(trimmed);
-    if (isNaN(parsedDate.getTime())) {
-      return '0001-01-01T00:00:00.000Z';
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString();
     }
 
-    // If input already includes time, return as is (assume it's valid ISO format)
-    if (trimmed.includes('T')) {
-      return trimmed;
-    }
-
-    // If only date was provided (e.g., "1983-08-12"), add default time
-    return `${trimmed}T00:00:00.000Z`;
+    return '0001-01-01T00:00:00.000Z';
   }
 
   /**
