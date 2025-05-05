@@ -370,6 +370,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
            * Delete the credential.
            */
           onPress: async () : Promise<void> => {
+            setIsLoading(true);
+
             await executeVaultMutation(async () => {
               await dbContext.sqliteClient!.deleteCredentialById(id);
             });
@@ -382,6 +384,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                 position: 'bottom'
               });
             }, 200);
+
+            setIsLoading(false);
 
             /*
              * Hard navigate back to the credentials list as the credential that was
