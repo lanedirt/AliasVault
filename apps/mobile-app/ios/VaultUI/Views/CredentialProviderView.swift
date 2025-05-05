@@ -122,7 +122,7 @@ public struct CredentialProviderView: View {
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
                 // Define all text strings
                 guard let credential = viewModel.selectedCredential else {
-                    return ActionSheet(title: Text("Select Login Method"), message: Text("No credential selected."), buttons: [.cancel()])
+                    return ActionSheet(title: Text("Choose Username"), message: Text("No credential selected."), buttons: [.cancel()])
                 }
 
                 var buttons: [ActionSheet.Button] = []
@@ -145,13 +145,13 @@ public struct CredentialProviderView: View {
                     })
                 } else {
                     if let username = credential.username, !username.isEmpty {
-                        buttons.append(.default(Text("Username: \(username)")) {
+                        buttons.append(.default(Text("\(username)")) {
                             viewModel.selectUsernamePassword()
                         })
                     }
 
                     if let email = credential.alias?.email, !email.isEmpty {
-                        buttons.append(.default(Text("Email: \(email)")) {
+                        buttons.append(.default(Text("\(email)")) {
                             viewModel.selectEmailPassword()
                         })
                     }
@@ -160,8 +160,8 @@ public struct CredentialProviderView: View {
                 buttons.append(.cancel())
 
                 return ActionSheet(
-                    title: viewModel.isChoosingTextToInsert ? Text("Select Text To Insert") : Text("Select Login Method"),
-                    message: viewModel.isChoosingTextToInsert ? Text("Select the text to insert into the focused input field") : Text("Choose how you want to log in"),
+                    title: viewModel.isChoosingTextToInsert ? Text("Select Text To Insert") : Text("Choose Username"),
+                    message: viewModel.isChoosingTextToInsert ? Text("Select the text to insert into the focused input field") : Text("This website may require either your username or your email address to log in"),
                     buttons: buttons
                 )
             }
