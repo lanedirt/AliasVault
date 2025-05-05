@@ -24,7 +24,7 @@ git clone https://github.com/lanedirt/AliasVault.git
 
 2. Navigate to the Browser Extension directory:
 ```bash
-cd AliasVault/browser-extension
+cd AliasVault/apps/browser-extension
 ```
 
 3. Install the required dependencies:
@@ -42,7 +42,7 @@ npm run build:firefox
 1. Open Firefox and go to `about:debugging`
 2. Click "This Firefox"
 3. Click "Load Temporary Add-on"
-4. Navigate to and select the file `browser-extension/dist/firefox-mv2/manifest.json`
+4. Navigate to and select the file `apps/browser-extension/dist/firefox-mv2/manifest.json`
 5. The AliasVault extension should now appear in your extensions list
 
 ## Development Mode (Optional)

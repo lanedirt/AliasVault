@@ -1,13 +1,12 @@
 ---
 layout: default
 title: Enable WebAuthn
-parent: Development
-grand_parent: Miscellaneous
-nav_order: 9
+parent: Miscellaneous
+nav_order: 10
 ---
 
 # WebAuthn
-Webauthn allows to quick unlock the vault. This can be either the built-in browser authenticator or an external authenticator like a Yubikey.
+Webauthn allows to quick unlock the vault in the AliasVault web app. This can be either the built-in browser authenticator or an external authenticator like a Yubikey.
 
 At the time of writing (2024-10-04), only some browsers support the required PRF extension. In order to make it work in Chrome, you need to enable the PRF extension in the browser settings.
 

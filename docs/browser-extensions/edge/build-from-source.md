@@ -24,7 +24,7 @@ git clone https://github.com/lanedirt/AliasVault.git
 
 2. Navigate to the Browser Extension directory:
 ```bash
-cd AliasVault/browser-extension
+cd AliasVault/apps/browser-extension
 ```
 
 3. Install the required dependencies:
@@ -42,7 +42,7 @@ npm run build:edge
 1. Open Microsoft Edge and go to `edge://extensions/`
 2. Enable "Developer mode" using the toggle in the top right corner
 3. Click "Load unpacked"
-4. Navigate to and select the folder `browser-extension/dist/edge-mv3`
+4. Navigate to and select the folder `apps/browser-extension/dist/edge-mv3`
 5. The AliasVault extension should now appear in your extensions list
 
 ## Development Mode (Optional)

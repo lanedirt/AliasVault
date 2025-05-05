@@ -49,7 +49,7 @@ npm run build:chrome
 2. Load in Chrome:
    - Open Chrome and navigate to `chrome://extensions/`
    - Enable "Developer mode" in the top right corner
-   - Click "Load unpacked" and the folder `./browser-extension/dist/chrome-mv3`
+   - Click "Load unpacked" and the folder `./apps/browser-extension/dist/chrome-mv3`
 
 ### Firefox
 
@@ -62,7 +62,7 @@ npm run build:firefox
    - Open Firefox and navigate to `about:debugging`
    - Click "This Firefox" in the left sidebar
    - Click "Load Temporary Add-on"
-   - Navigate to the `./browser-extension/dist/firefox-mv2` folder and select the `manifest.json` file
+   - Navigate to the `./apps/browser-extension/dist/firefox-mv2` folder and select the `manifest.json` file
 
 ### Microsoft Edge
 
@@ -74,7 +74,7 @@ npm run build:edge
 2. Load in Edge:
    - Open Edge and navigate to `edge://extensions/`
    - Enable "Developer mode" in the top right corner
-   - Click "Load unpacked" and the folder `./browser-extension/dist/edge-mv3`
+   - Click "Load unpacked" and the folder `./apps/browser-extension/dist/edge-mv3`
 
 ### Safari
 

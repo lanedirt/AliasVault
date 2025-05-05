@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Mobile App Development
+title: Mobile Apps
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 9
+nav_order: 4
 ---
 
 # React Native Expo
@@ -47,9 +47,9 @@ open -a "Android Studio"
 ```
 
 ## Unit tests
-TODO: improve documentation further.
+The iOS project contains unit tests that test the `VaultStoreKit` native Swift implementation. The `VaultStoreKit` logic is responsible for handling vault encryption/decryption, contains the SQLite client and acts as a proxy for all queries made by the React Native and autofill components.
 
-The iOS project contains unit tests that test the `VaultStore` native Swift implementation. The `VaultStore` logic is responsible for handling vault encryption/decryption, contains the SQLite client and acts as a proxy for all local queries etc.
+Tests can be ran via XCode test interface.
 
 In order to test this query logic behavior the tests contain a static encrypted client vault (SQLite database) that is provided to the tests.
 

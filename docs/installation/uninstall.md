@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Uninstall
-parent: Installation Guide
+parent: Server Installation
 nav_order: 4
 ---
 

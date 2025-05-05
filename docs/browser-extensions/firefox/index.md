@@ -8,7 +8,7 @@ nav_order: 1
 # Firefox Extension
 In order to install the Firefox Extension, see the options below.
 
-## Firefox Add-ons
+## Download from Firefox Add-ons
 Installing the extension from the Firefox Add-ons is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
 1. Go to the [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) page

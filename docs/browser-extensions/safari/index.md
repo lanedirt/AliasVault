@@ -8,7 +8,7 @@ nav_order: 1
 # Safari Extension
 In order to install the Safari Extension, see the options below.
 
-## MacOS App Store
+## Download from MacOS App Store
 Installing the extension from the MacOS App Store is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
 1. Go to the [MacOS App Store](https://apps.apple.com/app/id6743163173) page

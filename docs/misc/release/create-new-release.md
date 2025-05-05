@@ -16,8 +16,8 @@ Follow the steps in the checklist below to prepare a new release.
 - [ ] Update ./install.sh `@version` in header if the install script has changed. This allows the install script to self-update when running the `./install.sh update` command on default installations.
 
 ## Versioning browser extension
-- [ ] Update ./browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
-- [ ] Update the version `MARKETING_VERSION` and increase the build number `CURRENT_PROJECT_VERSION` in the ./browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj project file in MacOS Xcode. This is the version that will be shown in the Safari Browser Extension App Store.
+- [ ] Update ./apps/browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
+- [ ] Update the version `MARKETING_VERSION` and increase the build number `CURRENT_PROJECT_VERSION` in the ./apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj project file in MacOS Xcode. This is the version that will be shown in the Safari Browser Extension App Store.
 - [ ] Update ./apps/browser-extension/src/utils/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
 - [ ] Update ./apps/browser-extension/src/utils/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
 - [ ] Update ./apps/browser-extension/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
@@ -57,6 +57,6 @@ The GitHub Actions workflow `Browser Extension Build` will build the browser ext
 3. Upload the Firefox archive (normal + sources) to the Firefox Add-ons page.
 4. Upload the Edge archive to the Microsoft Edge Add-ons page.
 5. Submit the Safari extension to Apple for review:
-    1. Navigate to the `browser-extension` directory.
+    1. Navigate to the `apps/browser-extension` directory.
     2. Build the safari extension locally via `npm run build:safari`, which will output the build files to `dist/safari-mv2`. **Note: it's important to always rebuild, as otherwise stale build files from a previous build might get included in the Safari binary by accident!**
-    3. Open the `browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Archive" and then "Distribute App" option.
+    3. Open the `apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Archive" and then "Distribute App" option.

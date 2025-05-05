@@ -8,7 +8,7 @@ nav_order: 1
 # Google Chrome Extension
 In order to install the Google Chrome Extension, see the options below.
 
-## Chrome Web Store
+## Download from Chrome Web Store
 Installing the extension from the Chrome Web Store is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
 1. Go to the [Chrome Web Store](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj)
