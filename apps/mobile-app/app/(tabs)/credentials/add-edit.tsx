@@ -277,7 +277,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
       setIsLoading(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi]);
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch]);
 
   /**
    * Extract the service name from the service URL.

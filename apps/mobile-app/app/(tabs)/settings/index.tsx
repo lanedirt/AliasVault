@@ -1,7 +1,7 @@
 import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated, Platform } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -20,7 +20,7 @@ import avatarImage from '@/assets/images/avatar.webp';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
-  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder, getBiometricDisplayName } = useAuth();
+  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
