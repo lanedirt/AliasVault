@@ -1,11 +1,11 @@
 # AliasVault: password & (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
 
-[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-integration-tests.yml?label=integration tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-build-run-tests.yml)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-e2e-client-tests.yml?label=e2e tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-client-tests.yml)
-[<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
-[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
+[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
+[![.NET Unit Tests](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-unit-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-unit-tests.yml)
+[![.NET Integration Tests](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-integration-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-integration-tests.yml)
+[![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
+[<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=Sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
+[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=Discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
 
 > AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
 
