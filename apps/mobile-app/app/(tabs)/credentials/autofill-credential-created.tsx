@@ -1,7 +1,7 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, AppState } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -21,6 +21,25 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
    */
   const handleStayInApp = useCallback(() => {
     router.back();
+  }, [router]);
+
+  // Handle app state changes to auto-dismiss when app comes back from background
+  useEffect(() => {
+    let wasInBackground = false;
+
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'background') {
+        wasInBackground = true;
+      } else if (nextAppState === 'active' && wasInBackground) {
+        // App is returning from background, dismiss the screen
+        router.back();
+        wasInBackground = false;
+      }
+    });
+
+    return (): void => {
+      subscription.remove();
+    };
   }, [router]);
 
   const styles = StyleSheet.create({
