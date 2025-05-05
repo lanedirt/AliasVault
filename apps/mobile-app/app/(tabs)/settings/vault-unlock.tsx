@@ -1,6 +1,7 @@
 import { StyleSheet, View, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useCallback } from 'react';
+import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
@@ -105,6 +106,16 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
 
     setIsFaceIDEnabled(value);
     setAuthMethods(value ? ['faceid', 'password'] : ['password']);
+
+    // Show toast notification only on Face ID enabled
+    if (value) {
+      Toast.show({
+        type: 'success',
+        text1: 'Face ID is now successfully enabled',
+        position: 'bottom',
+        visibilityTime: 1200,
+      });
+    }
   }, [hasFaceID, setAuthMethods]);
 
   const styles = StyleSheet.create({

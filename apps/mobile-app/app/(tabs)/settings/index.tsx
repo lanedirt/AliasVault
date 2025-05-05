@@ -1,7 +1,7 @@
 import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated, Platform } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -27,46 +27,48 @@ export default function SettingsScreen() : React.ReactNode {
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
 
-  useEffect(() => {
-    /**
-     * Load the auto-lock display.
-     */
-    const loadAutoLockDisplay = async () : Promise<void> => {
-      const autoLockTimeout = await getAutoLockTimeout();
-      let display = 'Never';
+  useFocusEffect(
+    useCallback(() => {
+      /**
+       * Load the auto-lock display.
+       */
+      const loadAutoLockDisplay = async () : Promise<void> => {
+        const autoLockTimeout = await getAutoLockTimeout();
+        let display = 'Never';
 
-      if (autoLockTimeout === 5) {
-        display = '5 seconds';
-      } else if (autoLockTimeout === 30) {
-        display = '30 seconds';
-      } else if (autoLockTimeout === 60) {
-        display = '1 minute';
-      } else if (autoLockTimeout === 900) {
-        display = '15 minutes';
-      } else if (autoLockTimeout === 1800) {
-        display = '30 minutes';
-      } else if (autoLockTimeout === 3600) {
-        display = '1 hour';
-      } else if (autoLockTimeout === 14400) {
-        display = '4 hours';
-      } else if (autoLockTimeout === 28800) {
-        display = '8 hours';
-      }
+        if (autoLockTimeout === 5) {
+          display = '5 seconds';
+        } else if (autoLockTimeout === 30) {
+          display = '30 seconds';
+        } else if (autoLockTimeout === 60) {
+          display = '1 minute';
+        } else if (autoLockTimeout === 900) {
+          display = '15 minutes';
+        } else if (autoLockTimeout === 1800) {
+          display = '30 minutes';
+        } else if (autoLockTimeout === 3600) {
+          display = '1 hour';
+        } else if (autoLockTimeout === 14400) {
+          display = '4 hours';
+        } else if (autoLockTimeout === 28800) {
+          display = '8 hours';
+        }
 
-      setAutoLockDisplay(display);
-    };
+        setAutoLockDisplay(display);
+      };
 
-    /**
-     * Load the auth method display.
-     */
-    const loadAuthMethodDisplay = async () : Promise<void> => {
-      const authMethod = await getAuthMethodDisplay();
-      setAuthMethodDisplay(authMethod);
-    };
+      /**
+       * Load the auth method display.
+       */
+      const loadAuthMethodDisplay = async () : Promise<void> => {
+        const authMethod = await getAuthMethodDisplay();
+        setAuthMethodDisplay(authMethod);
+      };
 
-    loadAutoLockDisplay();
-    loadAuthMethodDisplay();
-  }, [getAutoLockTimeout, getAuthMethodDisplay, getBiometricDisplayName]);
+      loadAutoLockDisplay();
+      loadAuthMethodDisplay();
+    }, [getAutoLockTimeout, getAuthMethodDisplay])
+  );
 
   /**
    * Handle the logout.
