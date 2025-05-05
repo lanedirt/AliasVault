@@ -12,38 +12,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-chrome-extension:
+  build-shared-libraries:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/browser-extension
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Get short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/browser-extension/package-lock.json
 
       - name: Build and distribute shared libraries
         run: |
-          cd ../../
-          chmod +x shared/build-and-distribute.sh
-          ./shared/build-and-distribute.sh
+          cd ./shared
+          chmod +x build-and-distribute.sh
+          ./build-and-distribute.sh
 
       - name: Verify shared library distribution
         run: |
           # Check if files exist and were recently modified
           TARGET_DIRS=(
-            "utils/shared/identity-generator"
-            "utils/shared/password-generator"
+            "apps/browser-extension/src/utils/shared/identity-generator"
+            "apps/browser-extension/src/utils/shared/password-generator"
           )
 
           for dir in "${TARGET_DIRS[@]}"; do
@@ -69,6 +59,27 @@ jobs:
           done
 
           echo "✅ Shared library distribution verified"
+
+  build-chrome-extension:
+    needs: build-shared-libraries
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/browser-extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/browser-extension/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -100,6 +111,7 @@ jobs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
 
   build-firefox-extension:
+    needs: build-shared-libraries
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -157,6 +169,7 @@ jobs:
       sha_short: ${{ steps.vars.outputs.sha_short }}
 
   build-edge-extension:
+    needs: build-shared-libraries
     runs-on: ubuntu-latest
     defaults:
       run:

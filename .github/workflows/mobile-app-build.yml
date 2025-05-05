@@ -30,9 +30,9 @@ jobs:
 
       - name: Build and distribute shared libraries
         run: |
-          cd ../../
-          chmod +x shared/build-and-distribute.sh
-          ./shared/build-and-distribute.sh
+          cd ../../shared
+          chmod +x build-and-distribute.sh
+          ./build-and-distribute.sh
 
       - name: Verify shared library distribution
         run: |

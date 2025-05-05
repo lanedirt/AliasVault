@@ -26,20 +26,23 @@ jobs:
         run: dotnet workload install wasm-tools
 
       - name: Build
+        working-directory: apps/server
         run: dotnet build
 
       - name: Start dev database
         run: ./install.sh configure-dev-db start
 
       - name: Ensure browsers are installed
-        run: pwsh apps/server/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+        working-directory: apps/server
+        run: pwsh Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
       - name: Run AdminTests with retry
+        working-directory: apps/server
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 60
           max_attempts: 3
-          command: dotnet test apps/server/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
+          command: dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
 
       - name: Upload Test Results
         if: always()
@@ -67,17 +70,20 @@ jobs:
         run: dotnet workload install wasm-tools
 
       - name: Build
+        working-directory: apps/server
         run: dotnet build
 
       - name: Start dev database
         run: ./install.sh configure-dev-db start
 
       - name: Ensure browsers are installed
-        run: pwsh apps/server/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+        working-directory: apps/server
+        run: pwsh Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
       - name: Run ClientTests with retry (Shard ${{ matrix.shard }})
+        working-directory: apps/server
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 60
           max_attempts: 3
-          command: dotnet test apps/server/Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
+          command: dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
