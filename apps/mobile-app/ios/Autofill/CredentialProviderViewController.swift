@@ -16,9 +16,15 @@ import VaultModels
 public class CredentialProviderViewController: ASCredentialProviderViewController {
     private var viewModel: CredentialProviderViewModel?
     private var isChoosingTextToInsert = false
+    private var hostingController: UIHostingController<CredentialProviderView>?
 
     override public func viewDidLoad() {
         super.viewDidLoad()
+        // Keep view empty until we confirm everything is valid in viewWillAppear
+    }
+
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
         // Check if there is a stored vault. If not, it means the user has not logged in yet and we
         // should redirect to the main app login screen automatically.
@@ -30,10 +36,30 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
             return
         }
 
+        // Try to unlock the vault. If it fails, we return and do not show the dialog.
+        do {
+            try vaultStore.unlockVault()
+        } catch {
+            print("Failed to unlock vault: \(error)")
+            self.extensionContext.cancelRequest(withError: NSError(
+                domain: ASExtensionErrorDomain,
+                code: ASExtensionError.failed.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: error.localizedDescription]
+            ))
+            return
+        }
+
+        // Only set up the view if we haven't already
+        if hostingController == nil {
+            setupView(vaultStore: vaultStore)
+        }
+    }
+
+    private func setupView(vaultStore: VaultStore) {
         // Create the ViewModel with injected behaviors
         let viewModel = CredentialProviderViewModel(
             loader: {
-                return try await self.loadCredentials()
+                return try await self.loadCredentials(vaultStore: vaultStore)
             },
             selectionHandler: { identifier, password in
                 self.handleCredentialSelection(identifier: identifier, password: password)
@@ -46,7 +72,7 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         self.viewModel = viewModel
 
         let hostingController = UIHostingController(
-          rootView: CredentialProviderView(viewModel: viewModel)
+            rootView: CredentialProviderView(viewModel: viewModel)
         )
 
         addChild(hostingController)
@@ -61,6 +87,7 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         ])
 
         hostingController.didMove(toParent: self)
+        self.hostingController = hostingController
     }
 
     override public func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
@@ -186,9 +213,7 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
 
     /// Load credentials from the vault store and register them as credential identities
     /// and then return them to the caller (view model).
-    private func loadCredentials() async throws -> [Credential] {
-        let vaultStore = VaultStore()
-        try vaultStore.unlockVault()
+    private func loadCredentials(vaultStore: VaultStore) async throws -> [Credential] {
         let credentials = try vaultStore.getAllCredentials()
         await self.registerCredentialIdentities(credentials: credentials)
         return credentials
