@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 import LocalAuthentication
-import KeychainAccess
+import Security
 
 /// Extension for the VaultStore class to handle encryption/decryption
 extension VaultStore {
@@ -21,9 +21,7 @@ extension VaultStore {
         if self.enabledAuthMethods.contains(.faceID) {
             print("Face ID is enabled, storing key in keychain")
             do {
-                try self.keychain
-                    .authenticationPrompt("Authenticate to save your vault decryption key in the iOS keychain")
-                    .set(keyData, key: VaultConstants.encryptionKeyKey)
+                try storeKeyInKeychain(keyData)
                 print("Encryption key saved successfully to keychain")
             } catch {
                 print("Failed to save encryption key to keychain: \(error)")
@@ -73,27 +71,92 @@ extension VaultStore {
 
             print("Attempting to get encryption key from keychain as Face ID is enabled as an option")
             do {
-                guard let keyData = try self.keychain
-                    .authenticationPrompt("Authenticate to unlock your vault")
-                    .getData(VaultConstants.encryptionKeyKey) else {
-                    throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
-                }
+                let keyData = try retrieveKeyFromKeychain(context: context)
                 self.encryptionKey = keyData
                 return keyData
-            } catch let keychainError as KeychainAccess.Status {
-                switch keychainError {
-                case .itemNotFound:
-                    throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
-                case .authFailed:
-                    throw NSError(domain: "VaultStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication failed"])
-                default:
-                    throw NSError(domain: "VaultStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Keychain access error: \(keychainError.localizedDescription)"])
-                }
             } catch {
-                throw NSError(domain: "VaultStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Unexpected error accessing keychain: \(error.localizedDescription)"])
+                throw NSError(domain: "VaultStore", code: 9, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve key from keychain: \(error.localizedDescription)"])
             }
         }
 
         throw NSError(domain: "VaultStore", code: 3, userInfo: [NSLocalizedDescriptionKey: "No encryption key found in memory"])
+    }
+
+    /// Store the encryption key in the keychain
+    internal func storeKeyInKeychain(_ keyData: Data) throws {
+        guard let accessControl = SecAccessControlCreateWithFlags(
+            nil,
+            kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+            [.userPresence],
+            nil
+        ) else {
+            throw NSError(domain: "VaultStore", code: 11, userInfo: [NSLocalizedDescriptionKey: "Failed to create access control"])
+        }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: VaultConstants.keychainService,
+            kSecAttrAccount as String: VaultConstants.encryptionKeyKey,
+            kSecAttrAccessGroup as String: VaultConstants.keychainAccessGroup,
+            kSecValueData as String: keyData,
+            kSecAttrAccessControl as String: accessControl
+        ]
+
+        SecItemDelete(query as CFDictionary)
+
+        let status = SecItemAdd(query as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw NSError(domain: "VaultStore", code: 10, userInfo: [NSLocalizedDescriptionKey: "Failed to store key in keychain: \(status)"])
+        }
+    }
+
+    /// Remove the encryption key from the keychain
+    internal func removeKeyFromKeychain() throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: VaultConstants.keychainService,
+            kSecAttrAccount as String: VaultConstants.encryptionKeyKey,
+            kSecAttrAccessGroup as String: VaultConstants.keychainAccessGroup
+        ]
+
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw NSError(domain: "VaultStore", code: 11, userInfo: [NSLocalizedDescriptionKey: "Failed to remove key from keychain: \(status)"])
+        }
+    }
+
+    // MARK: - Private Keychain Methods
+
+    /// Retrieve the encryption key from the keychain
+    private func retrieveKeyFromKeychain(context: LAContext) throws -> Data {
+        // Ensure interaction is allowed so system can prompt for Face ID or passcode fallback
+        context.interactionNotAllowed = false
+        context.localizedReason = "Authenticate to unlock your vault"
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: VaultConstants.keychainService,
+            kSecAttrAccount as String: VaultConstants.encryptionKeyKey,
+            kSecAttrAccessGroup as String: VaultConstants.keychainAccessGroup,
+            kSecReturnData as String: true,
+            kSecUseAuthenticationContext as String: context,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard status == errSecSuccess,
+              let keyData = result as? Data else {
+            if status == errSecUserCanceled {
+                throw NSError(domain: "VaultStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication canceled by user"])
+            } else if status == errSecAuthFailed {
+                throw NSError(domain: "VaultStore", code: 8, userInfo: [NSLocalizedDescriptionKey: "Authentication failed"])
+            } else {
+                throw NSError(domain: "VaultStore", code: 2, userInfo: [NSLocalizedDescriptionKey: "No encryption key found"])
+            }
+        }
+
+        return keyData
     }
 }

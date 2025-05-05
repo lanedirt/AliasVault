@@ -1,9 +1,9 @@
 import Foundation
-import KeychainAccess
 import SQLite
 import LocalAuthentication
 import CryptoKit
 import CommonCrypto
+import Security
 import VaultModels
 
 /// This class is used to store and retrieve the encrypted AliasVault database and encryption key.
@@ -15,10 +15,6 @@ public class VaultStore {
     /// A shared instance of the VaultStore class that can be used to access the vault which does
     /// require re-authentication every time the vault is accessed.
     public static let shared = VaultStore()
-
-    /// The keychain to access the vault's encryption key.
-    internal let keychain = Keychain(service: VaultConstants.keychainService, accessGroup: VaultConstants.keychainAccessGroup)
-        .accessibility(.whenPasscodeSetThisDeviceOnly, authenticationPolicy: .biometryAny)
 
     /// The user defaults using the shared container which is accessible by both the React Native
     /// app and the iOS Autofill extension.

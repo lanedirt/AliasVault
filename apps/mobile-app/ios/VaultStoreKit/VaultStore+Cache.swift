@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 /// Extension for the VaultStore class to handle cache management
 extension VaultStore {
@@ -14,9 +15,7 @@ extension VaultStore {
         print("Clearing vault - removing all stored data")
 
         do {
-            try self.keychain
-                .authenticationPrompt("Authenticate to remove your vault decryption key")
-                .remove(VaultConstants.encryptionKeyKey)
+            try removeKeyFromKeychain()
             print("Successfully removed encryption key from keychain")
         } catch {
             print("Failed to remove encryption key from keychain: \(error)")

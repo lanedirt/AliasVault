@@ -30,21 +30,29 @@ extension VaultStore {
 
         let encryptedDbData = Data(base64Encoded: encryptedDbBase64)!
 
+        // Try to decrypt the database twice to handle cases where the first attempt fails
+        // and this first attempt was using the cached encryption key.
+        if encryptionKey != nil {
+            // There is a cached encryption key, so we try to decrypt the database with it.
+            // If this fails, we remove the cached key and try a second time triggering
+            // re-authentication.
+            do {
+                let decryptedDbBase64 = try decrypt(data: encryptedDbData)
+                try setupDatabaseWithDecryptedData(decryptedDbBase64)
+                return
+            } catch {
+                print("First decryption attempt with cached key failed: \(error)")
+                encryptionKey = nil
+            }
+        }
+
+        // No cached key or first attempt failed — trigger authentication and try again
         do {
             let decryptedDbBase64 = try decrypt(data: encryptedDbData)
             try setupDatabaseWithDecryptedData(decryptedDbBase64)
         } catch {
-            print("First decryption attempt failed: \(error)")
-
-            encryptionKey = nil
-
-            do {
-                let decryptedDbBase64 = try decrypt(data: encryptedDbData)
-                try setupDatabaseWithDecryptedData(decryptedDbBase64)
-            } catch {
-                print("Second decryption attempt failed: \(error)")
-                throw NSError(domain: "VaultStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to decrypt database after retry: \(error.localizedDescription)"])
-            }
+            print("Second decryption attempt after reauth failed: \(error)")
+            throw NSError(domain: "VaultStore", code: 5, userInfo: [NSLocalizedDescriptionKey: "Could not unlock vault"])
         }
     }
 
