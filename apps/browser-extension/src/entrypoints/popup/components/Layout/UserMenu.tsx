@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useLoading } from '../../context/LoadingContext';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 /**
  * User menu component.

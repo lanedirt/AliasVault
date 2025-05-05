@@ -1,5 +1,5 @@
 import React from 'react';
-import { EmailPreview } from '../../components/EmailPreview';
+import { EmailPreview } from '@/entrypoints/popup/components/EmailPreview';
 
 type EmailBlockProps = {
   email: string;

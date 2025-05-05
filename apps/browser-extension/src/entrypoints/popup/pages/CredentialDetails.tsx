@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDb } from '../context/DbContext';
-import { Credential } from '../../../utils/types/Credential';
-import { useLoading } from '../context/LoadingContext';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { Credential } from '@/utils/types/Credential';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import {
   HeaderBlock,
   EmailBlock,
@@ -10,7 +10,7 @@ import {
   LoginCredentialsBlock,
   AliasBlock,
   NotesBlock
-} from '../components/CredentialDetails';
+} from '@/entrypoints/popup/components/CredentialDetails';
 
 /**
  * Credential details page.

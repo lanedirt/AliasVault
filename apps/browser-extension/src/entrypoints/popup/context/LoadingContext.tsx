@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import LoadingSpinnerFullScreen from '../components/LoadingSpinnerFullScreen';
+import LoadingSpinnerFullScreen from '@/entrypoints/popup/components/LoadingSpinnerFullScreen';
 
 type LoadingContextType = {
   isLoading: boolean;

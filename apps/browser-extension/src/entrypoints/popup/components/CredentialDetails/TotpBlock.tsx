@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useDb } from '../../context/DbContext';
-import { TotpCode } from '../../../../utils/types/TotpCode';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { TotpCode } from '@/utils/types/TotpCode';
 import  * as OTPAuth from 'otpauth';
 
 type TotpBlockProps = {

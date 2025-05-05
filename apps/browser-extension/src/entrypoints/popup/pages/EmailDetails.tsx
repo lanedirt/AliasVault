@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Email } from '../../../utils/types/webapi/Email';
-import { useDb } from '../context/DbContext';
-import { useWebApi } from '../context/WebApiContext';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useMinDurationLoading } from '../../../hooks/useMinDurationLoading';
-import EncryptionUtility from '../../../utils/EncryptionUtility';
-import { Attachment } from '../../../utils/types/webapi/Attachment';
-import { useLoading } from '../context/LoadingContext';
-import ConversionUtility from '../utils/ConversionUtility';
+import { Email } from '@/utils/types/webapi/Email';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import { Attachment } from '@/utils/types/webapi/Attachment';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import ConversionUtility from '@/entrypoints/popup/utils/ConversionUtility';
 
 /**
  * Email details page.

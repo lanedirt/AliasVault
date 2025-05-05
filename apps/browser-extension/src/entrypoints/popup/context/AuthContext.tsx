@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { useDb } from './DbContext';
 import { storage } from 'wxt/storage';
 import { sendMessage } from 'webext-bridge/popup';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
 
 type AuthContextType = {

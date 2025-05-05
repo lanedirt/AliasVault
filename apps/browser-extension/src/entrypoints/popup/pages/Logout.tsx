@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useWebApi } from '../context/WebApiContext';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 /**
  * Logout page.

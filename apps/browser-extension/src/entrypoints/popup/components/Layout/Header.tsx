@@ -1,9 +1,9 @@
 import React from 'react';
-import { UserMenu } from './UserMenu';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { AppInfo } from '../../../../utils/AppInfo';
 import { storage } from 'wxt/storage';
+import { UserMenu } from '@/entrypoints/popup/components/Layout/UserMenu';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { AppInfo } from '@/utils/AppInfo';
 
 /**
  * Header props.

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 
 /**
  * Global state change handler component which listens for global state changes and e.g. redirects user to login

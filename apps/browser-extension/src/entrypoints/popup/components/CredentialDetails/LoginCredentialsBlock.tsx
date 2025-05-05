@@ -1,6 +1,6 @@
 import React from 'react';
-import { Credential } from '../../../../utils/types/Credential';
-import { FormInputCopyToClipboard } from '../../components/FormInputCopyToClipboard';
+import { Credential } from '@/utils/types/Credential';
+import { FormInputCopyToClipboard } from '@/entrypoints/popup/components/FormInputCopyToClipboard';
 
 type LoginCredentialsBlockProps = {
   credential: Credential;

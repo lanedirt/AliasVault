@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppInfo } from '../../../utils/AppInfo';
 import { storage } from 'wxt/storage';
+import { AppInfo } from '@/utils/AppInfo';
 
 /**
  * Component for displaying the login server information.

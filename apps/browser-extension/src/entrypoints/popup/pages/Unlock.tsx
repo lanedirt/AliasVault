@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useDb } from '../context/DbContext';
-import { useAuth } from '../context/AuthContext';
-import { useWebApi } from '../context/WebApiContext';
-import { Buffer } from 'buffer';
-import Button from '../components/Button';
-import EncryptionUtility from '../../../utils/EncryptionUtility';
-import SrpUtility from '../utils/SrpUtility';
-import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
-import { useLoading } from '../context/LoadingContext';
 import { useNavigate } from 'react-router-dom';
-import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
+import { Buffer } from 'buffer';
 import { storage } from 'wxt/storage';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import Button from '@/entrypoints/popup/components/Button';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
 
 /**
  * Unlock page

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useDb } from '../../context/DbContext';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
 
 type TabName = 'credentials' | 'emails' | 'settings';
 

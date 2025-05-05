@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import { useMinDurationLoading } from '../../hooks/useMinDurationLoading';
-import Header from './components/Layout/Header';
-import BottomNav from './components/Layout/BottomNav';
-import AuthSettings from './pages/AuthSettings';
-import CredentialsList from './pages/CredentialsList';
-import EmailsList from './pages/EmailsList';
-import LoadingSpinner from './components/LoadingSpinner';
-import Home from './pages/Home';
-import CredentialDetails from './pages/CredentialDetails';
-import EmailDetails from './pages/EmailDetails';
-import Settings from './pages/Settings';
-import GlobalStateChangeHandler from './components/GlobalStateChangeHandler';
-import { useLoading } from './context/LoadingContext';
-import Logout from './pages/Logout';
-import './style.css';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import Header from '@/entrypoints/popup/components/Layout/Header';
+import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
+import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
+import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
+import EmailsList from '@/entrypoints/popup/pages/EmailsList';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import Home from '@/entrypoints/popup/pages/Home';
+import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
+import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
+import Settings from '@/entrypoints/popup/pages/Settings';
+import GlobalStateChangeHandler from '@/entrypoints/popup/components/GlobalStateChangeHandler';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import Logout from '@/entrypoints/popup/pages/Logout';
+import '@/entrypoints/popup/style.css';
 
 /**
  * Route configuration.

@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MailboxBulkRequest, MailboxBulkResponse } from '../../../utils/types/webapi/MailboxBulk';
-import { MailboxEmail } from '../../../utils/types/webapi/MailboxEmail';
-import { useDb } from '../context/DbContext';
-import { useWebApi } from '../context/WebApiContext';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useMinDurationLoading } from '../../../hooks/useMinDurationLoading';
-import EncryptionUtility from '../../../utils/EncryptionUtility';
-import ReloadButton from '../components/ReloadButton';
 import { Link } from 'react-router-dom';
+import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
+import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
+
 /**
  * Emails list page.
  */

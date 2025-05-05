@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import SqliteClient from '../../../utils/SqliteClient';
-import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
-import EncryptionUtility from '../../../utils/EncryptionUtility';
-import { VaultResponse as messageVaultResponse } from '../../../utils/types/messaging/VaultResponse';
 import { sendMessage } from 'webext-bridge/popup';
+import SqliteClient from '@/utils/SqliteClient';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;

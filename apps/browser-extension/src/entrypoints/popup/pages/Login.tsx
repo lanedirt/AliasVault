@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useDb } from '../context/DbContext';
-import { useWebApi } from '../context/WebApiContext';
 import { Buffer } from 'buffer';
-import Button from '../components/Button';
-import EncryptionUtility from '../../../utils/EncryptionUtility';
-import SrpUtility from '../utils/SrpUtility';
-import { useLoading } from '../context/LoadingContext';
-import { VaultResponse } from '../../../utils/types/webapi/VaultResponse';
-import { LoginResponse } from '../../../utils/types/webapi/Login';
-import LoginServerInfo from '../components/LoginServerInfo';
-import { AppInfo } from '../../../utils/AppInfo';
 import { storage } from 'wxt/storage';
-import { ApiAuthError } from '../../../utils/types/errors/ApiAuthError';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { AppInfo } from '@/utils/AppInfo';
+import Button from '@/entrypoints/popup/components/Button';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { LoginResponse } from '@/utils/types/webapi/Login';
+import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
+import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 
 /**
  * Login page

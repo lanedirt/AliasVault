@@ -1,6 +1,6 @@
 import { sendMessage } from 'webext-bridge/background';
-import { PasswordGenerator } from '../../utils/shared/password-generator';
 import { browser } from 'wxt/browser';
+import { PasswordGenerator } from '@/utils/shared/password-generator';
 
 /**
  * Setup the context menus.

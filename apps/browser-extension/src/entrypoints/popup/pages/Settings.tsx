@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '../../contentScript/Popup';
-import { AppInfo } from '../../../utils/AppInfo';
 import { storage } from "wxt/storage";
 import { browser } from 'wxt/browser';
-import { useTheme } from '../context/ThemeContext';
+import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '@/entrypoints/contentScript/Popup';
+import { AppInfo } from '@/utils/AppInfo';
+import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
 
 /**
  * Popup settings type.

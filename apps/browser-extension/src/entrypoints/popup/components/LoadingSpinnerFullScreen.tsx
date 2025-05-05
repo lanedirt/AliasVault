@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLoading } from '../context/LoadingContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 /**
  * Loading spinner full screen component used throughout the app for showing a loading spinner

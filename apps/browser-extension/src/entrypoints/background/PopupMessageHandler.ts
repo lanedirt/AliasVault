@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { browser } from "wxt/browser";
-import { BoolResponse } from '../../utils/types/messaging/BoolResponse';
+import { browser } from 'wxt/browser';
+import { BoolResponse } from '@/utils/types/messaging/BoolResponse';
+
 /**
  * Handle opening the popup.
  */

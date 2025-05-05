@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardCopyService } from '../utils/ClipboardCopyService';
+import { ClipboardCopyService } from '@/entrypoints/popup/utils/ClipboardCopyService';
 
 /**
  * Form input copy to clipboard props.
