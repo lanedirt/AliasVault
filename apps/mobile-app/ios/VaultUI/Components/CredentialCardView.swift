@@ -34,7 +34,7 @@ public struct CredentialCard: View {
             .padding(8)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
-            .background(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.background)
+            .background(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.accentBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(colorScheme == .dark ? ColorConstants.Dark.accentBorder : ColorConstants.Light.accentBorder, lineWidth: 1)
@@ -97,7 +97,7 @@ public struct CredentialCard: View {
                         Text(copyToastMessage)
                             .padding()
                             .background(Color.black.opacity(0.7))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.accentBackground)
                             .cornerRadius(8)
                             .padding(.bottom, 20)
                     }

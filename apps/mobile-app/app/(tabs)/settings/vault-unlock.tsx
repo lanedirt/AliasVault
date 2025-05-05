@@ -127,9 +127,8 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       opacity: 0.5,
     },
     header: {
-      borderBottomColor: colors.accentBorder,
-      borderBottomWidth: StyleSheet.hairlineWidth,
       padding: 16,
+      paddingBottom: 0,
     },
     headerText: {
       color: colors.textMuted,
@@ -147,7 +146,9 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       paddingVertical: 12,
     },
     optionContainer: {
-      backgroundColor: colors.background,
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      margin: 16,
     },
     optionHeader: {
       alignItems: 'center',

@@ -44,8 +44,6 @@ export default function AutoLockScreen() : React.ReactNode {
       flex: 1,
     },
     header: {
-      borderBottomColor: colors.accentBorder,
-      borderBottomWidth: StyleSheet.hairlineWidth,
       padding: 16,
     },
     headerText: {
@@ -54,12 +52,16 @@ export default function AutoLockScreen() : React.ReactNode {
     },
     option: {
       alignItems: 'center',
-      backgroundColor: colors.accentBackground,
       borderBottomColor: colors.accentBorder,
       borderBottomWidth: StyleSheet.hairlineWidth,
       flexDirection: 'row',
       paddingHorizontal: 16,
       paddingVertical: 16,
+    },
+    optionContainer: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      margin: 16,
     },
     optionText: {
       color: colors.text,
@@ -80,21 +82,23 @@ export default function AutoLockScreen() : React.ReactNode {
             Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
           </ThemedText>
         </View>
-        {timeoutOptions.map((option) => (
-          <TouchableOpacity
-            key={option.value}
-            style={styles.option}
-            onPress={() => {
-              setAutoLockTimeout(option.value);
-              setAutoLockTimeoutState(option.value);
-            }}
-          >
-            <ThemedText style={styles.optionText}>{option.label}</ThemedText>
-            {autoLockTimeout === option.value && (
-              <Ionicons name="checkmark" size={24} style={styles.selectedIcon} />
-            )}
-          </TouchableOpacity>
-        ))}
+        <View style={styles.optionContainer}>
+          {timeoutOptions.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={styles.option}
+              onPress={() => {
+                setAutoLockTimeout(option.value);
+                setAutoLockTimeoutState(option.value);
+              }}
+            >
+              <ThemedText style={styles.optionText}>{option.label}</ThemedText>
+              {autoLockTimeout === option.value && (
+                <Ionicons name="checkmark" size={24} style={styles.selectedIcon} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
       </ThemedScrollView>
     </ThemedView>
   );

@@ -54,11 +54,13 @@ public struct CredentialProviderView: View {
                                     if !viewModel.isChoosingTextToInsert {
                                         VStack(spacing: 12) {
                                             Button(action: {
+                                                var urlString = "net.aliasvault.app://credentials/add-edit"
                                                 if let serviceUrl = viewModel.serviceUrl {
                                                     let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                                                    if let url = URL(string: "net.aliasvault.app://credentials/add-edit?serviceUrl=\(encodedUrl)") {
-                                                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                                                    }
+                                                    urlString += "?serviceUrl=\(encodedUrl)"
+                                                }
+                                                if let url = URL(string: urlString) {
+                                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
                                                 }
                                             }, label: {
                                                 HStack {
@@ -106,11 +108,13 @@ public struct CredentialProviderView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button(action: {
+                            var urlString = "net.aliasvault.app://credentials/add-edit"
                             if let serviceUrl = viewModel.serviceUrl {
                                 let encodedUrl = serviceUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                                if let url = URL(string: "net.aliasvault.app://credentials/add-edit?serviceUrl=\(encodedUrl)") {
-                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                                }
+                                urlString += "?serviceUrl=\(encodedUrl)"
+                            }
+                            if let url = URL(string: urlString) {
+                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
                             }
                         }, label: {
                             Image(systemName: "plus")

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import LoadingIndicator from './LoadingIndicator';
+import { useColors } from '@/hooks/useColorScheme';
 
 type LoadingOverlayProps = {
   status: string;
@@ -14,12 +15,12 @@ type LoadingOverlayProps = {
  *
  */
 export default function LoadingOverlay({ status }: LoadingOverlayProps): React.ReactNode {
-  const backgroundColor = 'rgba(0,0,0,0.5)';
+  const colors = useColors();
 
   const styles = StyleSheet.create({
     container: {
       alignItems: 'center',
-      backgroundColor: backgroundColor,
+      backgroundColor: colors.background,
       bottom: 0,
       justifyContent: 'center',
       left: 0,
