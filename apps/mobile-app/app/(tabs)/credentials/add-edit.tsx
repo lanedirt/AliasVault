@@ -186,11 +186,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
     setIsLoading(true);
 
-    // If we're creating a new credential and mode is random, generate random values
-    if (!isEditMode && mode === 'random') {
-      await generateRandomAlias();
-    }
-
     // Assemble the credential to save
     const credentialToSave: Credential = {
       Id: isEditMode ? id : '',
@@ -207,6 +202,23 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         Gender: data.Alias.Gender,
         Email: data.Alias.Email
       }
+    }
+
+    // If we're creating a new credential and mode is random, generate random values here
+    if (!isEditMode && mode === 'random') {
+      // Generate random values now and then read them from the form fields to manually assign to the credentialToSave object
+      await generateRandomAlias();
+      credentialToSave.Username = watch('Username');
+      credentialToSave.Password = watch('Password');
+      credentialToSave.ServiceName = watch('ServiceName');
+      credentialToSave.ServiceUrl = watch('ServiceUrl');
+      credentialToSave.Notes = watch('Notes');
+      credentialToSave.Alias.FirstName = watch('Alias.FirstName');
+      credentialToSave.Alias.LastName = watch('Alias.LastName');
+      credentialToSave.Alias.NickName = watch('Alias.NickName');
+      credentialToSave.Alias.BirthDate = watch('Alias.BirthDate');
+      credentialToSave.Alias.Gender = watch('Alias.Gender');
+      credentialToSave.Alias.Email = watch('Alias.Email');
     }
 
     // Convert user birthdate entry format (yyyy-mm-dd) into valid ISO 8601 format for database storage
