@@ -69,15 +69,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build JS bundle (iOS)
+      - name: Build JS bundle (iOS - Expo)
         run: |
           mkdir -p build
-          npx react-native bundle \
-            --platform ios \
-            --dev false \
-            --entry-file index.js \
-            --bundle-output ./build/index.ios.bundle \
-            --assets-dest ./build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform ios
 
       - name: Run tests
         run: npm run test
