@@ -55,12 +55,17 @@ export function useVaultMutate() : {
 
     setSyncStatus('Uploading vault to server');
 
-    // Get email addresses from credentials
+    // Get all private email domains from credentials in order to claim them on server
+    const privateEmailDomains = await dbContext.sqliteClient!.getPrivateEmailDomains();
+
     const credentials = await dbContext.sqliteClient!.getAllCredentials();
-    const emailAddresses = credentials
+    const privateEmailAddresses = credentials
       .filter(cred => cred.Alias?.Email != null)
       .map(cred => cred.Alias!.Email!)
-      .filter((email, index, self) => self.indexOf(email) === index);
+      .filter((email, index, self) => self.indexOf(email) === index)
+      .filter(email => {
+        return privateEmailDomains.some(domain => email.toLowerCase().endsWith(`@${domain.toLowerCase()}`));
+      });
 
     // Get username from the auth context
     const username = authContext.username;
@@ -74,7 +79,7 @@ export function useVaultMutate() : {
       createdAt: new Date().toISOString(),
       credentialsCount: credentials.length,
       currentRevisionNumber: currentRevision,
-      emailAddressList: emailAddresses,
+      emailAddressList: privateEmailAddresses,
       privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
       publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
       encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated

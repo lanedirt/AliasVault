@@ -113,6 +113,15 @@ class SqliteClient {
   }
 
   /**
+   * Get the private email domains supported by the AliasVault server from the vault metadata.
+   * @returns The private email domains.
+   */
+  public async getPrivateEmailDomains(): Promise<string[]> {
+    const metadata = await this.getVaultMetadata();
+    return metadata?.privateEmailDomains ?? [];
+  }
+
+  /**
    * Store the encryption key in the native keychain
    */
   public async storeEncryptionKey(base64EncryptionKey: string): Promise<void> {

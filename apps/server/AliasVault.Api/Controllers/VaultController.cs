@@ -411,6 +411,9 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Keep track of processed and sanitized email addresses to know which ones still exist.
         var processedEmailAddresses = new List<string>();
 
+        // Get list of supported private domains from config
+        var supportedPrivateDomains = config.PrivateEmailDomains;
+
         // Register new email addresses.
         foreach (var email in newEmailAddresses)
         {
@@ -421,6 +424,17 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             // If email address is invalid according to the EmailAddressAttribute, skip it.
             if (!new EmailAddressAttribute().IsValid(sanitizedEmail))
             {
+                logger.LogWarning("{User} tried to claim invalid email address: {Email}", user.UserName, sanitizedEmail);
+                continue;
+            }
+
+            // Extract domain from email
+            var domain = sanitizedEmail.Split('@')[1];
+
+            // Skip if domain is not in supported private domains list
+            if (!supportedPrivateDomains.Contains(domain))
+            {
+                logger.LogWarning("{User} tried to claim email with unsupported private domain: {Email}", user.UserName, sanitizedEmail);
                 continue;
             }
 
