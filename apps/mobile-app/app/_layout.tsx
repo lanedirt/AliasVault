@@ -34,6 +34,7 @@ function RootLayoutNav() : React.ReactNode {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
+      primary: colors.primary,
       background: colors.background,
     },
   };

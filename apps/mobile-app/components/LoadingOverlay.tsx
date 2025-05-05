@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import LoadingIndicator from './LoadingIndicator';
+import { useColors } from '@/hooks/useColorScheme';
 
 type LoadingOverlayProps = {
   status: string;
@@ -14,7 +15,10 @@ type LoadingOverlayProps = {
  *
  */
 export default function LoadingOverlay({ status }: LoadingOverlayProps): React.ReactNode {
-  const backgroundColor = 'rgba(0,0,0,0.5)';
+  const colors = useColors();
+
+  // Take the background color and make it 50% transparent
+  const backgroundColor = colors.background.replace('100%', '50%');
 
   const styles = StyleSheet.create({
     container: {

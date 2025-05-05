@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Animated } from 'react-native';
+import { StyleSheet, View, Text, Animated, useColorScheme } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -18,6 +18,7 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps): Rea
   const dot4Anim = useRef(new Animated.Value(0)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
   const [dots, setDots] = useState('');
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     /**
@@ -91,7 +92,7 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps): Rea
   const statusTrimmed = status.endsWith('|') ? status.slice(0, -1) : status;
   const shouldShowDots = !status.endsWith('|');
 
-  const backgroundColor = 'transparent';
+  const backgroundColor = colorScheme === 'dark' ? 'transparent' : '#fff';
   const shadowColor = '#000';
 
   const styles = StyleSheet.create({

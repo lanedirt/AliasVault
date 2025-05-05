@@ -6,8 +6,8 @@ public struct ColorConstants {
     public struct Light {
         static let text = SwiftUI.Color(hex: "#11181C")
         static let textMuted = SwiftUI.Color(hex: "#4b5563")
-        static let background = SwiftUI.Color(hex: "#ffffff")
-        static let accentBackground = SwiftUI.Color(hex: "#fff")
+        static let background = SwiftUI.Color(hex: "#f3f4f6")
+        static let accentBackground = SwiftUI.Color(hex: "#ffffff")
         static let accentBorder = SwiftUI.Color(hex: "#d1d5db")
         static let primary = SwiftUI.Color(hex: "#f49541")
         static let secondary = SwiftUI.Color(hex: "#6b7280")

@@ -14,9 +14,10 @@ import VaultModels
  * logins in the keyboard).
  */
 public class CredentialProviderViewController: ASCredentialProviderViewController {
+    private var hostingController: UIHostingController<CredentialProviderView>?
     private var viewModel: CredentialProviderViewModel?
     private var isChoosingTextToInsert = false
-    private var hostingController: UIHostingController<CredentialProviderView>?
+    private var initialServiceUrl: String?
 
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -66,7 +67,8 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
             },
             cancelHandler: {
                 self.handleCancel()
-            }
+            },
+            serviceUrl: initialServiceUrl
         )
 
         self.viewModel = viewModel
@@ -91,18 +93,18 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
     }
 
     override public func prepareCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
-        guard let viewModel = self.viewModel else { return }
-
         let matchedDomains = serviceIdentifiers.map { $0.identifier.lowercased() }
         if let firstDomain = matchedDomains.first {
+            initialServiceUrl = firstDomain
+
             // Set the search text to the first domain which will auto filter the credentials
             // to show the most likely credentials first as suggestion.
-            viewModel.setSearchFilter(firstDomain)
+            viewModel?.setSearchFilter(firstDomain)
 
             // Set the service URL to the first domain which will be used to pass onto the
             // add credential view when the user taps the "+" button and prefill it with the
             // domain name.
-            viewModel.serviceUrl = firstDomain
+            viewModel?.serviceUrl = firstDomain
         }
     }
 
