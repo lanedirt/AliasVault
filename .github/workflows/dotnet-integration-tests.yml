@@ -1,5 +1,5 @@
 # This workflow will test if running the integration tests works.
-name: .NET Integration Tests
+name: Integration Tests
 
 on:
   push:

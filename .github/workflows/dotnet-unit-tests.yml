@@ -1,5 +1,5 @@
 # This workflow will test if running the unit tests works.
-name: .NET Unit Tests
+name: Unit Tests
 
 on:
   push:

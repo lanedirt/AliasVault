@@ -1,4 +1,5 @@
-name: .NET E2E Tests (with Sharding)
+# This workflow will test if running the e2e tests works.
+name: E2E Tests
 
 on:
   push:
