@@ -1,11 +1,26 @@
 import { Buffer } from 'buffer';
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Linking, Animated } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Linking,
+  Animated,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions
+} from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useDb } from '@/context/DbContext';
@@ -326,11 +341,17 @@ export default function LoginScreen() : React.ReactNode {
     formContainer: {
       gap: 16,
     },
+    gradientContainer: {
+      height: Dimensions.get('window').height * 0.4,
+      left: 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
+    },
     headerContainer: {
       marginBottom: 24,
     },
     headerSection: {
-      backgroundColor: colors.loginHeader,
       borderBottomLeftRadius: 24,
       borderBottomRightRadius: 24,
       paddingBottom: 24,
@@ -395,171 +416,188 @@ export default function LoginScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 14,
     },
+    scrollContent: {
+      flexGrow: 1,
+    },
     secondaryButton: {
       backgroundColor: colors.secondary,
     },
   });
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={{ backgroundColor: colors.loginHeader }}>
-        <Animated.View style={[styles.headerSection, { opacity: fadeAnim }]}>
-          <View style={styles.logoContainer}>
-            <Logo width={80} height={80} />
-            <Text style={styles.appName}>AliasVault</Text>
-          </View>
-        </Animated.View>
-      </SafeAreaView>
-      <ThemedView style={styles.content}>
-        {isLoading ? (
-          <LoadingIndicator status={loginStatus ?? 'Loading...'} />
-        ) : (
-          <>
-            <View style={styles.headerContainer}>
-              <Text style={styles.headerTitle}>Log in</Text>
-              <Text style={styles.headerSubtitle}>
-                Connecting to{' '}
-                <Text
-                  style={styles.clickableDomain}
-                  onPress={() => router.push('/settings')}
-                >
-                  {getDisplayUrl()}
-                </Text>
-              </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+
+        <SafeAreaView>
+          <LinearGradient
+            colors={[colors.loginHeader, colors.background]}
+            style={styles.gradientContainer}
+          />
+          <Animated.View style={[styles.headerSection, { opacity: fadeAnim }]}>
+            <View style={styles.logoContainer}>
+              <Logo width={80} height={80} />
+              <Text style={styles.appName}>AliasVault</Text>
             </View>
-
-            {error && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
+          </Animated.View>
+        </SafeAreaView>
+        <ThemedView style={styles.content}>
+          {isLoading ? (
+            <LoadingIndicator status={loginStatus ?? 'Loading...'} />
+          ) : (
+            <>
+              <View style={styles.headerContainer}>
+                <Text style={styles.headerTitle}>Log in</Text>
+                <Text style={styles.headerSubtitle}>
+                  Connecting to{' '}
+                  <Text
+                    style={styles.clickableDomain}
+                    onPress={() => router.push('/login-settings')}
+                  >
+                    {getDisplayUrl()}
+                  </Text>
+                </Text>
               </View>
-            )}
 
-            {twoFactorRequired ? (
-              <View style={styles.formContainer}>
-                <Text style={styles.label}>Authentication Code</Text>
-                <View style={styles.inputContainer}>
-                  <MaterialIcons
-                    name="security"
-                    size={24}
-                    color={colors.textMuted}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    value={twoFactorCode}
-                    onChangeText={setTwoFactorCode}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    placeholder="Enter 6-digit code"
-                    keyboardType="numeric"
-                    maxLength={6}
-                    placeholderTextColor={colors.textMuted}
-                  />
+              {error && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{error}</Text>
                 </View>
-                <View style={styles.buttonContainer}>
+              )}
+
+              {twoFactorRequired ? (
+                <View style={styles.formContainer}>
+                  <Text style={styles.label}>Authentication Code</Text>
+                  <View style={styles.inputContainer}>
+                    <MaterialIcons
+                      name="security"
+                      size={24}
+                      color={colors.textMuted}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={twoFactorCode}
+                      onChangeText={setTwoFactorCode}
+                      autoCorrect={false}
+                      autoCapitalize="none"
+                      placeholder="Enter 6-digit code"
+                      keyboardType="numeric"
+                      maxLength={6}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                  </View>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={[styles.button, styles.primaryButton]}
+                      onPress={handleTwoFactorSubmit}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <ActivityIndicator color={colors.text} />
+                      ) : (
+                        <Text style={styles.buttonText}>Verify</Text>
+                      )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.button, styles.secondaryButton]}
+                      onPress={() => {
+                        setCredentials({ username: '', password: '' });
+                        setTwoFactorRequired(false);
+                        setTwoFactorCode('');
+                        setPasswordHashString(null);
+                        setPasswordHashBase64(null);
+                        setLoginResponse(null);
+                        setError(null);
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.noteText}>
+                    Note: if you don&apos;t have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.formContainer}>
+                  <Text style={styles.label}>Username or email</Text>
+                  <View style={styles.inputContainer}>
+                    <MaterialIcons
+                      name="person"
+                      size={24}
+                      color={colors.textMuted}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={credentials.username}
+                      onChangeText={(text) => setCredentials({ ...credentials, username: text })}
+                      placeholder="name / name@company.com"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                  </View>
+                  <Text style={styles.label}>Password</Text>
+                  <View style={styles.inputContainer}>
+                    <MaterialIcons
+                      name="lock"
+                      size={24}
+                      color={colors.textMuted}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={credentials.password}
+                      onChangeText={(text) => setCredentials({ ...credentials, password: text })}
+                      placeholder="Enter your password"
+                      secureTextEntry
+                      placeholderTextColor={colors.textMuted}
+                      autoCorrect={false}
+                      autoCapitalize="none"
+                    />
+                  </View>
+                  <View style={styles.rememberMeContainer}>
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => setRememberMe(!rememberMe)}
+                    >
+                      <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
+                    </TouchableOpacity>
+                    <Text style={styles.rememberMeText}>Remember me</Text>
+                  </View>
                   <TouchableOpacity
                     style={[styles.button, styles.primaryButton]}
-                    onPress={handleTwoFactorSubmit}
+                    onPress={handleSubmit}
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <ActivityIndicator color={colors.text} />
                     ) : (
-                      <Text style={styles.buttonText}>Verify</Text>
+                      <Text style={styles.buttonText}>Login</Text>
                     )}
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
-                    onPress={() => {
-                      setCredentials({ username: '', password: '' });
-                      setTwoFactorRequired(false);
-                      setTwoFactorCode('');
-                      setPasswordHashString(null);
-                      setPasswordHashBase64(null);
-                      setLoginResponse(null);
-                      setError(null);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.noteText}>
-                  Note: if you don&apos;t have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.formContainer}>
-                <Text style={styles.label}>Username or email</Text>
-                <View style={styles.inputContainer}>
-                  <MaterialIcons
-                    name="person"
-                    size={24}
-                    color={colors.textMuted}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    value={credentials.username}
-                    onChangeText={(text) => setCredentials({ ...credentials, username: text })}
-                    placeholder="name / name@company.com"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    placeholderTextColor={colors.textMuted}
-                  />
-                </View>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.inputContainer}>
-                  <MaterialIcons
-                    name="lock"
-                    size={24}
-                    color={colors.textMuted}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    value={credentials.password}
-                    onChangeText={(text) => setCredentials({ ...credentials, password: text })}
-                    placeholder="Enter your password"
-                    secureTextEntry
-                    placeholderTextColor={colors.textMuted}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                  />
-                </View>
-                <View style={styles.rememberMeContainer}>
-                  <TouchableOpacity
-                    style={styles.checkbox}
-                    onPress={() => setRememberMe(!rememberMe)}
-                  >
-                    <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
-                  </TouchableOpacity>
-                  <Text style={styles.rememberMeText}>Remember me</Text>
-                </View>
-                <TouchableOpacity
-                  style={[styles.button, styles.primaryButton]}
-                  onPress={handleSubmit}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color={colors.text} />
-                  ) : (
-                    <Text style={styles.buttonText}>Login</Text>
-                  )}
-                </TouchableOpacity>
-                <Text style={styles.noteText}>
-                  No account yet?{' '}
-                  <Text
-                    style={styles.clickableDomain}
-                    onPress={() => Linking.openURL('https://app.aliasvault.net')}
-                  >
-                    Create new vault
+                  <Text style={styles.noteText}>
+                    No account yet?{' '}
+                    <Text
+                      style={styles.clickableDomain}
+                      onPress={() => Linking.openURL('https://app.aliasvault.net')}
+                    >
+                      Create new vault
+                    </Text>
                   </Text>
-                </Text>
-              </View>
-            )}
-          </>
-        )}
-      </ThemedView>
-    </View>
+                </View>
+              )}
+            </>
+          )}
+        </ThemedView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

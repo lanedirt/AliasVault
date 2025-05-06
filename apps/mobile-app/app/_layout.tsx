@@ -57,16 +57,16 @@ function RootLayoutNav() : React.ReactNode {
         headerStyle: {
           backgroundColor: colors.accentBackground,
         },
-        headerTintColor: colors.text,
+        headerTintColor: colors.primary,
         headerTitleStyle: {
-          fontWeight: 'bold',
+          color: colors.text,
         },
       }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ title: 'Login', headerShown: false }} />
+        <Stack.Screen name="login-settings" options={{ title: 'Login Settings' }} />
         <Stack.Screen name="sync" options={{ headerShown: false }} />
         <Stack.Screen name="unlock" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ title: 'Settings', headerShown: true }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>

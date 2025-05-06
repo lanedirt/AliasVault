@@ -97,6 +97,7 @@ export default function SettingsScreen() : React.ReactNode {
       marginBottom: 8,
     },
     optionButton: {
+      backgroundColor: colors.accentBackground,
       borderColor: colors.accentBorder,
       borderRadius: 8,
       borderWidth: 1,
@@ -146,12 +147,10 @@ export default function SettingsScreen() : React.ReactNode {
     <SafeAreaView style={styles.container}>
       <ThemedView style={styles.content}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.title}>API Connection</Text>
         </View>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>API Connection</Text>
-
           {DEFAULT_OPTIONS.map(option => (
             <TouchableOpacity
               key={option.value}
