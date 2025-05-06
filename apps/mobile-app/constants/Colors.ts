@@ -26,6 +26,7 @@ export const Colors = {
     tertiary: '#eabf69',
     loginHeader: '#f6dfc4',
     greenBackground: '#22c55e',
+    skeleton: '#rgba(255,255,255,0.4)',
   },
   dark: {
     white: '#ffffff',
@@ -50,6 +51,7 @@ export const Colors = {
     tertiary: '#eabf69',
     loginHeader: '#5c4331',
     greenBackground: '#22c55e',
+    skeleton: '#rgba(255,255,255,0.2)',
   },
 } as const;
 

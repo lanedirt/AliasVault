@@ -4,10 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useDb } from '@/context/DbContext';
 import { useAuth } from '@/context/AuthContext';
 import { Credential } from '@/utils/types/Credential';
@@ -34,7 +34,8 @@ export default function CredentialsScreen() : React.ReactNode {
   const [isTabFocused, setIsTabFocused] = useState(false);
   const router = useRouter();
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
-  const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 300);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
+  const insets = useSafeAreaInsets();
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -181,6 +182,7 @@ export default function CredentialsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      paddingTop: insets.top,
     },
     content: {
       flex: 1,
@@ -224,7 +226,7 @@ export default function CredentialsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedSafeAreaView style={styles.container}>
+    <ThemedView style={styles.container}>
       <CollapsibleHeader
         title="Credentials"
         scrollY={scrollY}
@@ -302,6 +304,6 @@ export default function CredentialsScreen() : React.ReactNode {
           )}
         </ThemedView>
       </ThemedView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 }

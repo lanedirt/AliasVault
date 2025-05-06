@@ -2,6 +2,7 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated, Platfo
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useCallback } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -10,8 +11,9 @@ import { AppInfo } from '@/utils/AppInfo';
 import { useColors } from '@/hooks/useColorScheme';
 import { TitleContainer } from '@/components/ui/TitleContainer';
 import { useAuth } from '@/context/AuthContext';
-import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
+import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import avatarImage from '@/assets/images/avatar.webp';
 
 /**
@@ -26,6 +28,8 @@ export default function SettingsScreen() : React.ReactNode {
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
+  const [isFirstLoad, setIsFirstLoad] = useMinDurationLoading(true, 100);
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -65,9 +69,16 @@ export default function SettingsScreen() : React.ReactNode {
         setAuthMethodDisplay(authMethod);
       };
 
-      loadAutoLockDisplay();
-      loadAuthMethodDisplay();
-    }, [getAutoLockTimeout, getAuthMethodDisplay])
+      /**
+       * Load all settings data.
+       */
+      const loadData = async () : Promise<void> => {
+        await Promise.all([loadAutoLockDisplay(), loadAuthMethodDisplay()]);
+        setIsFirstLoad(false);
+      };
+
+      loadData();
+    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad])
   );
 
   /**
@@ -108,6 +119,7 @@ export default function SettingsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      paddingTop: insets.top,
     },
     content: {
       flex: 1,
@@ -177,6 +189,9 @@ export default function SettingsScreen() : React.ReactNode {
       fontSize: 16,
       marginRight: 8,
     },
+    skeletonLoader: {
+      marginRight: 8,
+    },
     userInfoContainer: {
       alignItems: 'center',
       backgroundColor: colors.background,
@@ -202,11 +217,11 @@ export default function SettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedSafeAreaView style={styles.container}>
+    <ThemedView style={styles.container}>
       <CollapsibleHeader
         title="Settings"
         scrollY={scrollY}
-        showNavigationHeader={true}
+        showNavigationHeader={false}
       />
       <ThemedView style={styles.content}>
         <Animated.ScrollView
@@ -260,7 +275,11 @@ export default function SettingsScreen() : React.ReactNode {
               </View>
               <View style={styles.settingItemContent}>
                 <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
-                <ThemedText style={styles.settingItemValue}>{authMethodDisplay}</ThemedText>
+                {isFirstLoad ? (
+                  <InlineSkeletonLoader width={100} style={styles.skeletonLoader} />
+                ) : (
+                  <ThemedText style={styles.settingItemValue}>{authMethodDisplay}</ThemedText>
+                )}
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>
@@ -274,7 +293,11 @@ export default function SettingsScreen() : React.ReactNode {
               </View>
               <View style={styles.settingItemContent}>
                 <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
-                <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
+                {isFirstLoad ? (
+                  <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
+                ) : (
+                  <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
+                )}
                 <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
               </View>
             </TouchableOpacity>
@@ -299,6 +322,6 @@ export default function SettingsScreen() : React.ReactNode {
           </View>
         </Animated.ScrollView>
       </ThemedView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useNavigation } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
@@ -12,7 +13,6 @@ import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/Ma
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { EmailCard } from '@/components/EmailCard';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
@@ -30,9 +30,10 @@ export default function EmailsScreen() : React.ReactNode {
   const scrollViewRef = useRef<ScrollView>(null);
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
-  const [isLoading, setIsLoading] = useMinDurationLoading(true, 300);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTabFocused, setIsTabFocused] = useState(false);
+  const insets = useSafeAreaInsets();
 
   /**
    * Load emails.
@@ -131,6 +132,7 @@ export default function EmailsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      paddingTop: insets.top,
     },
     content: {
       flex: 1,
@@ -149,6 +151,9 @@ export default function EmailsScreen() : React.ReactNode {
       color: colors.errorBackground,
       textAlign: 'center',
     },
+    loadingContainer: {
+      flex: 1,
+    },
   });
 
   /**
@@ -157,7 +162,7 @@ export default function EmailsScreen() : React.ReactNode {
   const renderContent = () : React.ReactNode => {
     if (isLoading) {
       return (
-        <View style={styles.container}>
+        <View style={styles.loadingContainer}>
           <SkeletonLoader count={4} height={90} parts={3} />
         </View>
       );
@@ -187,7 +192,7 @@ export default function EmailsScreen() : React.ReactNode {
   };
 
   return (
-    <ThemedSafeAreaView style={styles.container}>
+    <ThemedView style={styles.container}>
       <CollapsibleHeader
         title="Emails"
         scrollY={scrollY}
@@ -216,6 +221,6 @@ export default function EmailsScreen() : React.ReactNode {
           {renderContent()}
         </Animated.ScrollView>
       </ThemedView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 }

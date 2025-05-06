@@ -50,7 +50,7 @@ export function CollapsibleHeader({
   });
 
   const headerTransform = alwaysVisible
-    ? 0
+    ? new Animated.Value(0)
     : headerOpacity.interpolate({
       inputRange: [0, 1],
       outputRange: [-20, 0],

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColors } from '@/hooks/useColorScheme';
 
-interface ISkeletonLoaderProps {
+type SkeletonLoaderProps = {
   /** Number of skeleton items to render */
   count?: number;
   /** Height of each skeleton item */
@@ -25,7 +25,7 @@ export const SkeletonLoader = ({
   height = 60,
   parts = 2,
   style,
-}: ISkeletonLoaderProps): React.ReactNode => {
+}: SkeletonLoaderProps): React.ReactNode => {
   const colors = useColors();
   const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -64,7 +64,7 @@ export const SkeletonLoader = ({
       padding: 16,
     },
     part: {
-      backgroundColor: colors.accentBorder,
+      backgroundColor: colors.skeleton,
       borderRadius: 4,
       height: 12,
       width: `${100 / parts}%`,
@@ -86,7 +86,7 @@ export const SkeletonLoader = ({
         ]}
       >
         <LinearGradient
-          colors={['transparent', colors.accentBorder, 'transparent']}
+          colors={['transparent', colors.skeleton, 'transparent']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
