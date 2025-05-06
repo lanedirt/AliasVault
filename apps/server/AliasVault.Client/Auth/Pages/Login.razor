@@ -88,7 +88,7 @@ else
         <DataAnnotationsValidator/>
         <div>
             <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
-            <InputTextField id="email" @bind-Value="_loginModel.Username" type="text" placeholder="name / name@company.com"/>
+            <InputTextField id="email" @bind-Value="_loginModel.Username" type="text" placeholder="name / name@company.com" autocapitalize="off" autocorrect="off"/>
             <ValidationMessage For="() => _loginModel.Username"/>
         </div>
         <div>
