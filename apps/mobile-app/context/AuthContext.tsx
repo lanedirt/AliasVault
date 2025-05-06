@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, Platform } from 'react-native';
-import { router, usePathname } from 'expo-router';
+import { router, useGlobalSearchParams, usePathname } from 'expo-router';
 import { NavigationContainerRef, ParamListBase } from '@react-navigation/native';
 import * as LocalAuthentication from 'expo-local-authentication';
 
@@ -33,6 +33,9 @@ type AuthContextType = {
   // iOS Autofill methods
   shouldShowIosAutofillReminder: boolean;
   markIosAutofillConfigured: () => Promise<void>;
+  // Return URL methods
+  returnUrl: { path: string; params?: object } | null;
+  setReturnUrl: (url: { path: string; params?: object } | null) => void;
 }
 
 const IOS_AUTOFILL_CONFIGURED_KEY = 'ios_autofill_configured';
@@ -51,9 +54,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [shouldShowIosAutofillReminder, setShouldShowIosAutofillReminder] = useState(false);
+  const [returnUrl, setReturnUrl] = useState<{ path: string; params?: object } | null>(null);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
   const pathname = usePathname();
+  const params = useGlobalSearchParams();
+  const lastRouteRef = useRef<{ path: string, params?: object }>({ path: pathname, params });
+
+  useEffect(() => {
+    lastRouteRef.current = { path: pathname, params };
+  }, [pathname, params]);
 
   /**
    * Get enabled auth methods from the native module
@@ -257,6 +267,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();
             if (!isUnlocked) {
+              // Get current full URL including query params
+              const currentRoute = lastRouteRef.current;
+              if (currentRoute?.path) {
+                setReturnUrl({
+                  path: currentRoute.path,
+                  params: currentRoute.params
+                });
+              }
+
               // Database connection failed, navigate to reinitialize flow
               router.replace('/reinitialize');
             }
@@ -320,7 +339,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // iOS Autofill methods
     shouldShowIosAutofillReminder,
     markIosAutofillConfigured,
-  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, getBiometricDisplayName, shouldShowIosAutofillReminder, markIosAutofillConfigured]);
+    // Return URL methods
+    returnUrl,
+    setReturnUrl,
+  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, getBiometricDisplayName, shouldShowIosAutofillReminder, markIosAutofillConfigured, returnUrl]);
 
   return (
     <AuthContext.Provider value={contextValue}>

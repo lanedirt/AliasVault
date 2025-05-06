@@ -26,6 +26,15 @@ export default function CredentialsLayout(): React.ReactNode {
         }}
       />
       <Stack.Screen
+        name="add-edit-page"
+        options={{
+          title: 'Add Credential',
+          headerShown: true,
+          gestureEnabled: true,
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
         name="autofill-credential-created"
         options={{
           title: 'Credential Created',

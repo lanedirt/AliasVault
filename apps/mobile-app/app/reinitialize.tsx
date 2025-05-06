@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
@@ -29,6 +29,49 @@ export default function ReinitializeScreen() : React.ReactNode {
     }
 
     hasInitialized.current = true;
+
+    /**
+     * Redirect to the return URL.
+     */
+    function redirectToReturnUrl() : void {
+      /**
+       * Simulate stack navigation.
+       */
+      function simulateStackNavigation(from: string, to: string) : void {
+        router.replace(from as Href);
+        setTimeout(() => {
+          router.push(to as Href);
+        }, 0);
+      }
+
+      if (authContext.returnUrl?.path) {
+        // Type assertion needed due to router type limitations
+        const path = authContext.returnUrl.path as '/';
+        const isDetailRoute = path.includes('credentials/');
+        if (isDetailRoute) {
+          // If there is a "serviceUrl" or "id" param from the return URL, use it.
+          const params = authContext.returnUrl.params as Record<string, string>;
+
+          if (params.serviceUrl) {
+            simulateStackNavigation('/(tabs)/credentials', path + '?serviceUrl=' + params.serviceUrl);
+          } else if (params.id) {
+            simulateStackNavigation('/(tabs)/credentials', path + '?id=' + params.id);
+          } else {
+            simulateStackNavigation('/(tabs)/credentials', path);
+          }
+        } else {
+          router.replace({
+            pathname: path,
+            params: authContext.returnUrl.params as Record<string, string>
+          });
+        }
+        // Clear the return URL after using it
+        authContext.setReturnUrl(null);
+      } else {
+        // If there is no return URL, navigate to the credentials tab as default entry page.
+        router.replace('/(tabs)/credentials');
+      }
+    }
 
     /**
      * Initialize the app.
@@ -71,8 +114,8 @@ export default function ReinitializeScreen() : React.ReactNode {
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Navigate to credentials
-            router.replace('/(tabs)/credentials');
+            // Vault is successfully unlocked, redirect to the stored return URL (if any) or default entry page.
+            redirectToReturnUrl();
 
             return;
           } else {
@@ -112,6 +155,7 @@ export default function ReinitializeScreen() : React.ReactNode {
       justifyContent: 'center',
     },
     message: {
+      marginTop: 5,
       textAlign: 'center',
     },
     messageContainer: {

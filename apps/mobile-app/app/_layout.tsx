@@ -60,7 +60,6 @@ function RootLayoutNav() : React.ReactNode {
         return;
       }
 
-      // Perform initial vault sync
       await syncVault({
         initialSync: true,
         /**
@@ -86,15 +85,20 @@ function RootLayoutNav() : React.ReactNode {
           await new Promise(resolve => setTimeout(resolve, 1000));
           setStatus('Decrypting vault');
           await new Promise(resolve => setTimeout(resolve, 1000));
+
           // The vault is successfully unlocked, so we let the native code handle the default routing.
-        } else {
-          setRedirectTarget('/unlock');
+          setBootComplete(true);
+          return;
         }
+
+        setRedirectTarget('/unlock');
+        setBootComplete(true);
+        return;
       } else {
         setRedirectTarget('/unlock');
+        setBootComplete(true);
+        return;
       }
-
-      setBootComplete(true);
     };
 
     initialize();
@@ -102,33 +106,36 @@ function RootLayoutNav() : React.ReactNode {
 
   useEffect(() => {
     /**
-     * Simulate stack navigation.
-     */
-    function simulateStackNavigation(from: string, to: string) : void {
-      router.replace(from as Href);
-      setTimeout(() => {
-        router.push(to as Href);
-      }, 0);
-    }
-
-    /**
-     * Redirect to the target if we have one, otherwise check for a deep link and simulate stack navigation.
+     * Redirect to a explicit target page if we have one (in case of non-happy path).
+     * Otherwise check for a deep link and simulate stack navigation.
+     * If neither is present, we let the router redirect us to the default route.
      */
     const redirect = async () : Promise<void> => {
-      if (bootComplete && redirectTarget) {
+      if (!bootComplete) {
+        return;
+      }
+
+      if (redirectTarget) {
         // If we have an explicit redirect target, we navigate to it. This overrides potential deep link handling.
         router.replace(redirectTarget as Href);
-      } else if (bootComplete) {
+      } else {
+        // Check if we have an initial URL to handle (deep link from most likely the autofill extension).
         const initialUrl = await Linking.getInitialURL();
         if (initialUrl) {
           /**
-           * Check for certain deep link routes, and if found, ensure we simulate the stack navigation
+           * Check for certain supported deep link routes, and if found, ensure we simulate the stack navigation
            * as otherwise the "back" button for navigation will not work as expected.
            */
           const path = initialUrl.replace('net.aliasvault.app://', '');
           const isDetailRoute = path.includes('credentials/');
           if (isDetailRoute) {
-            simulateStackNavigation('/(tabs)/credentials', path);
+            // First go to the credentials tab.
+            router.replace('/(tabs)/credentials');
+
+            // Then push the target route inside the credentials tab.
+            setTimeout(() => {
+              router.push(path as Href);
+            }, 0);
           }
         }
       }

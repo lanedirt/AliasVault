@@ -82,7 +82,7 @@ public struct CredentialCard: View {
             })
 
             Button(action: {
-                if let url = URL(string: "aliasvault://credentials/add-edit?id=\(credential.id.uuidString)") {
+                if let url = URL(string: "aliasvault://credentials/add-edit-page?id=\(credential.id.uuidString)") {
                     UIApplication.shared.open(url)
                 }
             }, label: {

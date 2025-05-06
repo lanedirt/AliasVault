@@ -103,12 +103,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       const serviceName = extractServiceNameFromUrl(decodedUrl);
       setValue('ServiceUrl', decodedUrl);
       setValue('ServiceName', serviceName);
-
-      // Focus and select the service name field
-      setTimeout(() => {
-        serviceNameRef.current?.focus();
-        serviceNameRef.current?.selectAll();
-      }, 100);
     }
   }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue]);
 
