@@ -257,14 +257,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();
             if (!isUnlocked) {
-              // Database connection failed, navigate to unlock flow
-              router.replace('/sync');
-            } else {
-              // Vault is still unlocked, staying on current screen
+              // Database connection failed, navigate to reinitialize flow
+              router.replace('/reinitialize');
             }
           } catch {
-            // Database query failed, navigate to unlock flow
-            router.replace('/sync');
+            // Database query failed, navigate to reinitialize flow
+            router.replace('/reinitialize');
           }
         }
       }

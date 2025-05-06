@@ -23,17 +23,11 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
     router.back();
   }, [router]);
 
-  // Handle app state changes to auto-dismiss when app comes back from background
+  // Handle app state changes to auto-dismiss when app goes to background
   useEffect(() => {
-    let wasInBackground = false;
-
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'background') {
-        wasInBackground = true;
-      } else if (nextAppState === 'active' && wasInBackground) {
-        // App is returning from background, dismiss the screen
         router.back();
-        wasInBackground = false;
       }
     });
 

@@ -1,25 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import NativeVaultManager from '../specs/NativeVaultManager';
-
+import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useAuth } from '@/context/AuthContext';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { ThemedView } from '@/components/themed/ThemedView';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useDb } from '@/context/DbContext';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useColors } from '@/hooks/useColorScheme';
 
 /**
- * Sync screen which will redirect to the login screen if the user is not logged in
- * or to the credentials screen if the user is logged in.
+ * Reinitialize screen which is triggered when the app was still open but the database in memory
+ * was cleared because of a time-out. When this happens, we need to re-initialize and unlock the vault.
  */
-export default function SyncScreen() : React.ReactNode {
+export default function ReinitializeScreen() : React.ReactNode {
   const authContext = useAuth();
   const dbContext = useDb();
   const { syncVault } = useVaultSync();
   const [status, setStatus] = useState('');
   const hasInitialized = useRef(false);
+  const colors = useColors();
 
   useEffect(() => {
     if (hasInitialized.current) {
@@ -103,17 +105,28 @@ export default function SyncScreen() : React.ReactNode {
     initialize();
   }, [syncVault, authContext, dbContext]);
 
+  const styles = StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+    },
+    message: {
+      textAlign: 'center',
+    },
+    messageContainer: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      padding: 20,
+    },
+  });
+
   return (
     <ThemedView style={styles.container}>
-      {status ? <LoadingIndicator status={status} /> : null}
+      <View style={styles.messageContainer}>
+        <ThemedText style={styles.message}>Vault locked due to time-out, unlocking vault again...</ThemedText>
+        {status ? <LoadingIndicator status={status} /> : null}
+      </View>
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-});

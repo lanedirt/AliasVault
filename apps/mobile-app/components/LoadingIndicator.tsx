@@ -98,7 +98,6 @@ export default function LoadingIndicator({ status }: LoadingIndicatorProps): Rea
   const styles = StyleSheet.create({
     container: {
       alignItems: 'center',
-      flex: 1,
       justifyContent: 'center',
       padding: 20,
     },
