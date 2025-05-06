@@ -119,6 +119,7 @@ export default function SettingsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      paddingBottom: insets.bottom,
       paddingTop: insets.top,
     },
     content: {

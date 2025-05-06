@@ -132,6 +132,7 @@ export default function EmailsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      paddingBottom: insets.bottom,
       paddingTop: insets.top,
     },
     content: {
