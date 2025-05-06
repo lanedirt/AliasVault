@@ -82,9 +82,9 @@ function RootLayoutNav() : React.ReactNode {
         setStatus('Unlocking vault');
         const isUnlocked = await dbContext.unlockVault();
         if (isUnlocked) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 750));
           setStatus('Decrypting vault');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 750));
 
           // The vault is successfully unlocked, so we let the native code handle the default routing.
           setBootComplete(true);

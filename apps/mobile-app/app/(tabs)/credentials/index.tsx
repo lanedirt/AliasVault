@@ -1,4 +1,4 @@
-import { StyleSheet, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, RefreshControl, Platform, Animated } from 'react-native';
+import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, View } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -16,7 +16,9 @@ import { useColors } from '@/hooks/useColorScheme';
 import { CredentialCard } from '@/components/credentials/CredentialCard';
 import { TitleContainer } from '@/components/ui/TitleContainer';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
 /**
  * Credentials screen.
@@ -32,7 +34,7 @@ export default function CredentialsScreen() : React.ReactNode {
   const [isTabFocused, setIsTabFocused] = useState(false);
   const router = useRouter();
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
-  const [isLoadingCredentials, setIsLoadingCredentials] = useState(false);
+  const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 300);
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -47,6 +49,7 @@ export default function CredentialsScreen() : React.ReactNode {
     try {
       const credentials = await dbContext.sqliteClient!.getAllCredentials();
       setCredentialsList(credentials);
+      setIsLoadingCredentials(false);
     } catch (err) {
       // Error loading credentials, show error toast
       Toast.show({
@@ -54,8 +57,9 @@ export default function CredentialsScreen() : React.ReactNode {
         text1: 'Error loading credentials',
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
+      setIsLoadingCredentials(false);
     }
-  }, [dbContext.sqliteClient]);
+  }, [dbContext.sqliteClient, setIsLoadingCredentials]);
 
   const headerButtons = [{
     icon: 'add' as const,
@@ -101,9 +105,6 @@ export default function CredentialsScreen() : React.ReactNode {
     setRefreshing(true);
 
     try {
-      // Record start time
-      const startTime = Date.now();
-
       // Sync vault and load credentials
       await syncVault({
         /**
@@ -111,15 +112,9 @@ export default function CredentialsScreen() : React.ReactNode {
          */
         onSuccess: async (hasNewVault) => {
           // Calculate remaining time needed to reach minimum duration
-          const elapsedTime = Date.now() - startTime;
-          const remainingDelay = Math.max(0, 350 - elapsedTime);
-
-          // Only delay if needed to reach minimum duration
-          if (remainingDelay > 0) {
-            await new Promise(resolve => setTimeout(resolve, remainingDelay));
-          }
-
+          setIsLoadingCredentials(true);
           await loadCredentials();
+          setIsLoadingCredentials(false);
           setRefreshing(false);
           Toast.show({
             type: 'success',
@@ -150,7 +145,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
@@ -159,8 +154,7 @@ export default function CredentialsScreen() : React.ReactNode {
 
     setIsLoadingCredentials(true);
     loadCredentials();
-    setIsLoadingCredentials(false);
-  }, [isAuthenticated, isDatabaseAvailable, loadCredentials]);
+  }, [isAuthenticated, isDatabaseAvailable, loadCredentials, setIsLoadingCredentials]);
 
   const filteredCredentials = credentialsList.filter(credential => {
     const searchLower = searchQuery.toLowerCase();
@@ -209,8 +203,7 @@ export default function CredentialsScreen() : React.ReactNode {
     searchIcon: {
       left: 12,
       position: 'absolute',
-      top: '50%',
-      transform: [{ translateY: -17 }],
+      top: 11,
       zIndex: 1,
     },
     searchInput: {
@@ -218,6 +211,7 @@ export default function CredentialsScreen() : React.ReactNode {
       borderRadius: 8,
       color: colors.text,
       fontSize: 16,
+      height: 40,
       marginBottom: 16,
       padding: 12,
       paddingLeft: 40,
@@ -242,7 +236,10 @@ export default function CredentialsScreen() : React.ReactNode {
       <ThemedView style={styles.content}>
         <ThemedView style={styles.stepContainer}>
           {isLoadingCredentials ? (
-            <ActivityIndicator size="large" color={colors.primary} />
+            <View style={styles.contentContainer}>
+              <TitleContainer title="Credentials" />
+              <SkeletonLoader count={4} height={60} parts={2} />
+            </View>
           ) : (
             <Animated.FlatList
               ref={flatListRef}
@@ -295,9 +292,7 @@ export default function CredentialsScreen() : React.ReactNode {
                   tintColor={colors.primary}
                 />
               }
-              renderItem={({ item }) => (
-                <CredentialCard credential={item} />
-              )}
+              renderItem={({ item }) => <CredentialCard credential={item} />}
               ListEmptyComponent={
                 <Text style={styles.emptyText}>
                   {searchQuery ? 'No matching credentials found' : 'No credentials found'}

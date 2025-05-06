@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl, Animated } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useNavigation } from 'expo-router';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
@@ -14,42 +14,9 @@ import { useColors } from '@/hooks/useColorScheme';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { EmailCard } from '@/components/EmailCard';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
-
-/**
- * Hook for minimum duration loading state.
- */
-const useMinDurationLoading = (
-  initialState: boolean,
-  minDuration: number
-): [boolean, (newState: boolean) => void] => {
-  const [state, setState] = useState(initialState);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const setStateWithMinDuration = useCallback(
-    (newState: boolean) => {
-      if (newState) {
-        setState(true);
-      } else {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
-        timerRef.current = setTimeout(() => setState(false), minDuration);
-      }
-    },
-    [minDuration] // ✅ No dependency on timerRef, it won't change
-  );
-
-  useEffect(() => {
-    return () : void => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
-
-  return [state, setStateWithMinDuration];
-};
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
 /**
  * Emails screen.
@@ -63,7 +30,7 @@ export default function EmailsScreen() : React.ReactNode {
   const scrollViewRef = useRef<ScrollView>(null);
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
-  const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 300);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTabFocused, setIsTabFocused] = useState(false);
 
@@ -148,10 +115,12 @@ export default function EmailsScreen() : React.ReactNode {
    * Refresh the emails on pull to refresh.
    */
   const onRefresh = useCallback(async () : Promise<void> => {
+    setIsLoading(true);
     setIsRefreshing(true);
     await loadEmails();
     setIsRefreshing(false);
-  }, [loadEmails]);
+    setIsLoading(false);
+  }, [loadEmails, setIsLoading]);
 
   const styles = StyleSheet.create({
     centerContainer: {
@@ -188,8 +157,8 @@ export default function EmailsScreen() : React.ReactNode {
   const renderContent = () : React.ReactNode => {
     if (isLoading) {
       return (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" />
+        <View style={styles.container}>
+          <SkeletonLoader count={4} height={90} parts={3} />
         </View>
       );
     }
