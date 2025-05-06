@@ -104,6 +104,7 @@ export default function CredentialsScreen() : React.ReactNode {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    setIsLoadingCredentials(true);
 
     try {
       // Sync vault and load credentials
@@ -113,7 +114,6 @@ export default function CredentialsScreen() : React.ReactNode {
          */
         onSuccess: async (hasNewVault) => {
           // Calculate remaining time needed to reach minimum duration
-          setIsLoadingCredentials(true);
           await loadCredentials();
           setIsLoadingCredentials(false);
           setRefreshing(false);
@@ -255,6 +255,10 @@ export default function CredentialsScreen() : React.ReactNode {
               scrollEventThrottle={16}
               contentContainerStyle={styles.contentContainer}
               scrollIndicatorInsets={{ bottom: 40 }}
+              initialNumToRender={14}
+              maxToRenderPerBatch={14}
+              windowSize={7}
+              removeClippedSubviews={true}
               ListHeaderComponent={
                 <ThemedView>
                   <TitleContainer title="Credentials" />

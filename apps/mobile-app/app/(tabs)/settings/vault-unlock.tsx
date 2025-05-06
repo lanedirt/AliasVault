@@ -30,15 +30,15 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       setHasFaceID(compatible && enrolled);
 
+      const displayName = await getBiometricDisplayName();
+      setBiometricDisplayName(displayName);
+
       const methods = await getEnabledAuthMethods();
       setEnabledAuthMethods(methods);
 
       if (methods.includes('faceid') && enrolled) {
         setIsFaceIDEnabled(true);
       }
-
-      const displayName = await getBiometricDisplayName();
-      setBiometricDisplayName(displayName);
 
       setInitialized(true);
     };
