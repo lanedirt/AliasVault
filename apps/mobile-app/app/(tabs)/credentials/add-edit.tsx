@@ -523,7 +523,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 0} // adjust offset as needed
       >
         <ThemedView style={styles.content}>
           <KeyboardAwareScrollView

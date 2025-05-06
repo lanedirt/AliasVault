@@ -151,9 +151,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
     },
     content: {
       backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
       borderRadius: 8,
-      borderWidth: 1,
       marginTop: 8,
       padding: 12,
     },

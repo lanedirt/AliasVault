@@ -88,9 +88,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
     },
     notesContainer: {
       backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
       borderRadius: 8,
-      borderWidth: 1,
       padding: 12,
     },
     section: {

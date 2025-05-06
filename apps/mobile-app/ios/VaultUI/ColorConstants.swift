@@ -18,9 +18,9 @@ public struct ColorConstants {
     public struct Dark {
         static let text = SwiftUI.Color(hex: "#ECEDEE")
         static let textMuted = SwiftUI.Color(hex: "#9BA1A6")
-        static let background = SwiftUI.Color(hex: "#111827")
-        static let accentBackground = SwiftUI.Color(hex: "#1f2937")
-        static let accentBorder = SwiftUI.Color(hex: "#4b5563")
+        static let background = SwiftUI.Color(hex: "#000000")
+        static let accentBackground = SwiftUI.Color(hex: "#202020")
+        static let accentBorder = SwiftUI.Color(hex: "#444444")
         static let primary = SwiftUI.Color(hex: "#f49541")
         static let secondary = SwiftUI.Color(hex: "#6b7280")
         static let icon = SwiftUI.Color(hex: "#9BA1A6")
