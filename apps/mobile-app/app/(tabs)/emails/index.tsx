@@ -164,7 +164,7 @@ export default function EmailsScreen() : React.ReactNode {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <SkeletonLoader count={4} height={90} parts={3} />
+          <SkeletonLoader count={3} height={120} parts={4} />
         </View>
       );
     }

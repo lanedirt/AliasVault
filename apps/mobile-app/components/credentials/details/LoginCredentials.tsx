@@ -15,7 +15,8 @@ export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
 
-  const hasLoginCredentials = email ?? username ?? password;
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const hasLoginCredentials = email || username || password;
 
   if (!hasLoginCredentials) {
     return null;

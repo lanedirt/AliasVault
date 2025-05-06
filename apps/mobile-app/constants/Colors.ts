@@ -7,7 +7,7 @@ export const Colors = {
   light: {
     text: '#11181C',
     textMuted: '#4b5563',
-    background: '#f3f4f6',
+    background: '#f3f2f7',
     accentBackground: '#fff',
     accentBorder: '#d1d5db',
     errorBackground: '#f8d7da',

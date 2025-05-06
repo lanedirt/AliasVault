@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
 import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
@@ -447,9 +447,8 @@ export default function EmailDetailsScreen() : React.ReactNode {
         scrollEnabled={true}
         onNavigationStateChange={(event) => {
           if (event.url !== 'about:blank') {
-            Share.share({
-              url: event.url,
-            });
+            // Open the URL in the browser
+            Linking.openURL(event.url);
           }
         }}
       />

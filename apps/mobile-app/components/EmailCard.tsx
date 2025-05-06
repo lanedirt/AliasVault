@@ -1,9 +1,13 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+import { useDb } from '@/context/DbContext';
+import { Credential } from '@/utils/types/Credential';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 type EmailCardProps = {
   email: MailboxEmail;
@@ -14,6 +18,28 @@ type EmailCardProps = {
  */
 export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
   const colors = useColors();
+  const dbContext = useDb();
+  const [associatedCredential, setAssociatedCredential] = useState<Credential | null>(null);
+
+  /**
+   * Load the associated credential for this email.
+   */
+  useEffect(() => {
+    /**
+     * Load the credential associated with the email's recipient address.
+     */
+    const loadCredential = async (): Promise<void> => {
+      if (!dbContext?.sqliteClient || !email.toLocal || !email.toDomain) {
+        return;
+      }
+
+      const emailAddress = `${email.toLocal}@${email.toDomain}`;
+      const credential = await dbContext.sqliteClient.getCredentialByEmail(emailAddress);
+      setAssociatedCredential(credential);
+    };
+
+    loadCredential();
+  }, [dbContext?.sqliteClient, email.toLocal, email.toDomain]);
 
   /**
    * Format the email date.
@@ -79,6 +105,18 @@ export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
       fontWeight: 'bold',
       marginRight: 8,
     },
+    serviceContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      marginTop: 4,
+    },
+    serviceIcon: {
+      marginRight: 4,
+    },
+    serviceName: {
+      color: colors.primary,
+      fontSize: 12,
+    },
   });
 
   return (
@@ -98,6 +136,14 @@ export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
       <ThemedText style={styles.emailPreview} numberOfLines={2}>
         {email.messagePreview}
       </ThemedText>
+      {associatedCredential && (
+        <View style={styles.serviceContainer}>
+          <IconSymbol size={14} name="key.fill" color={colors.primary} style={styles.serviceIcon} />
+          <ThemedText style={styles.serviceName}>
+            {associatedCredential.ServiceName}
+          </ThemedText>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
