@@ -1,10 +1,13 @@
 import React from 'react';
-import { StyleSheet, Platform, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { BlurView } from 'expo-blur';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 type HeaderButton = {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -29,10 +32,11 @@ export function CollapsibleHeader({
   showNavigationHeader = false,
   alwaysVisible = false,
   headerButtons = []
-}: CollapsibleHeaderProps) : React.ReactNode {
+}: CollapsibleHeaderProps): React.ReactNode {
   const colors = useColors();
+  const colorScheme = useColorScheme();
 
-  // Calculate header opacity based on scroll position and transform
+  // Calculate header opacity and transforms based on scroll
   const headerOpacity = scrollY.interpolate({
     inputRange: [10, 60],
     outputRange: [0, 1],
@@ -45,12 +49,13 @@ export function CollapsibleHeader({
     extrapolate: 'clamp',
   });
 
-  const headerTransform = alwaysVisible ? 0 : headerOpacity.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-20, 0],
-  });
+  const headerTransform = alwaysVisible
+    ? 0
+    : headerOpacity.interpolate({
+      inputRange: [0, 1],
+      outputRange: [-20, 0],
+    });
 
-  // Interpolate the header background color and border
   const headerBackground = headerOpacity.interpolate({
     inputRange: [0, 1],
     outputRange: [colors.background, colors.accentBackground],
@@ -63,6 +68,7 @@ export function CollapsibleHeader({
       height: Platform.OS === 'ios' ? 100 : 64,
       justifyContent: 'center',
       left: 0,
+      overflow: 'hidden',
       paddingBottom: Platform.OS === 'ios' ? 12 : 16,
       paddingTop: Platform.OS === 'ios' ? 60 : 0,
       position: 'absolute',
@@ -92,7 +98,6 @@ export function CollapsibleHeader({
     },
     headerButton: {
       bottom: Platform.OS === 'ios' ? 6 : 16,
-      color: colors.primary,
       padding: 4,
       position: 'absolute',
     },
@@ -106,37 +111,53 @@ export function CollapsibleHeader({
 
   return (
     <>
-      {showNavigationHeader ? (
-        <Stack.Screen options={{
-          title: title,
-          headerShown: false,
-        }} />
-      ) : null}
+      {showNavigationHeader && (
+        <Stack.Screen options={{ title, headerShown: false }} />
+      )}
 
       <Animated.View
         style={[
           styles.floatingHeader,
           {
-            backgroundColor: headerBackground,
-            transform: [{
-              translateY: headerTransform
-            }]
-          }
+            transform: [{ translateY: headerTransform }],
+          },
         ]}
       >
-        <Animated.View style={[
-          styles.floatingTitleContainer,
-          { opacity: alwaysVisible ? titleOpacity : headerOpacity },
-        ]}>
+        {Platform.OS === 'ios' ? (
+          colorScheme === 'dark' ? (
+            <AnimatedBlurView
+              tint="dark"
+              intensity={80}
+              style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}
+            />
+          ) : (
+            <AnimatedBlurView
+              tint="light"
+              intensity={100}
+              style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}
+            />
+          )
+        ) : (
+          <Animated.View
+            style={[StyleSheet.absoluteFill, { backgroundColor: headerBackground }]}
+          />
+        )}
+
+        <Animated.View
+          style={[
+            styles.floatingTitleContainer,
+            { opacity: alwaysVisible ? titleOpacity : headerOpacity },
+          ]}
+        >
           <ThemedText style={styles.floatingTitle}>{title}</ThemedText>
         </Animated.View>
 
-        {headerButtons.map((button, index) => (
+        {headerButtons.map((button, idx) => (
           <TouchableOpacity
-            key={`${button.icon}-${index}`}
+            key={`${button.icon}-${idx}`}
             style={[
               styles.headerButton,
-              button.position === 'left' ? styles.leftButton : styles.rightButton
+              button.position === 'left' ? styles.leftButton : styles.rightButton,
             ]}
             onPress={button.onPress}
           >
@@ -147,9 +168,7 @@ export function CollapsibleHeader({
         <Animated.View
           style={[
             styles.headerBorder,
-            {
-              opacity: headerOpacity
-            }
+            { opacity: headerOpacity },
           ]}
         />
       </Animated.View>

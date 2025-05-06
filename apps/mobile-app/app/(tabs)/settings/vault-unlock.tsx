@@ -156,6 +156,9 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       justifyContent: 'space-between',
       marginBottom: 4,
     },
+    optionLast: {
+      borderBottomWidth: 0,
+    },
     optionText: {
       color: colors.text,
       fontSize: 16,
@@ -197,7 +200,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
             )}
           </TouchableOpacity>
 
-          <View style={styles.option}>
+          <View style={[styles.option, styles.optionLast]}>
             <View style={styles.optionHeader}>
               <ThemedText style={styles.optionText}>Password</ThemedText>
               <Switch

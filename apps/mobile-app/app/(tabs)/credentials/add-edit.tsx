@@ -439,6 +439,10 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       padding: 10,
       paddingLeft: 0,
     },
+    headerLeftButtonText: {
+      color: colors.primary,
+      fontSize: 20,
+    },
     headerRightButton: {
       padding: 10,
       paddingRight: 0,
@@ -492,7 +496,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
           onPress={() => router.back()}
           style={styles.headerLeftButton}
         >
-          <ThemedText style={{ color: colors.primary }}>Cancel</ThemedText>
+          <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
         </TouchableOpacity>
       ),
       /**
@@ -507,7 +511,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerRightButton]);
+  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton]);
 
   return (
     <>

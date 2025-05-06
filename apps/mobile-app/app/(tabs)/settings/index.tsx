@@ -111,12 +111,11 @@ export default function SettingsScreen() : React.ReactNode {
     },
     content: {
       flex: 1,
-      marginTop: 22,
       padding: 16,
     },
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: 4,
+      paddingTop: 26,
     },
     scrollView: {
       flex: 1,
@@ -159,7 +158,7 @@ export default function SettingsScreen() : React.ReactNode {
       alignItems: 'center',
       flex: 1,
       flexDirection: 'row',
-      paddingVertical: 12,
+      paddingVertical: 10,
     },
     settingItemIcon: {
       alignItems: 'center',

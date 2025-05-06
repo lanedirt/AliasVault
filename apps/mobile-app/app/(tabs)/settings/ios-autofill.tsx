@@ -115,16 +115,6 @@ export default function IosAutofillScreen() : React.ReactNode {
                 Open iOS Settings
               </ThemedText>
             </TouchableOpacity>
-            {shouldShowIosAutofillReminder && (
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={handleAlreadyConfigured}
-              >
-                <ThemedText style={styles.secondaryButtonText}>
-                I already configured it
-                </ThemedText>
-              </TouchableOpacity>
-            )}
           </View>
           <ThemedText style={styles.instructionStep}>
             2. Go to &quot;General&quot;
@@ -141,6 +131,18 @@ export default function IosAutofillScreen() : React.ReactNode {
           <ThemedText style={styles.warningText}>
             Note: You&apos;ll need to authenticate with Face ID/Touch ID or your device passcode when using autofill.
           </ThemedText>
+          <View style={styles.buttonContainer}>
+            {shouldShowIosAutofillReminder && (
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={handleAlreadyConfigured}
+              >
+                <ThemedText style={styles.secondaryButtonText}>
+                I already configured it
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </ThemedScrollView>
     </ThemedView>

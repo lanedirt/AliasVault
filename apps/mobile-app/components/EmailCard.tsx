@@ -44,9 +44,7 @@ export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
   const styles = StyleSheet.create({
     emailCard: {
       backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
       borderRadius: 8,
-      borderWidth: 1,
       elevation: 3,
       marginBottom: 12,
       padding: 12,

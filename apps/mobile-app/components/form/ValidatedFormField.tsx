@@ -77,7 +77,7 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
       alignItems: 'center',
       backgroundColor: colors.background,
       borderColor: colors.accentBorder,
-      borderRadius: 4,
+      borderRadius: 6,
       borderWidth: 1,
       flexDirection: 'row',
     },

@@ -52,9 +52,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
     },
     inputContainer: {
       backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
       borderRadius: 8,
-      borderWidth: 1,
       marginBottom: 12,
       padding: 12,
     },

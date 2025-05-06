@@ -37,9 +37,7 @@ export function CredentialCard({ credential }: CredentialCardProps) : React.Reac
   const styles = StyleSheet.create({
     credentialCard: {
       backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
       borderRadius: 8,
-      borderWidth: 1,
       marginBottom: 8,
       padding: 12,
     },

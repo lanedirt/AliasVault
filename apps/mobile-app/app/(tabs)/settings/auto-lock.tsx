@@ -56,12 +56,15 @@ export default function AutoLockScreen() : React.ReactNode {
       borderBottomWidth: StyleSheet.hairlineWidth,
       flexDirection: 'row',
       paddingHorizontal: 16,
-      paddingVertical: 16,
+      paddingVertical: 14,
     },
     optionContainer: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
       margin: 16,
+    },
+    optionLast: {
+      borderBottomWidth: 0,
     },
     optionText: {
       color: colors.text,
@@ -83,21 +86,24 @@ export default function AutoLockScreen() : React.ReactNode {
           </ThemedText>
         </View>
         <View style={styles.optionContainer}>
-          {timeoutOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={styles.option}
-              onPress={() => {
-                setAutoLockTimeout(option.value);
-                setAutoLockTimeoutState(option.value);
-              }}
-            >
-              <ThemedText style={styles.optionText}>{option.label}</ThemedText>
-              {autoLockTimeout === option.value && (
-                <Ionicons name="checkmark" size={24} style={styles.selectedIcon} />
-              )}
-            </TouchableOpacity>
-          ))}
+          {timeoutOptions.map((option, index) => {
+            const isLast = index === timeoutOptions.length - 1;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[styles.option, isLast && styles.optionLast]}
+                onPress={() => {
+                  setAutoLockTimeout(option.value);
+                  setAutoLockTimeoutState(option.value);
+                }}
+              >
+                <ThemedText style={styles.optionText}>{option.label}</ThemedText>
+                {autoLockTimeout === option.value && (
+                  <Ionicons name="checkmark" size={20} style={styles.selectedIcon} />
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ThemedScrollView>
     </ThemedView>

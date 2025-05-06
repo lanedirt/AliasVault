@@ -190,13 +190,12 @@ export default function CredentialsScreen() : React.ReactNode {
     },
     content: {
       flex: 1,
-      marginTop: 36,
       padding: 16,
       paddingTop: 0,
     },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: 4,
+      paddingTop: 42,
     },
     emptyText: {
       color: colors.textMuted,
