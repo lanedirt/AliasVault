@@ -1,14 +1,12 @@
 import { Stack } from 'expo-router';
 import { Platform } from 'react-native';
 
-import { useColors } from '@/hooks/useColorScheme';
+import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
 
 /**
  * Credentials layout.
  */
-export default function CredentialsLayout() : React.ReactNode {
-  const colors = useColors();
-
+export default function CredentialsLayout(): React.ReactNode {
   return (
     <Stack>
       <Stack.Screen
@@ -23,10 +21,8 @@ export default function CredentialsLayout() : React.ReactNode {
           title: 'Add Credential',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           headerShown: true,
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
           gestureEnabled: true,
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
@@ -35,9 +31,7 @@ export default function CredentialsLayout() : React.ReactNode {
           title: 'Credential Created',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           headerShown: true,
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
@@ -45,9 +39,7 @@ export default function CredentialsLayout() : React.ReactNode {
         options={{
           title: 'Credential Details',
           headerShown: true,
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
@@ -55,9 +47,6 @@ export default function CredentialsLayout() : React.ReactNode {
         options={{
           title: 'Email Preview',
           headerShown: true,
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
         }}
       />
     </Stack>

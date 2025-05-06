@@ -14,6 +14,7 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import emitter from '@/utils/EventEmitter';
+import { ThemedView } from '@/components/themed/ThemedView';
 
 /**
  * Email details screen.
@@ -297,12 +298,6 @@ export default function EmailDetailsScreen() : React.ReactNode {
       flexDirection: 'row',
       padding: 2,
     },
-    viewDark: {
-      backgroundColor: colors.background,
-    },
-    viewLight: {
-      backgroundColor: colors.background,
-    },
     webView: {
       flex: 1,
     },
@@ -323,7 +318,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
             <Ionicons
               name={isHtmlView ? 'text-outline' : 'document-outline'}
               size={22}
-              color="#FFA500"
+              color={colors.primary}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -335,30 +330,30 @@ export default function EmailDetailsScreen() : React.ReactNode {
         </View>
       ),
     });
-  }, [isHtmlView, navigation, handleDelete, styles.headerRightButton, styles.headerRightContainer]);
+  }, [isHtmlView, navigation, handleDelete, colors.primary, styles.headerRightButton, styles.headerRightContainer]);
 
   if (isLoading) {
     return (
-      <View style={[styles.centerContainer, isDarkMode ? styles.viewDark : styles.viewLight]}>
+      <ThemedView style={styles.centerContainer}>
         <Stack.Screen options={{ title: 'Email Details' }} />
         <ActivityIndicator size="large" />
-      </View>
+      </ThemedView>
     );
   }
 
   if (error) {
     return (
-      <View style={[styles.centerContainer, isDarkMode ? styles.viewDark : styles.viewLight]}>
+      <ThemedView style={styles.centerContainer}>
         <ThemedText style={styles.errorText}>Error: {error}</ThemedText>
-      </View>
+      </ThemedView>
     );
   }
 
   if (!email) {
     return (
-      <View style={[styles.centerContainer, isDarkMode ? styles.viewDark : styles.viewLight]}>
+      <ThemedView style={styles.centerContainer}>
         <ThemedText style={styles.emptyText}>Email not found</ThemedText>
-      </View>
+      </ThemedView>
     );
   }
 
@@ -471,7 +466,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   }
 
   return (
-    <View style={[styles.container, isDarkMode ? styles.viewDark : styles.viewLight]}>
+    <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: 'Email Details' }} />
       {metadataView}
       {emailView}
@@ -492,6 +487,6 @@ export default function EmailDetailsScreen() : React.ReactNode {
           ))}
         </View>
       )}
-    </View>
+    </ThemedView>
   );
 }

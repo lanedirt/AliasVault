@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { AuthMethod, useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedView } from '@/components/themed/ThemedView';
 
 /**
  * Vault unlock settings screen.
@@ -166,7 +166,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedSafeAreaView style={styles.container}>
+    <ThemedView style={styles.container}>
       <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
@@ -214,6 +214,6 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
           </View>
         </View>
       </ThemedScrollView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 }

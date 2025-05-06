@@ -1,13 +1,9 @@
 import { Stack } from 'expo-router';
 
-import { useColors } from '@/hooks/useColorScheme';
-
 /**
  * Emails layout.
  */
-export default function EmailsLayout() : React.ReactNode {
-  const colors = useColors();
-
+export default function EmailsLayout(): React.ReactNode {
   return (
     <Stack>
       <Stack.Screen
@@ -21,9 +17,6 @@ export default function EmailsLayout() : React.ReactNode {
         options={{
           title: 'Email',
           headerShown: true,
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
         }}
       />
     </Stack>

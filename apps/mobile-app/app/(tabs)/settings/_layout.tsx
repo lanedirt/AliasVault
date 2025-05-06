@@ -1,13 +1,11 @@
 import { Stack } from 'expo-router';
 
-import { useColors } from '@/hooks/useColorScheme';
+import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
 
 /**
  * Settings layout.
  */
-export default function SettingsLayout() : React.ReactNode {
-  const colors = useColors();
-
+export default function SettingsLayout(): React.ReactNode {
   return (
     <Stack>
       <Stack.Screen
@@ -21,9 +19,8 @@ export default function SettingsLayout() : React.ReactNode {
         options={{
           title: 'iOS Autofill',
           headerBackTitle: 'Settings',
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
+          headerShown: true,
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
@@ -31,9 +28,8 @@ export default function SettingsLayout() : React.ReactNode {
         options={{
           title: 'Vault Unlock Method',
           headerBackTitle: 'Settings',
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
+          headerShown: true,
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
@@ -41,9 +37,8 @@ export default function SettingsLayout() : React.ReactNode {
         options={{
           title: 'Auto-lock Settings',
           headerBackTitle: 'Settings',
-          headerStyle: {
-            backgroundColor: colors.headerBackground,
-          },
+          headerShown: true,
+          ...defaultHeaderOptions,
         }}
       />
     </Stack>

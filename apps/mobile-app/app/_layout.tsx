@@ -53,6 +53,7 @@ function RootLayoutNav() : React.ReactNode {
       <Stack screenOptions={{
         headerShown: true,
         animation: 'none',
+        headerTransparent: true,
         headerStyle: {
           backgroundColor: colors.accentBackground,
         },

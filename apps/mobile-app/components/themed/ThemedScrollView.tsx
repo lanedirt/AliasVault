@@ -1,4 +1,4 @@
-import { ScrollView, StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { Platform, ScrollView, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 
 type ThemedScrollViewProps = {
   style?: StyleProp<ViewStyle>;
@@ -23,10 +23,13 @@ export function ThemedScrollView({ style, lightColor, darkColor, ...otherProps }
   );
 }
 
+const HEADER_HEIGHT = Platform.OS === 'ios' ? 96 : 56;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 80,
+    paddingTop: HEADER_HEIGHT,
   },
   contentContainer: {
     paddingBottom: 40,

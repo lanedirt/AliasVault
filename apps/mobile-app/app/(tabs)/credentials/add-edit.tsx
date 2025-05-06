@@ -1,14 +1,14 @@
-import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, ScrollView } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { ThemedSafeAreaView } from '@/components/themed/ThemedSafeAreaView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -404,9 +404,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
     },
     content: {
       flex: 1,
-      marginTop: 36,
       padding: 16,
       paddingTop: 0,
+    },
+    contentContainer: {
+      paddingBottom: 40,
+      paddingTop: Platform.OS === 'ios' ? 76 : 56,
     },
     deleteButton: {
       alignItems: 'center',
@@ -441,7 +444,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
     },
     headerLeftButtonText: {
       color: colors.primary,
-      fontSize: 20,
     },
     headerRightButton: {
       padding: 10,
@@ -518,9 +520,17 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       {(isLoading) && (
         <LoadingOverlay status={syncStatus} />
       )}
-      <ThemedSafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 0} // adjust offset as needed
+      >
         <ThemedView style={styles.content}>
-          <ScrollView
+          <KeyboardAwareScrollView
+            enableOnAndroid={true}
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+            extraScrollHeight={0}
           >
             {!isEditMode && (
               <View style={styles.modeSelector}>
@@ -658,10 +668,10 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                 )}
               </>
             )}
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </ThemedView>
         <AliasVaultToast />
-      </ThemedSafeAreaView>
+      </KeyboardAvoidingView>
     </>
   );
 }

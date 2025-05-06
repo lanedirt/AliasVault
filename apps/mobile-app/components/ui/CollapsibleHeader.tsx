@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme } from 'react-native';
+import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Stack } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { BlurView } from 'expo-blur';
@@ -89,7 +89,7 @@ export function CollapsibleHeader({
       flex: 1,
     },
     headerBorder: {
-      backgroundColor: colors.accentBorder,
+      backgroundColor: colors.headerBorder,
       bottom: 0,
       height: 1,
       left: 0,
@@ -124,23 +124,20 @@ export function CollapsibleHeader({
         ]}
       >
         {Platform.OS === 'ios' ? (
-          colorScheme === 'dark' ? (
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}>
             <AnimatedBlurView
-              tint="dark"
-              intensity={80}
-              style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}
+              tint={colorScheme === 'dark' ? 'dark' : 'light'}
+              intensity={colorScheme === 'dark' ? 80 : 100}
+              style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackground }]}
             />
-          ) : (
-            <AnimatedBlurView
-              tint="light"
-              intensity={100}
-              style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}
-            />
-          )
+            <View style={styles.headerBorder} />
+          </Animated.View>
         ) : (
           <Animated.View
             style={[StyleSheet.absoluteFill, { backgroundColor: headerBackground }]}
-          />
+          >
+            <View style={styles.headerBorder} />
+          </Animated.View>
         )}
 
         <Animated.View
@@ -166,10 +163,7 @@ export function CollapsibleHeader({
         ))}
 
         <Animated.View
-          style={[
-            styles.headerBorder,
-            { opacity: headerOpacity },
-          ]}
+          style={{ opacity: headerOpacity }}
         />
       </Animated.View>
     </>
