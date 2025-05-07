@@ -12,6 +12,7 @@ import { AppInfo } from '@/utils/AppInfo';
 import { PulseDot } from '@/components/PulseDot';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
+import { useAuth } from '@/context/AuthContext';
 
 type EmailPreviewProps = {
   email: string | undefined;
@@ -27,6 +28,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   const [isSpamOk, setIsSpamOk] = useState(false);
   const webApi = useWebApi();
   const dbContext = useDb();
+  const authContext = useAuth();
   const colors = useColors();
 
   /**
@@ -49,6 +51,12 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     const loadEmails = async () : Promise<void> => {
       try {
         if (!email) {
+          return;
+        }
+
+        // Check if we are in offline mode, if so, we don't need to load emails from the server
+        const isOffline = authContext.isOffline;
+        if (isOffline) {
           return;
         }
 
@@ -125,7 +133,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     // Set up auto-refresh interval
     const interval = setInterval(loadEmails, 2000);
     return () : void => clearInterval(interval);
-  }, [email, loading, webApi, dbContext, isPublicDomain]);
+  }, [email, loading, webApi, dbContext, isPublicDomain, authContext.isOffline]);
 
   const styles = StyleSheet.create({
     date: {
@@ -179,6 +187,17 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
           <PulseDot />
         </View>
         <ThemedText style={styles.placeholderText}>Loading emails...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  if (authContext.isOffline) {
+    return (
+      <ThemedView style={styles.section}>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+        </View>
+        <ThemedText style={styles.placeholderText}>You are offline. Please connect to the internet to load your emails.</ThemedText>
       </ThemedView>
     );
   }

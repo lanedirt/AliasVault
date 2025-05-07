@@ -22,6 +22,7 @@ import { PasswordGenerator } from '@/utils/shared/password-generator';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import { credentialSchema } from '@/utils/validationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAuth } from '@/context/AuthContext';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -33,6 +34,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const router = useRouter();
   const colors = useColors();
   const dbContext = useDb();
+  const authContext = useAuth();
   const [mode, setMode] = useState<CredentialMode>('random');
   const { executeVaultMutation, syncStatus } = useVaultMutate();
   const navigation = useNavigation();
@@ -96,6 +98,19 @@ export default function AddEditCredentialScreen() : React.ReactNode {
    * if we're in add mode and the service URL is provided (by native autofill component).
    */
   useEffect(() => {
+    if (authContext.isOffline) {
+      // Show toast and close the modal
+      setTimeout(() => {
+        Toast.show({
+          type: 'error',
+          text1: 'You are offline and in read-only mode. Please connect to the internet to add or edit a credential.',
+          position: 'bottom'
+        });
+      }, 100);
+      router.dismiss();
+      return;
+    }
+
     if (isEditMode) {
       loadExistingCredential();
     } else if (serviceUrl) {
@@ -104,7 +119,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       setValue('ServiceUrl', decodedUrl);
       setValue('ServiceName', serviceName);
     }
-  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue]);
+  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router]);
 
   /**
    * Initialize the identity and password generators with settings from user's vault.

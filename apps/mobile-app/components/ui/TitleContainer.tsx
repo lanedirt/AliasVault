@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { OfflineBanner } from '../OfflineBanner';
+
 import { ThemedText } from '@/components/themed/ThemedText';
 import Logo from '@/assets/images/logo.svg';
 
@@ -13,10 +15,13 @@ type TitleContainerProps = {
  */
 export function TitleContainer({ title, showLogo = true }: TitleContainerProps): React.ReactNode {
   return (
-    <View style={styles.titleContainer}>
-      {showLogo && <Logo width={40} height={40} style={styles.logo} />}
-      <ThemedText type="title">{title}</ThemedText>
-    </View>
+    <>
+      <OfflineBanner />
+      <View style={styles.titleContainer}>
+        {showLogo && <Logo width={40} height={40} style={styles.logo} />}
+        <ThemedText type="title">{title}</ThemedText>
+      </View>
+    </>
   );
 }
 

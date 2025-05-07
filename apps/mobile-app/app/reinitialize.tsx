@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Href, router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useAuth } from '@/context/AuthContext';
@@ -74,29 +74,11 @@ export default function ReinitializeScreen() : React.ReactNode {
     }
 
     /**
-     * Initialize the app.
+     * Handle vault unlocking process.
      */
-    const initialize = async () : Promise<void> => {
-      const { isLoggedIn, enabledAuthMethods } = await authContext.initializeAuth();
+    async function handleVaultUnlock() : Promise<void> {
+      const { enabledAuthMethods } = await authContext.initializeAuth();
 
-      // If user is not logged in, navigate to login immediately
-      if (!isLoggedIn) {
-        router.replace('/login');
-        return;
-      }
-
-      // Perform initial vault sync
-      await syncVault({
-        initialSync: true,
-        /**
-         * Handle the status update.
-         */
-        onStatus: (message) => {
-          setStatus(message);
-        }
-      });
-
-      // Try to unlock with FaceID
       try {
         const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
         if (hasEncryptedDatabase) {
@@ -106,44 +88,86 @@ export default function ReinitializeScreen() : React.ReactNode {
             return;
           }
 
-          // Attempt to unlock the vault with FaceID.
           setStatus('Unlocking vault');
           const isUnlocked = await dbContext.unlockVault();
           if (isUnlocked) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Vault is successfully unlocked, redirect to the stored return URL (if any) or default entry page.
             redirectToReturnUrl();
-
             return;
-          } else {
-            router.replace('/unlock');
           }
-        } else {
-          /*
-           * Vault is not initialized which means the database does not exist or decryption key is missing
-           * from device's keychain. Navigate to the unlock screen.
-           */
-          router.replace('/unlock');
-          return;
         }
-      } catch {
-        /*
-         * If FaceID fails (too many attempts, manual cancel, etc.)
-         * navigate to unlock screen
-         */
         router.replace('/unlock');
+      } catch {
+        router.replace('/unlock');
+      }
+    }
+
+    /**
+     * Initialize the app.
+     */
+    const initialize = async () : Promise<void> => {
+      const { isLoggedIn } = await authContext.initializeAuth();
+
+      // If user is not logged in, navigate to login immediately
+      if (!isLoggedIn) {
+        router.replace('/login');
         return;
       }
 
-      /*
-       * If we get here, something went wrong with the FaceID unlock
-       * Navigate to unlock screen as a fallback
-       */
-      router.replace('/unlock');
-    }
+      // First perform vault sync
+      const syncSuccess = await syncVault({
+        initialSync: true,
+        /**
+         * Handle the status update.
+         */
+        onStatus: (message) => {
+          setStatus(message);
+        },
+        /**
+         * Handle successful vault sync and continue with vault unlock flow.
+         */
+        onSuccess: async () => {
+          await handleVaultUnlock();
+        },
+        /**
+         * Handle offline state and prompt user for action.
+         */
+        onOffline: () => {
+          Alert.alert(
+            'Sync Issue',
+            'The AliasVault server could not be reached and the vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+            [
+              {
+                text: 'Open Local Vault',
+                /**
+                 * Handle opening vault in read-only mode.
+                 */
+                onPress: async () : Promise<void> => {
+                  setStatus('Opening vault in read-only mode');
+                  await handleVaultUnlock();
+                }
+              },
+              {
+                text: 'Retry Sync',
+                /**
+                 * Handle retrying the connection.
+                 */
+                onPress: () : void => {
+                  setStatus('Retrying connection...');
+                  initialize();
+                }
+              }
+            ]
+          );
+        }
+      });
+
+      if (!syncSuccess) {
+        router.replace('/unlock');
+      }
+    };
 
     initialize();
   }, [syncVault, authContext, dbContext]);
@@ -168,7 +192,7 @@ export default function ReinitializeScreen() : React.ReactNode {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.messageContainer}>
-        <ThemedText style={styles.message}>Vault locked due to time-out, unlocking vault again...</ThemedText>
+        <ThemedText style={styles.message}>Vault auto-locked after timeout. Attempting to unlock...</ThemedText>
         {status ? <LoadingIndicator status={status} /> : null}
       </View>
     </ThemedView>

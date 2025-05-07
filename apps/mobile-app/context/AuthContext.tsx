@@ -17,6 +17,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isInitialized: boolean;
   username: string | null;
+  isOffline: boolean;
   getEnabledAuthMethods: () => Promise<AuthMethod[]>;
   isFaceIDEnabled: () => Promise<boolean>;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
@@ -30,6 +31,7 @@ type AuthContextType = {
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
   getBiometricDisplayName: () => Promise<string>;
+  setOfflineMode: (isOffline: boolean) => void;
   // iOS Autofill methods
   shouldShowIosAutofillReminder: boolean;
   markIosAutofillConfigured: () => Promise<void>;
@@ -55,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [shouldShowIosAutofillReminder, setShouldShowIosAutofillReminder] = useState(false);
   const [returnUrl, setReturnUrl] = useState<{ path: string; params?: object } | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const appState = useRef(AppState.currentState);
   const dbContext = useDb();
   const pathname = usePathname();
@@ -323,26 +326,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoggedIn,
     isInitialized,
     username,
+    globalMessage,
+    shouldShowIosAutofillReminder,
+    returnUrl,
+    isOffline,
     getEnabledAuthMethods,
     isFaceIDEnabled,
-    initializeAuth,
     setAuthTokens,
+    initializeAuth,
     login,
     logout,
-    globalMessage,
     clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplay,
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
-    // iOS Autofill methods
-    shouldShowIosAutofillReminder,
     markIosAutofillConfigured,
-    // Return URL methods
-    returnUrl,
     setReturnUrl,
-  }), [isLoggedIn, isInitialized, username, globalMessage, getEnabledAuthMethods, setAuthTokens, login, logout, clearGlobalMessage, initializeAuth, setAuthMethods, getAuthMethodDisplay, isFaceIDEnabled, getAutoLockTimeout, setAutoLockTimeout, getBiometricDisplayName, shouldShowIosAutofillReminder, markIosAutofillConfigured, returnUrl]);
+    setOfflineMode: setIsOffline,
+  }), [
+    isLoggedIn,
+    isInitialized,
+    username,
+    globalMessage,
+    shouldShowIosAutofillReminder,
+    returnUrl,
+    isOffline,
+    getEnabledAuthMethods,
+    isFaceIDEnabled,
+    setAuthTokens,
+    initializeAuth,
+    login,
+    logout,
+    clearGlobalMessage,
+    setAuthMethods,
+    getAuthMethodDisplay,
+    getAutoLockTimeout,
+    setAutoLockTimeout,
+    getBiometricDisplayName,
+    markIosAutofillConfigured,
+    setReturnUrl,
+  ]);
 
   return (
     <AuthContext.Provider value={contextValue}>

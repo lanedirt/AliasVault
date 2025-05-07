@@ -106,6 +106,14 @@ export default function CredentialsScreen() : React.ReactNode {
     setRefreshing(true);
     setIsLoadingCredentials(true);
 
+    // Check if we are in offline mode, if so, we don't need to refresh the credentials
+    const isOffline = authContext.isOffline;
+    if (isOffline) {
+      setRefreshing(false);
+      setIsLoadingCredentials(false);
+      return;
+    }
+
     try {
       // Sync vault and load credentials
       await syncVault({
@@ -122,6 +130,18 @@ export default function CredentialsScreen() : React.ReactNode {
             text1: hasNewVault ? 'Vault synced successfully' : 'Vault is up-to-date',
             position: 'top',
             visibilityTime: 1200,
+          });
+        },
+        /**
+         * On offline.
+         */
+        onOffline: () => {
+          setRefreshing(false);
+          setIsLoadingCredentials(false);
+          Toast.show({
+            type: 'error',
+            text1: 'You are offline. Please connect to the internet to sync your vault',
+            position: 'bottom',
           });
         },
         /**
@@ -146,7 +166,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {

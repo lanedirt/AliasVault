@@ -89,16 +89,30 @@ export function useVaultMutate() : {
       version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
     };
 
-    // Upload to server
-    const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
+    try {
+      // Upload to server
+      const response = await webApi.post<typeof newVault, VaultPostResponse>('Vault', newVault);
 
-    if (response.status === 0) {
-      await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
-      options.onSuccess?.();
-    } else if (response.status === 1) {
-      throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
-    } else {
-      throw new Error('Failed to upload vault to server');
+      // If we get here, it means we have a valid connection to the server.
+      authContext.setOfflineMode(false);
+
+      if (response.status === 0) {
+        await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
+        options.onSuccess?.();
+      } else if (response.status === 1) {
+        throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
+      } else {
+        throw new Error('Failed to upload vault to server');
+      }
+    } catch (error) {
+      // Check if it's a network error
+      if (error instanceof Error && (error.message.includes('network') || error.message.includes('timeout'))) {
+        // Network error, mark as offline and track pending changes
+        authContext.setOfflineMode(true);
+        options.onSuccess?.();
+        return;
+      }
+      throw error;
     }
   }, [dbContext, authContext, webApi]);
 
@@ -110,34 +124,59 @@ export function useVaultMutate() : {
       setIsLoading(true);
       setSyncStatus('Checking for vault updates');
 
-      await syncVault({
-        /**
-         * Update the sync status
-         */
-        onStatus: (message) => setSyncStatus(message),
-        /**
-         * Execute the operation if the vault has been updated
-         */
-        onSuccess: async (hasNewVault) => {
-          if (hasNewVault) {
-            // Vault was changed, but has now been reloaded so we can continue with the operation.
+      // If we're in offline mode, try to sync once to see if we can get back online
+      if (authContext.isOffline) {
+        await syncVault({
+          /**
+           * Handle the status update.
+           */
+          onStatus: (message) => setSyncStatus(message),
+          /**
+           * Handle successful vault sync and continue with vault mutation.
+           */
+          onSuccess: async (hasNewVault) => {
+            if (hasNewVault) {
+              // Vault was changed, but has now been reloaded so we can continue with the operation.
+            }
+            await executeOperation(operation, options);
+          },
+          /**
+           * Handle offline state and prompt user for action.
+           */
+          onError: () => {
+            // Still offline, proceed with local operation
+            executeOperation(operation, options);
           }
-
-          await executeOperation(operation, options);
-        },
-        /**
-         * Handle errors
-         */
-        onError: (error) => {
-          Toast.show({
-            type: 'error',
-            text1: 'Failed to sync vault',
-            text2: error,
-            position: 'bottom'
-          });
-          options.onError?.(new Error(error));
-        }
-      });
+        });
+      } else {
+        await syncVault({
+          /**
+           * Handle the status update.
+           */
+          onStatus: (message) => setSyncStatus(message),
+          /**
+           * Handle successful vault sync and continue with vault mutation.
+           */
+          onSuccess: async (hasNewVault) => {
+            if (hasNewVault) {
+              // Vault was changed, but has now been reloaded so we can continue with the operation.
+            }
+            await executeOperation(operation, options);
+          },
+          /**
+           * Handle error during vault sync.
+           */
+          onError: (error) => {
+            Toast.show({
+              type: 'error',
+              text1: 'Failed to sync vault',
+              text2: error,
+              position: 'bottom'
+            });
+            options.onError?.(new Error(error));
+          }
+        });
+      }
     } catch (error) {
       console.error('Error during vault mutation:', error);
       Toast.show({
@@ -151,7 +190,7 @@ export function useVaultMutate() : {
       setIsLoading(false);
       setSyncStatus('');
     }
-  }, [syncVault, executeOperation]);
+  }, [syncVault, executeOperation, authContext.isOffline]);
 
   return {
     executeVaultMutation,

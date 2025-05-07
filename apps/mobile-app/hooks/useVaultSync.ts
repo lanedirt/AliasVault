@@ -34,6 +34,7 @@ type VaultSyncOptions = {
   onSuccess?: (hasNewVault: boolean) => void;
   onError?: (error: string) => void;
   onStatus?: (message: string) => void;
+  onOffline?: () => void;
 }
 
 /**
@@ -47,7 +48,7 @@ export const useVaultSync = () : {
   const webApi = useWebApi();
 
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
-    const { initialSync = false, onSuccess, onError, onStatus } = options;
+    const { initialSync = false, onSuccess, onError, onStatus, onOffline } = options;
 
     try {
       const { isLoggedIn } = await authContext.initializeAuth();
@@ -69,10 +70,21 @@ export const useVaultSync = () : {
       );
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
-        await webApi.logout(statusError);
-        onError?.(statusError);
-        return false;
+        // Only logout if it's an authentication error, not a network error
+        if (statusError.includes('authentication') || statusError.includes('unauthorized')) {
+          await webApi.logout(statusError);
+          onError?.(statusError);
+          return false;
+        }
+
+        // For other errors, go into offline mode
+        authContext.setOfflineMode(true);
+        onOffline?.();
+        return true;
       }
+
+      // If we get here, it means we have a valid connection to the server.
+      authContext.setOfflineMode(false);
 
       // Compare vault revisions
       const vaultMetadata = await dbContext.getVaultMetadata();
@@ -88,9 +100,16 @@ export const useVaultSync = () : {
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
         if (vaultError) {
-          await webApi.logout(vaultError);
-          onError?.(vaultError);
-          return false;
+          // Only logout if it's an authentication error, not a network error
+          if (vaultError.includes('authentication') || vaultError.includes('unauthorized')) {
+            await webApi.logout(vaultError);
+            onError?.(vaultError);
+            return false;
+          }
+
+          // For other errors, go into offline mode
+          authContext.setOfflineMode(true);
+          return true;
         }
 
         try {
@@ -112,6 +131,13 @@ export const useVaultSync = () : {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';
       console.error('Vault sync error:', err);
+
+      // Check if it's a network error
+      if (errorMessage.includes('network') || errorMessage.includes('timeout')) {
+        authContext.setOfflineMode(true);
+        return true;
+      }
+
       onError?.(errorMessage);
       return false;
     }

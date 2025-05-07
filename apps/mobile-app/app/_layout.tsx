@@ -1,4 +1,4 @@
-import { Linking, StyleSheet } from 'react-native';
+import { Linking, StyleSheet, Alert } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -49,10 +49,51 @@ function RootLayoutNav() : React.ReactNode {
     hasBooted.current = true;
 
     /**
+     * Handle vault unlocking process.
+     */
+    async function handleVaultUnlock() : Promise<void> {
+      const { enabledAuthMethods } = await initializeAuth();
+
+      try {
+        const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
+        if (hasEncryptedDatabase) {
+          const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
+          if (!isFaceIDEnabled) {
+            setRedirectTarget('/unlock');
+            setBootComplete(true);
+            return;
+          }
+
+          setStatus('Unlocking vault');
+          const isUnlocked = await dbContext.unlockVault();
+          if (isUnlocked) {
+            await new Promise(resolve => setTimeout(resolve, 750));
+            setStatus('Decrypting vault');
+            await new Promise(resolve => setTimeout(resolve, 750));
+            setBootComplete(true);
+            return;
+          }
+
+          setRedirectTarget('/unlock');
+          setBootComplete(true);
+          return;
+        } else {
+          setRedirectTarget('/unlock');
+          setBootComplete(true);
+          return;
+        }
+      } catch {
+        setRedirectTarget('/unlock');
+        setBootComplete(true);
+        return;
+      }
+    }
+
+    /**
      * Initialize the app.
      */
     const initialize = async () : Promise<void> => {
-      const { isLoggedIn, enabledAuthMethods } = await initializeAuth();
+      const { isLoggedIn } = await initializeAuth();
 
       if (!isLoggedIn) {
         setRedirectTarget('/login');
@@ -60,6 +101,7 @@ function RootLayoutNav() : React.ReactNode {
         return;
       }
 
+      // First perform vault sync
       await syncVault({
         initialSync: true,
         /**
@@ -67,38 +109,46 @@ function RootLayoutNav() : React.ReactNode {
          */
         onStatus: (message) => {
           setStatus(message);
+        },
+        /**
+         * Handle successful vault sync and continue with vault unlock flow.
+         */
+        onSuccess: async () => {
+          // Continue with the rest of the flow after successful sync
+          handleVaultUnlock();
+        },
+        /**
+         * Handle offline state and prompt user for action.
+         */
+        onOffline: () => {
+          Alert.alert(
+            'Sync Issue',
+            'The AliasVault server could not be reached and the vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+            [
+              {
+                text: 'Open Local Vault',
+                /**
+                 * Handle opening vault in read-only mode.
+                 */
+                onPress: async () : Promise<void> => {
+                  setStatus('Opening vault in read-only mode');
+                  handleVaultUnlock();
+                }
+              },
+              {
+                text: 'Retry Sync',
+                /**
+                 * Handle retrying the connection.
+                 */
+                onPress: () : void => {
+                  setStatus('Retrying connection...');
+                  initialize();
+                }
+              }
+            ]
+          );
         }
       });
-
-      const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
-      if (hasEncryptedDatabase) {
-        const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
-        if (!isFaceIDEnabled) {
-          setRedirectTarget('/unlock');
-          setBootComplete(true);
-          return;
-        }
-
-        setStatus('Unlocking vault');
-        const isUnlocked = await dbContext.unlockVault();
-        if (isUnlocked) {
-          await new Promise(resolve => setTimeout(resolve, 750));
-          setStatus('Decrypting vault');
-          await new Promise(resolve => setTimeout(resolve, 750));
-
-          // The vault is successfully unlocked, so we let the native code handle the default routing.
-          setBootComplete(true);
-          return;
-        }
-
-        setRedirectTarget('/unlock');
-        setBootComplete(true);
-        return;
-      } else {
-        setRedirectTarget('/unlock');
-        setBootComplete(true);
-        return;
-      }
     };
 
     initialize();

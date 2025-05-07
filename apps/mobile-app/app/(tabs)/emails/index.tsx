@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
@@ -17,13 +18,14 @@ import { EmailCard } from '@/components/EmailCard';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-
+import { useAuth } from '@/context/AuthContext';
 /**
  * Emails screen.
  */
 export default function EmailsScreen() : React.ReactNode {
   const dbContext = useDb();
   const webApi = useWebApi();
+  const authContext = useAuth();
   const colors = useColors();
   const navigation = useNavigation();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -43,6 +45,13 @@ export default function EmailsScreen() : React.ReactNode {
       setError(null);
 
       if (!dbContext?.sqliteClient) {
+        return;
+      }
+
+      // Check if we are in offline mode, if so, we don't need to load emails from the server
+      const isOffline = authContext.isOffline;
+      if (isOffline) {
+        setIsLoading(false);
         return;
       }
 
@@ -66,12 +75,20 @@ export default function EmailsScreen() : React.ReactNode {
         setEmails(decryptedEmails);
         setIsLoading(false);
       } catch {
+        // Show toast and throw error
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to load emails',
+          position: 'bottom',
+        });
         throw new Error('Failed to load emails');
+      } finally {
+        setIsLoading(false);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     }
-  }, [dbContext?.sqliteClient, webApi, setIsLoading]);
+  }, [dbContext?.sqliteClient, webApi, setIsLoading, authContext.isOffline]);
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -149,7 +166,7 @@ export default function EmailsScreen() : React.ReactNode {
       textAlign: 'center',
     },
     errorText: {
-      color: colors.errorBackground,
+      color: colors.errorText,
       textAlign: 'center',
     },
     loadingContainer: {
@@ -165,6 +182,14 @@ export default function EmailsScreen() : React.ReactNode {
       return (
         <View style={styles.loadingContainer}>
           <SkeletonLoader count={3} height={120} parts={4} />
+        </View>
+      );
+    }
+
+    if (authContext.isOffline) {
+      return (
+        <View style={styles.centerContainer}>
+          <ThemedText style={styles.emptyText}>You are offline. Please connect to the internet to load your emails.</ThemedText>
         </View>
       );
     }
