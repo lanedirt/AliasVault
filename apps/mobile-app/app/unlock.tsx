@@ -172,6 +172,11 @@ export default function UnlockScreen() : React.ReactNode {
       justifyContent: 'center',
       padding: 20,
     },
+    loadingContainer: {
+      alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+    },
     logo: {
       height: 80,
       width: 200,
@@ -216,7 +221,9 @@ export default function UnlockScreen() : React.ReactNode {
   return (
     <ThemedView style={styles.container}>
       {isLoading ? (
-        <LoadingIndicator status="Unlocking vault..." />
+        <View style={styles.loadingContainer}>
+          <LoadingIndicator status="Unlocking vault..." />
+        </View>
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

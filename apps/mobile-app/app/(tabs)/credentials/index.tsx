@@ -182,8 +182,8 @@ export default function CredentialsScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
-      paddingTop: insets.top,
       paddingBottom: insets.bottom,
+      paddingTop: insets.top,
     },
     content: {
       flex: 1,
