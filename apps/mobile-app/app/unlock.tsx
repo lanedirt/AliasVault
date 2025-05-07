@@ -98,7 +98,7 @@ export default function UnlockScreen() : React.ReactNode {
    * Handle the face ID retry.
    */
   const handleFaceIDRetry = async () : Promise<void> => {
-    router.replace('/');
+    router.replace('/reinitialize');
   };
 
   const styles = StyleSheet.create({

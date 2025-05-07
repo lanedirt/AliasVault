@@ -98,6 +98,7 @@ export default function ReinitializeScreen() : React.ReactNode {
             return;
           }
         }
+
         router.replace('/unlock');
       } catch {
         router.replace('/unlock');
@@ -117,7 +118,7 @@ export default function ReinitializeScreen() : React.ReactNode {
       }
 
       // First perform vault sync
-      const syncSuccess = await syncVault({
+      await syncVault({
         initialSync: true,
         /**
          * Handle the status update.
@@ -163,10 +164,6 @@ export default function ReinitializeScreen() : React.ReactNode {
           );
         }
       });
-
-      if (!syncSuccess) {
-        router.replace('/unlock');
-      }
     };
 
     initialize();
