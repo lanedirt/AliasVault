@@ -1,10 +1,11 @@
-import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, View } from 'react-native';
+import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -25,7 +26,6 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
  */
 export default function CredentialsScreen() : React.ReactNode {
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
   const { syncVault } = useVaultSync();
   const colors = useColors();
   const flatListRef = useRef<FlatList>(null);
@@ -35,6 +35,7 @@ export default function CredentialsScreen() : React.ReactNode {
   const router = useRouter();
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
+  const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
   const insets = useSafeAreaInsets();
 
   const authContext = useAuth();
@@ -100,9 +101,16 @@ export default function CredentialsScreen() : React.ReactNode {
       unsubscribeFocus();
       unsubscribeBlur();
     };
-  }, [isTabFocused, loadCredentials, navigation]);
+  }, [isTabFocused, loadCredentials, navigation, setRefreshing]);
 
   const onRefresh = useCallback(async () => {
+    // Trigger haptic feedback when pull-to-refresh is activated
+    if (Platform.OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (Platform.OS === 'android') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
     setRefreshing(true);
     setIsLoadingCredentials(true);
 
@@ -125,12 +133,14 @@ export default function CredentialsScreen() : React.ReactNode {
           await loadCredentials();
           setIsLoadingCredentials(false);
           setRefreshing(false);
-          Toast.show({
-            type: 'success',
-            text1: hasNewVault ? 'Vault synced successfully' : 'Vault is up-to-date',
-            position: 'top',
-            visibilityTime: 1200,
-          });
+          setTimeout(() => {
+            Toast.show({
+              type: 'success',
+              text1: hasNewVault ? 'Vault synced successfully' : 'Vault is up-to-date',
+              position: 'top',
+              visibilityTime: 1200,
+            });
+          }, 200);
         },
         /**
          * On offline.
@@ -138,11 +148,13 @@ export default function CredentialsScreen() : React.ReactNode {
         onOffline: () => {
           setRefreshing(false);
           setIsLoadingCredentials(false);
-          Toast.show({
-            type: 'error',
-            text1: 'You are offline. Please connect to the internet to sync your vault',
-            position: 'bottom',
-          });
+          setTimeout(() => {
+            Toast.show({
+              type: 'error',
+              text1: 'You are offline. Please connect to the internet to sync your vault',
+              position: 'bottom',
+            });
+          }, 200);
         },
         /**
          * On error.
@@ -150,23 +162,27 @@ export default function CredentialsScreen() : React.ReactNode {
         onError: (error) => {
           console.error('Error syncing vault:', error);
           setRefreshing(false);
-          Toast.show({
-            type: 'error',
-            text1: 'Vault sync failed',
-            text2: error,
-          });
+          setIsLoadingCredentials(false);
+          setTimeout(() => {
+            Toast.show({
+              type: 'error',
+              text1: 'Vault sync failed',
+              text2: error,
+            });
+          }, 200);
         },
       });
     } catch (err) {
       console.error('Error refreshing credentials:', err);
       setRefreshing(false);
+      setIsLoadingCredentials(false);
       Toast.show({
         type: 'error',
         text1: 'Vault sync failed',
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline, setRefreshing]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
@@ -258,75 +274,76 @@ export default function CredentialsScreen() : React.ReactNode {
 
       <ThemedView style={styles.content}>
         <ThemedView style={styles.stepContainer}>
-          {isLoadingCredentials ? (
-            <View style={styles.contentContainer}>
-              <TitleContainer title="Credentials" />
-              <SkeletonLoader count={4} height={60} parts={2} />
-            </View>
-          ) : (
-            <Animated.FlatList
-              ref={flatListRef}
-              data={filteredCredentials}
-              keyExtractor={(item) => item.Id}
-              keyboardShouldPersistTaps='handled'
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                { useNativeDriver: true }
-              )}
-              scrollEventThrottle={16}
-              contentContainerStyle={styles.contentContainer}
-              scrollIndicatorInsets={{ bottom: 40 }}
-              initialNumToRender={14}
-              maxToRenderPerBatch={14}
-              windowSize={7}
-              removeClippedSubviews={true}
-              ListHeaderComponent={
-                <ThemedView>
-                  <TitleContainer title="Credentials" />
-                  <ThemedView style={styles.searchContainer}>
-                    <MaterialIcons
-                      name="search"
-                      size={20}
-                      color={colors.textMuted}
-                      style={styles.searchIcon}
-                    />
-                    <TextInput
-                      style={styles.searchInput}
-                      placeholder="Search credentials..."
-                      placeholderTextColor={colors.textMuted}
-                      value={searchQuery}
-                      autoCorrect={false}
-                      autoCapitalize="none"
-                      onChangeText={setSearchQuery}
-                      clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
-                    />
-                    {Platform.OS === 'android' && searchQuery.length > 0 && (
-                      <TouchableOpacity
-                        style={styles.clearButton}
-                        onPress={() => setSearchQuery('')}
-                      >
-                        <ThemedText style={styles.clearButtonText}>×</ThemedText>
-                      </TouchableOpacity>
-                    )}
-                  </ThemedView>
+          <Animated.FlatList
+            ref={flatListRef}
+            data={isLoadingCredentials ? Array(4).fill(null) : filteredCredentials}
+            keyExtractor={(item, index) => item?.Id ?? `skeleton-${index}`}
+            keyboardShouldPersistTaps='handled'
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+            contentContainerStyle={styles.contentContainer}
+            scrollIndicatorInsets={{ bottom: 40 }}
+            initialNumToRender={14}
+            maxToRenderPerBatch={14}
+            windowSize={7}
+            removeClippedSubviews={true}
+            ListHeaderComponent={
+              <ThemedView>
+                <TitleContainer title="Credentials" />
+                <ThemedView style={styles.searchContainer}>
+                  <MaterialIcons
+                    name="search"
+                    size={20}
+                    color={colors.textMuted}
+                    style={styles.searchIcon}
+                  />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search credentials..."
+                    placeholderTextColor={colors.textMuted}
+                    value={searchQuery}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    onChangeText={setSearchQuery}
+                    clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
+                  />
+                  {Platform.OS === 'android' && searchQuery.length > 0 && (
+                    <TouchableOpacity
+                      style={styles.clearButton}
+                      onPress={() => setSearchQuery('')}
+                    >
+                      <ThemedText style={styles.clearButtonText}>×</ThemedText>
+                    </TouchableOpacity>
+                  )}
                 </ThemedView>
-              }
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={[colors.primary]}
-                  tintColor={colors.primary}
-                />
-              }
-              renderItem={({ item }) => <CredentialCard credential={item} />}
-              ListEmptyComponent={
+              </ThemedView>
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+                tintColor={colors.primary}
+              />
+            }
+            renderItem={({ item }) =>
+              isLoadingCredentials ? (
+                <SkeletonLoader count={1} height={60} parts={2} />
+              ) : (
+                <CredentialCard credential={item} />
+              )
+            }
+            ListEmptyComponent={
+              !isLoadingCredentials ? (
                 <Text style={styles.emptyText}>
                   {searchQuery ? 'No matching credentials found' : 'No credentials found'}
                 </Text>
-              }
-            />
-          )}
+              ) : null
+            }
+          />
         </ThemedView>
       </ThemedView>
     </ThemedView>

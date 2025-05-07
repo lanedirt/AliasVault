@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, Animated } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Animated , Platform } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import * as Haptics from 'expo-haptics';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
@@ -33,7 +34,7 @@ export default function EmailsScreen() : React.ReactNode {
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
   const [isTabFocused, setIsTabFocused] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -133,12 +134,19 @@ export default function EmailsScreen() : React.ReactNode {
    * Refresh the emails on pull to refresh.
    */
   const onRefresh = useCallback(async () : Promise<void> => {
+    // Trigger haptic feedback when pull-to-refresh is activated
+    if (Platform.OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (Platform.OS === 'android') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
     setIsLoading(true);
     setIsRefreshing(true);
     await loadEmails();
     setIsRefreshing(false);
     setIsLoading(false);
-  }, [loadEmails, setIsLoading]);
+  }, [loadEmails, setIsLoading, setIsRefreshing]);
 
   const styles = StyleSheet.create({
     centerContainer: {
