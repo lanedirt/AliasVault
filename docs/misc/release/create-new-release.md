@@ -15,12 +15,18 @@ Follow the steps in the checklist below to prepare a new release.
     - In case API output breaks earlier client versions and/or this version of the client/API will upgrade the client vault model to a new major version.
 - [ ] Update ./install.sh `@version` in header if the install script has changed. This allows the install script to self-update when running the `./install.sh update` command on default installations.
 
-## Versioning browser extension
-- [ ] Update ./apps/browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
-- [ ] Update the version `MARKETING_VERSION` and increase the build number `CURRENT_PROJECT_VERSION` in the ./apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj project file in MacOS Xcode. This is the version that will be shown in the Safari Browser Extension App Store.
-- [ ] Update ./apps/browser-extension/src/utils/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
-- [ ] Update ./apps/browser-extension/src/utils/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
-- [ ] Update ./apps/browser-extension/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
+## Versioning browser extensions
+- [ ] Update `./apps/browser-extension/wxt.config.ts` with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
+- [ ] Update `./apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the Safari Browser Extension App Store.
+- [ ] Update `./apps/browser-extension/src/utils/AppInfo.ts` with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update `./apps/browser-extension/src/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update `./apps/browser-extension/src/shared/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
+
+## Versioning mobile apps
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
+- [ ] Update `./apps/mobile-app/ios/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the iOS App Store.
 
 ## Docker Images
 If docker containers have been added or removed:
