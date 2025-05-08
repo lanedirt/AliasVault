@@ -3,6 +3,7 @@ import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme, View 
 import { Stack } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
@@ -35,6 +36,7 @@ export function CollapsibleHeader({
 }: CollapsibleHeaderProps): React.ReactNode {
   const colors = useColors();
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   // Calculate header opacity and transforms based on scroll
   const headerOpacity = scrollY.interpolate({
@@ -65,12 +67,10 @@ export function CollapsibleHeader({
     floatingHeader: {
       alignItems: 'flex-end',
       flexDirection: 'row',
-      height: Platform.OS === 'ios' ? 100 : 64,
+      height: Platform.OS === 'ios' ? insets.top + 44 : 64,
       justifyContent: 'center',
       left: 0,
       overflow: 'hidden',
-      paddingBottom: Platform.OS === 'ios' ? 12 : 16,
-      paddingTop: Platform.OS === 'ios' ? 60 : 0,
       position: 'absolute',
       right: 0,
       top: 0,
@@ -78,15 +78,15 @@ export function CollapsibleHeader({
     },
     floatingTitle: {
       color: colors.text,
-      flex: 1,
       fontSize: Platform.OS === 'ios' ? 20 : 17,
       fontWeight: '600',
-      marginHorizontal: 50,
-      marginTop: 5,
+      marginTop: insets.top,
       textAlign: 'center',
     },
     floatingTitleContainer: {
       flex: 1,
+      height: Platform.OS === 'ios' ? insets.top + 44 : 64,
+      justifyContent: 'center',
     },
     headerBorder: {
       backgroundColor: colors.headerBorder,
