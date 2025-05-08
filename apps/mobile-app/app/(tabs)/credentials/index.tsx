@@ -150,6 +150,7 @@ export default function CredentialsScreen() : React.ReactNode {
         onOffline: () => {
           setRefreshing(false);
           setIsLoadingCredentials(false);
+          authContext.setOfflineMode(true);
           setTimeout(() => {
             Toast.show({
               type: 'error',

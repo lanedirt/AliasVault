@@ -121,7 +121,7 @@ function RootLayoutNav() : React.ReactNode {
         /**
          * Handle offline state and prompt user for action.
          */
-        onOffline: () => {
+        onOffline: async () => {
           Alert.alert(
             'Sync Issue',
             'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
@@ -133,7 +133,7 @@ function RootLayoutNav() : React.ReactNode {
                  */
                 onPress: async () : Promise<void> => {
                   setStatus('Opening vault in read-only mode');
-                  handleVaultUnlock();
+                  await handleVaultUnlock();
                 }
               },
               {
