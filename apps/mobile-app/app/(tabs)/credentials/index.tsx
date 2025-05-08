@@ -151,7 +151,7 @@ export default function CredentialsScreen() : React.ReactNode {
           setTimeout(() => {
             Toast.show({
               type: 'error',
-              text1: 'You are offline. Please connect to the internet to sync your vault',
+              text1: 'You are offline. Please connect to the internet to sync your vault.',
               position: 'bottom',
             });
           }, 200);

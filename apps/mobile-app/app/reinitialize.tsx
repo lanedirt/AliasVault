@@ -138,7 +138,7 @@ export default function ReinitializeScreen() : React.ReactNode {
         onOffline: () => {
           Alert.alert(
             'Sync Issue',
-            'The AliasVault server could not be reached and the vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+            'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
             [
               {
                 text: 'Open Local Vault',
