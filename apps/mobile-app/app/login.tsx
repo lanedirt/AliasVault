@@ -14,7 +14,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,6 +37,7 @@ import LoadingIndicator from '@/components/LoadingIndicator';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
+import { useVaultSync } from '@/hooks/useVaultSync';
 
 /**
  * Login screen.
@@ -96,6 +98,7 @@ export default function LoginScreen() : React.ReactNode {
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
+  const { syncVault } = useVaultSync();
 
   const srpUtil = new SrpUtility(webApi);
 
@@ -113,8 +116,6 @@ export default function LoginScreen() : React.ReactNode {
     passwordHashBase64: string,
     initiateLoginResponse: LoginResponse
   ) : Promise<void> => {
-
-    // Create KeyDerivationParams from initiateLoginResponse
     const encryptionKeyDerivationParams : EncryptionKeyDerivationParams = {
       encryptionType: initiateLoginResponse.encryptionType,
       encryptionSettings: initiateLoginResponse.encryptionSettings,
@@ -125,11 +126,27 @@ export default function LoginScreen() : React.ReactNode {
     await dbContext.storeEncryptionKey(passwordHashBase64);
     await dbContext.storeEncryptionKeyDerivationParams(encryptionKeyDerivationParams);
     await dbContext.initializeDatabase(vaultResponseJson);
+
+    /**
+     * After setting auth tokens, execute a server status check immediately
+     * which takes care of certain sanity checks such as ensuring client/server
+     * compatibility.
+     */
+    await syncVault({
+      initialSync: true,
+      /**
+       * Handle the status update.
+       */
+      onError: (message) => {
+        // Show modal with error message
+        Alert.alert('Error', message);
+        webApi.logout(message);
+      }
+    });
+
     await authContext.login();
 
-    // Update offline mode to false as we have successfully logged in.
     authContext.setOfflineMode(false);
-
     setTwoFactorRequired(false);
     setTwoFactorCode('');
     setPasswordHashString(null);

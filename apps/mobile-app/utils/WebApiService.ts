@@ -250,7 +250,7 @@ export class WebApiService {
     try {
       return await this.get<StatusResponse>('Auth/status');
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Session expired')) {
+      if (error instanceof Error && error.message.includes('expired')) {
         /**
          * If session expired, logout the user immediately as otherwise this would
          * trigger a server offline banner.
@@ -269,25 +269,6 @@ export class WebApiService {
         vaultRevision: 0
       };
     }
-  }
-
-  /**
-   * Validates the status response and returns an error message if validation fails.
-   */
-  public validateStatusResponse(statusResponse: StatusResponse): string | null {
-    if (statusResponse.serverVersion === '0.0.0') {
-      return 'The AliasVault server is not available. Please try again later or contact support if the problem persists.';
-    }
-
-    if (!statusResponse.clientVersionSupported) {
-      return 'This version of the AliasVault browser extension is outdated. Please update your browser extension to the latest version.';
-    }
-
-    if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-      return 'The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help.';
-    }
-
-    return null;
   }
 
   /**

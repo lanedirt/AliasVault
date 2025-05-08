@@ -12,7 +12,7 @@ import { install } from 'react-native-quick-crypto';
 import { useColors, useColorScheme } from '@/hooks/useColorScheme';
 import { DbProvider, useDb } from '@/context/DbContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { WebApiProvider } from '@/context/WebApiContext';
+import { useWebApi, WebApiProvider } from '@/context/WebApiContext';
 import { AliasVaultToast } from '@/components/Toast';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useVaultSync } from '@/hooks/useVaultSync';
@@ -33,6 +33,7 @@ function RootLayoutNav() : React.ReactNode {
   const { initializeAuth } = useAuth();
   const { syncVault } = useVaultSync();
   const dbContext = useDb();
+  const webApi = useWebApi();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
@@ -151,16 +152,20 @@ function RootLayoutNav() : React.ReactNode {
         /**
          * Handle error during vault sync.
          */
-        onError: () => {
-          // Logout user and navigate to the login screen.
-          setRedirectTarget('/unlock');
+        onError: async (error: string) => {
+          // Show modal with error message
+          Alert.alert('Error', error);
+
+          // The logout user and navigate to the login screen.
+          await webApi.logout(error);
+          setRedirectTarget('/login');
           setBootComplete(true);
         }
       });
     };
 
     initialize();
-  }, [dbContext, syncVault, initializeAuth]);
+  }, [dbContext, syncVault, initializeAuth, webApi]);
 
   useEffect(() => {
     /**

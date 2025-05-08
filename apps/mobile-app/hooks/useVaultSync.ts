@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { AppInfo } from '@/utils/AppInfo';
 
 /**
  * Utility function to ensure a minimum time has elapsed for an operation
@@ -68,19 +69,23 @@ export const useVaultSync = () : {
         300,
         initialSync
       );
-      const statusError = webApi.validateStatusResponse(statusResponse);
-      if (statusError !== null) {
-        // Only logout if it's an authentication error, not a network error
-        if (statusError.includes('authentication') || statusError.includes('unauthorized')) {
-          await webApi.logout(statusError);
-          onError?.(statusError);
-          return false;
-        }
 
-        // For other errors, go into offline mode
-        authContext.setOfflineMode(true);
+      if (statusResponse.serverVersion === '0.0.0') {
+        // Server is not available, go into offline mode
         onOffline?.();
-        return true;
+        return false;
+      }
+
+      if (!statusResponse.clientVersionSupported) {
+        const statusError = 'This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.';
+        onError?.(statusError);
+        return false;
+      }
+
+      if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
+        const statusError = 'The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.';
+        onError?.(statusError);
+        return false;
       }
 
       // If we get here, it means we have a valid connection to the server.

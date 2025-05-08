@@ -1,4 +1,4 @@
-import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated } from 'react-native';
+import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -20,6 +20,7 @@ import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Credentials screen.
@@ -27,6 +28,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 export default function CredentialsScreen() : React.ReactNode {
   const [searchQuery, setSearchQuery] = useState('');
   const { syncVault } = useVaultSync();
+  const webApi = useWebApi();
   const colors = useColors();
   const flatListRef = useRef<FlatList>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -159,17 +161,16 @@ export default function CredentialsScreen() : React.ReactNode {
         /**
          * On error.
          */
-        onError: (error) => {
+        onError: async (error) => {
           console.error('Error syncing vault:', error);
           setRefreshing(false);
           setIsLoadingCredentials(false);
-          setTimeout(() => {
-            Toast.show({
-              type: 'error',
-              text1: 'Vault sync failed',
-              text2: error,
-            });
-          }, 200);
+
+          // Show modal with error message
+          Alert.alert('Error', error);
+
+          // Logout user
+          await webApi.logout(error);
         },
       });
     } catch (err) {
@@ -182,7 +183,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline, setRefreshing]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline, setRefreshing, webApi]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
