@@ -19,11 +19,6 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
     private var isChoosingTextToInsert = false
     private var initialServiceUrl: String?
 
-    override public func viewDidLoad() {
-        super.viewDidLoad()
-        // Keep view empty until we confirm everything is valid in viewWillAppear
-    }
-
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 

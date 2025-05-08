@@ -32,6 +32,9 @@ public class VaultStore {
     /// The encryption key for the vault.
     internal var encryptionKey: Data?
 
+    /// The key derivation parameters used to derive the encryption key from the password.
+    internal var keyDerivationParams: String?
+
     /// The timer for the auto-lock timeout.
     private var clearCacheTimer: Timer?
 
@@ -60,6 +63,10 @@ public class VaultStore {
 
         if userDefaults.object(forKey: VaultConstants.autoLockTimeoutKey) != nil {
             self.autoLockTimeout = userDefaults.integer(forKey: VaultConstants.autoLockTimeoutKey)
+        }
+
+        if let savedParams = userDefaults.string(forKey: VaultConstants.encryptionKeyDerivationParamsKey) {
+            self.keyDerivationParams = savedParams
         }
     }
 

@@ -4,12 +4,15 @@ import NativeVaultManager from '@/specs/NativeVaultManager';
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
+import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string | null) => Promise<void>;
+  storeEncryptionKey: (derivedKey: string) => Promise<void>;
+  storeEncryptionKeyDerivationParams: (keyDerivationParams: EncryptionKeyDerivationParams) => Promise<void>;
+  initializeDatabase: (vaultResponse: VaultResponse) => Promise<void>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   testDatabaseConnection: (derivedKey: string) => Promise<boolean>;
@@ -51,15 +54,32 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }, []);
 
-  const initializeDatabase = useCallback(async (vaultResponse: VaultResponse, derivedKey: string | null = null) => {
-    /*
-     * If the derived key is provided, store it in the keychain.
-     * Otherwise we assume the encryption key is already stored in the keychain.
-     */
-    if (derivedKey) {
-      await sqliteClient.storeEncryptionKey(derivedKey);
-    }
+  /**
+   * Store the encryption key in the Native module (in memory and optionally keychain).
+   *
+   * @param derivedKey The derived encryption key
+   * @param keyDerivationParams The key derivation parameters (used for deriving the encryption key from the plain text password in the unlock screen)
+   */
+  const storeEncryptionKey = useCallback(async (derivedKey: string) => {
+    await sqliteClient.storeEncryptionKey(derivedKey
+    );
+  }, [sqliteClient]);
 
+  /**
+   * Store the key derivation parameters in the Native module (in memory and optionally keychain).
+   *
+   * @param keyDerivationParams The key derivation parameters
+   */
+  const storeEncryptionKeyDerivationParams = useCallback(async (keyDerivationParams: EncryptionKeyDerivationParams) => {
+    await sqliteClient.storeEncryptionKeyDerivationParams(keyDerivationParams);
+  }, [sqliteClient]);
+
+  /**
+   * Initialize the database in the native module.
+   *
+   * @param vaultResponse The vault response from the API
+   */
+  const initializeDatabase = useCallback(async (vaultResponse: VaultResponse) => {
     const metadata: VaultMetadata = {
       publicEmailDomains: vaultResponse.vault.publicEmailDomainList,
       privateEmailDomains: vaultResponse.vault.privateEmailDomainList,
@@ -164,7 +184,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     getVaultMetadata,
     testDatabaseConnection,
     unlockVault,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault]);
+    storeEncryptionKey,
+    storeEncryptionKeyDerivationParams,
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault, storeEncryptionKey, storeEncryptionKeyDerivationParams]);
 
   return (
     <DbContext.Provider value={contextValue}>

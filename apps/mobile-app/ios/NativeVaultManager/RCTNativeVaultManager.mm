@@ -97,6 +97,14 @@
     [vaultManager storeEncryptionKey:base64EncryptionKey resolver:resolve rejecter:reject];
 }
 
+- (void)storeEncryptionKeyDerivationParams:(NSString *)keyDerivationParams resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager storeEncryptionKeyDerivationParams:keyDerivationParams resolver:resolve rejecter:reject];
+}
+
+- (void)getEncryptionKeyDerivationParams:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager getEncryptionKeyDerivationParams:resolve rejecter:reject];
+}
+
 - (void)unlockVault:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     [vaultManager unlockVault:resolve rejecter:reject];
 }

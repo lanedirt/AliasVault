@@ -32,7 +32,11 @@ final public class VaultStoreKitTests: XCTestCase {
 
     override public func tearDown() {
         // Clean up after each test
-        vaultStore.clearVault()
+        do {
+           try vaultStore.clearVault()
+        } catch {
+          // Ignore.
+        }
         super.tearDown()
     }
 

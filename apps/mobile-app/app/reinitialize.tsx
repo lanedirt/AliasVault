@@ -175,8 +175,11 @@ export default function ReinitializeScreen() : React.ReactNode {
       flex: 1,
       justifyContent: 'center',
     },
-    message: {
+    message1: {
       marginTop: 5,
+      textAlign: 'center',
+    },
+    message2: {
       textAlign: 'center',
     },
     messageContainer: {
@@ -189,7 +192,8 @@ export default function ReinitializeScreen() : React.ReactNode {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.messageContainer}>
-        <ThemedText style={styles.message}>Vault auto-locked after timeout. Attempting to unlock...</ThemedText>
+        <ThemedText style={styles.message1}>Vault auto-locked after timeout.</ThemedText>
+        <ThemedText style={styles.message2}>Attempting to unlock.</ThemedText>
         {status ? <LoadingIndicator status={status} /> : null}
       </View>
     </ThemedView>

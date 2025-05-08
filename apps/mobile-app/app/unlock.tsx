@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,11 +9,11 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { ThemedText } from '@/components/themed/ThemedText';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { useColors } from '@/hooks/useColorScheme';
-import Logo from '@/assets/images/logo.svg';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import { SrpUtility } from '@/utils/SrpUtility';
 import { useWebApi } from '@/context/WebApiContext';
 import avatarImage from '@/assets/images/avatar.webp';
+import { TitleContainer } from '@/components/ui/TitleContainer';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 /**
  * Unlock screen.
@@ -26,9 +26,24 @@ export default function UnlockScreen() : React.ReactNode {
   const [isFaceIDAvailable, setIsFaceIDAvailable] = useState(false);
   const colors = useColors();
   const webApi = useWebApi();
-  const srpUtil = new SrpUtility(webApi);
+
+  /**
+   * Check if the key derivation parameters are stored in native storage.
+   * If not, we can't unlock the vault so logout instead to redirect user to login screen.
+   */
+  const getKeyDerivationParams = useCallback(async () : Promise<string | null> => {
+    const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
+    if (!encryptionKeyDerivationParams) {
+      await webApi.logout();
+      router.replace('/login');
+      return null;
+    }
+    return encryptionKeyDerivationParams;
+  }, [webApi]);
 
   useEffect(() => {
+    getKeyDerivationParams();
+
     /**
      * Check the face ID status.
      */
@@ -37,7 +52,7 @@ export default function UnlockScreen() : React.ReactNode {
       setIsFaceIDAvailable(enabled);
     };
     checkFaceIDStatus();
-  }, [isFaceIDEnabled]);
+  }, [isFaceIDEnabled, getKeyDerivationParams]);
 
   /**
    * Handle the unlock.
@@ -56,14 +71,21 @@ export default function UnlockScreen() : React.ReactNode {
         return;
       }
 
-      // Initialize the database with the provided password
-      const loginResponse = await srpUtil.initiateLogin(username);
+      // Get the key derivation parameters from native storage
+      const encryptionKeyDerivationParams = await getKeyDerivationParams();
+      if (!encryptionKeyDerivationParams) {
+        return;
+      }
 
+      // Parse the key derivation parameters
+      const params = JSON.parse(encryptionKeyDerivationParams);
+
+      // Derive the encryption key from the password using the stored parameters
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         password,
-        loginResponse.salt,
-        loginResponse.encryptionType,
-        loginResponse.encryptionSettings
+        params.salt,
+        params.encryptionType,
+        params.encryptionSettings
       );
 
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
@@ -132,13 +154,15 @@ export default function UnlockScreen() : React.ReactNode {
       flex: 1,
     },
     content: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      padding: 20,
       width: '100%',
     },
     faceIdButton: {
       alignItems: 'center',
       height: 50,
       justifyContent: 'center',
-      marginBottom: 16,
       width: '100%',
     },
     faceIdButtonText: {
@@ -146,7 +170,12 @@ export default function UnlockScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
+    headerContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     input: {
+      backgroundColor: colors.background,
       color: colors.text,
       flex: 1,
       fontSize: 16,
@@ -155,7 +184,7 @@ export default function UnlockScreen() : React.ReactNode {
     },
     inputContainer: {
       alignItems: 'center',
-      backgroundColor: colors.accentBackground,
+      backgroundColor: colors.background,
       borderColor: colors.accentBorder,
       borderRadius: 8,
       borderWidth: 1,
@@ -177,14 +206,6 @@ export default function UnlockScreen() : React.ReactNode {
       flex: 1,
       justifyContent: 'center',
     },
-    logo: {
-      height: 80,
-      width: 200,
-    },
-    logoContainer: {
-      alignItems: 'center',
-      marginBottom: 16,
-    },
     logoutButton: {
       alignItems: 'center',
       height: 50,
@@ -192,7 +213,7 @@ export default function UnlockScreen() : React.ReactNode {
       width: '100%',
     },
     logoutButtonText: {
-      color: colors.primary,
+      color: colors.red,
       fontSize: 16,
     },
     subtitle: {
@@ -200,14 +221,6 @@ export default function UnlockScreen() : React.ReactNode {
       fontSize: 16,
       marginBottom: 24,
       opacity: 0.7,
-      textAlign: 'center',
-    },
-    title: {
-      color: colors.text,
-      fontSize: 28,
-      fontWeight: 'bold',
-      marginBottom: 16,
-      paddingTop: 4,
       textAlign: 'center',
     },
     username: {
@@ -222,18 +235,18 @@ export default function UnlockScreen() : React.ReactNode {
     <ThemedView style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <LoadingIndicator status="Unlocking vault..." />
+          <LoadingIndicator status="Unlocking vault" />
         </View>
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoidingView}
         >
+          <View style={styles.headerContainer}>
+            <TitleContainer title="Unlock Vault" />
+          </View>
+
           <View style={styles.content}>
-            <View style={styles.logoContainer}>
-              <Logo style={styles.logo} />
-            </View>
-            <ThemedText style={styles.title}>Unlock Vault</ThemedText>
             <View style={styles.avatarContainer}>
               <Image
                 source={avatarImage}
@@ -280,14 +293,14 @@ export default function UnlockScreen() : React.ReactNode {
                 <ThemedText style={styles.faceIdButtonText}>Try Face ID Again</ThemedText>
               </TouchableOpacity>
             )}
-
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-            </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       )}
     </ThemedView>

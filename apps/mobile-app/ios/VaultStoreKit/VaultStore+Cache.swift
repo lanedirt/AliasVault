@@ -29,13 +29,20 @@ extension VaultStore {
             throw error
         }
 
+        // Clear the UserDefaults to remove all locally persisted data
         self.userDefaults.removeObject(forKey: VaultConstants.vaultMetadataKey)
         self.userDefaults.removeObject(forKey: VaultConstants.authMethodsKey)
         self.userDefaults.removeObject(forKey: VaultConstants.autoLockTimeoutKey)
+        self.userDefaults.removeObject(forKey: VaultConstants.encryptionKeyDerivationParamsKey)
         self.userDefaults.synchronize()
         print("Cleared UserDefaults")
 
-        clearCache()
+        // Clear the cache to remove all in-memory data
+        self.encryptionKey = nil
+        self.dbConnection = nil
+        self.enabledAuthMethods = VaultConstants.defaultAuthMethods
+        self.autoLockTimeout = VaultConstants.defaultAutoLockTimeout
+        self.keyDerivationParams = nil
     }
 
     /// Set the auto-lock timeout - the number of seconds after which the vault will be locked automatically

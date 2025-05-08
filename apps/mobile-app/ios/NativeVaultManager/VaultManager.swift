@@ -80,6 +80,28 @@ public class VaultManager: NSObject {
     }
 
     @objc
+    func storeEncryptionKeyDerivationParams(_ keyDerivationParams: String,
+                           resolver resolve: @escaping RCTPromiseResolveBlock,
+                           rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            try vaultStore.storeEncryptionKeyDerivationParams(keyDerivationParams)
+            resolve(nil)
+        } catch {
+            reject("KEYCHAIN_ERROR", "Failed to store encryption key derivation params: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func getEncryptionKeyDerivationParams(_ resolve: @escaping RCTPromiseResolveBlock,
+                              rejecter reject: @escaping RCTPromiseRejectBlock) {
+        if let params = vaultStore.getEncryptionKeyDerivationParams() {
+            resolve(params)
+        } else {
+            resolve(nil)
+        }
+    }
+
+    @objc
     func executeQuery(_ query: String,
                       params: [Any],
                       resolver resolve: @escaping RCTPromiseResolveBlock,

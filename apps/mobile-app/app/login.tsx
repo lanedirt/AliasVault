@@ -35,6 +35,7 @@ import { AppInfo } from '@/utils/AppInfo';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 
 /**
  * Login screen.
@@ -87,7 +88,7 @@ export default function LoginScreen() : React.ReactNode {
   const [error, setError] = useState<string | null>(null);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
-  const [loginResponse, setLoginResponse] = useState<LoginResponse | null>(null);
+  const [initiateLoginResponse, setInitiateLoginResponse] = useState<LoginResponse | null>(null);
   const [passwordHashString, setPasswordHashString] = useState<string | null>(null);
   const [passwordHashBase64, setPasswordHashBase64] = useState<string | null>(null);
   const [loginStatus, setLoginStatus] = useState<string | null>(null);
@@ -109,17 +110,28 @@ export default function LoginScreen() : React.ReactNode {
     token: string,
     refreshToken: string,
     vaultResponseJson: VaultResponse,
-    passwordHashBase64: string
+    passwordHashBase64: string,
+    initiateLoginResponse: LoginResponse
   ) : Promise<void> => {
+
+    // Create KeyDerivationParams from initiateLoginResponse
+    const encryptionKeyDerivationParams : EncryptionKeyDerivationParams = {
+      encryptionType: initiateLoginResponse.encryptionType,
+      encryptionSettings: initiateLoginResponse.encryptionSettings,
+      salt: initiateLoginResponse.salt,
+    };
+
     await authContext.setAuthTokens(credentials.username, token, refreshToken);
-    await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+    await dbContext.storeEncryptionKey(passwordHashBase64);
+    await dbContext.storeEncryptionKeyDerivationParams(encryptionKeyDerivationParams);
+    await dbContext.initializeDatabase(vaultResponseJson);
     await authContext.login();
 
     setTwoFactorRequired(false);
     setTwoFactorCode('');
     setPasswordHashString(null);
     setPasswordHashBase64(null);
-    setLoginResponse(null);
+    setInitiateLoginResponse(null);
     setLoginStatus(null);
     router.replace('/(tabs)/credentials');
     setIsLoading(false);
@@ -145,13 +157,13 @@ export default function LoginScreen() : React.ReactNode {
     try {
       authContext.clearGlobalMessage();
 
-      const loginResponse = await srpUtil.initiateLogin(credentials.username);
+      const initiateLoginResponse = await srpUtil.initiateLogin(credentials.username);
 
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         credentials.password,
-        loginResponse.salt,
-        loginResponse.encryptionType,
-        loginResponse.encryptionSettings
+        initiateLoginResponse.salt,
+        initiateLoginResponse.encryptionType,
+        initiateLoginResponse.encryptionSettings
       );
 
       const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
@@ -163,11 +175,11 @@ export default function LoginScreen() : React.ReactNode {
         credentials.username,
         passwordHashString,
         rememberMe,
-        loginResponse
+        initiateLoginResponse
       );
 
       if (validationResponse.requiresTwoFactor) {
-        setLoginResponse(loginResponse);
+        setInitiateLoginResponse(initiateLoginResponse);
         setPasswordHashString(passwordHashString);
         setPasswordHashBase64(passwordHashBase64);
         setTwoFactorRequired(true);
@@ -199,7 +211,8 @@ export default function LoginScreen() : React.ReactNode {
         validationResponse.token.token,
         validationResponse.token.refreshToken,
         vaultResponseJson,
-        passwordHashBase64
+        passwordHashBase64,
+        initiateLoginResponse
       );
     } catch (err) {
       if (err instanceof ApiAuthError) {
@@ -224,7 +237,7 @@ export default function LoginScreen() : React.ReactNode {
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
-      if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
+      if (!passwordHashString || !passwordHashBase64 || !initiateLoginResponse) {
         throw new Error('Required login data not found');
       }
 
@@ -237,7 +250,7 @@ export default function LoginScreen() : React.ReactNode {
         credentials.username,
         passwordHashString,
         rememberMe,
-        loginResponse,
+        initiateLoginResponse,
         parseInt(twoFactorCode)
       );
 
@@ -262,7 +275,8 @@ export default function LoginScreen() : React.ReactNode {
         validationResponse.token.token,
         validationResponse.token.refreshToken,
         vaultResponseJson,
-        passwordHashBase64
+        passwordHashBase64,
+        initiateLoginResponse
       );
     } catch (err) {
       console.error('2FA error:', err);

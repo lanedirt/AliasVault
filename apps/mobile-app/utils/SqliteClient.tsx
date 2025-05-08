@@ -1,9 +1,10 @@
-import NativeVaultManager from '@/specs/NativeVaultManager';
-import { Credential } from '@/utils/types/Credential';
-import { EncryptionKey } from '@/utils/types/EncryptionKey';
 import { TotpCode } from '@/utils/types/TotpCode';
 import { PasswordSettings } from '@/utils/types/PasswordSettings';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
+import { Credential } from '@/utils/types/Credential';
+import { EncryptionKey } from '@/utils/types/EncryptionKey';
+import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type SQLiteBindValue = string | number | null | Uint8Array;
 
@@ -123,12 +124,30 @@ class SqliteClient {
 
   /**
    * Store the encryption key in the native keychain
+   *
+   * @param base64EncryptionKey The base64 encoded encryption key
    */
   public async storeEncryptionKey(base64EncryptionKey: string): Promise<void> {
     try {
+      // Store the encryption key in the native module
       await NativeVaultManager.storeEncryptionKey(base64EncryptionKey);
     } catch (error) {
       console.error('Error storing encryption key:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Store the key derivation params in the native keychain
+   *
+   * @param keyDerivationParams The key derivation parameters
+   */
+  public async storeEncryptionKeyDerivationParams(keyDerivationParams: EncryptionKeyDerivationParams): Promise<void> {
+    try {
+      const keyDerivationParamsJson = JSON.stringify(keyDerivationParams);
+      await NativeVaultManager.storeEncryptionKeyDerivationParams(keyDerivationParamsJson);
+    } catch (error) {
+      console.error('Error storing encryption key derivation params:', error);
       throw error;
     }
   }

@@ -113,7 +113,7 @@ export const useVaultSync = () : {
         }
 
         try {
-          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, null);
+          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse);
           onSuccess?.(true);
           return true;
         } catch {

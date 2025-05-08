@@ -16,6 +16,8 @@ export interface Spec extends TurboModule {
   storeMetadata(metadata: string): Promise<void>;
   setAuthMethods(authMethods: string[]): Promise<void>;
   storeEncryptionKey(base64EncryptionKey: string): Promise<void>;
+  storeEncryptionKeyDerivationParams(keyDerivationParams: string): Promise<void>;
+  getEncryptionKeyDerivationParams(): Promise<string | null>;
   hasEncryptedDatabase(): Promise<boolean>;
   getEncryptedDatabase(): Promise<string | null>;
   getCurrentVaultRevisionNumber(): Promise<number>;

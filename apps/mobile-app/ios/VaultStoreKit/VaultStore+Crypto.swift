@@ -16,19 +16,28 @@ extension VaultStore {
         }
 
         self.encryptionKey = keyData
-        print("Stored key in memory")
+        print("Stored key in memory, will be persisted in keychain upon succesful decrypt operation")
+    }
 
-        if self.enabledAuthMethods.contains(.faceID) {
-            print("Face ID is enabled, storing key in keychain")
-            do {
-                try storeKeyInKeychain(keyData)
-                print("Encryption key saved successfully to keychain")
-            } catch {
-                print("Failed to save encryption key to keychain: \(error)")
-            }
-        } else {
-            print("Face ID is disabled, not storing encryption key in keychain")
-        }
+    /// Check if a encryption key is stored in memory
+    public func hasEncryptionKeyInMemory() -> Bool {
+        return self.encryptionKey != nil
+    }
+
+    /// Store the key derivation parameters used for deriving the encryption key from the plain text password
+    public func storeEncryptionKeyDerivationParams(_ keyDerivationParams: String) throws {
+        // Store the key derivation params in memory
+        self.keyDerivationParams = keyDerivationParams
+
+        // Store the key derivation params in UserDefaults
+        self.userDefaults.set(keyDerivationParams, forKey: VaultConstants.encryptionKeyDerivationParamsKey)
+
+        print("Stored key derivation params in UserDefaults")
+    }
+
+    /// Get the key derivation parameters used for deriving the encryption key from the plain text password
+    public func getEncryptionKeyDerivationParams() -> String? {
+        return self.keyDerivationParams
     }
 
     /// Encrypt the data using the encryption key
@@ -46,7 +55,27 @@ extension VaultStore {
 
         let key = SymmetricKey(data: encryptionKey)
         let sealedBox = try AES.GCM.SealedBox(combined: data)
-        return try AES.GCM.open(sealedBox, using: key)
+        do {
+            let decryptedData = try AES.GCM.open(sealedBox, using: key)
+
+            // If the decryption succeeds, we persist the used encryption key in the keychain
+            // This makes sure that on future password unlock attempts, only succesful decryptions
+            // will be remembered and used so failed re-authentication attempts won't overwrite
+            // a previous successful decryption key stored in the keychain.
+            try storeKeyInKeychain(encryptionKey)
+
+            return decryptedData
+        } catch {
+            print("Decryption failed: \(error)")
+
+            // If the decryption fails, we remove the encryption key from memory
+            // so that the next password unlock attempt will require a fresh
+            // re-authentication attempt (either via Face ID or passcode) or
+            // manual password unlock.
+            self.encryptionKey = nil
+
+            throw NSError(domain: "VaultStore", code: 12, userInfo: [NSLocalizedDescriptionKey: "Decryption failed"])
+        }
     }
 
     /// Get the encryption key - the key used to encrypt and decrypt the vault.

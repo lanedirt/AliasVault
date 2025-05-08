@@ -147,6 +147,14 @@ function RootLayoutNav() : React.ReactNode {
               }
             ]
           );
+        },
+        /**
+         * Handle error during vault sync.
+         */
+        onError: () => {
+          // Navigate to the manual unlock screen.
+          setRedirectTarget('/unlock');
+          setBootComplete(true);
         }
       });
     };
