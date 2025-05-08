@@ -38,12 +38,11 @@ jobs:
         run: pwsh Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
       - name: Run AdminTests with retry
-        working-directory: apps/server
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 60
           max_attempts: 3
-          command: dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
+          command: cd apps/server && dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "Category=AdminTests"
 
       - name: Upload Test Results
         if: always()
@@ -82,9 +81,8 @@ jobs:
         run: pwsh Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install --with-deps
 
       - name: Run ClientTests with retry (Shard ${{ matrix.shard }})
-        working-directory: apps/server
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 60
           max_attempts: 3
-          command: dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
+          command: cd apps/server && dotnet test Tests/AliasVault.E2ETests --no-build --verbosity normal --filter "FullyQualifiedName~.E2ETests.Tests.Client.Shard${{ matrix.shard }}."
