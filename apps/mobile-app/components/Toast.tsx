@@ -1,8 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type ToastProps = {
+type BaseToastProps = {
   text1?: string;
+};
+
+type ErrorToastProps = BaseToastProps & {
   text2?: string;
 };
 
@@ -27,9 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: primaryColor,
     borderRadius: 8,
     elevation: 5,
-    marginBottom: 70,
     marginHorizontal: 16,
-    marginTop: 20,
     padding: 12,
     shadowColor: shadowColor,
     shadowOffset: {
@@ -50,25 +52,44 @@ const styles = StyleSheet.create({
   },
 });
 
-export const toastConfig = {
-  /**
-   * Success toast.
-   */
-  success: (props: ToastProps): React.ReactNode => (
+/**
+ * Success toast component with safe area insets.
+ */
+const SuccessToast = (props: BaseToastProps): React.ReactNode => {
+  const insets = useSafeAreaInsets();
+  return (
     <View
-      style={[styles.toast, styles.toastSuccess]}
+      style={[
+        styles.toast,
+        styles.toastSuccess,
+        {
+          marginTop: insets.top - 38,
+          marginBottom: insets.bottom + 20,
+        },
+      ]}
     >
       <Text style={styles.text1}>
         {props.text1 ?? ''}
       </Text>
     </View>
-  ),
-  /**
-   * Error toast.
-   */
-  error: (props: ToastProps): React.ReactNode => (
+  );
+};
+
+/**
+ * Error toast component with safe area insets.
+ */
+const ErrorToast = (props: ErrorToastProps): React.ReactNode => {
+  const insets = useSafeAreaInsets();
+  return (
     <View
-      style={[styles.toast, styles.toastError]}
+      style={[
+        styles.toast,
+        styles.toastError,
+        {
+          marginTop: insets.top + 20,
+          marginBottom: insets.bottom + 20,
+        },
+      ]}
     >
       <Text style={styles.text1}>
         {props.text1 ?? ''}
@@ -79,19 +100,45 @@ export const toastConfig = {
         </Text>
       )}
     </View>
-  ),
-  /**
-   * Info toast.
-   */
-  info: (props: ToastProps): React.ReactNode => (
+  );
+};
+
+/**
+ * Info toast component with safe area insets.
+ */
+const InfoToast = (props: BaseToastProps): React.ReactNode => {
+  const insets = useSafeAreaInsets();
+  return (
     <View
-      style={[styles.toast, styles.toastInfo]}
+      style={[
+        styles.toast,
+        styles.toastInfo,
+        {
+          marginTop: insets.top + 20,
+          marginBottom: insets.bottom + 20,
+        },
+      ]}
     >
       <Text style={styles.text1}>
         {props.text1 ?? ''}
       </Text>
     </View>
-  ),
+  );
+};
+
+export const toastConfig = {
+  /**
+   * Success toast.
+   */
+  success: SuccessToast,
+  /**
+   * Error toast.
+   */
+  error: ErrorToast,
+  /**
+   * Info toast.
+   */
+  info: InfoToast,
 };
 
 /**

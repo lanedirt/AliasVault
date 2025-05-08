@@ -219,12 +219,8 @@ export default function CredentialsScreen() : React.ReactNode {
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
+      paddingHorizontal: 14,
       paddingTop: insets.top,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-      paddingTop: 0,
     },
     contentContainer: {
       paddingBottom: 40,
@@ -271,80 +267,77 @@ export default function CredentialsScreen() : React.ReactNode {
         alwaysVisible={true}
         headerButtons={headerButtons}
       />
-
-      <ThemedView style={styles.content}>
-        <ThemedView style={styles.stepContainer}>
-          <Animated.FlatList
-            ref={flatListRef}
-            data={isLoadingCredentials ? Array(4).fill(null) : filteredCredentials}
-            keyExtractor={(item, index) => item?.Id ?? `skeleton-${index}`}
-            keyboardShouldPersistTaps='handled'
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-              { useNativeDriver: true }
-            )}
-            scrollEventThrottle={16}
-            contentContainerStyle={styles.contentContainer}
-            scrollIndicatorInsets={{ bottom: 40 }}
-            initialNumToRender={14}
-            maxToRenderPerBatch={14}
-            windowSize={7}
-            removeClippedSubviews={true}
-            ListHeaderComponent={
-              <ThemedView>
-                <TitleContainer title="Credentials" />
-                <ThemedView style={styles.searchContainer}>
-                  <MaterialIcons
-                    name="search"
-                    size={20}
-                    color={colors.textMuted}
-                    style={styles.searchIcon}
-                  />
-                  <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search credentials..."
-                    placeholderTextColor={colors.textMuted}
-                    value={searchQuery}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    onChangeText={setSearchQuery}
-                    clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
-                  />
-                  {Platform.OS === 'android' && searchQuery.length > 0 && (
-                    <TouchableOpacity
-                      style={styles.clearButton}
-                      onPress={() => setSearchQuery('')}
-                    >
-                      <ThemedText style={styles.clearButtonText}>×</ThemedText>
-                    </TouchableOpacity>
-                  )}
-                </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <Animated.FlatList
+          ref={flatListRef}
+          data={isLoadingCredentials ? Array(4).fill(null) : filteredCredentials}
+          keyExtractor={(item, index) => item?.Id ?? `skeleton-${index}`}
+          keyboardShouldPersistTaps='handled'
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
+          contentContainerStyle={styles.contentContainer}
+          scrollIndicatorInsets={{ bottom: 40 }}
+          initialNumToRender={14}
+          maxToRenderPerBatch={14}
+          windowSize={7}
+          removeClippedSubviews={true}
+          ListHeaderComponent={
+            <ThemedView>
+              <TitleContainer title="Credentials" />
+              <ThemedView style={styles.searchContainer}>
+                <MaterialIcons
+                  name="search"
+                  size={20}
+                  color={colors.textMuted}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search credentials..."
+                  placeholderTextColor={colors.textMuted}
+                  value={searchQuery}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  onChangeText={setSearchQuery}
+                  clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
+                />
+                {Platform.OS === 'android' && searchQuery.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={() => setSearchQuery('')}
+                  >
+                    <ThemedText style={styles.clearButtonText}>×</ThemedText>
+                  </TouchableOpacity>
+                )}
               </ThemedView>
-            }
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[colors.primary]}
-                tintColor={colors.primary}
-              />
-            }
-            renderItem={({ item }) =>
-              isLoadingCredentials ? (
-                <SkeletonLoader count={1} height={60} parts={2} />
-              ) : (
-                <CredentialCard credential={item} />
-              )
-            }
-            ListEmptyComponent={
-              !isLoadingCredentials ? (
-                <Text style={styles.emptyText}>
-                  {searchQuery ? 'No matching credentials found' : 'No credentials found'}
-                </Text>
-              ) : null
-            }
-          />
-        </ThemedView>
+            </ThemedView>
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          }
+          renderItem={({ item }) =>
+            isLoadingCredentials ? (
+              <SkeletonLoader count={1} height={60} parts={2} />
+            ) : (
+              <CredentialCard credential={item} />
+            )
+          }
+          ListEmptyComponent={
+            !isLoadingCredentials ? (
+              <Text style={styles.emptyText}>
+                {searchQuery ? 'No matching credentials found' : 'No credentials found'}
+              </Text>
+            ) : null
+          }
+        />
       </ThemedView>
     </ThemedView>
   );

@@ -120,11 +120,8 @@ export default function SettingsScreen() : React.ReactNode {
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
+      paddingHorizontal: 14,
       paddingTop: insets.top,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
     },
     scrollContent: {
       paddingBottom: 40,
@@ -224,105 +221,103 @@ export default function SettingsScreen() : React.ReactNode {
         scrollY={scrollY}
         showNavigationHeader={false}
       />
-      <ThemedView style={styles.content}>
-        <Animated.ScrollView
-          ref={scrollViewRef}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
+      <Animated.ScrollView
+        ref={scrollViewRef}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.scrollContent}
+        scrollIndicatorInsets={{ bottom: 40 }}
+        style={styles.scrollView}
+      >
+        <TitleContainer title="Settings" />
+        <View style={styles.userInfoContainer}>
+          <Image
+            source={avatarImage}
+            style={styles.avatar}
+          />
+          <ThemedText style={styles.usernameText}>Logged in as: {username}</ThemedText>
+        </View>
+
+        <View style={styles.section}>
+          {Platform.OS === 'ios' && (
+            <>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={handleIosAutofillPress}
+              >
+                <View style={styles.settingItemIcon}>
+                  <Ionicons name="key-outline" size={20} color={colors.text} />
+                </View>
+                <View style={styles.settingItemContent}>
+                  <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
+                  {shouldShowIosAutofillReminder && (
+                    <View style={styles.settingItemBadge}>
+                      <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+              <View style={styles.separator} />
+            </>
           )}
-          scrollEventThrottle={16}
-          contentContainerStyle={styles.scrollContent}
-          scrollIndicatorInsets={{ bottom: 40 }}
-          style={styles.scrollView}
-        >
-          <TitleContainer title="Settings" />
-          <View style={styles.userInfoContainer}>
-            <Image
-              source={avatarImage}
-              style={styles.avatar}
-            />
-            <ThemedText style={styles.usernameText}>Logged in as: {username}</ThemedText>
-          </View>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleVaultUnlockPress}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="lock-closed" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
+              {isFirstLoad ? (
+                <InlineSkeletonLoader width={100} style={styles.skeletonLoader} />
+              ) : (
+                <ThemedText style={styles.settingItemValue}>{authMethodDisplay}</ThemedText>
+              )}
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.separator} />
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleAutoLockPress}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="timer-outline" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
+              {isFirstLoad ? (
+                <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
+              ) : (
+                <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
+              )}
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.section}>
-            {Platform.OS === 'ios' && (
-              <>
-                <TouchableOpacity
-                  style={styles.settingItem}
-                  onPress={handleIosAutofillPress}
-                >
-                  <View style={styles.settingItemIcon}>
-                    <Ionicons name="key-outline" size={20} color={colors.text} />
-                  </View>
-                  <View style={styles.settingItemContent}>
-                    <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
-                    {shouldShowIosAutofillReminder && (
-                      <View style={styles.settingItemBadge}>
-                        <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-                <View style={styles.separator} />
-              </>
-            )}
-            <TouchableOpacity
-              style={styles.settingItem}
-              onPress={handleVaultUnlockPress}
-            >
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="lock-closed" size={20} color={colors.text} />
-              </View>
-              <View style={styles.settingItemContent}>
-                <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
-                {isFirstLoad ? (
-                  <InlineSkeletonLoader width={100} style={styles.skeletonLoader} />
-                ) : (
-                  <ThemedText style={styles.settingItemValue}>{authMethodDisplay}</ThemedText>
-                )}
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.separator} />
-            <TouchableOpacity
-              style={styles.settingItem}
-              onPress={handleAutoLockPress}
-            >
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="timer-outline" size={20} color={colors.text} />
-              </View>
-              <View style={styles.settingItemContent}>
-                <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
-                {isFirstLoad ? (
-                  <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
-                ) : (
-                  <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
-                )}
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </View>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleLogout}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="log-out" size={20} color={colors.primary} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>Logout</ThemedText>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.settingItem}
-              onPress={handleLogout}
-            >
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="log-out" size={20} color={colors.primary} />
-              </View>
-              <View style={styles.settingItemContent}>
-                <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>Logout</ThemedText>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.versionContainer}>
-            <ThemedText style={styles.versionText}>App version {AppInfo.VERSION}</ThemedText>
-          </View>
-        </Animated.ScrollView>
-      </ThemedView>
+        <View style={styles.versionContainer}>
+          <ThemedText style={styles.versionText}>App version {AppInfo.VERSION}</ThemedText>
+        </View>
+      </Animated.ScrollView>
     </ThemedView>
   );
 }

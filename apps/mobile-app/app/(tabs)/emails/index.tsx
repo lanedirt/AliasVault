@@ -158,11 +158,8 @@ export default function EmailsScreen() : React.ReactNode {
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
+      paddingHorizontal: 14,
       paddingTop: insets.top,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
     },
     contentContainer: {
       paddingBottom: 40,
@@ -232,29 +229,27 @@ export default function EmailsScreen() : React.ReactNode {
         scrollY={scrollY}
         showNavigationHeader={true}
       />
-      <ThemedView style={styles.content}>
-        <Animated.ScrollView
-          ref={scrollViewRef}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
-          scrollEventThrottle={16}
-          contentContainerStyle={styles.contentContainer}
-          scrollIndicatorInsets={{ bottom: 40 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={onRefresh}
-              colors={[colors.primary]}
-              tintColor={colors.primary}
-            />
-          }
-        >
-          <TitleContainer title="Emails" />
-          {renderContent()}
-        </Animated.ScrollView>
-      </ThemedView>
+      <Animated.ScrollView
+        ref={scrollViewRef}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.contentContainer}
+        scrollIndicatorInsets={{ bottom: 40 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        <TitleContainer title="Emails" />
+        {renderContent()}
+      </Animated.ScrollView>
     </ThemedView>
   );
 }
