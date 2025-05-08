@@ -1,7 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { OfflineBanner } from '../OfflineBanner';
-
+import { OfflineBanner } from '@/components/OfflineBanner';
 import { ThemedText } from '@/components/themed/ThemedText';
 import Logo from '@/assets/images/logo.svg';
 

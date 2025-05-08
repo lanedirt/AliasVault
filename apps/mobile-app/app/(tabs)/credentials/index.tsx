@@ -230,6 +230,7 @@ export default function CredentialsScreen() : React.ReactNode {
       color: colors.textMuted,
       fontSize: 16,
       marginTop: 24,
+      opacity: 0.7,
       textAlign: 'center',
     },
     searchContainer: {
@@ -333,7 +334,7 @@ export default function CredentialsScreen() : React.ReactNode {
           ListEmptyComponent={
             !isLoadingCredentials ? (
               <Text style={styles.emptyText}>
-                {searchQuery ? 'No matching credentials found' : 'No credentials found'}
+                {searchQuery ? 'No matching credentials found' : 'No credentials found. Create one to get started. Tip: you can also login to the AliasVault web app to import credentials from other password managers.'}
               </Text>
             ) : null
           }

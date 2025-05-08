@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import * as Haptics from 'expo-haptics';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -185,6 +186,19 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       setIsPasswordVisible(true);
     }
   }, [isEditMode, watch, setValue, setIsPasswordVisible, initializeGenerators, dbContext.sqliteClient]);
+
+  /**
+   * Handle the generate random alias button press.
+   */
+  const handleGenerateRandomAlias = useCallback(async (): Promise<void> => {
+    // Trigger haptic feedback when pull-to-refresh is activated
+    if (Platform.OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (Platform.OS === 'android') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    await generateRandomAlias();
+  }, [generateRandomAlias]);
 
   /**
    * Submit the form for either creating or updating a credential.
@@ -611,7 +625,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                       }
                     ]}
                   />
-                  <TouchableOpacity style={styles.generateButton} onPress={generateRandomAlias}>
+                  <TouchableOpacity style={styles.generateButton} onPress={handleGenerateRandomAlias}>
                     <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
                     <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
                   </TouchableOpacity>

@@ -249,7 +249,16 @@ export class WebApiService {
   public async getStatus(): Promise<StatusResponse> {
     try {
       return await this.get<StatusResponse>('Auth/status');
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Session expired')) {
+        /**
+         * If session expired, logout the user immediately as otherwise this would
+         * trigger a server offline banner.
+         */
+        this.authContextLogout(error.message);
+        throw error;
+      }
+
       /**
        * If the status endpoint is not available, return a default status response which will trigger
        * a logout and error message.

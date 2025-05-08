@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Text } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
@@ -12,8 +13,8 @@ import { useColors } from '@/hooks/useColorScheme';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useWebApi } from '@/context/WebApiContext';
 import avatarImage from '@/assets/images/avatar.webp';
-import { TitleContainer } from '@/components/ui/TitleContainer';
 import NativeVaultManager from '@/specs/NativeVaultManager';
+import Logo from '@/assets/images/logo.svg';
 
 /**
  * Unlock screen.
@@ -26,6 +27,8 @@ export default function UnlockScreen() : React.ReactNode {
   const [isFaceIDAvailable, setIsFaceIDAvailable] = useState(false);
   const colors = useColors();
   const webApi = useWebApi();
+  const { getBiometricDisplayName } = useAuth();
+  const [biometricDisplayName, setBiometricDisplayName] = useState('');
 
   /**
    * Check if the key derivation parameters are stored in native storage.
@@ -45,14 +48,18 @@ export default function UnlockScreen() : React.ReactNode {
     getKeyDerivationParams();
 
     /**
-     * Check the face ID status.
+     * Fetch the biometric config.
      */
-    const checkFaceIDStatus = async () : Promise<void> => {
+    const fetchBiometricConfig = async () : Promise<void> => {
       const enabled = await isFaceIDEnabled();
       setIsFaceIDAvailable(enabled);
+
+      const displayName = await getBiometricDisplayName();
+      setBiometricDisplayName(displayName);
     };
-    checkFaceIDStatus();
-  }, [isFaceIDEnabled, getKeyDerivationParams]);
+    fetchBiometricConfig();
+
+  }, [isFaceIDEnabled, getKeyDerivationParams, getBiometricDisplayName]);
 
   /**
    * Handle the unlock.
@@ -124,6 +131,12 @@ export default function UnlockScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
+    appName: {
+      color: colors.text,
+      fontSize: 32,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
     avatar: {
       borderRadius: 20,
       height: 40,
@@ -170,12 +183,21 @@ export default function UnlockScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-    headerContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
+    gradientContainer: {
+      height: Dimensions.get('window').height * 0.4,
+      left: 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
+    },
+    headerSection: {
+      paddingBottom: 24,
+      paddingHorizontal: 16,
+      paddingTop: 24,
     },
     input: {
       backgroundColor: colors.background,
+      borderRadius: 8,
       color: colors.text,
       flex: 1,
       fontSize: 16,
@@ -190,31 +212,38 @@ export default function UnlockScreen() : React.ReactNode {
       borderWidth: 1,
       flexDirection: 'row',
       marginBottom: 16,
-      width: '100%',
     },
     inputIcon: {
       padding: 12,
     },
     keyboardAvoidingView: {
-      alignItems: 'center',
       flex: 1,
-      justifyContent: 'center',
-      padding: 20,
     },
     loadingContainer: {
       alignItems: 'center',
       flex: 1,
       justifyContent: 'center',
     },
-    logoutButton: {
+    logoContainer: {
       alignItems: 'center',
-      height: 50,
+      marginBottom: 8,
+    },
+    logoutButton: {
+      alignSelf: 'center',
       justifyContent: 'center',
-      width: '100%',
+      marginTop: 16,
     },
     logoutButtonText: {
       color: colors.red,
       fontSize: 16,
+    },
+    mainContent: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     subtitle: {
       color: colors.text,
@@ -242,65 +271,81 @@ export default function UnlockScreen() : React.ReactNode {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoidingView}
         >
-          <View style={styles.headerContainer}>
-            <TitleContainer title="Unlock Vault" />
-          </View>
-
-          <View style={styles.content}>
-            <View style={styles.avatarContainer}>
-              <Image
-                source={avatarImage}
-                style={styles.avatar}
-              />
-              <ThemedText style={styles.username}>{username}</ThemedText>
-            </View>
-            <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
-
-            <View style={styles.inputContainer}>
-              <MaterialIcons
-                name="lock"
-                size={24}
-                color={colors.textMuted}
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleUnlock}
-              disabled={isLoading}
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
             >
-              <ThemedText style={styles.buttonText}>
-                {isLoading ? 'Unlocking...' : 'Unlock'}
-              </ThemedText>
-            </TouchableOpacity>
+              <LinearGradient
+                colors={[colors.loginHeader, colors.background]}
+                style={styles.gradientContainer}
+              />
 
-            {isFaceIDAvailable && (
-              <TouchableOpacity
-                style={styles.faceIdButton}
-                onPress={handleFaceIDRetry}
-              >
-                <ThemedText style={styles.faceIdButtonText}>Try Face ID Again</ThemedText>
-              </TouchableOpacity>
-            )}
-          </View>
+              <View style={styles.mainContent}>
+                <View style={styles.headerSection}>
+                  <View style={styles.logoContainer}>
+                    <Logo width={80} height={80} />
+                    <Text style={styles.appName}>Unlock Vault</Text>
+                  </View>
+                </View>
+                <View style={styles.content}>
+                  <View style={styles.avatarContainer}>
+                    <Image
+                      source={avatarImage}
+                      style={styles.avatar}
+                    />
+                    <ThemedText style={styles.username}>{username}</ThemedText>
+                  </View>
+                  <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
 
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={handleLogout}
-          >
-            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-          </TouchableOpacity>
+                  <View style={styles.inputContainer}>
+                    <MaterialIcons
+                      name="lock"
+                      size={24}
+                      color={colors.textMuted}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Password"
+                      placeholderTextColor={colors.textMuted}
+                      secureTextEntry
+                      value={password}
+                      onChangeText={setPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleUnlock}
+                    disabled={isLoading}
+                  >
+                    <ThemedText style={styles.buttonText}>
+                      {isLoading ? 'Unlocking...' : 'Unlock'}
+                    </ThemedText>
+                  </TouchableOpacity>
+
+                  {isFaceIDAvailable && (
+                    <TouchableOpacity
+                      style={styles.faceIdButton}
+                      onPress={handleFaceIDRetry}
+                    >
+                      <ThemedText style={styles.faceIdButtonText}>Try {biometricDisplayName} Again</ThemedText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
+                >
+                  <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       )}
     </ThemedView>

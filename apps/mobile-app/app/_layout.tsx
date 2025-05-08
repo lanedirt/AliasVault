@@ -152,7 +152,7 @@ function RootLayoutNav() : React.ReactNode {
          * Handle error during vault sync.
          */
         onError: () => {
-          // Navigate to the manual unlock screen.
+          // Logout user and navigate to the login screen.
           setRedirectTarget('/unlock');
           setBootComplete(true);
         }

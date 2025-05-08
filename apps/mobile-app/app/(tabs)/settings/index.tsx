@@ -125,7 +125,7 @@ export default function SettingsScreen() : React.ReactNode {
     },
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: 26,
+      paddingTop: 42,
     },
     scrollView: {
       flex: 1,

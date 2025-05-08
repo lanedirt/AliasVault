@@ -17,7 +17,7 @@ export function ThemedScrollView({ style, lightColor, darkColor, ...otherProps }
   const insets = useSafeAreaInsets();
 
   const paddingTop = Platform.OS === 'ios' ? insets.top + 36 : 64;
-  const paddingBottom = Platform.OS === 'ios' ? insets.bottom : 0;
+  const paddingBottom = Platform.OS === 'ios' ? insets.bottom + 60 : 0;
 
   return (
     <ScrollView
@@ -29,12 +29,8 @@ export function ThemedScrollView({ style, lightColor, darkColor, ...otherProps }
   );
 }
 
-const HEADER_HEIGHT = Platform.OS === 'ios' ? 96 : 56;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 80,
-    paddingTop: HEADER_HEIGHT,
   },
 });

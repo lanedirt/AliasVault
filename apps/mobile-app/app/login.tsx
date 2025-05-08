@@ -127,6 +127,9 @@ export default function LoginScreen() : React.ReactNode {
     await dbContext.initializeDatabase(vaultResponseJson);
     await authContext.login();
 
+    // Update offline mode to false as we have successfully logged in.
+    authContext.setOfflineMode(false);
+
     setTwoFactorRequired(false);
     setTwoFactorCode('');
     setPasswordHashString(null);
@@ -306,7 +309,7 @@ export default function LoginScreen() : React.ReactNode {
       gap: 8,
     },
     buttonText: {
-      color: colors.text,
+      color: colors.primarySurfaceText,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -527,7 +530,7 @@ export default function LoginScreen() : React.ReactNode {
                         setTwoFactorCode('');
                         setPasswordHashString(null);
                         setPasswordHashBase64(null);
-                        setLoginResponse(null);
+                        setInitiateLoginResponse(null);
                         setError(null);
                       }}
                     >
