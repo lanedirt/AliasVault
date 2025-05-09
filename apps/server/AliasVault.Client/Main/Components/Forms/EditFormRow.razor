@@ -2,11 +2,11 @@
 <div class="relative">
     @if (Type == "textarea")
     {
-        <textarea id="@Id" style="height: 200px;" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder"></textarea>
+        <textarea id="@Id" style="height: 200px;" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder" autocapitalize="off" autocorrect="off"></textarea>
     }
     else
     {
-        <input type="@Type" id="@Id" autocomplete="off" @onfocus="OnFocusEvent" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder">
+        <input type="@Type" id="@Id" autocomplete="off" @onfocus="OnFocusEvent" class="outline-0 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="@Value" @oninput="OnInputChanged" placeholder="@Placeholder" autocapitalize="off" autocorrect="off">
     }
 </div>
 

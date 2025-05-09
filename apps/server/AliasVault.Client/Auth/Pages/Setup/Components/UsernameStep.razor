@@ -31,7 +31,7 @@
 
         <div class="space-y-4">
             <div>
-                <EditFormRow Id="username" Label="Username" @bind-Value="Username" Placeholder="Enter your desired username or email" OnFocus="@OnUsernameInputFocus" autocapitalize="off" autocorrect="off" />
+                <EditFormRow Id="username" Label="Username" @bind-Value="Username" Placeholder="Enter your desired username or email" OnFocus="@OnUsernameInputFocus" />
                 @if (_isValidating)
                 {
                     <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">Validating username...</div>
