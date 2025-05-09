@@ -110,10 +110,11 @@ export default function SettingsScreen() : React.ReactNode {
     },
     optionButtonText: {
       color: colors.text,
-      fontSize: 16,
+      fontSize: 14,
     },
     optionButtonTextSelected: {
-      color: colors.text,
+      color: colors.primarySurfaceText,
+      fontWeight: 'bold',
     },
     title: {
       color: colors.text,

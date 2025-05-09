@@ -9,7 +9,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Linking,
   Animated,
   ScrollView,
   KeyboardAvoidingView,
@@ -38,6 +37,7 @@ import { LoginResponse } from '@/utils/types/webapi/Login';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 import { useVaultSync } from '@/hooks/useVaultSync';
+import { InAppBrowserView } from '@/components/ui/InAppBrowserView';
 
 /**
  * Login screen.
@@ -347,7 +347,7 @@ export default function LoginScreen() : React.ReactNode {
       height: 12,
       width: 12,
     },
-    clickableDomain: {
+    clickableLink: {
       color: colors.primary,
       textDecorationLine: 'underline',
     },
@@ -359,6 +359,12 @@ export default function LoginScreen() : React.ReactNode {
       backgroundColor: colors.background,
       flex: 1,
       padding: 16,
+    },
+    createNewVaultContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 16,
     },
     errorContainer: {
       backgroundColor: colors.errorBackground,
@@ -432,12 +438,6 @@ export default function LoginScreen() : React.ReactNode {
       alignItems: 'center',
       marginBottom: 8,
     },
-    noteText: {
-      color: colors.textMuted,
-      fontSize: 14,
-      marginTop: 16,
-      textAlign: 'center',
-    },
     primaryButton: {
       backgroundColor: colors.primary,
     },
@@ -455,6 +455,9 @@ export default function LoginScreen() : React.ReactNode {
     },
     secondaryButton: {
       backgroundColor: colors.secondary,
+    },
+    textMuted: {
+      color: colors.textMuted,
     },
   });
 
@@ -491,7 +494,7 @@ export default function LoginScreen() : React.ReactNode {
                 <Text style={styles.headerSubtitle}>
                   Connecting to{' '}
                   <Text
-                    style={styles.clickableDomain}
+                    style={styles.clickableLink}
                     onPress={() => router.push('/login-settings')}
                   >
                     {getDisplayUrl()}
@@ -554,7 +557,7 @@ export default function LoginScreen() : React.ReactNode {
                       <Text style={styles.buttonText}>Cancel</Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.noteText}>
+                  <Text style={styles.textMuted}>
                     Note: if you don&apos;t have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
                   </Text>
                 </View>
@@ -617,15 +620,14 @@ export default function LoginScreen() : React.ReactNode {
                       <Text style={styles.buttonText}>Login</Text>
                     )}
                   </TouchableOpacity>
-                  <Text style={styles.noteText}>
-                    No account yet?{' '}
-                    <Text
-                      style={styles.clickableDomain}
-                      onPress={() => Linking.openURL('https://app.aliasvault.net')}
-                    >
-                      Create new vault
-                    </Text>
-                  </Text>
+                  <View style={styles.createNewVaultContainer}>
+                    <Text style={styles.textMuted}>No account yet? </Text>
+                    <InAppBrowserView
+                      url="https://app.aliasvault.net/user/setup"
+                      title="Create new vault"
+                      textStyle={styles.clickableLink}
+                    />
+                  </View>
                 </View>
               )}
             </>
