@@ -1,4 +1,4 @@
-# AliasVault [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
+# <img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="35" alt="AliasVault"> AliasVault
 A powerful privacy toolbox that combines end-to-end encrypted password management with built-in alias and email generation — giving you full control over your online identity.
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
@@ -19,27 +19,27 @@ Built on 15 years of experience, AliasVault is open-source, self-hostable and co
 
 <table>
     <tr>
-        <th align="center">Browser Extension</th>
-        <th align="center">Generate email and aliases</th>
+        <th align="center">Responsive web app</th>
+        <th align="center">Browser extensions</th>
     </tr>
     <tr>
         <td align="center">
-            <img src="https://github.com/user-attachments/assets/d9ffd3dc-08a0-462d-8148-e8da5ec5a520" alt="Browser Autofill" />
+            <img src="https://github.com/user-attachments/assets/fa5bf64a-704d-4f09-b4e0-0310ab662204" alt="Responsive web app" />
         </td>
         <td align="center">
-            <img src="https://github.com/user-attachments/assets/86752994-d469-4b0e-b633-c089e0aed12b" alt="Generate Aliases" />
+            <img src="https://github.com/user-attachments/assets/b5218609-217b-4c8d-8d5d-8c71e19bf057"alt="Browser extensions" />
 		</td>
     </tr>
     <tr>
-        <th align="center">Strong security</th>
-        <th align="center">Easy self-host</th>
+        <th align="center">Native iOS & Android apps</th>
+        <th align="center">& much more</th>
     </tr>
     <tr>
 		<td align="center">
-            <img src="https://github.com/user-attachments/assets/26b66379-10a5-4b8b-9c69-e64b553a10be" alt="Strong security" />
+            <img src="https://github.com/user-attachments/assets/5d09ad78-d145-48a1-b8da-c5a1dc708886" alt="Native iOS & Android Apps" />
 		</td>
 		<td align="center">
-           <img src="https://github.com/user-attachments/assets/47c7002a-e326-4507-8801-194e134e00dd" alt="Easy self-host installation" />
+           <img src="https://github.com/user-attachments/assets/34fe650d-f08d-4c92-92e0-4e750b7a662a" alt="Lots of features" />
         </td>
 	</tr>
 </table>
@@ -48,6 +48,8 @@ Built on 15 years of experience, AliasVault is open-source, self-hostable and co
 Use the official cloud version of AliasVault at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release.
 
 AliasVault is available on: [Web](https://app.aliasvault.net) | [iOS](https://apps.apple.com/app/id6745490915) | [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo) | [Safari](https://apps.apple.com/app/id6743163173)
+
+[<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
 ## Self-hosting
 For full control over your own data you can self-host and install AliasVault on your own servers.
