@@ -102,27 +102,22 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
     <ThemedView style={styles.section}>
       <ThemedText type="subtitle">Notes</ThemedText>
       <View style={styles.notesContainer}>
-        <Text style={styles.notes}>
-          {parts.map((part, index) => {
-            if (part.type === 'url') {
-              return (
-                <Pressable
-                  key={index}
-                  onPress={() => handleLinkPress(part.url!)}
-                >
-                  <Text style={styles.link}>
-                    {part.content}
-                  </Text>
-                </Pressable>
-              );
-            }
+        {parts.map((part, index) => {
+          if (part.type === 'url') {
             return (
-              <Text key={index} selectable={true}>
-                {part.content}
-              </Text>
+              <Pressable key={index} onPress={() => handleLinkPress(part.url!)}>
+                <Text style={styles.link} selectable={true}>
+                  {part.content}
+                </Text>
+              </Pressable>
             );
-          })}
-        </Text>
+          }
+          return (
+            <Text key={index} style={styles.notes} selectable={true}>
+              {part.content}
+            </Text>
+          );
+        })}
       </View>
     </ThemedView>
   );
