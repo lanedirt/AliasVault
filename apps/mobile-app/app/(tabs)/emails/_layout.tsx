@@ -16,7 +16,6 @@ export default function EmailsLayout(): React.ReactNode {
         name="[id]"
         options={{
           title: 'Email',
-          headerShown: true,
         }}
       />
     </Stack>

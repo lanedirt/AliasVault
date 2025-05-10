@@ -20,8 +20,6 @@ export default function CredentialsLayout(): React.ReactNode {
         options={{
           title: 'Add Credential',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
-          headerShown: true,
-          gestureEnabled: true,
           ...defaultHeaderOptions,
         }}
       />
@@ -29,8 +27,6 @@ export default function CredentialsLayout(): React.ReactNode {
         name="add-edit-page"
         options={{
           title: 'Add Credential',
-          headerShown: true,
-          gestureEnabled: true,
           ...defaultHeaderOptions,
         }}
       />
@@ -39,7 +35,6 @@ export default function CredentialsLayout(): React.ReactNode {
         options={{
           title: 'Credential Created',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
-          headerShown: true,
           ...defaultHeaderOptions,
         }}
       />
@@ -47,7 +42,6 @@ export default function CredentialsLayout(): React.ReactNode {
         name="[id]"
         options={{
           title: 'Credential Details',
-          headerShown: true,
           ...defaultHeaderOptions,
         }}
       />
@@ -55,7 +49,6 @@ export default function CredentialsLayout(): React.ReactNode {
         name="email/[id]"
         options={{
           title: 'Email Preview',
-          headerShown: true,
         }}
       />
     </Stack>

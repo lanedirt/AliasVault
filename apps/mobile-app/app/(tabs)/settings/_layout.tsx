@@ -19,7 +19,6 @@ export default function SettingsLayout(): React.ReactNode {
         options={{
           title: 'iOS Autofill',
           headerBackTitle: 'Settings',
-          headerShown: true,
           ...defaultHeaderOptions,
         }}
       />
@@ -28,16 +27,50 @@ export default function SettingsLayout(): React.ReactNode {
         options={{
           title: 'Vault Unlock Method',
           headerBackTitle: 'Settings',
-          headerShown: true,
           ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
         name="auto-lock"
         options={{
-          title: 'Auto-lock Settings',
+          title: 'Auto-lock Timeout',
           headerBackTitle: 'Settings',
-          headerShown: true,
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="security/index"
+        options={{
+          title: 'Security Settings',
+          headerBackTitle: 'Settings',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="security/change-password"
+        options={{
+          title: 'Change Password',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="security/active-sessions"
+        options={{
+          title: 'Active Sessions',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="security/auth-logs"
+        options={{
+          title: 'Auth Logs',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="security/delete-account"
+        options={{
+          title: 'Delete Account',
           ...defaultHeaderOptions,
         }}
       />

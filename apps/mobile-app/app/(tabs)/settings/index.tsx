@@ -258,6 +258,7 @@ export default function SettingsScreen() : React.ReactNode {
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
                     </View>
                   )}
+                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                 </View>
               </TouchableOpacity>
               <View style={styles.separator} />
@@ -295,6 +296,21 @@ export default function SettingsScreen() : React.ReactNode {
               ) : (
                 <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
               )}
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/(tabs)/settings/security')}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="shield-checkmark" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>Security Settings</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
