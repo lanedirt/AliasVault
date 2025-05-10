@@ -28,18 +28,14 @@ export default function ChangePasswordScreen() : React.ReactNode {
   const [isLoading, setIsLoading] = useState(false);
 
   const styles = StyleSheet.create({
+    button: {
+      marginTop: 8,
+    },
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
       paddingHorizontal: 14,
       paddingTop: insets.top,
-    },
-    scrollContent: {
-      paddingBottom: 40,
-      paddingTop: 42,
-    },
-    scrollView: {
-      flex: 1,
     },
     form: {
       backgroundColor: colors.accentBackground,
@@ -55,11 +51,18 @@ export default function ChangePasswordScreen() : React.ReactNode {
       fontSize: 16,
       marginBottom: 8,
     },
-    button: {
-      marginTop: 8,
+    scrollContent: {
+      paddingBottom: 40,
+      paddingTop: 42,
+    },
+    scrollView: {
+      flex: 1,
     },
   });
 
+  /**
+   *
+   */
   const handleSubmit = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -75,21 +78,23 @@ export default function ChangePasswordScreen() : React.ReactNode {
       setIsLoading(true);
 
       // Verify current password
-      /*const isValid = await verifyPassword(currentPassword);
-      if (!isValid) {
-        Alert.alert('Error', 'Current password is incorrect');
-        return;
-      }
-
-      // Create new vault version with new password
-      await createNewVersion(newPassword);
-
-      // Submit to server
-      await webApi.submitVaultVersion(vault.getCurrentVersion());
-
-      Alert.alert('Success', 'Password changed successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);*/
+      /*
+       * const isValid = await verifyPassword(currentPassword);
+       *if (!isValid) {
+       *Alert.alert('Error', 'Current password is incorrect');
+       *return;
+       *}
+       *
+       * // Create new vault version with new password
+       *await createNewVersion(newPassword);
+       *
+       * // Submit to server
+       *await webApi.submitVaultVersion(vault.getCurrentVersion());
+       *
+       *Alert.alert('Success', 'Password changed successfully', [
+       *{ text: 'OK', onPress: () => router.back() }
+       *]);
+       */
     } catch (error) {
       Alert.alert('Error', 'Failed to change password. Please try again.');
     } finally {

@@ -1,5 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { RefreshToken } from './types/webapi/RefreshToken';
+import { AuthLogModel } from './types/webapi/AuthLog';
+
 import { AppInfo } from '@/utils/AppInfo';
 import { StatusResponse } from '@/utils/types/webapi/StatusResponse';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
@@ -269,6 +272,27 @@ export class WebApiService {
         vaultRevision: 0
       };
     }
+  }
+
+  /**
+   * Get the active sessions (logged in devices) for the current user from the server.
+   */
+  public async getActiveSessions(): Promise<RefreshToken[]> {
+    return this.get<RefreshToken[]>('Security/sessions');
+  }
+
+  /**
+   * Revoke a session (logged in device) for the current user on the server.
+   */
+  public async revokeSession(sessionId: string): Promise<void> {
+    return this.delete<void>('Security/sessions/' + sessionId);
+  }
+
+  /**
+   * Get the auth logs for the current user from the server.
+   */
+  public async getAuthLogs(): Promise<AuthLogModel[]> {
+    return this.get<AuthLogModel[]>('Security/authlogs');
   }
 
   /**

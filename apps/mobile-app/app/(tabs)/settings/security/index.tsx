@@ -7,8 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 
 /**
  * Security settings screen.

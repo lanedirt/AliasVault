@@ -184,7 +184,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials, authContext.isOffline, setRefreshing, webApi]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, setRefreshing, webApi, authContext]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {

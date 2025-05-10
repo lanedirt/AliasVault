@@ -1,24 +1,17 @@
-import { StyleSheet, View, TouchableOpacity, Animated, FlatList } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState, useEffect } from 'react';
+import { StyleSheet, View, ScrollView, RefreshControl, Platform } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { useWebApi } from '@/context/WebApiContext';
-import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
-
-interface IAuthLog {
-  id: string;
-  timestamp: string;
-  eventType: string;
-  ipAddress: string;
-  deviceName: string;
-  success: boolean;
-}
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { AuthLogModel } from '@/utils/types/webapi/AuthLog';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import { AuthEventType } from '@/utils/types/webapi/AuthEventType';
 
 /**
  * Auth logs screen.
@@ -26,58 +19,22 @@ interface IAuthLog {
 export default function AuthLogsScreen() : React.ReactNode {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
   const webApi = useWebApi();
 
-  const [logs, setLogs] = useState<IAuthLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [logs, setLogs] = useState<AuthLogModel[]>([]);
+  const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
+  const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      marginTop: 42,
       paddingBottom: insets.bottom,
       paddingHorizontal: 14,
       paddingTop: insets.top,
     },
-    scrollContent: {
+    contentContainer: {
       paddingBottom: 40,
-      paddingTop: 42,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    section: {
-      backgroundColor: colors.accentBackground,
-      borderRadius: 10,
-      marginTop: 20,
-      overflow: 'hidden',
-    },
-    logItem: {
-      padding: 16,
-    },
-    logHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    eventType: {
-      color: colors.text,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    status: {
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    statusSuccess: {
-      color: colors.success,
-    },
-    statusFailure: {
-      color: colors.error,
-    },
-    logDetails: {
-      marginBottom: 8,
     },
     detailText: {
       color: colors.textMuted,
@@ -94,68 +51,167 @@ export default function AuthLogsScreen() : React.ReactNode {
       fontSize: 16,
       textAlign: 'center',
     },
+    eventType: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    header: {
+      padding: 16,
+      paddingBottom: 0,
+    },
+    headerText: {
+      color: colors.textMuted,
+      fontSize: 13,
+    },
+    loadingContainer: {
+      flex: 1,
+    },
+    logDetails: {
+      marginBottom: 8,
+    },
+    logHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    logItem: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      marginBottom: 16,
+      padding: 16,
+    },
+    section: {
+      marginTop: 20,
+      overflow: 'hidden',
+    },
+    status: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    statusFailure: {
+      color: colors.red,
+    },
+    statusSuccess: {
+      color: colors.greenBackground,
+    },
   });
 
   /**
    * Loads the authentication logs from the server.
    */
-  const loadLogs = async () : Promise<void> => {
+  const loadLogs = useCallback(async () : Promise<void> => {
     try {
       setIsLoading(true);
       const response = await webApi.getAuthLogs();
       setLogs(response);
-    } catch (error) {
-      // Error handling is done by the WebApiService
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to load auth logs',
+        position: 'bottom',
+      });
     } finally {
       setIsLoading(false);
     }
+  }, [webApi, setIsLoading, setLogs]);
+
+  /**
+   * Refresh the logs on pull to refresh.
+   */
+  const onRefresh = async () : Promise<void> => {
+    // Trigger haptic feedback when pull-to-refresh is activated
+    if (Platform.OS === 'ios' || Platform.OS === 'android') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    setIsRefreshing(true);
+    await loadLogs();
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
     loadLogs();
-  }, []);
+  }, [loadLogs]);
 
-  const renderLog = ({ item }: { item: IAuthLog }) => (
-    <View style={styles.logItem}>
-      <View style={styles.logHeader}>
-        <ThemedText style={styles.eventType}>{item.eventType}</ThemedText>
-        <ThemedText style={[
-          styles.status,
-          item.success ? styles.statusSuccess : styles.statusFailure
-        ]}>
-          {item.success ? 'Success' : 'Failed'}
-        </ThemedText>
-      </View>
-      <View style={styles.logDetails}>
-        <ThemedText style={styles.detailText}>Time: {item.timestamp}</ThemedText>
-        <ThemedText style={styles.detailText}>Device: {item.deviceName}</ThemedText>
-        <ThemedText style={styles.detailText}>IP Address: {item.ipAddress}</ThemedText>
-      </View>
-    </View>
-  );
+  /**
+   * Format date to yyyy-mm-dd hh:mm format.
+   * @param date - The date to format
+   * @returns The formatted date string
+   */
+  const formatDate = (date: string) : string => {
+    const dateObject = new Date(date);
+    return dateObject.toISOString().slice(0, 16).replace('T', ' ');
+  };
+
+  /**
+   * Render the content.
+   */
+  const renderContent = () : React.ReactNode => {
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <SkeletonLoader count={3} height={120} parts={4} />
+        </View>
+      );
+    }
+
+    if (logs.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <ThemedText style={styles.emptyStateText}>No auth logs found</ThemedText>
+        </View>
+      );
+    }
+
+    return logs.map((item) => {
+      const eventType = AuthEventType[item.eventType];
+
+      return (
+        <View key={item.id} style={styles.logItem}>
+          <View style={styles.logHeader}>
+            <ThemedText style={styles.eventType}>{eventType}</ThemedText>
+            <ThemedText style={[
+              styles.status,
+              item.isSuccess ? styles.statusSuccess : styles.statusFailure
+            ]}>
+              {item.isSuccess ? 'Success' : 'Failed'}
+            </ThemedText>
+          </View>
+          <View style={styles.logDetails}>
+            <ThemedText style={styles.detailText}>Time: {formatDate(item.timestamp)}</ThemedText>
+            <ThemedText style={styles.detailText}>Device: {item.userAgent}</ThemedText>
+            <ThemedText style={styles.detailText}>IP Address: {item.ipAddress}</ThemedText>
+            <ThemedText style={styles.detailText}>Client: {item.client}</ThemedText>
+          </View>
+        </View>
+      );
+    });
+  };
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.scrollContent}>
-        <View style={styles.section}>
-          {isLoading ? (
-            <View style={styles.emptyState}>
-              <InlineSkeletonLoader width={200} />
-            </View>
-          ) : logs.length === 0 ? (
-            <View style={styles.emptyState}>
-              <ThemedText style={styles.emptyStateText}>No auth logs found</ThemedText>
-            </View>
-          ) : (
-            <FlatList
-              data={logs}
-              renderItem={renderLog}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          )}
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        <View style={styles.header}>
+          <ThemedText style={styles.headerText}>
+            Below you can find an overview of recent login attempts to your account.
+          </ThemedText>
         </View>
-      </View>
+        <View style={styles.section}>
+          {renderContent()}
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }

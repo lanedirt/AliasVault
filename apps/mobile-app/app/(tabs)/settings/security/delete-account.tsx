@@ -30,18 +30,17 @@ export default function DeleteAccountScreen() : React.ReactNode {
   const [step, setStep] = useState<'username' | 'password'>('username');
 
   const styles = StyleSheet.create({
+    button: {
+      marginTop: 8,
+    },
+    buttonDanger: {
+      backgroundColor: colors.error,
+    },
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
       paddingHorizontal: 14,
       paddingTop: insets.top,
-    },
-    scrollContent: {
-      paddingBottom: 40,
-      paddingTop: 42,
-    },
-    scrollView: {
-      flex: 1,
     },
     form: {
       backgroundColor: colors.accentBackground,
@@ -57,20 +56,24 @@ export default function DeleteAccountScreen() : React.ReactNode {
       fontSize: 16,
       marginBottom: 8,
     },
+    scrollContent: {
+      paddingBottom: 40,
+      paddingTop: 42,
+    },
+    scrollView: {
+      flex: 1,
+    },
     warningText: {
       color: colors.error,
       fontSize: 14,
       marginBottom: 16,
       textAlign: 'center',
     },
-    button: {
-      marginTop: 8,
-    },
-    buttonDanger: {
-      backgroundColor: colors.error,
-    },
   });
 
+  /**
+   *
+   */
   const handleUsernameSubmit = () => {
     if (confirmUsername !== username) {
       Alert.alert('Error', 'Username does not match');
@@ -79,6 +82,9 @@ export default function DeleteAccountScreen() : React.ReactNode {
     setStep('password');
   };
 
+  /**
+   *
+   */
   const handleDeleteAccount = async () => {
     if (!password) {
       Alert.alert('Error', 'Please enter your password');
@@ -93,19 +99,24 @@ export default function DeleteAccountScreen() : React.ReactNode {
         {
           text: 'Delete Account',
           style: 'destructive',
+          /**
+           *
+           */
           onPress: async () => {
             try {
               setIsLoading(true);
 
               // Verify password
-              /*const isValid = await vault.verifyPassword(password);
-              if (!isValid) {
-                Alert.alert('Error', 'Password is incorrect');
-                return;
-              }
-
-              // Delete account
-              await webApi.deleteAccount();*/
+              /*
+               * const isValid = await vault.verifyPassword(password);
+               *if (!isValid) {
+               *Alert.alert('Error', 'Password is incorrect');
+               *return;
+               *}
+               *
+               * // Delete account
+               *await webApi.deleteAccount();
+               */
 
               // Log out and return to login
               await webApi.logout();

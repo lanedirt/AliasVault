@@ -1,5 +1,6 @@
 import React from 'react';
 import { TextInput, TextInputProps, StyleSheet, View, Text } from 'react-native';
+
 import { useColors } from '@/hooks/useColorScheme';
 
 type ThemedTextInputProps = TextInputProps & {
@@ -14,7 +15,7 @@ export const ThemedTextInput: React.FC<ThemedTextInputProps> = ({ error, style, 
 
   const styles = StyleSheet.create({
     errorText: {
-      color: 'red',
+      color: colors.red,
       fontSize: 12,
       marginTop: 4,
     },
@@ -25,7 +26,7 @@ export const ThemedTextInput: React.FC<ThemedTextInputProps> = ({ error, style, 
     },
     inputContainer: {
       backgroundColor: colors.background,
-      borderColor: error ? 'red' : colors.accentBorder,
+      borderColor: error ? colors.red : colors.accentBorder,
       borderRadius: 6,
       borderWidth: 1,
     },
