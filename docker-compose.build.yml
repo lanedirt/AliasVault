@@ -3,40 +3,40 @@ services:
         image: aliasvault-postgres
         build:
             context: .
-            dockerfile: src/Databases/AliasServerDb/Dockerfile
+            dockerfile: apps/server/Databases/AliasServerDb/Dockerfile
 
     client:
         image: aliasvault-client
         build:
             context: .
-            dockerfile: src/AliasVault.Client/Dockerfile
+            dockerfile: apps/server/AliasVault.Client/Dockerfile
 
     api:
         image: aliasvault-api
         build:
             context: .
-            dockerfile: src/AliasVault.Api/Dockerfile
+            dockerfile: apps/server/AliasVault.Api/Dockerfile
 
     admin:
         image: aliasvault-admin
         build:
             context: .
-            dockerfile: src/AliasVault.Admin/Dockerfile
+            dockerfile: apps/server/AliasVault.Admin/Dockerfile
 
     reverse-proxy:
         image: aliasvault-reverse-proxy
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: apps/server/Dockerfile
 
     smtp:
         image: aliasvault-smtp
         build:
             context: .
-            dockerfile: src/Services/AliasVault.SmtpService/Dockerfile
+            dockerfile: apps/server/Services/AliasVault.SmtpService/Dockerfile
 
     task-runner:
         image: aliasvault-task-runner
         build:
             context: .
-            dockerfile: src/Services/AliasVault.TaskRunner/Dockerfile
+            dockerfile: apps/server/Services/AliasVault.TaskRunner/Dockerfile

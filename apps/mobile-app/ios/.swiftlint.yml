@@ -1,0 +1,46 @@
+included:
+  - AliasVault
+  - Autofill
+  - VaultModels
+  - VaultStoreKit
+  - VaultStoreKitTests
+  - VaultUI
+
+excluded:
+  - Pods
+  - Carthage
+
+# Rules that require 'analyze' mode
+analyzer_rules:
+  - explicit_self
+
+opt_in_rules:
+  - explicit_top_level_acl
+  - vertical_whitespace
+  - missing_docs
+  - file_header
+  - function_parameter_count
+  - redundant_optional_initialization
+  - discouraged_optional_boolean
+
+disabled_rules:
+  - trailing_whitespace
+
+# Customize rules
+line_length:
+  warning: 200
+  error: 250
+
+comment_spacing: # fixed invalid configuration
+  severity: error
+
+missing_docs:
+  warning: true
+  included:
+    - public
+
+vertical_whitespace:
+  max_empty_lines: 1
+
+explicit_top_level_acl:
+  severity: warning

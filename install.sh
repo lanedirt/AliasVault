@@ -569,10 +569,10 @@ generate_admin_password() {
     if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null || ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
         printf "${CYAN}> Building InstallCli locally...${NC}"
         if [ "$VERBOSE" = true ]; then
-            docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
+            docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile .
         else
             (
-                docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
+                docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
                 BUILD_PID=$!
                 while kill -0 $BUILD_PID 2>/dev/null; do
                     printf "."
@@ -848,7 +848,7 @@ handle_install() {
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
-    
+
     # Set deployment mode to build to ensure container lifecycle uses build configuration
     set_deployment_mode "build"
     printf "\n"
@@ -857,12 +857,12 @@ handle_build() {
     initialize_workspace
 
     # Check for required build files
-    if [ ! -f "docker-compose.build.yml" ] || [ ! -d "src" ]; then
+    if [ ! -f "docker-compose.build.yml" ] || [ ! -d "apps/server" ]; then
         printf "${RED}Error: Required files for building from source are missing.${NC}\n"
         printf "\n"
         printf "To build AliasVault from source, you need:\n"
         printf "1. docker-compose.build.yml file\n"
-        printf "2. src/ directory with the complete source code\n"
+        printf "2. apps/server/ directory with the complete source code\n"
         printf "\n"
         printf "Please clone the complete repository using:\n"
         printf "git clone https://github.com/${REPO_OWNER}/${REPO_NAME}.git\n"
@@ -1830,10 +1830,10 @@ handle_migrate_db() {
     if ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:0.10.3 > /dev/null 2>&1; then
         printf "${YELLOW}> Pre-built image not found, building locally...${NC}"
         if [ "$VERBOSE" = true ]; then
-            docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile .
+            docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile .
         else
             (
-                docker build -t installcli -f src/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
+                docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
                 BUILD_PID=$!
                 while kill -0 $BUILD_PID 2>/dev/null; do
                     printf "."

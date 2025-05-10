@@ -1,0 +1,205 @@
+name: Docker Pull and Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-compose-pull:
+    name: Docker Compose Pull Test
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:26.0.0
+        options: --privileged
+
+    steps:
+      - name: Get repository and branch information
+        id: repo-info
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
+            echo "REPO_FULL_NAME=lanedirt/AliasVault" >> $GITHUB_ENV
+            echo "BRANCH_NAME=main" >> $GITHUB_ENV
+          else
+            echo "REPO_FULL_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+          fi
+
+      - name: Download install script from current branch
+        run: |
+          INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO_FULL_NAME/$BRANCH_NAME/install.sh"
+          echo "Downloading install script from: $INSTALL_SCRIPT_URL"
+          curl -f -o install.sh "$INSTALL_SCRIPT_URL"
+
+      - name: Create .env file with custom SMTP port
+        run: echo "SMTP_PORT=2525" > .env
+
+      - name: Set permissions and run install.sh (install)
+        id: install_script
+        run: |
+          chmod +x install.sh
+          {
+            ./install.sh install --verbose
+            exit_code=$?
+            if [ $exit_code -eq 2 ]; then
+              echo "skip_remaining=true" >> $GITHUB_OUTPUT
+              true
+            elif [ $exit_code -ne 0 ]; then
+              false
+            fi
+          } || {
+            if [ $exit_code -eq 2 ]; then
+              echo "skip_remaining=true" >> $GITHUB_OUTPUT
+              true
+            else
+              exit $exit_code
+            fi
+          }
+
+      - name: Run docker compose up
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Wait for services
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        run: sleep 10
+
+      - name: Test WASM App
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
+            if [ "$http_code" -ne 200 ]; then
+              echo "WASM app failed with $http_code"
+              exit 1
+            fi
+
+      - name: Test WebApi
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
+            if [ "$http_code" -ne 200 ]; then
+              echo "WebApi failed with $http_code"
+              exit 1
+            fi
+
+      - name: Test Admin App
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
+            if [ "$http_code" -ne 200 ]; then
+              echo "Admin app failed with $http_code"
+              exit 1
+            fi
+
+      - name: Test SMTP
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+              echo "SMTP failed"
+              exit 1
+            fi
+
+      - name: Test reset-admin-password output
+        if: ${{ !steps.install_script.outputs.skip_remaining }}
+        run: |
+          output=$(./install.sh reset-admin-password)
+          if ! echo "$output" | grep -E '.*New admin password: [A-Za-z0-9+/=]{8,}.*'; then
+            echo "Invalid reset-admin-password output"
+            exit 1
+          fi
+
+  docker-compose-build:
+    name: Docker Compose Build Test
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:26.0.0
+        options: --privileged
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create .env file with custom SMTP port
+        run: echo "SMTP_PORT=2525" > .env
+
+      - name: Set permissions and run install.sh build
+        run: |
+          chmod +x install.sh
+          ./install.sh build --verbose
+
+      - name: Test services are responding
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: |
+            sleep 15
+            declare -A endpoints=(
+              ["WASM"]="https://localhost:443"
+              ["WebApi"]="https://localhost:443/api"
+              ["Admin"]="https://localhost:443/admin/user/login"
+            )
+            failed=false
+            for name in "${!endpoints[@]}"; do
+              url="${endpoints[$name]}"
+              echo "Testing $name at $url"
+              response=$(curl -k -s -w "\nHTTP_CODE=%{http_code}" "$url")
+              http_code=$(echo "$response" | grep "HTTP_CODE=" | cut -d= -f2)
+              if [ "$http_code" -ne 200 ]; then
+                echo "❌ $name failed with $http_code"
+                failed=true
+              else
+                echo "✅ $name passed"
+              fi
+            done
+
+            echo "Testing SMTP on port 2525"
+            if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
+              echo "❌ SMTP failed"
+              failed=true
+            else
+              echo "✅ SMTP passed"
+            fi
+
+            if [ "$failed" = true ]; then
+              echo "Dumping logs"
+              docker compose logs admin
+              docker compose logs api
+              docker compose logs client
+              docker compose logs smtp
+              docker compose logs reverse-proxy
+              docker compose restart
+              exit 1
+            fi
+
+      - name: Test reset-admin-password output
+        run: |
+          output=$(./install.sh reset-admin-password)
+          if ! echo "$output" | grep -E '.*New admin password: [A-Za-z0-9+/=]{8,}.*'; then
+            echo "Invalid reset-admin-password output"
+            exit 1
+          fi

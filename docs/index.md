@@ -9,11 +9,11 @@ permalink: /
 # AliasVault Documentation
 {: .fs-9 }
 
-Open-source E2EE password and alias manager with built-in email server and zero-knowledge architecture.
+A self-hostable, end-to-end encrypted password manager with a built-in alias generator and email server.
 
 {: .fs-6 .fw-300 }
 
-[Installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Server Installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [View on GitHub](https://github.com/lanedirt/AliasVault){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
@@ -43,4 +43,4 @@ Create separate identities for different purposes, each with its own email alias
 
 ## Getting Started
 
-Ready to get started with AliasVault? Check out the [installation guide](./installation).
+Ready to get started with AliasVault? Check out the [server installation guide](./installation).

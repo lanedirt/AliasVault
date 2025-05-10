@@ -9,20 +9,23 @@ nav_order: 1
 
 If you prefer to manually set up AliasVault instead of using the `install.sh` script, this README provides step-by-step instructions.
 
+**Prerequisities:**
+- Docker and Docker Compose installed on your system
+- Knowledge of working with direct Docker commands
+- Knowledge of .env files
+- OpenSSL for generating random passwords
+
+---
+
 {: .toc }
 * TOC
 {:toc}
 
 ---
 
-## Prerequisites
-
-- Docker and Docker Compose installed on your system
-- Knowledge of working with direct Docker commands
-- Knowledge of .env files
-- OpenSSL for generating random passwords
 
 ## Steps
+Follow these steps to manually install AliasVault on your own server.
 
 1. **Clone the git repository**
    ```bash
@@ -96,8 +99,26 @@ If you prefer to manually set up AliasVault instead of using the `install.sh` sc
 docker compose pull && docker compose down && docker compose up -d
 ```
 
+## Using a Custom Reverse Proxy (e.g. Cloudflare Tunnel)
+
+AliasVault includes its own internal reverse proxy (nginx) container that routes traffic to other containers. By default, the built-in nginx container (`reverse-proxy`) makes AliasVault's services available at:
+
+- **Client**: `http://localhost/`
+- **API**: `http://localhost/api`
+- **Admin**: `http://localhost/admin`
+
+If you want to use your own reverse proxy setup (e.g. with a Cloudflare Tunnel), you **must** ensure the following:
+
+- Your custom proxy/tunnel **points to the AliasVault `reverse-proxy` container**, **not** directly to the client, API, or admin containers.
+- The forwarding protocol must be **HTTPS**, since the `reverse-proxy` container listens on port `443` for secure connections.
+
+> ⚠️ Failing to route through the reverse-proxy container correctly will break the app. Errors such as HTTP 502 often indicate a misconfigured reverse proxy.
+
+If you're using **Cloudflare Tunnel**, you will likely encounter TLS verification issues. In that case, go to the Cloudflare dashboard and enable the **"No TLS Verify"** option for your tunnel configuration. This tells Cloudflare to skip certificate validation when connecting to the internal reverse-proxy over HTTPS.
+
+
 ## Troubleshooting
-If you encounter any issues during the setup:
+If you encounter any miscellaneous issues during the setup:
 
 1. Check the Docker logs:
    ```bash
@@ -111,3 +132,7 @@ If you encounter any issues during the setup:
    ```
 
 For more detailed troubleshooting information, please refer to the full [troubleshooting guide](../troubleshooting.md).
+
+## FAQ
+### Why does AliasVault use its own reverse proxy?
+AliasVault requires precise routing between its client, API, and admin interfaces. These are structured under `/`, `/api`, and `/admin`. A unified nginx reverse proxy ensures that all AliasVault's containers are accessible under the same hostname and path structure. If you use your own reverse proxy, you must replicate this logic exactly. See the nginx.conf used by the official container for reference.

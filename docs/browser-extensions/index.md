@@ -10,7 +10,7 @@ nav_order: 3
 This section contains information about installing and using the AliasVault browser extensions. Browser extensions allow you to manage and use AliasVault from within your browser enabling autofilling of login credentials and email aliases on all websites that you use.
 
 ## Features
-You can use the AliasVaultbrowser extension to:
+You can use the AliasVault browser extension to:
 - Autofill existing alias information on any website
 - Generate new aliases for any website on the registration form itself
 - Access received emails on all of your aliases

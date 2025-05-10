@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Start/stop
-parent: Installation Guide
+parent: Server Installation
 nav_order: 2
 ---
 

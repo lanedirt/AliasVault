@@ -1,0 +1,1 @@
+This folder contains the dictionaries used by the identity generator in .ts format which are directly included by the Typescript logic.

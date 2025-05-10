@@ -1,8 +1,8 @@
 ---
 layout: default
-title: Installation Guide
+title: Server Installation
 nav_order: 2
 ---
 
-# Installation Guide
+# Server Installation
 The following guide will walk you through the steps to install AliasVault on your own server. Minimum experience with Docker and Linux is required.

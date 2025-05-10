@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "AliasVault",
+    "slug": "AliasVault",
+    "version": "0.17.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "net.aliasvault.app",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "deepLinking": true,
+    "platforms": ["ios", "android", "web"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "net.aliasvault.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "net.aliasvault.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

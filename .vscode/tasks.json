@@ -12,7 +12,7 @@
                 "isDefault": true
             },
             "options": {
-                "cwd": "${workspaceFolder}/src/AliasVault.Api"
+                "cwd": "${workspaceFolder}/apps/server/AliasVault.Api"
             }
         },
         {
@@ -26,7 +26,7 @@
                 "isDefault": true
             },
             "options": {
-                "cwd": "${workspaceFolder}/src/AliasVault.Client"
+                "cwd": "${workspaceFolder}/apps/server/AliasVault.Client"
             }
         },
         {
@@ -40,7 +40,7 @@
                 "isDefault": true
             },
             "options": {
-                "cwd": "${workspaceFolder}/src/AliasVault.Admin"
+                "cwd": "${workspaceFolder}/apps/server/AliasVault.Admin"
             }
         },
         {
@@ -50,7 +50,7 @@
             "args": ["run", "build:client-css"],
             "problemMatcher": [],
             "options": {
-                "cwd": "${workspaceFolder}/src/AliasVault.Client"
+                "cwd": "${workspaceFolder}/apps/server/AliasVault.Client"
             },
             "group": {
                 "kind": "build",
@@ -64,7 +64,7 @@
             "args": ["run", "build:admin-css"],
             "problemMatcher": [],
             "options": {
-                "cwd": "${workspaceFolder}/src/AliasVault.Admin"
+                "cwd": "${workspaceFolder}/apps/server/AliasVault.Admin"
             },
             "group": {
                 "kind": "build",
@@ -91,7 +91,7 @@
             "args": ["test"],
             "problemMatcher": "$msCompile",
             "options": {
-                "cwd": "${workspaceFolder}/src/Tests/AliasVault.UnitTests"
+                "cwd": "${workspaceFolder}/apps/server/Tests/AliasVault.UnitTests"
             },
             "group": {
                 "kind": "test",
@@ -105,12 +105,81 @@
             "args": ["run", "dev:chrome"],
             "problemMatcher": [],
             "options": {
-                "cwd": "${workspaceFolder}/browser-extension"
+                "cwd": "${workspaceFolder}/apps/browser-extension"
             },
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+        {
+            "label": "Run debug iOS App (simulator)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/apps/mobile-app"
+            }
+        },
+        {
+            "label": "Run debug iOS App (device)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios", "--device"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/apps/mobile-app"
+            }
+        },
+        {
+            "label": "Run release iOS App (device)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:ios", "--device", "--configuration", "Release"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/apps/mobile-app"
+            }
+        },
+        {
+            "label": "Run Android App",
+            "type": "shell",
+            "command": "npx",
+            "args": ["expo", "run:android"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/apps/mobile-app"
+            }
+        },
+        {
+            "label": "Build and watch Docs",
+            "type": "shell",
+            "command": "docker compose up",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/docs"
+            }
+        },
     ]
 }
