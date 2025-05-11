@@ -21,7 +21,7 @@ class EncryptionUtility {
     password: string,
     salt: string,
     encryptionType: string = 'Argon2Id',
-    encryptionSettings: string = '{"Iterations":1,"MemorySize":1024,"DegreeOfParallelism":4}'
+    encryptionSettings: string = '{"Iterations":2,"MemorySize":19456,"DegreeOfParallelism":1}'
   ): Promise<Uint8Array> {
     const settings = JSON.parse(encryptionSettings);
 
