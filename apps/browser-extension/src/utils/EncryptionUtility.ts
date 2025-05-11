@@ -6,18 +6,18 @@ import { Buffer } from 'buffer';
 
 /**
  * Utility class for encryption operations including:
- * - Argon2id key derivation
+ * - Argon2Id key derivation
  * - AES-GCM symmetric encryption/decryption
  * - RSA-OAEP asymmetric encryption/decryption
  */
 export class EncryptionUtility {
   /**
-   * Derives a key from a password using Argon2id
+   * Derives a key from a password using Argon2Id
    */
   public static async deriveKeyFromPassword(
     password: string,
     salt: string,
-    encryptionType: string = 'Argon2id',
+    encryptionType: string = 'Argon2Id',
     encryptionSettings: string = '{"Iterations":1,"MemorySize":1024,"DegreeOfParallelism":4}'
   ): Promise<Uint8Array> {
     const settings = JSON.parse(encryptionSettings);
