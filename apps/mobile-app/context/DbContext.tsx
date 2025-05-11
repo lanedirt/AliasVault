@@ -159,11 +159,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       await sqliteClient.storeEncryptionKey(derivedKey);
 
       // Initialize the database
-      await unlockVault();
+      const unlocked = await unlockVault();
+      if (!unlocked) {
+        return false;
+      }
 
       // Try to get the database version as a simple test query
       const version = await sqliteClient.getDatabaseVersion();
-
       if (version && version.length > 0) {
         return true;
       }

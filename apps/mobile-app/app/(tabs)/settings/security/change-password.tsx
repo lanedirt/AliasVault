@@ -1,31 +1,38 @@
-import { StyleSheet, View, TouchableOpacity, Animated, Alert } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import { Buffer } from 'buffer';
+
+import { StyleSheet, View, Alert, ScrollView } from 'react-native';
+import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
-import { useWebApi } from '@/context/WebApiContext';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import NativeVaultManager from '@/specs/NativeVaultManager';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 /**
  * Change password screen.
+ * @returns {React.ReactNode} The rendered component
  */
-export default function ChangePasswordScreen() : React.ReactNode {
+export default function ChangePasswordScreen(): React.ReactNode {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const webApi = useWebApi();
+  const authContext = useAuth();
+  const dbContext = useDb();
+  const { executeVaultPasswordChange, syncStatus } = useVaultMutate();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
 
   const styles = StyleSheet.create({
     button: {
@@ -33,15 +40,27 @@ export default function ChangePasswordScreen() : React.ReactNode {
     },
     container: {
       flex: 1,
+      marginTop: 42,
       paddingBottom: insets.bottom,
       paddingHorizontal: 14,
       paddingTop: insets.top,
+    },
+    contentContainer: {
+      paddingBottom: 40,
     },
     form: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
       marginTop: 20,
       padding: 16,
+    },
+    header: {
+      padding: 16,
+      paddingBottom: 0,
+    },
+    headerText: {
+      color: colors.textMuted,
+      fontSize: 13,
     },
     inputContainer: {
       marginBottom: 16,
@@ -51,19 +70,13 @@ export default function ChangePasswordScreen() : React.ReactNode {
       fontSize: 16,
       marginBottom: 8,
     },
-    scrollContent: {
-      paddingBottom: 40,
-      paddingTop: 42,
-    },
-    scrollView: {
-      flex: 1,
-    },
   });
 
   /**
-   *
+   * Handle the submit button press.
+   * @returns {Promise<void>} A promise that resolves when the operation is complete
    */
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -74,76 +87,121 @@ export default function ChangePasswordScreen() : React.ReactNode {
       return;
     }
 
+    if (!authContext.username) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
+    }
+
     try {
       setIsLoading(true);
+      setLoadingStatus('Initiating password change...');
 
-      // Verify current password
-      /*
-       * const isValid = await verifyPassword(currentPassword);
-       *if (!isValid) {
-       *Alert.alert('Error', 'Current password is incorrect');
-       *return;
-       *}
-       *
-       * // Create new vault version with new password
-       *await createNewVersion(newPassword);
-       *
-       * // Submit to server
-       *await webApi.submitVaultVersion(vault.getCurrentVersion());
-       *
-       *Alert.alert('Success', 'Password changed successfully', [
-       *{ text: 'OK', onPress: () => router.back() }
-       *]);
-       */
+      // Check locally if the current password is correct by attempting to decrypt the vault
+      const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
+      if (!encryptionKeyDerivationParams) {
+        throw new Error('Failed to verify current password. Please try again.');
+      }
+
+      // Parse the key derivation parameters
+      const params = JSON.parse(encryptionKeyDerivationParams);
+
+      // Derive the encryption key from the password using the stored parameters
+      const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
+        currentPassword,
+        params.salt,
+        params.encryptionType,
+        params.encryptionSettings
+      );
+
+      const currentPasswordHashBase64 = Buffer.from(passwordHash).toString('base64');
+
+      // Check if the current password is correct by attempting to decrypt the vault
+      const dbAvailable = await dbContext.testDatabaseConnection(currentPasswordHashBase64);
+      if (!dbAvailable) {
+        console.error('Current password is not correct');
+        Alert.alert('Error', 'Current password is not correct');
+        return;
+      }
+
+      // 2nd. if it is, we pass the new plain text password to the vault password change sync hook and that takes care of all the rest?
+      await executeVaultPasswordChange(currentPasswordHashBase64, newPassword);
+
+      // Show confirm dialog and go back to the settings screen
+      Alert.alert('Success', 'Password changed successfully', [
+        { text: 'OK',
+          /**
+           * Reset the password change state and go back to the settings screen
+           */
+          onPress: () : void => {
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            router.back();
+          } }
+      ]);
     } catch (error) {
+      console.error('Password change error:', error);
       Alert.alert('Error', 'Failed to change password. Please try again.');
     } finally {
       setIsLoading(false);
+      setLoadingStatus(null);
     }
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.scrollContent}>
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Current Password</ThemedText>
-            <ThemedTextInput
-              secureTextEntry
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              placeholder="Enter current password"
+    <>
+      {(isLoading) && (
+        <LoadingOverlay status={syncStatus.length > 0 ? syncStatus : loadingStatus ?? ''} />
+      )}
+      <ThemedView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.contentContainer}
+        >
+          <View style={styles.header}>
+            <ThemedText style={styles.headerText}>
+            Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
+            </ThemedText>
+          </View>
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Current Password</ThemedText>
+              <ThemedTextInput
+                secureTextEntry
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                placeholder="Enter current password"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>New Password</ThemedText>
+              <ThemedTextInput
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Enter new password"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Confirm New Password</ThemedText>
+              <ThemedTextInput
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm new password"
+              />
+            </View>
+
+            <ThemedButton
+              title="Change Password"
+              onPress={handleSubmit}
+              loading={isLoading}
+              style={styles.button}
             />
           </View>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>New Password</ThemedText>
-            <ThemedTextInput
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder="Enter new password"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Confirm New Password</ThemedText>
-            <ThemedTextInput
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="Confirm new password"
-            />
-          </View>
-
-          <ThemedButton
-            title="Change Password"
-            onPress={handleSubmit}
-            loading={isLoading}
-            style={styles.button}
-          />
-        </View>
-      </View>
-    </ThemedView>
+        </ScrollView>
+      </ThemedView>
+    </>
   );
 }
