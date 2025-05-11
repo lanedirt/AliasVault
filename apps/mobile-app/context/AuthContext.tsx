@@ -7,6 +7,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 
 import { useDb } from '@/context/DbContext';
 import NativeVaultManager from '@/specs/NativeVaultManager';
+import EncryptionUtility from '@/utils/EncryptionUtility';
 
 // Create a navigation reference
 export const navigationRef = React.createRef<NavigationContainerRef<ParamListBase>>();
@@ -32,6 +33,7 @@ type AuthContextType = {
   setAutoLockTimeout: (timeout: number) => Promise<void>;
   getBiometricDisplayName: () => Promise<string>;
   setOfflineMode: (isOffline: boolean) => void;
+  verifyPassword: (password: string) => Promise<string | null>;
   // iOS Autofill methods
   shouldShowIosAutofillReminder: boolean;
   markIosAutofillConfigured: () => Promise<void>;
@@ -260,6 +262,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  /**
+   * Verify the password. Returns the current password hash if the password is correct, otherwise returns null.
+   */
+  const verifyPassword = useCallback(async (password: string): Promise<string | null> => {
+    // Check locally if the current password is correct by attempting to decrypt the vault
+    const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
+    if (!encryptionKeyDerivationParams) {
+      throw new Error('Failed to verify current password. Please try again.');
+    }
+
+    // Parse the key derivation parameters
+    const params = JSON.parse(encryptionKeyDerivationParams);
+
+    // Derive the encryption key from the password using the stored parameters
+    const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
+      password,
+      params.salt,
+      params.encryptionType,
+      params.encryptionSettings
+    );
+
+    const currentPasswordHashBase64 = Buffer.from(passwordHash).toString('base64');
+
+    // Check if the current password is correct by attempting to decrypt the vault
+    const dbAvailable = await dbContext.testDatabaseConnection(currentPasswordHashBase64);
+    if (!dbAvailable) {
+      return null;
+    }
+
+    return currentPasswordHashBase64;
+  }, [dbContext]);
+
   // Handle app state changes
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
@@ -344,6 +378,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getBiometricDisplayName,
     markIosAutofillConfigured,
     setReturnUrl,
+    verifyPassword,
     setOfflineMode: setIsOffline,
   }), [
     isLoggedIn,
@@ -367,6 +402,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getBiometricDisplayName,
     markIosAutofillConfigured,
     setReturnUrl,
+    verifyPassword,
   ]);
 
   return (

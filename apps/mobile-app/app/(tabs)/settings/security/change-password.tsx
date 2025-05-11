@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import { StyleSheet, View, Alert, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,11 +9,9 @@ import { useColors } from '@/hooks/useColorScheme';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
 import { useAuth } from '@/context/AuthContext';
-import { useDb } from '@/context/DbContext';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 
 /**
  * Change password screen.
@@ -25,7 +21,6 @@ export default function ChangePasswordScreen(): React.ReactNode {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const authContext = useAuth();
-  const dbContext = useDb();
   const { executeVaultPasswordChange, syncStatus } = useVaultMutate();
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -96,34 +91,12 @@ export default function ChangePasswordScreen(): React.ReactNode {
       setIsLoading(true);
       setLoadingStatus('Initiating password change...');
 
-      // Check locally if the current password is correct by attempting to decrypt the vault
-      const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
-      if (!encryptionKeyDerivationParams) {
-        throw new Error('Failed to verify current password. Please try again.');
-      }
-
-      // Parse the key derivation parameters
-      const params = JSON.parse(encryptionKeyDerivationParams);
-
-      // Derive the encryption key from the password using the stored parameters
-      const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
-        currentPassword,
-        params.salt,
-        params.encryptionType,
-        params.encryptionSettings
-      );
-
-      const currentPasswordHashBase64 = Buffer.from(passwordHash).toString('base64');
-
-      // Check if the current password is correct by attempting to decrypt the vault
-      const dbAvailable = await dbContext.testDatabaseConnection(currentPasswordHashBase64);
-      if (!dbAvailable) {
-        console.error('Current password is not correct');
+      const currentPasswordHashBase64 = await authContext.verifyPassword(currentPassword);
+      if (!currentPasswordHashBase64) {
         Alert.alert('Error', 'Current password is not correct');
         return;
       }
 
-      // 2nd. if it is, we pass the new plain text password to the vault password change sync hook and that takes care of all the rest?
       await executeVaultPasswordChange(currentPasswordHashBase64, newPassword);
 
       // Show confirm dialog and go back to the settings screen
@@ -162,6 +135,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
             Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
             </ThemedText>
           </View>
+          <UsernameDisplay />
           <View style={styles.form}>
             <View style={styles.inputContainer}>
               <ThemedText style={styles.label}>Current Password</ThemedText>

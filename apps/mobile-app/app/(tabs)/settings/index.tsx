@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Animated, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useCallback } from 'react';
@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import avatarImage from '@/assets/images/avatar.webp';
+import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 
 /**
  * Settings screen.
@@ -22,7 +22,7 @@ import avatarImage from '@/assets/images/avatar.webp';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
-  const { username, getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
+  const { getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -111,12 +111,6 @@ export default function SettingsScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
-    avatar: {
-      borderRadius: 20,
-      height: 40,
-      marginRight: 12,
-      width: 40,
-    },
     container: {
       flex: 1,
       paddingBottom: insets.bottom,
@@ -190,18 +184,6 @@ export default function SettingsScreen() : React.ReactNode {
     skeletonLoader: {
       marginRight: 8,
     },
-    userInfoContainer: {
-      alignItems: 'center',
-      backgroundColor: colors.background,
-      borderRadius: 10,
-      flexDirection: 'row',
-      marginBottom: 20,
-    },
-    usernameText: {
-      color: colors.text,
-      fontSize: 16,
-      fontWeight: '600',
-    },
     versionContainer: {
       alignItems: 'center',
       marginTop: 20,
@@ -233,14 +215,7 @@ export default function SettingsScreen() : React.ReactNode {
         style={styles.scrollView}
       >
         <TitleContainer title="Settings" />
-        <View style={styles.userInfoContainer}>
-          <Image
-            source={avatarImage}
-            style={styles.avatar}
-          />
-          <ThemedText style={styles.usernameText}>Logged in as: {username}</ThemedText>
-        </View>
-
+        <UsernameDisplay />
         <View style={styles.section}>
           {Platform.OS === 'ios' && (
             <>

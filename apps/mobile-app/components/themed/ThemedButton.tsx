@@ -39,7 +39,7 @@ export const ThemedButton: React.FC<ThemedButtonProps> = ({
       opacity: 0.7,
     },
     buttonText: {
-      color: colors.background,
+      color: colors.primarySurfaceText,
       fontSize: 16,
       fontWeight: '600',
     },
