@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { useWebApi } from '@/context/WebApiContext';
 import { useDb } from '@/context/DbContext';
@@ -26,6 +27,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
+  const [isComponentVisible, setIsComponentVisible] = useState(true);
   const webApi = useWebApi();
   const dbContext = useDb();
   const authContext = useAuth();
@@ -44,13 +46,34 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     return metadata.publicEmailDomains.includes(emailAddress.split('@')[1]);
   }, [dbContext]);
 
+  // Handle app state changes
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState): void => {
+      setIsComponentVisible(nextAppState === 'active');
+    });
+
+    return (): void => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Handle focus changes
+  useFocusEffect(
+    useCallback((): (() => void) => {
+      setIsComponentVisible(true);
+      return (): void => {
+        setIsComponentVisible(false);
+      };
+    }, [])
+  );
+
   useEffect(() => {
     /**
      * Load the emails.
      */
     const loadEmails = async () : Promise<void> => {
       try {
-        if (!email) {
+        if (!email || !isComponentVisible) {
           return;
         }
 
@@ -130,10 +153,14 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     };
 
     loadEmails();
-    // Set up auto-refresh interval
-    const interval = setInterval(loadEmails, 2000);
-    return () : void => clearInterval(interval);
-  }, [email, loading, webApi, dbContext, isPublicDomain, authContext.isOffline]);
+    // Set up auto-refresh interval only when component is visible
+    const interval = isComponentVisible ? setInterval(loadEmails, 2000) : null;
+    return () : void => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [email, loading, webApi, dbContext, isPublicDomain, authContext.isOffline, isComponentVisible]);
 
   const styles = StyleSheet.create({
     date: {
