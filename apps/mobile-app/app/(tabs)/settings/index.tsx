@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useCallback } from 'react';
@@ -85,8 +85,23 @@ export default function SettingsScreen() : React.ReactNode {
    * Handle the logout.
    */
   const handleLogout = async () : Promise<void> => {
-    await webApi.logout();
-    router.replace('/login');
+    // Show native confirmation dialog
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout? You need to login again with your master password to access your vault.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive',
+          /**
+           * Handle the logout.
+           */
+          onPress: async () : Promise<void> => {
+            await webApi.logout();
+            router.replace('/login');
+          }
+        },
+      ]
+    );
   };
 
   /**
