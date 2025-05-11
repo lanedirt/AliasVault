@@ -45,6 +45,7 @@ export default function AutoLockScreen() : React.ReactNode {
     },
     header: {
       padding: 16,
+      paddingBottom: 0,
     },
     headerText: {
       color: colors.textMuted,

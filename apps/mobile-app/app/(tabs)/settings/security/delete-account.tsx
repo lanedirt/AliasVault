@@ -1,4 +1,4 @@
-import { StyleSheet, View, Alert, ScrollView } from 'react-native';
+import { StyleSheet, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,9 +35,6 @@ export default function DeleteAccountScreen(): React.ReactNode {
     button: {
       marginTop: 16,
     },
-    buttonDanger: {
-      backgroundColor: colors.errorBackground,
-    },
     container: {
       flex: 1,
       marginTop: 42,
@@ -57,16 +54,17 @@ export default function DeleteAccountScreen(): React.ReactNode {
       padding: 20,
     },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 16,
     },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
     },
     inputContainer: {
-      marginBottom: 20,
-      marginTop: 20,
+      marginTop: 10,
+    },
+    keyboardAvoidingView: {
+      flex: 1,
     },
     label: {
       color: colors.text,
@@ -236,64 +234,72 @@ export default function DeleteAccountScreen(): React.ReactNode {
   return (
     <>
       {isLoading && <LoadingOverlay status={loadingStatus ?? ''} />}
-      <ThemedView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.contentContainer}>
-          <View style={styles.header}>
-            <ThemedText style={styles.headerText}>
-              Deleting your account will immediately and permanently delete all of your data.
-            </ThemedText>
-          </View>
-          <UsernameDisplay />
-          <View style={styles.form}>
-            {step === 'username' ? (
-              <>
-                <ThemedText style={styles.warningText}>
-                  Warning: This action cannot be undone. All your data will be permanently deleted.
-                </ThemedText>
-                <WarningItem text="All encrypted vaults which includes all of your credentials will be permanently deleted" />
-                <WarningItem text="Your email aliases will be orphaned and cannot be claimed by other users" />
-                <WarningItem text="Your account cannot be recovered after deletion" />
-                <View style={styles.inputContainer}>
-                  <ThemedText style={styles.label}>Enter your username to continue</ThemedText>
-                  <ThemedTextInput
-                    value={confirmUsername}
-                    onChangeText={setConfirmUsername}
-                    placeholder="Enter username"
-                    autoCapitalize="none"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+      >
+        <ThemedView style={styles.container}>
+          <ScrollView
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.header}>
+              <ThemedText style={styles.headerText}>
+                Deleting your account will immediately and permanently delete all of your data.
+              </ThemedText>
+            </View>
+            <UsernameDisplay />
+            <View style={styles.form}>
+              {step === 'username' ? (
+                <>
+                  <ThemedText style={styles.warningText}>
+                    Warning: This action cannot be undone. All your data will be permanently deleted.
+                  </ThemedText>
+                  <WarningItem text="All encrypted vaults which includes all of your credentials will be permanently deleted" />
+                  <WarningItem text="Your email aliases will be orphaned and cannot be claimed by other users" />
+                  <WarningItem text="Your account cannot be recovered after deletion" />
+                  <View style={styles.inputContainer}>
+                    <ThemedText style={styles.label}>Enter your username to continue</ThemedText>
+                    <ThemedTextInput
+                      value={confirmUsername}
+                      onChangeText={setConfirmUsername}
+                      placeholder="Enter username"
+                      autoCapitalize="none"
+                    />
+                  </View>
+                  <ThemedButton
+                    title="Continue"
+                    onPress={handleUsernameSubmit}
+                    style={styles.button}
                   />
-                </View>
-                <ThemedButton
-                  title="Continue"
-                  onPress={handleUsernameSubmit}
-                  style={styles.button}
-                />
-              </>
-            ) : (
-              <>
-                <ThemedText style={styles.warningText}>
-                  Final warning: Enter your password to permanently delete your account.
-                </ThemedText>
-                <WarningItem text="Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently." />
-                <View style={styles.inputContainer}>
-                  <ThemedText style={styles.label}>Password</ThemedText>
-                  <ThemedTextInput
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Enter password"
+                </>
+              ) : (
+                <>
+                  <ThemedText style={styles.warningText}>
+                    Final warning: Enter your password to permanently delete your account.
+                  </ThemedText>
+                  <WarningItem text="Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently." />
+                  <View style={styles.inputContainer}>
+                    <ThemedText style={styles.label}>Password</ThemedText>
+                    <ThemedTextInput
+                      secureTextEntry
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="Enter password"
+                    />
+                  </View>
+                  <ThemedButton
+                    title="Delete Account"
+                    onPress={handleDeleteAccount}
+                    loading={isLoading}
+                    style={styles.button}
                   />
-                </View>
-                <ThemedButton
-                  title="Delete Account"
-                  onPress={handleDeleteAccount}
-                  loading={isLoading}
-                  style={[styles.button, styles.buttonDanger]}
-                />
-              </>
-            )}
-          </View>
-        </ScrollView>
-      </ThemedView>
+                </>
+              )}
+            </View>
+          </ScrollView>
+        </ThemedView>
+      </KeyboardAvoidingView>
     </>
   );
 }

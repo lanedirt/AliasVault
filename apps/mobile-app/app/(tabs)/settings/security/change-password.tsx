@@ -1,4 +1,4 @@
-import { StyleSheet, View, Alert, ScrollView } from 'react-native';
+import { StyleSheet, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -50,8 +50,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
       padding: 16,
     },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 16,
     },
     headerText: {
       color: colors.textMuted,
@@ -59,6 +58,9 @@ export default function ChangePasswordScreen(): React.ReactNode {
     },
     inputContainer: {
       marginBottom: 16,
+    },
+    keyboardAvoidingView: {
+      flex: 1,
     },
     label: {
       color: colors.text,
@@ -126,56 +128,62 @@ export default function ChangePasswordScreen(): React.ReactNode {
       {(isLoading) && (
         <LoadingOverlay status={syncStatus.length > 0 ? syncStatus : loadingStatus ?? ''} />
       )}
-      <ThemedView style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.contentContainer}
-        >
-          <View style={styles.header}>
-            <ThemedText style={styles.headerText}>
-            Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
-            </ThemedText>
-          </View>
-          <UsernameDisplay />
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Current Password</ThemedText>
-              <ThemedTextInput
-                secureTextEntry
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                placeholder="Enter current password"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+      >
+        <ThemedView style={styles.container}>
+          <ScrollView
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.header}>
+              <ThemedText style={styles.headerText}>
+              Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
+              </ThemedText>
+            </View>
+            <UsernameDisplay />
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <ThemedText style={styles.label}>Current Password</ThemedText>
+                <ThemedTextInput
+                  secureTextEntry
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  placeholder="Enter current password"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <ThemedText style={styles.label}>New Password</ThemedText>
+                <ThemedTextInput
+                  secureTextEntry
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="Enter new password"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <ThemedText style={styles.label}>Confirm New Password</ThemedText>
+                <ThemedTextInput
+                  secureTextEntry
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm new password"
+                />
+              </View>
+
+              <ThemedButton
+                title="Change Password"
+                onPress={handleSubmit}
+                loading={isLoading}
+                style={styles.button}
               />
             </View>
-
-            <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>New Password</ThemedText>
-              <ThemedTextInput
-                secureTextEntry
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="Enter new password"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Confirm New Password</ThemedText>
-              <ThemedTextInput
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Confirm new password"
-              />
-            </View>
-
-            <ThemedButton
-              title="Change Password"
-              onPress={handleSubmit}
-              loading={isLoading}
-              style={styles.button}
-            />
-          </View>
-        </ScrollView>
-      </ThemedView>
+          </ScrollView>
+        </ThemedView>
+      </KeyboardAvoidingView>
     </>
   );
 }

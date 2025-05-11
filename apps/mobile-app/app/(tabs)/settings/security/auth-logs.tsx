@@ -57,8 +57,7 @@ export default function AuthLogsScreen() : React.ReactNode {
       fontWeight: '600',
     },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 16,
     },
     headerText: {
       color: colors.textMuted,
@@ -66,9 +65,6 @@ export default function AuthLogsScreen() : React.ReactNode {
     },
     loadingContainer: {
       flex: 1,
-    },
-    logDetails: {
-      marginBottom: 8,
     },
     logHeader: {
       alignItems: 'center',
@@ -81,6 +77,7 @@ export default function AuthLogsScreen() : React.ReactNode {
       borderRadius: 10,
       marginBottom: 16,
       padding: 16,
+      paddingBottom: 8,
     },
     section: {
       marginTop: 20,
@@ -179,7 +176,7 @@ export default function AuthLogsScreen() : React.ReactNode {
               {item.isSuccess ? 'Success' : 'Failed'}
             </ThemedText>
           </View>
-          <View style={styles.logDetails}>
+          <View>
             <ThemedText style={styles.detailText}>Time: {formatDate(item.timestamp)}</ThemedText>
             <ThemedText style={styles.detailText}>Device: {item.userAgent}</ThemedText>
             <ThemedText style={styles.detailText}>IP Address: {item.ipAddress}</ThemedText>

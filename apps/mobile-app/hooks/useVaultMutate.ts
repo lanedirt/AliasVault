@@ -170,10 +170,8 @@ export function useVaultMutate() : {
     const newPasswordHash = await EncryptionUtility.deriveKeyFromPassword(newPasswordPlainText, newSalt, data.encryptionType, data.encryptionSettings);
     const newPasswordHashString = Buffer.from(newPasswordHash).toString('hex').toUpperCase();
 
-    // Set new password hash locally
+    // Store the new encryption key and derivation parameters locally
     try {
-
-      // Store the new encryption key and derivation parameters locally
       const newEncryptionKeyDerivationParams : EncryptionKeyDerivationParams = {
         encryptionType: data.encryptionType,
         encryptionSettings: data.encryptionSettings,

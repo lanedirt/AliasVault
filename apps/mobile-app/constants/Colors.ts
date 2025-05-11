@@ -28,6 +28,7 @@ export const Colors = {
     greenBackground: '#22c55e',
     skeleton: '#rgba(255,255,255,0.4)',
     red: '#ff0000',
+    black: '#000000',
   },
   dark: {
     white: '#ffffff',
@@ -54,6 +55,7 @@ export const Colors = {
     greenBackground: '#22c55e',
     skeleton: '#rgba(255,255,255,0.2)',
     red: '#ff0000',
+    black: '#000000',
   },
 } as const;
 

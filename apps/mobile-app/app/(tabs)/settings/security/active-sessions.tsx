@@ -57,8 +57,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       textAlign: 'center',
     },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 16
     },
     headerText: {
       color: colors.textMuted,
@@ -88,6 +87,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       borderRadius: 10,
       marginBottom: 16,
       padding: 16,
+      paddingBottom: 2,
     },
   });
 

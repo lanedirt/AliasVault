@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
+import { SettingsHeader } from '@/components/ui/SettingsHeader';
 
 /**
  * Security settings screen.
@@ -82,6 +83,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
         scrollIndicatorInsets={{ bottom: 40 }}
         style={styles.scrollView}
       >
+        <SettingsHeader title="Security" description="Manage your account and vault security settings." icon="shield-checkmark" />
         <View style={styles.section}>
           <TouchableOpacity
             style={styles.settingItem}
