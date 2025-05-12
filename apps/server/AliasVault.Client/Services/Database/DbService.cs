@@ -99,6 +99,15 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Stores / updates the vault revision number. Should be called after a successful vault update to the server.
+    /// </summary>
+    /// <param name="newRevisionNumber">New revision number.</param>
+    public void StoreVaultRevisionNumber(long newRevisionNumber)
+    {
+        _vaultRevisionNumber = newRevisionNumber;
+    }
+
+    /// <summary>
     /// Merges two or more databases into one.
     /// </summary>
     /// <returns>Bool which indicates if merging was successful.</returns>
@@ -184,7 +193,8 @@ public sealed class DbService : IDisposable
             // Update the current vault revision number to the highest revision number in the merged database(s).
             // This is important so the server knows that the local client has successfully merged the databases
             // and should overwrite the existing database on the server with the new merged database.
-            _vaultRevisionNumber = vaultsToMerge.Vaults.Max(v => v.CurrentRevisionNumber);
+            var newRevisionNumber = vaultsToMerge.Vaults.Max(v => v.CurrentRevisionNumber);
+            StoreVaultRevisionNumber(newRevisionNumber);
 
             _isSuccessfullyInitialized = true;
             await _settingsService.InitializeAsync(this);
@@ -580,7 +590,7 @@ public sealed class DbService : IDisposable
                 }
 
                 var vault = response.Vault!;
-                _vaultRevisionNumber = vault.CurrentRevisionNumber;
+                StoreVaultRevisionNumber(vault.CurrentRevisionNumber);
 
                 // Store username of the loaded vault in memory to send to server as sanity check when updating the vault later.
                 _authService.StoreUsername(vault.Username);

@@ -45,6 +45,16 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     private static readonly string[] InvalidCurrentPassword = ["The current password provided is invalid. Please try again."];
 
     /// <summary>
+    /// Error message for providing an invalid username.
+    /// </summary>
+    private static readonly string[] InvalidUsername = ["The currently logged on user is not the owner of the vault being saved. Please save your changes."];
+
+    /// <summary>
+    /// Error message for providing an older vault revision number.
+    /// </summary>
+    private static readonly string[] OlderVaultRevisionNumber = ["The local vault is not up-to-date. Please synchronize your vault by refreshing the page and try again."];
+
+    /// <summary>
     /// Default retention policy for vaults.
     /// </summary>
     private readonly RetentionPolicy _retentionPolicy = new()
@@ -211,7 +221,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // that is being used to update the vault (e.g. if working with multiple tabs).
         if (user.UserName != model.Username)
         {
-            return BadRequest("The currently logged on user is not the owner of the vault being saved. Please save your changes locally and log out and in again.");
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsername, 400));
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
@@ -220,7 +230,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Reject vaults with a version that is lower than the last vault version.
         if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
         {
-            return BadRequest("The uploaded vault version is lower than the last vault version. Please update and/or refresh your client.");
+            return BadRequest(ServerValidationErrorResponse.Create(OlderVaultRevisionNumber, 400));
         }
 
         // Calculate the new revision number for the vault.
@@ -299,7 +309,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // that is being used to update the vault (e.g. if working with multiple tabs).
         if (model.Username != user.UserName)
         {
-            return BadRequest("The currently logged on user is not the owner of the vault being saved. Please save your changes locally and log out and in again.");
+            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsername, 400));
         }
 
         // Validate the SRP session (actual password check).
@@ -311,6 +321,14 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
 
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.PasswordChange, AuthFailureReason.InvalidPassword);
             return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
+        }
+
+        // Check if the provided revision number is equal to the latest revision number.
+        // If not, then the client is trying to update an older vault which we don't allow to prevent data loss.
+        var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).First();
+        if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
+        {
+            return BadRequest(ServerValidationErrorResponse.Create(OlderVaultRevisionNumber, 400));
         }
 
         // Calculate the new revision number for the vault.
@@ -350,7 +368,8 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         await GetUserManager().UpdateAsync(user);
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
-        return Ok(new { Message = "Password changed successfully." });
+
+        return Ok(new VaultUpdateResponse { Status = VaultStatus.Ok, NewRevisionNumber = newRevisionNumber });
     }
 
     /// <summary>
