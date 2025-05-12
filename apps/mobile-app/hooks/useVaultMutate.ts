@@ -215,12 +215,18 @@ export function useVaultMutate() : {
 
     try {
       // Upload to server
-      await webApi.post<typeof passwordChangeVault, VaultPostResponse>('Vault/change-password', passwordChangeVault);
+      const response = await webApi.post<typeof passwordChangeVault, VaultPostResponse>('Vault/change-password', passwordChangeVault);
+
+      /**
+       * Determine if the server responds with vault revision number, as API < 0.17.0 did not.
+       * TODO: Remove this once we have a minimum required API version of 0.17.0.
+       */
+      const newRevisionNumber = response.newRevisionNumber ?? passwordChangeVault.currentRevisionNumber + 1;
 
       // If we get here, it means we have a valid connection to the server.
       authContext.setOfflineMode(false);
 
-      await NativeVaultManager.setCurrentVaultRevisionNumber(passwordChangeVault.currentRevisionNumber + 1);
+      await NativeVaultManager.setCurrentVaultRevisionNumber(newRevisionNumber);
       options.onSuccess?.();
     } catch (error) {
       console.error('Error during password change operation:', error);
