@@ -1,6 +1,7 @@
 ﻿@page "/welcome"
 @inherits MainBase
 @using AliasVault.Shared.Core.BrowserExtensions
+@using AliasVault.Shared.Core.MobileApps
 
 <div class="bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
     <div class="w-full mt-4 lg:mt-16 mx-auto lg:max-w-4xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
@@ -53,14 +54,14 @@
                                     </p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Settings</h4>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Security Settings</h4>
                                     <p class="text-gray-600 dark:text-gray-400">Two-factor authentication adds an extra layer of security to your account. It requires you to enter a code from your authenticator app or provide a recovery code before your encrypted vault can be accessed.</p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">Browser Extensions</h4>
-                                    <p class="text-gray-600 dark:text-gray-400 mb-4">Install the AliasVault browser extension to create aliases and autofill forms directly from your browser.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Browser Extensions and Mobile Apps</h4>
+                                    <p class="text-gray-600 dark:text-gray-400 mb-4">Install the AliasVault browser extension and mobile app to create aliases and autofill forms directly from your browser and smartphone.</p>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                                        @foreach (var extension in Constants.Extensions.Where(x => x.Key != BrowserType.Unknown).Select(x => x.Value))
+                                        @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions.Where(x => x.Key != BrowserType.Unknown).Select(x => x.Value))
                                         {
                                             @if (extension.IsAvailable)
                                             {
@@ -79,6 +80,29 @@
                                                     <img src="@extension.IconPath" alt="@extension.Name" class="w-8 h-8 mb-2 opacity-50">
                                                     <span class="text-xs text-gray-500 dark:text-gray-400">
                                                         Coming Soon
+                                                    </span>
+                                                </div>
+                                            }
+                                        }
+                                        @foreach (var app in Shared.Core.MobileApps.Constants.MobileApps)
+                                        {
+                                            @if (app.IsAvailable)
+                                            {
+                                                <a href="@app.DownloadUrl"
+                                                   target="_blank"
+                                                   class="flex flex-col items-center p-3 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                                                    <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mb-2">
+                                                    <span class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+                                                        Download for @app.Name
+                                                    </span>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <div class="flex flex-col items-center p-3 rounded-lg bg-gray-200 dark:bg-gray-600">
+                                                    <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mb-2 opacity-50">
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                        @app.Name (Soon)
                                                     </span>
                                                 </div>
                                             }

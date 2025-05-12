@@ -1,64 +1,31 @@
-@page "/settings/browser-extensions"
+@page "/settings/apps"
 @inherits MainBase
 @inject IJSRuntime JsRuntime
-@inject ILogger<BrowserExtensions> Logger
+@inject ILogger<Apps> Logger
 @using AliasVault.Shared.Core.BrowserExtensions
-<LayoutPageTitle>Install Browser Extension</LayoutPageTitle>
+@using AliasVault.Shared.Core.MobileApps
+
+<LayoutPageTitle>Extensions & Apps</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Install Browser Extension"
-    Description="Install browser extensions to automatically fill credentials on websites.">
+    Title="Extensions & Apps"
+    Description="Install browser extensions and mobile apps to access your vault from all your devices and automatically fill credentials on websites.">
 </PageHeader>
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="mb-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Available Extensions</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Browser Extensions</h3>
         <p class="text-gray-600 dark:text-gray-400">
-            The AliasVault browser extension allows you to:
+            The AliasVault browser extension allows you to autofill existing credentials on any website. It also allows you to generate new aliases during registration, access received emails on all of your aliases, and view your aliases and identities.
         </p>
-        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600 dark:text-gray-400">
-            <li>Autofill existing credentials on any website</li>
-            <li>Generate new aliases during registration</li>
-            <li>Access received emails on all of your aliases</li>
-            <li>View your aliases and identities</li>
-        </ul>
     </div>
 
-    @if (CurrentBrowser != BrowserType.Unknown)
-    {
-        <div class="mb-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recommended for Your Browser</h3>
-            <div class="p-4 border rounded-lg dark:border-amber-500/50 bg-amber-50 dark:bg-amber-800/30 border-amber-400">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div class="flex items-center">
-                        <img src="@CurrentBrowserExtension?.IconPath" alt="@CurrentBrowserExtension?.Name" class="w-8 h-8 mr-3">
-                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">@CurrentBrowserExtension?.Name</h4>
-                    </div>
-                    @if (CurrentBrowserExtension?.IsAvailable ?? false)
-                    {
-                        <a href="@CurrentBrowserExtension.DownloadUrl"
-                           target="_blank"
-                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for @CurrentBrowserExtension.Name
-                        </a>
-                    }
-                    else
-                    {
-                        <p class="text-sm text-blue-800 dark:text-blue-400">
-                            Support for @CurrentBrowserExtension?.Name is coming soon!
-                        </p>
-                    }
-                </div>
-            </div>
-        </div>
-    }
-
-    <div class="mb-4">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Other Browsers</h3>
+    <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Browsers</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach (var extension in Constants.Extensions
-                .Where(x => x.Key != BrowserType.Unknown && x.Key != CurrentBrowser)
+            @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions
+                .Where(x => x.Key != BrowserType.Unknown)
                 .Select(x => x.Value))
             {
                 <div class="p-4 border rounded-lg dark:border-gray-700">
@@ -84,6 +51,39 @@
             }
         </div>
     </div>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Mobile Apps</h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            The AliasVault mobile app allows you to access your aliases and identities on the go, view and manage received emails, and generate new aliases anytime. Your data is fully protected with on-device biometric authentication.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @foreach (var app in Shared.Core.MobileApps.Constants.MobileApps)
+        {
+            <div class="p-4 border rounded-lg dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mr-3">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">@app.Name</h4>
+                </div>
+                @if (app.IsAvailable)
+                {
+                    <a href="@app.DownloadUrl"
+                       target="_blank"
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
+                        Download for @app.Name
+                    </a>
+                }
+                else
+                {
+                    <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
+                        Coming soon
+                    </span>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -101,12 +101,12 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Install Browser Extension" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Extensions & Apps" });
 
         try
         {
             CurrentBrowser = await DetermineBrowser();
-            CurrentBrowserExtension = Constants.Extensions[CurrentBrowser];
+            CurrentBrowserExtension = Shared.Core.BrowserExtensions.Constants.Extensions[CurrentBrowser];
         }
         catch (Exception ex)
         {
