@@ -10,7 +10,7 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
-import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
+import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
 
 /**
  * Unlock page
