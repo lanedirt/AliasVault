@@ -1,4 +1,4 @@
-import { browser } from 'wxt/browser';
+import { browser } from '#imports';
 import { BoolResponse } from '@/utils/types/messaging/BoolResponse';
 
 /**

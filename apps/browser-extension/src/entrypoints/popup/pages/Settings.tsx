@@ -4,7 +4,7 @@ import { sendMessage } from 'webext-bridge/popup';
 import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY } from '@/entrypoints/contentScript/Popup';
 import { AppInfo } from '@/utils/AppInfo';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
-import { browser } from 'wxt/browser';
+import { browser } from "#imports";
 
 /**
  * Popup settings type.
