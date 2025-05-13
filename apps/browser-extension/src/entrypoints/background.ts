@@ -3,9 +3,8 @@ import { onMessage, sendMessage } from "webext-bridge/background";
 import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from '@/entrypoints/background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
-import { storage } from '#imports';
+import { storage, browser } from '#imports';
 import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/utils/Constants';
-import { browser } from '#imports';
 
 export default defineBackground({
   /**
@@ -33,7 +32,7 @@ export default defineBackground({
     if (isContextMenuEnabled) {
       setupContextMenus();
     }
-
+    
     // Listen for custom commands
     try {
       browser.commands.onCommand.addListener(async (command) => {
