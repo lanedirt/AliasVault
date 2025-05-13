@@ -169,6 +169,25 @@ const Settings: React.FC = () => {
     }));
   };
 
+  /**
+   * Open keyboard shortcuts configuration page.
+   */
+  const openKeyboardShortcuts = async (): Promise<void> => {
+    // Detect browser type using user agent
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isFirefox = userAgent.includes('firefox');
+    const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome');
+
+    if (isFirefox) {
+      await browser.tabs.create({ url: 'about:addons' });
+    } else if (isSafari) {
+      await browser.tabs.create({ url: 'safari-extension://shortcuts' });
+    } else {
+      // Chrome and other Chromium-based browsers
+      await browser.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -222,7 +241,7 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Site-Specific Settings Section */}
-      {settings.isGloballyEnabled ? (
+      {settings.isGloballyEnabled && (
         <section>
           <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Site-Specific Settings</h3>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -264,7 +283,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
         </section>
-      ) : (<></>)}
+      )}
 
       {/* Appearance Settings Section */}
       <section>
@@ -312,6 +331,28 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Keyboard Shortcuts Section */}
+      {import.meta.env.CHROME && (
+        <section>
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Keyboard Shortcuts</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Configure keyboard shortcuts</p>
+                </div>
+                <button
+                  onClick={openKeyboardShortcuts}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                >
+                  Configure
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="text-center text-gray-400 dark:text-gray-600">
         Version: {AppInfo.VERSION}
