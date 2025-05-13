@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------
 // <copyright file="BooleanConverter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// Licensed under the AGPLv3 license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ public class BooleanConverter : DefaultTypeConverter
         if (string.IsNullOrEmpty(text)) {
             return false;
         }
-        
+
         var trimmedText = text.ToLowerInvariant().Trim();
 
         switch (trimmedText) {
@@ -41,4 +41,4 @@ public class BooleanConverter : DefaultTypeConverter
                 return false;
         }
     }
-} 
+}
