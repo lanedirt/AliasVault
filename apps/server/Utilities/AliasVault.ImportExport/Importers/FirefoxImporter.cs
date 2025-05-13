@@ -1,7 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="FirefoxImporter.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// Licensed under the AGPLv3 license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ public static class FirefoxImporter
             // Extract service name from URL, e.g. https://example.com/path -> example.com.
             var uri = new Uri(record.Url);
             var serviceName = uri.Host.StartsWith("www.") ? uri.Host[4..] : uri.Host;
-            
+
             var credential = new ImportedCredential
             {
                 ServiceName = serviceName,
