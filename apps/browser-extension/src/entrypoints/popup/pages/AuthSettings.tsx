@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppInfo } from '@/utils/AppInfo';
 import { storage } from '#imports';
-import { GLOBAL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
+import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/entrypoints/contentScript/Popup';
 
 type ApiOption = {
   label: string;
@@ -29,7 +29,7 @@ const AuthSettings: React.FC = () => {
     const loadStoredSettings = async () : Promise<void> => {
       const apiUrl = await storage.getItem('local:apiUrl') as string;
       const clientUrl = await storage.getItem('local:clientUrl') as string;
-      const globallyEnabled = await storage.getItem(GLOBAL_POPUP_ENABLED_KEY) !== false; // Default to true if not set
+      const globallyEnabled = await storage.getItem(GLOBAL_AUTOFILL_POPUP_ENABLED_KEY) !== false; // Default to true if not set
       const dismissUntil = await storage.getItem(VAULT_LOCKED_DISMISS_UNTIL_KEY) as number;
 
       if (dismissUntil) {
@@ -91,7 +91,7 @@ const AuthSettings: React.FC = () => {
   const toggleGlobalPopup = async () : Promise<void> => {
     const newGloballyEnabled = !isGloballyEnabled;
 
-    await storage.setItem(GLOBAL_POPUP_ENABLED_KEY, newGloballyEnabled);
+    await storage.setItem(GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, newGloballyEnabled);
 
     if (newGloballyEnabled) {
       // Reset all disabled sites when enabling globally
