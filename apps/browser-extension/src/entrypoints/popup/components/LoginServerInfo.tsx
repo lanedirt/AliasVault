@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 import { AppInfo } from '@/utils/AppInfo';
 
 /**

@@ -129,14 +129,17 @@ public class BrowserExtensionPlaywrightTest : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Find the solution root directory by walking up from the current assembly location.
+    /// Find the repository root directory by walking up from the current assembly location.
     /// </summary>
     /// <param name="startPath">The starting directory.</param>
     /// <returns>The solution root directory.</returns>
     private static string FindSolutionRoot(string startPath)
     {
         var directory = new DirectoryInfo(startPath);
-        while (directory != null && !File.Exists(Path.Combine(directory.FullName, "AliasVault.sln")))
+
+        // This method expects the `install.sh` file to be in the root. If that file ever gets moved to a different
+        // location, update this method accordingly.
+        while (directory != null && !File.Exists(Path.Combine(directory.FullName, "install.sh")))
         {
             directory = directory.Parent;
         }
@@ -159,8 +162,8 @@ public class BrowserExtensionPlaywrightTest : ClientPlaywrightTest
         var solutionDir = FindSolutionRoot(currentDir);
 
         // Construct absolute path to extension directory
-        var extensionDir = Path.GetFullPath(Path.Combine(solutionDir, "browser-extension"));
-        var distDir = Path.GetFullPath(Path.Combine(extensionDir, "dist", "chrome-mv3"));
+        var extensionDir = Path.GetFullPath(Path.Combine(solutionDir, "apps/browser-extension"));
+        var distDir = Path.GetFullPath(Path.Combine(extensionDir, "dist", "chrome-mv3-dev"));
         var manifestPath = Path.Combine(distDir, "manifest.json");
 
         // Verify the dist directory exists and contains required files

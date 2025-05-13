@@ -2,7 +2,7 @@
 layout: default
 title: Microsoft Edge
 parent: Browser Extensions
-nav_order: 1
+nav_order: 3
 ---
 
 # Microsoft Edge Extension

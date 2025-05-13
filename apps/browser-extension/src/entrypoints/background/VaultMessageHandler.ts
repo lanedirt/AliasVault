@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { storage } from 'wxt/storage';
+import { storage } from 'wxt/utils/storage';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { WebApiService } from '@/utils/WebApiService';

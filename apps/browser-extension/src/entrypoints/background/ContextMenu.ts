@@ -1,5 +1,5 @@
 import { sendMessage } from 'webext-bridge/background';
-import { browser } from 'wxt/browser';
+import { browser } from '#imports';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
 
 /**

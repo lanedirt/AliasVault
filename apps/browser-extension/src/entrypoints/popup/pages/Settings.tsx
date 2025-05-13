@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { storage } from "wxt/storage";
+import { storage } from "#imports";
 import { browser } from 'wxt/browser';
 import { DISABLED_SITES_KEY, GLOBAL_POPUP_ENABLED_KEY } from '@/entrypoints/contentScript/Popup';
 import { AppInfo } from '@/utils/AppInfo';

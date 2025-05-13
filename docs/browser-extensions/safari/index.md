@@ -2,7 +2,7 @@
 layout: default
 title: Safari
 parent: Browser Extensions
-nav_order: 1
+nav_order: 4
 ---
 
 # Safari Extension

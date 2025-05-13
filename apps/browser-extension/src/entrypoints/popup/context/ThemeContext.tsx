@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 
 /**
  * Theme type.

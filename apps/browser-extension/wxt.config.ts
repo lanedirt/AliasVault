@@ -23,7 +23,6 @@ export default defineConfig({
       "<all_urls>"
     ],
   },
-  extensionApi: 'webextension-polyfill',
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
   outDir: 'dist',
@@ -44,6 +43,6 @@ export default defineConfig({
     ],
   }),
   zip: {
-    includeSources: ['dictionaries', 'README.md'],
+    includeSources: ['README.md'],
   },
 });
