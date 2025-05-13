@@ -64,11 +64,12 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               shell: powershell
               run: |
+                  $scanner = "${{ github.workspace }}\.sonar\scanner\dotnet-sonarscanner"
                   if ('${{ github.event_name }}' -eq 'pull_request_target') {
-                      .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html"
+                      & $scanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html"
                   } else {
-                      .\.sonar\scanner\dotnet-sonarscanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html"
+                      & $scanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html"
                   }
                   dotnet build
                   dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover --filter 'FullyQualifiedName!~AliasVault.E2ETests'
-                  .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+                  & $scanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
