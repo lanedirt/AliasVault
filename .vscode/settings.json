@@ -1,0 +1,9 @@
+{
+    "typescript.tsc.autoDetect": "off",
+    "npm.autoDetect": "off",
+    "grunt.autoDetect": "off",
+    "gulp.autoDetect": "off",
+    "jake.autoDetect": "off",
+    "task.autoDetect": "off",
+    "dotnet.autoDetect": "off"
+  }

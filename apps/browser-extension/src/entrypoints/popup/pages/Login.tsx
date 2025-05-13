@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';

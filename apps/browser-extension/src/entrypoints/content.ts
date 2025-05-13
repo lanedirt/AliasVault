@@ -4,8 +4,8 @@ import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from '
 import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from './contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
 import { BoolResponse as messageBoolResponse } from '../utils/types/messaging/BoolResponse';
-import { defineContentScript } from 'wxt/sandbox';
-import { createShadowRootUi } from 'wxt/client';
+import { defineContentScript } from '#imports';
+import { createShadowRootUi } from '#imports';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

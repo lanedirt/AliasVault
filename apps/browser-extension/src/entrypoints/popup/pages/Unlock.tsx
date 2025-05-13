@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Buffer } from 'buffer';
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';

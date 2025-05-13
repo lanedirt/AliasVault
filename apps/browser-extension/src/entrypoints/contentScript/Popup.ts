@@ -1,4 +1,4 @@
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 import { sendMessage } from 'webext-bridge/content-script';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 import { filterCredentials } from '@/entrypoints/contentScript/Filter';

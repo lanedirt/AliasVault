@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import { defineBackground } from 'wxt/sandbox';
+import { defineBackground } from '#imports';
 import { onMessage } from "webext-bridge/background";
 import { setupContextMenus, handleContextMenuClick } from './background/ContextMenu';
 import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';

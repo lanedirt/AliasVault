@@ -2,7 +2,7 @@
 layout: default
 title: Google Chrome
 parent: Browser Extensions
-nav_order: 1
+nav_order: 2
 ---
 
 # Google Chrome Extension

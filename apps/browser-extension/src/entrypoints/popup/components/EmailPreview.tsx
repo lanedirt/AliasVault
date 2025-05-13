@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { storage } from 'wxt/storage';
+import { storage } from '#imports';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
