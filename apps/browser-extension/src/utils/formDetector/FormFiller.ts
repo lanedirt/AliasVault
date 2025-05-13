@@ -1,7 +1,7 @@
 import { Credential } from "@/utils/types/Credential";
 import { FormFields } from "@/utils/formDetector/types/FormFields";
 import { CombinedDateOptionPatterns, CombinedGenderOptionPatterns } from "@/utils/formDetector/FieldPatterns";
-import { Gender } from "@/utils/shared/identity-generator";
+import { Gender, IdentityHelperUtils } from "@/utils/shared/identity-generator";
 /**
  * Class to fill the fields of a form with the given credential.
  */
@@ -118,7 +118,7 @@ export class FormFiller {
    */
   private fillBirthdateFields(credential: Credential): void {
     // TODO: when birth date is made optional in datamodel, we can remove this mindate check here.
-    if (!credential.Alias.BirthDate || credential.Alias.BirthDate.startsWith('0001-01-01')) {
+    if (!IdentityHelperUtils.isValidBirthDate(credential.Alias.BirthDate)) {
       return;
     }
 

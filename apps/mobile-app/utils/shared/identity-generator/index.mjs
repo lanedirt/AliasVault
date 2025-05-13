@@ -1670,6 +1670,9 @@ var IdentityHelperUtils = class {
     if (!input || input.trim() === "") {
       return false;
     }
+    if (input.startsWith("0001-01-01")) {
+      return false;
+    }
     const date = new Date(input);
     if (isNaN(date.getTime())) {
       return false;
