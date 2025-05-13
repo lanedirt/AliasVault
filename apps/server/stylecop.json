@@ -5,7 +5,7 @@
             "xmlHeader": true,
             "copyrightText": "Copyright (c) {companyName}. All rights reserved.\nLicensed under the {licenseName} license. See {licenseFile} file in the project root for full license information.",
 			"variables": {
-				"licenseName": "MIT",
+				"licenseName": "AGPLv3",
 				"licenseFile": "LICENSE.md"
 			},
             "headerDecoration": "-----------------------------------------------------------------------"
