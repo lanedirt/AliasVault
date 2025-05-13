@@ -1,21 +1,19 @@
-import { browser } from "wxt/browser";
+import { browser } from "#imports";
 import { defineBackground } from '#imports';
 import { onMessage } from "webext-bridge/background";
-import { setupContextMenus, handleContextMenuClick } from './background/ContextMenu';
-import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from './background/VaultMessageHandler';
-import { handleOpenPopup, handlePopupWithCredential } from './background/PopupMessageHandler';
+import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
+import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from '@/entrypoints/background/VaultMessageHandler';
+import { handleOpenPopup, handlePopupWithCredential } from '@/entrypoints/background/PopupMessageHandler';
+
+type ToggleContextMenuData = {
+  enabled: boolean;
+};
 
 export default defineBackground({
   /**
    * This is the main entry point for the background script.
    */
   main() {
-    // Set up context menus
-    setupContextMenus();
-    browser.contextMenus.onClicked.addListener((info: browser.contextMenus.OnClickData, tab?: browser.tabs.Tab) =>
-      handleContextMenuClick(info, tab)
-    );
-
     // Listen for messages using webext-bridge
     onMessage('CHECK_AUTH_STATUS', () => handleCheckAuthStatus());
     onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
@@ -30,5 +28,12 @@ export default defineBackground({
     onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
     onMessage('OPEN_POPUP', () => handleOpenPopup());
     onMessage('OPEN_POPUP_WITH_CREDENTIAL', ({ data }) => handlePopupWithCredential(data));
+    onMessage('TOGGLE_CONTEXT_MENU', ({ data }: { data: ToggleContextMenuData }) => {
+      if (data.enabled) {
+        setupContextMenus();
+      } else {
+        browser.contextMenus.removeAll();
+      }
+    });
   }
 });

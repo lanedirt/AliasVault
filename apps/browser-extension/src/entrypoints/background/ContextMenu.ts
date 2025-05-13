@@ -1,41 +1,53 @@
 import { sendMessage } from 'webext-bridge/background';
-import { browser } from '#imports';
+import { browser } from "#imports";
+import { storage } from '#imports';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
+import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/entrypoints/contentScript/Popup';
 
 /**
  * Setup the context menus.
  */
-export function setupContextMenus() : void {
-  // Create root menu
-  browser.contextMenus.create({
-    id: "aliasvault-root",
-    title: "AliasVault",
-    contexts: ["all"]
-  });
+export function setupContextMenus() : Promise<void> {
+  return (async () : Promise<void> => {
+    // Set up context menus
+    const isContextMenuEnabled = await storage.getItem(GLOBAL_CONTEXT_MENU_ENABLED_KEY);
+    if (isContextMenuEnabled !== false) {
+      // Create root menu
+      browser.contextMenus.create({
+        id: "aliasvault-root",
+        title: "AliasVault",
+        contexts: ["all"]
+      });
 
-  // Add fill option first (only for editable fields)
-  browser.contextMenus.create({
-    id: "aliasvault-activate-form",
-    parentId: "aliasvault-root",
-    title: "Autofill with AliasVault",
-    contexts: ["editable"],
-  });
+      // Add fill option first (only for editable fields)
+      browser.contextMenus.create({
+        id: "aliasvault-activate-form",
+        parentId: "aliasvault-root",
+        title: "Autofill with AliasVault",
+        contexts: ["editable"],
+      });
 
-  // Add separator (only for editable fields)
-  browser.contextMenus.create({
-    id: "aliasvault-separator",
-    parentId: "aliasvault-root",
-    type: "separator",
-    contexts: ["editable"],
-  });
+      // Add separator (only for editable fields)
+      browser.contextMenus.create({
+        id: "aliasvault-separator",
+        parentId: "aliasvault-root",
+        type: "separator",
+        contexts: ["editable"],
+      });
 
-  // Add password generator option
-  browser.contextMenus.create({
-    id: "aliasvault-generate-password",
-    parentId: "aliasvault-root",
-    title: "Generate random password (copy to clipboard)",
-    contexts: ["all"]
-  });
+      // Add password generator option
+      browser.contextMenus.create({
+        id: "aliasvault-generate-password",
+        parentId: "aliasvault-root",
+        title: "Generate random password (copy to clipboard)",
+        contexts: ["all"]
+      });
+
+      browser.contextMenus.onClicked.addListener((info: browser.contextMenus.OnClickData, tab?: browser.tabs.Tab) =>
+        handleContextMenuClick(info, tab)
+      );
+    }
+  })();
 }
 
 /**
