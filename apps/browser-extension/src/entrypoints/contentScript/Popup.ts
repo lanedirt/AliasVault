@@ -345,13 +345,13 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Dismiss for 1 hour (current site)
+        Hide for 1 hour (current site)
       </button>
       <button class="av-context-menu-item" data-action="permanent">
         <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Dismiss permanently (current site)
+        Hide permanently (current site)
       </button>
     `;
 
