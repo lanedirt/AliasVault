@@ -42,11 +42,6 @@ export default [
             "curly": ["error", "all"],
             "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
             "@typescript-eslint/await-thenable": "error",
-            "@typescript-eslint/prefer-nullish-coalescing": ["error", {
-                "ignoreTernaryTests": false,
-                "ignoreConditionalTests": false,
-                "ignoreMixedLogicalExpressions": false
-            }],
             "react/react-in-jsx-scope": "off",
             "react/no-unused-prop-types": "error",
             "@typescript-eslint/explicit-module-boundary-types": "off",
