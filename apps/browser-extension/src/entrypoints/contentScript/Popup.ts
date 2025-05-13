@@ -14,8 +14,10 @@ import { Credential } from '@/utils/types/Credential';
 
 // TODO: store generic setting constants somewhere else.
 export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
-export const GLOBAL_POPUP_ENABLED_KEY = 'local:aliasvault_global_popup_enabled';
+export const GLOBAL_AUTOFILL_POPUP_ENABLED_KEY = 'local:aliasvault_global_autofill_popup_enabled';
+export const GLOBAL_CONTEXT_MENU_ENABLED_KEY = 'local:aliasvault_global_context_menu_enabled';
 export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
+export const TEMPORARY_DISABLED_SITES_KEY = 'local:aliasvault_temporary_disabled_sites';
 
 // TODO: store these settings in the actual vault when updating the datamodel for roadmap v1.0.
 export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
@@ -332,23 +334,77 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   const closeButton = document.createElement('button');
   closeButton.className = 'av-button av-button-close';
   closeButton.innerHTML = `
-  <svg class="av-icon" viewBox="0 0 24 24">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-`;
+    <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
 
   /**
    * Handle close button click
    */
-  const handleCloseClick = async (e: Event) : Promise<void> => {
-    e.preventDefault();
+  const handleCloseClick = (e: Event): void => {
     e.stopPropagation();
-    e.stopImmediatePropagation();
-    await disableAutoShowPopup();
-    removeExistingPopup(rootContainer);
+    const rect = closeButton.getBoundingClientRect();
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'av-context-menu';
+    contextMenu.style.position = 'fixed';
+    contextMenu.style.left = `${rect.left}px`;
+    contextMenu.style.top = `${rect.bottom + 4}px`;
+    contextMenu.innerHTML = `
+      <button class="av-context-menu-item" data-action="temporary">
+        <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Dismiss for 1 hour (current site)
+      </button>
+      <button class="av-context-menu-item" data-action="permanent">
+        <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Dismiss permanently (current site)
+      </button>
+    `;
+
+    // Remove any existing context menu
+    const existingMenu = document.querySelector('.av-context-menu');
+    if (existingMenu) {
+      existingMenu.remove();
+    }
+
+    // Add the new context menu
+    popup.appendChild(contextMenu);
+
+    /**
+     * Handle clicks on context menu items
+     * @param e - The click event
+     */
+    const handleContextMenuClick = (e: MouseEvent): void => {
+      const target = e.target as HTMLElement;
+      const menuItem = target.closest('.av-context-menu-item') as HTMLElement;
+      if (!menuItem) {
+        // Clicked outside the menu, close everything
+        contextMenu.remove();
+        removeExistingPopup(rootContainer);
+        document.removeEventListener('click', handleContextMenuClick);
+        return;
+      }
+
+      const action = menuItem.dataset.action;
+      if (action === 'temporary') {
+        disableAutoShowPopup(true);
+      } else if (action === 'permanent') {
+        disableAutoShowPopup(false);
+      }
+      contextMenu.remove();
+      removeExistingPopup(rootContainer);
+      document.removeEventListener('click', handleContextMenuClick);
+    };
+
+    // Add click listener to handle menu item clicks
+    contextMenu.addEventListener('click', handleContextMenuClick);
   };
 
+  // Add click handlers
   addReliableClickHandler(closeButton, handleCloseClick);
 
   actionContainer.appendChild(searchInput);
@@ -621,7 +677,8 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
  */
 export async function isAutoShowPopupEnabled(): Promise<boolean> {
   const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
-  const globalPopupEnabled = await storage.getItem(GLOBAL_POPUP_ENABLED_KEY) ?? true;
+  const temporaryDisabledSites = await storage.getItem(TEMPORARY_DISABLED_SITES_KEY) as Record<string, number> ?? {};
+  const globalPopupEnabled = await storage.getItem(GLOBAL_AUTOFILL_POPUP_ENABLED_KEY) ?? true;
 
   const currentHostname = window.location.hostname;
 
@@ -631,7 +688,14 @@ export async function isAutoShowPopupEnabled(): Promise<boolean> {
   }
 
   if (disabledSites.includes(currentHostname)) {
-    // Popup is disabled for current site.
+    // Popup is permanently disabled for current site.
+    return false;
+  }
+
+  // Check temporary disable
+  const temporaryDisabledUntil = temporaryDisabledSites[currentHostname];
+  if (temporaryDisabledUntil && Date.now() < temporaryDisabledUntil) {
+    // Popup is temporarily disabled for current site.
     return false;
   }
 
@@ -648,11 +712,21 @@ export async function isAutoShowPopupEnabled(): Promise<boolean> {
 /**
  * Disable auto-popup for current site
  */
-export async function disableAutoShowPopup(): Promise<void> {
-  const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
-  if (!disabledSites.includes(window.location.hostname)) {
-    disabledSites.push(window.location.hostname);
-    await storage.setItem(DISABLED_SITES_KEY, disabledSites);
+export async function disableAutoShowPopup(temporary: boolean = false): Promise<void> {
+  const currentHostname = window.location.hostname;
+
+  if (temporary) {
+    // Add to temporary disabled sites with 1 hour expiry
+    const temporaryDisabledSites = await storage.getItem(TEMPORARY_DISABLED_SITES_KEY) as Record<string, number> ?? {};
+    temporaryDisabledSites[currentHostname] = Date.now() + (60 * 60 * 1000); // 1 hour from now
+    await storage.setItem(TEMPORARY_DISABLED_SITES_KEY, temporaryDisabledSites);
+  } else {
+    // Add to permanently disabled sites
+    const disabledSites = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
+    if (!disabledSites.includes(currentHostname)) {
+      disabledSites.push(currentHostname);
+      await storage.setItem(DISABLED_SITES_KEY, disabledSites);
+    }
   }
 }
 

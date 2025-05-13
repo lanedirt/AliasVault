@@ -1,9 +1,9 @@
-import './contentScript/style.css';
-import { FormDetector } from '../utils/formDetector/FormDetector';
-import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from './contentScript/Popup';
-import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from './contentScript/Form';
+import '@/entrypoints/contentScript/style.css';
+import { FormDetector } from '@/utils/formDetector/FormDetector';
+import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from '@/entrypoints/contentScript/Popup';
+import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/entrypoints/contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
-import { BoolResponse as messageBoolResponse } from '../utils/types/messaging/BoolResponse';
+import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { defineContentScript } from '#imports';
 import { createShadowRootUi } from '#imports';
 
@@ -54,11 +54,14 @@ export default defineContentScript({
               return;
             }
 
-            injectIcon(inputElement, container);
+            // Only inject icon and show popup if autofill popup is enabled
+            if (await isAutoShowPopupEnabled()) {
+              injectIcon(inputElement, container);
 
-            // Only show popup if its enabled and debounce time has passed.
-            if (await isAutoShowPopupEnabled() && popupDebounceTimeHasPassed()) {
-              openAutofillPopup(inputElement, container);
+              // Only show popup if debounce time has passed
+              if (popupDebounceTimeHasPassed()) {
+                openAutofillPopup(inputElement, container);
+              }
             }
           }
         };
@@ -96,6 +99,7 @@ export default defineContentScript({
             return { success: false, error: 'No form found' };
           }
 
+          // This is an explicit call by the user to open the popup, so we don't check if it's enabled.
           injectIcon(inputElement, container);
           openAutofillPopup(inputElement, container);
           return { success: true };
