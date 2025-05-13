@@ -22,13 +22,14 @@ export default defineContentScript({
       return;
     }
 
+    // Wait for 750ms to give the host page time to load and to increase the chance that the body is available and ready.
+    await new Promise(resolve => setTimeout(resolve, 750));
+
     // Create a shadow root UI for isolation
     const ui = await createShadowRootUi(ctx, {
       name: 'aliasvault-ui',
-      position: 'overlay',
-      alignment: 'top-left',
-      zIndex: 2147483646,
-      anchor: 'html',
+      position: 'inline',
+      anchor: 'body',
       /**
        * Handle mount.
        */
@@ -69,6 +70,12 @@ export default defineContentScript({
         // Listen for input field focus in the main document
         document.addEventListener('focusin', handleFocusIn);
 
+        // Check if currently something is focused, if so, apply check for that element
+        const currentFocusedElement = document.activeElement;
+        if (currentFocusedElement) {
+          showPopupForElement(currentFocusedElement);
+        }
+
         // Listen for popstate events (back/forward navigation)
         window.addEventListener('popstate', () => {
           if (ctx.isInvalid) {
@@ -88,22 +95,31 @@ export default defineContentScript({
           }
 
           const target = document.getElementById(elementIdentifier) ?? document.getElementsByName(elementIdentifier)[0];
-          const { isValid, inputElement } = validateInputField(target);
+
+          showPopupForElement(target);
+
+          return { success: true };
+        });
+
+        /**
+         * Show popup for element.
+         */
+        function showPopupForElement(element: Element) : void {
+          const { isValid, inputElement } = validateInputField(element);
 
           if (!isValid || !inputElement) {
-            return { success: false, error: 'Target element is not a supported input field' };
+            return;
           }
 
           const formDetector = new FormDetector(document, inputElement);
           if (!formDetector.containsLoginForm()) {
-            return { success: false, error: 'No form found' };
+            return;
           }
 
           // This is an explicit call by the user to open the popup, so we don't check if it's enabled.
           injectIcon(inputElement, container);
           openAutofillPopup(inputElement, container);
-          return { success: true };
-        });
+        }
       },
     });
 

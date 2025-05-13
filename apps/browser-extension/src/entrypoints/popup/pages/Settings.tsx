@@ -169,6 +169,25 @@ const Settings: React.FC = () => {
     }));
   };
 
+  /**
+   * Open keyboard shortcuts configuration page.
+   */
+  const openKeyboardShortcuts = async (): Promise<void> => {
+    // Detect browser type using user agent
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isFirefox = userAgent.includes('firefox');
+    const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome');
+
+    if (isFirefox) {
+      await browser.tabs.create({ url: 'about:addons' });
+    } else if (isSafari) {
+      await browser.tabs.create({ url: 'safari-extension://shortcuts' });
+    } else {
+      // Chrome and other Chromium-based browsers
+      await browser.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -222,45 +241,49 @@ const Settings: React.FC = () => {
       </section>
 
       {/* Site-Specific Settings Section */}
-      <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Site-Specific Settings</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Autofill popup on: {settings.currentUrl}</p>
-                <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isEnabled ? 'Enabled for this site' : 'Disabled for this site'}
-                </p>
-                {!settings.isEnabled && settings.temporaryDisabledUrls[settings.currentUrl] && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Temporarily disabled until {new Date(settings.temporaryDisabledUrls[settings.currentUrl]).toLocaleTimeString()}
+      {settings.isGloballyEnabled && (
+        <section>
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Site-Specific Settings</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Autofill popup on: {settings.currentUrl}</p>
+                  <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {settings.isEnabled ? 'Enabled for this site' : 'Disabled for this site'}
                   </p>
+                  {!settings.isEnabled && settings.temporaryDisabledUrls[settings.currentUrl] && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Temporarily disabled until {new Date(settings.temporaryDisabledUrls[settings.currentUrl]).toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
+                {settings.isGloballyEnabled && (
+                  <button
+                    onClick={toggleCurrentSite}
+                    className={`px-4 py-2 rounded-md transition-colors ${
+                      settings.isEnabled
+                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                        : 'bg-red-500 hover:bg-red-600 text-white'
+                    }`}
+                  >
+                    {settings.isEnabled ? 'Enabled' : 'Disabled'}
+                  </button>
                 )}
               </div>
-              <button
-                onClick={toggleCurrentSite}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  settings.isEnabled
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              >
-                {settings.isEnabled ? 'Enabled' : 'Disabled'}
-              </button>
-            </div>
 
-            <div className="mt-4">
-              <button
-                onClick={resetSettings}
-                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors text-sm"
-              >
-                Reset all site-specific settings
-              </button>
+              <div className="mt-4">
+                <button
+                  onClick={resetSettings}
+                  className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors text-sm"
+                >
+                  Reset all site-specific settings
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Appearance Settings Section */}
       <section>
@@ -308,6 +331,28 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Keyboard Shortcuts Section */}
+      {import.meta.env.CHROME && (
+        <section>
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Keyboard Shortcuts</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Configure keyboard shortcuts</p>
+                </div>
+                <button
+                  onClick={openKeyboardShortcuts}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                >
+                  Configure
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="text-center text-gray-400 dark:text-gray-600">
         Version: {AppInfo.VERSION}

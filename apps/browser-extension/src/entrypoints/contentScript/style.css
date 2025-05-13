@@ -196,6 +196,7 @@ body {
   justify-content: center;
   gap: 4px;
   transition: background-color 0.2s ease;
+  min-width: 0px;
 }
 
 .av-button:hover {
@@ -231,6 +232,7 @@ body {
   outline: none;
   line-height: 1;
   text-align: center;
+  min-width: 0px;
 }
 
 .av-search-input::placeholder {

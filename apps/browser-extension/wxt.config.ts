@@ -22,6 +22,11 @@ export default defineConfig({
     host_permissions: [
       "<all_urls>"
     ],
+    commands: {
+      "show-autofill-popup": {
+        description: "Show the autofill popup (while focusing an input field)"
+      }
+    }
   },
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',

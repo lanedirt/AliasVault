@@ -1,10 +1,11 @@
 import { defineBackground } from '#imports';
-import { onMessage } from "webext-bridge/background";
+import { onMessage, sendMessage } from "webext-bridge/background";
 import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleCheckAuthStatus, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetVault, handleStoreVault, handleSyncVault } from '@/entrypoints/background/VaultMessageHandler';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
-import { storage } from '#imports';
+import { storage, browser } from '#imports';
 import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/utils/Constants';
+
 export default defineBackground({
   /**
    * This is the main entry point for the background script.
@@ -31,5 +32,42 @@ export default defineBackground({
     if (isContextMenuEnabled) {
       setupContextMenus();
     }
+    
+    // Listen for custom commands
+    try {
+      browser.commands.onCommand.addListener(async (command) => {
+        if (command === "show-autofill-popup") {
+          // Get the currently active tab
+          const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+          if (!tab?.id) {
+            return;
+          }
+
+          // Execute script in the active tab
+          await browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: getActiveElementIdentifier,
+          }).then((results) => {
+            const elementIdentifier = results[0]?.result;
+            if (elementIdentifier) {
+              sendMessage('OPEN_AUTOFILL_POPUP', { elementIdentifier }, `content-script@${tab.id}`);
+            }
+          }).catch(console.error);
+        }
+      });
+    } catch (error) {
+      console.error('Error setting up command listener:', error);
+    }
   }
 });
+
+/**
+ * Activate AliasVault for the active input element.
+ */
+function getActiveElementIdentifier() : string {
+  const target = document.activeElement;
+  if (target instanceof HTMLInputElement) {
+    return target.id || target.name || '';
+  }
+  return '';
+}

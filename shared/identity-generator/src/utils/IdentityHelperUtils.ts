@@ -48,6 +48,10 @@ export class IdentityHelperUtils {
       return false;
     }
 
+    if (input.startsWith('0001-01-01')) {
+      return false;
+    }
+
     const date = new Date(input);
 
     // Check if the date is valid
