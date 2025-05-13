@@ -1,5 +1,5 @@
 # This workflow will test if running the unit tests works.
-name: .NET Unit Tests
+name: Unit Tests
 
 on:
   push:
@@ -26,10 +26,13 @@ jobs:
       run: dotnet workload install wasm-tools
 
     - name: Restore dependencies
+      working-directory: apps/server
       run: dotnet restore
 
     - name: Build
+      working-directory: apps/server
       run: dotnet build --no-restore
 
     - name: Run unittests
-      run: dotnet test src/Tests/AliasVault.UnitTests --no-build --verbosity normal
+      working-directory: apps/server
+      run: dotnet test Tests/AliasVault.UnitTests --no-build --verbosity normal

@@ -58,6 +58,7 @@ jobs:
                   dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
             - name: Build and analyze
+              working-directory: apps/server
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

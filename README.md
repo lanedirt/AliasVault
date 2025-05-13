@@ -1,62 +1,58 @@
-# AliasVault: password & (email) alias manager [<img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="100" align="right" alt="AliasVault">](https://github.com/lanedirt/AliasVault)
+# <img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="35" alt="AliasVault"> AliasVault
+End-to-end encrypted password manager with built-in alias and email generation — giving you full control over your online identity and safeguarding your privacy. AliasVault: the privacy toolbox that you control.
 
-[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github">](https://github.com/lanedirt/AliasVault/releases)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-unit-tests.yml?label=unit tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-unit-tests.yml)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-integration-tests.yml?label=integration tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-integration-tests.yml)
-[<img src="https://img.shields.io/github/actions/workflow/status/lanedirt/AliasVault/dotnet-e2e-client-tests.yml?label=e2e tests">](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-client-tests.yml)
-[<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
-[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
+[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
+[![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
+[<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=Sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
+[<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=Discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
 
-> AliasVault is an end-to-end encrypted password and (email) alias manager that protects your privacy by creating alternative identities, passwords and email addresses for every website you use. Use the official supported cloud version or self-host AliasVault on your own server with Docker.
+<a href="https://app.aliasvault.net">Try the cloud version 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">Website </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation </a> | <a href="#self-hosting">Self-host instructions</a>
 
-- <a href="https://app.aliasvault.net">Try the cloud version 🔥</a> - <a href="https://aliasvault.net?utm_source=gh-readme">Website 🌐</a> - <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation 📚</a> - <a href="#self-hosting">Self-host instructions ⚙️</a> - <a href="https://aliasvault.net/plugins?utm_source=gh-readme">Browser Extensions 🔌</a>
+## About
+AliasVault helps protect your privacy online by generating a unique password, identity, and email alias for every service you use. Everything is end-to-end encrypted and under your control — whether in the cloud or self-hosted.
 
-### What makes AliasVault unique:
-- **Zero-knowledge architecture**:
-    - All data is end-to-end encrypted on the client and stored in encrypted state on the server. Your master password never leaves your device and the server never has access to your data.
-- **Built-in email server**:
-    - AliasVault includes its own email server that allows you to generate real working email addresses for each alias. Emails sent to these addresses are instantly visible in the AliasVault app and browser extension.
-- **Alias generation**:
-     - Generate aliases and assign them to a website, allowing you to use different email addresses and usernames for each website. Keeping your online identities separate and secure, making it harder for bad actors to link your accounts.
-- **Open-source & Self-hostable**:
-    - The source code is available on GitHub and AliasVault can be self-hosted on your own server via an easy install script.
+Built on 15 years of experience, AliasVault is open-source, self-hostable and community-driven. It’s the response to a web that tracks everything: a way to take back control of your digital privacy and help you stay secure online.
+
+– Leendert de Borst (@lanedirt), Creator of AliasVault
 
 ## Screenshots
 
 <table>
     <tr>
-        <th align="center">Browser Extension</th>
-        <th align="center">Generate email and aliases</th>
+        <th align="center">Responsive web app</th>
+        <th align="center">Browser extensions</th>
     </tr>
     <tr>
         <td align="center">
-            <img src="https://github.com/user-attachments/assets/d9ffd3dc-08a0-462d-8148-e8da5ec5a520" alt="Browser Autofill" />
+            <img src="https://github.com/user-attachments/assets/fa5bf64a-704d-4f09-b4e0-0310ab662204" alt="Responsive web app" />
         </td>
         <td align="center">
-            <img src="https://github.com/user-attachments/assets/86752994-d469-4b0e-b633-c089e0aed12b" alt="Generate Aliases" />
+            <img src="https://github.com/user-attachments/assets/b5218609-217b-4c8d-8d5d-8c71e19bf057"alt="Browser extensions" />
 		</td>
     </tr>
     <tr>
-        <th align="center">Strong security</th>
-        <th align="center">Easy self-host</th>
+        <th align="center">Native iOS & Android apps</th>
+        <th align="center">& much more</th>
     </tr>
     <tr>
 		<td align="center">
-            <img src="https://github.com/user-attachments/assets/26b66379-10a5-4b8b-9c69-e64b553a10be" alt="Strong security" />
+            <img src="https://github.com/user-attachments/assets/5d09ad78-d145-48a1-b8da-c5a1dc708886" alt="Native iOS & Android Apps" />
 		</td>
 		<td align="center">
-           <img src="https://github.com/user-attachments/assets/47c7002a-e326-4507-8801-194e134e00dd" alt="Easy self-host installation" />
+           <img src="https://github.com/user-attachments/assets/34fe650d-f08d-4c92-92e0-4e750b7a662a" alt="Lots of features" />
         </td>
 	</tr>
 </table>
 
-## Official Cloud Version
-The official cloud version of AliasVault is freely available at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release. Create an account to protect your privacy today.
+## Cloud-hosted
+Use the official cloud version of AliasVault at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release.
+
+AliasVault is available on: [Web](https://app.aliasvault.net) | [iOS](https://apps.apple.com/app/id6745490915) | [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo) | [Safari](https://apps.apple.com/app/id6743163173)
 
 [<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
 ## Self-hosting
-For full control over your own data you can self-host and install AliasVault on your own servers. The easiest method is to use the provided install script. This will download the pre-built Docker images and start the containers.
+For full control over your own data you can self-host and install AliasVault on your own servers.
 
 ### Install using install script
 
@@ -83,7 +79,7 @@ The install script will output the URL where the app is available. By default th
 
 > Note: If you want to change the default AliasVault ports you can do so in the `.env` file.
 
-## Documentation
+## Technical documentation
 For more information about the installation process, manual setup instructions and other topics, please see the official documentation website:
 - [Documentation website (docs.aliasvault.net) 📚](https://docs.aliasvault.net)
 
@@ -100,12 +96,12 @@ For detailed information about our encryption implementation and security archit
 - [SECURITY.md](SECURITY.md)
 - [Security Architecture Diagram](https://docs.aliasvault.net/architecture)
 
-## Roadmap
+## Features & Roadmap
 
-AliasVault is under active development, with a strong focus on usability, security, and cross-platform support.  
+AliasVault is under active development, with a strong focus on usability, security, and cross-platform support.
 The main focus is on ensuring robust usability for everyday tasks, including comprehensive autofill capabilities across all platforms.
 
-🛠️ Incremental releases are published every 2–3 weeks, with a strong emphasis on real-world testing and user feedback. 
+🛠️ Incremental releases are published every 2–3 weeks, with a strong emphasis on real-world testing and user feedback.
 During this phase, AliasVault can safely be used in production as it maintains strict data integrity and automatic migration guarantees.
 
 Core features that are being worked on:
@@ -117,14 +113,15 @@ Core features that are being worked on:
 - [x] Browser extensions with autofill feature (Chrome, Firefox, Edge, Safari, Brave)
 - [x] Built-in TOTP authenticator
 - [x] Import passwords from traditional password managers
-- [ ] iOS and Android native apps
+- [x] iOS native app
+- [ ] Android native app
 - [ ] Data model improvements to support reusable identities in combination with aliases
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
 - [ ] Adding support for family/team sharing (organization features)
 
 👉 [View the full AliasVault roadmap here](https://github.com/lanedirt/AliasVault/issues/731)
 
-### Got feedback or ideas?  
+### Got feedback or ideas?
 Feel free to open an issue or join our [Discord](https://discord.gg/DsaXMTEtpF)! Contributions are warmly welcomed—whether in feature development, testing, or spreading the word. Get in touch on Discord if you're interested in contributing.
 
 ### Support the mission

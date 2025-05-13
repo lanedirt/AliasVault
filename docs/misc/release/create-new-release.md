@@ -10,17 +10,23 @@ nav_order: 1
 Follow the steps in the checklist below to prepare a new release.
 
 ## Versioning client and server
-- [ ] Update ./src/Shared/AliasVault.Shared.Core/AppInfo.cs and update major/minor/patch to the new version. This version will be shown in the client and admin app footer. This version should be equal to the git release tag.
-- [ ] Update ./src/Shared/AliasVault.Shared.Core/AppInfo.cs with the minimum supported client versions.
+- [ ] Update ./apps/server/Shared/AliasVault.Shared.Core/AppInfo.cs and update major/minor/patch to the new version. This version will be shown in the client and admin app footer. This version should be equal to the git release tag.
+- [ ] Update ./apps/server/Shared/AliasVault.Shared.Core/AppInfo.cs with the minimum supported client versions.
     - In case API output breaks earlier client versions and/or this version of the client/API will upgrade the client vault model to a new major version.
 - [ ] Update ./install.sh `@version` in header if the install script has changed. This allows the install script to self-update when running the `./install.sh update` command on default installations.
 
-## Versioning browser extension
-- [ ] Update ./browser-extension/wxt.config.ts with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
-- [ ] Update the version `MARKETING_VERSION` and increase the build number `CURRENT_PROJECT_VERSION` in the ./browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj project file in MacOS Xcode. This is the version that will be shown in the Safari Browser Extension App Store.
-- [ ] Update ./browser-extension/src/utils/AppInfo.ts with the new version for the extension. This version should be equal to the git release tag.
-- [ ] Update ./browser-extension/src/utils/AppInfo.ts with the minimum supported server version (in case of required API breaking changes).
-- [ ] Update ./browser-extension/src/shared/AppInfo.ts with the minimum supported client vault version (in case of required client vault model changes).
+## Versioning browser extensions
+- [ ] Update `./apps/browser-extension/wxt.config.ts` with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
+- [ ] Update `./apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the Safari Browser Extension App Store.
+- [ ] Update `./apps/browser-extension/src/utils/AppInfo.ts` with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update `./apps/browser-extension/src/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update `./apps/browser-extension/src/shared/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
+
+## Versioning mobile apps
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
+- [ ] Update `./apps/mobile-app/ios/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the iOS App Store.
 
 ## Docker Images
 If docker containers have been added or removed:
@@ -57,6 +63,6 @@ The GitHub Actions workflow `Browser Extension Build` will build the browser ext
 3. Upload the Firefox archive (normal + sources) to the Firefox Add-ons page.
 4. Upload the Edge archive to the Microsoft Edge Add-ons page.
 5. Submit the Safari extension to Apple for review:
-    1. Navigate to the `browser-extension` directory.
+    1. Navigate to the `apps/browser-extension` directory.
     2. Build the safari extension locally via `npm run build:safari`, which will output the build files to `dist/safari-mv2`. **Note: it's important to always rebuild, as otherwise stale build files from a previous build might get included in the Safari binary by accident!**
-    3. Open the `browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Archive" and then "Distribute App" option.
+    3. Open the `apps/browser-extension/safari-xcode/AliasVault/AliasVault.xcodeproj` project in Xcode and submitting the extension via the "Archive" and then "Distribute App" option.

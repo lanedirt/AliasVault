@@ -37,11 +37,11 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    ```bash
    # Install dotnet EF tools globally
    dotnet tool install --global dotnet-ef
-   
+
    # Add to your shell's PATH (if not already done)
    # For bash/zsh, add to ~/.bashrc or ~/.zshrc:
    export PATH="$PATH:$HOME/.dotnet/tools"
-   
+
    # Verify installation
    dotnet ef
    ```
@@ -54,11 +54,11 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
 4. **Run Tailwind CSS compiler**
    ```bash
    # For Admin project
-   cd src/AliasVault.Admin
+   cd apps/server/AliasVault.Admin
    npm run build:admin-css
-   
+
    # For Client project
-   cd src/AliasVault.Client
+   cd apps/server/AliasVault.Client
    npm run build:client-css
    ```
 
@@ -66,9 +66,9 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
    ```bash
    # Install Playwright CLI
    dotnet tool install --global Microsoft.Playwright.CLI
-   
+
    # Install browsers
-   pwsh src/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install
+   pwsh apps/server/Tests/AliasVault.E2ETests/bin/Debug/net9.0/playwright.ps1 install
    ```
 
 6. **Configure Development Settings**
@@ -94,9 +94,9 @@ This guide will help you set up AliasVault for development on Linux or MacOS sys
 2. **Run the Application**
    ```bash
    # Using dotnet CLI
-   cd src/AliasVault.Api
+   cd apps/server/AliasVault.Api
    dotnet run
-   
+
    # Or using your preferred IDE (VS Code, Rider, etc.)
    ```
 
@@ -144,4 +144,4 @@ If you encounter database connection issues:
 If you encounter any issues not covered in this guide, please:
 1. Check the [GitHub Issues](https://github.com/lanedirt/AliasVault/issues)
 2. Search for existing solutions
-3. Create a new issue if needed 
+3. Create a new issue if needed

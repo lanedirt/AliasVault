@@ -1,0 +1,108 @@
+﻿@using AliasVault.Shared.Models.WebApi.Security
+@inject HttpClient Http
+@inject GlobalNotificationService GlobalNotificationService
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Active Sessions</h3>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.</p>
+
+    @if (IsLoading)
+    {
+        <LoadingIndicator />
+    }
+    else
+    {
+        @if (!Sessions.Any())
+        {
+            <p class="text-sm text-gray-600 dark:text-gray-400">No active sessions found.</p>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Device</th>
+                        <th scope="col" class="px-6 py-3">Last active</th>
+                        <th scope="col" class="px-6 py-3">Expires</th>
+                        <th scope="col" class="px-6 py-3">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var session in Sessions)
+                    {
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4">@session.DeviceIdentifier</td>
+                            <td class="px-6 py-4">@session.CreatedAt.ToLocalTime().ToString("g")</td>
+                            <td class="px-6 py-4">@session.ExpireDate.ToLocalTime().ToString("g")</td>
+                            <td class="px-6 py-4">
+                                <Button Color="danger" OnClick="() => RevokeSession(session.Id)">Revoke</Button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the list of active sessions (refresh tokens) for the current user.
+    /// </summary>
+    [Parameter]
+    public List<RefreshTokenModel> Sessions { get; set; } = [];
+
+    /// <summary>
+    /// Event callback that is invoked when the list of active sessions changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnSessionsChanged { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+
+    /// <summary>
+    /// Loads the active sessions data from the server.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task LoadData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        var sessionsResponse = await Http.GetFromJsonAsync<List<RefreshTokenModel>>("v1/Security/sessions");
+        if (sessionsResponse is not null)
+        {
+            Sessions = sessionsResponse;
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Revokes a specific session (refresh token) for the current user.
+    /// </summary>
+    /// <param name="id">The unique identifier of the session to revoke.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task RevokeSession(Guid id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"v1/Security/sessions/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                GlobalNotificationService.AddSuccessMessage("Session revoked successfully.", true);
+                await OnSessionsChanged.InvokeAsync();
+            }
+            else
+            {
+                GlobalNotificationService.AddErrorMessage("Failed to revoke session.", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Failed to revoke session: {ex.Message}.", true);
+        }
+    }
+}

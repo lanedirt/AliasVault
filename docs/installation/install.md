@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Basic Install
-parent: Installation Guide
+parent: Server Installation
 nav_order: 1
 ---
 

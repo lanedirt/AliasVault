@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: browser-extension
+        working-directory: apps/browser-extension
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: browser-extension/package-lock.json
+          cache-dependency-path: apps/browser-extension/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -52,10 +52,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
-            browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
-            browser-extension/dist/aliasvault-browser-extension-*-edge.zip
-            browser-extension/dist/aliasvault-browser-extension-*-sources.zip
+            apps/browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
+            apps/browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
+            apps/browser-extension/dist/aliasvault-browser-extension-*-edge.zip
+            apps/browser-extension/dist/aliasvault-browser-extension-*-sources.zip
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-docker:
@@ -96,7 +96,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/Databases/AliasServerDb/Dockerfile
+          file: apps/server/Databases/AliasServerDb/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:${{ github.ref_name }}
@@ -105,7 +105,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/AliasVault.Api/Dockerfile
+          file: apps/server/AliasVault.Api/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
@@ -114,7 +114,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/AliasVault.Client/Dockerfile
+          file: apps/server/AliasVault.Client/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
@@ -123,7 +123,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/AliasVault.Admin/Dockerfile
+          file: apps/server/AliasVault.Admin/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
@@ -132,7 +132,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
+          file: apps/server/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
@@ -141,7 +141,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/Services/AliasVault.SmtpService/Dockerfile
+          file: apps/server/Services/AliasVault.SmtpService/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
@@ -150,7 +150,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/Services/AliasVault.TaskRunner/Dockerfile
+          file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
@@ -159,7 +159,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/Utilities/AliasVault.InstallCli/Dockerfile
+          file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }} 
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}

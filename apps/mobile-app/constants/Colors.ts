@@ -1,0 +1,63 @@
+/**
+ * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
+ * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ */
+
+export const Colors = {
+  light: {
+    text: '#11181C',
+    textMuted: '#4b5563',
+    background: '#f3f2f7',
+    accentBackground: '#fff',
+    accentBorder: '#d1d5db',
+    errorBackground: '#f8d7da',
+    errorBorder: '#f8d7da',
+    errorText: '#842029',
+    tint: '#f49541',
+    icon: '#687076',
+    tabIconDefault: '#687076',
+    tabIconSelected: '#f49541',
+    headerBackground: 'rgba(255, 255, 255, 0.7)',
+    headerBorder: '#eae9eb',
+    tabBarBackground: '#fff',
+    primary: '#f49541',
+    primarySurfaceText: '#ffffff',
+    secondary: '#6b7280',
+    tertiary: '#eabf69',
+    loginHeader: '#f6dfc4',
+    greenBackground: '#22c55e',
+    skeleton: '#rgba(255,255,255,0.4)',
+    red: '#ff0000',
+    black: '#000000',
+  },
+  dark: {
+    white: '#ffffff',
+    text: '#ECEDEE',
+    textMuted: '#9BA1A6',
+    background: '#000000',
+    accentBackground: '#202020',
+    accentBorder: '#444444',
+    errorBackground: '#3d1a1e',
+    errorBorder: '#9c2530',
+    errorText: '#fae1e3',
+    tint: '#f49541',
+    icon: '#9BA1A6',
+    tabIconDefault: '#9BA1A6',
+    tabIconSelected: '#f49541',
+    headerBackground: 'rgba(0, 0, 0, 0.3)',
+    headerBorder: '#2f2e30',
+    tabBarBackground: '#202020',
+    primary: '#f49541',
+    primarySurfaceText: '#ffffff',
+    secondary: '#6b7280',
+    tertiary: '#eabf69',
+    loginHeader: '#5c4331',
+    greenBackground: '#22c55e',
+    skeleton: '#rgba(255,255,255,0.2)',
+    red: '#ff0000',
+    black: '#000000',
+  },
+} as const;
+
+// Export the type for TypeScript support
+export type ThemeColors = typeof Colors.light;

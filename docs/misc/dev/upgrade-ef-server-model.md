@@ -3,7 +3,7 @@ layout: default
 title: Upgrade the AliasServerDb EF model
 parent: Development
 grand_parent: Miscellaneous
-nav_order: 3
+nav_order: 6
 ---
 
 # Upgrade the AliasServerDb EF model

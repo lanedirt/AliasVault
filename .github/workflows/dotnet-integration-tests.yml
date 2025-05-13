@@ -1,5 +1,5 @@
 # This workflow will test if running the integration tests works.
-name: .NET Integration Tests
+name: Integration Tests
 
 on:
   push:
@@ -27,10 +27,12 @@ jobs:
       run: dotnet workload install wasm-tools
 
     - name: Build
+      working-directory: apps/server
       run: dotnet build
 
     - name: Start dev database
       run: ./install.sh configure-dev-db start
 
     - name: Run integration tests
-      run: dotnet test src/Tests/AliasVault.IntegrationTests --no-build --verbosity normal
+      working-directory: apps/server
+      run: dotnet test Tests/AliasVault.IntegrationTests --no-build --verbosity normal

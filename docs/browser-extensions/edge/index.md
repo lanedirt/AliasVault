@@ -8,7 +8,7 @@ nav_order: 1
 # Microsoft Edge Extension
 In order to install the Microsoft Edge Extension, see the options below.
 
-## Microsoft Edge Add-ons
+## Download from Microsoft Edge Add-ons
 Installing the extension from the Microsoft Edge Add-ons is the easiest way to get started. This ensures that you are always using the latest version of the extension.
 
 1. Go to the [Microsoft Edge Add-ons page](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo)
