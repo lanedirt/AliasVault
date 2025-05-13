@@ -11,17 +11,7 @@ import { BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { Credential } from '@/utils/types/Credential';
-
-// TODO: store generic setting constants somewhere else.
-export const DISABLED_SITES_KEY = 'local:aliasvault_disabled_sites';
-export const GLOBAL_AUTOFILL_POPUP_ENABLED_KEY = 'local:aliasvault_global_autofill_popup_enabled';
-export const GLOBAL_CONTEXT_MENU_ENABLED_KEY = 'local:aliasvault_global_context_menu_enabled';
-export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dismiss_until';
-export const TEMPORARY_DISABLED_SITES_KEY = 'local:aliasvault_temporary_disabled_sites';
-
-// TODO: store these settings in the actual vault when updating the datamodel for roadmap v1.0.
-export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
-export const LAST_CUSTOM_USERNAME_KEY = 'local:aliasvault_last_custom_username';
+import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
 
 /**
  * WeakMap to store event listeners for popup containers
