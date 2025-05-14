@@ -531,7 +531,7 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
   const searchTerm = searchInput.value.toLowerCase();
 
   // Ensure we have unique credentials
-  const uniqueCredentials = Array.from(new Map(credentials.map(cred => [cred.id, cred])).values());
+  const uniqueCredentials = Array.from(new Map(credentials.map(cred => [cred.Id, cred])).values());
   let filteredCredentials;
 
   if (searchTerm === '') {
@@ -1339,7 +1339,12 @@ async function fetchAndProcessFavicon(url: string, maxSize: number, targetWidth:
  */
 async function resizeImage(imageData: Uint8Array, contentType: string, targetWidth: number): Promise<Blob | null> {
   return new Promise((resolve) => {
-    const blob = new Blob([imageData], { type: contentType });
+    // Convert Uint8Array to ArrayBuffer to ensure compatibility with Blob
+    const arrayBuffer = imageData.buffer.slice(
+      imageData.byteOffset,
+      imageData.byteOffset + imageData.byteLength
+    ) as ArrayBuffer; // Assert as ArrayBuffer to ensure type compatibility
+    const blob = new Blob([arrayBuffer], { type: contentType });
     const img = new Image();
 
     /**
