@@ -813,17 +813,40 @@ class SqliteClient {
 
       // 4. Update Password if changed
       if (credential.Password !== existingCredential.Password) {
-        const passwordQuery = `
-          UPDATE Passwords
-          SET Value = ?,
-              UpdatedAt = ?
+        // Check if a password record already exists for this credential, if not, then create one.
+        const passwordRecordExistsQuery = `
+          SELECT Id
+          FROM Passwords
           WHERE CredentialId = ?`;
+        const passwordResults = await this.executeQuery(passwordRecordExistsQuery, [credential.Id]);
 
-        await this.executeUpdate(passwordQuery, [
-          credential.Password,
-          currentDateTime,
-          credential.Id
-        ]);
+        if (passwordResults.length === 0) {
+          // Create a new password record
+          const passwordQuery = `
+            INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+            VALUES (?, ?, ?, ?, ?, ?)`;
+
+          await this.executeUpdate(passwordQuery, [
+            crypto.randomUUID().toUpperCase(),
+            credential.Password,
+            credential.Id,
+            currentDateTime,
+            currentDateTime,
+            0
+          ]);
+        } else {
+          // Update the existing password record
+          const passwordQuery = `
+            UPDATE Passwords
+            SET Value = ?, UpdatedAt = ?
+            WHERE CredentialId = ?`;
+
+          await this.executeUpdate(passwordQuery, [
+            credential.Password,
+            currentDateTime,
+            credential.Id
+          ]);
+        }
       }
 
       await NativeVaultManager.commitTransaction();
