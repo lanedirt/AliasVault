@@ -96,7 +96,7 @@ export default defineContentScript({
 
           const target = document.getElementById(elementIdentifier) ?? document.getElementsByName(elementIdentifier)[0];
 
-          showPopupForElement(target);
+          await showPopupForElement(target, true);
 
           return { success: true };
         });
@@ -104,7 +104,7 @@ export default defineContentScript({
         /**
          * Show popup for element.
          */
-        function showPopupForElement(element: Element) : void {
+        async function showPopupForElement(element: Element, forceShow: boolean = false) : Promise<void> {
           const { isValid, inputElement } = validateInputField(element);
 
           if (!isValid || !inputElement) {
@@ -116,9 +116,16 @@ export default defineContentScript({
             return;
           }
 
-          // This is an explicit call by the user to open the popup, so we don't check if it's enabled.
-          injectIcon(inputElement, container);
-          openAutofillPopup(inputElement, container);
+          /**
+           * By default we check if the popup is not disabled (for current site)
+           * but if forceShow is true, we show the popup regardless.
+           */
+          const canShowPopup = forceShow || (await isAutoShowPopupEnabled());
+
+          if (canShowPopup) {
+            injectIcon(inputElement, container);
+            openAutofillPopup(inputElement, container);
+          }
         }
       },
     });

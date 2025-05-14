@@ -368,7 +368,11 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
      * Handle clicks on context menu items
      * @param e - The click event
      */
-    const handleContextMenuClick = (e: MouseEvent): void => {
+    const handleContextMenuClick = (e: Event): void => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
       const target = e.target as HTMLElement;
       const menuItem = target.closest('.av-context-menu-item') as HTMLElement;
       if (!menuItem) {
@@ -391,7 +395,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     };
 
     // Add click listener to handle menu item clicks
-    contextMenu.addEventListener('click', handleContextMenuClick);
+    addReliableClickHandler(contextMenu, handleContextMenuClick);
   };
 
   // Add click handlers
@@ -446,7 +450,7 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
   container.className = 'av-vault-locked-container';
 
   // Make the entire container clickable
-  container.addEventListener('click', handleUnlockClick);
+  addReliableClickHandler(container, handleUnlockClick);
   container.style.cursor = 'pointer';
 
   // Add message
@@ -488,7 +492,7 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
   closeButton.style.transform = 'translateY(-50%)';
 
   // Handle close button click
-  closeButton.addEventListener('click', async (e) => {
+  addReliableClickHandler(closeButton, async (e) => {
     e.stopPropagation(); // Prevent opening the unlock popup
     await dismissVaultLockedPopup();
     removeExistingPopup(rootContainer);
