@@ -5,6 +5,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+namespace AliasVault.Shared.Core.MobileApps;
+
 /// <summary>
 /// Represents information about a mobile app.
 /// </summary>
