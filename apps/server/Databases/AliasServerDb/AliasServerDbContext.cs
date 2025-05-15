@@ -11,6 +11,7 @@ using AliasVault.WorkerStatus.Database;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
@@ -137,6 +138,32 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     public DbSet<TaskRunnerJob> TaskRunnerJobs { get; set; }
 
     /// <summary>
+    /// Sets up the connection string if it is not already configured.
+    /// </summary>
+    /// <param name="optionsBuilder">DbContextOptionsBuilder instance.</param>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+        if (optionsBuilder.IsConfigured)
+        {
+            return;
+        }
+
+        var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+        // Add SQLite connection with enhanced settings
+        var connectionString = configuration.GetConnectionString("AliasServerDbContext");
+
+        optionsBuilder
+            .UseNpgsql(connectionString, options => options.CommandTimeout(60))
+            .UseLazyLoadingProxies();
+    }
+
+    /// <summary>
     /// The OnModelCreating method.
     /// </summary>
     /// <param name="modelBuilder">ModelBuilder instance.</param>
@@ -144,19 +171,21 @@ public class AliasServerDbContext : WorkerStatusDbContext, IDataProtectionKeyCon
     {
         base.OnModelCreating(modelBuilder);
 
-        // NOTE: This is a workaround for SQLite. Add conditional check if SQLite is used.
-        // NOTE: SQL server doesn't need this override.
-        if (Database.IsSqlite())
+        // Configure all DateTime properties to use timestamp with time zone in UTC
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            foreach (var property in entityType.GetProperties())
             {
-                foreach (var property in entity.GetProperties())
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
                 {
-                    // SQLite does not support varchar(max) so we use TEXT.
-                    if (property.ClrType == typeof(string) && property.GetMaxLength() == null)
-                    {
-                        property.SetColumnType("TEXT");
-                    }
+                    property.SetColumnType("timestamp with time zone");
+
+                    // Add value converter for DateTime properties
+                    var converter = new ValueConverter<DateTime, DateTime>(
+                        v => v.ToUniversalTime(),
+                        v => v.ToUniversalTime());
+
+                    property.SetValueConverter(converter);
                 }
             }
         }

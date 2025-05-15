@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
-/// The AliasServerDbContextFactory interface.
+/// The PostgreSQL DbContext factory.
 /// </summary>
 public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
 {
@@ -32,7 +32,7 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
         var optionsBuilder = new DbContextOptionsBuilder<AliasServerDbContext>();
         ConfigureDbContextOptions(optionsBuilder);
 
-        return new AliasServerDbContextPostgresql(optionsBuilder.Options);
+        return new AliasServerDbContext(optionsBuilder.Options);
     }
 
     /// <inheritdoc/>

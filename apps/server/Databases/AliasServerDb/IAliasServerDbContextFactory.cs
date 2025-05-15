@@ -10,7 +10,11 @@ namespace AliasServerDb;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// The AliasServerDbContextFactory interface.
+/// The AliasServerDbContextFactory interface. This factory was primarily created to support the migration window
+/// from SQLite to PostgreSQL (where both were supported). Currently only PostgreSQL is supported, so this factory
+/// simply creates an instance of the now default AliasServerDbContext. This factory pattern has therefore became
+/// optional and does not actually has any benefits vs. just creating the DbContext directly. But we kept it for
+/// now as all clients already use this factory pattern.
 /// </summary>
 public interface IAliasServerDbContextFactory
 {
