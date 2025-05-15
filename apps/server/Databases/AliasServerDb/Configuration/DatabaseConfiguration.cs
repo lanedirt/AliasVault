@@ -47,15 +47,9 @@ public static class DatabaseConfiguration
         }
 
         // Add custom DbContextFactory registration which supports multiple database providers
-        switch (dbProvider)
-        {
-            case "postgresql":
-                services.AddSingleton<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
-                break;
-            default:
-                services.AddSingleton<IAliasServerDbContextFactory, SqliteDbContextFactory>();
-                break;
-        }
+        // NOTE: previously we looked at the "dbProvider" flag for which factory to initiate,
+        // but as we dropped support for SQLite we now just have this one database provider.
+        services.AddSingleton<IAliasServerDbContextFactory, PostgresqlDbContextFactory>();
 
         // Updated DbContextFactory registration
         services.AddDbContextFactory<AliasServerDbContext>((sp, options) =>

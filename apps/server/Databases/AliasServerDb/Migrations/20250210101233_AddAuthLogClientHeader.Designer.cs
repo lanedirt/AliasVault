@@ -9,18 +9,18 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace AliasServerDb.Migrations.PostgresqlMigrations
+namespace AliasServerDb.Migrations
 {
-    [DbContext(typeof(AliasServerDbContextPostgresql))]
-    [Migration("20250320101427_AddEmailClaimDisabledFlag")]
-    partial class AddEmailClaimDisabledFlag
+    [DbContext(typeof(AliasServerDbContext))]
+    [Migration("20250210101233_AddAuthLogClientHeader")]
+    partial class AddAuthLogClientHeader
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -567,9 +567,6 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("Disabled")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -624,10 +621,6 @@ namespace AliasServerDb.Migrations.PostgresqlMigrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Client")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

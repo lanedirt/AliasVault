@@ -3,19 +3,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AliasServerDb.Migrations.SqliteMigrations
+namespace AliasServerDb.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAuthLogClientHeader : Migration
+    public partial class AddVaultClientColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
                 name: "Client",
-                table: "AuthLogs",
-                type: "TEXT",
-                maxLength: 100,
+                table: "Vaults",
+                type: "character varying(255)",
+                maxLength: 255,
                 nullable: true);
         }
 
@@ -24,7 +24,7 @@ namespace AliasServerDb.Migrations.SqliteMigrations
         {
             migrationBuilder.DropColumn(
                 name: "Client",
-                table: "AuthLogs");
+                table: "Vaults");
         }
     }
 }
