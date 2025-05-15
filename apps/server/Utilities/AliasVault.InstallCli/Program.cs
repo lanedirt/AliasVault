@@ -43,13 +43,6 @@ public static partial class Program
 
                 return HashPassword(args[1]);
 
-            // The implementation for this command was removed in version 0.18.0 onwards. The command is still here for
-            // backwards compatibility, but it does nothing and returns an error to the user. This placeholder can be
-            // removed in a future version.
-            case "migrate-sqlite":
-                Console.WriteLine("SQLite migration has been removed from version 0.18.0 onwards. You'll need to update to a previous version (0.17.0 or lower) to run this script. Follow the official docs.");
-                return 1;
-
             default:
                 Console.WriteLine("Unknown command. Available commands:");
                 Console.WriteLine("  hash-password <password>");
