@@ -11,6 +11,7 @@ buildscript {
         ndkVersion = "26.1.10909125"
     }
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
     }
