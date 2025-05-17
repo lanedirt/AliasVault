@@ -5,7 +5,7 @@ import VaultStoreKit
 import VaultModels
 
 /**
- * This class is used as a bridge to allow React Native to interact with the VaultStore class.
+ * This class is used as a bridge to allow React Native to interact with the VaultStoreKit class.
  * The VaultStore class is implemented in Swift and used by both React Native and the native iOS
  * Autofill extension.
  */
