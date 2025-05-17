@@ -23,15 +23,17 @@ class MainActivity : ReactActivity() {
     // @generated begin expo-splashscreen - expo prebuild (DO NOT MODIFY) sync-f3ff59a738c56c9a6119210cb55f0b613eb8b6af
     SplashScreenManager.registerOnActivity(this)
     // @generated end expo-splashscreen
-    
+
     // Initialize autofill service, this opens the set_autofill_service setting screen
     // to instruct user to enable AliasVault as autofill provider.
     // TODO: this should be triggerable from React Native instead so we can better control flow
     // of when to ask the user to enable native system autofill.
-    startActivity(Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
+    // TODO: enable this again when implementing Android autofill setup just like we
+    // did for iOS autofill instructions in settings in the app.
+    /*startActivity(Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
       data = Uri.parse("package:net.aliasvault.app")
-    })
-    
+    })*/
+
     super.onCreate(null)
   }
 
