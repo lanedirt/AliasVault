@@ -6,6 +6,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import org.json.JSONArray
@@ -26,7 +27,8 @@ import javax.crypto.spec.SecretKeySpec
 class SharedCredentialStore private constructor(context: Context) {
     private val appContext = context.applicationContext
     private val executor: Executor = Executors.newSingleThreadExecutor()
-    
+    private val biometricManager = BiometricManager.from(appContext)
+
     // Cache for encryption key during the lifetime of this instance
     private var encryptionKey: ByteArray? = null
 
@@ -37,7 +39,15 @@ class SharedCredentialStore private constructor(context: Context) {
     }
 
     /**
-     * Get or create encryption key using biometric authentication
+     * Check if biometric authentication is available on the device
+     */
+    private fun isBiometricAvailable(): Boolean {
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
+            BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    /**
+     * Get or create encryption key using biometric authentication if available
      */
     fun getEncryptionKey(activity: FragmentActivity, callback: CryptoOperationCallback) {
         // If key is already in memory, use it
@@ -53,10 +63,68 @@ class SharedCredentialStore private constructor(context: Context) {
 
         if (encryptedKeyB64 == null) {
             // No key exists, create a new one
-            createNewEncryptionKey(activity, callback)
+            if (isBiometricAvailable()) {
+                createNewEncryptionKey(activity, callback)
+            } else {
+                // Create key without biometric protection
+                createNewEncryptionKeyWithoutBiometric(callback)
+            }
         } else {
-            // Key exists, retrieve it with biometric auth
-            retrieveEncryptionKey(activity, encryptedKeyB64, callback)
+            // Key exists, retrieve it
+            if (isBiometricAvailable()) {
+                retrieveEncryptionKey(activity, encryptedKeyB64, callback)
+            } else {
+                // Retrieve key without biometric protection
+                retrieveEncryptionKeyWithoutBiometric(encryptedKeyB64, callback)
+            }
+        }
+    }
+
+    /**
+     * Create a new random encryption key without biometric protection
+     */
+    private fun createNewEncryptionKeyWithoutBiometric(callback: CryptoOperationCallback) {
+        try {
+            // Generate a random 32-byte key for AES-256
+            val secureRandom = SecureRandom()
+            val randomKey = ByteArray(32)
+            secureRandom.nextBytes(randomKey)
+
+            // Cache the key
+            encryptionKey = randomKey
+
+            // Store the key directly
+            val prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            val encryptedKeyB64 = Base64.encodeToString(randomKey, Base64.DEFAULT)
+            prefs.edit().putString(ENCRYPTED_KEY_PREF, encryptedKeyB64).apply()
+
+            Log.d(TAG, "Encryption key stored successfully without biometric protection")
+            callback.onSuccess("Key stored successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating encryption key", e)
+            callback.onError(e)
+        }
+    }
+
+    /**
+     * Retrieve the encryption key without biometric authentication
+     */
+    private fun retrieveEncryptionKeyWithoutBiometric(
+        encryptedKeyB64: String,
+        callback: CryptoOperationCallback
+    ) {
+        try {
+            // Decode the key
+            val key = Base64.decode(encryptedKeyB64, Base64.DEFAULT)
+
+            // Cache the key
+            encryptionKey = key
+
+            Log.d(TAG, "Encryption key retrieved successfully without biometric protection")
+            callback.onSuccess("Key retrieved successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error retrieving encryption key", e)
+            callback.onError(e)
         }
     }
 
@@ -314,7 +382,7 @@ class SharedCredentialStore private constructor(context: Context) {
      * Decrypts data using AES/GCM/NoPadding
      */
     @Throws(Exception::class)
-    private fun decryptData(encryptedData: String): String {
+    public fun decryptData(encryptedData: String): String {
         val key = encryptionKey ?: throw Exception("Encryption key not available")
 
         // Decode combined data
@@ -410,30 +478,30 @@ class SharedCredentialStore private constructor(context: Context) {
         // First check if credentials exist
         val prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         val encryptedCredentialsJson = prefs.getString(CREDENTIALS_KEY, null)
-        
+
         if (encryptedCredentialsJson == null) {
             // No credentials found, return empty array without triggering biometric authentication
             Log.d(TAG, "No credentials found, returning empty array without key retrieval")
             callback.onSuccess(JSONArray().toString())
             return
         }
-        
+
         // Credentials exist, ensure we have the encryption key
         getEncryptionKey(activity, object : CryptoOperationCallback {
             override fun onSuccess(result: String) {
                 try {
                     Log.d(TAG, "Retrieving credentials from SharedPreferences")
-                    
+
                     // Decrypt credentials
                     val decryptedJson = decryptData(encryptedCredentialsJson)
-                    
+
                     callback.onSuccess(decryptedJson)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error retrieving credentials", e)
                     callback.onError(e)
                 }
             }
-            
+
             override fun onError(e: Exception) {
                 Log.e(TAG, "Failed to get encryption key", e)
                 callback.onError(e)
@@ -455,20 +523,20 @@ class SharedCredentialStore private constructor(context: Context) {
         // Check if credentials exist
         val prefs = appContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         val encryptedCredentialsJson = prefs.getString(CREDENTIALS_KEY, null)
-        
+
         if (encryptedCredentialsJson == null) {
             // No credentials found, return empty array
             Log.d(TAG, "No credentials found, returning empty array")
             callback.onSuccess(JSONArray().toString())
             return true
         }
-        
+
         try {
             Log.d(TAG, "Retrieving credentials using cached key")
-            
+
             // Decrypt credentials directly with cached key
             val decryptedJson = decryptData(encryptedCredentialsJson)
-            
+
             callback.onSuccess(decryptedJson)
             return true
         } catch (e: Exception) {
@@ -488,15 +556,15 @@ class SharedCredentialStore private constructor(context: Context) {
             .remove(CREDENTIALS_KEY)
             .remove(ENCRYPTED_KEY_PREF)
             .apply()
-            
+
         // Clear the cached encryption key
         encryptionKey = null
-        
+
         // Remove the key from Android Keystore if it exists
         try {
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
-            
+
             if (keyStore.containsAlias(KEYSTORE_ALIAS)) {
                 keyStore.deleteEntry(KEYSTORE_ALIAS)
                 Log.d(TAG, "Removed encryption key from Android Keystore")
@@ -562,4 +630,4 @@ class SharedCredentialStore private constructor(context: Context) {
             }
         }
     }
-} 
+}

@@ -94,7 +94,25 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             override fun onSuccess(result: String) {
                 isVaultUnlocked = true
                 lastUnlockTime = System.currentTimeMillis()
-                promise.resolve(true)
+
+                // Now that we have the key, we can initialize the database
+                try {
+                    val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
+                    val encryptedDb = prefs.getString("encrypted_db", null)
+
+                    if (encryptedDb != null) {
+                        // Initialize the database with the decrypted data
+                        println("Initializing database with encrypted data")
+                        val db = VaultDatabase(reactApplicationContext)
+                        println("Database initialized")
+                        db.initializeWithEncryptedData(encryptedDb)
+                    }
+
+                    promise.resolve(true)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error initializing database", e)
+                    promise.reject("ERR_INIT_DB", "Failed to initialize database: ${e.message}", e)
+                }
             }
 
             override fun onError(e: Exception) {
@@ -148,9 +166,27 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun storeEncryptionKey(base64EncryptionKey: String, promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_keys", Activity.MODE_PRIVATE)
-            prefs.edit().putString("encryption_key", base64EncryptionKey).apply()
-            promise.resolve(null)
+            val activity = getFragmentActivity()
+            if (activity == null) {
+                promise.reject("ERR_ACTIVITY", "Activity is not available")
+                return
+            }
+
+            val store = SharedCredentialStore.getInstance(reactApplicationContext)
+            val keyBytes = android.util.Base64.decode(base64EncryptionKey, android.util.Base64.DEFAULT)
+
+            // Store the key in SharedCredentialStore which will handle biometric protection
+            store.getEncryptionKey(activity, object : SharedCredentialStore.CryptoOperationCallback {
+                override fun onSuccess(result: String) {
+                    // Key is now stored securely in SharedCredentialStore
+                    promise.resolve(null)
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, "Error storing encryption key", e)
+                    promise.reject("ERR_STORE_KEY", "Failed to store encryption key: ${e.message}", e)
+                }
+            })
         } catch (e: Exception) {
             Log.e(TAG, "Error storing encryption key", e)
             promise.reject("ERR_STORE_KEY", "Failed to store encryption key: ${e.message}", e)
