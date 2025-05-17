@@ -1,6 +1,6 @@
 services:
     postgres:
-        image: ghcr.io/lanedirt/aliasvault-postgres:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-postgres:latest
         volumes:
             - ./database/postgres:/var/lib/postgresql/data:rw
         env_file:
@@ -14,7 +14,7 @@ services:
             start_period: 10s
 
     client:
-        image: ghcr.io/lanedirt/aliasvault-client:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-client:latest
         volumes:
             - ./logs/msbuild:/apps/server/msbuild-logs:rw
         expose:
@@ -24,7 +24,7 @@ services:
             - .env
 
     api:
-        image: ghcr.io/lanedirt/aliasvault-api:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-api:latest
         expose:
             - "3001"
         volumes:
@@ -41,7 +41,7 @@ services:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     admin:
-        image: ghcr.io/lanedirt/aliasvault-admin:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-admin:latest
         expose:
             - "3002"
         volumes:
@@ -58,7 +58,7 @@ services:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     reverse-proxy:
-        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
         ports:
             - "${HTTP_PORT:-80}:80"
             - "${HTTPS_PORT:-443}:443"
@@ -76,7 +76,7 @@ services:
             - .env
 
     smtp:
-        image: ghcr.io/lanedirt/aliasvault-smtp:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-smtp:latest
         ports:
             - "${SMTP_PORT:-25}:25"
             - "${SMTP_TLS_PORT:-587}:587"
@@ -93,7 +93,7 @@ services:
             ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     task-runner:
-        image: ghcr.io/lanedirt/aliasvault-task-runner:0.16.1
+        image: ghcr.io/lanedirt/aliasvault-task-runner:latest
         volumes:
             - ./database:/database:rw
             - ./logs:/logs:rw
