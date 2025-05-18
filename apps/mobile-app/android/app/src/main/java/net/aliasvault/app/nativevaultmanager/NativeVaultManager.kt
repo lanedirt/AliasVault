@@ -13,7 +13,6 @@ import com.facebook.react.bridge.*
 import net.aliasvault.app.credentialmanager.SharedCredentialStore
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.concurrent.Executors
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
@@ -24,10 +23,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         const val NAME = "NativeVaultManager"
     }
 
-    private val executor = Executors.newSingleThreadExecutor()
-    private var isVaultUnlocked = false
-    private var autoLockTimeout: Long = 300000 // 5 minutes default
-    private var lastUnlockTime: Long = 0
+    private val vaultStore = VaultStore()
 
     override fun getName(): String {
         return NAME
@@ -42,19 +38,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
-    private fun checkVaultLock() {
-        if (isVaultUnlocked && System.currentTimeMillis() - lastUnlockTime > autoLockTimeout) {
-            isVaultUnlocked = false
-        }
-    }
-
     // Basic credential operations
     @ReactMethod
     override fun clearVault(promise: Promise) {
         try {
-            val store = SharedCredentialStore.getInstance(reactApplicationContext)
-            store.clearAllData()
-            isVaultUnlocked = false
+            vaultStore.clearVault()
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error clearing vault", e)
@@ -65,8 +53,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     // Vault state management
     @ReactMethod
     override fun isVaultUnlocked(promise: Promise) {
-        checkVaultLock()
-        promise.resolve(isVaultUnlocked)
+        promise.resolve(vaultStore.isVaultUnlocked())
     }
 
     @ReactMethod
@@ -92,20 +79,12 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         val store = SharedCredentialStore.getInstance(reactApplicationContext)
         store.getEncryptionKey(activity, object : SharedCredentialStore.CryptoOperationCallback {
             override fun onSuccess(result: String) {
-                isVaultUnlocked = true
-                lastUnlockTime = System.currentTimeMillis()
-
-                // Now that we have the key, we can initialize the database
                 try {
                     val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
                     val encryptedDb = prefs.getString("encrypted_db", null)
 
                     if (encryptedDb != null) {
-                        // Initialize the database with the decrypted data
-                        println("Initializing database with encrypted data")
-                        val db = VaultDatabase(reactApplicationContext)
-                        println("Database initialized")
-                        db.initializeWithEncryptedData(encryptedDb)
+                        vaultStore.initializeWithEncryptedData(encryptedDb, result)
                     }
 
                     promise.resolve(true)
@@ -173,12 +152,8 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             }
 
             val store = SharedCredentialStore.getInstance(reactApplicationContext)
-            val keyBytes = android.util.Base64.decode(base64EncryptionKey, android.util.Base64.DEFAULT)
-
-            // Store the key in SharedCredentialStore which will handle biometric protection
             store.getEncryptionKey(activity, object : SharedCredentialStore.CryptoOperationCallback {
                 override fun onSuccess(result: String) {
-                    // Key is now stored securely in SharedCredentialStore
                     promise.resolve(null)
                 }
 
@@ -269,7 +244,6 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun executeQuery(query: String, params: ReadableArray, promise: Promise) {
         try {
-            val db = VaultDatabase(reactApplicationContext)
             val paramsArray = Array<Any?>(params.size()) { i ->
                 when (params.getType(i)) {
                     ReadableType.Null -> null
@@ -280,7 +254,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                 }
             }
 
-            val results = db.executeQuery(query, paramsArray)
+            val results = vaultStore.executeQuery(query, paramsArray)
             val resultArray = Arguments.createArray()
 
             for (row in results) {
@@ -311,7 +285,6 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun executeUpdate(query: String, params: ReadableArray, promise: Promise) {
         try {
-            val db = VaultDatabase(reactApplicationContext)
             val paramsArray = Array<Any?>(params.size()) { i ->
                 when (params.getType(i)) {
                     ReadableType.Null -> null
@@ -322,7 +295,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                 }
             }
 
-            val affectedRows = db.executeUpdate(query, paramsArray)
+            val affectedRows = vaultStore.executeUpdate(query, paramsArray)
             promise.resolve(affectedRows)
         } catch (e: Exception) {
             Log.e(TAG, "Error executing update", e)
@@ -333,8 +306,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun beginTransaction(promise: Promise) {
         try {
-            val db = VaultDatabase(reactApplicationContext)
-            db.beginTransaction()
+            vaultStore.beginTransaction()
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error beginning transaction", e)
@@ -345,8 +317,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun commitTransaction(promise: Promise) {
         try {
-            val db = VaultDatabase(reactApplicationContext)
-            db.commitTransaction()
+            vaultStore.commitTransaction()
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error committing transaction", e)
@@ -357,8 +328,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun rollbackTransaction(promise: Promise) {
         try {
-            val db = VaultDatabase(reactApplicationContext)
-            db.rollbackTransaction()
+            vaultStore.rollbackTransaction()
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error rolling back transaction", e)
@@ -369,9 +339,9 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setAutoLockTimeout(timeout: Double, promise: Promise?) {
         try {
-            autoLockTimeout = timeout.toLong()
+            vaultStore.setAutoLockTimeout(timeout.toLong())
             val prefs = reactApplicationContext.getSharedPreferences("vault_settings", Activity.MODE_PRIVATE)
-            prefs.edit().putLong("auto_lock_timeout", autoLockTimeout).apply()
+            prefs.edit().putLong("auto_lock_timeout", timeout.toLong()).apply()
             promise?.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting auto-lock timeout", e)
@@ -382,8 +352,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getAutoLockTimeout(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_settings", Activity.MODE_PRIVATE)
-            val timeout = prefs.getLong("auto_lock_timeout", 300000) // 5 minutes default
+            val timeout = vaultStore.getAutoLockTimeout()
             promise.resolve(timeout.toInt())
         } catch (e: Exception) {
             Log.e(TAG, "Error getting auto-lock timeout", e)
