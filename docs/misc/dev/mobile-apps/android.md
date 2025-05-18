@@ -33,3 +33,14 @@ If getting `node` errors in Android studio, close and re-open Android Studio fro
 ```
 open -a "Android Studio"
 ```
+
+## Unit tests
+The Android project contains unit tests that test the `VaultStore` native Kotlin implementation. The `VaultStore` logic is responsible for handling vault encryption/decryption, contains the SQLite client and acts as a proxy for all queries made by the React Native and autofill components.
+
+In order to run the Android unit tests:
+
+```
+./gradlew test
+```
+
+You can also open up the project in Android Studio, navigate to the `VaultStoreTest.kt` file and run/debug individual tests.
