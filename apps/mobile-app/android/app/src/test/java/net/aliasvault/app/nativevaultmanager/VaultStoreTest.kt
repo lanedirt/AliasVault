@@ -21,6 +21,8 @@ import java.util.concurrent.Executors
 import org.junit.Assert.*
 import androidx.fragment.app.FragmentActivity
 import com.facebook.react.bridge.Promise
+import net.aliasvault.app.vaultstore.VaultStore
+import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
@@ -30,11 +32,32 @@ class VaultStoreTest {
 
     @Before
     fun setup() {
-        vaultStore = VaultStore()
-
         // Store test data
-        val testDb = loadTestDatabase()
-        vaultStore.initializeWithEncryptedData(testDb, testEncryptionKeyBase64)
+        val encryptedDb = loadTestDatabase()
+
+        // Initialize the VaultStore instance with a mock file provider that
+        // is only used for testing purposes
+        vaultStore = VaultStore(TestStorageProvider())
+
+        vaultStore.storeEncryptionKey(testEncryptionKeyBase64)
+        vaultStore.storeEncryptedDatabase(encryptedDb)
+
+
+        val metadata = """
+        {
+            "publicEmailDomains": ["spamok.com", "spamok.nl"],
+            "privateEmailDomains": ["aliasvault.net", "main.aliasvault.net"],
+            "vaultRevisionNumber": 1
+        }
+        """
+
+        val db = vaultStore.getEncryptedDatabase()
+
+        vaultStore.storeMetadata(metadata)
+
+        //vaultStore.unlockVault()
+
+        //vaultStore.initializeWithEncryptedData(testDb, testEncryptionKeyBase64)
     }
 
     @Test

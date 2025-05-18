@@ -13,6 +13,8 @@ import com.facebook.react.bridge.*
 import net.aliasvault.app.credentialmanager.SharedCredentialStore
 import org.json.JSONArray
 import org.json.JSONObject
+import net.aliasvault.app.vaultstore.VaultStore
+import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
@@ -23,7 +25,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         const val NAME = "NativeVaultManager"
     }
 
-    private val vaultStore = VaultStore()
+    private val vaultStore = VaultStore(AndroidStorageProvider(reactContext))
 
     override fun getName(): String {
         return NAME

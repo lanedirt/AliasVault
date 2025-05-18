@@ -1,4 +1,4 @@
-package net.aliasvault.app.nativevaultmanager
+package net.aliasvault.app.vaultstore
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -16,8 +16,9 @@ import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
-
-class VaultStore() {
+import java.io.File
+import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
+class VaultStore(private val storageProvider: StorageProvider) {
     private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
     private var isVaultUnlocked = false
@@ -54,6 +55,26 @@ class VaultStore() {
             Log.e(TAG, "Error initializing database", e)
             throw e
         }
+    }
+
+    fun storeEncryptionKey(base64EncryptionKey: String) {
+        this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
+    }
+
+    fun storeEncryptedDatabase(encryptedData: String) {
+        // Write the encrypted blob to the filesystem via the supplied file provider
+        // which can either be the real Android file system or a fake file system for testing
+        storageProvider.setEncryptedDatabaseFile(encryptedData)
+    }
+
+    fun getEncryptedDatabase() : File {
+        return storageProvider.getEncryptedDatabaseFile()
+    }
+
+    fun storeMetadata(metadata: String) {
+        // Write the metadata to the filesystem via the supplied file provider
+        // which can either be the real Android file system or a fake file system for testing
+        storageProvider.setMetadata(metadata)
     }
 
     fun executeQuery(query: String, params: Array<Any?>): List<Map<String, Any?>> {
