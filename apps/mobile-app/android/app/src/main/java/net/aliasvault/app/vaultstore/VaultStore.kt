@@ -2,6 +2,7 @@ package net.aliasvault.app.vaultstore
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Base64
 import android.util.Log
@@ -67,14 +68,31 @@ class VaultStore(private val storageProvider: StorageProvider) {
         storageProvider.setEncryptedDatabaseFile(encryptedData)
     }
 
-    fun getEncryptedDatabase() : File {
-        return storageProvider.getEncryptedDatabaseFile()
+    /**
+     * Get the encrypted database from the storage provider
+     * @return The encrypted database as a base64 encoded string
+     */
+    fun getEncryptedDatabase() : String {
+        val encryptedDbBase64 = storageProvider.getEncryptedDatabaseFile().readText()
+        return encryptedDbBase64
     }
 
     fun storeMetadata(metadata: String) {
         // Write the metadata to the filesystem via the supplied file provider
         // which can either be the real Android file system or a fake file system for testing
         storageProvider.setMetadata(metadata)
+    }
+
+    fun unlockVault() {
+        val encryptedDbBase64 = getEncryptedDatabase()
+        val decryptedDbBase64 = decryptData(encryptedDbBase64)
+
+        try {
+            setupDatabaseWithDecryptedData(decryptedDbBase64)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unlocking vault", e)
+            throw e
+        }
     }
 
     fun executeQuery(query: String, params: Array<Any?>): List<Map<String, Any?>> {
@@ -154,6 +172,10 @@ class VaultStore(private val storageProvider: StorageProvider) {
     }
 
     private fun decryptData(encryptedData: String): String {
+        if (encryptionKey == null) {
+            throw IllegalStateException("Encryption key not set")
+        }
+
         try {
             val decoded = Base64.decode(encryptedData, Base64.DEFAULT)
 
@@ -163,7 +185,7 @@ class VaultStore(private val storageProvider: StorageProvider) {
 
             // Create cipher
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            val keySpec = SecretKeySpec(encryptionKey!!, "AES")
+            val keySpec = SecretKeySpec(encryptionKey, "AES")
             val gcmSpec = GCMParameterSpec(128, iv)
 
             // Initialize cipher for decryption
@@ -227,6 +249,71 @@ class VaultStore(private val storageProvider: StorageProvider) {
         gzipOutputStream.write(data.toByteArray(Charsets.UTF_8))
         gzipOutputStream.close()
         return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
+    }
+
+    private fun setupDatabaseWithDecryptedData(decryptedDbBase64: String) {
+        var tempDbFile: File? = null
+        try {
+            // Decode the base64 data
+            val decryptedDbData = Base64.decode(decryptedDbBase64, Base64.DEFAULT)
+
+            // Create a temporary file to store the decrypted database
+            tempDbFile = File.createTempFile("temp_db", ".sqlite")
+            tempDbFile.writeBytes(decryptedDbData)
+
+            // Create an in-memory database
+            dbConnection = SQLiteDatabase.create(null)
+
+            // Begin transaction
+            dbConnection?.beginTransaction()
+
+            try {
+                // Attach the temporary database
+                val attachQuery = "ATTACH DATABASE '${tempDbFile.path}' AS source"
+                dbConnection?.execSQL(attachQuery)
+
+                // Verify the attachment worked by checking if we can access the source database
+                val verifyCursor = dbConnection?.rawQuery(
+                    "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+                    null
+                )
+
+                if (verifyCursor == null || !verifyCursor.moveToFirst()) {
+                    throw SQLiteException("Failed to attach source database or no tables found")
+                }
+
+                verifyCursor.use {
+                    while (it.moveToNext()) {
+                        val tableName = it.getString(0)
+                        // Create table and copy data using rawQuery
+                        dbConnection?.rawQuery("CREATE TABLE $tableName AS SELECT * FROM source.$tableName", null)
+                    }
+                }
+
+                // Commit transaction
+                dbConnection?.setTransactionSuccessful()
+            } finally {
+                dbConnection?.endTransaction()
+            }
+
+            // Detach the source database
+            dbConnection?.rawQuery("DETACH DATABASE source", null)
+
+            // Set database pragmas using rawQuery
+            dbConnection?.rawQuery("PRAGMA journal_mode = WAL", null)
+            dbConnection?.rawQuery("PRAGMA synchronous = NORMAL", null)
+            dbConnection?.rawQuery("PRAGMA foreign_keys = ON", null)
+
+            isVaultUnlocked = true
+            lastUnlockTime = System.currentTimeMillis()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up database with decrypted data", e)
+            throw e
+        } finally {
+            // Clean up temporary file
+            tempDbFile?.delete()
+        }
     }
 
     companion object {

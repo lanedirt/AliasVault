@@ -55,7 +55,7 @@ class VaultStoreTest {
 
         vaultStore.storeMetadata(metadata)
 
-        //vaultStore.unlockVault()
+        vaultStore.unlockVault()
 
         //vaultStore.initializeWithEncryptedData(testDb, testEncryptionKeyBase64)
     }
