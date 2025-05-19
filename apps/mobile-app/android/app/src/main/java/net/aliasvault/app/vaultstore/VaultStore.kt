@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Base64
 import android.util.Log
 import net.aliasvault.app.credentialmanager.SharedCredentialStore
+import net.aliasvault.app.vaultstore.models.*
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -18,7 +19,10 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
+
 class VaultStore(private val storageProvider: StorageProvider) {
     private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
@@ -316,8 +320,167 @@ class VaultStore(private val storageProvider: StorageProvider) {
         }
     }
 
+    fun getAllCredentials(): List<Credential> {
+        if (dbConnection == null) {
+            throw IllegalStateException("Database not initialized")
+        }
+
+        Log.d(TAG, "Executing get all credentials query..")
+
+        val query = """
+            WITH LatestPasswords AS (
+                SELECT
+                    p.Id as password_id,
+                    p.CredentialId,
+                    p.Value,
+                    p.CreatedAt,
+                    p.UpdatedAt,
+                    p.IsDeleted,
+                    ROW_NUMBER() OVER (PARTITION BY p.CredentialId ORDER BY p.CreatedAt DESC) as rn
+                FROM Passwords p
+                WHERE p.IsDeleted = 0
+            )
+            SELECT
+                c.Id,
+                c.AliasId,
+                c.Username,
+                c.Notes,
+                c.CreatedAt,
+                c.UpdatedAt,
+                c.IsDeleted,
+                s.Id as service_id,
+                s.Name as service_name,
+                s.Url as service_url,
+                s.Logo as service_logo,
+                s.CreatedAt as service_created_at,
+                s.UpdatedAt as service_updated_at,
+                s.IsDeleted as service_is_deleted,
+                lp.password_id,
+                lp.Value as password_value,
+                lp.CreatedAt as password_created_at,
+                lp.UpdatedAt as password_updated_at,
+                lp.IsDeleted as password_is_deleted,
+                a.Id as alias_id,
+                a.Gender as alias_gender,
+                a.FirstName as alias_first_name,
+                a.LastName as alias_last_name,
+                a.NickName as alias_nick_name,
+                a.BirthDate as alias_birth_date,
+                a.Email as alias_email,
+                a.CreatedAt as alias_created_at,
+                a.UpdatedAt as alias_updated_at,
+                a.IsDeleted as alias_is_deleted
+            FROM Credentials c
+            LEFT JOIN Services s ON s.Id = c.ServiceId AND s.IsDeleted = 0
+            LEFT JOIN LatestPasswords lp ON lp.CredentialId = c.Id AND lp.rn = 1
+            LEFT JOIN Aliases a ON a.Id = c.AliasId AND a.IsDeleted = 0
+            WHERE c.IsDeleted = 0
+            ORDER BY c.CreatedAt DESC
+        """
+
+        val result = mutableListOf<Credential>()
+        val cursor = dbConnection?.rawQuery(query, null)
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                try {
+                    val id = UUID.fromString(it.getString(0))
+                    val isDeleted = it.getInt(6) == 1
+
+                    // Service
+                    val serviceId = UUID.fromString(it.getString(7))
+                    val service = Service(
+                        id = serviceId,
+                        name = it.getString(8),
+                        url = it.getString(9),
+                        logo = it.getBlob(10),
+                        createdAt = parseDateString(it.getString(11)) ?: MIN_DATE,
+                        updatedAt = parseDateString(it.getString(12)) ?: MIN_DATE,
+                        isDeleted = it.getInt(13) == 1
+                    )
+
+                    // Password
+                    var password: Password? = null
+                    if (!it.isNull(14)) {
+                        password = Password(
+                            id = UUID.fromString(it.getString(14)),
+                            credentialId = id,
+                            value = it.getString(15),
+                            createdAt = parseDateString(it.getString(16)) ?: MIN_DATE,
+                            updatedAt = parseDateString(it.getString(17)) ?: MIN_DATE,
+                            isDeleted = it.getInt(18) == 1
+                        )
+                    }
+
+                    // Alias
+                    var alias: Alias? = null
+                    if (!it.isNull(19)) {
+                        alias = Alias(
+                            id = UUID.fromString(it.getString(19)),
+                            gender = it.getString(20),
+                            firstName = it.getString(21),
+                            lastName = it.getString(22),
+                            nickName = it.getString(23),
+                            birthDate = parseDateString(it.getString(24)) ?: MIN_DATE,
+                            email = it.getString(25),
+                            createdAt = parseDateString(it.getString(26)) ?: MIN_DATE,
+                            updatedAt = parseDateString(it.getString(27)) ?: MIN_DATE,
+                            isDeleted = it.getInt(28) == 1
+                        )
+                    }
+
+                    val credential = Credential(
+                        id = id,
+                        alias = alias,
+                        service = service,
+                        username = it.getString(2),
+                        notes = it.getString(3),
+                        password = password,
+                        createdAt = parseDateString(it.getString(4)) ?: MIN_DATE,
+                        updatedAt = parseDateString(it.getString(5)) ?: MIN_DATE,
+                        isDeleted = isDeleted
+                    )
+                    result.add(credential)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing credential row", e)
+                }
+            }
+        }
+
+        Log.d(TAG, "Found ${result.size} credentials")
+        return result
+    }
+
+    /**
+     * Parse a date string from the database into a Date object
+     *
+     * @param dateString The date string to parse
+     * @return The parsed Date object or null if the date string is null or cannot be parsed
+     */
+    private fun parseDateString(dateString: String?): Date? {
+        if (dateString == null) {
+            return null
+        }
+
+        return try {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.parse(dateString)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing date: $dateString", e)
+            null
+        }
+    }
+
     companion object {
-        private const val DATABASE_NAME = "vault.db"
-        private const val DATABASE_VERSION = 1
+        private val MIN_DATE: Date = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            set(Calendar.YEAR, 1)
+            set(Calendar.MONTH, Calendar.JANUARY)
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
     }
 }

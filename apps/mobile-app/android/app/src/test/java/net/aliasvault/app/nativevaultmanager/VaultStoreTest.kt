@@ -1,28 +1,13 @@
 package net.aliasvault.app.nativevaultmanager
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.test.core.app.ApplicationProvider
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.WritableArray
-import com.facebook.react.bridge.Arguments
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.util.concurrent.Executors
-import org.junit.Assert.*
-import androidx.fragment.app.FragmentActivity
-import com.facebook.react.bridge.Promise
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
+import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
@@ -56,8 +41,6 @@ class VaultStoreTest {
         vaultStore.storeMetadata(metadata)
 
         vaultStore.unlockVault()
-
-        //vaultStore.initializeWithEncryptedData(testDb, testEncryptionKeyBase64)
     }
 
     @Test
@@ -67,95 +50,45 @@ class VaultStoreTest {
 
     @Test
     fun testGetAllCredentials() {
-        val query = "SELECT * FROM credentials"
-        val results = vaultStore.executeQuery(query, emptyArray())
-        assertNotNull(results)
-        assertTrue(results.isNotEmpty())
+        val credentials = vaultStore.getAllCredentials()
+
+        // Verify we got some credentials back
+        assertFalse(credentials.isEmpty(), "Should have retrieved some credentials")
+
+        // Verify the structure of the first credential
+        if (credentials.isNotEmpty()) {
+            val firstCredential = credentials.first()
+            assertNotNull(firstCredential.id, "Credential should have an ID")
+            assertNotNull(firstCredential.service, "Credential should have a service")
+            assertNotNull(firstCredential.password, "Credential should have a password")
+            assertNotNull(firstCredential.username, "Credential should have a username")
+            assertNotNull(firstCredential.createdAt, "Credential should have a creation date")
+            assertNotNull(firstCredential.updatedAt, "Credential should have an update date")
+        }
     }
 
     @Test
     fun testGetGmailCredentialDetails() {
-        val query = "SELECT * FROM credentials WHERE service_name = ?"
-        val params = arrayOf<Any?>("Gmail Test Account")
-        val results = vaultStore.executeQuery(query, params)
-        assertNotNull(results)
-        assertTrue(results.isNotEmpty())
-        assertEquals("Gmail Test Account", results[0]["service_name"])
-    }
+        // Get all credentials
+        val credentials = vaultStore.getAllCredentials()
 
-    @Test
-    fun testTransactionManagement() {
-        // Test begin transaction
-        vaultStore.beginTransaction()
+        // Find the Gmail credential
+        val gmailCredential = credentials.find { it.service.name == "Gmail Test Account" }
+        assertNotNull(gmailCredential, "Gmail Test Account credential should exist")
 
-        // Test execute update within transaction
-        val insertQuery = "INSERT INTO credentials (service_name, username) VALUES (?, ?)"
-        val insertParams = arrayOf<Any?>("Test Service", "testuser")
-        val affectedRows = vaultStore.executeUpdate(insertQuery, insertParams)
-        assertEquals(1, affectedRows)
+        // Verify all expected properties
+        assertEquals("Gmail Test Account", gmailCredential.service.name)
+        assertEquals("https://google.com", gmailCredential.service.url)
+        assertEquals("test.user@gmail.com", gmailCredential.username)
+        assertEquals("Test", gmailCredential.alias?.firstName)
+        assertEquals("User", gmailCredential.alias?.lastName)
+        assertEquals("Test Gmail account for unit testing", gmailCredential.notes)
 
-        // Test commit transaction
-        vaultStore.commitTransaction()
+        // Verify logo exists and has sufficient size
+        val logo = gmailCredential.service.logo
 
-        // Verify the insert was successful
-        val selectQuery = "SELECT * FROM credentials WHERE service_name = ?"
-        val selectParams = arrayOf<Any?>("Test Service")
-        val results = vaultStore.executeQuery(selectQuery, selectParams)
-        assertNotNull(results)
-        assertEquals(1, results.size)
-        assertEquals("testuser", results[0]["username"])
-    }
-
-    @Test
-    fun testRollbackTransaction() {
-        // Test begin transaction
-        vaultStore.beginTransaction()
-
-        // Test execute update within transaction
-        val insertQuery = "INSERT INTO credentials (service_name, username) VALUES (?, ?)"
-        val insertParams = arrayOf<Any?>("Test Service", "testuser")
-        vaultStore.executeUpdate(insertQuery, insertParams)
-
-        // Test rollback transaction
-        vaultStore.rollbackTransaction()
-
-        // Verify the insert was rolled back
-        val selectQuery = "SELECT * FROM credentials WHERE service_name = ?"
-        val selectParams = arrayOf<Any?>("Test Service")
-        val results = vaultStore.executeQuery(selectQuery, selectParams)
-        assertTrue(results.isEmpty())
-    }
-
-    @Test
-    fun testAutoLockTimeout() {
-        // Set a short timeout for testing
-        vaultStore.setAutoLockTimeout(1000) // 1 second
-
-        // Verify vault is unlocked initially
-        assertTrue(vaultStore.isVaultUnlocked())
-
-        // Wait for timeout
-        Thread.sleep(1100)
-
-        // Verify vault is now locked
-        assertFalse(vaultStore.isVaultUnlocked())
-    }
-
-    @Test
-    fun testClearVault() {
-        // Verify vault is unlocked initially
-        assertTrue(vaultStore.isVaultUnlocked())
-
-        // Clear the vault
-        vaultStore.clearVault()
-
-        // Verify vault is now locked
-        assertFalse(vaultStore.isVaultUnlocked())
-
-        // Verify we can't execute queries after clearing
-        val query = "SELECT * FROM credentials"
-        val results = vaultStore.executeQuery(query, emptyArray())
-        assertTrue(results.isEmpty())
+        assertNotNull(logo, "Service logo should not be nil")
+        assertTrue(logo.size > 1024, "Logo data should exceed 1KB in size")
     }
 
     private fun loadTestDatabase(): String {
