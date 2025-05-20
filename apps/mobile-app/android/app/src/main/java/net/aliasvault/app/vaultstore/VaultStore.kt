@@ -66,6 +66,14 @@ class VaultStore(private val storageProvider: StorageProvider) {
         this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
     }
 
+    fun storeEncryptionKeyDerivationParams(keyDerivationParams: String) {
+        this.storageProvider.setKeyDerivationParams(keyDerivationParams)
+    }
+
+    fun getEncryptionKeyDerivationParams(): String {
+        return this.storageProvider.getKeyDerivationParams()
+    }
+
     fun storeEncryptedDatabase(encryptedData: String) {
         // Write the encrypted blob to the filesystem via the supplied file provider
         // which can either be the real Android file system or a fake file system for testing

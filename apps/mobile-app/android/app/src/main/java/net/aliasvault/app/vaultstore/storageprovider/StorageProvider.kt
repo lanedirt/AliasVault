@@ -10,4 +10,6 @@ interface StorageProvider {
     fun setEncryptedDatabaseFile(encryptedData: String)
     fun setMetadata(metadata: String)
     fun getMetadata(): String
+    fun setKeyDerivationParams(keyDerivationParams: String)
+    fun getKeyDerivationParams(): String
 }

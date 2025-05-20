@@ -27,4 +27,16 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
         return sharedPreferences.getString("metadata", "") ?: ""
     }
+
+    override fun setKeyDerivationParams(keyDerivationParams: String) {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("key_derivation_params", keyDerivationParams)
+        editor.apply()
+    }
+
+    override fun getKeyDerivationParams(): String {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("key_derivation_params", "") ?: ""
+    }
 }

@@ -72,43 +72,26 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun unlockVault(promise: Promise) {
-        val activity = getFragmentActivity()
-        if (activity == null) {
-            promise.reject("ERR_ACTIVITY", "Activity is not available")
-            return
+        try {
+            val activity = getFragmentActivity()
+            if (activity == null) {
+                promise.reject("ERR_ACTIVITY", "Activity is not available")
+                return
+            }
+
+            vaultStore.unlockVault()
+            promise.resolve(null)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error storing encryption key", e)
+            promise.reject("ERR_STORE_KEY", "Failed to store encryption key: ${e.message}", e)
         }
-
-        val store = SharedCredentialStore.getInstance(reactApplicationContext)
-        store.getEncryptionKey(activity, object : SharedCredentialStore.CryptoOperationCallback {
-            override fun onSuccess(result: String) {
-                try {
-                    val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
-                    val encryptedDb = prefs.getString("encrypted_db", null)
-
-                    if (encryptedDb != null) {
-                        vaultStore.initializeWithEncryptedData(encryptedDb, result)
-                    }
-
-                    promise.resolve(true)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error initializing database", e)
-                    promise.reject("ERR_INIT_DB", "Failed to initialize database: ${e.message}", e)
-                }
-            }
-
-            override fun onError(e: Exception) {
-                Log.e(TAG, "Error unlocking vault", e)
-                promise.reject("ERR_UNLOCK_VAULT", "Failed to unlock vault: ${e.message}", e)
-            }
-        })
     }
 
     // Database operations
     @ReactMethod
     override fun storeDatabase(base64EncryptedDb: String, promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
-            prefs.edit().putString("encrypted_db", base64EncryptedDb).apply()
+            vaultStore.storeEncryptedDatabase(base64EncryptedDb)
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error storing database", e)
@@ -119,8 +102,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun storeMetadata(metadata: String, promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_metadata", Activity.MODE_PRIVATE)
-            prefs.edit().putString("metadata", metadata).apply()
+            vaultStore.storeMetadata(metadata)
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error storing metadata", e)
@@ -153,17 +135,8 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                 return
             }
 
-            val store = SharedCredentialStore.getInstance(reactApplicationContext)
-            store.getEncryptionKey(activity, object : SharedCredentialStore.CryptoOperationCallback {
-                override fun onSuccess(result: String) {
-                    promise.resolve(null)
-                }
-
-                override fun onError(e: Exception) {
-                    Log.e(TAG, "Error storing encryption key", e)
-                    promise.reject("ERR_STORE_KEY", "Failed to store encryption key: ${e.message}", e)
-                }
-            })
+            vaultStore.storeEncryptionKey(base64EncryptionKey)
+            promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error storing encryption key", e)
             promise.reject("ERR_STORE_KEY", "Failed to store encryption key: ${e.message}", e)
@@ -173,8 +146,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun storeEncryptionKeyDerivationParams(keyDerivationParams: String, promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_keys", Activity.MODE_PRIVATE)
-            prefs.edit().putString("key_derivation_params", keyDerivationParams).apply()
+            vaultStore.storeEncryptionKeyDerivationParams(keyDerivationParams)
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error storing key derivation params", e)
@@ -185,8 +157,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getEncryptionKeyDerivationParams(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_keys", Activity.MODE_PRIVATE)
-            val params = prefs.getString("key_derivation_params", null)
+            val params = vaultStore.getEncryptionKeyDerivationParams()
             promise.resolve(params)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting key derivation params", e)
@@ -209,9 +180,8 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getEncryptedDatabase(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
-            val db = prefs.getString("encrypted_db", null)
-            promise.resolve(db)
+            val encryptedDb = vaultStore.getEncryptedDatabase()
+            promise.resolve(encryptedDb)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting encrypted database", e)
             promise.reject("ERR_GET_DB", "Failed to get encrypted database: ${e.message}", e)
