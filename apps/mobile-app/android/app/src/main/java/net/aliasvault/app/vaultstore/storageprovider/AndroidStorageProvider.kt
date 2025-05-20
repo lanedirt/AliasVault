@@ -39,4 +39,28 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
         return sharedPreferences.getString("key_derivation_params", "") ?: ""
     }
+
+    override fun setAuthMethods(authMethods: String) {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("auth_methods", authMethods)
+        editor.apply()
+    }
+
+    override fun getAuthMethods(): String {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("auth_methods", "[]") ?: "[]"
+    }
+
+    override fun setAutoLockTimeout(timeout: Long) {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putLong("auto_lock_timeout", timeout)
+        editor.apply()
+    }
+
+    override fun getAutoLockTimeout(): Long {
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        return sharedPreferences.getLong("auto_lock_timeout", 300000) // 5 minutes default
+    }
 }

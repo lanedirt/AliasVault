@@ -22,6 +22,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
+import org.json.JSONArray
 
 class VaultStore(private val storageProvider: StorageProvider) {
     private var dbConnection: SQLiteDatabase? = null
@@ -30,37 +31,6 @@ class VaultStore(private val storageProvider: StorageProvider) {
     private var autoLockTimeout: Long = 300000 // 5 minutes default
     private var lastUnlockTime: Long = 0
     private var encryptionKey: ByteArray? = null
-
-    fun initializeWithEncryptedData(encryptedData: String, base64EncryptionKey: String) {
-        try {
-            // Decode the encryption key
-            this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
-
-            // Decrypt the data using the encryption key
-            val decryptedData = decryptData(encryptedData)
-
-            // Decompress the data if it's compressed
-            val decompressedData = decompressData(decryptedData)
-
-            // Create an in-memory SQLite database
-            dbConnection = SQLiteDatabase.create(null)
-
-            // Import the SQL statements from the decrypted data
-            val statements = decompressedData.split(";")
-            for (statement in statements) {
-                if (statement.trim().isNotEmpty()) {
-                    dbConnection?.execSQL(statement)
-                }
-            }
-
-            isVaultUnlocked = true
-            lastUnlockTime = System.currentTimeMillis()
-            Log.d(TAG, "Database initialized successfully")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error initializing database", e)
-            throw e
-        }
-    }
 
     fun storeEncryptionKey(base64EncryptionKey: String) {
         this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
@@ -87,6 +57,14 @@ class VaultStore(private val storageProvider: StorageProvider) {
     fun getEncryptedDatabase() : String {
         val encryptedDbBase64 = storageProvider.getEncryptedDatabaseFile().readText()
         return encryptedDbBase64
+    }
+
+    /**
+     * Check if the encrypted database exists in the storage provider
+     * @return True if the encrypted database exists, false otherwise
+     */
+    fun hasEncryptedDatabase() : Boolean {
+        return storageProvider.getEncryptedDatabaseFile().exists()
     }
 
     /**
@@ -180,10 +158,55 @@ class VaultStore(private val storageProvider: StorageProvider) {
 
     fun setAutoLockTimeout(timeout: Long) {
         autoLockTimeout = timeout
+        storageProvider.setAutoLockTimeout(timeout)
     }
 
     fun getAutoLockTimeout(): Long {
-        return autoLockTimeout
+        return storageProvider.getAutoLockTimeout()
+    }
+
+    fun setAuthMethods(authMethods: String) {
+        storageProvider.setAuthMethods(authMethods)
+    }
+
+    fun getAuthMethods(): String {
+        return storageProvider.getAuthMethods()
+    }
+
+    fun setVaultRevisionNumber(revisionNumber: Int) {
+        val metadata = getVaultMetadataObject() ?: VaultMetadata()
+        val updatedMetadata = metadata.copy(vaultRevisionNumber = revisionNumber)
+        storeMetadata(JSONObject().apply {
+            put("publicEmailDomains", JSONArray(updatedMetadata.publicEmailDomains))
+            put("privateEmailDomains", JSONArray(updatedMetadata.privateEmailDomains))
+            put("vaultRevisionNumber", updatedMetadata.vaultRevisionNumber)
+        }.toString())
+    }
+
+    fun getVaultRevisionNumber(): Int {
+        return getVaultMetadataObject()?.vaultRevisionNumber ?: 0
+    }
+
+    private fun getVaultMetadataObject(): VaultMetadata? {
+        val metadataJson = getMetadata()
+        if (metadataJson.isBlank()) {
+            return null
+        }
+        return try {
+            val json = JSONObject(metadataJson)
+            VaultMetadata(
+                publicEmailDomains = json.optJSONArray("publicEmailDomains")?.let { array ->
+                    List(array.length()) { i -> array.getString(i) }
+                } ?: emptyList(),
+                privateEmailDomains = json.optJSONArray("privateEmailDomains")?.let { array ->
+                    List(array.length()) { i -> array.getString(i) }
+                } ?: emptyList(),
+                vaultRevisionNumber = json.optInt("vaultRevisionNumber", 0)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing vault metadata", e)
+            null
+        }
     }
 
     fun clearVault() {
@@ -249,28 +272,6 @@ class VaultStore(private val storageProvider: StorageProvider) {
             Log.e(TAG, "Error encrypting data", e)
             throw e
         }
-    }
-
-    private fun decompressData(compressedData: String): String {
-        val decoded = Base64.decode(compressedData, Base64.DEFAULT)
-        val inputStream = GZIPInputStream(ByteArrayInputStream(decoded))
-        val outputStream = ByteArrayOutputStream()
-
-        val buffer = ByteArray(1024)
-        var len: Int
-        while (inputStream.read(buffer).also { len = it } > 0) {
-            outputStream.write(buffer, 0, len)
-        }
-
-        return outputStream.toString("UTF-8")
-    }
-
-    private fun compressData(data: String): String {
-        val outputStream = ByteArrayOutputStream()
-        val gzipOutputStream = GZIPOutputStream(outputStream)
-        gzipOutputStream.write(data.toByteArray(Charsets.UTF_8))
-        gzipOutputStream.close()
-        return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
     }
 
     private fun setupDatabaseWithDecryptedData(decryptedDbBase64: String) {

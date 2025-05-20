@@ -12,4 +12,8 @@ interface StorageProvider {
     fun getMetadata(): String
     fun setKeyDerivationParams(keyDerivationParams: String)
     fun getKeyDerivationParams(): String
+    fun setAuthMethods(authMethods: String)
+    fun getAuthMethods(): String
+    fun setAutoLockTimeout(timeout: Long)
+    fun getAutoLockTimeout(): Long
 }

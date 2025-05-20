@@ -69,12 +69,6 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun unlockVault(promise: Promise) {
         try {
-            val activity = getFragmentActivity()
-            if (activity == null) {
-                promise.reject("ERR_ACTIVITY", "Activity is not available")
-                return
-            }
-
             vaultStore.unlockVault()
             promise.resolve(null)
         } catch (e: Exception) {
@@ -109,12 +103,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setAuthMethods(authMethods: ReadableArray, promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_auth", Activity.MODE_PRIVATE)
             val jsonArray = JSONArray()
             for (i in 0 until authMethods.size()) {
                 jsonArray.put(authMethods.getString(i))
             }
-            prefs.edit().putString("auth_methods", jsonArray.toString()).apply()
+            vaultStore.setAuthMethods(jsonArray.toString())
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting auth methods", e)
@@ -125,12 +118,6 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun storeEncryptionKey(base64EncryptionKey: String, promise: Promise) {
         try {
-            val activity = getFragmentActivity()
-            if (activity == null) {
-                promise.reject("ERR_ACTIVITY", "Activity is not available")
-                return
-            }
-
             vaultStore.storeEncryptionKey(base64EncryptionKey)
             promise.resolve(null)
         } catch (e: Exception) {
@@ -164,8 +151,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun hasEncryptedDatabase(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_data", Activity.MODE_PRIVATE)
-            val hasDb = prefs.contains("encrypted_db")
+            val hasDb = vaultStore.hasEncryptedDatabase()
             promise.resolve(hasDb)
         } catch (e: Exception) {
             Log.e(TAG, "Error checking encrypted database", e)
@@ -187,8 +173,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getCurrentVaultRevisionNumber(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_metadata", Activity.MODE_PRIVATE)
-            val revision = prefs.getInt("revision_number", 0)
+            val revision = vaultStore.getVaultRevisionNumber()
             promise.resolve(revision)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting vault revision", e)
@@ -199,8 +184,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setCurrentVaultRevisionNumber(revisionNumber: Double, promise: Promise?) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_metadata", Activity.MODE_PRIVATE)
-            prefs.edit().putInt("revision_number", revisionNumber.toInt()).apply()
+            vaultStore.setVaultRevisionNumber(revisionNumber.toInt())
             promise?.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting vault revision", e)
@@ -308,8 +292,6 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     override fun setAutoLockTimeout(timeout: Double, promise: Promise?) {
         try {
             vaultStore.setAutoLockTimeout(timeout.toLong())
-            val prefs = reactApplicationContext.getSharedPreferences("vault_settings", Activity.MODE_PRIVATE)
-            prefs.edit().putLong("auto_lock_timeout", timeout.toLong()).apply()
             promise?.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting auto-lock timeout", e)
@@ -331,8 +313,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getAuthMethods(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_auth", Activity.MODE_PRIVATE)
-            val methodsJson = prefs.getString("auth_methods", "[]")
+            val methodsJson = vaultStore.getAuthMethods()
             val jsonArray = JSONArray(methodsJson)
             val methods = Arguments.createArray()
 

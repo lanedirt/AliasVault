@@ -9,6 +9,9 @@ class TestStorageProvider() : StorageProvider {
     private val tempFile = File.createTempFile("encrypted_database", ".db")
     private var tempMetadata = String()
     private var tempKeyDerivationParams = String()
+    private var tempAuthMethods = "[]"
+    private var tempAutoLockTimeout = 300000L // 5 minutes default
+
     override fun getEncryptedDatabaseFile(): File = tempFile
 
     override fun setEncryptedDatabaseFile(encryptedData: String) {
@@ -29,5 +32,21 @@ class TestStorageProvider() : StorageProvider {
 
     override fun getKeyDerivationParams(): String {
         return tempKeyDerivationParams
+    }
+
+    override fun setAuthMethods(authMethods: String) {
+        tempAuthMethods = authMethods
+    }
+
+    override fun getAuthMethods(): String {
+        return tempAuthMethods
+    }
+
+    override fun setAutoLockTimeout(timeout: Long) {
+        tempAutoLockTimeout = timeout
+    }
+
+    override fun getAutoLockTimeout(): Long {
+        return tempAutoLockTimeout
     }
 }
