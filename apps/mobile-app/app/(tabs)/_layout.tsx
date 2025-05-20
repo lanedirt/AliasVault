@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { IconSymbolName } from '@/components/ui/IconSymbolName';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
@@ -94,7 +95,7 @@ export default function TabLayout() : React.ReactNode {
           /**
            * Icon for the credentials tab.
            */
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="key.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name={IconSymbolName.Key} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -104,7 +105,7 @@ export default function TabLayout() : React.ReactNode {
           /**
            * Icon for the emails tab.
            */
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="envelope.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name={IconSymbolName.Envelope} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -116,7 +117,7 @@ export default function TabLayout() : React.ReactNode {
            */
           tabBarIcon: ({ color }) => (
             <View style={styles.iconContainer}>
-              <IconSymbol size={28} name="gear" color={color} />
+              <IconSymbol size={28} name={IconSymbolName.Gear} color={color} />
               {Platform.OS === 'ios' && authContext.shouldShowIosAutofillReminder && (
                 <View style={styles.iconNotificationContainer}>
                   <ThemedText style={styles.iconNotificationText}>1</ThemedText>

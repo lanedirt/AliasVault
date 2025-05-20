@@ -8,6 +8,7 @@ import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
 import { Credential } from '@/utils/types/Credential';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { IconSymbolName } from '@/components/ui/IconSymbolName';
 
 type EmailCardProps = {
   email: MailboxEmail;
@@ -138,7 +139,7 @@ export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
       </ThemedText>
       {associatedCredential && (
         <View style={styles.serviceContainer}>
-          <IconSymbol size={14} name="key.fill" color={colors.primary} style={styles.serviceIcon} />
+          <IconSymbol size={14} name={IconSymbolName.Key} color={colors.primary} style={styles.serviceIcon} />
           <ThemedText style={styles.serviceName}>
             {associatedCredential.ServiceName}
           </ThemedText>
