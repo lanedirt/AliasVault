@@ -34,9 +34,9 @@ For most version updates, you can use the standard update process:
 > Tip: to skip the confirmation prompts and automatically proceed with the update, use the `-y` flag: `./install.sh update -y`
 
 ## Version-Specific Upgrade Guides
-Some versions require additional steps during upgrade. If you are upgrading from an older version, please check the relevant upgrade guide below:
+Upgrading from certain earlier versions require additional steps during upgrade. If you are upgrading from an older version, please check the relevant articles below if it applies to your server:
 
-- [Updating to v0.10.0](v0.10.0.html) - SQLite to PostgreSQL migration
+- [Updating from < v0.10.0](v0.10.0.html) - SQLite to PostgreSQL migration
 
 ## Additional Update Options
 
