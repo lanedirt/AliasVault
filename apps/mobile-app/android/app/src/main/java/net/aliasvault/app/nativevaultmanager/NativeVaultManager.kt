@@ -6,13 +6,10 @@ import com.facebook.react.bridge.ReactApplicationContext
 
 import android.app.Activity
 import android.util.Log
-import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentActivity
 import com.aliasvault.nativevaultmanager.NativeVaultManagerSpec
 import com.facebook.react.bridge.*
-import net.aliasvault.app.credentialmanager.SharedCredentialStore
 import org.json.JSONArray
-import org.json.JSONObject
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
 
@@ -61,8 +58,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getVaultMetadata(promise: Promise) {
         try {
-            val prefs = reactApplicationContext.getSharedPreferences("vault_metadata", Activity.MODE_PRIVATE)
-            val metadata = prefs.getString("metadata", "{}")
+            val metadata = vaultStore.getMetadata()
             promise.resolve(metadata)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting vault metadata", e)

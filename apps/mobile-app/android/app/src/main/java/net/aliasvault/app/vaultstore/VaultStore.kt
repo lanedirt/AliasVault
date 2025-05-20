@@ -89,10 +89,20 @@ class VaultStore(private val storageProvider: StorageProvider) {
         return encryptedDbBase64
     }
 
+    /**
+     * Store the metadata in the storage provider
+     * @param metadata The metadata to store
+     */
     fun storeMetadata(metadata: String) {
-        // Write the metadata to the filesystem via the supplied file provider
-        // which can either be the real Android file system or a fake file system for testing
         storageProvider.setMetadata(metadata)
+    }
+
+    /**
+     * Get the metadata from the storage provider
+     * @return The metadata as a string
+     */
+    fun getMetadata() : String {
+        return storageProvider.getMetadata()
     }
 
     fun unlockVault() {
