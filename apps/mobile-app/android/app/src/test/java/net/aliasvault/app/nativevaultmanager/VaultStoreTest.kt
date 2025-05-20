@@ -7,6 +7,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
+import java.util.Date
 import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)
@@ -89,6 +90,35 @@ class VaultStoreTest {
 
         assertNotNull(logo, "Service logo should not be nil")
         assertTrue(logo.size > 1024, "Logo data should exceed 1KB in size")
+    }
+
+    @Test
+    fun testDatabaseWriteOperation() {
+        // Create a test setting
+        val testKey = "test_setting_key"
+        val testValue = "test_setting_value"
+
+        // Begin transaction
+        vaultStore.beginTransaction()
+        try {
+            // Insert the setting using raw SQL with parameters
+            val insertSql = "INSERT INTO Settings (Key, Value, CreatedAt, UpdatedAt, IsDeleted) VALUES (?, ?, ?, ?, ?)"
+            val insertResult = vaultStore.executeUpdate(insertSql, arrayOf(testKey, testValue, "2025-01-01 00:00:00", "2025-01-01 00:00:00", 0))
+            assertTrue(insertResult > 0, "Setting insertion should succeed")
+
+            // Verify the setting was inserted by querying it
+            val querySql = "SELECT Value FROM Settings WHERE Key = ?"
+            val results = vaultStore.executeQuery(querySql, arrayOf(testKey))
+
+            assertTrue(results.isNotEmpty(), "Should get a result (amount of updated rows)")
+
+            // If everything succeeded, commit the transaction
+            vaultStore.commitTransaction()
+        } catch (e: Exception) {
+            // If anything fails, rollback the transaction
+            vaultStore.rollbackTransaction()
+            throw e
+        }
     }
 
     private fun loadTestDatabase(): String {

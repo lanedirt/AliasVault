@@ -284,6 +284,9 @@ class VaultStore(private val storageProvider: StorageProvider) {
             tempDbFile = File.createTempFile("temp_db", ".sqlite")
             tempDbFile.writeBytes(decryptedDbData)
 
+            // Close any existing connection if it exists
+            dbConnection?.close()
+
             // Create an in-memory database
             dbConnection = SQLiteDatabase.create(null)
 
@@ -309,7 +312,7 @@ class VaultStore(private val storageProvider: StorageProvider) {
                     while (it.moveToNext()) {
                         val tableName = it.getString(0)
                         // Create table and copy data using rawQuery
-                        dbConnection?.rawQuery("CREATE TABLE $tableName AS SELECT * FROM source.$tableName", null)
+                        dbConnection?.execSQL("CREATE TABLE $tableName AS SELECT * FROM source.$tableName")
                     }
                 }
 
