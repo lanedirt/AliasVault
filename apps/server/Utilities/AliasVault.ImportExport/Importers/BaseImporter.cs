@@ -53,18 +53,27 @@ public static class BaseImporter
             if (!string.IsNullOrEmpty(importedCredential.TwoFactorSecret))
             {
                 // Sanitize the secret key by converting from potential URI to secret key and name.
-                var (secretKey, name) = TotpHelper.SanitizeSecretKey(importedCredential.TwoFactorSecret);
-
-                credential.TotpCodes = new List<TotpCode>
+                try
                 {
-                    new()
+                    var (secretKey, name) = TotpHelper.SanitizeSecretKey(importedCredential.TwoFactorSecret);
+
+                    credential.TotpCodes = new List<TotpCode>
                     {
-                        Name = name ?? "Authenticator",
-                        SecretKey = secretKey,
-                        CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
-                        UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
-                    }
-                };
+                        new()
+                        {
+                            Name = name ?? "Authenticator",
+                            SecretKey = secretKey,
+                            CreatedAt = importedCredential.CreatedAt ?? DateTime.UtcNow,
+                            UpdatedAt = importedCredential.UpdatedAt ?? DateTime.UtcNow,
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    // 2FA extraction failed, log the error and continue with the next credential
+                    // so the import doesn't fail due to failed 2FA extraction.
+                    Console.WriteLine($"Error importing TOTP code: {ex.Message}");
+                }
             }
 
             credentials.Add(credential);
