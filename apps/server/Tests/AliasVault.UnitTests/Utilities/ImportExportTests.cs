@@ -107,7 +107,10 @@ public class ImportExportTests
         var importedCredentials = await BitwardenImporter.ImportFromCsvAsync(fileContent);
 
         // Assert
-        Assert.That(importedCredentials, Has.Count.EqualTo(5));
+        Assert.That(importedCredentials, Has.Count.EqualTo(8));
+
+        // There is one entry which has an invalid TOTP code ("! in the secret), we ensure this logic does not throw a fatal error.
+        var convertedCredentials = BaseImporter.ConvertToCredential(importedCredentials);
 
         // Test specific entries
         var tutaNotaCredential = importedCredentials.First(c => c.ServiceName == "TutaNota");
