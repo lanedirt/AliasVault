@@ -100,7 +100,17 @@ class VaultStore(private val storageProvider: StorageProvider) {
         val results = mutableListOf<Map<String, Any?>>()
 
         dbConnection?.let { db ->
-            val cursor = db.rawQuery(query, params.map { it?.toString() }.toTypedArray())
+            // Convert any base64 strings with the special flag to blobs
+            val convertedParams = params.map { param ->
+                if (param is String && param.startsWith("av-base64-to-blob:")) {
+                    val base64 = param.substring("av-base64-to-blob:".length)
+                    Base64.decode(base64, Base64.DEFAULT)
+                } else {
+                    param
+                }
+            }.toTypedArray()
+
+            val cursor = db.rawQuery(query, convertedParams.map { it?.toString() }.toTypedArray())
 
             cursor.use {
                 val columnNames = it.columnNames
@@ -125,7 +135,17 @@ class VaultStore(private val storageProvider: StorageProvider) {
 
     fun executeUpdate(query: String, params: Array<Any?>): Int {
         dbConnection?.let { db ->
-            db.execSQL(query, params.map { it?.toString() }.toTypedArray())
+            // Convert any base64 strings with the special flag to blobs
+            val convertedParams = params.map { param ->
+                if (param is String && param.startsWith("av-base64-to-blob:")) {
+                    val base64 = param.substring("av-base64-to-blob:".length)
+                    Base64.decode(base64, Base64.DEFAULT)
+                } else {
+                    param
+                }
+            }.toTypedArray()
+
+            db.execSQL(query, convertedParams)
             // Get the number of affected rows
             val cursor = db.rawQuery("SELECT changes()", null)
             cursor.use {
