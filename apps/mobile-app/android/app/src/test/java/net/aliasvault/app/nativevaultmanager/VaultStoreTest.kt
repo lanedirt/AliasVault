@@ -7,6 +7,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
+import net.aliasvault.app.vaultstore.keystoreprovider.TestKeystoreProvider
 import java.util.Date
 import kotlin.test.*
 
@@ -23,7 +24,7 @@ class VaultStoreTest {
 
         // Initialize the VaultStore instance with a mock file provider that
         // is only used for testing purposes
-        vaultStore = VaultStore(TestStorageProvider())
+        vaultStore = VaultStore(TestStorageProvider(), TestKeystoreProvider())
         vaultStore.storeEncryptionKey(testEncryptionKeyBase64)
         vaultStore.storeEncryptedDatabase(encryptedDb)
 

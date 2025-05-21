@@ -12,6 +12,7 @@ import com.facebook.react.bridge.*
 import org.json.JSONArray
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
+import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
@@ -22,7 +23,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         const val NAME = "NativeVaultManager"
     }
 
-    private val vaultStore = VaultStore(AndroidStorageProvider(reactContext))
+    private val vaultStore = VaultStore(
+        AndroidStorageProvider(reactContext),
+        AndroidKeystoreProvider(reactContext, getFragmentActivity())
+    )
 
     override fun getName(): String {
         return NAME

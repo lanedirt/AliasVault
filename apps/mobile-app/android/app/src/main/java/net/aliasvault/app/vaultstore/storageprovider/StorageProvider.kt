@@ -1,19 +1,70 @@
 package net.aliasvault.app.vaultstore.storageprovider
 
+import android.content.Context
 import java.io.File
 
 /**
- * A storage provider that abstracts the storage of the encrypted database file and metadata (SharedPreferences).
+ * Interface for storage providers that can store and retrieve data.
+ * This allows for different implementations for real devices and testing.
  */
 interface StorageProvider {
+    /**
+     * Get the encrypted database file
+     * @return The encrypted database file
+     */
     fun getEncryptedDatabaseFile(): File
+
+    /**
+     * Set the encrypted database file
+     * @param encryptedData The encrypted database data as a base64 encoded string
+     */
     fun setEncryptedDatabaseFile(encryptedData: String)
-    fun setMetadata(metadata: String)
-    fun getMetadata(): String
-    fun setKeyDerivationParams(keyDerivationParams: String)
+
+    /**
+     * Get the key derivation parameters
+     * @return The key derivation parameters as a string
+     */
     fun getKeyDerivationParams(): String
-    fun setAuthMethods(authMethods: String)
-    fun getAuthMethods(): String
-    fun setAutoLockTimeout(timeout: Long)
+
+    /**
+     * Set the key derivation parameters
+     * @param keyDerivationParams The key derivation parameters as a string
+     */
+    fun setKeyDerivationParams(keyDerivationParams: String)
+
+    /**
+     * Get the metadata
+     * @return The metadata as a string
+     */
+    fun getMetadata(): String
+
+    /**
+     * Set the metadata
+     * @param metadata The metadata as a string
+     */
+    fun setMetadata(metadata: String)
+
+    /**
+     * Get the auto-lock timeout
+     * @return The auto-lock timeout in milliseconds
+     */
     fun getAutoLockTimeout(): Long
+
+    /**
+     * Set the auto-lock timeout
+     * @param timeout The auto-lock timeout in milliseconds
+     */
+    fun setAutoLockTimeout(timeout: Long)
+
+    /**
+     * Get the authentication methods
+     * @return The authentication methods as a string
+     */
+    fun getAuthMethods(): String
+
+    /**
+     * Set the authentication methods
+     * @param authMethods The authentication methods as a string
+     */
+    fun setAuthMethods(authMethods: String)
 }

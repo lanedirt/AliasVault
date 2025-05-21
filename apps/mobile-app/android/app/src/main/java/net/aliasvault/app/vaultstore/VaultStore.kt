@@ -1,19 +1,11 @@
 package net.aliasvault.app.vaultstore
 
-import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
-import android.database.sqlite.SQLiteOpenHelper
 import android.util.Base64
 import android.util.Log
-import net.aliasvault.app.credentialmanager.SharedCredentialStore
 import net.aliasvault.app.vaultstore.models.*
 import org.json.JSONObject
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
-import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -23,9 +15,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
 import org.json.JSONArray
-import androidx.core.database.sqlite.transaction
+import androidx.fragment.app.FragmentActivity
+import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreProvider
+import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreOperationCallback
 
-class VaultStore(private val storageProvider: StorageProvider) {
+class VaultStore(
+    private val storageProvider: StorageProvider,
+    private val keystoreProvider: KeystoreProvider
+) {
     private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
     private var isVaultUnlocked = false
@@ -33,8 +30,66 @@ class VaultStore(private val storageProvider: StorageProvider) {
     private var lastUnlockTime: Long = 0
     private var encryptionKey: ByteArray? = null
 
+    // Interface for operations that need callbacks
+    interface CryptoOperationCallback {
+        fun onSuccess(result: String)
+        fun onError(e: Exception)
+    }
+
     fun storeEncryptionKey(base64EncryptionKey: String) {
         this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
+
+        // Check if biometric auth is enabled in auth methods
+        val authMethods = getAuthMethods()
+        if (authMethods.contains("biometric") && keystoreProvider.isBiometricAvailable()) {
+            keystoreProvider.storeKey(
+                key = base64EncryptionKey,
+                object : KeystoreOperationCallback {
+                    override fun onSuccess(result: String) {
+                        Log.d(TAG, "Encryption key stored successfully with biometric protection")
+                    }
+
+                    override fun onError(e: Exception) {
+                        Log.e(TAG, "Error storing encryption key with biometric protection", e)
+                    }
+                }
+            )
+        }
+    }
+
+    fun getEncryptionKey(callback: CryptoOperationCallback) {
+        // If key is already in memory, use it
+        encryptionKey?.let {
+            Log.d(TAG, "Using cached encryption key")
+            callback.onSuccess(Base64.encodeToString(it, Base64.DEFAULT))
+            return
+        }
+
+        // Check if biometric auth is enabled in auth methods
+        val authMethods = getAuthMethods()
+        if (authMethods.contains("biometric") && keystoreProvider.isBiometricAvailable()) {
+            keystoreProvider.retrieveKey(
+                object : KeystoreOperationCallback {
+                    override fun onSuccess(result: String) {
+                        try {
+                            // Cache the key
+                            encryptionKey = Base64.decode(result, Base64.DEFAULT)
+                            callback.onSuccess(result)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error decoding retrieved key", e)
+                            callback.onError(e)
+                        }
+                    }
+
+                    override fun onError(e: Exception) {
+                        Log.e(TAG, "Error retrieving key", e)
+                        callback.onError(e)
+                    }
+                }
+            )
+        } else {
+            callback.onError(Exception("No encryption key found"))
+        }
     }
 
     fun storeEncryptionKeyDerivationParams(keyDerivationParams: String) {
@@ -291,35 +346,57 @@ class VaultStore(private val storageProvider: StorageProvider) {
         dbConnection = null
         isVaultUnlocked = false
         encryptionKey = null
+        keystoreProvider.clearKeys()
     }
 
     private fun decryptData(encryptedData: String): String {
-        if (encryptionKey == null) {
-            throw IllegalStateException("Encryption key not set")
-        }
+        var decryptedResult: String? = null
+        var error: Exception? = null
 
-        try {
-            val decoded = Base64.decode(encryptedData, Base64.DEFAULT)
+        // Create a latch to wait for the callback
+        val latch = java.util.concurrent.CountDownLatch(1)
 
-            // Extract IV from the first 12 bytes
-            val iv = decoded.copyOfRange(0, 12)
-            val encryptedContent = decoded.copyOfRange(12, decoded.size)
+        getEncryptionKey(object : CryptoOperationCallback {
+            override fun onSuccess(result: String) {
+                try {
+                    val decoded = Base64.decode(encryptedData, Base64.DEFAULT)
 
-            // Create cipher
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            val keySpec = SecretKeySpec(encryptionKey, "AES")
-            val gcmSpec = GCMParameterSpec(128, iv)
+                    // Extract IV from the first 12 bytes
+                    val iv = decoded.copyOfRange(0, 12)
+                    val encryptedContent = decoded.copyOfRange(12, decoded.size)
 
-            // Initialize cipher for decryption
-            cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec)
+                    // Create cipher
+                    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                    val keySpec = SecretKeySpec(encryptionKey!!, "AES")
+                    val gcmSpec = GCMParameterSpec(128, iv)
 
-            // Decrypt
-            val decrypted = cipher.doFinal(encryptedContent)
-            return String(decrypted, Charsets.UTF_8)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error decrypting data", e)
-            throw e
-        }
+                    // Initialize cipher for decryption
+                    cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec)
+
+                    // Decrypt
+                    val decrypted = cipher.doFinal(encryptedContent)
+                    decryptedResult = String(decrypted, Charsets.UTF_8)
+                } catch (e: Exception) {
+                    error = e
+                    Log.e(TAG, "Error decrypting data", e)
+                } finally {
+                    latch.countDown()
+                }
+            }
+
+            override fun onError(e: Exception) {
+                error = e
+                Log.e(TAG, "Error getting encryption key", e)
+                latch.countDown()
+            }
+        })
+
+        // Wait for the callback to complete
+        latch.await()
+
+        // Throw any error that occurred or return the result
+        error?.let { throw it }
+        return decryptedResult ?: throw IllegalStateException("Decryption failed")
     }
 
     private fun encryptData(data: String): String {
