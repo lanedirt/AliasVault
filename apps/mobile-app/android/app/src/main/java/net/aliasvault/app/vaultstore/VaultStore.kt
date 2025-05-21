@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
 import org.json.JSONArray
+import androidx.core.database.sqlite.transaction
 
 class VaultStore(private val storageProvider: StorageProvider) {
     private var dbConnection: SQLiteDatabase? = null
@@ -143,6 +144,62 @@ class VaultStore(private val storageProvider: StorageProvider) {
     fun commitTransaction() {
         dbConnection?.setTransactionSuccessful()
         dbConnection?.endTransaction()
+
+        // Create a temporary file to store the database
+        val tempDbFile = File.createTempFile("temp_db", ".sqlite")
+        tempDbFile.writeBytes(ByteArray(0)) // Initialize empty file
+
+        try {
+            // Attach the temporary file as target database
+            dbConnection?.execSQL("ATTACH DATABASE '${tempDbFile.path}' AS target")
+
+            // Begin transaction for copying data
+            dbConnection?.beginTransaction()
+
+            try {
+                // Get all table names from the main database
+                val cursor = dbConnection?.rawQuery(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
+                    null
+                )
+
+                cursor?.use {
+                    while (it.moveToNext()) {
+                        val tableName = it.getString(0)
+                        // Create table and copy data
+                        dbConnection?.execSQL("CREATE TABLE target.$tableName AS SELECT * FROM main.$tableName")
+                    }
+                }
+
+                // Commit the copy transaction
+                dbConnection?.setTransactionSuccessful()
+            } catch (e: Exception) {
+                // If anything fails, rollback the transaction
+                throw e
+            } finally {
+                dbConnection?.endTransaction()
+            }
+
+            // Detach the target database
+            dbConnection?.execSQL("DETACH DATABASE target")
+
+            // Read the temporary database file
+            val rawData = tempDbFile.readBytes()
+
+            // Convert to base64 and encrypt
+            val base64String = Base64.encodeToString(rawData, Base64.DEFAULT)
+            val encryptedBase64Data = encryptData(base64String)
+
+            // Store the encrypted database
+            storeEncryptedDatabase(encryptedBase64Data)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error exporting and encrypting database", e)
+            throw e
+        }
+        finally {
+            // Remove the temporary file
+            tempDbFile.delete()
+        }
     }
 
     fun rollbackTransaction() {
@@ -298,22 +355,40 @@ class VaultStore(private val storageProvider: StorageProvider) {
                 val attachQuery = "ATTACH DATABASE '${tempDbFile.path}' AS source"
                 dbConnection?.execSQL(attachQuery)
 
+                // Select all tables from source temp db (the locally stored one)
+                val tableNamesLocal: List<String> = buildList {
+                    val verifyCursor = dbConnection?.rawQuery(
+                        "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
+                        null
+                    )
+
+                    verifyCursor?.use {
+                        while (it.moveToNext()) {
+                            add(it.getString(0)) // Add table name
+                        }
+                    }
+                }
+
                 // Verify the attachment worked by checking if we can access the source database
                 val verifyCursor = dbConnection?.rawQuery(
                     "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
                     null
                 )
 
-                if (verifyCursor == null || !verifyCursor.moveToFirst()) {
-                    throw SQLiteException("Failed to attach source database or no tables found")
+                if (verifyCursor == null) {
+                    throw SQLiteException("Failed to attach source database")
                 }
 
                 verifyCursor.use {
-                    while (it.moveToNext()) {
+                    if (!it.moveToFirst()) {
+                        throw SQLiteException("No tables found in source database")
+                    }
+
+                    do {
                         val tableName = it.getString(0)
                         // Create table and copy data using rawQuery
                         dbConnection?.execSQL("CREATE TABLE $tableName AS SELECT * FROM source.$tableName")
-                    }
+                    } while (it.moveToNext())
                 }
 
                 // Commit transaction
@@ -329,6 +404,20 @@ class VaultStore(private val storageProvider: StorageProvider) {
             dbConnection?.rawQuery("PRAGMA journal_mode = WAL", null)
             dbConnection?.rawQuery("PRAGMA synchronous = NORMAL", null)
             dbConnection?.rawQuery("PRAGMA foreign_keys = ON", null)
+
+            // Select all tables...
+            val tableNames: List<String> = buildList {
+                val verifyCursor = dbConnection?.rawQuery(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
+                    null
+                )
+
+                verifyCursor?.use {
+                    while (it.moveToNext()) {
+                        add(it.getString(0)) // Add table name
+                    }
+                }
+            }
 
             isVaultUnlocked = true
             lastUnlockTime = System.currentTimeMillis()

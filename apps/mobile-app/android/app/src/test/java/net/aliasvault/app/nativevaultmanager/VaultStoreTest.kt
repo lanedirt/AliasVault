@@ -24,10 +24,8 @@ class VaultStoreTest {
         // Initialize the VaultStore instance with a mock file provider that
         // is only used for testing purposes
         vaultStore = VaultStore(TestStorageProvider())
-
         vaultStore.storeEncryptionKey(testEncryptionKeyBase64)
         vaultStore.storeEncryptedDatabase(encryptedDb)
-
 
         val metadata = """
         {
@@ -36,11 +34,7 @@ class VaultStoreTest {
             "vaultRevisionNumber": 1
         }
         """
-
-        val db = vaultStore.getEncryptedDatabase()
-
         vaultStore.storeMetadata(metadata)
-
         vaultStore.unlockVault()
     }
 
@@ -114,9 +108,21 @@ class VaultStoreTest {
 
             // If everything succeeded, commit the transaction
             vaultStore.commitTransaction()
+
+            // Then, try to re-load the database and ensure the __EFMigrationsHistory table still exists.
+            // This asserts that the database commit results in a properly exported and encrypted database file.
+            vaultStore.clearVault()
+            vaultStore.storeEncryptionKey(testEncryptionKeyBase64)
+            vaultStore.unlockVault()
+
+            // Do a query
+            val querySql2 = "SELECT MigrationId FROM __EFMigrationsHistory"
+            val results2 = vaultStore.executeQuery(querySql2, arrayOf<Any?>())
+
+            assertTrue(results2.isNotEmpty(), "Should get a result (migration history table contents)")
+
         } catch (e: Exception) {
             // If anything fails, rollback the transaction
-            vaultStore.rollbackTransaction()
             throw e
         }
     }
