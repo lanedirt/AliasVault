@@ -25,6 +25,7 @@ class VaultStore(
 ) {
     private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
+    private val BIOMETRICS_AUTH_METHOD = "faceid"
     private var isVaultUnlocked = false
     private var autoLockTimeout: Long = 300000 // 5 minutes default
     private var lastUnlockTime: Long = 0
@@ -41,7 +42,7 @@ class VaultStore(
 
         // Check if biometric auth is enabled in auth methods
         val authMethods = getAuthMethods()
-        if (authMethods.contains("biometric") && keystoreProvider.isBiometricAvailable()) {
+        if (authMethods.contains(BIOMETRICS_AUTH_METHOD) && keystoreProvider.isBiometricAvailable()) {
             keystoreProvider.storeKey(
                 key = base64EncryptionKey,
                 object : KeystoreOperationCallback {
@@ -67,7 +68,9 @@ class VaultStore(
 
         // Check if biometric auth is enabled in auth methods
         val authMethods = getAuthMethods()
-        if (authMethods.contains("biometric") && keystoreProvider.isBiometricAvailable()) {
+        val contains = authMethods.contains(BIOMETRICS_AUTH_METHOD)
+        val available = keystoreProvider.isBiometricAvailable()
+        if (authMethods.contains(BIOMETRICS_AUTH_METHOD) && keystoreProvider.isBiometricAvailable()) {
             keystoreProvider.retrieveKey(
                 object : KeystoreOperationCallback {
                     override fun onSuccess(result: String) {

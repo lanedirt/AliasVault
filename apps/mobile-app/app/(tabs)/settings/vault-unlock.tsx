@@ -16,9 +16,9 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   const colors = useColors();
   const [initialized, setInitialized] = useState(false);
   const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayName } = useAuth();
-  const [hasFaceID, setHasFaceID] = useState(false);
-  const [isFaceIDEnabled, setIsFaceIDEnabled] = useState(false);
-  const [biometricDisplayName, setBiometricDisplayName] = useState('Face ID / Touch ID');
+  const [hasBiometrics, setHasBiometrics] = useState(false);
+  const [isBiometricsEnabled, setIsBiometricsEnabled] = useState(false);
+  const [biometricDisplayName, setBiometricDisplayName] = useState(Platform.OS === 'ios' ? 'Face ID / Touch ID' : 'Biometrics');
   const [_, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
 
   useEffect(() => {
@@ -26,21 +26,42 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
      * Initialize the auth methods.
      */
     const initializeAuth = async () : Promise<void> => {
-      const compatible = await LocalAuthentication.hasHardwareAsync();
-      const enrolled = await LocalAuthentication.isEnrolledAsync();
-      setHasFaceID(compatible && enrolled);
+      try {
+        // Check for hardware support
+        const compatible = await LocalAuthentication.hasHardwareAsync();
 
-      const displayName = await getBiometricDisplayName();
-      setBiometricDisplayName(displayName);
+        // Check if any biometrics are enrolled
+        const enrolled = await LocalAuthentication.isEnrolledAsync();
 
-      const methods = await getEnabledAuthMethods();
-      setEnabledAuthMethods(methods);
+        // Check for strong authentication support
+        const hasStrongAuth = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Checking biometric capabilities',
+          disableDeviceFallback: true,
+          cancelLabel: 'Cancel',
+          fallbackLabel: 'Use password',
+        }).then(result => result.success);
 
-      if (methods.includes('faceid') && enrolled) {
-        setIsFaceIDEnabled(true);
+        // Set biometric availability based on all checks
+        const isBiometricAvailable = compatible && enrolled && hasStrongAuth;
+        setHasBiometrics(isBiometricAvailable);
+
+        // Get appropriate display name
+        const displayName = Platform.OS === 'ios' ? await getBiometricDisplayName() : 'Biometrics';
+        setBiometricDisplayName(displayName);
+
+        const methods = await getEnabledAuthMethods();
+        setEnabledAuthMethods(methods);
+
+        if (methods.includes('faceid') && enrolled) {
+          setIsBiometricsEnabled(true);
+        }
+
+        setInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize auth:', error);
+        setHasBiometrics(false);
+        setInitialized(true);
       }
-
-      setInitialized(true);
     };
 
     initializeAuth();
@@ -56,7 +77,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
      */
     const updateAuthMethods = async () : Promise<void> => {
       const currentAuthMethods = await getEnabledAuthMethods();
-      const newAuthMethods = isFaceIDEnabled ? ['faceid', 'password'] : ['password'];
+      const newAuthMethods = isBiometricsEnabled ? ['faceid', 'password'] : ['password'];
 
       if (currentAuthMethods.length === newAuthMethods.length &&
           currentAuthMethods.every(method => newAuthMethods.includes(method))) {
@@ -67,13 +88,13 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
     };
 
     updateAuthMethods();
-  }, [isFaceIDEnabled, setAuthMethods, getEnabledAuthMethods, initialized]);
+  }, [isBiometricsEnabled, setAuthMethods, getEnabledAuthMethods, initialized]);
 
-  const handleFaceIDToggle = useCallback(async (value: boolean) : Promise<void> => {
-    if (value && !hasFaceID) {
+  const handleBiometricsToggle = useCallback(async (value: boolean) : Promise<void> => {
+    if (value && !hasBiometrics) {
       Alert.alert(
-        'Face ID Not Available',
-        'Face ID is disabled for AliasVault. In order to use it, please enable it in the iOS app settings first.',
+        `${biometricDisplayName} Not Available`,
+        `${biometricDisplayName} is disabled for AliasVault. In order to use it, please enable it in your device settings first.`,
         [
           {
             text: 'Open Settings',
@@ -81,10 +102,12 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
              * Handle the open settings press.
              */
             onPress: () : void => {
-              setIsFaceIDEnabled(true);
+              setIsBiometricsEnabled(true);
               setAuthMethods(['faceid', 'password']);
               if (Platform.OS === 'ios') {
                 Linking.openURL('app-settings:');
+              } else {
+                Linking.openSettings();
               }
             },
           },
@@ -95,7 +118,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
              * Handle the cancel press.
              */
             onPress: () : void => {
-              setIsFaceIDEnabled(false);
+              setIsBiometricsEnabled(false);
               setAuthMethods(['password']);
             },
           },
@@ -104,19 +127,19 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       return;
     }
 
-    setIsFaceIDEnabled(value);
+    setIsBiometricsEnabled(value);
     setAuthMethods(value ? ['faceid', 'password'] : ['password']);
 
-    // Show toast notification only on Face ID enabled
+    // Show toast notification only on biometrics enabled
     if (value) {
       Toast.show({
         type: 'success',
-        text1: 'Face ID is now successfully enabled',
+        text1: `${biometricDisplayName} is now successfully enabled`,
         position: 'bottom',
         visibilityTime: 1200,
       });
     }
-  }, [hasFaceID, setAuthMethods]);
+  }, [hasBiometrics, setAuthMethods, biometricDisplayName]);
 
   const styles = StyleSheet.create({
     container: {
@@ -177,25 +200,25 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
         <View style={styles.optionContainer}>
           <TouchableOpacity
             style={styles.option}
-            onPress={() => handleFaceIDToggle(!isFaceIDEnabled)}
+            onPress={() => handleBiometricsToggle(!isBiometricsEnabled)}
           >
             <View style={styles.optionHeader}>
-              <ThemedText style={[styles.optionText, !hasFaceID && styles.disabledText]}>
+              <ThemedText style={[styles.optionText, !hasBiometrics && styles.disabledText]}>
                 {biometricDisplayName}
               </ThemedText>
               <View pointerEvents="none">
                 <Switch
-                  value={isFaceIDEnabled}
-                  disabled={!hasFaceID}
+                  value={isBiometricsEnabled}
+                  disabled={!hasBiometrics}
                 />
               </View>
             </View>
             <ThemedText style={styles.helpText}>
-              Your vault decryption key will be securely stored on your local device in the iOS Keychain and can be accessed securely with {biometricDisplayName}.
+              Your vault decryption key will be securely stored on your local device in the {Platform.OS === 'ios' ? 'iOS Keychain' : 'Android Keystore'} and can be accessed securely with {biometricDisplayName}.
             </ThemedText>
-            {!hasFaceID && (
+            {!hasBiometrics && (
               <ThemedText style={[styles.helpText, { color: colors.errorBorder }]}>
-                {biometricDisplayName} is blocked in iOS settings. Tap to open settings and enable it.
+                {biometricDisplayName} is blocked in device settings. Tap to open settings and enable it.
               </ThemedText>
             )}
           </TouchableOpacity>
