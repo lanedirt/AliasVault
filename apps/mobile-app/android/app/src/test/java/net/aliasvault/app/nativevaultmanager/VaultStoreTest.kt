@@ -8,7 +8,6 @@ import org.robolectric.annotation.Config
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
 import net.aliasvault.app.vaultstore.keystoreprovider.TestKeystoreProvider
-import java.util.Date
 import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)

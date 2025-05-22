@@ -43,18 +43,31 @@ class VaultStore(
         // Check if biometric auth is enabled in auth methods
         val authMethods = getAuthMethods()
         if (authMethods.contains(BIOMETRICS_AUTH_METHOD) && keystoreProvider.isBiometricAvailable()) {
+            // Create a latch to wait for the callback
+            val latch = java.util.concurrent.CountDownLatch(1)
+            var error: Exception? = null
+
             keystoreProvider.storeKey(
                 key = base64EncryptionKey,
                 object : KeystoreOperationCallback {
                     override fun onSuccess(result: String) {
                         Log.d(TAG, "Encryption key stored successfully with biometric protection")
+                        latch.countDown()
                     }
 
                     override fun onError(e: Exception) {
                         Log.e(TAG, "Error storing encryption key with biometric protection", e)
+                        error = e
+                        latch.countDown()
                     }
                 }
             )
+
+            // Wait for the callback to complete
+            latch.await()
+
+            // Throw any error that occurred
+            error?.let { throw it }
         }
     }
 
@@ -68,8 +81,6 @@ class VaultStore(
 
         // Check if biometric auth is enabled in auth methods
         val authMethods = getAuthMethods()
-        val contains = authMethods.contains(BIOMETRICS_AUTH_METHOD)
-        val available = keystoreProvider.isBiometricAvailable()
         if (authMethods.contains(BIOMETRICS_AUTH_METHOD) && keystoreProvider.isBiometricAvailable()) {
             keystoreProvider.retrieveKey(
                 object : KeystoreOperationCallback {

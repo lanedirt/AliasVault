@@ -25,7 +25,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
 
     private val vaultStore = VaultStore(
         AndroidStorageProvider(reactContext),
-        AndroidKeystoreProvider(reactContext, getFragmentActivity())
+        AndroidKeystoreProvider(reactContext) { getFragmentActivity() }
     )
 
     override fun getName(): String {
