@@ -20,7 +20,7 @@ type AuthContextType = {
   username: string | null;
   isOffline: boolean;
   getEnabledAuthMethods: () => Promise<AuthMethod[]>;
-  isFaceIDEnabled: () => Promise<boolean>;
+  isBiometricsEnabled: () => Promise<boolean>;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
   initializeAuth: () => Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }>;
   login: () => Promise<void>;
@@ -92,9 +92,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Check if Face ID is enabled based on enabled auth methods
+   * Check if biometrics is enabled based on enabled auth methods
    */
-  const isFaceIDEnabled = useCallback(async (): Promise<boolean> => {
+  const isBiometricsEnabled = useCallback(async (): Promise<boolean> => {
     const methods = await getEnabledAuthMethods();
     return methods.includes('faceid');
   }, [getEnabledAuthMethods]);
@@ -371,7 +371,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
-    isFaceIDEnabled,
+    isBiometricsEnabled,
     setAuthTokens,
     initializeAuth,
     login,
@@ -395,7 +395,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
-    isFaceIDEnabled,
+    isBiometricsEnabled,
     setAuthTokens,
     initializeAuth,
     login,
