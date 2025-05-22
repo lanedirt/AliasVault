@@ -4,7 +4,6 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.turbomodule.core.interfaces.TurboModule
 import com.facebook.react.bridge.ReactApplicationContext
 
-import android.app.Activity
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.aliasvault.nativevaultmanager.NativeVaultManagerSpec
@@ -16,7 +15,7 @@ import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
-    NativeVaultManagerSpec(reactContext), TurboModule {
+    NativeVaultManagerSpec(reactContext), TurboModule, LifecycleEventListener {
 
     companion object {
         private const val TAG = "NativeVaultManager"
@@ -25,8 +24,27 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
 
     private val vaultStore = VaultStore(
         AndroidStorageProvider(reactContext),
-        AndroidKeystoreProvider(reactContext) { getFragmentActivity() }
+        AndroidKeystoreProvider(reactContext) { getFragmentActivity() },
     )
+
+    init {
+        // Register for lifecycle callbacks
+        reactContext.addLifecycleEventListener(this)
+    }
+
+    override fun onHostPause() {
+        Log.d(TAG, "App entered background")
+        vaultStore.onAppBackgrounded()
+    }
+
+    override fun onHostResume() {
+        Log.d(TAG, "App entered foreground")
+        vaultStore.onAppForegrounded()
+    }
+
+    override fun onHostDestroy() {
+        // Not needed
+    }
 
     override fun getName(): String {
         return NAME
@@ -295,7 +313,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setAutoLockTimeout(timeout: Double, promise: Promise?) {
         try {
-            vaultStore.setAutoLockTimeout(timeout.toLong())
+            vaultStore.setAutoLockTimeout(timeout.toInt())
             promise?.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting auto-lock timeout", e)
@@ -307,7 +325,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     override fun getAutoLockTimeout(promise: Promise) {
         try {
             val timeout = vaultStore.getAutoLockTimeout()
-            promise.resolve(timeout.toInt())
+            promise.resolve(timeout)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting auto-lock timeout", e)
             promise.reject("ERR_GET_TIMEOUT", "Failed to get auto-lock timeout: ${e.message}", e)

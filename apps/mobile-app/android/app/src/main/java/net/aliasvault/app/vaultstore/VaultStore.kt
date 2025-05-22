@@ -15,21 +15,28 @@ import java.text.SimpleDateFormat
 import java.util.*
 import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
 import org.json.JSONArray
-import androidx.fragment.app.FragmentActivity
 import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreProvider
 import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreOperationCallback
+import android.os.Handler
+import android.os.Looper
 
 class VaultStore(
     private val storageProvider: StorageProvider,
-    private val keystoreProvider: KeystoreProvider
+    private val keystoreProvider: KeystoreProvider,
 ) {
     private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
     private val BIOMETRICS_AUTH_METHOD = "faceid"
     private var isVaultUnlocked = false
-    private var autoLockTimeout: Long = 300000 // 5 minutes default
     private var lastUnlockTime: Long = 0
     private var encryptionKey: ByteArray? = null
+    private var autoLockHandler: Handler? = null
+    private var autoLockRunnable: Runnable? = null
+
+    init {
+        // Initialize the handler on the main thread
+        autoLockHandler = Handler(Looper.getMainLooper())
+    }
 
     // Interface for operations that need callbacks
     interface CryptoOperationCallback {
@@ -296,18 +303,18 @@ class VaultStore(
     }
 
     fun isVaultUnlocked(): Boolean {
-        if (isVaultUnlocked && System.currentTimeMillis() - lastUnlockTime > autoLockTimeout) {
-            isVaultUnlocked = false
+        if (encryptionKey == null) {
+            return false
         }
-        return isVaultUnlocked
+
+        return true
     }
 
-    fun setAutoLockTimeout(timeout: Long) {
-        autoLockTimeout = timeout
+    fun setAutoLockTimeout(timeout: Int) {
         storageProvider.setAutoLockTimeout(timeout)
     }
 
-    fun getAutoLockTimeout(): Long {
+    fun getAutoLockTimeout(): Int {
         return storageProvider.getAutoLockTimeout()
     }
 
@@ -360,12 +367,26 @@ class VaultStore(
         }
     }
 
-    fun clearVault() {
+    /**
+     * Clear the memory - remove the encryption key and decrypted database from memory
+     */
+    fun clearCache() {
+        Log.d(TAG, "Clearing cache - removing encryption key and decrypted database from memory")
         dbConnection?.close()
+        encryptionKey = null
         dbConnection = null
         isVaultUnlocked = false
-        encryptionKey = null
+    }
+
+    fun clearVault() {
+        // Remove cached data from memory
+        clearCache()
+
+        // Remove the encryption key stored in the keystore
         keystoreProvider.clearKeys()
+
+        // Remove all data from the storage provider
+        storageProvider.clearStorage()
     }
 
     private fun decryptData(encryptedData: String): String {
@@ -697,6 +718,28 @@ class VaultStore(
             Log.e(TAG, "Error parsing date: $dateString", e)
             null
         }
+    }
+
+    fun onAppBackgrounded() {
+        Log.d(TAG, "App entered background, starting auto-lock timer with ${getAutoLockTimeout()}s")
+        if (getAutoLockTimeout() > 0) {
+            // Cancel any existing auto-lock timer
+            autoLockRunnable?.let { autoLockHandler?.removeCallbacks(it) }
+
+            // Create and schedule new auto-lock timer
+            autoLockRunnable = Runnable {
+                Log.d(TAG, "Auto-lock timer fired, clearing cache")
+                clearCache()
+            }
+            autoLockHandler?.postDelayed(autoLockRunnable!!, getAutoLockTimeout().toLong() * 1000)
+        }
+    }
+
+    fun onAppForegrounded() {
+        Log.d(TAG, "App entered foreground, canceling auto-lock timer")
+        // Cancel the auto-lock timer
+        autoLockRunnable?.let { autoLockHandler?.removeCallbacks(it) }
+        autoLockRunnable = null
     }
 
     companion object {

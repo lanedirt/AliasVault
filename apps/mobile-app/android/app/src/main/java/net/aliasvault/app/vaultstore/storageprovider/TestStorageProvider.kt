@@ -6,11 +6,13 @@ import java.io.File
  * A fake file provider that mocks the storage of the encrypted database file and metadata.
  */
 class TestStorageProvider() : StorageProvider {
+    private var defaultAutoLockTimeout = 3600 // 1 hour default
+
     private val tempFile = File.createTempFile("encrypted_database", ".db")
     private var tempMetadata = String()
     private var tempKeyDerivationParams = String()
     private var tempAuthMethods = "[]"
-    private var tempAutoLockTimeout = 300000L // 5 minutes default
+    private var tempAutoLockTimeout = defaultAutoLockTimeout
 
     override fun getEncryptedDatabaseFile(): File = tempFile
 
@@ -42,11 +44,19 @@ class TestStorageProvider() : StorageProvider {
         return tempAuthMethods
     }
 
-    override fun setAutoLockTimeout(timeout: Long) {
-        tempAutoLockTimeout = timeout
+    override fun setAutoLockTimeout(timeout: Int) {
+        defaultAutoLockTimeout = timeout
     }
 
-    override fun getAutoLockTimeout(): Long {
-        return tempAutoLockTimeout
+    override fun getAutoLockTimeout(): Int {
+        return defaultAutoLockTimeout
+    }
+
+    override fun clearStorage() {
+        tempFile.delete()
+        tempMetadata = ""
+        tempKeyDerivationParams = ""
+        tempAuthMethods = "[]"
+        tempAutoLockTimeout = defaultAutoLockTimeout
     }
 }

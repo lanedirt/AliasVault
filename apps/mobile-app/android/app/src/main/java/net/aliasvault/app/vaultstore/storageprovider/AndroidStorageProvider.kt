@@ -2,11 +2,14 @@ package net.aliasvault.app.vaultstore.storageprovider
 
 import android.content.Context
 import java.io.File
+import androidx.core.content.edit
 
 /**
  * A file provider that returns the encrypted database file from the Android filesystem.
  */
 class AndroidStorageProvider(private val context: Context) : StorageProvider {
+    private var defaultAutoLockTimeout = 3600 // 1 hour default
+
     override fun getEncryptedDatabaseFile(): File {
         return File(context.filesDir, "encrypted_database.db")
     }
@@ -18,9 +21,9 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
 
     override fun setMetadata(metadata: String) {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("metadata", metadata)
-        editor.apply()
+        sharedPreferences.edit {
+            putString("metadata", metadata)
+        }
     }
 
     override fun getMetadata(): String {
@@ -30,9 +33,9 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
 
     override fun setKeyDerivationParams(keyDerivationParams: String) {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("key_derivation_params", keyDerivationParams)
-        editor.apply()
+        sharedPreferences.edit {
+            putString("key_derivation_params", keyDerivationParams)
+        }
     }
 
     override fun getKeyDerivationParams(): String {
@@ -42,9 +45,9 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
 
     override fun setAuthMethods(authMethods: String) {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("auth_methods", authMethods)
-        editor.apply()
+        sharedPreferences.edit {
+            putString("auth_methods", authMethods)
+        }
     }
 
     override fun getAuthMethods(): String {
@@ -52,15 +55,27 @@ class AndroidStorageProvider(private val context: Context) : StorageProvider {
         return sharedPreferences.getString("auth_methods", "[]") ?: "[]"
     }
 
-    override fun setAutoLockTimeout(timeout: Long) {
+    override fun setAutoLockTimeout(timeout: Int) {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putLong("auto_lock_timeout", timeout)
+        editor.putInt("auto_lock_timeout", timeout)
         editor.apply()
     }
 
-    override fun getAutoLockTimeout(): Long {
+    override fun getAutoLockTimeout(): Int {
         val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
-        return sharedPreferences.getLong("auto_lock_timeout", 300000) // 5 minutes default
+        return sharedPreferences.getInt("auto_lock_timeout", defaultAutoLockTimeout)
+    }
+
+    override fun clearStorage() {
+        // Clear all shared preferences
+        val sharedPreferences = context.getSharedPreferences("aliasvault", Context.MODE_PRIVATE)
+        sharedPreferences.edit { clear() }
+
+        // Clear encrypted database file
+        val encryptedDatabaseFile = File(context.filesDir, "encrypted_database.db")
+        if (encryptedDatabaseFile.exists()) {
+            encryptedDatabaseFile.delete()
+        }
     }
 }

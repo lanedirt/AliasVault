@@ -46,15 +46,15 @@ interface StorageProvider {
 
     /**
      * Get the auto-lock timeout
-     * @return The auto-lock timeout in milliseconds
+     * @return The auto-lock timeout in seconds
      */
-    fun getAutoLockTimeout(): Long
+    fun getAutoLockTimeout(): Int
 
     /**
      * Set the auto-lock timeout
-     * @param timeout The auto-lock timeout in milliseconds
+     * @param timeout The auto-lock timeout in seconds
      */
-    fun setAutoLockTimeout(timeout: Long)
+    fun setAutoLockTimeout(timeout: Int)
 
     /**
      * Get the authentication methods
@@ -67,4 +67,9 @@ interface StorageProvider {
      * @param authMethods The authentication methods as a string
      */
     fun setAuthMethods(authMethods: String)
+
+    /**
+     * Clear all data from the storage provider
+     */
+    fun clearStorage()
 }
