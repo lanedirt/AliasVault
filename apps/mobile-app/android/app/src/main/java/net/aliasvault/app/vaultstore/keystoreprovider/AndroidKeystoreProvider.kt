@@ -37,8 +37,11 @@ class AndroidKeystoreProvider(
     private val SHARED_PREFS_NAME = "net.aliasvault.keystore"
 
     override fun isBiometricAvailable(): Boolean {
-        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
-            BiometricManager.BIOMETRIC_SUCCESS
+        return biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
     override fun storeKey(key: String, callback: KeystoreOperationCallback) {
@@ -66,7 +69,7 @@ class AndroidKeystoreProvider(
                     )
                         .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        .setUserAuthenticationRequired(true)
+                        .setUserAuthenticationRequired(false)
                         .build()
 
                     keyGenerator.init(keySpec)
@@ -79,16 +82,26 @@ class AndroidKeystoreProvider(
                 // Create BiometricPrompt
                 val promptInfo = BiometricPrompt.PromptInfo.Builder()
                     .setTitle("Store Encryption Key")
-                    .setSubtitle("Authenticate to securely store your encryption key in the Android Keystore. This enables biometric access to your vault.")
-                    .setNegativeButtonText("Cancel")
+                    .setSubtitle("Authenticate to securely store your encryption key in the Android Keystore. This enables secure access to your vault.")
+                    .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    )
                     .build()
 
                 val biometricPrompt = BiometricPrompt(currentActivity, executor,
                     object : BiometricPrompt.AuthenticationCallback() {
                         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                             try {
-                                // Get the cipher from the result
-                                val cipher = result.cryptoObject?.cipher ?: throw Exception("Cipher is null")
+                                // Initialize cipher for encryption
+                                val cipher = Cipher.getInstance(
+                                    "${KeyProperties.KEY_ALGORITHM_AES}/" +
+                                    "${KeyProperties.BLOCK_MODE_GCM}/" +
+                                    KeyProperties.ENCRYPTION_PADDING_NONE
+                                )
+
+                                // Initialize cipher with the secret key
+                                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
 
                                 // Encrypt the key
                                 val encryptedKey = cipher.doFinal(key.toByteArray())
@@ -109,13 +122,13 @@ class AndroidKeystoreProvider(
                                 callback.onSuccess("Key stored successfully")
                             } catch (e: Exception) {
                                 Log.e(TAG, "Error storing encryption key", e)
-                                callback.onError(e)
+                                callback.onError(Exception("Failed to store encryption key: ${e.message}"))
                             }
                         }
 
                         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                            Log.e(TAG, "Authentication error: $errString")
-                            callback.onError(Exception("Authentication error: $errString"))
+                            Log.e(TAG, "Authentication error: $errorCode - $errString")
+                            callback.onError(Exception("Authentication error: $errString (code: $errorCode)"))
                         }
 
                         override fun onAuthenticationFailed() {
@@ -123,20 +136,12 @@ class AndroidKeystoreProvider(
                         }
                     })
 
-                // Initialize cipher for encryption
-                val cipher = Cipher.getInstance(
-                    "${KeyProperties.KEY_ALGORITHM_AES}/" +
-                    "${KeyProperties.BLOCK_MODE_GCM}/" +
-                    KeyProperties.ENCRYPTION_PADDING_NONE
-                )
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-
-                // Show biometric prompt
-                biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+                // Show biometric prompt without crypto object for device credentials
+                biometricPrompt.authenticate(promptInfo)
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error in biometric key storage", e)
-                callback.onError(e)
+                callback.onError(Exception("Failed to initialize key storage: ${e.message}"))
             }
         }
     }
@@ -177,7 +182,10 @@ class AndroidKeystoreProvider(
                 val promptInfo = BiometricPrompt.PromptInfo.Builder()
                     .setTitle("Unlock Vault")
                     .setSubtitle("Authenticate to access your vault")
-                    .setNegativeButtonText("Cancel")
+                    .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    )
                     .build()
 
                 val biometricPrompt = BiometricPrompt(currentActivity, executor,

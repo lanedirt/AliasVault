@@ -33,16 +33,8 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
         // Check if any biometrics are enrolled
         const enrolled = await LocalAuthentication.isEnrolledAsync();
 
-        // Check for strong authentication support
-        const hasStrongAuth = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Checking biometric capabilities',
-          disableDeviceFallback: true,
-          cancelLabel: 'Cancel',
-          fallbackLabel: 'Use password',
-        }).then(result => result.success);
-
         // Set biometric availability based on all checks
-        const isBiometricAvailable = compatible && enrolled && hasStrongAuth;
+        const isBiometricAvailable = compatible && enrolled;
         setHasBiometrics(isBiometricAvailable);
 
         // Get appropriate display name

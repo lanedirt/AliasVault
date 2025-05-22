@@ -171,11 +171,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Ensure password is always included
     const methodsToSave = methods.includes('password') ? methods : [...methods, 'password'];
 
-    // Update iOS credentials manager
+    // Update native credentials manager
     try {
       await NativeVaultManager.setAuthMethods(methodsToSave);
     } catch (error) {
-      console.error('Failed to update iOS auth methods:', error);
+      console.error('Failed to update native auth methods:', error);
     }
   }, []);
 
@@ -184,10 +184,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const getBiometricDisplayName = useCallback(async (): Promise<string> => {
     try {
-      const hasFaceID = await LocalAuthentication.hasHardwareAsync();
+      const hasBiometrics = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
 
-      if (!hasFaceID || !enrolled) {
+      // For Android, we use the term "Biometrics" for facial recognition and fingerprint.
+      if (Platform.OS === 'android') {
+        return 'Biometrics';
+      }
+
+      // For iOS, we check if the device has explicit Face ID or Touch ID support.
+      if (!hasBiometrics || !enrolled) {
         return 'Face ID / Touch ID';
       }
 

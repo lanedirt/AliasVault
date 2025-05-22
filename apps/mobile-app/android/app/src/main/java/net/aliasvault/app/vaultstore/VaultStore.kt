@@ -313,6 +313,11 @@ class VaultStore(
 
     fun setAuthMethods(authMethods: String) {
         storageProvider.setAuthMethods(authMethods)
+
+        // If the new auth methods no longer include biometrics, clear the biometric key.
+        if (!authMethods.contains(BIOMETRICS_AUTH_METHOD)) {
+            keystoreProvider.clearKeys()
+        }
     }
 
     fun getAuthMethods(): String {
