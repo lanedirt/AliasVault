@@ -1,5 +1,5 @@
 import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
@@ -18,6 +18,7 @@ import { CredentialCard } from '@/components/credentials/CredentialCard';
 import { TitleContainer } from '@/components/ui/TitleContainer';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useWebApi } from '@/context/WebApiContext';
@@ -65,14 +66,14 @@ export default function CredentialsScreen() : React.ReactNode {
     }
   }, [dbContext.sqliteClient, setIsLoadingCredentials]);
 
-  const headerButtons = [{
+  const headerButtons = useMemo(() => [{
     icon: 'add' as const,
     position: 'right' as const,
     /**
      * Add credential.
      */
     onPress: () : void => router.push('/(tabs)/credentials/add-edit')
-  }];
+  }], [router]);
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -260,6 +261,17 @@ export default function CredentialsScreen() : React.ReactNode {
       gap: 8,
     },
   });
+
+  // Set header buttons
+  useEffect(() => {
+    navigation.setOptions({
+      /**
+       * Define custom header which is shown on Android. iOS displays the custom CollapsibleHeader component instead.
+       * @returns
+       */
+      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" headerButtons={headerButtons} /> : <Text>Credentials</Text>,
+    });
+  }, [navigation, headerButtons]);
 
   return (
     <ThemedView style={styles.container}>

@@ -99,7 +99,7 @@ export function CollapsibleHeader({
       right: 0,
     },
     headerButton: {
-      bottom: 6,
+      bottom: 2,
       padding: 4,
       position: 'absolute',
     },
