@@ -411,10 +411,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
             setIsLoading(false);
 
             /*
-             * Hard navigate back to the credentials list as the credential that was
-             * shown in the previous screen is now deleted.
+             * Navigate back to the root of the navigation stack.
+             * On Android, we need to go back twice since we're two levels deep.
+             * On iOS, this will dismiss the modal.
              */
-            router.replace('/credentials');
+            router.back();
+            router.back();
           }
         }
       ]
@@ -422,9 +424,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 76 : 56,
+      paddingTop: Platform.OS === 'ios' ? 32 : 0,
     },
     deleteButton: {
       alignItems: 'center',
