@@ -24,12 +24,12 @@ class VaultStore(
     private val storageProvider: StorageProvider,
     private val keystoreProvider: KeystoreProvider,
 ) {
-    private var dbConnection: SQLiteDatabase? = null
     private val TAG = "VaultStore"
     private val BIOMETRICS_AUTH_METHOD = "faceid"
-    private var isVaultUnlocked = false
-    private var lastUnlockTime: Long = 0
+
     private var encryptionKey: ByteArray? = null
+    private var dbConnection: SQLiteDatabase? = null
+    private var lastUnlockTime: Long = 0
     private var autoLockHandler: Handler? = null
     private var autoLockRunnable: Runnable? = null
 
@@ -375,7 +375,6 @@ class VaultStore(
         dbConnection?.close()
         encryptionKey = null
         dbConnection = null
-        isVaultUnlocked = false
     }
 
     fun clearVault() {
@@ -492,20 +491,6 @@ class VaultStore(
                 val attachQuery = "ATTACH DATABASE '${tempDbFile.path}' AS source"
                 dbConnection?.execSQL(attachQuery)
 
-                // Select all tables from source temp db (the locally stored one)
-                val tableNamesLocal: List<String> = buildList {
-                    val verifyCursor = dbConnection?.rawQuery(
-                        "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
-                        null
-                    )
-
-                    verifyCursor?.use {
-                        while (it.moveToNext()) {
-                            add(it.getString(0)) // Add table name
-                        }
-                    }
-                }
-
                 // Verify the attachment worked by checking if we can access the source database
                 val verifyCursor = dbConnection?.rawQuery(
                     "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
@@ -542,21 +527,6 @@ class VaultStore(
             dbConnection?.rawQuery("PRAGMA synchronous = NORMAL", null)
             dbConnection?.rawQuery("PRAGMA foreign_keys = ON", null)
 
-            // Select all tables...
-            val tableNames: List<String> = buildList {
-                val verifyCursor = dbConnection?.rawQuery(
-                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
-                    null
-                )
-
-                verifyCursor?.use {
-                    while (it.moveToNext()) {
-                        add(it.getString(0)) // Add table name
-                    }
-                }
-            }
-
-            isVaultUnlocked = true
             lastUnlockTime = System.currentTimeMillis()
 
         } catch (e: Exception) {
