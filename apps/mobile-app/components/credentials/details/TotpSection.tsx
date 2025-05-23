@@ -146,8 +146,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
       justifyContent: 'space-between',
     },
     container: {
-      marginTop: 16,
-      padding: 16,
+      paddingTop: 16,
     },
     content: {
       backgroundColor: colors.accentBackground,

@@ -5,12 +5,12 @@ import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useWebApi } from '@/context/WebApiContext';
 import { RefreshToken } from '@/utils/types/webapi/RefreshToken';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 /**
  * Active sessions screen.
  */
@@ -24,15 +24,9 @@ export default function ActiveSessionsScreen() : React.ReactNode {
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     contentContainer: {
       paddingBottom: 40,
+      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
     },
     detailText: {
       color: colors.textMuted,
@@ -57,7 +51,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       textAlign: 'center',
     },
     header: {
-      paddingTop: 16
+      paddingTop: 12
     },
     headerText: {
       color: colors.textMuted,
@@ -175,7 +169,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ScrollView
         contentContainerStyle={styles.contentContainer}
         refreshControl={
@@ -217,6 +211,6 @@ export default function ActiveSessionsScreen() : React.ReactNode {
           )}
         </View>
       </ScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

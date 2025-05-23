@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import srp from 'secure-remote-password/client';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
@@ -15,6 +14,7 @@ import { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse } from '@/u
 import { DeleteAccountRequest } from '@/utils/types/webapi/DeleteAccountRequest';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Delete account screen.
@@ -35,15 +35,9 @@ export default function DeleteAccountScreen(): React.ReactNode {
     button: {
       marginTop: 16,
     },
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 16,
-      paddingTop: insets.top,
-    },
     contentContainer: {
       paddingBottom: 40,
+      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
     },
     form: {
       backgroundColor: colors.accentBackground,
@@ -54,7 +48,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
       padding: 20,
     },
     header: {
-      paddingTop: 16,
+      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
@@ -238,7 +232,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ThemedView style={styles.container}>
+        <ThemedContainer>
           <ScrollView
             contentContainerStyle={styles.contentContainer}
             keyboardShouldPersistTaps="handled"
@@ -298,7 +292,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
               )}
             </View>
           </ScrollView>
-        </ThemedView>
+        </ThemedContainer>
       </KeyboardAvoidingView>
     </>
   );

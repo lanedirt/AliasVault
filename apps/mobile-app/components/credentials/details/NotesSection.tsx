@@ -93,8 +93,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
     },
     section: {
       gap: 8,
-      padding: 16,
-      paddingBottom: 8,
+      paddingTop: 16,
     },
   });
 

@@ -41,8 +41,7 @@ export function ThemedHeader(): React.ReactNode {
         <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
       </View>
     );
-  }
-  else if (Platform.OS === 'android') {
+  } else if (Platform.OS === 'android') {
     return (
       <View style={[styles.header, styles.androidHeader]}>
         <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
@@ -59,7 +58,11 @@ export function ThemedHeader(): React.ReactNode {
  * @returns {Object} The default header options
  */
 export const defaultHeaderOptions = {
-  headerTransparent: true,
+  /**
+   * On iOS, we want the header to be transparent.
+   * On Android, we want the header to be opaque.
+   */
+  headerTransparent: Platform.OS === 'ios' ? true : false,
   /**
    * Header background component that provides consistent styling.
    * @returns {React.ReactNode} The themed header background component

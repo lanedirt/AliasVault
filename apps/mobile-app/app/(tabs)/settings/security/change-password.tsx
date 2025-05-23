@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
@@ -12,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Change password screen.
@@ -33,15 +33,9 @@ export default function ChangePasswordScreen(): React.ReactNode {
     button: {
       marginTop: 8,
     },
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     contentContainer: {
       paddingBottom: 40,
+      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
     },
     form: {
       backgroundColor: colors.accentBackground,
@@ -50,7 +44,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
       padding: 16,
     },
     header: {
-      paddingTop: 16,
+      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
@@ -132,7 +126,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ThemedView style={styles.container}>
+        <ThemedContainer>
           <ScrollView
             contentContainerStyle={styles.contentContainer}
             keyboardShouldPersistTaps="handled"
@@ -182,7 +176,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
               />
             </View>
           </ScrollView>
-        </ThemedView>
+        </ThemedContainer>
       </KeyboardAvoidingView>
     </>
   );

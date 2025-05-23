@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Auto-lock screen.
@@ -40,12 +40,8 @@ export default function AutoLockScreen() : React.ReactNode {
   ];
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
@@ -62,7 +58,7 @@ export default function AutoLockScreen() : React.ReactNode {
     optionContainer: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
-      margin: 16,
+      marginTop: 16,
     },
     optionLast: {
       borderBottomWidth: 0,
@@ -79,7 +75,7 @@ export default function AutoLockScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
@@ -107,6 +103,6 @@ export default function AutoLockScreen() : React.ReactNode {
           })}
         </View>
       </ThemedScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

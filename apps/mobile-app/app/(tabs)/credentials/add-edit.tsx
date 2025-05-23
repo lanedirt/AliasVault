@@ -9,7 +9,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import * as Haptics from 'expo-haptics';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -24,6 +23,7 @@ import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/Val
 import { credentialSchema } from '@/utils/validationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -422,14 +422,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-      paddingTop: 0,
-    },
     contentContainer: {
       paddingBottom: 40,
       paddingTop: Platform.OS === 'ios' ? 76 : 56,
@@ -547,7 +539,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ThemedView style={styles.content}>
+        <ThemedContainer>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
             contentContainerStyle={styles.contentContainer}
@@ -691,7 +683,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
               </>
             )}
           </KeyboardAwareScrollView>
-        </ThemedView>
+        </ThemedContainer>
         <AliasVaultToast />
       </KeyboardAvoidingView>
     </>

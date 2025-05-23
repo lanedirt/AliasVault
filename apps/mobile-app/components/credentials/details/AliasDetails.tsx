@@ -58,8 +58,7 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) : Reac
 
 const styles = {
   section: {
-    padding: 16,
-    paddingBottom: 0,
+    paddingTop: 16,
     gap: 8,
   },
 };

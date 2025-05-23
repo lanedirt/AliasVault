@@ -181,8 +181,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       marginBottom: 8,
     },
     section: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 16,
     },
     subject: {
       color: colors.text,

@@ -1,9 +1,7 @@
 import { Stack } from 'expo-router';
-import { Platform, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Platform } from 'react-native';
 
 import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
-import { AndroidHeader } from '@/components/ui/AndroidHeader';
 
 /**
  * Credentials layout.

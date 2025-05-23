@@ -4,7 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -22,6 +21,7 @@ import { AndroidHeader } from '@/components/ui/AndroidHeader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useWebApi } from '@/context/WebApiContext';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Credentials screen.
@@ -39,7 +39,6 @@ export default function CredentialsScreen() : React.ReactNode {
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
   const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
-  const insets = useSafeAreaInsets();
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -219,15 +218,9 @@ export default function CredentialsScreen() : React.ReactNode {
       color: colors.textMuted,
       fontSize: 20,
     },
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: Platform.OS === 'android' ? insets.top + 24 : insets.top,
-    },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: 42,
+      paddingTop: Platform.OS === 'ios' ? 42 : 0,
     },
     emptyText: {
       color: colors.textMuted,
@@ -274,7 +267,7 @@ export default function CredentialsScreen() : React.ReactNode {
   }, [navigation, headerButtons]);
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <CollapsibleHeader
         title="Credentials"
         scrollY={scrollY}
@@ -354,6 +347,6 @@ export default function CredentialsScreen() : React.ReactNode {
           }
         />
       </ThemedView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

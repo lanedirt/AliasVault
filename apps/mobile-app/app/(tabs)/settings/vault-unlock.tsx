@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
 import { AuthMethod, useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
-import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Vault unlock settings screen.
@@ -134,16 +134,12 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   }, [hasBiometrics, setAuthMethods, biometricDisplayName]);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
     disabledText: {
       color: colors.textMuted,
       opacity: 0.5,
     },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
@@ -163,7 +159,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
     optionContainer: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
-      margin: 16,
+      marginTop: 16,
     },
     optionHeader: {
       alignItems: 'center',
@@ -181,7 +177,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
@@ -229,6 +225,6 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
           </View>
         </View>
       </ThemedScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

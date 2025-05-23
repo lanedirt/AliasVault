@@ -16,7 +16,7 @@ type ThemedScrollViewProps = {
 export function ThemedScrollView({ style, lightColor, darkColor, ...otherProps }: ThemedScrollViewProps): React.ReactNode {
   const insets = useSafeAreaInsets();
 
-  const paddingTop = Platform.OS === 'ios' ? insets.top + 36 : 64;
+  const paddingTop = Platform.OS === 'ios' ? insets.top : 0;
   const paddingBottom = Platform.OS === 'ios' ? insets.bottom + 60 : 0;
 
   return (

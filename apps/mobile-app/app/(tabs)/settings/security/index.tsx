@@ -1,33 +1,25 @@
-import { StyleSheet, View, TouchableOpacity, Animated, ScrollView } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Animated, ScrollView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { SettingsHeader } from '@/components/ui/SettingsHeader';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Security settings screen.
  */
 export default function SecuritySettingsScreen() : React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: 42,
+      paddingTop: Platform.OS === 'ios' ? 42 : 0,
     },
     scrollView: {
       flex: 1,
@@ -71,7 +63,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <Animated.ScrollView
         ref={scrollViewRef}
         onScroll={Animated.event(
@@ -141,6 +133,6 @@ export default function SecuritySettingsScreen() : React.ReactNode {
           </TouchableOpacity>
         </View>
       </Animated.ScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

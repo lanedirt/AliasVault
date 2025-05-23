@@ -50,8 +50,7 @@ export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }
 
 const styles = {
   section: {
-    padding: 16,
-    paddingBottom: 0,
+    paddingTop: 16,
     gap: 8,
   },
 };

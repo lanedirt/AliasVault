@@ -17,6 +17,7 @@ import { EmailPreview } from '@/components/credentials/details/EmailPreview';
 import { TotpSection } from '@/components/credentials/details/TotpSection';
 import { useColors } from '@/hooks/useColorScheme';
 import emitter from '@/utils/EventEmitter';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Credential details screen.
@@ -107,28 +108,30 @@ export default function CredentialDetailsScreen() : React.ReactNode {
   }
 
   return (
-    <ThemedScrollView>
-      <ThemedView style={styles.header}>
-        <CredentialIcon logo={credential.Logo} style={styles.logo} />
-        <View style={styles.headerText}>
-          <ThemedText type="title" style={styles.serviceName}>
-            {credential.ServiceName}
-          </ThemedText>
-          {credential.ServiceUrl && (
-            <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
-              <Text style={[styles.serviceUrl, { color: colors.primary }]}>
-                {credential.ServiceUrl}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ThemedView>
-      <EmailPreview email={credential.Alias.Email} />
-      <TotpSection credential={credential} />
-      <NotesSection credential={credential} />
-      <LoginCredentials credential={credential} />
-      <AliasDetails credential={credential} />
-    </ThemedScrollView>
+    <ThemedContainer>
+      <ThemedScrollView>
+        <ThemedView style={styles.header}>
+          <CredentialIcon logo={credential.Logo} style={styles.logo} />
+          <View style={styles.headerText}>
+            <ThemedText type="title" style={styles.serviceName}>
+              {credential.ServiceName}
+            </ThemedText>
+            {credential.ServiceUrl && (
+              <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
+                <Text style={[styles.serviceUrl, { color: colors.primary }]}>
+                  {credential.ServiceUrl}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ThemedView>
+        <EmailPreview email={credential.Alias.Email} />
+        <TotpSection credential={credential} />
+        <NotesSection credential={credential} />
+        <LoginCredentials credential={credential} />
+        <AliasDetails credential={credential} />
+      </ThemedScrollView>
+    </ThemedContainer>
   );
 }
 
@@ -137,8 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
-    marginTop: 6,
-    padding: 16,
+    paddingTop: 16,
   },
   headerRightButton: {
     padding: 10,

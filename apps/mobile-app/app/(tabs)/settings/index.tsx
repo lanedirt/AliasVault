@@ -2,10 +2,8 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Ale
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useWebApi } from '@/context/WebApiContext';
 import { AppInfo } from '@/utils/AppInfo';
 import { useColors } from '@/hooks/useColorScheme';
@@ -15,6 +13,7 @@ import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Settings screen.
@@ -29,7 +28,6 @@ export default function SettingsScreen() : React.ReactNode {
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
   const [isFirstLoad, setIsFirstLoad] = useMinDurationLoading(true, 100);
-  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -126,15 +124,9 @@ export default function SettingsScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: Platform.OS === 'android' ? insets.top + 24 : insets.top,
-    },
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: 42,
+      paddingTop: Platform.OS === 'ios' ? 42 : 0,
     },
     scrollView: {
       flex: 1,
@@ -212,7 +204,7 @@ export default function SettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <CollapsibleHeader
         title="Settings"
         scrollY={scrollY}
@@ -324,6 +316,6 @@ export default function SettingsScreen() : React.ReactNode {
           <ThemedText style={styles.versionText}>App version {AppInfo.VERSION}</ThemedText>
         </View>
       </Animated.ScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

@@ -2,10 +2,10 @@ import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * iOS autofill screen.
@@ -47,19 +47,15 @@ export default function IosAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-    container: {
-      flex: 1,
-    },
     header: {
-      padding: 16,
-      paddingBottom: 0,
+      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
     },
     instructionContainer: {
-      padding: 16,
+      paddingTop: 16,
     },
     instructionStep: {
       color: colors.text,
@@ -94,7 +90,7 @@ export default function IosAutofillScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ThemedScrollView>
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
@@ -146,6 +142,6 @@ export default function IosAutofillScreen() : React.ReactNode {
           </View>
         </View>
       </ThemedScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }
