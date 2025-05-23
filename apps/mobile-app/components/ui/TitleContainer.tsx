@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -13,6 +13,15 @@ type TitleContainerProps = {
  * Title container component.
  */
 export function TitleContainer({ title, showLogo = true }: TitleContainerProps): React.ReactNode {
+  // On Android, we don't show the title container as the native header is used, so we only return the offline banner.
+  if (Platform.OS === 'android') {
+    return (
+      <>
+        <OfflineBanner />
+      </>
+    );
+  }
+
   return (
     <>
       <OfflineBanner />

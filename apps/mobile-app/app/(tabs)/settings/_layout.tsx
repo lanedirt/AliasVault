@@ -1,6 +1,8 @@
 import { Stack } from 'expo-router';
+import { Platform, Text } from 'react-native';
 
 import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
 
 /**
  * Settings layout.
@@ -11,7 +13,15 @@ export default function SettingsLayout(): React.ReactNode {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: 'Settings',
+          headerShown: Platform.OS === 'android',
+          /**
+           * On Android, we use a custom header component that includes the AliasVault logo.
+           * On iOS, we don't show the header as a custom collapsible header is used.
+           * @returns {React.ReactNode} The header component
+           */
+          headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Settings" /> : <Text>Settings</Text>,
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen

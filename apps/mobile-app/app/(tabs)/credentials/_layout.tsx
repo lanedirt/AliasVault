@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, Text } from 'react-native';
 
 import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
 
 /**
  * Credentials layout.
+ * @returns {React.ReactNode} The credentials layout component
  */
 export default function CredentialsLayout(): React.ReactNode {
   return (
@@ -12,7 +14,15 @@ export default function CredentialsLayout(): React.ReactNode {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: 'Credentials',
+          headerShown: Platform.OS === 'android',
+          /**
+           * On Android, we use a custom header component that includes the AliasVault logo.
+           * On iOS, we don't show the header as a custom collapsible header is used.
+           * @returns {React.ReactNode} The header component
+           */
+          headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" /> : <Text>Credentials</Text>,
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen

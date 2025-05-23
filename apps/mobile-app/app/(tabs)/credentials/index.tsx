@@ -222,7 +222,7 @@ export default function CredentialsScreen() : React.ReactNode {
       flex: 1,
       paddingBottom: insets.bottom,
       paddingHorizontal: 14,
-      paddingTop: insets.top,
+      paddingTop: Platform.OS === 'android' ? insets.top + 24 : insets.top,
     },
     contentContainer: {
       paddingBottom: 40,

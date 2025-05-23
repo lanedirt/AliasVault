@@ -13,6 +13,10 @@ export function ThemedHeader(): React.ReactNode {
   const colors = useColors();
 
   const styles = StyleSheet.create({
+    androidHeader: {
+      backgroundColor: colors.headerBackgroundAndroid,
+      height: 56,
+    },
     header: {
       flex: 1,
     },
@@ -32,8 +36,15 @@ export function ThemedHeader(): React.ReactNode {
         <BlurView
           tint={colorScheme === 'dark' ? 'dark' : 'light'}
           intensity={colorScheme === 'dark' ? 90 : 100}
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackground }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackgroundIos }]}
         />
+        <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
+      </View>
+    );
+  }
+  else if (Platform.OS === 'android') {
+    return (
+      <View style={[styles.header, styles.androidHeader]}>
         <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
       </View>
     );
