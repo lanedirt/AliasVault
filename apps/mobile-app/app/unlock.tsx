@@ -20,11 +20,11 @@ import Logo from '@/assets/images/logo.svg';
  * Unlock screen.
  */
 export default function UnlockScreen() : React.ReactNode {
-  const { isLoggedIn, username, isFaceIDEnabled } = useAuth();
+  const { isLoggedIn, username, isBiometricsEnabled } = useAuth();
   const { testDatabaseConnection } = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFaceIDAvailable, setIsFaceIDAvailable] = useState(false);
+  const [isBiometricsAvailable, setIsBiometricsAvailable] = useState(false);
   const colors = useColors();
   const webApi = useWebApi();
   const { getBiometricDisplayName } = useAuth();
@@ -51,15 +51,15 @@ export default function UnlockScreen() : React.ReactNode {
      * Fetch the biometric config.
      */
     const fetchBiometricConfig = async () : Promise<void> => {
-      const enabled = await isFaceIDEnabled();
-      setIsFaceIDAvailable(enabled);
+      const enabled = await isBiometricsEnabled();
+      setIsBiometricsAvailable(enabled);
 
       const displayName = await getBiometricDisplayName();
       setBiometricDisplayName(displayName);
     };
     fetchBiometricConfig();
 
-  }, [isFaceIDEnabled, getKeyDerivationParams, getBiometricDisplayName]);
+  }, [isBiometricsEnabled, getKeyDerivationParams, getBiometricDisplayName]);
 
   /**
    * Handle the unlock.
@@ -124,9 +124,9 @@ export default function UnlockScreen() : React.ReactNode {
   };
 
   /**
-   * Handle the face ID retry.
+   * Handle the biometrics retry.
    */
-  const handleFaceIDRetry = async () : Promise<void> => {
+  const handleBiometricsRetry = async () : Promise<void> => {
     router.replace('/reinitialize');
   };
 
@@ -327,10 +327,10 @@ export default function UnlockScreen() : React.ReactNode {
                     </ThemedText>
                   </TouchableOpacity>
 
-                  {isFaceIDAvailable && (
+                  {isBiometricsAvailable && (
                     <TouchableOpacity
                       style={styles.faceIdButton}
-                      onPress={handleFaceIDRetry}
+                      onPress={handleBiometricsRetry}
                     >
                       <ThemedText style={styles.faceIdButtonText}>Try {biometricDisplayName} Again</ThemedText>
                     </TouchableOpacity>
