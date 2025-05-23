@@ -45,7 +45,7 @@ class VaultStore(
     }
 
     fun storeEncryptionKey(base64EncryptionKey: String) {
-        this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.DEFAULT)
+        this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.NO_WRAP)
 
         // Check if biometric auth is enabled in auth methods
         val authMethods = getAuthMethods()
@@ -82,7 +82,7 @@ class VaultStore(
         // If key is already in memory, use it
         encryptionKey?.let {
             Log.d(TAG, "Using cached encryption key")
-            callback.onSuccess(Base64.encodeToString(it, Base64.DEFAULT))
+            callback.onSuccess(Base64.encodeToString(it, Base64.NO_WRAP))
             return
         }
 
@@ -94,7 +94,7 @@ class VaultStore(
                     override fun onSuccess(result: String) {
                         try {
                             // Cache the key
-                            encryptionKey = Base64.decode(result, Base64.DEFAULT)
+                            encryptionKey = Base64.decode(result, Base64.NO_WRAP)
                             callback.onSuccess(result)
                         } catch (e: Exception) {
                             Log.e(TAG, "Error decoding retrieved key", e)
@@ -180,7 +180,7 @@ class VaultStore(
             val convertedParams = params.map { param ->
                 if (param is String && param.startsWith("av-base64-to-blob:")) {
                     val base64 = param.substring("av-base64-to-blob:".length)
-                    Base64.decode(base64, Base64.DEFAULT)
+                    Base64.decode(base64, Base64.NO_WRAP)
                 } else {
                     param
                 }
@@ -215,7 +215,7 @@ class VaultStore(
             val convertedParams = params.map { param ->
                 if (param is String && param.startsWith("av-base64-to-blob:")) {
                     val base64 = param.substring("av-base64-to-blob:".length)
-                    Base64.decode(base64, Base64.DEFAULT)
+                    Base64.decode(base64, Base64.NO_WRAP)
                 } else {
                     param
                 }
@@ -283,7 +283,7 @@ class VaultStore(
             val rawData = tempDbFile.readBytes()
 
             // Convert to base64 and encrypt
-            val base64String = Base64.encodeToString(rawData, Base64.DEFAULT)
+            val base64String = Base64.encodeToString(rawData, Base64.NO_WRAP)
             val encryptedBase64Data = encryptData(base64String)
 
             // Store the encrypted database
@@ -398,7 +398,7 @@ class VaultStore(
         getEncryptionKey(object : CryptoOperationCallback {
             override fun onSuccess(result: String) {
                 try {
-                    val decoded = Base64.decode(encryptedData, Base64.DEFAULT)
+                    val decoded = Base64.decode(encryptedData, Base64.NO_WRAP)
 
                     // Extract IV from the first 12 bytes
                     val iv = decoded.copyOfRange(0, 12)
@@ -460,7 +460,7 @@ class VaultStore(
             System.arraycopy(iv, 0, result, 0, iv.size)
             System.arraycopy(encrypted, 0, result, iv.size, encrypted.size)
 
-            return Base64.encodeToString(result, Base64.DEFAULT)
+            return Base64.encodeToString(result, Base64.NO_WRAP)
         } catch (e: Exception) {
             Log.e(TAG, "Error encrypting data", e)
             throw e
@@ -471,7 +471,7 @@ class VaultStore(
         var tempDbFile: File? = null
         try {
             // Decode the base64 data
-            val decryptedDbData = Base64.decode(decryptedDbBase64, Base64.DEFAULT)
+            val decryptedDbData = Base64.decode(decryptedDbBase64, Base64.NO_WRAP)
 
             // Create a temporary file to store the decrypted database
             tempDbFile = File.createTempFile("temp_db", ".sqlite")

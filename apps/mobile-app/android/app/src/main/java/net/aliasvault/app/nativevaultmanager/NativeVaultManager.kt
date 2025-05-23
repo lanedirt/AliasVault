@@ -242,7 +242,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                         is Float -> rowMap.putDouble(key, value.toDouble())
                         is Double -> rowMap.putDouble(key, value)
                         is String -> rowMap.putString(key, value)
-                        is ByteArray -> rowMap.putString(key, android.util.Base64.encodeToString(value, android.util.Base64.DEFAULT))
+                        is ByteArray -> rowMap.putString(key, android.util.Base64.encodeToString(value, android.util.Base64.NO_WRAP))
                         else -> rowMap.putString(key, value.toString())
                     }
                 }

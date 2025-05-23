@@ -114,7 +114,7 @@ class AndroidKeystoreProvider(
                                 val combined = byteBuffer.array()
 
                                 // Store encrypted key in SharedPreferences
-                                val encryptedKeyB64 = Base64.encodeToString(combined, Base64.DEFAULT)
+                                val encryptedKeyB64 = Base64.encodeToString(combined, Base64.NO_WRAP)
                                 val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
                                 prefs.edit().putString(ENCRYPTED_KEY_PREF, encryptedKeyB64).apply()
 
@@ -196,7 +196,7 @@ class AndroidKeystoreProvider(
                                 val cipher = result.cryptoObject?.cipher ?: throw Exception("Cipher is null")
 
                                 // Decode combined data
-                                val combined = Base64.decode(encryptedKeyB64, Base64.DEFAULT)
+                                val combined = Base64.decode(encryptedKeyB64, Base64.NO_WRAP)
 
                                 // Extract IV and encrypted data
                                 val byteBuffer = ByteBuffer.wrap(combined)
@@ -231,7 +231,7 @@ class AndroidKeystoreProvider(
                     })
 
                 // Initialize cipher for decryption with IV from stored encrypted key
-                val combined = Base64.decode(encryptedKeyB64, Base64.DEFAULT)
+                val combined = Base64.decode(encryptedKeyB64, Base64.NO_WRAP)
                 val byteBuffer = ByteBuffer.wrap(combined)
                 val iv = ByteArray(12)
                 byteBuffer.get(iv)
