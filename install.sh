@@ -1254,11 +1254,14 @@ configure_letsencrypt() {
     printf "${CYAN}> Creating Let's Encrypt directories...${NC}\n"
     mkdir -p ./certificates/letsencrypt/www
 
+    # Get absolute path for certificates directory for the docker bind mounts
+    CERTIFICATES_DIR=$(realpath ./certificates)
+
     # Request certificate using a temporary certbot container
     printf "${CYAN}> Requesting Let's Encrypt certificate...${NC}\n"
     docker run --rm \
-        -v ./certificates/letsencrypt:/etc/letsencrypt:rw \
-        -v ./certificates/letsencrypt/www:/var/www/certbot:rw \
+        -v "${CERTIFICATES_DIR}/letsencrypt:/etc/letsencrypt:rw" \
+        -v "${CERTIFICATES_DIR}/letsencrypt/www:/var/www/certbot:rw" \
         certbot/certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
