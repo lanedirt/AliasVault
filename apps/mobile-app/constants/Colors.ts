@@ -27,7 +27,7 @@ export const Colors = {
     tertiary: '#eabf69',
     loginHeader: '#f6dfc4',
     greenBackground: '#22c55e',
-    skeleton: '#rgba(255,255,255,0.4)',
+    skeleton: 'rgba(98, 98, 98, 0.33)',
     red: '#ff0000',
     black: '#000000',
   },
