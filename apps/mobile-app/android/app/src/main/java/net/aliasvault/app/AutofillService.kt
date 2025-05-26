@@ -38,10 +38,9 @@ import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
-import net.aliasvault.app.credentialmanager.Credential
-import net.aliasvault.app.credentialmanager.SharedCredentialStore
-import net.aliasvault.app.credentialmanager.SharedCredentialStore.CryptoOperationCallback
-import org.json.JSONArray
+import net.aliasvault.app.vaultstore.VaultStore
+import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
+import net.aliasvault.app.vaultstore.models.Credential
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -90,76 +89,65 @@ class AutofillService : AutofillService() {
     private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
         Log.d(TAG, "Launching activity for autofill authentication")
 
-        // Get the shared credential store
-        val store = SharedCredentialStore.getInstance(applicationContext)
+        // First try to get an existing instance
+        val store = VaultStore.getExistingInstance()
 
-        // Try to retrieve all credentials using the cached key first, which if available
-        // does not require biometric authentication.
-        if (store.tryGetAllCredentialsWithCachedKey(object : CryptoOperationCallback {
-            override fun onSuccess(jsonString: String) {
-                try {
-                    val jsonArray = JSONArray(jsonString)
-                    Log.d(TAG, "Retrieved ${jsonArray.length()} credentials")
+        if (store != null) {
+            // We have an existing instance, try to get credentials
+            if (store.tryGetAllCredentials(object : CredentialOperationCallback {
+                override fun onSuccess(result: List<Credential>) {
+                    try {
+                        Log.d(TAG, "Retrieved ${result.size} credentials")
+                        if (result.size == 0) {
+                            // No credentials available
+                            Log.d(TAG, "No credentials available")
+                            callback.onSuccess(null)
+                            return
+                        }
 
-                    if (jsonArray.length() == 0) {
-                        // No credentials available
-                        Log.d(TAG, "No credentials available")
+                        // Create a response with all credentials
+                        val responseBuilder = FillResponse.Builder()
+
+                        // Add each credential as a dataset
+                        for (credential in result) {
+                            // Create a dataset for this credential
+                            addDatasetForCredential(responseBuilder, fieldFinder, credential)
+                        }
+
+                        // Send the response back
+                        callback.onSuccess(responseBuilder.build())
+
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing credentials", e)
                         callback.onSuccess(null)
-                        return
                     }
+                }
 
-                    // Create a response with all credentials
-                    val responseBuilder = FillResponse.Builder()
-
-                    // Add each credential as a dataset
-                    for (i in 0 until jsonArray.length()) {
-                        val jsonObject = jsonArray.getJSONObject(i)
-                        val username = jsonObject.getString("username")
-                        val password = jsonObject.getString("password")
-                        val service = jsonObject.getString("service")
-
-                        // Create a credential object
-                        val credential = Credential(username, password, service)
-
-                        // Create a dataset for this credential
-                        addDatasetForCredential(responseBuilder, fieldFinder, credential)
-                    }
-
-                    // Send the response back
-                    callback.onSuccess(responseBuilder.build())
-
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing credentials", e)
+                override fun onError(e: Exception) {
+                    Log.e(TAG, "Error getting credentials", e)
                     callback.onSuccess(null)
                 }
+            })) {
+                // Successfully used cached key - method returns true
+                Log.d(TAG, "Successfully retrieved credentials with unlocked vault")
+                return
             }
-
-            override fun onError(e: Exception) {
-                Log.e(TAG, "Error getting credentials", e)
-                callback.onSuccess(null)
-            }
-        })) {
-            // Successfully used cached key - method returns true
-            Log.d(TAG, "Successfully retrieved credentials with cached key")
-        } else {
-            // No cached key available, we need to launch the AliasVault app in order to
-            // load the encryption key from biometric keystore.
-            Log.d(TAG, "No cached key available, launching activity for authentication")
-
-            // Create an intent to launch MainActivity with autofill flags
-            // TODO: detect "AUTOFILL_REQUEST" when app opens to show proper help text to
-            // indicate vault should be unlocked in order for autofill to work. With dismiss
-            // close buttons etc for better UX.
-            val intent = Intent(this, MainActivity::class.java).apply {
-                // Add flags to launch as a new task
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // Add extra data to indicate this is for autofill
-                putExtra("AUTOFILL_REQUEST", true)
-            }
-
-            // Start the activity
-            startActivity(intent)
         }
+
+        // If we get here, either there was no instance or the vault wasn't unlocked
+        // Launch the AliasVault app in order to load the encryption key from biometric keystore
+        Log.d(TAG, "No unlocked vault available, launching activity for authentication")
+
+        // Create an intent to launch MainActivity with autofill flags
+        val intent = Intent(this, MainActivity::class.java).apply {
+            // Add flags to launch as a new task
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Add extra data to indicate this is for autofill
+            putExtra("AUTOFILL_REQUEST", true)
+        }
+
+        // Start the activity
+        startActivity(intent)
     }
 
     // Helper method to create a dataset from a credential
@@ -172,7 +160,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
         presentation.setTextViewText(
             android.R.id.text1,
-            "AliasVault: ${credential.username} (${credential.service})"
+            "${credential.username} (${credential.service.name})"
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -180,8 +168,15 @@ class AutofillService : AutofillService() {
         // Add autofill values for all fields
         for (field in fieldFinder.autofillableFields) {
             val isPassword = field.second
-            val value = if (isPassword) credential.password else credential.username
-            dataSetBuilder.setValue(field.first, AutofillValue.forText(value))
+            if (isPassword) {
+                if (credential.password != null) {
+                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password as CharSequence))
+                }
+            } else {
+                if (credential.username != null) {
+                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                }
+            }
         }
 
         // Add this dataset to the response
