@@ -21,7 +21,7 @@ import { ThemedContainer } from '@/components/themed/ThemedContainer';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
-  const { getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
+  const { getAuthMethodDisplay, shouldShowIosAutofillReminder, shouldShowAndroidAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -121,6 +121,13 @@ export default function SettingsScreen() : React.ReactNode {
    */
   const handleIosAutofillPress = () : void => {
     router.push('/(tabs)/settings/ios-autofill');
+  };
+
+  /**
+   * Handle the Android autofill press.
+   */
+  const handleAndroidAutofillPress = () : void => {
+    router.push('/(tabs)/settings/android-autofill');
   };
 
   const styles = StyleSheet.create({
@@ -236,6 +243,28 @@ export default function SettingsScreen() : React.ReactNode {
                 <View style={styles.settingItemContent}>
                   <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
                   {shouldShowIosAutofillReminder && (
+                    <View style={styles.settingItemBadge}>
+                      <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
+                    </View>
+                  )}
+                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                </View>
+              </TouchableOpacity>
+              <View style={styles.separator} />
+            </>
+          )}
+          {Platform.OS === 'android' && (
+            <>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={handleAndroidAutofillPress}
+              >
+                <View style={styles.settingItemIcon}>
+                  <Ionicons name="key-outline" size={20} color={colors.text} />
+                </View>
+                <View style={styles.settingItemContent}>
+                  <ThemedText style={styles.settingItemText}>Android Autofill</ThemedText>
+                  {shouldShowAndroidAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
                     </View>

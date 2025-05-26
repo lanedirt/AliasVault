@@ -33,6 +33,14 @@ export default function SettingsLayout(): React.ReactNode {
         }}
       />
       <Stack.Screen
+        name="android-autofill"
+        options={{
+          title: 'Android Autofill',
+          headerBackTitle: 'Settings',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
         name="vault-unlock"
         options={{
           title: 'Vault Unlock Method',
