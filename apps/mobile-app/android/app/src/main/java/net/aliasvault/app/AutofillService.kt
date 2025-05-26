@@ -23,6 +23,7 @@
  *     - Implementing field detection heuristics for apps without autofill hints
  */
 package net.aliasvault.app
+import android.R
 import android.app.assist.AssistStructure
 import android.content.Intent
 import android.os.CancellationSignal
@@ -38,9 +39,18 @@ import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
+import android.service.autofill.InlinePresentation
+import android.widget.inline.InlinePresentationSpec
+import android.app.slice.Slice
+import android.app.slice.SliceSpec
+import android.net.Uri
+import android.graphics.drawable.Icon
+import android.app.PendingIntent
+import android.content.Context
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
+import androidx.core.net.toUri
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -80,6 +90,15 @@ class AutofillService : AutofillService() {
             Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
         }
 
+        // Handle inline suggestions request if present
+        val inlineRequest = request.inlineSuggestionsRequest
+        if (inlineRequest != null) {
+            Log.d(TAG, "Inline suggestions request received!")
+            handleInlineSuggestionsRequest(inlineRequest, callback, fieldFinder)
+            return
+        }
+
+        // If no inline request, proceed with regular autofill
         launchActivityForAutofill(fieldFinder, callback)
     }
 
@@ -164,10 +183,29 @@ class AutofillService : AutofillService() {
         credential: Credential
     ) {
         // Create presentation for this credential
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
+        val presentation = RemoteViews(packageName, R.layout.simple_list_item_1)
         presentation.setTextViewText(
-            android.R.id.text1,
+            R.id.text1,
             "${credential.username} (${credential.service.name})"
+        )
+
+        // Create inline presentation spec
+        val inlinePresentationSpec = InlinePresentationSpec.Builder(
+            android.util.Size(0, 0),  // minSize
+            android.util.Size(500, 100)  // maxSize
+        ).build()
+
+        // Create a Slice for the inline presentation
+        val sliceUri = "content://${packageName}/autofill/${credential.id}".toUri()
+        val slice = Slice.Builder(sliceUri, SliceSpec("autofill", 1))
+            .addText("${credential.username} (${credential.service.name})", null, listOf("title"))
+            .build()
+
+        // Create inline presentation with the Slice
+        val inlinePresentation = InlinePresentation(
+            slice,
+            inlinePresentationSpec,
+            false // isPinned
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -177,11 +215,15 @@ class AutofillService : AutofillService() {
             val isPassword = field.second
             if (isPassword) {
                 if (credential.password != null) {
-                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password as CharSequence))
+                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+                    // Add inline presentation for password field
+                    dataSetBuilder.setInlinePresentation(inlinePresentation)
                 }
             } else {
                 if (credential.username != null) {
                     dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                    // Add inline presentation for username field
+                    dataSetBuilder.setInlinePresentation(inlinePresentation)
                 }
             }
         }
@@ -330,6 +372,115 @@ class AutofillService : AutofillService() {
         }
 
         return false
+    }
+
+    private fun handleInlineSuggestionsRequest(
+        inlineRequest: android.view.inputmethod.InlineSuggestionsRequest,
+        callback: FillCallback,
+        fieldFinder: FieldFinder
+    ) {
+        // Get the maximum number of suggestions requested
+        val maxSuggestions = inlineRequest.maxSuggestionCount
+
+        // Get the inline presentation specs
+        val specs = inlineRequest.inlinePresentationSpecs
+
+        if (specs.isEmpty()) {
+            Log.d(TAG, "No inline presentation specs provided")
+            callback.onSuccess(null)
+            return
+        }
+
+        // First try to get an existing instance
+        val store = VaultStore.getExistingInstance()
+
+        if (store != null) {
+            // We have an existing instance, try to get credentials
+            if (store.tryGetAllCredentials(object : CredentialOperationCallback {
+                override fun onSuccess(result: List<Credential>) {
+                    try {
+                        Log.d(TAG, "Retrieved ${result.size} credentials")
+                        if (result.size == 0) {
+                            // No credentials available
+                            Log.d(TAG, "No credentials available")
+                            callback.onSuccess(null)
+                            return
+                        }
+
+                        // Create a response with credentials
+                        val responseBuilder = FillResponse.Builder()
+
+                        // Add each credential as a dataset, up to max suggestions
+                        for (i in 0 until minOf(result.size, maxSuggestions)) {
+                            val credential = result[i]
+                            val spec = specs[i % specs.size] // Cycle through available specs
+
+                            // Create inline presentation for this credential
+                            val inlinePresentation = createInlinePresentation(credential, spec)
+
+                            // Create dataset with inline presentation
+                            val datasetBuilder = Dataset.Builder()
+                                .setInlinePresentation(inlinePresentation)
+
+                            // Add the credential data to all detected fields
+                            for (field in fieldFinder.autofillableFields) {
+                                val isPassword = field.second
+                                val value = if (isPassword) {
+                                    credential.password?.value as? CharSequence ?: ""
+                                } else {
+                                    credential.username ?: ""
+                                }
+                                datasetBuilder.setValue(
+                                    field.first,
+                                    AutofillValue.forText(value),
+                                )
+                            }
+
+                            // Add this dataset to the response
+                            responseBuilder.addDataset(datasetBuilder.build())
+                        }
+
+                        // Send the response back
+                        callback.onSuccess(responseBuilder.build())
+
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error creating inline suggestions", e)
+                        callback.onSuccess(null)
+                    }
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e(TAG, "Error getting credentials", e)
+                    callback.onSuccess(null)
+                }
+            })) {
+                // Successfully used cached key - method returns true
+                Log.d(TAG, "Successfully retrieved credentials with unlocked vault")
+                return
+            }
+        }
+
+        // If we get here, either there was no instance or the vault wasn't unlocked
+        Log.d(TAG, "No unlocked vault available for inline suggestions")
+        callback.onSuccess(null)
+    }
+
+    private fun createInlinePresentation(
+        credential: Credential,
+        spec: android.widget.inline.InlinePresentationSpec
+    ): InlinePresentation {
+        // Create a Slice for the inline presentation
+        val sliceUri = "content://${packageName}/autofill/${credential.id}".toUri()
+        val slice = Slice.Builder(sliceUri, SliceSpec("autofill", 1))
+            .addText("${credential.username} (${credential.service.name})", null, listOf("title"))
+            .build()
+
+        // Create inline presentation with the Slice
+        return InlinePresentation(
+            slice,
+            spec,
+            false // isPinned
+        )
     }
 
     private class FieldFinder {
