@@ -44,6 +44,11 @@ class VaultStore(
         fun onError(e: Exception)
     }
 
+    interface CredentialOperationCallback {
+        fun onSuccess(result: List<Credential>)
+        fun onError(e: Exception)
+    }
+
     fun storeEncryptionKey(base64EncryptionKey: String) {
         this.encryptionKey = Base64.decode(base64EncryptionKey, Base64.NO_WRAP)
 
@@ -388,6 +393,35 @@ class VaultStore(
         storageProvider.clearStorage()
     }
 
+    /**
+     * Attempts to get all credentials using only the cached encryption key.
+     * Returns false if the key isn't in memory, which signals the caller to authenticate.
+     */
+    fun tryGetAllCredentials(callback: CredentialOperationCallback): Boolean {
+        // Check if the encryption key is already in memory
+        if (encryptionKey == null) {
+            Log.d(TAG, "Encryption key not in memory, authentication required")
+            return false
+        }
+
+        try {
+            Log.d(TAG, "Unlocking vault and retrieving all credentials")
+
+            // Unlock vault if it's locked
+            if (!isVaultUnlocked()) {
+                unlockVault()
+            }
+
+            // Return all credentials
+            callback.onSuccess(getAllCredentials())
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error retrieving credentials", e)
+            callback.onError(e)
+            return false
+        }
+    }
+
     private fun decryptData(encryptedData: String): String {
         var decryptedResult: String? = null
         var error: Exception? = null
@@ -680,14 +714,26 @@ class VaultStore(
             return null
         }
 
-        return try {
+        val formats = listOf(
             SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
-            }.parse(dateString)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error parsing date: $dateString", e)
-            null
+            },
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+        )
+
+        for (format in formats) {
+            try {
+                return format.parse(dateString)
+            } catch (e: Exception) {
+                // Continue to next format if this one fails
+                continue
+            }
         }
+
+        Log.e(TAG, "Error parsing date: $dateString")
+        return null
     }
 
     fun onAppBackgrounded() {
@@ -722,5 +768,20 @@ class VaultStore(
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }.time
+
+        @Volatile
+        private var instance: VaultStore? = null
+
+        @JvmStatic
+        fun getInstance(keystoreProvider: KeystoreProvider, storageProvider: StorageProvider): VaultStore {
+            return instance ?: synchronized(this) {
+                instance ?: VaultStore(storageProvider, keystoreProvider).also { instance = it }
+            }
+        }
+
+        @JvmStatic
+        fun getExistingInstance(): VaultStore? {
+            return instance
+        }
     }
 }

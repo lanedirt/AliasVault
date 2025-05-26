@@ -118,10 +118,10 @@ export default function AndroidAutofillScreen() : React.ReactNode {
             </TouchableOpacity>
           </View>
           <ThemedText style={styles.instructionStep}>
-            2. Navigate to &quot;Passwords, passkeys & accounts&quot; in the settings menu
+            2. Navigate to the &quot;Passwords and autofill&quot; section in the settings menu. Depending on your device, this option may be under &quot;General management&quot; or &quot;System Settings&quot;.
           </ThemedText>
           <ThemedText style={styles.instructionStep}>
-            3. Change the &quot;prefered service&quot; to &quot;AliasVault&quot;
+            3. Change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
           </ThemedText>
           <ThemedText style={styles.warningText}>
             Note: You&apos;ll need to authenticate with your device security method when using autofill.

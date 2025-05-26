@@ -22,9 +22,9 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         const val NAME = "NativeVaultManager"
     }
 
-    private val vaultStore = VaultStore(
-        AndroidStorageProvider(reactContext),
+    private val vaultStore = VaultStore.getInstance(
         AndroidKeystoreProvider(reactContext) { getFragmentActivity() },
+        AndroidStorageProvider(reactContext)
     )
 
     init {
