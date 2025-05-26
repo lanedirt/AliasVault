@@ -66,11 +66,18 @@ class AutofillService : AutofillService() {
         val fieldFinder = FieldFinder()
         parseStructure(structure, fieldFinder)
 
-        // If no fields were found, return an empty response
-        if (fieldFinder.autofillableFields.isEmpty()) {
-            Log.d(TAG, "No autofillable fields found")
+        // If no password field was found, return an empty response
+        if (!fieldFinder.foundPasswordField) {
+            Log.d(TAG, "No password field found, skipping autofill")
             callback.onSuccess(null)
             return
+        }
+
+        // If we found a password field but no username field, and we have a last field,
+        // assume it's the username field
+        if (fieldFinder.lastUsernameField == null && fieldFinder.lastField != null) {
+            fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, false))
+            Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
         }
 
         launchActivityForAutofill(fieldFinder, callback)
@@ -195,12 +202,26 @@ class AutofillService : AutofillService() {
     private fun parseNode(node: AssistStructure.ViewNode, fieldFinder: FieldFinder) {
         val viewId = node.autofillId
 
-        // Consider any editable field as an autofillable field
+        // Consider any editable field as a potential field
         if (viewId != null && isEditableField(node)) {
             // Check if it's likely a password field
             val isPasswordField = isLikelyPasswordField(node)
-            fieldFinder.autofillableFields.add(Pair(viewId, isPasswordField))
-            Log.d(TAG, "Found autofillable field: $viewId, isPassword: $isPasswordField")
+
+            if (isPasswordField) {
+                fieldFinder.foundPasswordField = true
+                fieldFinder.autofillableFields.add(Pair(viewId, true))
+                Log.d(TAG, "Found password field: $viewId")
+            } else {
+                // For non-password fields, check if it might be a username field
+                if (isLikelyUsernameField(node)) {
+                    fieldFinder.lastUsernameField = viewId
+                    fieldFinder.autofillableFields.add(Pair(viewId, false))
+                    Log.d(TAG, "Found username field: $viewId")
+                } else {
+                    // Store the last field we saw in case we need it for username detection
+                    fieldFinder.lastField = viewId
+                }
+            }
         }
 
         // Recursively parse child nodes
@@ -259,9 +280,64 @@ class AutofillService : AutofillService() {
         return false
     }
 
+    private fun isLikelyUsernameField(node: AssistStructure.ViewNode): Boolean {
+        // Check autofill hints
+        val hints = node.autofillHints
+        if (hints != null) {
+            for (hint in hints) {
+                if (hint == View.AUTOFILL_HINT_USERNAME ||
+                    hint.contains("username", ignoreCase = true) ||
+                    hint.contains("email", ignoreCase = true)) {
+                    return true
+                }
+            }
+        }
+
+        // Check by ID or text
+        val idEntry = node.idEntry
+        if (idEntry != null) {
+            val lowerId = idEntry.lowercase()
+            if (lowerId.contains("username") ||
+                lowerId.contains("email") ||
+                lowerId.contains("login") ||
+                lowerId.contains("user")) {
+                return true
+            }
+        }
+
+        // Check by HTML attributes
+        val htmlInfo = node.htmlInfo
+        if (htmlInfo != null) {
+            val attributes = htmlInfo.attributes
+            if (attributes != null) {
+                for (i in 0 until attributes.size) {
+                    val name = attributes.get(i)?.first
+                    val value = attributes.get(i)?.second
+                    if (name == "type" && (value == "text" || value == "email")) {
+                        // Check if there's a label or placeholder that suggests username
+                        val label = node.hint
+                        if (label != null && (
+                            label.contains("username", ignoreCase = true) ||
+                            label.contains("email", ignoreCase = true) ||
+                            label.contains("login", ignoreCase = true) ||
+                            label.contains("user", ignoreCase = true)
+                        )) {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+
+        return false
+    }
+
     private class FieldFinder {
         // Store pairs of (AutofillId, isPasswordField)
         val autofillableFields = mutableListOf<Pair<AutofillId, Boolean>>()
+        var foundPasswordField = false
+        var lastUsernameField: AutofillId? = null
+        var lastField: AutofillId? = null
     }
 
     companion object {
