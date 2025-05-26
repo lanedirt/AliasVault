@@ -35,6 +35,13 @@ export default function AndroidAutofillScreen() : React.ReactNode {
     router.back();
   };
 
+  /**
+   * Handle opening the documentation link.
+   */
+  const handleOpenDocs = () : void => {
+    Linking.openURL('https://docs.aliasvault.net/mobile-apps/android/autofill.html');
+  };
+
   const styles = StyleSheet.create({
     buttonContainer: {
       padding: 16,
@@ -85,17 +92,48 @@ export default function AndroidAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
+    warningContainer: {
+      backgroundColor: colors.accentBackground,
+      marginBottom: 16,
+      padding: 16,
+    },
+    warningDescription: {
+      color: colors.text,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    warningLink: {
+      color: colors.primary,
+      fontSize: 14,
+      textDecorationLine: 'underline',
+    },
     warningText: {
       color: colors.textMuted,
       fontSize: 15,
       fontStyle: 'italic',
       marginTop: 8,
     },
+    warningTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
   });
 
   return (
     <ThemedContainer>
       <ThemedScrollView>
+        <View style={styles.warningContainer}>
+          <ThemedText style={styles.warningTitle}>⚠️ Experimental Feature</ThemedText>
+          <ThemedText style={styles.warningDescription}>
+            Autofill support for Android is currently in an experimental state.{' '}
+            <ThemedText style={styles.warningLink} onPress={handleOpenDocs}>
+              Read more about it here
+            </ThemedText>
+          </ThemedText>
+        </View>
+
         <View style={styles.header}>
           <ThemedText style={styles.headerText}>
             You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.
