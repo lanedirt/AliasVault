@@ -41,9 +41,11 @@ import android.widget.RemoteViews
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
+import net.aliasvault.app.autofill.CredentialMatcher
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
+    private val credentialMatcher = CredentialMatcher()
 
     override fun onFillRequest(
         request: FillRequest,
@@ -64,6 +66,7 @@ class AutofillService : AutofillService() {
 
         // Find any autofillable fields in the form
         val fieldFinder = FieldFinder()
+        fieldFinder.structure = structure
         parseStructure(structure, fieldFinder)
 
         // If no password field was found, return an empty response
@@ -87,7 +90,7 @@ class AutofillService : AutofillService() {
         // In a full implementation, you would:
         // 1. Extract the username/password from the SaveRequest
         // 2. Launch an activity to let the user confirm saving
-        // 3. Save the credential using the SharedCredentialStore
+        // 3. Save the credential using the VaultStore
 
         // For now, just acknowledge the request
         callback.onSuccess()
@@ -95,6 +98,17 @@ class AutofillService : AutofillService() {
 
     private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
         Log.d(TAG, "Launching activity for autofill authentication")
+
+        // Get the app/website information from the structure
+        val appInfo = getAppInfo(fieldFinder.structure)
+        Log.d(TAG, "Autofill request from: $appInfo")
+
+        // Ignore requests from our own unlock page as this would cause a loop
+        if (appInfo == "net.aliasvault.app") {
+            Log.d(TAG, "Skipping autofill request from AliasVault app itself")
+            callback.onSuccess(null)
+            return
+        }
 
         // First try to get an existing instance
         val store = VaultStore.getExistingInstance()
@@ -112,11 +126,27 @@ class AutofillService : AutofillService() {
                                 return
                             }
 
-                            // Create a response with all credentials
+                            // Filter credentials based on app/website info
+                            val filteredCredentials = if (appInfo != null) {
+                                filterCredentialsByAppInfo(result, appInfo)
+                            } else {
+                                result
+                            }
+
+                            Log.d(TAG, "Amount of credentials filtered with this app info: ${filteredCredentials.size}")
+
+                            // If there are no results, disable autofill.
+                            if (filteredCredentials.size == 0) {
+                                Log.d(TAG, "No credentials found for this app, disabling autofill")
+                                callback.onSuccess(null)
+                                return
+                            }
+
+                            // Create a response with filtered credentials
                             val responseBuilder = FillResponse.Builder()
 
                             // Add each credential as a dataset
-                            for (credential in result) {
+                            for (credential in filteredCredentials) {
                                 // Create a dataset for this credential
                                 addDatasetForCredential(responseBuilder, fieldFinder, credential)
                             }
@@ -155,6 +185,95 @@ class AutofillService : AutofillService() {
 
         // Start the activity
         startActivity(intent)
+    }
+
+    private fun getAppInfo(structure: AssistStructure?): String? {
+        if (structure == null) {
+            return null
+        }
+
+        // First check if this is web content
+        val nodeCount = structure.windowNodeCount
+        for (i in 0 until nodeCount) {
+            val windowNode = structure.getWindowNodeAt(i)
+            val rootNode = windowNode.rootViewNode
+
+            // Check for web-specific information
+            val webInfo = findWebInfoInNode(rootNode)
+            if (webInfo != null) {
+                Log.d(TAG, "Found web info: $webInfo")
+                return webInfo
+            }
+        }
+
+        // If no web info found, fall back to package name
+        val packageName = structure.activityComponent?.packageName
+        if (packageName != null) {
+            Log.d(TAG, "Using package name: $packageName")
+            return packageName
+        }
+
+        return null
+    }
+
+    private fun findWebInfoInNode(node: AssistStructure.ViewNode): String? {
+        // Check for web domain
+        val webDomain = node.webDomain
+        if (webDomain != null) {
+            return webDomain
+        }
+
+        // Check for web URL
+        val webUrl = node.webDomain
+        if (webUrl != null) {
+            try {
+                val uri = android.net.Uri.parse(webUrl)
+                val host = uri.host
+                if (host != null) {
+                    return host
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing web URL: $webUrl", e)
+            }
+        }
+
+        // Check HTML info for domain or URL
+        val htmlInfo = node.htmlInfo
+        if (htmlInfo != null) {
+            val attributes = htmlInfo.attributes
+            if (attributes != null) {
+                for (i in 0 until attributes.size) {
+                    val name = attributes.get(i)?.first
+                    val value = attributes.get(i)?.second
+                    if (name == "domain" || name == "host" || name == "url") {
+                        return value
+                    }
+                }
+            }
+        }
+
+        // Check for web-specific hints
+        val hints = node.autofillHints
+        if (hints != null) {
+            for (hint in hints) {
+                if (hint.contains("web", ignoreCase = true) ||
+                    hint.contains("url", ignoreCase = true) ||
+                    hint.contains("domain", ignoreCase = true)) {
+                    return hint
+                }
+            }
+        }
+
+        // Recursively check child nodes
+        val childCount = node.childCount
+        for (i in 0 until childCount) {
+            val webInfo = findWebInfoInNode(node.getChildAt(i))
+            if (webInfo != null) {
+                return webInfo
+            }
+        }
+
+        return null
     }
 
     // Helper method to create a dataset from a credential
@@ -332,12 +451,17 @@ class AutofillService : AutofillService() {
         return false
     }
 
+    private fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
+        return credentialMatcher.filterCredentialsByAppInfo(credentials, appInfo)
+    }
+
     private class FieldFinder {
         // Store pairs of (AutofillId, isPasswordField)
         val autofillableFields = mutableListOf<Pair<AutofillId, Boolean>>()
         var foundPasswordField = false
         var lastUsernameField: AutofillId? = null
         var lastField: AutofillId? = null
+        var structure: AssistStructure? = null
     }
 
     companion object {

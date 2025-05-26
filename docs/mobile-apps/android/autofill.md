@@ -19,3 +19,11 @@ Android has added multiple autofill APIs throughout the years, which include Acc
 
 If you're running into any specific issues with your specific device make/model, feel free to raise an issue on GitHub.
 
+
+## Using Native Autofill in Chrome
+Currently AliasVault implements the `Native Autofill` API which shows an autofill popup on supported input fields. The Chrome browser on Android from **version 135** onwards support native autofill via third party apps. You need to enable this manually.
+
+To configure AliasVault as the autofill provider in Chrome:
+1. Open Chrome
+2. Go to Menu > Settings > Autofill services
+3. Choose the option `Autofill using another service`
