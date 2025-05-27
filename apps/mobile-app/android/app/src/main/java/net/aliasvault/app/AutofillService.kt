@@ -81,8 +81,9 @@ class AutofillService : AutofillService() {
 
         // If we found a password field but no username field, and we have a last field,
         // assume it's the username field
+        // TODO: do we actually need this part?
         if (fieldFinder.lastUsernameField == null && fieldFinder.lastField != null) {
-            fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, false))
+            fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, FieldType.USERNAME))
             Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
         }
 
@@ -138,92 +139,23 @@ class AutofillService : AutofillService() {
 
                             Log.d(TAG, "Amount of credentials filtered with this app info: ${filteredCredentials.size}")
 
-                            // If there are no results, disable autofill.
+                            val responseBuilder = FillResponse.Builder()
+
+                            // If there are matches, add them to the dataset
+                            for (credential in filteredCredentials) {
+                                addDatasetForCredential(responseBuilder, fieldFinder, credential)
+                            }
+
+                            // If there are no results, return "no matches" placeholder option.
                             if (filteredCredentials.isEmpty()) {
                                 Log.d(TAG, "No credentials found for this app, showing 'no matches' option")
-
-                                // Create a response with a "no matches" dataset
-                                val responseBuilder = FillResponse.Builder()
-
-                                // Create presentation for the "no matches" option
-                                val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
-                                presentation.setTextViewText(
-                                    R.id.text,
-                                    "AliasVault: no matches"
-                                )
-
-                                val dataSetBuilder = Dataset.Builder(presentation)
-
-                                // Add a click listener to open AliasVault app
-                                val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    putExtra("OPEN_CREDENTIALS", true)
-                                }
-                                val pendingIntent = PendingIntent.getActivity(
-                                    this@AutofillService,
-                                    0,
-                                    intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                                )
-                                dataSetBuilder.setAuthentication(pendingIntent.intentSender)
-
-                                // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
-                                if (fieldFinder.autofillableFields.isNotEmpty()) {
-                                    for (field in fieldFinder.autofillableFields) {
-                                        dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
-                                    }
-                                }
-
-                                // Add this dataset to the response
-                                responseBuilder.addDataset(dataSetBuilder.build())
-
-                                // Send the response back
+                                responseBuilder.addDataset(createNoMatchesDataset(fieldFinder))
                                 callback.onSuccess(responseBuilder.build())
                                 return
                             }
 
-                            // Create a response with filtered credentials
-                            val responseBuilder = FillResponse.Builder()
-
-                            // Add each credential as a dataset
-                            for (credential in filteredCredentials) {
-                                // Create a dataset for this credential
-                                addDatasetForCredential(responseBuilder, fieldFinder, credential)
-                            }
-
                             // Add "Open AliasVault app" as the last option
-                            val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
-                            openAppPresentation.setTextViewText(
-                                R.id.text,
-                                "Open app"
-                            )
-
-                            val openAppDataSetBuilder = Dataset.Builder(openAppPresentation)
-
-                            // Add a click listener to open AliasVault app
-                            val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                putExtra("OPEN_CREDENTIALS", true)
-                            }
-                            val pendingIntent = PendingIntent.getActivity(
-                                this@AutofillService,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-                            openAppDataSetBuilder.setAuthentication(pendingIntent.intentSender)
-
-                            // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
-                            if (fieldFinder.autofillableFields.isNotEmpty()) {
-                                for (field in fieldFinder.autofillableFields) {
-                                    openAppDataSetBuilder.setValue(field.first, AutofillValue.forText(""))
-                                }
-                            }
-
-                            // Add this dataset to the response
-                            responseBuilder.addDataset(openAppDataSetBuilder.build())
-
-                            // Send the response back
+                            responseBuilder.addDataset(createOpenAppDataset(fieldFinder.autofillableFields.first()))
                             callback.onSuccess(responseBuilder.build())
 
                         } catch (e: Exception) {
@@ -370,26 +302,48 @@ class AutofillService : AutofillService() {
         // Add autofill values for all fields
         var presentationDisplayValue = credential.service.name
         for (field in fieldFinder.autofillableFields) {
-            val isPassword = field.second
-            if (isPassword) {
-                if (credential.password != null) {
-                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+            val fieldType = field.second
+            when (fieldType) {
+                FieldType.PASSWORD -> {
+                    if (credential.password != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+                    }
                 }
-            } else {
-                // Get the appropriate value for this field
-                val (displayValue, autofillValue) = getCredentialValueForField(fieldFinder, field.first, credential)
-                if (autofillValue != null) {
-                    dataSetBuilder.setValue(field.first, AutofillValue.forText(autofillValue))
+                FieldType.EMAIL -> {
+                    if (credential.alias?.email != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                    } else if (credential.username != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                    }
                 }
-                // Update the presentation text with the display value
-                presentationDisplayValue = "${credential.service.name} ($displayValue)"
+                FieldType.USERNAME -> {
+                    if (credential.username != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                    } else if (credential.alias?.email != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                    }
+                }
+                else -> {
+                    // For unknown field types, try both email and username
+                    if (credential.alias?.email != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                    } else if (credential.username != null) {
+                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                    }
+                }
             }
         }
 
         // Set the display value of the dropdown item.
         presentation.setTextViewText(
             R.id.text,
-            "$presentationDisplayValue"
+            presentationDisplayValue
         )
 
         // Set the logo if available
@@ -415,57 +369,72 @@ class AutofillService : AutofillService() {
         responseBuilder.addDataset(dataSetBuilder.build())
     }
 
-    /**
-     * Determines the appropriate credential value to use for a given field and returns both
-     * a display value and the actual value to use for autofill.
-     *
-     * @param fieldId The AutofillId of the field
-     * @param credential The credential to get the value from
-     * @return A Pair containing (displayValue, autofillValue)
-     */
-    private fun getCredentialValueForField(fieldFinder: FieldFinder, fieldId: AutofillId, credential: Credential): Pair<String, String?> {
-        // Find the field in the structure to determine its type
-        val fieldType = fieldFinder.determineFieldType(fieldId)
+    private fun createNoMatchesDataset(fieldFinder: FieldFinder): Dataset {
+        // Create presentation for the "no matches" option
+        val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+        presentation.setTextViewText(
+            R.id.text,
+            "AliasVault: no matches"
+        )
 
-        return when (fieldType) {
-            FieldType.EMAIL -> {
-                // Prefer email, fall back to username if no email available
-                if (credential.alias?.email != null) {
-                    Log.d(TAG, "Using email1: ${credential.alias.email}")
-                    Pair(credential.alias.email, credential.alias.email)
-                } else {
-                    // If we only have username, use it.
-                    Log.d(TAG, "Using username1: ${credential.username}")
-                    Pair("${credential.username}", credential.username)
-                }
-            }
-            FieldType.USERNAME -> {
-                // Prefer username, fall back to email if no username available
-                if (credential.username != null) {
-                    Log.d(TAG, "Using username2: ${credential.username}")
-                    Pair(credential.username, credential.username)
-                } else {
-                    // If we only have email, use it.
-                    Log.d(TAG, "Using email2: ${credential.alias?.email}")
-                    Pair("${credential.alias?.email}", credential.alias?.email)
-                }
-            }
-            else -> {
-                // For unknown field types, try both email and username
-                if (credential.alias?.email != null) {
-                    Log.d(TAG, "Using email3: ${credential.alias.email}")
-                    Pair(credential.alias.email, credential.alias.email)
-                } else {
-                    Log.d(TAG, "Using username3: ${credential.username}")
-                    Pair(credential.username ?: "", credential.username ?: "")
-                }
+        val dataSetBuilder = Dataset.Builder(presentation)
+
+        // Add a click listener to open AliasVault app
+        val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("OPEN_CREDENTIALS", true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this@AutofillService,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+        // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
+        if (fieldFinder.autofillableFields.isNotEmpty()) {
+            for (field in fieldFinder.autofillableFields) {
+                dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
             }
         }
+
+        return dataSetBuilder.build()
+    }
+
+    private fun createOpenAppDataset(pair: Pair<AutofillId, FieldType>): Dataset {
+        val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+        openAppPresentation.setTextViewText(
+            R.id.text,
+            "Open app"
+        )
+
+        val dataSetBuilder = Dataset.Builder(openAppPresentation)
+
+        // Add a click listener to open AliasVault app
+        val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("OPEN_CREDENTIALS", true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this@AutofillService,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+        // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
+        dataSetBuilder.setValue(pair.first, AutofillValue.forText(""))
+
+        // Add this dataset to the response
+        return dataSetBuilder.build()
     }
 
     private enum class FieldType {
         EMAIL,
         USERNAME,
+        PASSWORD,
         UNKNOWN
     }
 
@@ -474,8 +443,8 @@ class AutofillService : AutofillService() {
     }
 
     private class FieldFinder(var structure: AssistStructure) {
-        // Store pairs of (AutofillId, isPasswordField)
-        val autofillableFields = mutableListOf<Pair<AutofillId, Boolean>>()
+        // Store pairs of (AutofillId, FieldType)
+        val autofillableFields = mutableListOf<Pair<AutofillId, FieldType>>()
         var foundPasswordField = false
         var lastUsernameField: AutofillId? = null
         var lastField: AutofillId? = null
@@ -490,11 +459,16 @@ class AutofillService : AutofillService() {
         }
 
         /**
-         * Determines if a field is most likely an email field, username field, or unknown.
+         * Determines if a field is most likely an email field, username field, password field, or unknown.
          */
         fun determineFieldType(fieldId: AutofillId): FieldType {
             // Find the node in the structure
             val node = findNodeById(fieldId) ?: return FieldType.UNKNOWN
+
+            // Check for password field first
+            if (isLikelyPasswordField(node)) {
+                return FieldType.PASSWORD
+            }
 
             // Check for email-specific indicators
             if (isEmailField(node)) {
@@ -507,6 +481,34 @@ class AutofillService : AutofillService() {
             }
 
             return FieldType.UNKNOWN
+        }
+
+        private fun parseNode(node: AssistStructure.ViewNode) {
+            val viewId = node.autofillId
+
+            // Consider any editable field as a potential field
+            if (viewId != null && isEditableField(node)) {
+                val fieldType = determineFieldType(viewId)
+
+                if (fieldType == FieldType.PASSWORD) {
+                    foundPasswordField = true
+                    autofillableFields.add(Pair(viewId, fieldType))
+                    Log.d(TAG, "Found password field: $viewId")
+                } else if (fieldType == FieldType.USERNAME || fieldType == FieldType.EMAIL) {
+                    lastUsernameField = viewId
+                    autofillableFields.add(Pair(viewId, fieldType))
+                    Log.d(TAG, "Found ${fieldType.name.lowercase()} field: $viewId")
+                } else {
+                    // Store the last field we saw in case we need it for username detection
+                    lastField = viewId
+                }
+            }
+
+            // Recursively parse child nodes
+            val childCount = node.childCount
+            for (i in 0 until childCount) {
+                parseNode(node.getChildAt(i))
+            }
         }
 
         private fun isEmailField(node: AssistStructure.ViewNode): Boolean {
@@ -594,38 +596,6 @@ class AutofillService : AutofillService() {
             return false
         }
 
-        private fun parseNode(node: AssistStructure.ViewNode) {
-            val viewId = node.autofillId
-
-            // Consider any editable field as a potential field
-            if (viewId != null && isEditableField(node)) {
-                // Check if it's likely a password field
-                val isPasswordField = isLikelyPasswordField(node)
-
-                if (isPasswordField) {
-                    foundPasswordField = true
-                    autofillableFields.add(Pair(viewId, true))
-                    Log.d(TAG, "Found password field: $viewId")
-                } else {
-                    // For non-password fields, check if it might be a username field
-                    if (isLikelyUsernameField(node)) {
-                        lastUsernameField = viewId
-                        autofillableFields.add(Pair(viewId, false))
-                        Log.d(TAG, "Found username field: $viewId")
-                    } else {
-                        // Store the last field we saw in case we need it for username detection
-                        lastField = viewId
-                    }
-                }
-            }
-
-            // Recursively parse child nodes
-            val childCount = node.childCount
-            for (i in 0 until childCount) {
-                parseNode(node.getChildAt(i))
-            }
-        }
-
         private fun isEditableField(node: AssistStructure.ViewNode): Boolean {
             // Check if the node is editable in any way
             return node.inputType > 0 ||
@@ -667,63 +637,6 @@ class AutofillService : AutofillService() {
                         val value = attributes.get(i)?.second
                         if (name == "type" && value == "password") {
                             return true
-                        }
-                    }
-                }
-            }
-
-            return false
-        }
-
-        private fun isLikelyUsernameField(node: AssistStructure.ViewNode): Boolean {
-            // Check autofill hints
-            val hints = node.autofillHints
-            if (hints != null) {
-                for (hint in hints) {
-                    if (hint == View.AUTOFILL_HINT_USERNAME ||
-                        hint.contains("username", ignoreCase = true) ||
-                        hint.contains("email", ignoreCase = true)) {
-                        return true
-                    }
-                }
-            }
-
-            // Check by ID or text
-            val idEntry = node.idEntry
-            if (idEntry != null) {
-                val lowerId = idEntry.lowercase()
-                if (lowerId.contains("username") ||
-                    lowerId.contains("email") ||
-                    lowerId.contains("login") ||
-                    lowerId.contains("user")) {
-                    return true
-                }
-            }
-
-            // Check by HTML attributes
-            val htmlInfo = node.htmlInfo
-            if (htmlInfo != null) {
-                val attributes = htmlInfo.attributes
-                if (attributes != null) {
-                    for (i in 0 until attributes.size) {
-                        val name = attributes.get(i)?.first
-                        val value = attributes.get(i)?.second
-
-                        if (name == "name" && (value == "username" || value == "name" || value == "email" || value == "user")) {
-                            return true;
-                        }
-
-                        if (name == "type" && (value == "text" || value == "email")) {
-                            // Check if there's a label or placeholder that suggests username
-                            val label = node.hint
-                            if (label != null && (
-                                    label.contains("username", ignoreCase = true) ||
-                                        label.contains("email", ignoreCase = true) ||
-                                        label.contains("login", ignoreCase = true) ||
-                                        label.contains("user", ignoreCase = true)
-                                    )) {
-                                return true
-                            }
                         }
                     }
                 }
