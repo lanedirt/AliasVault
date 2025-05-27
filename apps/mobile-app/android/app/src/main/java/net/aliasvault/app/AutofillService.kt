@@ -338,19 +338,9 @@ class AutofillService : AutofillService() {
         // Set the logo if available
         val logoBytes = credential.service.logo
         if (logoBytes != null) {
-            val mimeType = ImageUtils.detectMimeType(logoBytes)
-            if (mimeType == "image/svg+xml") {
-                // For SVG, we need to convert it to a bitmap first
-                val bitmap = ImageUtils.bytesToBitmap(logoBytes)
-                if (bitmap != null) {
-                    presentation.setImageViewBitmap(R.id.icon, bitmap)
-                }
-            } else {
-                // For other image types, try to decode directly
-                val bitmap = ImageUtils.bytesToBitmap(logoBytes)
-                if (bitmap != null) {
-                    presentation.setImageViewBitmap(R.id.icon, bitmap)
-                }
+            val bitmap = ImageUtils.bytesToBitmap(logoBytes)
+            if (bitmap != null) {
+                presentation.setImageViewBitmap(R.id.icon, bitmap)
             }
         }
 
