@@ -43,6 +43,7 @@ import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
 import net.aliasvault.app.autofill.CredentialMatcher
 import androidx.core.net.toUri
+import android.app.PendingIntent
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -66,9 +67,8 @@ class AutofillService : AutofillService() {
         val structure = context.structure
 
         // Find any autofillable fields in the form
-        val fieldFinder = FieldFinder()
-        fieldFinder.structure = structure
-        parseStructure(structure, fieldFinder)
+        val fieldFinder = FieldFinder(structure)
+        fieldFinder.parseStructure()
 
         // If no password field was found, return an empty response
         /*if (!fieldFinder.foundPasswordField) {
@@ -137,9 +137,42 @@ class AutofillService : AutofillService() {
                             Log.d(TAG, "Amount of credentials filtered with this app info: ${filteredCredentials.size}")
 
                             // If there are no results, disable autofill.
-                            if (filteredCredentials.size == 0) {
-                                Log.d(TAG, "No credentials found for this app, disabling autofill")
-                                callback.onSuccess(null)
+                            if (filteredCredentials.isEmpty()) {
+                                Log.d(TAG, "No credentials found for this app, showing 'no matches' option")
+
+                                // Create a response with a "no matches" dataset
+                                val responseBuilder = FillResponse.Builder()
+
+                                // Create presentation for the "no matches" option
+                                val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
+                                presentation.setTextViewText(android.R.id.text1, "AliasVault: no matches")
+
+                                val dataSetBuilder = Dataset.Builder(presentation)
+
+                                // Add a click listener to open AliasVault app
+                                val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    putExtra("OPEN_CREDENTIALS", true)
+                                }
+                                val pendingIntent = PendingIntent.getActivity(
+                                    this@AutofillService,
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                )
+                                dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+                                // Add a placeholder value to satisfy the requirement that at least one value must be set
+                                if (fieldFinder.autofillableFields.isNotEmpty()) {
+                                    val firstField = fieldFinder.autofillableFields.first()
+                                    dataSetBuilder.setValue(firstField.first, AutofillValue.forText(""))
+                                }
+
+                                // Add this dataset to the response
+                                responseBuilder.addDataset(dataSetBuilder.build())
+
+                                // Send the response back
+                                callback.onSuccess(responseBuilder.build())
                                 return
                             }
 
@@ -311,159 +344,160 @@ class AutofillService : AutofillService() {
         responseBuilder.addDataset(dataSetBuilder.build())
     }
 
-    private fun parseStructure(structure: AssistStructure, fieldFinder: FieldFinder) {
-        val nodeCount = structure.windowNodeCount
-        for (i in 0 until nodeCount) {
-            val windowNode = structure.getWindowNodeAt(i)
-            val rootNode = windowNode.rootViewNode
-            parseNode(rootNode, fieldFinder)
-        }
-    }
 
-    private fun parseNode(node: AssistStructure.ViewNode, fieldFinder: FieldFinder) {
-        val viewId = node.autofillId
-
-        // Consider any editable field as a potential field
-        if (viewId != null && isEditableField(node)) {
-            // Check if it's likely a password field
-            val isPasswordField = isLikelyPasswordField(node)
-
-            if (isPasswordField) {
-                fieldFinder.foundPasswordField = true
-                fieldFinder.autofillableFields.add(Pair(viewId, true))
-                Log.d(TAG, "Found password field: $viewId")
-            } else {
-                // For non-password fields, check if it might be a username field
-                if (isLikelyUsernameField(node)) {
-                    fieldFinder.lastUsernameField = viewId
-                    fieldFinder.autofillableFields.add(Pair(viewId, false))
-                    Log.d(TAG, "Found username field: $viewId")
-                } else {
-                    // Store the last field we saw in case we need it for username detection
-                    fieldFinder.lastField = viewId
-                }
-            }
-        }
-
-        // Recursively parse child nodes
-        val childCount = node.childCount
-        for (i in 0 until childCount) {
-            parseNode(node.getChildAt(i), fieldFinder)
-        }
-    }
-
-    private fun isEditableField(node: AssistStructure.ViewNode): Boolean {
-        // Check if the node is editable in any way
-        return node.inputType > 0 ||
-            node.className?.contains("EditText") == true ||
-            node.className?.contains("Input") == true ||
-            node.htmlInfo?.tag?.equals("input", ignoreCase = true) == true
-    }
-
-    private fun isLikelyPasswordField(node: AssistStructure.ViewNode): Boolean {
-        // Try to determine if this is a password field
-        val hints = node.autofillHints
-        if (hints != null) {
-            for (hint in hints) {
-                if (hint == View.AUTOFILL_HINT_PASSWORD || hint.contains("password", ignoreCase = true)) {
-                    return true
-                }
-            }
-        }
-
-        // Check by input type
-        if ((node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
-            (node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0) {
-            return true
-        }
-
-        // Check by ID or text
-        val idEntry = node.idEntry
-        if (idEntry != null && idEntry.contains("pass", ignoreCase = true)) {
-            return true
-        }
-
-        // Check by HTML attributes
-        val htmlInfo = node.htmlInfo
-        if (htmlInfo != null) {
-            val attributes = htmlInfo.attributes
-            if (attributes != null) {
-                for (i in 0 until attributes.size) {
-                    val name = attributes.get(i)?.first
-                    val value = attributes.get(i)?.second
-                    if (name == "type" && value == "password") {
-                        return true
-                    }
-                }
-            }
-        }
-
-        return false
-    }
-
-    private fun isLikelyUsernameField(node: AssistStructure.ViewNode): Boolean {
-        // Check autofill hints
-        val hints = node.autofillHints
-        if (hints != null) {
-            for (hint in hints) {
-                if (hint == View.AUTOFILL_HINT_USERNAME ||
-                    hint.contains("username", ignoreCase = true) ||
-                    hint.contains("email", ignoreCase = true)) {
-                    return true
-                }
-            }
-        }
-
-        // Check by ID or text
-        val idEntry = node.idEntry
-        if (idEntry != null) {
-            val lowerId = idEntry.lowercase()
-            if (lowerId.contains("username") ||
-                lowerId.contains("email") ||
-                lowerId.contains("login") ||
-                lowerId.contains("user")) {
-                return true
-            }
-        }
-
-        // Check by HTML attributes
-        val htmlInfo = node.htmlInfo
-        if (htmlInfo != null) {
-            val attributes = htmlInfo.attributes
-            if (attributes != null) {
-                for (i in 0 until attributes.size) {
-                    val name = attributes.get(i)?.first
-                    val value = attributes.get(i)?.second
-                    if (name == "type" && (value == "text" || value == "email")) {
-                        // Check if there's a label or placeholder that suggests username
-                        val label = node.hint
-                        if (label != null && (
-                                label.contains("username", ignoreCase = true) ||
-                                    label.contains("email", ignoreCase = true) ||
-                                    label.contains("login", ignoreCase = true) ||
-                                    label.contains("user", ignoreCase = true)
-                                )) {
-                            return true
-                        }
-                    }
-                }
-            }
-        }
-
-        return false
-    }
 
     private fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
         return credentialMatcher.filterCredentialsByAppInfo(credentials, appInfo)
     }
 
-    private class FieldFinder {
+    private class FieldFinder(var structure: AssistStructure) {
         // Store pairs of (AutofillId, isPasswordField)
         val autofillableFields = mutableListOf<Pair<AutofillId, Boolean>>()
         var foundPasswordField = false
         var lastUsernameField: AutofillId? = null
         var lastField: AutofillId? = null
-        var structure: AssistStructure? = null
+
+        fun parseStructure() {
+            val nodeCount = structure.windowNodeCount
+            for (i in 0 until nodeCount) {
+                val windowNode = structure.getWindowNodeAt(i)
+                val rootNode = windowNode.rootViewNode
+                parseNode(rootNode)
+            }
+        }
+
+        private fun parseNode(node: AssistStructure.ViewNode) {
+            val viewId = node.autofillId
+
+            // Consider any editable field as a potential field
+            if (viewId != null && isEditableField(node)) {
+                // Check if it's likely a password field
+                val isPasswordField = isLikelyPasswordField(node)
+
+                if (isPasswordField) {
+                    foundPasswordField = true
+                    autofillableFields.add(Pair(viewId, true))
+                    Log.d(TAG, "Found password field: $viewId")
+                } else {
+                    // For non-password fields, check if it might be a username field
+                    if (isLikelyUsernameField(node)) {
+                        lastUsernameField = viewId
+                        autofillableFields.add(Pair(viewId, false))
+                        Log.d(TAG, "Found username field: $viewId")
+                    } else {
+                        // Store the last field we saw in case we need it for username detection
+                        lastField = viewId
+                    }
+                }
+            }
+
+            // Recursively parse child nodes
+            val childCount = node.childCount
+            for (i in 0 until childCount) {
+                parseNode(node.getChildAt(i))
+            }
+        }
+
+        private fun isEditableField(node: AssistStructure.ViewNode): Boolean {
+            // Check if the node is editable in any way
+            return node.inputType > 0 ||
+                node.className?.contains("EditText") == true ||
+                node.className?.contains("Input") == true ||
+                node.htmlInfo?.tag?.equals("input", ignoreCase = true) == true
+        }
+
+        private fun isLikelyPasswordField(node: AssistStructure.ViewNode): Boolean {
+            // Try to determine if this is a password field
+            val hints = node.autofillHints
+            if (hints != null) {
+                for (hint in hints) {
+                    if (hint == View.AUTOFILL_HINT_PASSWORD || hint.contains("password", ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+
+            // Check by input type
+            if ((node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
+                (node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0) {
+                return true
+            }
+
+            // Check by ID or text
+            val idEntry = node.idEntry
+            if (idEntry != null && idEntry.contains("pass", ignoreCase = true)) {
+                return true
+            }
+
+            // Check by HTML attributes
+            val htmlInfo = node.htmlInfo
+            if (htmlInfo != null) {
+                val attributes = htmlInfo.attributes
+                if (attributes != null) {
+                    for (i in 0 until attributes.size) {
+                        val name = attributes.get(i)?.first
+                        val value = attributes.get(i)?.second
+                        if (name == "type" && value == "password") {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            return false
+        }
+
+        private fun isLikelyUsernameField(node: AssistStructure.ViewNode): Boolean {
+            // Check autofill hints
+            val hints = node.autofillHints
+            if (hints != null) {
+                for (hint in hints) {
+                    if (hint == View.AUTOFILL_HINT_USERNAME ||
+                        hint.contains("username", ignoreCase = true) ||
+                        hint.contains("email", ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+
+            // Check by ID or text
+            val idEntry = node.idEntry
+            if (idEntry != null) {
+                val lowerId = idEntry.lowercase()
+                if (lowerId.contains("username") ||
+                    lowerId.contains("email") ||
+                    lowerId.contains("login") ||
+                    lowerId.contains("user")) {
+                    return true
+                }
+            }
+
+            // Check by HTML attributes
+            val htmlInfo = node.htmlInfo
+            if (htmlInfo != null) {
+                val attributes = htmlInfo.attributes
+                if (attributes != null) {
+                    for (i in 0 until attributes.size) {
+                        val name = attributes.get(i)?.first
+                        val value = attributes.get(i)?.second
+                        if (name == "type" && (value == "text" || value == "email")) {
+                            // Check if there's a label or placeholder that suggests username
+                            val label = node.hint
+                            if (label != null && (
+                                    label.contains("username", ignoreCase = true) ||
+                                        label.contains("email", ignoreCase = true) ||
+                                        label.contains("login", ignoreCase = true) ||
+                                        label.contains("user", ignoreCase = true)
+                                    )) {
+                                return true
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false
+        }
     }
 
     companion object {
