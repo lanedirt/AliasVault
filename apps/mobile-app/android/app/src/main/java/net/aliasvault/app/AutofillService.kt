@@ -140,21 +140,21 @@ class AutofillService : AutofillService() {
 
                             val responseBuilder = FillResponse.Builder()
 
-                            // If there are matches, add them to the dataset
-                            for (credential in filteredCredentials) {
-                                responseBuilder.addDataset(createCredentialDataset(fieldFinder, credential))
-                            }
-
                             // If there are no results, return "no matches" placeholder option.
                             if (filteredCredentials.isEmpty()) {
                                 Log.d(TAG, "No credentials found for this app, showing 'no matches' option")
                                 responseBuilder.addDataset(createNoMatchesDataset(fieldFinder))
                             }
+                            else {
+                                // If there are matches, add them to the dataset
+                                for (credential in filteredCredentials) {
+                                    responseBuilder.addDataset(createCredentialDataset(fieldFinder, credential))
+                                }
+                            }
 
                             // Add "Open AliasVault app" as the last option
-                            responseBuilder.addDataset(createOpenAppDataset(fieldFinder.autofillableFields.first()))
+                            responseBuilder.addDataset(createOpenAppDataset(fieldFinder))
                             callback.onSuccess(responseBuilder.build())
-
                         } catch (e: Exception) {
                             Log.e(TAG, "Error parsing credentials", e)
                             callback.onSuccess(null)
@@ -390,7 +390,7 @@ class AutofillService : AutofillService() {
         return dataSetBuilder.build()
     }
 
-    private fun createOpenAppDataset(pair: Pair<AutofillId, FieldType>): Dataset {
+    private fun createOpenAppDataset(fieldFinder: FieldFinder): Dataset {
         val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         openAppPresentation.setTextViewText(
             R.id.text,
@@ -412,10 +412,13 @@ class AutofillService : AutofillService() {
         )
         dataSetBuilder.setAuthentication(pendingIntent.intentSender)
 
-        // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
-        dataSetBuilder.setValue(pair.first, AutofillValue.forText(""))
+        // Set an empty value for the field to satisfy the requirement
+        if (fieldFinder.autofillableFields.isNotEmpty()) {
+            for (field in fieldFinder.autofillableFields) {
+                dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
+            }
+        }
 
-        // Add this dataset to the response
         return dataSetBuilder.build()
     }
 
