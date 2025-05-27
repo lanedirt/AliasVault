@@ -27,3 +27,16 @@ To configure AliasVault as the autofill provider in Chrome:
 1. Open Chrome
 2. Go to Menu > Settings > Autofill services
 3. Choose the option `Autofill using another service`
+
+## Frequently Asked Questions
+
+### Chrome Autofill Issues
+
+#### Autofill suggestions stopped appearing in Chrome
+If you notice that autofill suggestions have stopped appearing in Chrome, this is often due to a Chrome process issue rather than an AliasVault problem. To resolve this:
+
+1. Fully close the Chrome browser on your Android device
+2. Reopen Chrome
+
+This simple restart of the browser process typically resolves the issue and restores autofill functionality.
+

@@ -71,11 +71,11 @@ class AutofillService : AutofillService() {
         fieldFinder.parseStructure()
 
         // If no password field was found, return an empty response
-        /*if (!fieldFinder.foundPasswordField) {
+        if (!fieldFinder.foundPasswordField) {
             Log.d(TAG, "No password field found, skipping autofill")
             callback.onSuccess(null)
             return
-        }*/
+        }
 
         // If we found a password field but no username field, and we have a last field,
         // assume it's the username field
@@ -144,8 +144,11 @@ class AutofillService : AutofillService() {
                                 val responseBuilder = FillResponse.Builder()
 
                                 // Create presentation for the "no matches" option
-                                val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
-                                presentation.setTextViewText(android.R.id.text1, "AliasVault: no matches")
+                                val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+                                presentation.setTextViewText(
+                                    R.id.text,
+                                    "AliasVault: no matches"
+                                )
 
                                 val dataSetBuilder = Dataset.Builder(presentation)
 
@@ -162,10 +165,11 @@ class AutofillService : AutofillService() {
                                 )
                                 dataSetBuilder.setAuthentication(pendingIntent.intentSender)
 
-                                // Add a placeholder value to satisfy the requirement that at least one value must be set
+                                // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
                                 if (fieldFinder.autofillableFields.isNotEmpty()) {
-                                    val firstField = fieldFinder.autofillableFields.first()
-                                    dataSetBuilder.setValue(firstField.first, AutofillValue.forText(""))
+                                    for (field in fieldFinder.autofillableFields) {
+                                        dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
+                                    }
                                 }
 
                                 // Add this dataset to the response
@@ -184,6 +188,38 @@ class AutofillService : AutofillService() {
                                 // Create a dataset for this credential
                                 addDatasetForCredential(responseBuilder, fieldFinder, credential)
                             }
+
+                            // Add "Open AliasVault app" as the last option
+                            val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+                            openAppPresentation.setTextViewText(
+                                R.id.text,
+                                "Open app"
+                            )
+
+                            val openAppDataSetBuilder = Dataset.Builder(openAppPresentation)
+
+                            // Add a click listener to open AliasVault app
+                            val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                putExtra("OPEN_CREDENTIALS", true)
+                            }
+                            val pendingIntent = PendingIntent.getActivity(
+                                this@AutofillService,
+                                0,
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                            openAppDataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+                            // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
+                            if (fieldFinder.autofillableFields.isNotEmpty()) {
+                                for (field in fieldFinder.autofillableFields) {
+                                    openAppDataSetBuilder.setValue(field.first, AutofillValue.forText(""))
+                                }
+                            }
+
+                            // Add this dataset to the response
+                            responseBuilder.addDataset(openAppDataSetBuilder.build())
 
                             // Send the response back
                             callback.onSuccess(responseBuilder.build())
@@ -317,10 +353,10 @@ class AutofillService : AutofillService() {
         fieldFinder: FieldFinder,
         credential: Credential
     ) {
-        // Create presentation for this credential
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1)
+        // Create presentation for this credential using our custom layout
+        val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item)
         presentation.setTextViewText(
-            android.R.id.text1,
+            R.id.text,
             "${credential.username} (${credential.service.name})"
         )
 
@@ -480,6 +516,11 @@ class AutofillService : AutofillService() {
                     for (i in 0 until attributes.size) {
                         val name = attributes.get(i)?.first
                         val value = attributes.get(i)?.second
+
+                        if (name == "name" && (value == "username" || value == "name" || value == "email" || value == "user")) {
+                            return true;
+                        }
+
                         if (name == "type" && (value == "text" || value == "email")) {
                             // Check if there's a label or placeholder that suggests username
                             val label = node.hint
