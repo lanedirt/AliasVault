@@ -11,7 +11,7 @@ import net.aliasvault.app.vaultstore.keystoreprovider.TestKeystoreProvider
 import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [28], manifest = Config.NONE)
 class VaultStoreTest {
     private lateinit var vaultStore: VaultStore
     private val testEncryptionKeyBase64 = "/9So3C83JLDIfjsF0VQOc4rz1uAFtIseW7yrUuztAD0=" // 32 bytes for AES-256

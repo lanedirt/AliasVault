@@ -13,7 +13,7 @@ import java.util.UUID
 import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [28], manifest = Config.NONE)
 class AutofillTest {
     private lateinit var credentialMatcher: CredentialMatcher
     private lateinit var testCredentials: List<Credential>
@@ -27,6 +27,11 @@ class AutofillTest {
             createTestCredential(
                 "Gmail",
                 "https://gmail.com",
+                "user@gmail.com"
+            ),
+            createTestCredential(
+                "Google",
+                "https://google.com",
                 "user@gmail.com"
             ),
             createTestCredential(
@@ -51,11 +56,11 @@ class AutofillTest {
     fun testExactUrlMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://gmail.com"
+            "www.coolblue.nl"
         )
 
         assertEquals(1, matches.size)
-        assertEquals("Gmail", matches[0].service.name)
+        assertEquals("Coolblue", matches[0].service.name)
     }
 
     @Test
@@ -77,7 +82,7 @@ class AutofillTest {
         )
 
         assertEquals(1, matches.size)
-        assertEquals("Gmail", matches[0].service.name)
+        assertEquals("Google", matches[0].service.name)
     }
 
     @Test
@@ -99,8 +104,9 @@ class AutofillTest {
             "com.coolblue.app"
         )
 
-        assertEquals(1, matches.size)
-        assertEquals("Coolblue App", matches[0].service.name)
+        assertEquals(2, matches.size)
+        assertTrue(matches.any { it.service.name == "Coolblue" })
+        assertTrue(matches.any { it.service.name == "Coolblue App" })
     }
 
     @Test

@@ -1,6 +1,5 @@
 package net.aliasvault.app.autofill
 
-import android.net.Uri
 import net.aliasvault.app.vaultstore.models.Credential
 
 /**
@@ -9,91 +8,88 @@ import net.aliasvault.app.vaultstore.models.Credential
  * for a given app or website context.
  */
 class CredentialMatcher {
+
     /**
-     * Filters a list of credentials based on app/website information.
-     * Uses multiple matching strategies in order of specificity:
+     * Filters a list of credentials based on app/package name or URL.
+     * Matching strategies in order of specificity:
      * 1. Exact URL match
-     * 2. Base URL match (excluding query/path)
+     * 2. Base URL match (excluding path/query)
      * 3. Root domain match
-     * 4. Domain name part match
+     * 4. Domain key match (package middle segment or domain without TLD)
      * 5. General text matching on service name, username, and URL
      */
     fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
-        // First try URL-based matching
-        val uri = try {
-            Uri.parse(appInfo)
-        } catch (e: Exception) {
-            null
+        if (appInfo.isBlank()) return credentials
+
+        val input = appInfo.trim().lowercase()
+        val isUrlLike = input.contains('.') && !input.contains(' ')
+        val host: String?
+        val rootDomain: String?
+        val domainKey: String
+
+        if (isUrlLike && (input.startsWith("http://") || input.startsWith("https://") || input.startsWith("www."))) {
+            // Treat as full or partial URL
+            val cleaned = input
+                .removePrefix("https://")
+                .removePrefix("http://")
+                .removePrefix("www.")
+            host = cleaned.substringBefore("/").substringBefore("?")
+            rootDomain = extractRootDomain(host)
+            domainKey = extractDomainWithoutExtension(rootDomain)
+        } else if (isUrlLike && !input.contains('/')) {
+            // Treat as package name (e.g., com.coolblue.app)
+            val parts = input.split('.')
+            host = null
+            rootDomain = null
+            domainKey = if (parts.size >= 3) parts[1] else parts.first()
+        } else {
+            // Plain text search
+            host = null
+            rootDomain = null
+            domainKey = input
         }
 
         val matches = mutableListOf<Credential>()
 
-        if (uri != null && uri.host != null) {
-            val host = uri.host!!
-            val baseUrl = "${uri.scheme}://$host"
-            val rootDomain = extractRootDomain(host)
-            val domainWithoutExtension = extractDomainWithoutExtension(rootDomain)
-
-            // 1. Exact URL match
-            matches.addAll(credentials.filter { credential ->
-                credential.service.url?.equals(appInfo, ignoreCase = true) == true
-            })
-
-            // 2. Base URL match (excluding query/path)
-            if (matches.isEmpty()) {
-                matches.addAll(credentials.filter { credential ->
-                    credential.service.url?.startsWith(baseUrl, ignoreCase = true) == true
-                })
+        if (host != null) {
+            // 1. Exact URL match (with or without scheme)
+            matches += credentials.filter { cred ->
+                cred.service.url?.trim()?.lowercase() in listOf(
+                    input,
+                    "https://$host",
+                    "http://$host"
+                )
             }
-
-            // 3. Root domain match (e.g., coolblue.nl)
+            // 2. Base URL match
             if (matches.isEmpty()) {
-                matches.addAll(credentials.filter { credential ->
-                    credential.service.url?.let { url ->
-                        extractRootDomain(url)?.equals(rootDomain, ignoreCase = true) == true
-                    } ?: false
-                })
-            }
-
-            // 4. Domain name part match (e.g., "coolblue" in service name)
-            if (matches.isEmpty()) {
-                matches.addAll(credentials.filter { credential ->
-                    credential.service.name?.let { name ->
-                        name.contains(domainWithoutExtension, ignoreCase = true) ||
-                        domainWithoutExtension.contains(name, ignoreCase = true)
-                    } ?: false
-                })
+                matches += credentials.filter { cred ->
+                    cred.service.url?.trim()?.lowercase()?.let { url ->
+                        url.startsWith("https://$host") || url.startsWith("http://$host")
+                    } == true
+                }
             }
         }
 
-        // If no URL matches found or appInfo is not a URL, try non-URL matching
-        if (matches.isEmpty()) {
-            // Split appInfo into words for better matching
-            val searchTerms = appInfo.split(Regex("[\\s._-]+")).filter { it.isNotEmpty() }
+        if (matches.isEmpty() && rootDomain != null) {
+            // 3. Root domain match
+            matches += credentials.filter { cred ->
+                cred.service.url?.trim()?.lowercase()?.let { url ->
+                    val u = url.removePrefix("https://")
+                        .removePrefix("http://")
+                        .removePrefix("www.")
+                        .substringBefore("/")
+                    extractRootDomain(u) == rootDomain
+                } == true
+            }
+        }
 
-            matches.addAll(credentials.filter { credential ->
-                // Check service name
-                credential.service.name?.let { name ->
-                    searchTerms.any { term ->
-                        name.contains(term, ignoreCase = true) ||
-                        term.contains(name, ignoreCase = true)
-                    }
-                } ?: false ||
-                // Check username
-                credential.username?.let { username ->
-                    searchTerms.any { term ->
-                        username.contains(term, ignoreCase = true) ||
-                        term.contains(username, ignoreCase = true)
-                    }
-                } ?: false ||
-                // Check service URL (even if appInfo isn't a URL)
-                credential.service.url?.let { url ->
-                    searchTerms.any { term ->
-                        url.contains(term, ignoreCase = true) ||
-                        term.contains(url, ignoreCase = true)
-                    }
-                } ?: false
-            })
+        // 4. Domain key match against service name
+        if (matches.isEmpty()) {
+            matches += credentials.filter { cred ->
+                cred.service.name?.lowercase()?.let { name ->
+                    name.contains(domainKey) || domainKey.contains(name)
+                } == true
+            }
         }
 
         return matches
@@ -101,22 +97,18 @@ class CredentialMatcher {
 
     /**
      * Extracts the root domain from a host string.
-     * For example: "sub.example.com" -> "example.com"
+     * E.g., "sub.example.com" -> "example.com"
      */
     private fun extractRootDomain(host: String): String {
-        val parts = host.split(".")
-        return if (parts.size >= 2) {
-            parts.takeLast(2).joinToString(".")
-        } else {
-            host
-        }
+        val parts = host.split('.')
+        return if (parts.size >= 2) parts.takeLast(2).joinToString(".") else host
     }
 
     /**
-     * Extracts the domain name without its extension.
-     * For example: "example.com" -> "example"
+     * Extracts the domain key (name without extension/TLD).
+     * E.g., "example.com" -> "example"
      */
     private fun extractDomainWithoutExtension(domain: String): String {
-        return domain.split(".").firstOrNull() ?: domain
+        return domain.substringBefore('.')
     }
 }

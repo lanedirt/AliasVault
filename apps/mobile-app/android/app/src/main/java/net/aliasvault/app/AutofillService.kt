@@ -42,6 +42,7 @@ import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
 import net.aliasvault.app.autofill.CredentialMatcher
+import androidx.core.net.toUri
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -219,15 +220,16 @@ class AutofillService : AutofillService() {
     private fun findWebInfoInNode(node: AssistStructure.ViewNode): String? {
         // Check for web domain
         val webDomain = node.webDomain
-        if (webDomain != null) {
-            return webDomain
+        val webScheme = node.webScheme
+        if (webDomain != null && webScheme != null) {
+            return "$webScheme://$webDomain"
         }
 
         // Check for web URL
         val webUrl = node.webDomain
         if (webUrl != null) {
             try {
-                val uri = android.net.Uri.parse(webUrl)
+                val uri = webUrl.toUri()
                 val host = uri.host
                 if (host != null) {
                     return host
