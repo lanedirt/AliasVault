@@ -73,7 +73,7 @@ class AutofillService : AutofillService() {
         fieldFinder.parseStructure()
 
         // If no password field was found, return an empty response
-        if (!fieldFinder.foundPasswordField && fieldFinder.lastUsernameField == null) {
+        if (!fieldFinder.foundPasswordField && !fieldFinder.foundUsernameField) {
             Log.d(TAG, "No password or username field found, skipping autofill")
             callback.onSuccess(null)
             return
@@ -82,7 +82,7 @@ class AutofillService : AutofillService() {
         // If we found a password field but no username field, and we have a last field,
         // assume it's the username field
         // TODO: do we actually need this part?
-        if (fieldFinder.lastUsernameField == null && fieldFinder.lastField != null) {
+        if (!fieldFinder.foundUsernameField && fieldFinder.lastField != null) {
             fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, FieldType.USERNAME))
             Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
         }
@@ -446,7 +446,7 @@ class AutofillService : AutofillService() {
         // Store pairs of (AutofillId, FieldType)
         val autofillableFields = mutableListOf<Pair<AutofillId, FieldType>>()
         var foundPasswordField = false
-        var lastUsernameField: AutofillId? = null
+        var foundUsernameField = false
         var lastField: AutofillId? = null
 
         fun parseStructure() {
@@ -495,7 +495,7 @@ class AutofillService : AutofillService() {
                     autofillableFields.add(Pair(viewId, fieldType))
                     Log.d(TAG, "Found password field: $viewId")
                 } else if (fieldType == FieldType.USERNAME || fieldType == FieldType.EMAIL) {
-                    lastUsernameField = viewId
+                    foundUsernameField = true
                     autofillableFields.add(Pair(viewId, fieldType))
                     Log.d(TAG, "Found ${fieldType.name.lowercase()} field: $viewId")
                 } else {
@@ -616,8 +616,14 @@ class AutofillService : AutofillService() {
             }
 
             // Check by input type
-            if ((node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
-                (node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0) {
+            val inputType = node.inputType
+            val isPasswordType = (inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_TEXT &&
+                (inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+                    inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                    inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) ||
+                (inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_NUMBER &&
+                    inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)
+            if (isPasswordType) {
                 return true
             }
 
