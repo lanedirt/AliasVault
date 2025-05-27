@@ -44,6 +44,8 @@ import net.aliasvault.app.vaultstore.models.Credential
 import net.aliasvault.app.autofill.CredentialMatcher
 import androidx.core.net.toUri
 import android.app.PendingIntent
+import android.graphics.Bitmap
+import net.aliasvault.app.autofill.ImageUtils
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -353,12 +355,39 @@ class AutofillService : AutofillService() {
         fieldFinder: FieldFinder,
         credential: Credential
     ) {
+        // Choose layout based on whether we have a logo
+        val layoutId = if (credential.service.logo != null) {
+            R.layout.autofill_dataset_item_icon
+        } else {
+            R.layout.autofill_dataset_item
+        }
+
         // Create presentation for this credential using our custom layout
-        val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item)
+        val presentation = RemoteViews(packageName, layoutId)
         presentation.setTextViewText(
             R.id.text,
             "${credential.username} (${credential.service.name})"
         )
+
+        // Set the logo if available
+        val logoBytes = credential.service.logo
+        if (logoBytes != null) {
+            val mimeType = ImageUtils.detectMimeType(logoBytes)
+            if (mimeType == "image/svg+xml") {
+                // For SVG, we need to convert it to a bitmap first
+                // This is a simplified approach - in production you might want to use a proper SVG library
+                val bitmap = ImageUtils.bytesToBitmap(logoBytes)
+                if (bitmap != null) {
+                    presentation.setImageViewBitmap(R.id.icon, bitmap)
+                }
+            } else {
+                // For other image types, try to decode directly
+                val bitmap = ImageUtils.bytesToBitmap(logoBytes)
+                if (bitmap != null) {
+                    presentation.setImageViewBitmap(R.id.icon, bitmap)
+                }
+            }
+        }
 
         val dataSetBuilder = Dataset.Builder(presentation)
 
@@ -379,8 +408,6 @@ class AutofillService : AutofillService() {
         // Add this dataset to the response
         responseBuilder.addDataset(dataSetBuilder.build())
     }
-
-
 
     private fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
         return credentialMatcher.filterCredentialsByAppInfo(credentials, appInfo)
