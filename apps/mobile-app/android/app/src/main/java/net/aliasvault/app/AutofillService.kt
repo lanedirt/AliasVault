@@ -73,8 +73,8 @@ class AutofillService : AutofillService() {
         fieldFinder.parseStructure()
 
         // If no password field was found, return an empty response
-        if (!fieldFinder.foundPasswordField) {
-            Log.d(TAG, "No password field found, skipping autofill")
+        if (!fieldFinder.foundPasswordField && fieldFinder.lastUsernameField == null) {
+            Log.d(TAG, "No password or username field found, skipping autofill")
             callback.onSuccess(null)
             return
         }
