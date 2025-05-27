@@ -364,9 +364,32 @@ class AutofillService : AutofillService() {
 
         // Create presentation for this credential using our custom layout
         val presentation = RemoteViews(packageName, layoutId)
+
+        val dataSetBuilder = Dataset.Builder(presentation)
+
+        // Add autofill values for all fields
+        var presentationDisplayValue = credential.service.name
+        for (field in fieldFinder.autofillableFields) {
+            val isPassword = field.second
+            if (isPassword) {
+                if (credential.password != null) {
+                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+                }
+            } else {
+                // Get the appropriate value for this field
+                val (displayValue, autofillValue) = getCredentialValueForField(fieldFinder, field.first, credential)
+                if (autofillValue != null) {
+                    dataSetBuilder.setValue(field.first, AutofillValue.forText(autofillValue))
+                }
+                // Update the presentation text with the display value
+                presentationDisplayValue = "${credential.service.name} ($displayValue)"
+            }
+        }
+
+        // Set the display value of the dropdown item.
         presentation.setTextViewText(
             R.id.text,
-            "${credential.username} (${credential.service.name})"
+            "$presentationDisplayValue"
         )
 
         // Set the logo if available
@@ -375,7 +398,6 @@ class AutofillService : AutofillService() {
             val mimeType = ImageUtils.detectMimeType(logoBytes)
             if (mimeType == "image/svg+xml") {
                 // For SVG, we need to convert it to a bitmap first
-                // This is a simplified approach - in production you might want to use a proper SVG library
                 val bitmap = ImageUtils.bytesToBitmap(logoBytes)
                 if (bitmap != null) {
                     presentation.setImageViewBitmap(R.id.icon, bitmap)
@@ -389,24 +411,62 @@ class AutofillService : AutofillService() {
             }
         }
 
-        val dataSetBuilder = Dataset.Builder(presentation)
+        // Add this dataset to the response
+        responseBuilder.addDataset(dataSetBuilder.build())
+    }
 
-        // Add autofill values for all fields
-        for (field in fieldFinder.autofillableFields) {
-            val isPassword = field.second
-            if (isPassword) {
-                if (credential.password != null) {
-                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+    /**
+     * Determines the appropriate credential value to use for a given field and returns both
+     * a display value and the actual value to use for autofill.
+     *
+     * @param fieldId The AutofillId of the field
+     * @param credential The credential to get the value from
+     * @return A Pair containing (displayValue, autofillValue)
+     */
+    private fun getCredentialValueForField(fieldFinder: FieldFinder, fieldId: AutofillId, credential: Credential): Pair<String, String?> {
+        // Find the field in the structure to determine its type
+        val fieldType = fieldFinder.determineFieldType(fieldId)
+
+        return when (fieldType) {
+            FieldType.EMAIL -> {
+                // Prefer email, fall back to username if no email available
+                if (credential.alias?.email != null) {
+                    Log.d(TAG, "Using email1: ${credential.alias.email}")
+                    Pair(credential.alias.email, credential.alias.email)
+                } else {
+                    // If we only have username, use it.
+                    Log.d(TAG, "Using username1: ${credential.username}")
+                    Pair("${credential.username}", credential.username)
                 }
-            } else {
+            }
+            FieldType.USERNAME -> {
+                // Prefer username, fall back to email if no username available
                 if (credential.username != null) {
-                    dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                    Log.d(TAG, "Using username2: ${credential.username}")
+                    Pair(credential.username, credential.username)
+                } else {
+                    // If we only have email, use it.
+                    Log.d(TAG, "Using email2: ${credential.alias?.email}")
+                    Pair("${credential.alias?.email}", credential.alias?.email)
+                }
+            }
+            else -> {
+                // For unknown field types, try both email and username
+                if (credential.alias?.email != null) {
+                    Log.d(TAG, "Using email3: ${credential.alias.email}")
+                    Pair(credential.alias.email, credential.alias.email)
+                } else {
+                    Log.d(TAG, "Using username3: ${credential.username}")
+                    Pair(credential.username ?: "", credential.username ?: "")
                 }
             }
         }
+    }
 
-        // Add this dataset to the response
-        responseBuilder.addDataset(dataSetBuilder.build())
+    private enum class FieldType {
+        EMAIL,
+        USERNAME,
+        UNKNOWN
     }
 
     private fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
@@ -427,6 +487,111 @@ class AutofillService : AutofillService() {
                 val rootNode = windowNode.rootViewNode
                 parseNode(rootNode)
             }
+        }
+
+        /**
+         * Determines if a field is most likely an email field, username field, or unknown.
+         */
+        fun determineFieldType(fieldId: AutofillId): FieldType {
+            // Find the node in the structure
+            val node = findNodeById(fieldId) ?: return FieldType.UNKNOWN
+
+            // Check for email-specific indicators
+            if (isEmailField(node)) {
+                return FieldType.EMAIL
+            }
+
+            // Check for username-specific indicators
+            if (isUsernameField(node)) {
+                return FieldType.USERNAME
+            }
+
+            return FieldType.UNKNOWN
+        }
+
+        private fun isEmailField(node: AssistStructure.ViewNode): Boolean {
+            // Check input type for email
+            if ((node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) != 0) {
+                return true
+            }
+
+            // Check autofill hints
+            val hints = node.autofillHints
+            if (hints != null) {
+                for (hint in hints) {
+                    if (hint.contains("email", ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+
+            // Check HTML attributes
+            val htmlInfo = node.htmlInfo
+            if (htmlInfo != null) {
+                val attributes = htmlInfo.attributes
+                if (attributes != null) {
+                    for (i in 0 until attributes.size) {
+                        val name = attributes.get(i)?.first
+                        val value = attributes.get(i)?.second
+                        if (name == "type" && value == "email") {
+                            return true
+                        }
+                        if (name == "name" && value?.contains("email", ignoreCase = true) == true) {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            // Check ID and hint text
+            val idEntry = node.idEntry
+            val hint = node.hint
+            if (idEntry?.contains("email", ignoreCase = true) == true ||
+                hint?.contains("email", ignoreCase = true) == true) {
+                return true
+            }
+
+            return false
+        }
+
+        private fun isUsernameField(node: AssistStructure.ViewNode): Boolean {
+            // Check autofill hints
+            val hints = node.autofillHints
+            if (hints != null) {
+                for (hint in hints) {
+                    if (hint == View.AUTOFILL_HINT_USERNAME ||
+                        hint.contains("username", ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+
+            // Check HTML attributes
+            val htmlInfo = node.htmlInfo
+            if (htmlInfo != null) {
+                val attributes = htmlInfo.attributes
+                if (attributes != null) {
+                    for (i in 0 until attributes.size) {
+                        val name = attributes.get(i)?.first
+                        val value = attributes.get(i)?.second
+                        if (name == "name" && (value == "username" || value == "user")) {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            // Check ID and hint text
+            val idEntry = node.idEntry
+            val hint = node.hint
+            if (idEntry?.contains("username", ignoreCase = true) == true ||
+                idEntry?.contains("user", ignoreCase = true) == true ||
+                hint?.contains("username", ignoreCase = true) == true ||
+                hint?.contains("user", ignoreCase = true) == true) {
+                return true
+            }
+
+            return false
         }
 
         private fun parseNode(node: AssistStructure.ViewNode) {
@@ -565,6 +730,34 @@ class AutofillService : AutofillService() {
             }
 
             return false
+        }
+
+        private fun findNodeById(fieldId: AutofillId): AssistStructure.ViewNode? {
+            val nodeCount = structure.windowNodeCount
+            for (i in 0 until nodeCount) {
+                val windowNode = structure.getWindowNodeAt(i)
+                val rootNode = windowNode.rootViewNode
+                val node = findNodeByIdRecursive(rootNode, fieldId)
+                if (node != null) {
+                    return node
+                }
+            }
+            return null
+        }
+
+        private fun findNodeByIdRecursive(node: AssistStructure.ViewNode, fieldId: AutofillId): AssistStructure.ViewNode? {
+            if (node.autofillId == fieldId) {
+                return node
+            }
+            val childCount = node.childCount
+            for (i in 0 until childCount) {
+                val child = node.getChildAt(i)
+                val result = findNodeByIdRecursive(child, fieldId)
+                if (result != null) {
+                    return result
+                }
+            }
+            return null
         }
     }
 
