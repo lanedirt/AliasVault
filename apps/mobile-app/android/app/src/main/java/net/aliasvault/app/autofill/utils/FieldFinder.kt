@@ -1,14 +1,18 @@
-package net.aliasvault.app.autofill
+package net.aliasvault.app.autofill.utils
 
 import android.app.assist.AssistStructure
 import android.view.View
 import android.view.autofill.AutofillId
+import android.util.Log
+import androidx.core.net.toUri
 import net.aliasvault.app.autofill.models.FieldType
 
 /**
  * Helper class to find fields in the assist structure.
  */
 class FieldFinder(var structure: AssistStructure) {
+    private val TAG = "AliasVaultAutofill"
+
     // Store pairs of (AutofillId, net.aliasvault.app.autofill.models.FieldType)
     val autofillableFields = mutableListOf<Pair<AutofillId, FieldType>>()
     var foundPasswordField = false
@@ -22,6 +26,33 @@ class FieldFinder(var structure: AssistStructure) {
             val rootNode = windowNode.rootViewNode
             parseNode(rootNode)
         }
+    }
+
+    /**
+     * Get the current app or website information from the assist structure to know
+     * what credential suggestions to show.
+     */
+    fun getAppInfo(): String? {
+        // First check if this is web content
+        val nodeCount = structure.windowNodeCount
+        for (i in 0 until nodeCount) {
+            val windowNode = structure.getWindowNodeAt(i)
+            val rootNode = windowNode.rootViewNode
+
+            // Check for web-specific information
+            val webInfo = findWebInfoInNode(rootNode)
+            if (webInfo != null) {
+                return webInfo
+            }
+        }
+
+        // If no web info found, fall back to package name
+        val packageName = structure.activityComponent?.packageName
+        if (packageName != null) {
+            return packageName
+        }
+
+        return null
     }
 
     /**
@@ -47,6 +78,70 @@ class FieldFinder(var structure: AssistStructure) {
         }
 
         return FieldType.UNKNOWN
+    }
+
+    /**
+     * Attempt to find the web domain or URL in the assist structure.
+     */
+    private fun findWebInfoInNode(node: AssistStructure.ViewNode): String? {
+        // Check for web domain
+        val webDomain = node.webDomain
+        val webScheme = node.webScheme
+        if (webDomain != null && webScheme != null) {
+            return "$webScheme://$webDomain"
+        }
+
+        // Check for web URL
+        val webUrl = node.webDomain
+        if (webUrl != null) {
+            try {
+                val uri = webUrl.toUri()
+                val host = uri.host
+                if (host != null) {
+                    return host
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing web URL: $webUrl", e)
+            }
+        }
+
+        // Check HTML info for domain or URL
+        val htmlInfo = node.htmlInfo
+        if (htmlInfo != null) {
+            val attributes = htmlInfo.attributes
+            if (attributes != null) {
+                for (i in 0 until attributes.size) {
+                    val name = attributes.get(i)?.first
+                    val value = attributes.get(i)?.second
+                    if (name == "domain" || name == "host" || name == "url") {
+                        return value
+                    }
+                }
+            }
+        }
+
+        // Check for web-specific hints
+        val hints = node.autofillHints
+        if (hints != null) {
+            for (hint in hints) {
+                if (hint.contains("web", ignoreCase = true) ||
+                    hint.contains("url", ignoreCase = true) ||
+                    hint.contains("domain", ignoreCase = true)) {
+                    return hint
+                }
+            }
+        }
+
+        // Recursively check child nodes
+        val childCount = node.childCount
+        for (i in 0 until childCount) {
+            val webInfo = findWebInfoInNode(node.getChildAt(i))
+            if (webInfo != null) {
+                return webInfo
+            }
+        }
+
+        return null
     }
 
     private fun parseNode(node: AssistStructure.ViewNode) {

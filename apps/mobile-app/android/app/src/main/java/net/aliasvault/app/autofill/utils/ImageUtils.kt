@@ -1,4 +1,4 @@
-package net.aliasvault.app.autofill
+package net.aliasvault.app.autofill.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

@@ -5,25 +5,9 @@
  * to forms. It identifies username and password fields in apps and websites,
  * then offers stored credentials from AliasVault.
  *
- * IMPORTANT IMPLEMENTATION NOTES:
- * 1. Since autofill services don't have direct access to activities, we need a way to
- *    authenticate the user. The current implementation:
- *     - Shows a Toast indicating authentication is needed
- *     - In a real implementation, would launch an activity for authentication
- *
- * 2. To complete this implementation, you need to:
- *     - Register this service in AndroidManifest.xml with proper metadata
- *     - Add a way to communicate between the launched activity and this service
- *     - Implement credential storage/retrieval with proper authentication
- *
- * 3. For full production implementation, consider:
- *     - Adding a specific autofill activity for authentication
- *     - Implementing dataset presentation customization
- *     - Adding support for save functionality
- *     - Implementing field detection heuristics for apps without autofill hints
  */
-package net.aliasvault.app
-import android.app.assist.AssistStructure
+package net.aliasvault.app.autofill
+
 import android.content.Intent
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
@@ -34,18 +18,15 @@ import android.service.autofill.FillResponse
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
 import android.util.Log
-import android.view.View
-import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
-import net.aliasvault.app.autofill.CredentialMatcher
-import androidx.core.net.toUri
 import android.app.PendingIntent
-import net.aliasvault.app.autofill.FieldFinder
-import net.aliasvault.app.autofill.ImageUtils
+import net.aliasvault.app.MainActivity
+import net.aliasvault.app.R
+import net.aliasvault.app.autofill.utils.*
 import net.aliasvault.app.autofill.models.FieldType
 
 class AutofillService : AutofillService() {
@@ -104,8 +85,8 @@ class AutofillService : AutofillService() {
     private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
         Log.d(TAG, "Launching activity for autofill authentication")
 
-        // Get the app/website information from the structure
-        val appInfo = getAppInfo(fieldFinder.structure)
+        // Get the app/website information from assist structure.
+        val appInfo = fieldFinder.getAppInfo()
         Log.d(TAG, "Autofill request from: $appInfo")
 
         // Ignore requests from our own unlock page as this would cause a loop
@@ -181,96 +162,6 @@ class AutofillService : AutofillService() {
         val responseBuilder = FillResponse.Builder()
         responseBuilder.addDataset(createVaultLockedDataset(fieldFinder))
         callback.onSuccess(responseBuilder.build())
-    }
-
-    private fun getAppInfo(structure: AssistStructure?): String? {
-        if (structure == null) {
-            return null
-        }
-
-        // First check if this is web content
-        val nodeCount = structure.windowNodeCount
-        for (i in 0 until nodeCount) {
-            val windowNode = structure.getWindowNodeAt(i)
-            val rootNode = windowNode.rootViewNode
-
-            // Check for web-specific information
-            val webInfo = findWebInfoInNode(rootNode)
-            if (webInfo != null) {
-                Log.d(TAG, "Found web info: $webInfo")
-                return webInfo
-            }
-        }
-
-        // If no web info found, fall back to package name
-        val packageName = structure.activityComponent?.packageName
-        if (packageName != null) {
-            Log.d(TAG, "Using package name: $packageName")
-            return packageName
-        }
-
-        return null
-    }
-
-    private fun findWebInfoInNode(node: AssistStructure.ViewNode): String? {
-        // Check for web domain
-        val webDomain = node.webDomain
-        val webScheme = node.webScheme
-        if (webDomain != null && webScheme != null) {
-            return "$webScheme://$webDomain"
-        }
-
-        // Check for web URL
-        val webUrl = node.webDomain
-        if (webUrl != null) {
-            try {
-                val uri = webUrl.toUri()
-                val host = uri.host
-                if (host != null) {
-                    return host
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error parsing web URL: $webUrl", e)
-            }
-        }
-
-        // Check HTML info for domain or URL
-        val htmlInfo = node.htmlInfo
-        if (htmlInfo != null) {
-            val attributes = htmlInfo.attributes
-            if (attributes != null) {
-                for (i in 0 until attributes.size) {
-                    val name = attributes.get(i)?.first
-                    val value = attributes.get(i)?.second
-                    if (name == "domain" || name == "host" || name == "url") {
-                        return value
-                    }
-                }
-            }
-        }
-
-        // Check for web-specific hints
-        val hints = node.autofillHints
-        if (hints != null) {
-            for (hint in hints) {
-                if (hint.contains("web", ignoreCase = true) ||
-                    hint.contains("url", ignoreCase = true) ||
-                    hint.contains("domain", ignoreCase = true)) {
-                    return hint
-                }
-            }
-        }
-
-        // Recursively check child nodes
-        val childCount = node.childCount
-        for (i in 0 until childCount) {
-            val webInfo = findWebInfoInNode(node.getChildAt(i))
-            if (webInfo != null) {
-                return webInfo
-            }
-        }
-
-        return null
     }
 
     // Helper method to create a dataset from a credential

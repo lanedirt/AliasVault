@@ -17,7 +17,7 @@
     <meta-data android:name="expo.modules.updates.ENABLED" android:value="false"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
-    <service android:name=".AutofillService" android:permission="android.permission.BIND_AUTOFILL_SERVICE" android:exported="true">
+    <service android:name=".autofill.AutofillService" android:permission="android.permission.BIND_AUTOFILL_SERVICE" android:exported="true">
       <intent-filter>
         <action android:name="android.service.autofill.AutofillService"/>
       </intent-filter>
