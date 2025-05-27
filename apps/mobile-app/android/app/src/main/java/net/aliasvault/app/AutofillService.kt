@@ -44,7 +44,6 @@ import net.aliasvault.app.vaultstore.models.Credential
 import net.aliasvault.app.autofill.CredentialMatcher
 import androidx.core.net.toUri
 import android.app.PendingIntent
-import android.graphics.Bitmap
 import net.aliasvault.app.autofill.ImageUtils
 
 class AutofillService : AutofillService() {
@@ -123,7 +122,7 @@ class AutofillService : AutofillService() {
                     override fun onSuccess(result: List<Credential>) {
                         try {
                             Log.d(TAG, "Retrieved ${result.size} credentials")
-                            if (result.size == 0) {
+                            if (result.isEmpty()) {
                                 // No credentials available
                                 Log.d(TAG, "No credentials available")
                                 callback.onSuccess(null)
@@ -143,15 +142,13 @@ class AutofillService : AutofillService() {
 
                             // If there are matches, add them to the dataset
                             for (credential in filteredCredentials) {
-                                addDatasetForCredential(responseBuilder, fieldFinder, credential)
+                                responseBuilder.addDataset(createCredentialDataset(fieldFinder, credential))
                             }
 
                             // If there are no results, return "no matches" placeholder option.
                             if (filteredCredentials.isEmpty()) {
                                 Log.d(TAG, "No credentials found for this app, showing 'no matches' option")
                                 responseBuilder.addDataset(createNoMatchesDataset(fieldFinder))
-                                callback.onSuccess(responseBuilder.build())
-                                return
                             }
 
                             // Add "Open AliasVault app" as the last option
@@ -176,19 +173,12 @@ class AutofillService : AutofillService() {
         }
 
         // If we get here, either there was no instance or the vault wasn't unlocked
-        // Launch the AliasVault app in order to load the encryption key from biometric keystore
-        Log.d(TAG, "No unlocked vault available, launching activity for authentication")
+        // Show a "vault locked" placeholder instead of launching the activity
+        Log.d(TAG, "Vault is locked, showing placeholder")
 
-        // Create an intent to launch MainActivity with autofill flags
-        val intent = Intent(this, MainActivity::class.java).apply {
-            // Add flags to launch as a new task
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            // Add extra data to indicate this is for autofill
-            putExtra("AUTOFILL_REQUEST", true)
-        }
-
-        // Start the activity
-        startActivity(intent)
+        val responseBuilder = FillResponse.Builder()
+        responseBuilder.addDataset(createVaultLockedDataset(fieldFinder))
+        callback.onSuccess(responseBuilder.build())
     }
 
     private fun getAppInfo(structure: AssistStructure?): String? {
@@ -282,11 +272,10 @@ class AutofillService : AutofillService() {
     }
 
     // Helper method to create a dataset from a credential
-    private fun addDatasetForCredential(
-        responseBuilder: FillResponse.Builder,
+    private fun createCredentialDataset(
         fieldFinder: FieldFinder,
         credential: Credential
-    ) {
+    ) : Dataset {
         // Choose layout based on whether we have a logo
         val layoutId = if (credential.service.logo != null) {
             R.layout.autofill_dataset_item_icon
@@ -365,8 +354,7 @@ class AutofillService : AutofillService() {
             }
         }
 
-        // Add this dataset to the response
-        responseBuilder.addDataset(dataSetBuilder.build())
+        return dataSetBuilder.build()
     }
 
     private fun createNoMatchesDataset(fieldFinder: FieldFinder): Dataset {
@@ -428,6 +416,39 @@ class AutofillService : AutofillService() {
         dataSetBuilder.setValue(pair.first, AutofillValue.forText(""))
 
         // Add this dataset to the response
+        return dataSetBuilder.build()
+    }
+
+    private fun createVaultLockedDataset(fieldFinder: FieldFinder): Dataset {
+        // Create presentation for the "vault locked" option
+        val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+        presentation.setTextViewText(
+            R.id.text,
+            "Vault locked"
+        )
+
+        val dataSetBuilder = Dataset.Builder(presentation)
+
+        // Add a click listener to open AliasVault app
+        val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("OPEN_CREDENTIALS", true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this@AutofillService,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+        // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
+        if (fieldFinder.autofillableFields.isNotEmpty()) {
+            for (field in fieldFinder.autofillableFields) {
+                dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
+            }
+        }
+
         return dataSetBuilder.build()
     }
 
