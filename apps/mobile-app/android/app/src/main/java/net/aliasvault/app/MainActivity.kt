@@ -26,24 +26,6 @@ class MainActivity : ReactActivity() {
     SplashScreenManager.registerOnActivity(this)
     // @generated end expo-splashscreen
 
-    window.setDecorFitsSystemWindows(false)
-    window.setNavigationBarColor(Color.TRANSPARENT)
-    window.setStatusBarColor(Color.TRANSPARENT)
-    window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-    window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-
-    // Initialize autofill service, this opens the set_autofill_service setting screen
-    // to instruct user to enable AliasVault as autofill provider.
-    // TODO: this should be triggerable from React Native instead so we can better control flow
-    // of when to ask the user to enable native system autofill.
-    // TODO: enable this again when implementing Android autofill setup just like we
-    // did for iOS autofill instructions in settings in the app.
-    /*startActivity(Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-      data = Uri.parse("package:net.aliasvault.app")
-    })*/
-
     super.onCreate(null)
   }
 

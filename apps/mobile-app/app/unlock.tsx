@@ -241,6 +241,7 @@ export default function UnlockScreen() : React.ReactNode {
       flex: 1,
       justifyContent: 'center',
       paddingHorizontal: 20,
+      paddingBottom: 40,
     },
     scrollContent: {
       flexGrow: 1,
