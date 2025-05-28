@@ -1,6 +1,5 @@
-import { StyleSheet, View, TouchableOpacity, Alert, ScrollView, RefreshControl, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 
@@ -17,7 +16,6 @@ import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
  */
 export default function ActiveSessionsScreen() : React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
 
   const [refreshTokens, setRefreshTokens] = useState<RefreshToken[]>([]);
@@ -25,10 +23,6 @@ export default function ActiveSessionsScreen() : React.ReactNode {
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
-    contentContainer: {
-      paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
-    },
     detailText: {
       color: colors.textMuted,
       fontSize: 14,
@@ -50,9 +44,6 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       color: colors.textMuted,
       fontSize: 16,
       textAlign: 'center',
-    },
-    header: {
-      paddingTop: 12
     },
     headerText: {
       color: colors.textMuted,

@@ -1,7 +1,6 @@
-import { StyleSheet, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import srp from 'secure-remote-password/client';
 
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -22,7 +21,6 @@ import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
  */
 export default function DeleteAccountScreen(): React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
   const { username, verifyPassword, logout } = useAuth();
 

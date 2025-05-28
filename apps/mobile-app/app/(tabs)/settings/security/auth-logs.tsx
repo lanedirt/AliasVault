@@ -1,6 +1,5 @@
-import { StyleSheet, View, ScrollView, RefreshControl, Platform } from 'react-native';
+import { StyleSheet, View, RefreshControl, Platform } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 
@@ -19,7 +18,6 @@ import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
  */
 export default function AuthLogsScreen() : React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
 
   const [logs, setLogs] = useState<AuthLogModel[]>([]);
@@ -27,10 +25,6 @@ export default function AuthLogsScreen() : React.ReactNode {
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
-    contentContainer: {
-      paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
-    },
     detailText: {
       color: colors.textMuted,
       fontSize: 14,
@@ -50,9 +44,6 @@ export default function AuthLogsScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 16,
       fontWeight: '600',
-    },
-    header: {
-      paddingTop: 12,
     },
     headerText: {
       color: colors.textMuted,
