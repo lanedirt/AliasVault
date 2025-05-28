@@ -358,7 +358,9 @@ export default function LoginScreen() : React.ReactNode {
     content: {
       backgroundColor: colors.background,
       flex: 1,
+      marginBottom: 16,
       padding: 16,
+      paddingBottom: 0,
     },
     createNewVaultContainer: {
       alignItems: 'center',
@@ -422,7 +424,6 @@ export default function LoginScreen() : React.ReactNode {
       borderRadius: 8,
       borderWidth: 1,
       flexDirection: 'row',
-      marginBottom: 16,
       width: '100%',
     },
     inputIcon: {

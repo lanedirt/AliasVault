@@ -280,7 +280,6 @@ export default function UnlockScreen() : React.ReactNode {
                 colors={[colors.loginHeader, colors.background]}
                 style={styles.gradientContainer}
               />
-
               <View style={styles.mainContent}>
                 <View style={styles.headerSection}>
                   <View style={styles.logoContainer}>

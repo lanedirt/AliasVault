@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView, RefreshControl, Animated , Platform } fro
 import { useNavigation } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
@@ -19,6 +20,7 @@ import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+
 /**
  * Emails screen.
  */
@@ -35,6 +37,7 @@ export default function EmailsScreen() : React.ReactNode {
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
   const [isTabFocused, setIsTabFocused] = useState(false);
+  const insets = useSafeAreaInsets();
 
   /**
    * Load emails.
@@ -154,7 +157,7 @@ export default function EmailsScreen() : React.ReactNode {
       padding: 20,
     },
     contentContainer: {
-      paddingBottom: 40,
+      paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 10,
       paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {

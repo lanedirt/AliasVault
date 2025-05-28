@@ -15,7 +15,6 @@ export function ThemedContainer({ style, ...otherProps }: ThemedContainerProps):
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingBottom: insets.bottom,
       paddingHorizontal: 14,
       paddingTop: Platform.OS === 'ios' ? insets.top : 0,
     },

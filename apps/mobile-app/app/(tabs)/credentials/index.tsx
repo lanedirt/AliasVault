@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -42,6 +43,7 @@ export default function CredentialsScreen() : React.ReactNode {
   const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
   const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
   const [serviceUrl, setServiceUrl] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -221,7 +223,7 @@ export default function CredentialsScreen() : React.ReactNode {
       fontSize: 20,
     },
     contentContainer: {
-      paddingBottom: 40,
+      paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 10,
       paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {
