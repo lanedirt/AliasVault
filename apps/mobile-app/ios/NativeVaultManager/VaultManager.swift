@@ -309,6 +309,19 @@ public class VaultManager: NSObject {
     }
 
     @objc
+    func openAutofillSettingsPage(_ resolve: @escaping RCTPromiseResolveBlock,
+                                 rejecter reject: @escaping RCTPromiseRejectBlock) {
+        if let settingsUrl = URL(string: "App-Prefs:root") {
+            DispatchQueue.main.async {
+                UIApplication.shared.open(settingsUrl)
+                resolve(nil)
+            }
+        } else {
+            reject("SETTINGS_ERROR", "Cannot open settings", nil)
+        }
+    }
+
+    @objc
     static func moduleName() -> String! {
         return "VaultManager"
     }

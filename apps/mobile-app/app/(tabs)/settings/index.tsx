@@ -21,7 +21,7 @@ import { ThemedContainer } from '@/components/themed/ThemedContainer';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
-  const { getAuthMethodDisplay, shouldShowIosAutofillReminder, shouldShowAndroidAutofillReminder } = useAuth();
+  const { getAuthMethodDisplay, shouldShowAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -242,7 +242,7 @@ export default function SettingsScreen() : React.ReactNode {
                 </View>
                 <View style={styles.settingItemContent}>
                   <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
-                  {shouldShowIosAutofillReminder && (
+                  {shouldShowAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
                     </View>
@@ -264,7 +264,7 @@ export default function SettingsScreen() : React.ReactNode {
                 </View>
                 <View style={styles.settingItemContent}>
                   <ThemedText style={styles.settingItemText}>Android Autofill</ThemedText>
-                  {shouldShowAndroidAutofillReminder && (
+                  {shouldShowAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
                     </View>

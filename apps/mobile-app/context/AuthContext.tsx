@@ -34,19 +34,15 @@ type AuthContextType = {
   getBiometricDisplayName: () => Promise<string>;
   setOfflineMode: (isOffline: boolean) => void;
   verifyPassword: (password: string) => Promise<string | null>;
-  // iOS Autofill methods
-  shouldShowIosAutofillReminder: boolean;
-  markIosAutofillConfigured: () => Promise<void>;
-  // Android Autofill methods
-  shouldShowAndroidAutofillReminder: boolean;
-  markAndroidAutofillConfigured: () => Promise<void>;
+  // Autofill methods
+  shouldShowAutofillReminder: boolean;
+  markAutofillConfigured: () => Promise<void>;
   // Return URL methods
   returnUrl: { path: string; params?: object } | null;
   setReturnUrl: (url: { path: string; params?: object } | null) => void;
 }
 
-const IOS_AUTOFILL_CONFIGURED_KEY = 'ios_autofill_configured';
-const ANDROID_AUTOFILL_CONFIGURED_KEY = 'android_autofill_configured';
+const AUTOFILL_CONFIGURED_KEY = 'autofill_configured';
 
 /**
  * Auth context.
@@ -61,8 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
-  const [shouldShowIosAutofillReminder, setShouldShowIosAutofillReminder] = useState(false);
-  const [shouldShowAndroidAutofillReminder, setShouldShowAndroidAutofillReminder] = useState(false);
+  const [shouldShowAutofillReminder, setShouldShowAutofillReminder] = useState(false);
   const [returnUrl, setReturnUrl] = useState<{ path: string; params?: object } | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const appState = useRef(AppState.currentState);
@@ -342,65 +337,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isVaultUnlocked, pathname]);
 
   /**
-   * Load iOS Autofill state from storage
+   * Load autofill state from storage
    */
-  const loadIosAutofillState = useCallback(async () => {
-    if (Platform.OS !== 'ios') {
-      setShouldShowIosAutofillReminder(false);
-      return;
-    }
-
-    const configured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
-    setShouldShowIosAutofillReminder(configured !== 'true');
+  const loadAutofillState = useCallback(async () => {
+    const configured = await AsyncStorage.getItem(AUTOFILL_CONFIGURED_KEY);
+    setShouldShowAutofillReminder(configured !== 'true');
   }, []);
 
   /**
-   * Mark iOS Autofill as configured
+   * Mark autofill as configured for the current platform
    */
-  const markIosAutofillConfigured = useCallback(async () => {
-    await AsyncStorage.setItem(IOS_AUTOFILL_CONFIGURED_KEY, 'true');
-    setShouldShowIosAutofillReminder(false);
+  const markAutofillConfigured = useCallback(async () => {
+    await AsyncStorage.setItem(AUTOFILL_CONFIGURED_KEY, 'true');
+    setShouldShowAutofillReminder(false);
   }, []);
 
-  /**
-   * Mark Android autofill as configured.
-   */
-  const markAndroidAutofillConfigured = useCallback(async (): Promise<void> => {
-    await AsyncStorage.setItem(ANDROID_AUTOFILL_CONFIGURED_KEY, 'true');
-    setShouldShowAndroidAutofillReminder(false);
-  }, []);
-
-  // Load iOS Autofill state on mount
+  // Load autofill state on mount
   useEffect(() => {
-    loadIosAutofillState();
-  }, [loadIosAutofillState]);
-
-  // Check if autofill is configured on mount
-  useEffect(() => {
-    /**
-     * Check if autofill is configured for the current platform.
-     * @returns {Promise<void>} A promise that resolves when the check is complete
-     */
-    const checkAutofillConfiguration = async (): Promise<void> => {
-      if (Platform.OS === 'ios') {
-        const isConfigured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
-        setShouldShowIosAutofillReminder(!isConfigured);
-      } else if (Platform.OS === 'android') {
-        const isConfigured = await AsyncStorage.getItem(ANDROID_AUTOFILL_CONFIGURED_KEY);
-        setShouldShowAndroidAutofillReminder(!isConfigured);
-      }
-    };
-
-    checkAutofillConfiguration();
-  }, []);
+    loadAutofillState();
+  }, [loadAutofillState]);
 
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
     username,
     globalMessage,
-    shouldShowIosAutofillReminder,
-    shouldShowAndroidAutofillReminder,
+    shouldShowAutofillReminder,
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
@@ -415,8 +377,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
-    markIosAutofillConfigured,
-    markAndroidAutofillConfigured,
+    markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
     setOfflineMode: setIsOffline,
@@ -425,8 +386,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInitialized,
     username,
     globalMessage,
-    shouldShowIosAutofillReminder,
-    shouldShowAndroidAutofillReminder,
+    shouldShowAutofillReminder,
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
@@ -441,8 +401,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
-    markIosAutofillConfigured,
-    markAndroidAutofillConfigured,
+    markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
   ]);

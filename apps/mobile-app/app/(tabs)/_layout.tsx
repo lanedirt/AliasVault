@@ -118,7 +118,7 @@ export default function TabLayout() : React.ReactNode {
           tabBarIcon: ({ color }) => (
             <View style={styles.iconContainer}>
               <IconSymbol size={28} name={IconSymbolName.Gear} color={color} />
-              {Platform.OS === 'ios' && authContext.shouldShowIosAutofillReminder && (
+              {authContext.shouldShowAutofillReminder && (
                 <View style={styles.iconNotificationContainer}>
                   <ThemedText style={styles.iconNotificationText}>1</ThemedText>
                 </View>

@@ -1,6 +1,7 @@
 import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 import { router } from 'expo-router';
 
+import NativeVaultManager from '@/specs/NativeVaultManager';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
@@ -12,16 +13,15 @@ import { ThemedContainer } from '@/components/themed/ThemedContainer';
  */
 export default function AndroidAutofillScreen() : React.ReactNode {
   const colors = useColors();
-  const { markAndroidAutofillConfigured, shouldShowAndroidAutofillReminder } = useAuth();
+  const { markAutofillConfigured, shouldShowAutofillReminder } = useAuth();
 
   /**
    * Handle the configure press.
    */
   const handleConfigurePress = async () : Promise<void> => {
-    await markAndroidAutofillConfigured();
+    await markAutofillConfigured();
     try {
-      await Linking.sendIntent('android.settings.SETTINGS');
-      router.back();
+      await NativeVaultManager.openAutofillSettingsPage();
     } catch (err) {
       console.warn('Failed to open settings:', err);
     }
@@ -31,7 +31,7 @@ export default function AndroidAutofillScreen() : React.ReactNode {
    * Handle the already configured press.
    */
   const handleAlreadyConfigured = async () : Promise<void> => {
-    await markAndroidAutofillConfigured();
+    await markAutofillConfigured();
     router.back();
   };
 
@@ -89,6 +89,12 @@ export default function AndroidAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
+    tipStep: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 20,
+      marginTop: 8,
+    },
     warningContainer: {
       backgroundColor: colors.accentBackground,
       marginBottom: 16,
@@ -134,7 +140,7 @@ export default function AndroidAutofillScreen() : React.ReactNode {
         <View style={styles.instructionContainer}>
           <ThemedText style={styles.instructionTitle}>How to enable:</ThemedText>
           <ThemedText style={styles.instructionStep}>
-            1. Open Android Settings via the button below
+            1. Open Android Settings via the button below, and change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
           </ThemedText>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -142,21 +148,18 @@ export default function AndroidAutofillScreen() : React.ReactNode {
               onPress={handleConfigurePress}
             >
               <ThemedText style={styles.configureButtonText}>
-                Open Android Settings
+                Open Autofill Settings
               </ThemedText>
             </TouchableOpacity>
+            <ThemedText style={styles.tipStep}>
+              If the button above doesn&apos;t work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.
+            </ThemedText>
           </View>
           <ThemedText style={styles.instructionStep}>
-            2. Navigate to the &quot;Passwords and autofill&quot; section in the settings menu. Depending on your device, this option may be under &quot;General management&quot; or &quot;System Settings&quot;.
-          </ThemedText>
-          <ThemedText style={styles.instructionStep}>
-            3. Change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
-          </ThemedText>
-          <ThemedText style={styles.instructionStep}>
-            4. Some apps, like Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.
+            2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.
           </ThemedText>
           <View style={styles.buttonContainer}>
-            {shouldShowAndroidAutofillReminder && (
+            {shouldShowAutofillReminder && (
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={handleAlreadyConfigured}

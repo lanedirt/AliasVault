@@ -12,6 +12,10 @@ import org.json.JSONArray
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
 import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.core.net.toUri
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
@@ -347,6 +351,33 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         } catch (e: Exception) {
             Log.e(TAG, "Error getting auth methods", e)
             promise.reject("ERR_GET_AUTH_METHODS", "Failed to get auth methods: ${e.message}", e)
+        }
+    }
+
+    @ReactMethod
+    override fun openAutofillSettingsPage(promise: Promise) {
+        try {
+            val autofillIntent = Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
+                data = "package:${reactApplicationContext.packageName}".toUri()
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            // Try to resolve the intent first
+            if (autofillIntent.resolveActivity(reactApplicationContext.packageManager) != null) {
+                reactApplicationContext.startActivity(autofillIntent)
+            } else {
+                // Fallback to privacy settings (may contain Autofill on Samsung)
+                val fallbackIntent = Intent(Settings.ACTION_PRIVACY_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                reactApplicationContext.startActivity(fallbackIntent)
+            }
+
+            promise.resolve(null)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening autofill settings", e)
+            promise.reject("ERR_OPEN_AUTOFILL_SETTINGS", "Failed to open autofill settings: ${e.message}", e)
         }
     }
 }

@@ -125,4 +125,8 @@
     [vaultManager setCurrentVaultRevisionNumber:revisionNumber resolver:resolve rejecter:reject];
 }
 
+- (void)openAutofillSettingsPage:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager openAutofillSettingsPage:resolve rejecter:reject];
+}
+
 @end
