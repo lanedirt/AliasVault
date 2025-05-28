@@ -44,7 +44,6 @@
     "expo-haptics": "~14.0.1",
     "expo-linking": "~7.0.5",
     "expo-local-authentication": "~15.0.2",
-    "expo-modules-core": "~2.2.3",
     "expo-router": "~4.0.20",
     "expo-sharing": "~13.0.1",
     "expo-splash-screen": "~0.29.24",

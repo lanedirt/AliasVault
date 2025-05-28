@@ -8,7 +8,6 @@
     "scheme": "net.aliasvault.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "deepLinking": true,
     "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
@@ -17,7 +16,7 @@
         "image": "./assets/images/adaptive-icon.png",
         "imageWidth": 200,
         "resizeMode": "contain",
-        "backgroundColor": "transparent"
+        "backgroundColor": "#ffffff"
       }
     },
     "android": {
