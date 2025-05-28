@@ -11,6 +11,7 @@ import { RefreshToken } from '@/utils/types/webapi/RefreshToken';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 /**
  * Active sessions screen.
  */
@@ -170,8 +171,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
 
   return (
     <ThemedContainer>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
+      <ThemedScrollView
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -181,11 +181,9 @@ export default function ActiveSessionsScreen() : React.ReactNode {
           />
         }
       >
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.
+        </ThemedText>
         <View style={styles.section}>
           {isLoading ? (
             <SkeletonLoader count={1} height={100} parts={3} />
@@ -210,7 +208,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
             ))
           )}
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     </ThemedContainer>
   );
 }

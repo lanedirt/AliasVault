@@ -47,12 +47,10 @@ export default function IosAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-    header: {
-      paddingTop: 12,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+      textAlignVertical: 'top',
     },
     instructionContainer: {
       paddingTop: 16,
@@ -92,11 +90,9 @@ export default function IosAutofillScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <ThemedScrollView>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
+        </ThemedText>
 
         <View style={styles.instructionContainer}>
           <ThemedText style={styles.instructionTitle}>How to enable:</ThemedText>

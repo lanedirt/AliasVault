@@ -15,6 +15,7 @@ import { DeleteAccountRequest } from '@/utils/types/webapi/DeleteAccountRequest'
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Delete account screen.
@@ -35,10 +36,6 @@ export default function DeleteAccountScreen(): React.ReactNode {
     button: {
       marginTop: 16,
     },
-    contentContainer: {
-      paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? insets.top : 0,
-    },
     form: {
       backgroundColor: colors.accentBackground,
       borderColor: colors.accentBorder,
@@ -47,12 +44,10 @@ export default function DeleteAccountScreen(): React.ReactNode {
       marginTop: 20,
       padding: 20,
     },
-    header: {
-      paddingTop: 12,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+      marginBottom: 16,
     },
     inputContainer: {
       marginTop: 10,
@@ -233,15 +228,10 @@ export default function DeleteAccountScreen(): React.ReactNode {
         style={styles.keyboardAvoidingView}
       >
         <ThemedContainer>
-          <ScrollView
-            contentContainerStyle={styles.contentContainer}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.header}>
-              <ThemedText style={styles.headerText}>
-                Deleting your account will immediately and permanently delete all of your data.
-              </ThemedText>
-            </View>
+          <ThemedScrollView>
+            <ThemedText style={styles.headerText}>
+              Deleting your account will immediately and permanently delete all of your data.
+            </ThemedText>
             <UsernameDisplay />
             <View style={styles.form}>
               {step === 'username' ? (
@@ -291,7 +281,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
                 </>
               )}
             </View>
-          </ScrollView>
+          </ThemedScrollView>
         </ThemedContainer>
       </KeyboardAvoidingView>
     </>

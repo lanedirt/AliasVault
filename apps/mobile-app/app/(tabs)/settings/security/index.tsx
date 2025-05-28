@@ -1,29 +1,20 @@
-import { StyleSheet, View, TouchableOpacity, Animated, ScrollView, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRef } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
 import { SettingsHeader } from '@/components/ui/SettingsHeader';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Security settings screen.
  */
 export default function SecuritySettingsScreen() : React.ReactNode {
   const colors = useColors();
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const styles = StyleSheet.create({
-    scrollContent: {
-      paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 42 : 0,
-    },
-    scrollView: {
-      flex: 1,
-    },
     section: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
@@ -64,17 +55,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
 
   return (
     <ThemedContainer>
-      <Animated.ScrollView
-        ref={scrollViewRef}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-        contentContainerStyle={styles.scrollContent}
-        scrollIndicatorInsets={{ bottom: 40 }}
-        style={styles.scrollView}
-      >
+      <ThemedScrollView>
         <SettingsHeader title="Security" description="Manage your account and vault security settings." icon="shield-checkmark" />
         <View style={styles.section}>
           <TouchableOpacity
@@ -132,7 +113,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
             </View>
           </TouchableOpacity>
         </View>
-      </Animated.ScrollView>
+      </ThemedScrollView>
     </ThemedContainer>
   );
 }

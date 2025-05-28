@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
-    paddingTop: 16,
   },
   headerRightButton: {
     padding: 10,
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    borderRadius: 8,
+    borderRadius: 4,
     height: 48,
     width: 48,
   },

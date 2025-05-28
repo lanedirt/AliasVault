@@ -25,6 +25,8 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 type CredentialMode = 'random' | 'manual';
 
@@ -44,6 +46,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -396,12 +399,16 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
+    keyboardContainer: {
+      flex: 1,
+    },
     container: {
       flex: 1,
+      paddingTop: Platform.OS === 'ios' ? 52 : 0,
     },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 32 : 0,
+      paddingTop: 16,
     },
     deleteButton: {
       alignItems: 'center',
@@ -474,7 +481,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 18,
       fontWeight: '600',
-      marginBottom: 16,
+      marginBottom: 10,
     },
   });
 
@@ -513,10 +520,10 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         <LoadingOverlay status={syncStatus} />
       )}
       <KeyboardAvoidingView
-        style={styles.container}
+        style={styles.keyboardContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ThemedContainer>
+        <ThemedContainer style={styles.container}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
             contentContainerStyle={styles.contentContainer}

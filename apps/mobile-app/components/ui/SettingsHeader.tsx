@@ -26,7 +26,6 @@ export function SettingsHeader({ title, description, icon }: SettingsHeaderProps
     container: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
-      marginTop: 20,
       paddingBottom: 16,
       paddingHorizontal: 16,
       paddingTop: 20,

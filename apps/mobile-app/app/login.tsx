@@ -471,7 +471,6 @@ export default function LoginScreen() : React.ReactNode {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-
         <SafeAreaView>
           <LinearGradient
             colors={[colors.loginHeader, colors.background]}

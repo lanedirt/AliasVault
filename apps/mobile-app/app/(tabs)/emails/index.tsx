@@ -155,7 +155,7 @@ export default function EmailsScreen() : React.ReactNode {
     },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 42 : 0,
+      paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {
       color: colors.textMuted,

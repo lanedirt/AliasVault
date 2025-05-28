@@ -19,18 +19,11 @@ export function UsernameDisplay(): React.ReactNode {
       marginRight: 12,
       width: 40,
     },
-    avatar: {
-      borderRadius: 20,
-      height: 40,
-      marginRight: 12,
-      width: 40,
-    },
     userInfoContainer: {
       alignItems: 'center',
       backgroundColor: colors.background,
       borderRadius: 10,
       flexDirection: 'row',
-      marginTop: 10,
     },
     usernameText: {
       color: colors.text,

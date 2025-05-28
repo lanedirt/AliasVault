@@ -138,9 +138,6 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
       color: colors.textMuted,
       opacity: 0.5,
     },
-    header: {
-      paddingTop: 12,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
@@ -179,11 +176,9 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <ThemedScrollView>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Choose how you want to unlock your vault.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Choose how you want to unlock your vault.
+        </ThemedText>
 
         <View style={styles.optionContainer}>
           <TouchableOpacity

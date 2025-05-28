@@ -40,9 +40,6 @@ export default function AutoLockScreen() : React.ReactNode {
   ];
 
   const styles = StyleSheet.create({
-    header: {
-      paddingTop: 12,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
@@ -77,11 +74,9 @@ export default function AutoLockScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <ThemedScrollView>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
+        </ThemedText>
         <View style={styles.optionContainer}>
           {timeoutOptions.map((option, index) => {
             const isLast = index === timeoutOptions.length - 1;

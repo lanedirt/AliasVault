@@ -16,9 +16,9 @@ export function TitleContainer({ title, showLogo = true }: TitleContainerProps):
   // On Android, we don't show the title container as the native header is used, so we only return the offline banner.
   if (Platform.OS === 'android') {
     return (
-      <View style={styles.titleContainer}>
+      <>
         <OfflineBanner />
-      </View>
+      </>
     );
   }
 

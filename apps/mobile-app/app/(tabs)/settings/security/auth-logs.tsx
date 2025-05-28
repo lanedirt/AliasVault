@@ -12,6 +12,7 @@ import { AuthLogModel } from '@/utils/types/webapi/AuthLog';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { AuthEventType } from '@/utils/types/webapi/AuthEventType';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Auth logs screen.
@@ -183,8 +184,7 @@ export default function AuthLogsScreen() : React.ReactNode {
 
   return (
     <ThemedContainer>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
+      <ThemedScrollView
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -194,15 +194,13 @@ export default function AuthLogsScreen() : React.ReactNode {
           />
         }
       >
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Below you can find an overview of recent login attempts to your account.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Below you can find an overview of recent login attempts to your account.
+        </ThemedText>
         <View style={styles.section}>
           {renderContent()}
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     </ThemedContainer>
   );
 }

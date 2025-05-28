@@ -133,7 +133,7 @@ export default function SettingsScreen() : React.ReactNode {
   const styles = StyleSheet.create({
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 42 : 0,
+      paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     scrollView: {
       flex: 1,
