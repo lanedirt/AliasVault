@@ -20,11 +20,11 @@ import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
-import { credentialSchema } from '@/utils/validationSchema';
+import { credentialSchema } from '@/utils/ValidationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
-import { extractServiceNameFromUrl } from '@/utils/shared/service-url';
+import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 
 type CredentialMode = 'random' | 'manual';
 

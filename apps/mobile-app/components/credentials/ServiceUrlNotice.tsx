@@ -5,7 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
-import { extractServiceNameFromUrl } from '@/utils/shared/service-url';
+import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 
 interface IServiceUrlNoticeProps {
   serviceUrl: string;
