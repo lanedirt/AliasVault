@@ -14,7 +14,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "net.aliasvault.app",
       "splash": {
-        "image": "./assets/images/splash-icon.png",
+        "image": "./assets/images/adaptive-icon.png",
         "imageWidth": 200,
         "resizeMode": "contain",
         "backgroundColor": "transparent"
@@ -30,14 +30,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/adaptive-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
