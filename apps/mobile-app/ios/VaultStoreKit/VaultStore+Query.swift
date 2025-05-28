@@ -114,7 +114,6 @@ extension VaultStore {
         let encryptedBase64String = encryptedBase64Data.base64EncodedString()
 
         try storeEncryptedDatabase(encryptedBase64String)
-        try storeMetadata(getVaultMetadata()!)
 
         try FileManager.default.removeItem(at: tempDbPath)
     }
