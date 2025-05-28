@@ -58,9 +58,6 @@ export default function AndroidAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-    header: {
-      paddingTop: 12,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
@@ -107,12 +104,6 @@ export default function AndroidAutofillScreen() : React.ReactNode {
       fontSize: 14,
       textDecorationLine: 'underline',
     },
-    warningText: {
-      color: colors.textMuted,
-      fontSize: 15,
-      fontStyle: 'italic',
-      marginTop: 8,
-    },
     warningTitle: {
       color: colors.text,
       fontSize: 16,
@@ -134,7 +125,7 @@ export default function AndroidAutofillScreen() : React.ReactNode {
           </ThemedText>
         </View>
 
-        <View style={styles.header}>
+        <View>
           <ThemedText style={styles.headerText}>
             You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.
           </ThemedText>
@@ -161,8 +152,8 @@ export default function AndroidAutofillScreen() : React.ReactNode {
           <ThemedText style={styles.instructionStep}>
             3. Change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
           </ThemedText>
-          <ThemedText style={styles.warningText}>
-            Note: You&apos;ll need to authenticate with your device security method when using autofill.
+          <ThemedText style={styles.instructionStep}>
+            4. For some apps, such as Google Chrome, you may need to manually configure it to accept third-party autofill apps in the settings. However most apps should already work by default.
           </ThemedText>
           <View style={styles.buttonContainer}>
             {shouldShowAndroidAutofillReminder && (
