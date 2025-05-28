@@ -1,16 +1,18 @@
 package net.aliasvault.app.nativevaultmanager
 
+import net.aliasvault.app.autofill.utils.CredentialMatcher
+import net.aliasvault.app.vaultstore.models.Credential
+import net.aliasvault.app.vaultstore.models.Service
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import net.aliasvault.app.autofill.CredentialMatcher
-import net.aliasvault.app.vaultstore.models.Credential
-import net.aliasvault.app.vaultstore.models.Service
 import java.util.Date
 import java.util.UUID
-import kotlin.test.*
+import kotlin.test.DefaultAsserter.assertEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
@@ -27,28 +29,28 @@ class AutofillTest {
             createTestCredential(
                 "Gmail",
                 "https://gmail.com",
-                "user@gmail.com"
+                "user@gmail.com",
             ),
             createTestCredential(
                 "Google",
                 "https://google.com",
-                "user@gmail.com"
+                "user@gmail.com",
             ),
             createTestCredential(
                 "Coolblue",
                 "https://www.coolblue.nl",
-                "user@coolblue.nl"
+                "user@coolblue.nl",
             ),
             createTestCredential(
                 "Amazon",
                 "https://amazon.com",
-                "user@amazon.com"
+                "user@amazon.com",
             ),
             createTestCredential(
                 "Coolblue App",
                 "com.coolblue.app",
-                "user@coolblue.nl"
-            )
+                "user@coolblue.nl",
+            ),
         )
     }
 
@@ -56,7 +58,7 @@ class AutofillTest {
     fun testExactUrlMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "www.coolblue.nl"
+            "www.coolblue.nl",
         )
 
         assertEquals(1, matches.size)
@@ -67,7 +69,7 @@ class AutofillTest {
     fun testBaseUrlMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://gmail.com/signin"
+            "https://gmail.com/signin",
         )
 
         assertEquals(1, matches.size)
@@ -78,7 +80,7 @@ class AutofillTest {
     fun testRootDomainMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://mail.google.com"
+            "https://mail.google.com",
         )
 
         assertEquals(1, matches.size)
@@ -89,7 +91,7 @@ class AutofillTest {
     fun testDomainNamePartMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://coolblue.be"
+            "https://coolblue.be",
         )
 
         assertEquals(2, matches.size)
@@ -101,7 +103,7 @@ class AutofillTest {
     fun testPackageNameMatch() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "com.coolblue.app"
+            "com.coolblue.app",
         )
 
         assertEquals(2, matches.size)
@@ -113,7 +115,7 @@ class AutofillTest {
     fun testNoMatches() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://nonexistent.com"
+            "https://nonexistent.com",
         )
 
         assertTrue(matches.isEmpty())
@@ -123,7 +125,7 @@ class AutofillTest {
     fun testInvalidUrl() {
         val matches = credentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "not a url"
+            "not a url",
         )
 
         assertTrue(matches.isEmpty())
@@ -132,7 +134,7 @@ class AutofillTest {
     private fun createTestCredential(
         serviceName: String,
         serviceUrl: String,
-        username: String
+        username: String,
     ): Credential {
         return Credential(
             id = UUID.randomUUID(),
@@ -143,7 +145,7 @@ class AutofillTest {
                 logo = null,
                 createdAt = Date(),
                 updatedAt = Date(),
-                isDeleted = false
+                isDeleted = false,
             ),
             username = username,
             password = null,

@@ -18,7 +18,10 @@ class CredentialMatcher {
      * 4. Domain key match (package middle segment or domain without TLD)
      * 5. General text matching on service name, username, and URL
      */
-    fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
+    fun filterCredentialsByAppInfo(
+        credentials: List<Credential>,
+        appInfo: String,
+    ): List<Credential> {
         if (appInfo.isBlank()) return credentials
 
         val input = appInfo.trim().lowercase()
@@ -27,7 +30,12 @@ class CredentialMatcher {
         val rootDomain: String?
         val domainKey: String
 
-        if (isUrlLike && (input.startsWith("http://") || input.startsWith("https://") || input.startsWith("www."))) {
+        if (isUrlLike && (
+                input.startsWith("http://") || input.startsWith("https://") || input.startsWith(
+                    "www.",
+                )
+                )
+        ) {
             // Treat as full or partial URL
             val cleaned = input
                 .removePrefix("https://")
@@ -57,7 +65,7 @@ class CredentialMatcher {
                 cred.service.url?.trim()?.lowercase() in listOf(
                     input,
                     "https://$host",
-                    "http://$host"
+                    "http://$host",
                 )
             }
             // 2. Base URL match

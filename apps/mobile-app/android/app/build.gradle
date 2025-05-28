@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: "org.jlleitschuh.gradle.ktlint"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -124,6 +125,13 @@ android {
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError true
+        xmlReport true
+        htmlReport true
+        lintConfig file("lint.xml")
+    }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
@@ -190,4 +198,46 @@ dependencies {
         implementation jscFlavor
     }
     implementation "org.jetbrains.kotlin:kotlin-test:1.9.25"
+}
+
+ktlint {
+    android = true
+    verbose = true
+    outputToConsole = true
+    ignoreFailures = false
+    enableExperimentalRules = true
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+        include("**/java/**")
+    }
+
+    // Configure max line length
+    kotlinScriptAdditionalPaths {
+        include(fileTree("scripts/"))
+    }
+
+    // Set max line length to 160
+    version.set("0.50.0")
+}
+
+task lintFixAll {
+    description = "Run all auto-fixers (ktlint and Android lint)"
+    group = "formatting"
+    dependsOn ktlintFormat, lintFix
+}
+
+// Add a task dependency to make ktlint run before build
+tasks.named("preBuild") {
+    dependsOn("ktlintCheck")
+}
+
+// Ensure codegen completes before ktlint tasks run
+afterEvaluate {
+    tasks.withType(org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask).configureEach {
+        dependsOn("generateCodegenArtifactsFromSchema")
+    }
+    tasks.withType(org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask).configureEach {
+        dependsOn("generateCodegenArtifactsFromSchema")
+    }
 }

@@ -22,10 +22,10 @@ class NativeVaultManagerPackage : TurboReactPackage() {
                 NativeVaultManager.NAME,
                 NativeVaultManager::class.java.name,
                 false, // canOverrideExistingModule
-                true,  // needsEagerInit
-                true,  // hasConstants
+                true, // needsEagerInit
+                true, // hasConstants
                 false, // isCxxModule
-                true   // isTurboModule
+                true, // isTurboModule
             )
             moduleMap
         }

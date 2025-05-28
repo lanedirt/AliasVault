@@ -1,21 +1,24 @@
 package net.aliasvault.app.nativevaultmanager
 
-import com.facebook.react.module.annotations.ReactModule
-import com.facebook.react.turbomodule.core.interfaces.TurboModule
-import com.facebook.react.bridge.ReactApplicationContext
-
+import android.content.Intent
+import android.provider.Settings
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.aliasvault.nativevaultmanager.NativeVaultManagerSpec
-import com.facebook.react.bridge.*
-import org.json.JSONArray
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.LifecycleEventListener
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableType
+import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.turbomodule.core.interfaces.TurboModule
 import net.aliasvault.app.vaultstore.VaultStore
-import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
 import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.core.net.toUri
+import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
+import org.json.JSONArray
 
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
@@ -28,7 +31,7 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
 
     private val vaultStore = VaultStore.getInstance(
         AndroidKeystoreProvider(reactContext) { getFragmentActivity() },
-        AndroidStorageProvider(reactContext)
+        AndroidStorageProvider(reactContext),
     )
 
     init {
@@ -159,7 +162,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error storing key derivation params", e)
-            promise.reject("ERR_STORE_KEY_PARAMS", "Failed to store key derivation params: ${e.message}", e)
+            promise.reject(
+                "ERR_STORE_KEY_PARAMS",
+                "Failed to store key derivation params: ${e.message}",
+                e,
+            )
         }
     }
 
@@ -170,7 +177,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             promise.resolve(params)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting key derivation params", e)
-            promise.reject("ERR_GET_KEY_PARAMS", "Failed to get key derivation params: ${e.message}", e)
+            promise.reject(
+                "ERR_GET_KEY_PARAMS",
+                "Failed to get key derivation params: ${e.message}",
+                e,
+            )
         }
     }
 
@@ -246,7 +257,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                         is Float -> rowMap.putDouble(key, value.toDouble())
                         is Double -> rowMap.putDouble(key, value)
                         is String -> rowMap.putString(key, value)
-                        is ByteArray -> rowMap.putString(key, android.util.Base64.encodeToString(value, android.util.Base64.NO_WRAP))
+                        is ByteArray -> rowMap.putString(
+                            key,
+                            android.util.Base64.encodeToString(value, android.util.Base64.NO_WRAP),
+                        )
                         else -> rowMap.putString(key, value.toString())
                     }
                 }
@@ -299,7 +313,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error committing transaction", e)
-            promise.reject("ERR_COMMIT_TRANSACTION", "Failed to commit transaction: ${e.message}", e)
+            promise.reject(
+                "ERR_COMMIT_TRANSACTION",
+                "Failed to commit transaction: ${e.message}",
+                e,
+            )
         }
     }
 
@@ -310,7 +328,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             promise.resolve(null)
         } catch (e: Exception) {
             Log.e(TAG, "Error rolling back transaction", e)
-            promise.reject("ERR_ROLLBACK_TRANSACTION", "Failed to rollback transaction: ${e.message}", e)
+            promise.reject(
+                "ERR_ROLLBACK_TRANSACTION",
+                "Failed to rollback transaction: ${e.message}",
+                e,
+            )
         }
     }
 
@@ -374,10 +396,13 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
             }
 
             promise.resolve(null)
-
         } catch (e: Exception) {
             Log.e(TAG, "Error opening autofill settings", e)
-            promise.reject("ERR_OPEN_AUTOFILL_SETTINGS", "Failed to open autofill settings: ${e.message}", e)
+            promise.reject(
+                "ERR_OPEN_AUTOFILL_SETTINGS",
+                "Failed to open autofill settings: ${e.message}",
+                e,
+            )
         }
     }
 }

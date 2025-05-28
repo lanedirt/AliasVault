@@ -1,6 +1,5 @@
 package net.aliasvault.app.vaultstore.storageprovider
 
-import android.content.Context
 import java.io.File
 
 /**

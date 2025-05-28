@@ -12,7 +12,7 @@ data class Credential(
     val password: Password?,
     val createdAt: Date,
     val updatedAt: Date,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
 )
 
 data class Service(
@@ -22,7 +22,7 @@ data class Service(
     val logo: ByteArray?,
     val createdAt: Date,
     val updatedAt: Date,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -59,7 +59,7 @@ data class Password(
     val value: String,
     val createdAt: Date,
     val updatedAt: Date,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
 )
 
 data class Alias(
@@ -72,7 +72,7 @@ data class Alias(
     val email: String?,
     val createdAt: Date,
     val updatedAt: Date,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -8,6 +8,7 @@
  */
 package net.aliasvault.app.autofill
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
@@ -20,14 +21,15 @@ import android.service.autofill.SaveRequest
 import android.util.Log
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
+import net.aliasvault.app.MainActivity
+import net.aliasvault.app.R
+import net.aliasvault.app.autofill.models.FieldType
+import net.aliasvault.app.autofill.utils.CredentialMatcher
+import net.aliasvault.app.autofill.utils.FieldFinder
+import net.aliasvault.app.autofill.utils.ImageUtils
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
-import android.app.PendingIntent
-import net.aliasvault.app.MainActivity
-import net.aliasvault.app.R
-import net.aliasvault.app.autofill.utils.*
-import net.aliasvault.app.autofill.models.FieldType
 
 class AutofillService : AutofillService() {
     private val TAG = "AliasVaultAutofill"
@@ -36,7 +38,7 @@ class AutofillService : AutofillService() {
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
-        callback: FillCallback
+        callback: FillCallback,
     ) {
         Log.d(TAG, "onFillRequest called")
 
@@ -119,19 +121,26 @@ class AutofillService : AutofillService() {
                                 result
                             }
 
-                            Log.d(TAG, "Amount of credentials filtered with this app info: ${filteredCredentials.size}")
+                            Log.d(
+                                TAG,
+                                "Amount of credentials filtered with this app info: ${filteredCredentials.size}",
+                            )
 
                             val responseBuilder = FillResponse.Builder()
 
                             // If there are no results, return "no matches" placeholder option.
                             if (filteredCredentials.isEmpty()) {
-                                Log.d(TAG, "No credentials found for this app, showing 'no matches' option")
+                                Log.d(
+                                    TAG,
+                                    "No credentials found for this app, showing 'no matches' option",
+                                )
                                 responseBuilder.addDataset(createNoMatchesDataset(fieldFinder))
-                            }
-                            else {
+                            } else {
                                 // If there are matches, add them to the dataset
                                 for (credential in filteredCredentials) {
-                                    responseBuilder.addDataset(createCredentialDataset(fieldFinder, credential))
+                                    responseBuilder.addDataset(
+                                        createCredentialDataset(fieldFinder, credential),
+                                    )
                                 }
 
                                 // Add "Open AliasVault app" as the last option
@@ -149,7 +158,8 @@ class AutofillService : AutofillService() {
                         Log.e(TAG, "Error getting credentials", e)
                         callback.onSuccess(null)
                     }
-                })) {
+                })
+            ) {
                 // Successfully used cached key - method returns true
                 Log.d(TAG, "Successfully retrieved credentials with unlocked vault")
                 return
@@ -166,10 +176,7 @@ class AutofillService : AutofillService() {
     }
 
     // Helper method to create a dataset from a credential
-    private fun createCredentialDataset(
-        fieldFinder: FieldFinder,
-        credential: Credential
-    ) : Dataset {
+    private fun createCredentialDataset(fieldFinder: FieldFinder, credential: Credential): Dataset {
         // Choose layout based on whether we have a logo
         val layoutId = if (credential.service.logo != null) {
             R.layout.autofill_dataset_item_icon
@@ -189,34 +196,55 @@ class AutofillService : AutofillService() {
             when (fieldType) {
                 FieldType.PASSWORD -> {
                     if (credential.password != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.password.value as CharSequence))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.password.value as CharSequence),
+                        )
                     }
                 }
                 FieldType.EMAIL -> {
                     if (credential.alias?.email != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.alias.email),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
                     } else if (credential.username != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.username),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.username})"
                     }
                 }
                 FieldType.USERNAME -> {
                     if (credential.username != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.username),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.username})"
                     } else if (credential.alias?.email != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.alias.email),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
                     }
                 }
                 else -> {
                     // For unknown field types, try both email and username
                     if (credential.alias?.email != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.alias.email))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.alias.email),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
                     } else if (credential.username != null) {
-                        dataSetBuilder.setValue(field.first, AutofillValue.forText(credential.username))
+                        dataSetBuilder.setValue(
+                            field.first,
+                            AutofillValue.forText(credential.username),
+                        )
                         presentationDisplayValue = "${credential.service.name} (${credential.username})"
                     }
                 }
@@ -226,7 +254,7 @@ class AutofillService : AutofillService() {
         // Set the display value of the dropdown item.
         presentation.setTextViewText(
             R.id.text,
-            presentationDisplayValue
+            presentationDisplayValue,
         )
 
         // Set the logo if available
@@ -246,7 +274,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "No match found, create new?"
+            "No match found, create new?",
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -267,7 +295,7 @@ class AutofillService : AutofillService() {
             this@AutofillService,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         dataSetBuilder.setAuthentication(pendingIntent.intentSender)
 
@@ -285,7 +313,7 @@ class AutofillService : AutofillService() {
         val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         openAppPresentation.setTextViewText(
             R.id.text,
-            "Open app"
+            "Open app",
         )
 
         val dataSetBuilder = Dataset.Builder(openAppPresentation)
@@ -306,7 +334,7 @@ class AutofillService : AutofillService() {
             this@AutofillService,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         dataSetBuilder.setAuthentication(pendingIntent.intentSender)
 
@@ -325,7 +353,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "Vault locked"
+            "Vault locked",
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -339,7 +367,7 @@ class AutofillService : AutofillService() {
             this@AutofillService,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         dataSetBuilder.setAuthentication(pendingIntent.intentSender)
 
@@ -353,7 +381,10 @@ class AutofillService : AutofillService() {
         return dataSetBuilder.build()
     }
 
-    private fun filterCredentialsByAppInfo(credentials: List<Credential>, appInfo: String): List<Credential> {
+    private fun filterCredentialsByAppInfo(
+        credentials: List<Credential>,
+        appInfo: String,
+    ): List<Credential> {
         return credentialMatcher.filterCredentialsByAppInfo(credentials, appInfo)
     }
 

@@ -1,9 +1,9 @@
 package net.aliasvault.app.autofill.utils
 
 import android.app.assist.AssistStructure
+import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
-import android.util.Log
 import androidx.core.net.toUri
 import net.aliasvault.app.autofill.models.FieldType
 
@@ -126,7 +126,8 @@ class FieldFinder(var structure: AssistStructure) {
             for (hint in hints) {
                 if (hint.contains("web", ignoreCase = true) ||
                     hint.contains("url", ignoreCase = true) ||
-                    hint.contains("domain", ignoreCase = true)) {
+                    hint.contains("domain", ignoreCase = true)
+                ) {
                     return hint
                 }
             }
@@ -208,7 +209,8 @@ class FieldFinder(var structure: AssistStructure) {
         val idEntry = node.idEntry
         val hint = node.hint
         if (idEntry?.contains("email", ignoreCase = true) == true ||
-            hint?.contains("email", ignoreCase = true) == true) {
+            hint?.contains("email", ignoreCase = true) == true
+        ) {
             return true
         }
 
@@ -221,7 +223,8 @@ class FieldFinder(var structure: AssistStructure) {
         if (hints != null) {
             for (hint in hints) {
                 if (hint == View.AUTOFILL_HINT_USERNAME ||
-                    hint.contains("username", ignoreCase = true)) {
+                    hint.contains("username", ignoreCase = true)
+                ) {
                     return true
                 }
             }
@@ -248,7 +251,8 @@ class FieldFinder(var structure: AssistStructure) {
         if (idEntry?.contains("username", ignoreCase = true) == true ||
             idEntry?.contains("user", ignoreCase = true) == true ||
             hint?.contains("username", ignoreCase = true) == true ||
-            hint?.contains("user", ignoreCase = true) == true) {
+            hint?.contains("user", ignoreCase = true) == true
+        ) {
             return true
         }
 
@@ -268,7 +272,11 @@ class FieldFinder(var structure: AssistStructure) {
         val hints = node.autofillHints
         if (hints != null) {
             for (hint in hints) {
-                if (hint == View.AUTOFILL_HINT_PASSWORD || hint.contains("password", ignoreCase = true)) {
+                if (hint == View.AUTOFILL_HINT_PASSWORD || hint.contains(
+                        "password",
+                        ignoreCase = true,
+                    )
+                ) {
                     return true
                 }
             }
@@ -276,12 +284,18 @@ class FieldFinder(var structure: AssistStructure) {
 
         // Check by input type
         val inputType = node.inputType
-        val isPasswordType = (inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_TEXT &&
-            (inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD ||
-                inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-                inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) ||
-            (inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_NUMBER &&
-                inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)
+        val isPasswordType = (
+            inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_TEXT &&
+                (
+                    inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+                        inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                        inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    )
+            ) ||
+            (
+                inputType and android.text.InputType.TYPE_MASK_CLASS == android.text.InputType.TYPE_CLASS_NUMBER &&
+                    inputType and android.text.InputType.TYPE_MASK_VARIATION == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+                )
         if (isPasswordType) {
             return true
         }
@@ -323,7 +337,10 @@ class FieldFinder(var structure: AssistStructure) {
         return null
     }
 
-    private fun findNodeByIdRecursive(node: AssistStructure.ViewNode, fieldId: AutofillId): AssistStructure.ViewNode? {
+    private fun findNodeByIdRecursive(
+        node: AssistStructure.ViewNode,
+        fieldId: AutofillId,
+    ): AssistStructure.ViewNode? {
         if (node.autofillId == fieldId) {
             return node
         }

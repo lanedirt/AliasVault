@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Disable some rules that are too strict or not relevant -->
+    <issue id="ObsoleteLintCustomCheck" severity="ignore" />
+    <issue id="GradleDependency" severity="ignore" />
+
+    <!-- Enable and configure important rules -->
+    <issue id="NewApi" severity="error" />
+    <issue id="InlinedApi" severity="error" />
+    <issue id="MissingPermission" severity="error" />
+    <issue id="HardcodedText" severity="warning" />
+    <issue id="UnusedResources" severity="warning" />
+    <issue id="ContentDescription" severity="warning" />
+    <issue id="ClickableViewAccessibility" severity="warning" />
+
+    <!-- Kotlin specific rules -->
+    <issue id="KotlinPropertyAccess" severity="warning" />
+    <issue id="KotlinNullness" severity="error" />
+</lint>

@@ -2,23 +2,27 @@ package net.aliasvault.app.vaultstore
 
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
-import net.aliasvault.app.vaultstore.models.*
+import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreOperationCallback
+import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreProvider
+import net.aliasvault.app.vaultstore.models.Alias
+import net.aliasvault.app.vaultstore.models.Credential
+import net.aliasvault.app.vaultstore.models.Password
+import net.aliasvault.app.vaultstore.models.Service
+import net.aliasvault.app.vaultstore.models.VaultMetadata
+import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.security.SecureRandom
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import java.security.SecureRandom
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
-import net.aliasvault.app.vaultstore.storageprovider.StorageProvider
-import org.json.JSONArray
-import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreProvider
-import net.aliasvault.app.vaultstore.keystoreprovider.KeystoreOperationCallback
-import android.os.Handler
-import android.os.Looper
 
 class VaultStore(
     private val storageProvider: StorageProvider,
@@ -72,7 +76,7 @@ class VaultStore(
                         error = e
                         latch.countDown()
                     }
-                }
+                },
             )
 
             // Wait for the callback to complete
@@ -111,7 +115,7 @@ class VaultStore(
                         Log.e(TAG, "Error retrieving key", e)
                         callback.onError(e)
                     }
-                }
+                },
             )
         } else {
             callback.onError(Exception("No encryption key found"))
@@ -136,7 +140,7 @@ class VaultStore(
      * Get the encrypted database from the storage provider
      * @return The encrypted database as a base64 encoded string
      */
-    fun getEncryptedDatabase() : String {
+    fun getEncryptedDatabase(): String {
         val encryptedDbBase64 = storageProvider.getEncryptedDatabaseFile().readText()
         return encryptedDbBase64
     }
@@ -145,7 +149,7 @@ class VaultStore(
      * Check if the encrypted database exists in the storage provider
      * @return True if the encrypted database exists, false otherwise
      */
-    fun hasEncryptedDatabase() : Boolean {
+    fun hasEncryptedDatabase(): Boolean {
         return storageProvider.getEncryptedDatabaseFile().exists()
     }
 
@@ -161,7 +165,7 @@ class VaultStore(
      * Get the metadata from the storage provider
      * @return The metadata as a string
      */
-    fun getMetadata() : String {
+    fun getMetadata(): String {
         return storageProvider.getMetadata()
     }
 
@@ -200,10 +204,18 @@ class VaultStore(
                     for (columnName in columnNames) {
                         when (it.getType(it.getColumnIndexOrThrow(columnName))) {
                             android.database.Cursor.FIELD_TYPE_NULL -> row[columnName] = null
-                            android.database.Cursor.FIELD_TYPE_INTEGER -> row[columnName] = it.getLong(it.getColumnIndexOrThrow(columnName))
-                            android.database.Cursor.FIELD_TYPE_FLOAT -> row[columnName] = it.getDouble(it.getColumnIndexOrThrow(columnName))
-                            android.database.Cursor.FIELD_TYPE_STRING -> row[columnName] = it.getString(it.getColumnIndexOrThrow(columnName))
-                            android.database.Cursor.FIELD_TYPE_BLOB -> row[columnName] = it.getBlob(it.getColumnIndexOrThrow(columnName))
+                            android.database.Cursor.FIELD_TYPE_INTEGER -> row[columnName] = it.getLong(
+                                it.getColumnIndexOrThrow(columnName),
+                            )
+                            android.database.Cursor.FIELD_TYPE_FLOAT -> row[columnName] = it.getDouble(
+                                it.getColumnIndexOrThrow(columnName),
+                            )
+                            android.database.Cursor.FIELD_TYPE_STRING -> row[columnName] = it.getString(
+                                it.getColumnIndexOrThrow(columnName),
+                            )
+                            android.database.Cursor.FIELD_TYPE_BLOB -> row[columnName] = it.getBlob(
+                                it.getColumnIndexOrThrow(columnName),
+                            )
                         }
                     }
                     results.add(row)
@@ -261,14 +273,16 @@ class VaultStore(
                 // Get all table names from the main database
                 val cursor = dbConnection?.rawQuery(
                     "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_%'",
-                    null
+                    null,
                 )
 
                 cursor?.use {
                     while (it.moveToNext()) {
                         val tableName = it.getString(0)
                         // Create table and copy data
-                        dbConnection?.execSQL("CREATE TABLE target.$tableName AS SELECT * FROM main.$tableName")
+                        dbConnection?.execSQL(
+                            "CREATE TABLE target.$tableName AS SELECT * FROM main.$tableName",
+                        )
                     }
                 }
 
@@ -296,8 +310,7 @@ class VaultStore(
         } catch (e: Exception) {
             Log.e(TAG, "Error exporting and encrypting database", e)
             throw e
-        }
-        finally {
+        } finally {
             // Remove the temporary file
             tempDbFile.delete()
         }
@@ -339,11 +352,13 @@ class VaultStore(
     fun setVaultRevisionNumber(revisionNumber: Int) {
         val metadata = getVaultMetadataObject() ?: VaultMetadata()
         val updatedMetadata = metadata.copy(vaultRevisionNumber = revisionNumber)
-        storeMetadata(JSONObject().apply {
-            put("publicEmailDomains", JSONArray(updatedMetadata.publicEmailDomains))
-            put("privateEmailDomains", JSONArray(updatedMetadata.privateEmailDomains))
-            put("vaultRevisionNumber", updatedMetadata.vaultRevisionNumber)
-        }.toString())
+        storeMetadata(
+            JSONObject().apply {
+                put("publicEmailDomains", JSONArray(updatedMetadata.publicEmailDomains))
+                put("privateEmailDomains", JSONArray(updatedMetadata.privateEmailDomains))
+                put("vaultRevisionNumber", updatedMetadata.vaultRevisionNumber)
+            }.toString(),
+        )
     }
 
     fun getVaultRevisionNumber(): Int {
@@ -364,7 +379,7 @@ class VaultStore(
                 privateEmailDomains = json.optJSONArray("privateEmailDomains")?.let { array ->
                     List(array.length()) { i -> array.getString(i) }
                 } ?: emptyList(),
-                vaultRevisionNumber = json.optInt("vaultRevisionNumber", 0)
+                vaultRevisionNumber = json.optInt("vaultRevisionNumber", 0),
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing vault metadata", e)
@@ -528,7 +543,7 @@ class VaultStore(
                 // Verify the attachment worked by checking if we can access the source database
                 val verifyCursor = dbConnection?.rawQuery(
                     "SELECT name FROM source.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-                    null
+                    null,
                 )
 
                 if (verifyCursor == null) {
@@ -543,7 +558,9 @@ class VaultStore(
                     do {
                         val tableName = it.getString(0)
                         // Create table and copy data using rawQuery
-                        dbConnection?.execSQL("CREATE TABLE $tableName AS SELECT * FROM source.$tableName")
+                        dbConnection?.execSQL(
+                            "CREATE TABLE $tableName AS SELECT * FROM source.$tableName",
+                        )
                     } while (it.moveToNext())
                 }
 
@@ -562,7 +579,6 @@ class VaultStore(
             dbConnection?.rawQuery("PRAGMA foreign_keys = ON", null)
 
             lastUnlockTime = System.currentTimeMillis()
-
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up database with decrypted data", e)
             throw e
@@ -648,7 +664,7 @@ class VaultStore(
                         logo = it.getBlob(10),
                         createdAt = parseDateString(it.getString(11)) ?: MIN_DATE,
                         updatedAt = parseDateString(it.getString(12)) ?: MIN_DATE,
-                        isDeleted = it.getInt(13) == 1
+                        isDeleted = it.getInt(13) == 1,
                     )
 
                     // Password
@@ -660,7 +676,7 @@ class VaultStore(
                             value = it.getString(15),
                             createdAt = parseDateString(it.getString(16)) ?: MIN_DATE,
                             updatedAt = parseDateString(it.getString(17)) ?: MIN_DATE,
-                            isDeleted = it.getInt(18) == 1
+                            isDeleted = it.getInt(18) == 1,
                         )
                     }
 
@@ -677,7 +693,7 @@ class VaultStore(
                             email = it.getString(25),
                             createdAt = parseDateString(it.getString(26)) ?: MIN_DATE,
                             updatedAt = parseDateString(it.getString(27)) ?: MIN_DATE,
-                            isDeleted = it.getInt(28) == 1
+                            isDeleted = it.getInt(28) == 1,
                         )
                     }
 
@@ -690,7 +706,7 @@ class VaultStore(
                         password = password,
                         createdAt = parseDateString(it.getString(4)) ?: MIN_DATE,
                         updatedAt = parseDateString(it.getString(5)) ?: MIN_DATE,
-                        isDeleted = isDeleted
+                        isDeleted = isDeleted,
                     )
                     result.add(credential)
                 } catch (e: Exception) {
@@ -720,7 +736,7 @@ class VaultStore(
             },
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
-            }
+            },
         )
 
         for (format in formats) {
@@ -773,7 +789,10 @@ class VaultStore(
         private var instance: VaultStore? = null
 
         @JvmStatic
-        fun getInstance(keystoreProvider: KeystoreProvider, storageProvider: StorageProvider): VaultStore {
+        fun getInstance(
+            keystoreProvider: KeystoreProvider,
+            storageProvider: StorageProvider,
+        ): VaultStore {
             return instance ?: synchronized(this) {
                 instance ?: VaultStore(storageProvider, keystoreProvider).also { instance = it }
             }

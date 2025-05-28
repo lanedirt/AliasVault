@@ -1,8 +1,8 @@
 package net.aliasvault.app.vaultstore.storageprovider
 
 import android.content.Context
-import java.io.File
 import androidx.core.content.edit
+import java.io.File
 
 /**
  * A file provider that returns the encrypted database file from the Android filesystem.

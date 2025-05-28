@@ -19,10 +19,12 @@ buildscript {
         classpath('com.android.tools.build:gradle')
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+        classpath('org.jlleitschuh.gradle:ktlint-gradle:11.6.1')
     }
 }
 
 apply plugin: "com.facebook.react.rootproject"
+apply plugin: "org.jlleitschuh.gradle.ktlint"
 
 allprojects {
     repositories {
@@ -38,5 +40,18 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+    }
+}
+
+// Configure ktlint
+ktlint {
+    android = true
+    verbose = true
+    outputToConsole = true
+    ignoreFailures = false
+    enableExperimentalRules = true
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
     }
 }

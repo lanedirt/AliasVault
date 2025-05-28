@@ -7,5 +7,5 @@ enum class FieldType {
     EMAIL,
     USERNAME,
     PASSWORD,
-    UNKNOWN
+    UNKNOWN,
 }

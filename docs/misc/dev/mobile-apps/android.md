@@ -44,3 +44,22 @@ In order to run the Android unit tests:
 ```
 
 You can also open up the project in Android Studio, navigate to the `VaultStoreTest.kt` file and run/debug individual tests.
+
+## Linting
+Linting is ran automatically during normal Android app build. You can however also run the linting checks manually:
+
+### Kotlin
+```bash
+./gradlew ktlintCheck
+```
+
+### Java
+```bash
+./gradlew lint
+```
+
+### Auto fix linting issues
+To automatically fix linting issues (where possible), run this command:
+```bash
+./gradlew lintFixAll
+```

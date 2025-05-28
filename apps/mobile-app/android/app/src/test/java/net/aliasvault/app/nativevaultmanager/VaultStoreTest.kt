@@ -1,14 +1,17 @@
 package net.aliasvault.app.nativevaultmanager
 
+import junit.framework.TestCase.assertEquals
+import net.aliasvault.app.vaultstore.VaultStore
+import net.aliasvault.app.vaultstore.keystoreprovider.TestKeystoreProvider
+import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import net.aliasvault.app.vaultstore.VaultStore
-import net.aliasvault.app.vaultstore.storageprovider.TestStorageProvider
-import net.aliasvault.app.vaultstore.keystoreprovider.TestKeystoreProvider
-import kotlin.test.*
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
@@ -97,7 +100,10 @@ class VaultStoreTest {
         try {
             // Insert the setting using raw SQL with parameters
             val insertSql = "INSERT INTO Settings (Key, Value, CreatedAt, UpdatedAt, IsDeleted) VALUES (?, ?, ?, ?, ?)"
-            val insertResult = vaultStore.executeUpdate(insertSql, arrayOf(testKey, testValue, "2025-01-01 00:00:00", "2025-01-01 00:00:00", 0))
+            val insertResult = vaultStore.executeUpdate(
+                insertSql,
+                arrayOf(testKey, testValue, "2025-01-01 00:00:00", "2025-01-01 00:00:00", 0),
+            )
             assertTrue(insertResult > 0, "Setting insertion should succeed")
 
             // Verify the setting was inserted by querying it
@@ -119,8 +125,10 @@ class VaultStoreTest {
             val querySql2 = "SELECT MigrationId FROM __EFMigrationsHistory"
             val results2 = vaultStore.executeQuery(querySql2, arrayOf<Any?>())
 
-            assertTrue(results2.isNotEmpty(), "Should get a result (migration history table contents)")
-
+            assertTrue(
+                results2.isNotEmpty(),
+                "Should get a result (migration history table contents)",
+            )
         } catch (e: Exception) {
             // If anything fails, rollback the transaction
             throw e

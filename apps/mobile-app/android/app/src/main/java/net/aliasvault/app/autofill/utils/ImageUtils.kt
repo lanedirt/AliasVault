@@ -1,11 +1,11 @@
 package net.aliasvault.app.autofill.utils
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.util.Base64
 import android.util.Log
-import android.content.res.Resources
 import com.caverock.androidsvg.SVG
 import java.io.ByteArrayOutputStream
 
@@ -88,6 +88,5 @@ object ImageUtils {
     }
 
     fun base64ToBytes(base64: String): ByteArray? =
-        try { Base64.decode(base64, Base64.DEFAULT) }
-        catch (e: Exception) { null }
+        try { Base64.decode(base64, Base64.DEFAULT) } catch (e: Exception) { null }
 }
