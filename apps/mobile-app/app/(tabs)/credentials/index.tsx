@@ -1,7 +1,7 @@
 import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from 'expo-haptics';
@@ -22,6 +22,7 @@ import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useWebApi } from '@/context/WebApiContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ServiceUrlNotice } from '@/components/credentials/ServiceUrlNotice';
 
 /**
  * Credentials screen.
@@ -36,9 +37,11 @@ export default function CredentialsScreen() : React.ReactNode {
   const navigation = useNavigation();
   const [isTabFocused, setIsTabFocused] = useState(false);
   const router = useRouter();
+  const { serviceUrl: serviceUrlParam } = useLocalSearchParams<{ serviceUrl?: string }>();
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
   const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
+  const [serviceUrl, setServiceUrl] = useState<string | null>(null);
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -265,6 +268,15 @@ export default function CredentialsScreen() : React.ReactNode {
     });
   }, [navigation, headerButtons]);
 
+  // Handle deep link parameters
+  useFocusEffect(
+    useCallback(() => {
+      // Always check the current serviceUrlParam when screen comes into focus
+      const currentServiceUrl = serviceUrlParam ? decodeURIComponent(serviceUrlParam) : null;
+      setServiceUrl(currentServiceUrl);
+    }, [serviceUrlParam])
+  );
+
   return (
     <ThemedContainer>
       <CollapsibleHeader
@@ -294,6 +306,12 @@ export default function CredentialsScreen() : React.ReactNode {
           ListHeaderComponent={
             <ThemedView>
               <TitleContainer title="Credentials" />
+              {serviceUrl && (
+                <ServiceUrlNotice
+                  serviceUrl={serviceUrl}
+                  onDismiss={() => setServiceUrl(null)}
+                />
+              )}
               <ThemedView style={styles.searchContainer}>
                 <MaterialIcons
                   name="search"

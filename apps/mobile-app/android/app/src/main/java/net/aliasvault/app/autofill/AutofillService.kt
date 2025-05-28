@@ -133,10 +133,11 @@ class AutofillService : AutofillService() {
                                 for (credential in filteredCredentials) {
                                     responseBuilder.addDataset(createCredentialDataset(fieldFinder, credential))
                                 }
+
+                                // Add "Open AliasVault app" as the last option
+                                responseBuilder.addDataset(createOpenAppDataset(fieldFinder))
                             }
 
-                            // Add "Open AliasVault app" as the last option
-                            responseBuilder.addDataset(createOpenAppDataset(fieldFinder))
                             callback.onSuccess(responseBuilder.build())
                         } catch (e: Exception) {
                             Log.e(TAG, "Error parsing credentials", e)
@@ -245,15 +246,22 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "AliasVault: no matches"
+            "No match found, create new?"
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
 
-        // Add a click listener to open AliasVault app
-        val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+        // Get the app/website information to use as service URL
+        val appInfo = fieldFinder.getAppInfo()
+        val encodedUrl = appInfo?.let { java.net.URLEncoder.encode(it, "UTF-8") } ?: ""
+
+        // Create deep link URL
+        val deepLinkUrl = "net.aliasvault.app://credentials/add-edit-page?serviceUrl=$encodedUrl"
+
+        // Add a click listener to open AliasVault app with deep link
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(deepLinkUrl)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra("OPEN_CREDENTIALS", true)
         }
         val pendingIntent = PendingIntent.getActivity(
             this@AutofillService,
@@ -282,10 +290,17 @@ class AutofillService : AutofillService() {
 
         val dataSetBuilder = Dataset.Builder(openAppPresentation)
 
-        // Add a click listener to open AliasVault app
-        val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+        // Get the app/website information to use as service URL
+        val appInfo = fieldFinder.getAppInfo()
+        val encodedUrl = appInfo?.let { java.net.URLEncoder.encode(it, "UTF-8") } ?: ""
+
+        // Create deep link URL to credentials page with service URL
+        val deepLinkUrl = "net.aliasvault.app://credentials?serviceUrl=$encodedUrl"
+
+        // Add a click listener to open AliasVault app with deep link
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(deepLinkUrl)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra("OPEN_CREDENTIALS", true)
         }
         val pendingIntent = PendingIntent.getActivity(
             this@AutofillService,

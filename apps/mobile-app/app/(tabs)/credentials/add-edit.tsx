@@ -24,6 +24,7 @@ import { credentialSchema } from '@/utils/validationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { extractServiceNameFromUrl } from '@/utils/shared/service-url';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -301,35 +302,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       setIsLoading(false);
     }
   }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch]);
-
-  /**
-   * Extract the service name from the service URL.
-   */
-  function extractServiceNameFromUrl(url: string): string {
-    try {
-      const urlObj = new URL(url);
-      const hostParts = urlObj.hostname.split('.');
-
-      // Remove common subdomains
-      const commonSubdomains = ['www', 'app', 'login', 'auth', 'account', 'portal'];
-      while (hostParts.length > 2 && commonSubdomains.includes(hostParts[0].toLowerCase())) {
-        hostParts.shift();
-      }
-
-      // For domains like google.com, return Google.com
-      if (hostParts.length <= 2) {
-        const domain = hostParts.join('.');
-        return domain.charAt(0).toUpperCase() + domain.slice(1);
-      }
-
-      // For domains like app.example.com, return Example.com
-      const mainDomain = hostParts.slice(-2).join('.');
-      return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
-    } catch {
-      // If URL parsing fails, return the original URL
-      return url;
-    }
-  }
 
   /**
    * Generate a random username.
