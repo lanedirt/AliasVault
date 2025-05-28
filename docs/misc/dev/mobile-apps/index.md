@@ -27,9 +27,15 @@ The AliasVault React Native app uses the Turbo Module method for implementing th
 In order to update the Native Turbo Module scheme, edit the specs file in: `specs/NativeVaultManager.ts`. Afterwards:
 - For iOS, run pod install (see instructions below). Then make sure to implement the new or changed methods in the actual NativeVaultManager implementation of which the files are located in the `ios/NativeVaultManager` directory.
 
-## Install/update Pods for iOS
+## (Re)generate native turbo module spec file
+
+### iOS: run Pod install
 1. Go to root of mobile-app directory
 2. Run `npx pod-install` (don't run `pod install` directly from ios directory as this can cause errors)
 
-## Install/update for Android
-TODO: add instructions
+### Android: run custom gradlew command
+1. Go to mobile-app/android directory and run the gradlew codegen command:
+```bash
+cd mobile-app/android
+./gradlew generateCodegenArtifactsFromSchema
+```

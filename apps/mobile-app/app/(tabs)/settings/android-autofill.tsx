@@ -153,7 +153,7 @@ export default function AndroidAutofillScreen() : React.ReactNode {
             3. Change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
           </ThemedText>
           <ThemedText style={styles.instructionStep}>
-            4. For some apps, such as Google Chrome, you may need to manually configure it to accept third-party autofill apps in the settings. However most apps should already work by default.
+            4. Some apps, like Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.
           </ThemedText>
           <View style={styles.buttonContainer}>
             {shouldShowAndroidAutofillReminder && (
