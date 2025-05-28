@@ -42,16 +42,3 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
-
-// Configure ktlint
-ktlint {
-    android = true
-    verbose = true
-    outputToConsole = true
-    ignoreFailures = false
-    enableExperimentalRules = true
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
-    }
-}

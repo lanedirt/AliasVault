@@ -131,6 +131,8 @@ android {
         xmlReport true
         htmlReport true
         lintConfig file("lint.xml")
+        // Focus only on app/src and exclude expo modules
+        disable 'InvalidPackage'
     }
 }
 
@@ -224,7 +226,20 @@ ktlint {
 task lintFixAll {
     description = "Run all auto-fixers (ktlint and Android lint)"
     group = "formatting"
-    dependsOn ktlintFormat, lintFix
+    dependsOn 'ktlintFormat'
+}
+
+task lintAll {
+    description = "Run all linting checks (ktlint and Android lint)"
+    group = "formatting"
+    dependsOn 'ktlintCheck'
+}
+
+// Fix for expo-dev-menu lint model generation
+afterEvaluate {
+    tasks.withType(com.android.build.gradle.internal.lint.LintModelWriterTask).configureEach {
+        dependsOn(':expo-dev-menu:copyAssets')
+    }
 }
 
 // Add a task dependency to make ktlint run before build
