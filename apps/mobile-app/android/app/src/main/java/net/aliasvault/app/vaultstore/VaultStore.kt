@@ -484,7 +484,7 @@ class VaultStore(
 
         // Throw any error that occurred or return the result
         error?.let { throw it }
-        return decryptedResult ?: throw IllegalStateException("Decryption failed")
+        return decryptedResult ?: error("Decryption failed")
     }
 
     private fun encryptData(data: String): String {
@@ -588,6 +588,10 @@ class VaultStore(
         }
     }
 
+    /**
+     * Get all credentials from the vault.
+     * @return The list of credentials
+     */
     fun getAllCredentials(): List<Credential> {
         if (dbConnection == null) {
             throw IllegalStateException("Database not initialized")
@@ -752,6 +756,9 @@ class VaultStore(
         return null
     }
 
+    /**
+     * Called when the app enters the background.
+     */
     fun onAppBackgrounded() {
         Log.d(TAG, "App entered background, starting auto-lock timer with ${getAutoLockTimeout()}s")
         if (getAutoLockTimeout() > 0) {
@@ -767,6 +774,9 @@ class VaultStore(
         }
     }
 
+    /**
+     * Called when the app enters the foreground.
+     */
     fun onAppForegrounded() {
         Log.d(TAG, "App entered foreground, canceling auto-lock timer")
         // Cancel the auto-lock timer

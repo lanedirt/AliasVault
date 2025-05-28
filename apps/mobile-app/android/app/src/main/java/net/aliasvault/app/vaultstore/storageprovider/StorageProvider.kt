@@ -38,7 +38,7 @@ interface StorageProvider {
     fun getMetadata(): String
 
     /**
-     * Set the metadata
+     * Set the metadata.
      * @param metadata The metadata as a string
      */
     fun setMetadata(metadata: String)

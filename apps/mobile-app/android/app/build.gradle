@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply plugin: "org.jlleitschuh.gradle.ktlint"
+apply plugin: "io.gitlab.arturbosch.detekt"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -230,9 +231,10 @@ task lintFixAll {
 }
 
 task lintAll {
-    description = "Run all linting checks (ktlint and Android lint)"
+    description = "Run all linting checks (ktlint, Detekt and Android lint)"
     group = "formatting"
     dependsOn 'ktlintCheck'
+    dependsOn 'detekt'
 }
 
 // Fix for expo-dev-menu lint model generation
@@ -254,5 +256,19 @@ afterEvaluate {
     }
     tasks.withType(org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask).configureEach {
         dependsOn("generateCodegenArtifactsFromSchema")
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config = files("$rootProject.projectDir/detekt.yml")
+    baseline = file("$rootProject.projectDir/baseline.xml")
+
+    source.setFrom(files("src/main/java"))
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        txt.required.set(false)
+        sarif.required.set(false)
     }
 }

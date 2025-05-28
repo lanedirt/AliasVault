@@ -7,6 +7,7 @@ buildscript {
         compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
         targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
         kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
+        detektVersion = '1.23.5'
 
         ndkVersion = "26.1.10909125"
     }
@@ -20,11 +21,26 @@ buildscript {
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
         classpath('org.jlleitschuh.gradle:ktlint-gradle:11.6.1')
+        classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
     }
 }
 
 apply plugin: "com.facebook.react.rootproject"
 apply plugin: "org.jlleitschuh.gradle.ktlint"
+apply plugin: "io.gitlab.arturbosch.detekt"
+
+detekt {
+    buildUponDefaultConfig = true
+    config = files("$projectDir/detekt.yml")
+    baseline = file("$projectDir/baseline.xml")
+}
+
+tasks.register('lintAll') {
+    dependsOn 'ktlintCheck'
+    dependsOn 'detekt'
+    group = 'verification'
+    description = 'Run all linting checks'
+}
 
 allprojects {
     repositories {

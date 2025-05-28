@@ -9,11 +9,19 @@ import android.util.Log
 import com.caverock.androidsvg.SVG
 import java.io.ByteArrayOutputStream
 
+/**
+ * Utility class for image operations.
+ */
 object ImageUtils {
     private const val TAG = "ImageUtils"
     private const val TARGET_SIZE_DP = 24
     private const val RENDER_SCALE_FACTOR = 4
 
+    /**
+     * Detect the mime type of the bytes.
+     * @param bytes The bytes to detect the mime type of
+     * @return The mime type
+     */
     fun detectMimeType(bytes: ByteArray): String {
         // SVG heuristic
         if (bytes.size >= 5) {
@@ -43,6 +51,11 @@ object ImageUtils {
         return "image/x-icon"
     }
 
+    /**
+     * Convert bytes to a bitmap.
+     * @param bytes The bytes to convert
+     * @return The bitmap
+     */
     fun bytesToBitmap(bytes: ByteArray): Bitmap? {
         return try {
             when (detectMimeType(bytes)) {
@@ -55,6 +68,11 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Convert SVG bytes to a bitmap.
+     * @param bytes The bytes to convert
+     * @return The bitmap
+     */
     private fun svgToBitmap(bytes: ByteArray): Bitmap? {
         return try {
             val svg = SVG.getFromString(String(bytes, Charsets.UTF_8))
@@ -87,6 +105,11 @@ object ImageUtils {
         }
     }
 
-    fun base64ToBytes(base64: String): ByteArray? =
-        try { Base64.decode(base64, Base64.DEFAULT) } catch (e: Exception) { null }
+    fun base64ToBytes(base64: String): ByteArray? {
+        return try {
+            Base64.decode(base64, Base64.DEFAULT)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
