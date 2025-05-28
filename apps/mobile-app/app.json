@@ -12,7 +12,13 @@
     "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "net.aliasvault.app"
+      "bundleIdentifier": "net.aliasvault.app",
+      "splash": {
+        "image": "./assets/images/splash-icon.png",
+        "imageWidth": 200,
+        "resizeMode": "contain",
+        "backgroundColor": "transparent"
+      }
     },
     "android": {
       "adaptiveIcon": {

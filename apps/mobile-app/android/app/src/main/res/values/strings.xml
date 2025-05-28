@@ -4,5 +4,5 @@
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
   <string name="autofill_service_description" translatable="true">AliasVault AutoFill</string>
-    <string name="aliasvault_icon">AliasVault icon</string>
+  <string name="aliasvault_icon">AliasVault icon</string>
 </resources>

@@ -48,7 +48,7 @@ export const Colors = {
     headerBackgroundAndroid: '#000000',
     headerBackgroundIos: 'rgba(0, 0, 0, 0.3)',
     headerBorder: '#2f2e30',
-    tabBarBackground: '#202020',
+    tabBarBackground: '#000000',
     primary: '#f49541',
     primarySurfaceText: '#ffffff',
     secondary: '#6b7280',

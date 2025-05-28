@@ -83,7 +83,9 @@ export default function TabLayout() : React.ReactNode {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
-            // backgroundColor: colors.tabBarBackground,
+          },
+          android: {
+            backgroundColor: colors.tabBarBackground,
           },
           default: {},
         }),

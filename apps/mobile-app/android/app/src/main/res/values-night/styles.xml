@@ -3,8 +3,8 @@
     <item name="android:textColor">@android:color/white</item>
     <item name="android:editTextStyle">@style/ResetEditText</item>
     <item name="colorPrimary">@color/colorPrimary</item>
-    <item name="android:statusBarColor">#202020</item>
-    <item name="android:navigationBarColor">#202020</item>
+    <item name="android:statusBarColor">#000000</item>
+    <item name="android:navigationBarColor">#000000</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
   </style>
   <style name="ResetEditText" parent="@android:style/Widget.EditText">
