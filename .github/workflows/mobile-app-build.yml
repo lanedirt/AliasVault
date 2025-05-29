@@ -85,6 +85,12 @@ jobs:
             --output-dir ./build \
             --platform android
 
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -97,15 +103,19 @@ jobs:
       - name: Run Android Unit Tests
         run: |
           cd android
-          ./gradlew testDebugUnitTest --tests "net.aliasvault.app.nativevaultmanager.*"
+          ./gradlew :app:testDebugUnitTest --tests "net.aliasvault.app.*"
+
+      - name: Upload Android Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports
+          path: apps/mobile-app/android/app/build/reports/tests/testDebugUnitTest/
+          retention-days: 7
 
       - name: Build Android App
         run: |
           cd android
           ./gradlew assembleDebug
 
-      - name: Run tests
-        run: npm run test
 
-      - name: Run linting
-        run: npm run lint

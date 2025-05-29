@@ -117,7 +117,7 @@ class VaultStoreTest {
 
             // Then, try to re-load the database and ensure the __EFMigrationsHistory table still exists.
             // This asserts that the database commit results in a properly exported and encrypted database file.
-            vaultStore.clearVault()
+            vaultStore.clearCache()
             vaultStore.storeEncryptionKey(testEncryptionKeyBase64)
             vaultStore.unlockVault()
 

@@ -135,6 +135,16 @@ android {
         // Focus only on app/src and exclude expo modules
         disable 'InvalidPackage'
     }
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+            testLogging {
+                events "passed", "failed", "skipped"
+                exceptionFormat "full"
+                showStandardStreams true
+            }
+        }
+    }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
@@ -176,6 +186,9 @@ dependencies {
     testImplementation 'androidx.test:rules:1.5.0'
     testImplementation 'androidx.test.ext:junit:1.1.5'
     testImplementation 'org.robolectric:robolectric:4.9'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.2'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

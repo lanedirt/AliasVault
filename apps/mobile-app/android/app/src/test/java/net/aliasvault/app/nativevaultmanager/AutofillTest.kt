@@ -17,13 +17,10 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
 class AutofillTest {
-    private lateinit var credentialMatcher: CredentialMatcher
     private lateinit var testCredentials: List<Credential>
 
     @Before
     fun setup() {
-        credentialMatcher = CredentialMatcher()
-
         // Create test credentials
         testCredentials = listOf(
             createTestCredential(
@@ -56,7 +53,7 @@ class AutofillTest {
 
     @Test
     fun testExactUrlMatch() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "www.coolblue.nl",
         )
@@ -67,7 +64,7 @@ class AutofillTest {
 
     @Test
     fun testBaseUrlMatch() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://gmail.com/signin",
         )
@@ -78,7 +75,7 @@ class AutofillTest {
 
     @Test
     fun testRootDomainMatch() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://mail.google.com",
         )
@@ -89,7 +86,7 @@ class AutofillTest {
 
     @Test
     fun testDomainNamePartMatch() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://coolblue.be",
         )
@@ -101,7 +98,7 @@ class AutofillTest {
 
     @Test
     fun testPackageNameMatch() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "com.coolblue.app",
         )
@@ -113,7 +110,7 @@ class AutofillTest {
 
     @Test
     fun testNoMatches() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://nonexistent.com",
         )
@@ -123,7 +120,7 @@ class AutofillTest {
 
     @Test
     fun testInvalidUrl() {
-        val matches = credentialMatcher.filterCredentialsByAppInfo(
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "not a url",
         )

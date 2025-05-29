@@ -40,7 +40,7 @@ The Android project contains unit tests that test the `VaultStore` native Kotlin
 In order to run the Android unit tests:
 
 ```
-./gradlew test
+./gradlew :app:testDebugUnitTest --tests "net.aliasvault.app.*"
 ```
 
 You can also open up the project in Android Studio, navigate to the `VaultStoreTest.kt` file and run/debug individual tests.
