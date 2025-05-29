@@ -238,13 +238,6 @@ task lintCheck {
     dependsOn 'detekt'
 }
 
-// Fix for expo-dev-menu lint model generation
-afterEvaluate {
-    tasks.withType(com.android.build.gradle.internal.lint.LintModelWriterTask).configureEach {
-        dependsOn(':expo-dev-menu:copyAssets')
-    }
-}
-
 // Add a task dependency to make ktlint run before build
 tasks.named("preBuild") {
     dependsOn("ktlintCheck")

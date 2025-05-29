@@ -33,6 +33,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-sqlite",
       [
         "expo-splash-screen",
         {
@@ -42,7 +43,15 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-sqlite"
+      [
+        "react-native-edge-to-edge",
+        {
+          "android": {
+            "parentTheme": "Default",
+            "enforceNavigationBarContrast": false
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

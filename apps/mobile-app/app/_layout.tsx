@@ -4,7 +4,6 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Href, Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import 'react-native-get-random-values';
 import { install } from 'react-native-quick-crypto';
@@ -265,7 +264,6 @@ function RootLayoutNav() : React.ReactNode {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
-      <StatusBar style="auto" />
       <AliasVaultToast />
     </ThemeProvider>
   );

@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+  <style name="AppTheme" parent="Theme.EdgeToEdge">
     <item name="android:textColor">@android:color/white</item>
     <item name="android:editTextStyle">@style/ResetEditText</item>
     <item name="colorPrimary">@color/colorPrimary</item>
