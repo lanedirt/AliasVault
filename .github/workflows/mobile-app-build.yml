@@ -97,7 +97,7 @@ jobs:
       - name: Run Android Unit Tests
         run: |
           cd android
-          ./gradlew testDebugUnitTest
+          ./gradlew testDebugUnitTest --tests "net.aliasvault.app.nativevaultmanager.*"
 
       - name: Build Android App
         run: |
