@@ -13,10 +13,6 @@ export function ThemedHeader(): React.ReactNode {
   const colors = useColors();
 
   const styles = StyleSheet.create({
-    androidHeader: {
-      backgroundColor: colors.headerBackgroundAndroid,
-      height: 56,
-    },
     header: {
       flex: 1,
     },
@@ -30,26 +26,16 @@ export function ThemedHeader(): React.ReactNode {
     },
   });
 
-  if (Platform.OS === 'ios') {
-    return (
-      <View style={styles.header}>
-        <BlurView
-          tint={colorScheme === 'dark' ? 'dark' : 'light'}
-          intensity={colorScheme === 'dark' ? 90 : 100}
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackgroundIos }]}
-        />
-        <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
-      </View>
-    );
-  } else if (Platform.OS === 'android') {
-    return (
-      <View style={[styles.header, styles.androidHeader]}>
-        <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
-      </View>
-    );
-  }
-
-  return null;
+  return (
+    <View style={styles.header}>
+      <BlurView
+        tint={colorScheme === 'dark' ? 'dark' : 'light'}
+        intensity={colorScheme === 'dark' ? 90 : 100}
+        style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackgroundIos }]}
+      />
+      <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
+    </View>
+  );
 }
 
 /**
@@ -59,13 +45,9 @@ export function ThemedHeader(): React.ReactNode {
  */
 export const defaultHeaderOptions = {
   /**
-   * On iOS, we want the header to be transparent.
-   * On Android, we want the header to be opaque.
+   * On iOS, we want the header to be transparent and use our custom header background.
+   * On Android, we want to use the native header.
    */
-  headerTransparent: Platform.OS === 'ios' ? true : false,
-  /**
-   * Header background component that provides consistent styling.
-   * @returns {React.ReactNode} The themed header background component
-   */
-  headerBackground: (): React.ReactNode => <ThemedHeader />,
+  headerTransparent: Platform.OS === 'ios',
+  headerBackground: Platform.OS === 'ios' ? (): React.ReactNode => <ThemedHeader /> : undefined,
 };

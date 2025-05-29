@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -52,30 +52,36 @@ export function AndroidHeader({ title, headerButtons = [] }: IAndroidHeaderProps
   return (
     <View style={styles.headerContainer}>
       {headerButtons.find(b => b.position === 'left') && (
-        <TouchableOpacity
+        <Pressable
           style={[styles.headerButton, styles.leftButton]}
           onPress={headerButtons.find(b => b.position === 'left')?.onPress}
+          hitSlop={100}
+          android_ripple={{ color: 'lightgray' }}
+          pressRetentionOffset={100}
         >
           <MaterialIcons
             name={headerButtons.find(b => b.position === 'left')?.icon ?? 'add'}
             size={28}
             color={colors.primary}
           />
-        </TouchableOpacity>
+        </Pressable>
       )}
       <Logo width={40} height={40} style={styles.logo} />
       <ThemedText style={styles.headerTitle}>{title}</ThemedText>
       {headerButtons.find(b => b.position === 'right') && (
-        <TouchableOpacity
+        <Pressable
           style={[styles.headerButton, styles.rightButton]}
           onPress={headerButtons.find(b => b.position === 'right')?.onPress}
+          hitSlop={100}
+          android_ripple={{ color: 'lightgray' }}
+          pressRetentionOffset={100}
         >
           <MaterialIcons
             name={headerButtons.find(b => b.position === 'right')?.icon ?? 'add'}
             size={28}
             color={colors.primary}
           />
-        </TouchableOpacity>
+        </Pressable>
       )}
     </View>
   );

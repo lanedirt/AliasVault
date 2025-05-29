@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable } from 'react-native';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -46,8 +46,11 @@ export default function CredentialDetailsScreen() : React.ReactNode {
        */
       headerRight: () => (
         <View style={styles.headerRightContainer}>
-          <TouchableOpacity
-            onPress={handleEdit}
+          <Pressable
+            onPressIn={handleEdit}
+            android_ripple={{ color: 'lightgray' }}
+            pressRetentionOffset={100}
+            hitSlop={100}
             style={styles.headerRightButton}
           >
             <MaterialIcons
@@ -55,7 +58,7 @@ export default function CredentialDetailsScreen() : React.ReactNode {
               size={24}
               color={colors.primary}
             />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ),
     });

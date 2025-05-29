@@ -28,6 +28,8 @@ export default function EmailsLayout(): React.ReactNode {
         name="[id]"
         options={{
           title: 'Email',
+          ...defaultHeaderOptions,
+          headerTransparent: false,
         }}
       />
     </Stack>

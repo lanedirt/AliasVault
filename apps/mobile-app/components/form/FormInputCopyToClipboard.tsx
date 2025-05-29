@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -29,12 +29,16 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const copyToClipboard = async () : Promise<void> => {
     if (value) {
       await Clipboard.setStringAsync(value);
-      Toast.show({
-        type: 'success',
-        text1: 'Copied to clipboard',
-        position: 'bottom',
-        visibilityTime: 2000,
-      });
+
+      if (Platform.OS !== 'android') {
+        // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
+        Toast.show({
+          type: 'success',
+          text1: 'Copied to clipboard',
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+      }
     }
   };
 

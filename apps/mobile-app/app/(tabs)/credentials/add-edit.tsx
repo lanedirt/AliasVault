@@ -1,6 +1,6 @@
-import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Resolver, useForm } from 'react-hook-form';
@@ -25,6 +25,7 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -44,6 +45,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -206,6 +208,14 @@ export default function AddEditCredentialScreen() : React.ReactNode {
    * @param {Credential} data - The form data.
    */
   const onSubmit = useCallback(async (data: Credential) : Promise<void> => {
+    // Prevent multiple submissions
+    if (isSaveDisabled) {
+      return;
+    }
+
+    // Disable save button to prevent multiple submissions
+    setIsSaveDisabled(true);
+
     Keyboard.dismiss();
 
     setIsLoading(true);
@@ -440,7 +450,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
     },
     headerRightButton: {
       padding: 10,
-      paddingRight: 0,
+    },
+    headerRightButtonDisabled: {
+      opacity: 0.5,
     },
     keyboardContainer: {
       flex: 1,
@@ -449,7 +461,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       alignItems: 'center',
       borderRadius: 6,
       flex: 1,
-      padding: 12,
+      padding: 8,
     },
     modeButtonActive: {
       backgroundColor: colors.primary,
@@ -484,35 +496,56 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
   // Set header buttons
   useEffect(() => {
-    navigation.setOptions({
-      title: isEditMode ? 'Edit Credential' : 'Add Credential',
-      /**
-       * Header left button.
-       */
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.headerLeftButton}
-        >
-          <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
-        </TouchableOpacity>
-      ),
-      /**
-       * Header right button.
-       */
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
-          style={styles.headerRightButton}
-        >
-          <MaterialIcons name="save" size={24} color={colors.primary} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton]);
+    if (Platform.OS === 'ios') {
+      navigation.setOptions({
+        /**
+         * Header left button.
+         */
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.headerLeftButton}
+          >
+            <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
+          </TouchableOpacity>
+        ),
+        /**
+         * Header right button.
+         */
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={handleSubmit(onSubmit)}
+            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
+            disabled={isSaveDisabled}
+          >
+            <MaterialIcons name="save" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        /**
+         * Header right button.
+         */
+        headerRight: () => (
+          <Pressable
+            onPress={handleSubmit(onSubmit)}
+            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
+            android_ripple={{ color: 'lightgray' }}
+            pressRetentionOffset={100}
+            hitSlop={100}
+            disabled={isSaveDisabled}
+          >
+            <MaterialIcons name="save" size={24} color={colors.primary} />
+          </Pressable>
+        ),
+      });
+    }
+  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton, styles.headerRightButtonDisabled, isSaveDisabled]);
 
   return (
     <>
+      <Stack.Screen options={{ title: isEditMode ? 'Edit Credential' : 'Add Credential' }} />
       {(isLoading) && (
         <LoadingOverlay status={syncStatus} />
       )}
