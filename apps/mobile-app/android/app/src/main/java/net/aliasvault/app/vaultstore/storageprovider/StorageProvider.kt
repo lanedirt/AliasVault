@@ -8,31 +8,31 @@ import java.io.File
  */
 interface StorageProvider {
     /**
-     * Get the encrypted database file
+     * Get the encrypted database file.
      * @return The encrypted database file
      */
     fun getEncryptedDatabaseFile(): File
 
     /**
-     * Set the encrypted database file
+     * Set the encrypted database file.
      * @param encryptedData The encrypted database data as a base64 encoded string
      */
     fun setEncryptedDatabaseFile(encryptedData: String)
 
     /**
-     * Get the key derivation parameters
+     * Get the key derivation parameters.
      * @return The key derivation parameters as a string
      */
     fun getKeyDerivationParams(): String
 
     /**
-     * Set the key derivation parameters
+     * Set the key derivation parameters.
      * @param keyDerivationParams The key derivation parameters as a string
      */
     fun setKeyDerivationParams(keyDerivationParams: String)
 
     /**
-     * Get the metadata
+     * Get the metadata.
      * @return The metadata as a string
      */
     fun getMetadata(): String
@@ -44,31 +44,31 @@ interface StorageProvider {
     fun setMetadata(metadata: String)
 
     /**
-     * Get the auto-lock timeout
+     * Get the auto-lock timeout.
      * @return The auto-lock timeout in seconds
      */
     fun getAutoLockTimeout(): Int
 
     /**
-     * Set the auto-lock timeout
+     * Set the auto-lock timeout.
      * @param timeout The auto-lock timeout in seconds
      */
     fun setAutoLockTimeout(timeout: Int)
 
     /**
-     * Get the authentication methods
+     * Get the authentication methods.
      * @return The authentication methods as a string
      */
     fun getAuthMethods(): String
 
     /**
-     * Set the authentication methods
+     * Set the authentication methods.
      * @param authMethods The authentication methods as a string
      */
     fun setAuthMethods(authMethods: String)
 
     /**
-     * Clear all data from the storage provider
+     * Clear all data from the storage provider.
      */
     fun clearStorage()
 }

@@ -6,21 +6,16 @@ grand_parent: Mobile Apps
 nav_order: 1
 ---
 
-# Building AliasVault iOS App from Source
+# Building AliasVault Android App from Source
 
-This guide explains how to build and install the AliasVault iOS app from source code using React Native.
+This guide explains how to build and install the AliasVault Android app from source code using React Native.
 
 ## Prerequisites
 
-- macOS with Xcode installed (required for building iOS apps)
-- [Homebrew](https://brew.sh) installed
-- Node.js installed
-- CocoaPods installed (`brew install cocoapods`)
+- MacOS or Windows machine with Android Studio installed
 - Git to clone the repository
-- Xcode Command Line Tools (`xcode-select --install`)
-- An Apple developer account for signing and installing on real devices (optional for simulator)
 
-## Building the iOS App
+## Building the Android app
 
 1. Clone the repository:
 ```bash
@@ -37,19 +32,23 @@ cd AliasVault/apps/mobile-app
 npm install
 ```
 
-4. Install iOS native dependencies via CocoaPods:
+4. Install and build Android dependencies:
 ```bash
-npx pod-install
+cd android
+./gradlew assembleRelease
 ```
 
-5. Open the iOS workspace in Xcode:
+5. Deploy release build to your device:
+
+For MacOS, install adb to deploy the app to a phone or simulator via command line:
 ```bash
-./apps/mobile-app/ios/AliasVault.xcworkspace
+# Install adb
+brew install android-platform-tools
+
+# List devices (physical devices connected via USB and any running simulators)
+adb devices
+
+# Deploy to chosen device
+adb -s [device-id] install android/app/build/outputs/apk/release/app-release.apk
 ```
 
-6. In Xcode, select a simulator or a connected physical device.
-
-7. Click Run (▶️) in Xcode to build and launch the app.
-
-## Notes
-- If you're running on a physical iPhone, you'll need to configure code signing with your Apple ID in Xcode under Signing & Capabilities.

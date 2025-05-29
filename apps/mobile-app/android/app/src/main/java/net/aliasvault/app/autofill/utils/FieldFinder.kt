@@ -9,16 +9,39 @@ import net.aliasvault.app.autofill.models.FieldType
 
 /**
  * Helper class to find fields in the assist structure.
+ * @param structure The assist structure to parse
  */
 class FieldFinder(var structure: AssistStructure) {
-    private val TAG = "AliasVaultAutofill"
+    companion object {
+        /**
+         * The tag for logging.
+         */
+        private const val TAG = "AliasVaultAutofill"
+    }
 
-    // Store pairs of (AutofillId, net.aliasvault.app.autofill.models.FieldType)
+    /**
+     * The list of autofillable fields.
+     */
     val autofillableFields = mutableListOf<Pair<AutofillId, FieldType>>()
-    var foundPasswordField = false
+
+    /**
+     * Whether a username field has been found.
+     */
     var foundUsernameField = false
+
+    /**
+     * Whether a password field has been found.
+     */
+    var foundPasswordField = false
+
+    /**
+     * Whether a username field has been found.
+     */
     var lastField: AutofillId? = null
 
+    /**
+     * Parse the structure.
+     */
     fun parseStructure() {
         val nodeCount = structure.windowNodeCount
         for (i in 0 until nodeCount) {
@@ -84,14 +107,33 @@ class FieldFinder(var structure: AssistStructure) {
      * Attempt to find the web domain or URL in the assist structure.
      */
     private fun findWebInfoInNode(node: AssistStructure.ViewNode): String? {
-        // Check for web domain
+        return findWebInfoFromDomainAndScheme(node)
+            ?: findWebInfoFromUrl(node)
+            ?: findWebInfoFromHtmlAttributes(node)
+            ?: findWebInfoFromHints(node)
+            ?: findWebInfoFromChildren(node)
+    }
+
+    /**
+     * Find the web domain or URL in the assist structure.
+     * @param node The node to search in
+     * @return The web domain or URL
+     */
+    private fun findWebInfoFromDomainAndScheme(node: AssistStructure.ViewNode): String? {
         val webDomain = node.webDomain
         val webScheme = node.webScheme
         if (webDomain != null && webScheme != null) {
             return "$webScheme://$webDomain"
         }
+        return null
+    }
 
-        // Check for web URL
+    /**
+     * Find the web domain or URL in the assist structure.
+     * @param node The node to search in
+     * @return The web domain or URL
+     */
+    private fun findWebInfoFromUrl(node: AssistStructure.ViewNode): String? {
         val webUrl = node.webDomain
         if (webUrl != null) {
             try {
@@ -104,8 +146,15 @@ class FieldFinder(var structure: AssistStructure) {
                 Log.e(TAG, "Error parsing web URL: $webUrl", e)
             }
         }
+        return null
+    }
 
-        // Check HTML info for domain or URL
+    /**
+     * Find the web domain or URL in the assist structure.
+     * @param node The node to search in
+     * @return The web domain or URL
+     */
+    private fun findWebInfoFromHtmlAttributes(node: AssistStructure.ViewNode): String? {
         val htmlInfo = node.htmlInfo
         if (htmlInfo != null) {
             val attributes = htmlInfo.attributes
@@ -119,8 +168,15 @@ class FieldFinder(var structure: AssistStructure) {
                 }
             }
         }
+        return null
+    }
 
-        // Check for web-specific hints
+    /**
+     * Find the web domain or URL in the assist structure.
+     * @param node The node to search in
+     * @return The web domain or URL
+     */
+    private fun findWebInfoFromHints(node: AssistStructure.ViewNode): String? {
         val hints = node.autofillHints
         if (hints != null) {
             for (hint in hints) {
@@ -132,8 +188,15 @@ class FieldFinder(var structure: AssistStructure) {
                 }
             }
         }
+        return null
+    }
 
-        // Recursively check child nodes
+    /**
+     * Find the web domain or URL in the assist structure.
+     * @param node The node to search in
+     * @return The web domain or URL
+     */
+    private fun findWebInfoFromChildren(node: AssistStructure.ViewNode): String? {
         val childCount = node.childCount
         for (i in 0 until childCount) {
             val webInfo = findWebInfoInNode(node.getChildAt(i))
@@ -141,10 +204,13 @@ class FieldFinder(var structure: AssistStructure) {
                 return webInfo
             }
         }
-
         return null
     }
 
+    /**
+     * Parse a node.
+     * @param node The node to parse
+     */
     private fun parseNode(node: AssistStructure.ViewNode) {
         val viewId = node.autofillId
 
@@ -171,6 +237,11 @@ class FieldFinder(var structure: AssistStructure) {
         }
     }
 
+    /**
+     * Check if a node is an email field.
+     * @param node The node to check
+     * @return Whether the node is an email field
+     */
     private fun isEmailField(node: AssistStructure.ViewNode): Boolean {
         // Check input type for email
         if ((node.inputType and android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) != 0) {
@@ -217,13 +288,20 @@ class FieldFinder(var structure: AssistStructure) {
         return false
     }
 
+    /**
+     * Check if a node is a username field.
+     * @param node The node to check
+     * @return Whether the node is a username field
+     */
     private fun isUsernameField(node: AssistStructure.ViewNode): Boolean {
+        val searchTerms = listOf("username", "user")
+
         // Check autofill hints
         val hints = node.autofillHints
         if (hints != null) {
             for (hint in hints) {
                 if (hint == View.AUTOFILL_HINT_USERNAME ||
-                    hint.contains("username", ignoreCase = true)
+                    searchTerms.any { term -> hint.contains(term, ignoreCase = true) }
                 ) {
                     return true
                 }
@@ -238,20 +316,23 @@ class FieldFinder(var structure: AssistStructure) {
                 for (i in 0 until attributes.size) {
                     val name = attributes.get(i)?.first
                     val value = attributes.get(i)?.second
-                    if (name == "name" && (value == "username" || value == "user")) {
+                    if (name == "name" && value != null && searchTerms.any { term ->
+                            value.equals(term, ignoreCase = true)
+                        }
+                    ) {
                         return true
                     }
                 }
             }
         }
 
-        // Check ID and hint text
+        // Check if ID or hint text contains one of the search terms
         val idEntry = node.idEntry
         val hint = node.hint
-        if (idEntry?.contains("username", ignoreCase = true) == true ||
-            idEntry?.contains("user", ignoreCase = true) == true ||
-            hint?.contains("username", ignoreCase = true) == true ||
-            hint?.contains("user", ignoreCase = true) == true
+        if (searchTerms.any { term ->
+                idEntry?.contains(term, ignoreCase = true) == true ||
+                    hint?.contains(term, ignoreCase = true) == true
+            }
         ) {
             return true
         }
@@ -259,6 +340,11 @@ class FieldFinder(var structure: AssistStructure) {
         return false
     }
 
+    /**
+     * Check if a node is an editable field.
+     * @param node The node to check
+     * @return Whether the node is an editable field
+     */
     private fun isEditableField(node: AssistStructure.ViewNode): Boolean {
         // Check if the node is editable in any way
         return node.inputType > 0 ||
@@ -267,6 +353,11 @@ class FieldFinder(var structure: AssistStructure) {
             node.htmlInfo?.tag?.equals("input", ignoreCase = true) == true
     }
 
+    /**
+     * Check if a node is a password field.
+     * @param node The node to check
+     * @return Whether the node is a password field
+     */
     private fun isLikelyPasswordField(node: AssistStructure.ViewNode): Boolean {
         // Try to determine if this is a password field
         val hints = node.autofillHints
@@ -324,6 +415,11 @@ class FieldFinder(var structure: AssistStructure) {
         return false
     }
 
+    /**
+     * Find a node by ID.
+     * @param fieldId The ID of the field to find
+     * @return The node
+     */
     private fun findNodeById(fieldId: AutofillId): AssistStructure.ViewNode? {
         val nodeCount = structure.windowNodeCount
         for (i in 0 until nodeCount) {
@@ -337,6 +433,12 @@ class FieldFinder(var structure: AssistStructure) {
         return null
     }
 
+    /**
+     * Find a node by ID recursively.
+     * @param node The node to start searching from
+     * @param fieldId The ID of the field to find
+     * @return The node
+     */
     private fun findNodeByIdRecursive(
         node: AssistStructure.ViewNode,
         fieldId: AutofillId,

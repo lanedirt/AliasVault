@@ -50,11 +50,11 @@ Linting is ran automatically during normal Android app build. You can however al
 
 ### Kotlin
 ```bash
-./gradlew lintAll
+./gradlew lintCheck
 ```
 
 ### Auto fix linting issues
 To automatically fix linting issues (where possible), run this command:
 ```bash
-./gradlew lintFixAll
+./gradlew lintFormat
 ```

@@ -20,13 +20,27 @@ import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
 import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
 import org.json.JSONArray
 
+/**
+ * The native vault manager that manages the vault store and all input/output operations on it.
+ * This class implements the NativeVaultManagerSpec React Native interface and then calls the
+ * VaultStore class to perform the actual operations.
+ *
+ * @param reactContext The React context
+ */
 @ReactModule(name = NativeVaultManager.NAME)
 class NativeVaultManager(reactContext: ReactApplicationContext) :
     NativeVaultManagerSpec(reactContext), TurboModule, LifecycleEventListener {
 
     companion object {
-        private const val TAG = "NativeVaultManager"
+        /**
+         * The name of the module.
+         */
         const val NAME = "NativeVaultManager"
+
+        /**
+         * The tag for logging.
+         */
+        private const val TAG = "NativeVaultManager"
     }
 
     private val vaultStore = VaultStore.getInstance(
@@ -39,34 +53,41 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         reactContext.addLifecycleEventListener(this)
     }
 
+    /**
+     * Called when the app enters the background.
+     */
     override fun onHostPause() {
         Log.d(TAG, "App entered background")
         vaultStore.onAppBackgrounded()
     }
 
+    /**
+     * Called when the app enters the foreground.
+     */
     override fun onHostResume() {
         Log.d(TAG, "App entered foreground")
         vaultStore.onAppForegrounded()
     }
 
+    /**
+     * Called when the app is destroyed.
+     */
     override fun onHostDestroy() {
         // Not needed
     }
 
+    /**
+     * Get the name of the module.
+     * @return The name of the module
+     */
     override fun getName(): String {
         return NAME
     }
 
-    private fun getFragmentActivity(): FragmentActivity? {
-        val activity = currentActivity
-        return if (activity is FragmentActivity) {
-            activity
-        } else {
-            null
-        }
-    }
-
-    // Basic credential operations
+    /**
+     * Clear the vault.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun clearVault(promise: Promise) {
         try {
@@ -78,12 +99,19 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
-    // Vault state management
+    /**
+     * Check if the vault is unlocked.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun isVaultUnlocked(promise: Promise) {
         promise.resolve(vaultStore.isVaultUnlocked())
     }
 
+    /**
+     * Get the vault metadata.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getVaultMetadata(promise: Promise) {
         try {
@@ -95,6 +123,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Unlock the vault.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun unlockVault(promise: Promise) {
         try {
@@ -106,7 +138,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
-    // Database operations
+    /**
+     * Store the encrypted database.
+     * @param base64EncryptedDb The encrypted database as a base64 encoded string
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun storeDatabase(base64EncryptedDb: String, promise: Promise) {
         try {
@@ -118,6 +154,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Store the metadata.
+     * @param metadata The metadata as a string
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun storeMetadata(metadata: String, promise: Promise) {
         try {
@@ -129,6 +170,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Set the auth methods.
+     * @param authMethods The auth methods
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun setAuthMethods(authMethods: ReadableArray, promise: Promise) {
         try {
@@ -144,6 +190,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Store the encryption key.
+     * @param base64EncryptionKey The encryption key as a base64 encoded string
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun storeEncryptionKey(base64EncryptionKey: String, promise: Promise) {
         try {
@@ -155,6 +206,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Store the encryption key derivation parameters.
+     * @param keyDerivationParams The encryption key derivation parameters
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun storeEncryptionKeyDerivationParams(keyDerivationParams: String, promise: Promise) {
         try {
@@ -170,6 +226,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Get the encryption key derivation parameters.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getEncryptionKeyDerivationParams(promise: Promise) {
         try {
@@ -185,6 +245,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Check if the encrypted database exists.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun hasEncryptedDatabase(promise: Promise) {
         try {
@@ -196,6 +260,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Get the encrypted database.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getEncryptedDatabase(promise: Promise) {
         try {
@@ -207,6 +275,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Get the current vault revision number.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getCurrentVaultRevisionNumber(promise: Promise) {
         try {
@@ -218,6 +290,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Set the current vault revision number.
+     * @param revisionNumber The revision number
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun setCurrentVaultRevisionNumber(revisionNumber: Double, promise: Promise?) {
         try {
@@ -229,7 +306,12 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
-    // SQL operations
+    /**
+     * Execute a query on the vault.
+     * @param query The query
+     * @param params The parameters to the query
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun executeQuery(query: String, params: ReadableArray, promise: Promise) {
         try {
@@ -274,6 +356,12 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Execute an update on the vault.
+     * @param query The query
+     * @param params The parameters to the query
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun executeUpdate(query: String, params: ReadableArray, promise: Promise) {
         try {
@@ -295,6 +383,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Begin a transaction on the vault.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun beginTransaction(promise: Promise) {
         try {
@@ -306,6 +398,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Commit a transaction on the vault.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun commitTransaction(promise: Promise) {
         try {
@@ -321,6 +417,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Rollback a transaction on the vault.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun rollbackTransaction(promise: Promise) {
         try {
@@ -336,6 +436,11 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Set the auto-lock timeout.
+     * @param timeout The timeout in seconds
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun setAutoLockTimeout(timeout: Double, promise: Promise?) {
         try {
@@ -347,6 +452,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Get the auto-lock timeout.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getAutoLockTimeout(promise: Promise) {
         try {
@@ -358,6 +467,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Get the auth methods.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun getAuthMethods(promise: Promise) {
         try {
@@ -376,6 +489,10 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Open the autofill settings page.
+     * @param promise The promise to resolve
+     */
     @ReactMethod
     override fun openAutofillSettingsPage(promise: Promise) {
         try {
@@ -404,5 +521,13 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
                 e,
             )
         }
+    }
+
+    /**
+     * Get the current fragment activity.
+     * @return The fragment activity
+     */
+    private fun getFragmentActivity(): FragmentActivity? {
+        return currentActivity as? FragmentActivity
     }
 }

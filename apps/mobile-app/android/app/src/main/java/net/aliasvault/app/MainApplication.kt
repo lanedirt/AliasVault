@@ -15,8 +15,14 @@ import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 import net.aliasvault.app.nativevaultmanager.NativeVaultManagerPackage
 
+/**
+ * The main application class.
+ */
 class MainApplication : Application(), ReactApplication {
 
+    /**
+     * The react native host.
+     */
     override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {

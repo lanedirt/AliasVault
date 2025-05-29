@@ -28,12 +28,19 @@ import net.aliasvault.app.autofill.utils.CredentialMatcher
 import net.aliasvault.app.autofill.utils.FieldFinder
 import net.aliasvault.app.autofill.utils.ImageUtils
 import net.aliasvault.app.vaultstore.VaultStore
-import net.aliasvault.app.vaultstore.VaultStore.CredentialOperationCallback
+import net.aliasvault.app.vaultstore.interfaces.CredentialOperationCallback
 import net.aliasvault.app.vaultstore.models.Credential
 
+/**
+ * The AutofillService class.
+ */
 class AutofillService : AutofillService() {
-    private val TAG = "AliasVaultAutofill"
-    private val credentialMatcher = CredentialMatcher()
+    companion object {
+        /**
+         * The tag for logging.
+         */
+        private const val TAG = "AliasVaultAutofill"
+    }
 
     override fun onFillRequest(
         request: FillRequest,
@@ -65,11 +72,10 @@ class AutofillService : AutofillService() {
 
         // If we found a password field but no username field, and we have a last field,
         // assume it's the username field
-        // TODO: do we actually need this part?
-        if (!fieldFinder.foundUsernameField && fieldFinder.lastField != null) {
+        /*if (!fieldFinder.foundUsernameField && fieldFinder.lastField != null) {
             fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, FieldType.USERNAME))
             Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
-        }
+        }*/
 
         launchActivityForAutofill(fieldFinder, callback)
     }
@@ -116,7 +122,7 @@ class AutofillService : AutofillService() {
 
                             // Filter credentials based on app/website info
                             val filteredCredentials = if (appInfo != null) {
-                                filterCredentialsByAppInfo(result, appInfo)
+                                CredentialMatcher.filterCredentialsByAppInfo(result, appInfo)
                             } else {
                                 result
                             }
@@ -175,7 +181,12 @@ class AutofillService : AutofillService() {
         callback.onSuccess(responseBuilder.build())
     }
 
-    // Helper method to create a dataset from a credential
+    /**
+     * Create a dataset from a credential.
+     * @param fieldFinder The field finder
+     * @param credential The credential
+     * @return The dataset
+     */
     private fun createCredentialDataset(fieldFinder: FieldFinder, credential: Credential): Dataset {
         // Choose layout based on whether we have a logo
         val layoutId = if (credential.service.logo != null) {
@@ -269,6 +280,11 @@ class AutofillService : AutofillService() {
         return dataSetBuilder.build()
     }
 
+    /**
+     * Create a dataset for the "no matches" option.
+     * @param fieldFinder The field finder
+     * @return The dataset
+     */
     private fun createNoMatchesDataset(fieldFinder: FieldFinder): Dataset {
         // Create presentation for the "no matches" option
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
@@ -309,6 +325,11 @@ class AutofillService : AutofillService() {
         return dataSetBuilder.build()
     }
 
+    /**
+     * Create a dataset for the "open app" option.
+     * @param fieldFinder The field finder
+     * @return The dataset
+     */
     private fun createOpenAppDataset(fieldFinder: FieldFinder): Dataset {
         val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         openAppPresentation.setTextViewText(
@@ -348,6 +369,11 @@ class AutofillService : AutofillService() {
         return dataSetBuilder.build()
     }
 
+    /**
+     * Create a dataset for the "vault locked" option.
+     * @param fieldFinder The field finder
+     * @return The dataset
+     */
     private fun createVaultLockedDataset(fieldFinder: FieldFinder): Dataset {
         // Create presentation for the "vault locked" option
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
@@ -379,16 +405,5 @@ class AutofillService : AutofillService() {
         }
 
         return dataSetBuilder.build()
-    }
-
-    private fun filterCredentialsByAppInfo(
-        credentials: List<Credential>,
-        appInfo: String,
-    ): List<Credential> {
-        return credentialMatcher.filterCredentialsByAppInfo(credentials, appInfo)
-    }
-
-    companion object {
-        private const val TAG = "AliasVaultAutofill"
     }
 }

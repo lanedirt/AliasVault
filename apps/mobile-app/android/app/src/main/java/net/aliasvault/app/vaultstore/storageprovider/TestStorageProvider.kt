@@ -5,7 +5,7 @@ import java.io.File
 /**
  * A fake file provider that mocks the storage of the encrypted database file and metadata.
  */
-class TestStorageProvider() : StorageProvider {
+class TestStorageProvider : StorageProvider {
     private var defaultAutoLockTimeout = 3600 // 1 hour default
 
     private val tempFile = File.createTempFile("encrypted_database", ".db")

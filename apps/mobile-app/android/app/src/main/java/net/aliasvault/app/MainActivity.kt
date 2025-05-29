@@ -7,7 +7,13 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 import expo.modules.ReactActivityDelegateWrapper
 import expo.modules.splashscreen.SplashScreenManager
 
+/**
+ * The main activity of the app.
+ */
 class MainActivity : ReactActivity() {
+    /**
+     * Called when the activity is created.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set the theme to AppTheme BEFORE onCreate to support
         // coloring the background, status bar, and navigation bar.

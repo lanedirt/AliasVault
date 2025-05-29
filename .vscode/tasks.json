@@ -155,10 +155,10 @@
             }
         },
         {
-            "label": "Run Android App",
+            "label": "Run release Android App (device)",
             "type": "shell",
             "command": "npx",
-            "args": ["expo", "run:android"],
+            "args": ["expo", "run:android", "--device", "--variant", "release"],
             "problemMatcher": [],
             "group": {
                 "kind": "build",

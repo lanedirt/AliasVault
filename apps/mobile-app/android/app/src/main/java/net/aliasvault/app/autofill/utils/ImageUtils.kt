@@ -18,11 +18,28 @@ object ImageUtils {
     private const val RENDER_SCALE_FACTOR = 4
 
     /**
+     * Convert bytes to a bitmap.
+     * @param bytes The bytes to convert
+     * @return The bitmap
+     */
+    fun bytesToBitmap(bytes: ByteArray): Bitmap? {
+        return try {
+            when (detectMimeType(bytes)) {
+                "image/svg+xml" -> svgToBitmap(bytes)
+                else -> BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error converting bytes to bitmap", e)
+            null
+        }
+    }
+
+    /**
      * Detect the mime type of the bytes.
      * @param bytes The bytes to detect the mime type of
      * @return The mime type
      */
-    fun detectMimeType(bytes: ByteArray): String {
+    private fun detectMimeType(bytes: ByteArray): String {
         // SVG heuristic
         if (bytes.size >= 5) {
             val header = String(bytes, 0, 5).lowercase()
@@ -49,23 +66,6 @@ object ImageUtils {
             return "image/x-icon"
         }
         return "image/x-icon"
-    }
-
-    /**
-     * Convert bytes to a bitmap.
-     * @param bytes The bytes to convert
-     * @return The bitmap
-     */
-    fun bytesToBitmap(bytes: ByteArray): Bitmap? {
-        return try {
-            when (detectMimeType(bytes)) {
-                "image/svg+xml" -> svgToBitmap(bytes)
-                else -> BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error converting bytes to bitmap", e)
-            null
-        }
     }
 
     /**
@@ -98,6 +98,11 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Convert a bitmap to bytes.
+     * @param bitmap The bitmap to convert
+     * @return The bytes
+     */
     fun bitmapToBytes(bitmap: Bitmap): ByteArray {
         return ByteArrayOutputStream().use { stream ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -105,11 +110,12 @@ object ImageUtils {
         }
     }
 
-    fun base64ToBytes(base64: String): ByteArray? {
-        return try {
-            Base64.decode(base64, Base64.DEFAULT)
-        } catch (e: Exception) {
-            null
-        }
+    /**
+     * Convert a base64 string to bytes.
+     * @param base64 The base64 string to convert
+     * @return The bytes
+     */
+    fun base64ToBytes(base64: String): ByteArray {
+        return Base64.decode(base64, Base64.DEFAULT)
     }
 }

@@ -27,24 +27,62 @@ class AndroidKeystoreProvider(
     private val context: Context,
     private val getCurrentActivity: () -> Activity?,
 ) : KeystoreProvider {
-    private val biometricManager = BiometricManager.from(context)
-    private val executor: Executor = Executors.newSingleThreadExecutor()
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private val TAG = "AndroidKeystoreProvider"
-    private val KEYSTORE_ALIAS = "aliasvault_biometric_key"
-    private val ENCRYPTED_KEY_PREF = "encrypted_vault_key"
-    private val SHARED_PREFS_NAME = "net.aliasvault.keystore"
+    companion object {
+        /**
+         * The tag for logging.
+         */
+        private const val TAG = "AndroidKeystoreProvider"
 
+        /**
+         * The alias for the keystore.
+         */
+        private const val KEYSTORE_ALIAS = "alias_vault_key"
+
+        /**
+         * The tag for logging.
+         */
+        private const val ENCRYPTED_KEY_PREF = "encrypted_vault_key"
+
+        /**
+         * The shared preferences name.
+         */
+        private const val SHARED_PREFS_NAME = "net.aliasvault.keystore"
+    }
+
+    /**
+     * The biometric manager.
+     */
+    private val _biometricManager = BiometricManager.from(context)
+
+    /**
+     * The executor.
+     */
+    private val _executor: Executor = Executors.newSingleThreadExecutor()
+
+    /**
+     * The main handler.
+     */
+    private val _mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * Whether the biometric is available.
+     * @return Whether the biometric is available
+     */
     override fun isBiometricAvailable(): Boolean {
-        return biometricManager.canAuthenticate(
+        return _biometricManager.canAuthenticate(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                 BiometricManager.Authenticators.BIOMETRIC_STRONG or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL,
         ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
+    /**
+     * Store the key in the keystore.
+     * @param key The key to store
+     * @param callback The callback to call when the operation is complete
+     */
     override fun storeKey(key: String, callback: KeystoreOperationCallback) {
-        mainHandler.post {
+        _mainHandler.post {
             try {
                 val currentActivity = getCurrentActivity()
                 if (currentActivity == null || !(currentActivity is FragmentActivity)) {
@@ -95,7 +133,7 @@ class AndroidKeystoreProvider(
 
                 val biometricPrompt = BiometricPrompt(
                     currentActivity,
-                    executor,
+                    _executor,
                     object : BiometricPrompt.AuthenticationCallback() {
                         override fun onAuthenticationSucceeded(
                             result: BiometricPrompt.AuthenticationResult,
@@ -168,7 +206,7 @@ class AndroidKeystoreProvider(
     }
 
     override fun retrieveKey(callback: KeystoreOperationCallback) {
-        mainHandler.post {
+        _mainHandler.post {
             try {
                 val currentActivity = getCurrentActivity()
                 if (currentActivity == null || !(currentActivity is FragmentActivity)) {
@@ -213,16 +251,14 @@ class AndroidKeystoreProvider(
 
                 val biometricPrompt = BiometricPrompt(
                     currentActivity,
-                    executor,
+                    _executor,
                     object : BiometricPrompt.AuthenticationCallback() {
                         override fun onAuthenticationSucceeded(
                             result: BiometricPrompt.AuthenticationResult,
                         ) {
                             try {
                                 // Get the cipher from the result
-                                val cipher = result.cryptoObject?.cipher ?: throw Exception(
-                                    "Cipher is null",
-                                )
+                                val cipher = result.cryptoObject?.cipher ?: error("Cipher is null")
 
                                 // Decode combined data
                                 val combined = Base64.decode(encryptedKeyB64, Base64.NO_WRAP)

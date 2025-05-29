@@ -224,13 +224,14 @@ ktlint {
     version.set("0.50.0")
 }
 
-task lintFixAll {
+task lintFormat {
     description = "Run all auto-fixers (ktlint and Android lint)"
     group = "formatting"
     dependsOn 'ktlintFormat'
+    dependsOn 'detekt'
 }
 
-task lintAll {
+task lintCheck {
     description = "Run all linting checks (ktlint, Detekt and Android lint)"
     group = "formatting"
     dependsOn 'ktlintCheck'

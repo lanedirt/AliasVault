@@ -7,8 +7,7 @@ import net.aliasvault.app.vaultstore.models.Credential
  * This class handles the logic of determining which credentials are relevant
  * for a given app or website context.
  */
-class CredentialMatcher {
-
+object CredentialMatcher {
     /**
      * Filters a list of credentials based on app/package name or URL.
      * Matching strategies in order of specificity:
@@ -30,12 +29,7 @@ class CredentialMatcher {
         val rootDomain: String?
         val domainKey: String
 
-        if (isUrlLike && (
-                input.startsWith("http://") || input.startsWith("https://") || input.startsWith(
-                    "www.",
-                )
-                )
-        ) {
+        if (isUrlLike && listOf("http://", "https://", "www.").any { input.startsWith(it) }) {
             // Treat as full or partial URL
             val cleaned = input
                 .removePrefix("https://")
