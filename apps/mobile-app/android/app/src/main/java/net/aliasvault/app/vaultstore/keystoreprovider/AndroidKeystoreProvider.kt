@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
+import java.io.File
 import java.nio.ByteBuffer
 import java.security.KeyStore
 import java.util.concurrent.Executor
@@ -39,14 +40,9 @@ class AndroidKeystoreProvider(
         private const val KEYSTORE_ALIAS = "alias_vault_key"
 
         /**
-         * The tag for logging.
+         * The filename for the encrypted key.
          */
-        private const val ENCRYPTED_KEY_PREF = "encrypted_vault_key"
-
-        /**
-         * The shared preferences name.
-         */
-        private const val SHARED_PREFS_NAME = "net.aliasvault.keystore"
+        private const val ENCRYPTED_KEY_FILE = "encrypted_vault_key"
     }
 
     /**
@@ -159,16 +155,13 @@ class AndroidKeystoreProvider(
                                 byteBuffer.put(encryptedKey)
                                 val combined = byteBuffer.array()
 
-                                // Store encrypted key in SharedPreferences
+                                // Store encrypted key in private file
                                 val encryptedKeyB64 = Base64.encodeToString(
                                     combined,
                                     Base64.NO_WRAP,
                                 )
-                                val prefs = context.getSharedPreferences(
-                                    SHARED_PREFS_NAME,
-                                    Context.MODE_PRIVATE,
-                                )
-                                prefs.edit().putString(ENCRYPTED_KEY_PREF, encryptedKeyB64).apply()
+                                val keyFile = File(context.filesDir, ENCRYPTED_KEY_FILE)
+                                keyFile.writeText(encryptedKeyB64)
 
                                 Log.d(TAG, "Encryption key stored successfully")
                                 callback.onSuccess("Key stored successfully")
@@ -217,13 +210,12 @@ class AndroidKeystoreProvider(
                 }
 
                 // Check if we have a stored key
-                val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-                val encryptedKeyB64 = prefs.getString(ENCRYPTED_KEY_PREF, null)
-
-                if (encryptedKeyB64 == null) {
+                val keyFile = File(context.filesDir, ENCRYPTED_KEY_FILE)
+                if (!keyFile.exists()) {
                     callback.onError(Exception("No encryption key found"))
                     return@post
                 }
+                val encryptedKeyB64 = keyFile.readText()
 
                 // Set up KeyStore
                 val keyStore = KeyStore.getInstance("AndroidKeyStore")
@@ -324,9 +316,12 @@ class AndroidKeystoreProvider(
 
     override fun clearKeys() {
         try {
-            // Clear from SharedPreferences
-            val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit().remove(ENCRYPTED_KEY_PREF).apply()
+            // Clear from private file storage
+            val keyFile = File(context.filesDir, ENCRYPTED_KEY_FILE)
+            if (keyFile.exists()) {
+                keyFile.delete()
+                Log.d(TAG, "Removed encryption key from private storage")
+            }
 
             // Remove from Android Keystore
             val keyStore = KeyStore.getInstance("AndroidKeyStore")

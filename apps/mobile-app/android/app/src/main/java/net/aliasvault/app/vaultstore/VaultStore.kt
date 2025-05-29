@@ -394,9 +394,9 @@ class VaultStore(
         dbConnection?.setTransactionSuccessful()
         dbConnection?.endTransaction()
 
-        // Create a temporary file to store the database
+        // Create a temporary file in app-specific storage
         val tempDbFile = File.createTempFile("temp_db", ".sqlite")
-        tempDbFile.writeBytes(ByteArray(0)) // Initialize empty file
+        tempDbFile.deleteOnExit() // Ensure cleanup on JVM exit
 
         try {
             // Attach the temporary file as target database
@@ -444,8 +444,11 @@ class VaultStore(
             Log.e(TAG, "Error exporting and encrypting database", e)
             throw e
         } finally {
-            // Remove the temporary file
-            tempDbFile.delete()
+            // Securely delete the temporary file
+            if (tempDbFile.exists()) {
+                tempDbFile.setWritable(true, true) // Temporarily enable write for deletion
+                tempDbFile.delete()
+            }
         }
     }
 
@@ -842,8 +845,9 @@ class VaultStore(
             // Decode the base64 data
             val decryptedDbData = Base64.decode(decryptedDbBase64, Base64.NO_WRAP)
 
-            // Create a temporary file to store the decrypted database
+            // Create a temporary file in app-specific storage
             tempDbFile = File.createTempFile("temp_db", ".sqlite")
+            tempDbFile.deleteOnExit() // Ensure cleanup on JVM exit
             tempDbFile.writeBytes(decryptedDbData)
 
             // Close any existing connection if it exists
@@ -903,8 +907,13 @@ class VaultStore(
             Log.e(TAG, "Error setting up database with decrypted data", e)
             throw e
         } finally {
-            // Clean up temporary file
-            tempDbFile?.delete()
+            // Securely delete the temporary file
+            tempDbFile?.let {
+                if (it.exists()) {
+                    it.setWritable(true, true) // Temporarily enable write for deletion
+                    it.delete()
+                }
+            }
         }
     }
 

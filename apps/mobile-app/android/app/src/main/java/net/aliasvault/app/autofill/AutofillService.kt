@@ -42,11 +42,6 @@ class AutofillService : AutofillService() {
         private const val TAG = "AliasVaultAutofill"
     }
 
-    /**
-     * The credential matcher.
-     */
-    private val credentialMatcher = CredentialMatcher()
-
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
@@ -127,7 +122,7 @@ class AutofillService : AutofillService() {
 
                             // Filter credentials based on app/website info
                             val filteredCredentials = if (appInfo != null) {
-                                credentialMatcher.filterCredentialsByAppInfo(result, appInfo)
+                                CredentialMatcher.filterCredentialsByAppInfo(result, appInfo)
                             } else {
                                 result
                             }
