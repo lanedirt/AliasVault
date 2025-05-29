@@ -77,6 +77,33 @@ jobs:
             --output-dir ./build \
             --platform ios
 
+      - name: Build JS bundle (Android - Expo)
+        run: |
+          mkdir -p build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform android
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Run Android Unit Tests
+        run: |
+          cd android
+          ./gradlew testDebugUnitTest
+
+      - name: Build Android App
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
       - name: Run tests
         run: npm run test
 
