@@ -304,7 +304,7 @@ export default function CredentialsScreen() : React.ReactNode {
           initialNumToRender={14}
           maxToRenderPerBatch={14}
           windowSize={7}
-          removeClippedSubviews={true}
+          removeClippedSubviews={false}
           ListHeaderComponent={
             <ThemedView>
               <TitleContainer title="Credentials" />
