@@ -1,21 +1,7 @@
 import { Buffer } from 'buffer';
 
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Animated,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Dimensions,
-  Alert
-} from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Alert } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -108,8 +94,71 @@ export default function LoginScreen() : React.ReactNode {
    * @param refreshToken - The refresh token to use for the vault
    * @param vaultResponseJson - The vault response
    * @param passwordHashBase64 - The password hash base64
+   * @param initiateLoginResponse - The initiate login response
    */
   const processVaultResponse = async (
+    token: string,
+    refreshToken: string,
+    vaultResponseJson: VaultResponse,
+    passwordHashBase64: string,
+    initiateLoginResponse: LoginResponse
+  ) : Promise<void> => {
+    // Get biometric display name
+    const biometricDisplayName = await authContext.getBiometricDisplayName();
+
+    // Show biometric prompt
+    Alert.alert(
+      `Enable ${biometricDisplayName}?`,
+      `Would you like to use ${biometricDisplayName} to unlock your vault?`,
+      [
+        {
+          text: 'No',
+          style: 'destructive',
+          /**
+           * Handle disabling biometric authentication
+           */
+          onPress: async () : Promise<void> => {
+            await authContext.setAuthMethods(['password']);
+            await continueProcessVaultResponse(
+              token,
+              refreshToken,
+              vaultResponseJson,
+              passwordHashBase64,
+              initiateLoginResponse
+            );
+          }
+        },
+        {
+          text: 'Yes',
+          isPreferred: true,
+          /**
+           * Handle enabling biometric authentication
+           */
+          onPress: async () : Promise<void> => {
+            await authContext.setAuthMethods(['faceid', 'password']);
+            await continueProcessVaultResponse(
+              token,
+              refreshToken,
+              vaultResponseJson,
+              passwordHashBase64,
+              initiateLoginResponse
+            );
+          }
+        }
+      ]
+    );
+  };
+
+  /**
+   * Continue processing the vault response after biometric choice
+   * @param token - The token to use for the vault
+   * @param refreshToken - The refresh token to use for the vault
+   * @param vaultResponseJson - The vault response
+   * @param passwordHashBase64 - The password hash base64
+   * @param initiateLoginResponse - The initiate login response
+   * @param encryptionKeyDerivationParams - The encryption key derivation parameters
+   */
+  const continueProcessVaultResponse = async (
     token: string,
     refreshToken: string,
     vaultResponseJson: VaultResponse,
@@ -122,6 +171,7 @@ export default function LoginScreen() : React.ReactNode {
       salt: initiateLoginResponse.salt,
     };
 
+    // Set auth tokens, store encryption key and key derivation params, and initialize database
     await authContext.setAuthTokens(credentials.username, token, refreshToken);
     await dbContext.storeEncryptionKey(passwordHashBase64);
     await dbContext.storeEncryptionKeyDerivationParams(encryptionKeyDerivationParams);
@@ -240,7 +290,7 @@ export default function LoginScreen() : React.ReactNode {
         setError(err.message);
       } else {
         console.error('Login error:', err);
-        setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
+        setError('An error occurred while logging in. Please try again later or contact support if the problem persists.');
       }
       setIsLoading(false);
       setLoginStatus(null);
