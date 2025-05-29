@@ -25,7 +25,6 @@ import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
-import { AndroidHeader } from '@/components/ui/AndroidHeader';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -311,7 +310,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
       setIsLoading(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch]);
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsLoading, isSaveDisabled]);
 
   /**
    * Generate a random username.
