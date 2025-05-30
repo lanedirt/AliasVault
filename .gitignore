@@ -419,3 +419,6 @@ temp
 # to check them in as it's not needed for the applications to actually run.
 **/*.js.map
 **/*.mjs.map
+
+# Android keystore file (for publishing to Google Play)
+*.keystore

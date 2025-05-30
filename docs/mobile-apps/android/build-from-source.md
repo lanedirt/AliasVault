@@ -52,3 +52,30 @@ adb devices
 adb -s [device-id] install android/app/build/outputs/apk/release/app-release.apk
 ```
 
+6. For publishing to Google Play:
+Create a local gradle file in your user directory where the keystore credentials will be placed
+```bash
+nano ~/.gradle/gradle.properties
+```
+
+Input the following contents and input the correct password:
+
+```bash
+ALIASVAULT_UPLOAD_STORE_FILE=aliasvault-upload-key.keystore     # Path to the keystore file
+ALIASVAULT_UPLOAD_KEY_ALIAS=aliasvault-key-alias                # Replace with value of the `keystore.keyAlias`
+ALIASVAULT_UPLOAD_STORE_PASSWORD=*****                  # Replace with the password to the keystore
+ALIASVAULT_UPLOAD_KEY_PASSWORD=*****                    # Replace with the password to the keystore
+```
+
+Then create the bundle for upload to Google Play:
+
+```bash
+cd android
+./gradlew app:bundleRelease
+```
+
+The resulting .aapb file will be available in:
+
+```bash
+app/build/outputs/bundle/release
+```

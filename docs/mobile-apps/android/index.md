@@ -11,8 +11,8 @@ In order to install the Android iOS app, see the options below.
 ## Download from App Store
 You can download the AliasVault mobile app via the Google Play store.
 
-1. Go to the [Google Play Store](#todo)
-2. Click on the "Get" button
+1. Go to the [Google Play Store](https://play.google.com/store/apps/details?id=net.aliasvault.app)
+2. Click on the "Install" button
 3. The app will be installed. Open the app and follow the instructions.
 
 ## Build from Source

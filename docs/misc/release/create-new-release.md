@@ -27,6 +27,7 @@ Follow the steps in the checklist below to prepare a new release.
 - [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
 - [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
 - [ ] Update `./apps/mobile-app/ios/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the iOS App Store.
+- [ ] Update `./apps/mobile-app/android/app/build.gradle` and set the version in `versionName` and increase the build number in `versionCode`.
 
 ## Docker Images
 If docker containers have been added or removed:
