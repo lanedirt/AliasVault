@@ -13,7 +13,7 @@ Follow the steps in the checklist below to prepare a new release.
 - [ ] Update ./apps/server/Shared/AliasVault.Shared.Core/AppInfo.cs and update major/minor/patch to the new version. This version will be shown in the client and admin app footer. This version should be equal to the git release tag.
 - [ ] Update ./apps/server/Shared/AliasVault.Shared.Core/AppInfo.cs with the minimum supported client versions.
     - In case API output breaks earlier client versions and/or this version of the client/API will upgrade the client vault model to a new major version.
-- [ ] Update ./install.sh `@version` in header if the install script has changed. This allows the install script to self-update when running the `./install.sh update` command on default installations.
+- [ ] Update ./install.sh `@version` in header ONLY if the install script content has changed since the last release. This allows the install script to self-update when running the `./install.sh update` command on default installations.
 
 ## Versioning browser extensions
 - [ ] Update `./apps/browser-extension/wxt.config.ts` with the new version for the extension. This will be shown in the browser extension web stores. This version should be equal to the git release tag.
