@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      build_android_signed:
+        description: 'Build signed Android APK/AAB'
+        required: true
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -129,19 +135,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Decode keystore
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
-
-      - name: Configure signing
-        run: |
-          cat >> android/gradle.properties <<EOF
-          ALIASVAULT_UPLOAD_STORE_FILE=keystore.jks
-          ALIASVAULT_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
-          ALIASVAULT_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
-          EOF
-
       - name: Build JS bundle (Android - Expo)
         run: |
           mkdir -p build
@@ -162,6 +155,56 @@ jobs:
           name: android-test-reports
           path: apps/mobile-app/android/app/build/reports/tests/testDebugUnitTest/
           retention-days: 7
+
+  build-android-signed:
+    needs: setup
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_android_signed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
+      - name: Configure signing
+        run: |
+          cat >> android/gradle.properties <<EOF
+          ALIASVAULT_UPLOAD_STORE_FILE=keystore.jks
+          ALIASVAULT_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          ALIASVAULT_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Build JS bundle (Android - Expo)
+        run: |
+          mkdir -p build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform android
 
       - name: Build Signed APK & AAB
         run: |
