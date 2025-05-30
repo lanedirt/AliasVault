@@ -125,7 +125,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-docker:
-    needs: [upload-install-script, package-browser-extensions, build-android-release]
     runs-on: ubuntu-latest
     permissions:
       contents: read
