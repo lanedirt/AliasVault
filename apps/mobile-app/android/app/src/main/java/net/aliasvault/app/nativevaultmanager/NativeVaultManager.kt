@@ -496,8 +496,15 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun openAutofillSettingsPage(promise: Promise) {
         try {
+            // Note: we add a 2 to the packageUri on purpose because if we don't,
+            // when the user has configured AliasVault as the autofill service already
+            // this action won't open the settings anymore, making the button in the UI
+            // become broken and not do anything anymore. This is not good UX so instead
+            // we append a "2" so Android will always open the page as it does not equal
+            // the actual chosen option.
+            val packageUri = "package:${reactApplicationContext.packageName}2".toUri()
             val autofillIntent = Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-                data = "package:${reactApplicationContext.packageName}".toUri()
+                data = packageUri
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
 
