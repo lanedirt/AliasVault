@@ -272,6 +272,16 @@ jobs:
           cd ios
           pod install
 
+      - name: Write CI code signing override
+        run: |
+          cat <<EOF > ios/ci.xcconfig
+          CODE_SIGN_STYLE = Manual
+          DEVELOPMENT_TEAM = 8PHW4HN3F7
+          PROVISIONING_PROFILE_SPECIFIER = AliasVault_GitHub_Actions_Provisioning
+          CODE_SIGN_IDENTITY = Apple Distribution
+          EOF
+
+
       - name: Build iOS IPA
         env:
           IDEFileSystemSynchronizedGroupsAreEnabled: NO
@@ -281,28 +291,22 @@ jobs:
           XCODE_ARCHIVE_PATH: AliasVault.xcarchive
           XCODE_EXPORT_PATH: ./build
           XCODE_SKIP_FILESYSTEM_SYNC: true
-          XCODE_PROVISIONING_PROFILE_SPECIFIER: AliasVault_GitHub_Actions_Provisioning
-          XCODE_DEVELOPMENT_TEAM: 8PHW4HN3F7
-          XCODE_CODE_SIGN_IDENTITY: "Apple Distribution"
         run: |
           cd ios
-          xcodebuild clean -workspace $XCODE_WORKSPACE \
-            -scheme $XCODE_SCHEME \
-            -configuration $XCODE_CONFIGURATION
-          xcodebuild -workspace $XCODE_WORKSPACE \
-            -scheme $XCODE_SCHEME \
-            -configuration $XCODE_CONFIGURATION \
-            -archivePath $XCODE_ARCHIVE_PATH \
+          xcodebuild clean -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration "$XCODE_CONFIGURATION"
+          xcodebuild -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration "$XCODE_CONFIGURATION" \
+            -archivePath "$XCODE_ARCHIVE_PATH" \
             -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY=$XCODE_CODE_SIGN_IDENTITY \
-            PROVISIONING_PROFILE_SPECIFIER=$XCODE_PROVISIONING_PROFILE_SPECIFIER \
-            DEVELOPMENT_TEAM=$XCODE_DEVELOPMENT_TEAM \
+            -xcconfig ci.xcconfig \
             archive
           xcodebuild -exportArchive \
-            -archivePath $XCODE_ARCHIVE_PATH \
+            -archivePath "$XCODE_ARCHIVE_PATH" \
             -exportOptionsPlist ../exportOptions.plist \
-            -exportPath $XCODE_EXPORT_PATH
-
+            -exportPath "$XCODE_EXPORT_PATH"
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
