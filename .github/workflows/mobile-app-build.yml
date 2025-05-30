@@ -252,35 +252,15 @@ jobs:
       - name: Install Fastlane
         run: gem install fastlane
 
-      - name: Decode Certificate
+      - name: Create ASC private key file
         run: |
-          echo "${{ secrets.IOS_CERTIFICATE_BASE64 }}" | base64 --decode > certificate.p12
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          security import certificate.p12 -k build.keychain -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-
-      - name: Decode Provisioning Profile
-        run: |
-          echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > AliasVault.mobileprovision
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp AliasVault.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          mkdir -p $RUNNER_TEMP/asc
+          echo "${{ secrets.ASC_PRIVATE_KEY_BASE64 }}" | base64 --decode > $RUNNER_TEMP/asc/AuthKey.p8
 
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
-
-      - name: Write CI code signing override
-        run: |
-          cat <<EOF > ios/ci.xcconfig
-          CODE_SIGN_STYLE = Manual
-          DEVELOPMENT_TEAM = 8PHW4HN3F7
-          PROVISIONING_PROFILE_SPECIFIER = AliasVault_GitHub_Actions_Provisioning
-          CODE_SIGN_IDENTITY = Apple Distribution
-          EOF
-
 
       - name: Build iOS IPA
         env:
@@ -301,7 +281,10 @@ jobs:
             -configuration "$XCODE_CONFIGURATION" \
             -archivePath "$XCODE_ARCHIVE_PATH" \
             -destination 'generic/platform=iOS' \
-            -xcconfig ci.xcconfig \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath $RUNNER_TEMP/asc/AuthKey.p8 \
+            -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} \
             archive
           xcodebuild -exportArchive \
             -archivePath "$XCODE_ARCHIVE_PATH" \
