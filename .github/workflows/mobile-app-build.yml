@@ -12,6 +12,11 @@ on:
         required: true
         type: boolean
         default: false
+      build_ios_signed:
+        description: 'Build signed iOS IPA'
+        required: true
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -224,6 +229,71 @@ jobs:
         with:
           name: signed-aab
           path: apps/mobile-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
+
+  build-ios-signed:
+    needs: setup
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_ios_signed == 'true'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Decode Certificate
+        run: |
+          echo "${{ secrets.IOS_CERTIFICATE_BASE64 }}" | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+      - name: Decode Provisioning Profile
+        run: |
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > AliasVault.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp AliasVault.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build JS bundle (iOS - Expo)
+        run: |
+          mkdir -p build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform ios
+
+      - name: Build iOS IPA
+        run: |
+          cd ios
+          xcodebuild -workspace AliasVault.xcworkspace -scheme AliasVault -configuration Release -archivePath AliasVault.xcarchive archive
+          xcodebuild -exportArchive -archivePath AliasVault.xcarchive -exportOptionsPlist ../exportOptions.plist -exportPath ./build
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-ipa
+          path: apps/mobile-app/ios/build/AliasVault.ipa
           retention-days: 14
 
 
