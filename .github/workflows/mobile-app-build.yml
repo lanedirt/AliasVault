@@ -12,12 +12,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-react-native-app:
+  setup:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/mobile-app
-
     steps:
       - uses: actions/checkout@v4
 
@@ -69,6 +68,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-app-workspace
+          path: apps/mobile-app
+          retention-days: 1
+
+  build-ios:
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-app-workspace
+          path: apps/mobile-app
+
       - name: Build JS bundle (iOS - Expo)
         run: |
           mkdir -p build
@@ -77,19 +111,21 @@ jobs:
             --output-dir ./build \
             --platform ios
 
-      - name: Build JS bundle (Android - Expo)
-        run: |
-          mkdir -p build
-          npx expo export \
-            --dev \
-            --output-dir ./build \
-            --platform android
+  build-android:
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Run tests
-        run: npm run test
-
-      - name: Run linting
-        run: npm run lint
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -99,6 +135,20 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-app-workspace
+          path: apps/mobile-app
+
+      - name: Build JS bundle (Android - Expo)
+        run: |
+          mkdir -p build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform android
 
       - name: Run Android Unit Tests
         run: |
