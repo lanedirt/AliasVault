@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppInfo } from '@/utils/AppInfo';
 import { storage } from '#imports';
 import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import * as Yup from 'yup';
 
 type ApiOption = {
   label: string;
@@ -13,6 +14,38 @@ const DEFAULT_OPTIONS: ApiOption[] = [
   { label: 'Self-hosted', value: 'custom' }
 ];
 
+// Validation schema for URLs
+const urlSchema = Yup.object().shape({
+  apiUrl: Yup.string()
+    .url('Please enter a valid URL')
+    .required('API URL is required')
+    .test('is-valid-api-url', 'Please enter a valid API URL', (value: string | undefined) => {
+      if (!value) {
+        return true; // Allow empty for non-custom option
+      }
+      try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    }),
+  clientUrl: Yup.string()
+    .url('Please enter a valid URL')
+    .required('Client URL is required')
+    .test('is-valid-client-url', 'Please enter a valid client URL', (value: string | undefined) => {
+      if (!value) {
+        return true; // Allow empty for non-custom option
+      }
+      try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    })
+});
+
 /**
  * Auth settings page only shown when user is not logged in.
  */
@@ -21,6 +54,7 @@ const AuthSettings: React.FC = () => {
   const [customUrl, setCustomUrl] = useState<string>('');
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
   const [isGloballyEnabled, setIsGloballyEnabled] = useState<boolean>(true);
+  const [errors, setErrors] = useState<{ apiUrl?: string; clientUrl?: string }>({});
 
   useEffect(() => {
     /**
@@ -63,6 +97,9 @@ const AuthSettings: React.FC = () => {
     if (value !== 'custom') {
       await storage.setItem('local:apiUrl', '');
       await storage.setItem('local:clientUrl', '');
+      setCustomUrl('');
+      setCustomClientUrl('');
+      setErrors({});
     }
   };
 
@@ -72,17 +109,36 @@ const AuthSettings: React.FC = () => {
   const handleCustomUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) : Promise<void> => {
     const value = e.target.value;
     setCustomUrl(value);
-    await storage.setItem('local:apiUrl', value);
+
+    try {
+      await urlSchema.validateAt('apiUrl', { apiUrl: value });
+      setErrors(prev => ({ ...prev, apiUrl: undefined }));
+      await storage.setItem('local:apiUrl', value);
+    } catch (error: unknown) {
+      if (error instanceof Yup.ValidationError) {
+        setErrors(prev => ({ ...prev, apiUrl: error.message }));
+        // On error we revert back to the aliasvault.net official hosted instance.
+        await storage.setItem('local:apiUrl', AppInfo.DEFAULT_API_URL);
+      }
+    }
   };
 
   /**
    * Handle custom client URL change
-   * @param e
    */
   const handleCustomClientUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) : Promise<void> => {
     const value = e.target.value;
     setCustomClientUrl(value);
-    await storage.setItem('local:clientUrl', value);
+
+    try {
+      await urlSchema.validateAt('clientUrl', { clientUrl: value });
+      setErrors(prev => ({ ...prev, clientUrl: undefined }));
+      await storage.setItem('local:clientUrl', value);
+    } catch (error: unknown) {
+      if (error instanceof Yup.ValidationError) {
+        setErrors(prev => ({ ...prev, clientUrl: error.message }));
+      }
+    }
   };
 
   /**
@@ -133,8 +189,11 @@ const AuthSettings: React.FC = () => {
               value={customClientUrl}
               onChange={handleCustomClientUrlChange}
               placeholder="https://my-aliasvault-instance.com"
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              className={`w-full bg-gray-50 border ${errors.clientUrl ? 'border-red-500' : 'border-gray-300'} text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white`}
             />
+            {errors.clientUrl && (
+              <p className="mt-1 text-sm text-red-500">{errors.clientUrl}</p>
+            )}
           </div>
           <div className="mb-6">
             <label htmlFor="custom-api-url" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
@@ -146,8 +205,11 @@ const AuthSettings: React.FC = () => {
               value={customUrl}
               onChange={handleCustomUrlChange}
               placeholder="https://my-aliasvault-instance.com/api"
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              className={`w-full bg-gray-50 border ${errors.apiUrl ? 'border-red-500' : 'border-gray-300'} text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white`}
             />
+            {errors.apiUrl && (
+              <p className="mt-1 text-sm text-red-500">{errors.apiUrl}</p>
+            )}
           </div>
         </>
       )}
