@@ -127,6 +127,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: apps/mobile-app/package-lock.json
 
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
