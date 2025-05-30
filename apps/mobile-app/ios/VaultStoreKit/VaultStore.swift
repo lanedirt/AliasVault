@@ -21,7 +21,7 @@ public class VaultStore {
     internal let userDefaults = UserDefaults(suiteName: VaultConstants.userDefaultsSuite)!
 
     /// The enabled authentication methods for the vault.
-    internal var enabledAuthMethods: AuthMethods = VaultConstants.defaultAuthMethods
+    internal var enabledAuthMethods: AuthMethods = []
 
     /// The auto-lock timeout for the vault.
     internal var autoLockTimeout: Int = VaultConstants.defaultAutoLockTimeout

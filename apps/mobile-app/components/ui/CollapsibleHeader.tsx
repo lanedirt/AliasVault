@@ -26,6 +26,8 @@ type CollapsibleHeaderProps = {
 
 /**
  * Collapsible header component.
+ * For iOS: Shows a collapsible header with blur effect
+ * For Android: Returns null and uses native header instead
  */
 export function CollapsibleHeader({
   title,
@@ -37,6 +39,11 @@ export function CollapsibleHeader({
   const colors = useColors();
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
+
+  // For Android, let the native header handle it. We do add a padding to the top of the screen to account for the status bar.
+  if (Platform.OS === 'android') {
+    return null;
+  }
 
   // Calculate header opacity and transforms based on scroll
   const headerOpacity = scrollY.interpolate({
@@ -58,16 +65,11 @@ export function CollapsibleHeader({
       outputRange: [-20, 0],
     });
 
-  const headerBackground = headerOpacity.interpolate({
-    inputRange: [0, 1],
-    outputRange: [colors.background, colors.accentBackground],
-  });
-
   const styles = StyleSheet.create({
     floatingHeader: {
       alignItems: 'flex-end',
       flexDirection: 'row',
-      height: Platform.OS === 'ios' ? insets.top + 44 : 64,
+      height: insets.top + 44,
       justifyContent: 'center',
       left: 0,
       overflow: 'hidden',
@@ -78,14 +80,14 @@ export function CollapsibleHeader({
     },
     floatingTitle: {
       color: colors.text,
-      fontSize: Platform.OS === 'ios' ? 20 : 17,
+      fontSize: 20,
       fontWeight: '600',
       marginTop: insets.top,
       textAlign: 'center',
     },
     floatingTitleContainer: {
       flex: 1,
-      height: Platform.OS === 'ios' ? insets.top + 44 : 64,
+      height: insets.top + 44,
       justifyContent: 'center',
     },
     headerBorder: {
@@ -97,7 +99,7 @@ export function CollapsibleHeader({
       right: 0,
     },
     headerButton: {
-      bottom: Platform.OS === 'ios' ? 6 : 16,
+      bottom: 2,
       padding: 4,
       position: 'absolute',
     },
@@ -123,22 +125,14 @@ export function CollapsibleHeader({
           },
         ]}
       >
-        {Platform.OS === 'ios' ? (
-          <Animated.View style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}>
-            <AnimatedBlurView
-              tint={colorScheme === 'dark' ? 'dark' : 'light'}
-              intensity={colorScheme === 'dark' ? 80 : 100}
-              style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackground }]}
-            />
-            <View style={styles.headerBorder} />
-          </Animated.View>
-        ) : (
-          <Animated.View
-            style={[StyleSheet.absoluteFill, { backgroundColor: headerBackground }]}
-          >
-            <View style={styles.headerBorder} />
-          </Animated.View>
-        )}
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: headerOpacity }]}>
+          <AnimatedBlurView
+            tint={colorScheme === 'dark' ? 'dark' : 'light'}
+            intensity={colorScheme === 'dark' ? 80 : 100}
+            style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackground }]}
+          />
+          <View style={styles.headerBorder} />
+        </Animated.View>
 
         <Animated.View
           style={[

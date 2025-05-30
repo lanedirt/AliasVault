@@ -40,7 +40,7 @@ extension VaultStore {
         // Clear the cache to remove all in-memory data
         self.encryptionKey = nil
         self.dbConnection = nil
-        self.enabledAuthMethods = VaultConstants.defaultAuthMethods
+        self.enabledAuthMethods = []
         self.autoLockTimeout = VaultConstants.defaultAutoLockTimeout
         self.keyDerivationParams = nil
     }

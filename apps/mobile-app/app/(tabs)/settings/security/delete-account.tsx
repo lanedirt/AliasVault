@@ -1,11 +1,9 @@
-import { StyleSheet, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import srp from 'secure-remote-password/client';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
@@ -15,13 +13,14 @@ import { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse } from '@/u
 import { DeleteAccountRequest } from '@/utils/types/webapi/DeleteAccountRequest';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Delete account screen.
  */
 export default function DeleteAccountScreen(): React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
   const { username, verifyPassword, logout } = useAuth();
 
@@ -35,16 +34,6 @@ export default function DeleteAccountScreen(): React.ReactNode {
     button: {
       marginTop: 16,
     },
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 16,
-      paddingTop: insets.top,
-    },
-    contentContainer: {
-      paddingBottom: 40,
-    },
     form: {
       backgroundColor: colors.accentBackground,
       borderColor: colors.accentBorder,
@@ -53,12 +42,10 @@ export default function DeleteAccountScreen(): React.ReactNode {
       marginTop: 20,
       padding: 20,
     },
-    header: {
-      paddingTop: 16,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+      marginBottom: 16,
     },
     inputContainer: {
       marginTop: 10,
@@ -238,16 +225,11 @@ export default function DeleteAccountScreen(): React.ReactNode {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ThemedView style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.contentContainer}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.header}>
-              <ThemedText style={styles.headerText}>
-                Deleting your account will immediately and permanently delete all of your data.
-              </ThemedText>
-            </View>
+        <ThemedContainer>
+          <ThemedScrollView>
+            <ThemedText style={styles.headerText}>
+              Deleting your account will immediately and permanently delete all of your data.
+            </ThemedText>
             <UsernameDisplay />
             <View style={styles.form}>
               {step === 'username' ? (
@@ -297,8 +279,8 @@ export default function DeleteAccountScreen(): React.ReactNode {
                 </>
               )}
             </View>
-          </ScrollView>
-        </ThemedView>
+          </ThemedScrollView>
+        </ThemedContainer>
       </KeyboardAvoidingView>
     </>
   );

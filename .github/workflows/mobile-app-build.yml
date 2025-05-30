@@ -6,18 +6,28 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      build_android_signed:
+        description: 'Build signed Android APK/AAB'
+        required: true
+        type: boolean
+        default: false
+      build_ios_signed:
+        description: 'Build signed iOS IPA'
+        required: true
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-react-native-app:
+  setup:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/mobile-app
-
     steps:
       - uses: actions/checkout@v4
 
@@ -69,6 +79,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
+
+  build-ios:
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build JS bundle (iOS - Expo)
         run: |
           mkdir -p build
@@ -77,8 +112,190 @@ jobs:
             --output-dir ./build \
             --platform ios
 
-      - name: Run tests
-        run: npm run test
+  build-android:
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Run linting
-        run: npm run lint
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build JS bundle (Android - Expo)
+        run: |
+          mkdir -p build
+          npx expo export \
+            --dev \
+            --output-dir ./build \
+            --platform android
+
+      - name: Run Android Unit Tests
+        run: |
+          cd android
+          ./gradlew :app:testDebugUnitTest --tests "net.aliasvault.app.*"
+
+      - name: Upload Android Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports
+          path: apps/mobile-app/android/app/build/reports/tests/testDebugUnitTest/
+          retention-days: 7
+
+  build-android-signed:
+    needs: setup
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_android_signed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
+      - name: Configure signing
+        run: |
+          cat >> android/gradle.properties <<EOF
+          ALIASVAULT_UPLOAD_STORE_FILE=keystore.jks
+          ALIASVAULT_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          ALIASVAULT_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Build Signed APK & AAB
+        run: |
+          cd android
+          ./gradlew bundleRelease
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-apk
+          path: apps/mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-aab
+          path: apps/mobile-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
+
+  build-ios-signed:
+    needs: setup
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_ios_signed == 'true'
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Create ASC private key file
+        run: |
+          mkdir -p $RUNNER_TEMP/asc
+          echo "${{ secrets.ASC_PRIVATE_KEY_BASE64 }}" | base64 --decode > $RUNNER_TEMP/asc/AuthKey.p8
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+
+      - name: Build iOS IPA
+        env:
+          IDEFileSystemSynchronizedGroupsAreEnabled: NO
+          XCODE_WORKSPACE: AliasVault.xcworkspace
+          XCODE_SCHEME: AliasVault
+          XCODE_CONFIGURATION: Release
+          XCODE_ARCHIVE_PATH: AliasVault.xcarchive
+          XCODE_EXPORT_PATH: ./build
+          XCODE_SKIP_FILESYSTEM_SYNC: true
+        run: |
+          cd ios
+          xcodebuild clean -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration "$XCODE_CONFIGURATION"
+          xcodebuild -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration "$XCODE_CONFIGURATION" \
+            -archivePath "$XCODE_ARCHIVE_PATH" \
+            -destination 'generic/platform=iOS' \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath $RUNNER_TEMP/asc/AuthKey.p8 \
+            -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} \
+            archive
+          xcodebuild -exportArchive \
+            -archivePath "$XCODE_ARCHIVE_PATH" \
+            -exportOptionsPlist ../exportOptions.plist \
+            -exportPath "$XCODE_EXPORT_PATH"
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-ipa
+          path: apps/mobile-app/ios/build/AliasVault.ipa
+          retention-days: 14
+
+

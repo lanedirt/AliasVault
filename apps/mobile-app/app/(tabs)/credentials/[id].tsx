@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable } from 'react-native';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -17,6 +17,7 @@ import { EmailPreview } from '@/components/credentials/details/EmailPreview';
 import { TotpSection } from '@/components/credentials/details/TotpSection';
 import { useColors } from '@/hooks/useColorScheme';
 import emitter from '@/utils/EventEmitter';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Credential details screen.
@@ -45,8 +46,11 @@ export default function CredentialDetailsScreen() : React.ReactNode {
        */
       headerRight: () => (
         <View style={styles.headerRightContainer}>
-          <TouchableOpacity
-            onPress={handleEdit}
+          <Pressable
+            onPressIn={handleEdit}
+            android_ripple={{ color: 'lightgray' }}
+            pressRetentionOffset={100}
+            hitSlop={100}
             style={styles.headerRightButton}
           >
             <MaterialIcons
@@ -54,7 +58,7 @@ export default function CredentialDetailsScreen() : React.ReactNode {
               size={24}
               color={colors.primary}
             />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ),
     });
@@ -107,28 +111,30 @@ export default function CredentialDetailsScreen() : React.ReactNode {
   }
 
   return (
-    <ThemedScrollView>
-      <ThemedView style={styles.header}>
-        <CredentialIcon logo={credential.Logo} style={styles.logo} />
-        <View style={styles.headerText}>
-          <ThemedText type="title" style={styles.serviceName}>
-            {credential.ServiceName}
-          </ThemedText>
-          {credential.ServiceUrl && (
-            <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
-              <Text style={[styles.serviceUrl, { color: colors.primary }]}>
-                {credential.ServiceUrl}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ThemedView>
-      <EmailPreview email={credential.Alias.Email} />
-      <TotpSection credential={credential} />
-      <NotesSection credential={credential} />
-      <LoginCredentials credential={credential} />
-      <AliasDetails credential={credential} />
-    </ThemedScrollView>
+    <ThemedContainer>
+      <ThemedScrollView>
+        <ThemedView style={styles.header}>
+          <CredentialIcon logo={credential.Logo} style={styles.logo} />
+          <View style={styles.headerText}>
+            <ThemedText type="title" style={styles.serviceName}>
+              {credential.ServiceName}
+            </ThemedText>
+            {credential.ServiceUrl && (
+              <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
+                <Text style={[styles.serviceUrl, { color: colors.primary }]}>
+                  {credential.ServiceUrl}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ThemedView>
+        <EmailPreview email={credential.Alias.Email} />
+        <TotpSection credential={credential} />
+        <NotesSection credential={credential} />
+        <LoginCredentials credential={credential} />
+        <AliasDetails credential={credential} />
+      </ThemedScrollView>
+    </ThemedContainer>
   );
 }
 
@@ -137,8 +143,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
-    marginTop: 6,
-    padding: 16,
   },
   headerRightButton: {
     padding: 10,
@@ -155,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    borderRadius: 8,
+    borderRadius: 4,
     height: 48,
     width: 48,
   },

@@ -1,22 +1,21 @@
-import { StyleSheet, View, TouchableOpacity, Alert, ScrollView, RefreshControl, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useWebApi } from '@/context/WebApiContext';
 import { RefreshToken } from '@/utils/types/webapi/RefreshToken';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 /**
  * Active sessions screen.
  */
 export default function ActiveSessionsScreen() : React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
 
   const [refreshTokens, setRefreshTokens] = useState<RefreshToken[]>([]);
@@ -24,16 +23,6 @@ export default function ActiveSessionsScreen() : React.ReactNode {
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
-    contentContainer: {
-      paddingBottom: 40,
-    },
     detailText: {
       color: colors.textMuted,
       fontSize: 14,
@@ -55,9 +44,6 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       color: colors.textMuted,
       fontSize: 16,
       textAlign: 'center',
-    },
-    header: {
-      paddingTop: 16
     },
     headerText: {
       color: colors.textMuted,
@@ -175,9 +161,8 @@ export default function ActiveSessionsScreen() : React.ReactNode {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
+    <ThemedContainer>
+      <ThemedScrollView
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -187,11 +172,9 @@ export default function ActiveSessionsScreen() : React.ReactNode {
           />
         }
       >
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.
+        </ThemedText>
         <View style={styles.section}>
           {isLoading ? (
             <SkeletonLoader count={1} height={100} parts={3} />
@@ -216,7 +199,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
             ))
           )}
         </View>
-      </ScrollView>
-    </ThemedView>
+      </ThemedScrollView>
+    </ThemedContainer>
   );
 }

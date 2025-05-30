@@ -1,6 +1,6 @@
-import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { Resolver, useForm } from 'react-hook-form';
@@ -9,7 +9,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import * as Haptics from 'expo-haptics';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -21,9 +20,11 @@ import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { PasswordGenerator } from '@/utils/shared/password-generator';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
-import { credentialSchema } from '@/utils/validationSchema';
+import { credentialSchema } from '@/utils/ValidationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAuth } from '@/context/AuthContext';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -43,6 +44,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -205,6 +207,14 @@ export default function AddEditCredentialScreen() : React.ReactNode {
    * @param {Credential} data - The form data.
    */
   const onSubmit = useCallback(async (data: Credential) : Promise<void> => {
+    // Prevent multiple submissions
+    if (isSaveDisabled) {
+      return;
+    }
+
+    // Disable save button to prevent multiple submissions
+    setIsSaveDisabled(true);
+
     Keyboard.dismiss();
 
     setIsLoading(true);
@@ -300,36 +310,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
       setIsLoading(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch]);
-
-  /**
-   * Extract the service name from the service URL.
-   */
-  function extractServiceNameFromUrl(url: string): string {
-    try {
-      const urlObj = new URL(url);
-      const hostParts = urlObj.hostname.split('.');
-
-      // Remove common subdomains
-      const commonSubdomains = ['www', 'app', 'login', 'auth', 'account', 'portal'];
-      while (hostParts.length > 2 && commonSubdomains.includes(hostParts[0].toLowerCase())) {
-        hostParts.shift();
-      }
-
-      // For domains like google.com, return Google.com
-      if (hostParts.length <= 2) {
-        const domain = hostParts.join('.');
-        return domain.charAt(0).toUpperCase() + domain.slice(1);
-      }
-
-      // For domains like app.example.com, return Example.com
-      const mainDomain = hostParts.slice(-2).join('.');
-      return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
-    } catch {
-      // If URL parsing fails, return the original URL
-      return url;
-    }
-  }
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsLoading, isSaveDisabled]);
 
   /**
    * Generate a random username.
@@ -411,10 +392,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
             setIsLoading(false);
 
             /*
-             * Hard navigate back to the credentials list as the credential that was
-             * shown in the previous screen is now deleted.
+             * Navigate back to the root of the navigation stack.
+             * On Android, we need to go back twice since we're two levels deep.
+             * On iOS, this will dismiss the modal.
              */
-            router.replace('/credentials');
+            router.back();
+            router.back();
           }
         }
       ]
@@ -424,15 +407,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-      paddingTop: 0,
+      paddingTop: Platform.OS === 'ios' ? 52 : 0,
     },
     contentContainer: {
       paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 76 : 56,
+      paddingTop: 16,
     },
     deleteButton: {
       alignItems: 'center',
@@ -470,13 +449,18 @@ export default function AddEditCredentialScreen() : React.ReactNode {
     },
     headerRightButton: {
       padding: 10,
-      paddingRight: 0,
+    },
+    headerRightButtonDisabled: {
+      opacity: 0.5,
+    },
+    keyboardContainer: {
+      flex: 1,
     },
     modeButton: {
       alignItems: 'center',
       borderRadius: 6,
       flex: 1,
-      padding: 12,
+      padding: 8,
     },
     modeButtonActive: {
       backgroundColor: colors.primary,
@@ -505,49 +489,70 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 18,
       fontWeight: '600',
-      marginBottom: 16,
+      marginBottom: 10,
     },
   });
 
   // Set header buttons
   useEffect(() => {
-    navigation.setOptions({
-      title: isEditMode ? 'Edit Credential' : 'Add Credential',
-      /**
-       * Header left button.
-       */
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.headerLeftButton}
-        >
-          <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
-        </TouchableOpacity>
-      ),
-      /**
-       * Header right button.
-       */
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
-          style={styles.headerRightButton}
-        >
-          <MaterialIcons name="save" size={24} color={colors.primary} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton]);
+    if (Platform.OS === 'ios') {
+      navigation.setOptions({
+        /**
+         * Header left button.
+         */
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.headerLeftButton}
+          >
+            <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
+          </TouchableOpacity>
+        ),
+        /**
+         * Header right button.
+         */
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={handleSubmit(onSubmit)}
+            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
+            disabled={isSaveDisabled}
+          >
+            <MaterialIcons name="save" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        /**
+         * Header right button.
+         */
+        headerRight: () => (
+          <Pressable
+            onPress={handleSubmit(onSubmit)}
+            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
+            android_ripple={{ color: 'lightgray' }}
+            pressRetentionOffset={100}
+            hitSlop={100}
+            disabled={isSaveDisabled}
+          >
+            <MaterialIcons name="save" size={24} color={colors.primary} />
+          </Pressable>
+        ),
+      });
+    }
+  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton, styles.headerRightButtonDisabled, isSaveDisabled]);
 
   return (
     <>
+      <Stack.Screen options={{ title: isEditMode ? 'Edit Credential' : 'Add Credential' }} />
       {(isLoading) && (
         <LoadingOverlay status={syncStatus} />
       )}
       <KeyboardAvoidingView
-        style={styles.container}
+        style={styles.keyboardContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ThemedView style={styles.content}>
+        <ThemedContainer style={styles.container}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
             contentContainerStyle={styles.contentContainer}
@@ -691,7 +696,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
               </>
             )}
           </KeyboardAwareScrollView>
-        </ThemedView>
+        </ThemedContainer>
         <AliasVaultToast />
       </KeyboardAvoidingView>
     </>

@@ -5,6 +5,7 @@ import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
 
 /**
  * Credentials layout.
+ * @returns {React.ReactNode} The credentials layout component
  */
 export default function CredentialsLayout(): React.ReactNode {
   return (
@@ -12,7 +13,9 @@ export default function CredentialsLayout(): React.ReactNode {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: 'Credentials',
+          headerShown: Platform.OS === 'android',
+          ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen

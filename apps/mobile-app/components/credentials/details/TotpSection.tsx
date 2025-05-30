@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import * as OTPAuth from 'otpauth';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
@@ -69,12 +69,16 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
   const copyToClipboard = async (code: string): Promise<void> => {
     try {
       await Clipboard.setStringAsync(code);
-      Toast.show({
-        type: 'success',
-        text1: 'Copied to clipboard',
-        position: 'bottom',
-        visibilityTime: 2000,
-      });
+
+      if (Platform.OS !== 'android') {
+        // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
+        Toast.show({
+          type: 'success',
+          text1: 'Copied to clipboard',
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+      }
     } catch (error) {
       console.error('Failed to copy:', error);
     }
@@ -146,8 +150,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
       justifyContent: 'space-between',
     },
     container: {
-      marginTop: 16,
-      padding: 16,
+      paddingTop: 16,
     },
     content: {
       backgroundColor: colors.accentBackground,

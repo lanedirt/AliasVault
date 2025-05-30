@@ -1,24 +1,23 @@
-import { StyleSheet, View, ScrollView, RefreshControl, Platform } from 'react-native';
+import { StyleSheet, View, RefreshControl, Platform } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Toast from 'react-native-toast-message';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useWebApi } from '@/context/WebApiContext';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { AuthLogModel } from '@/utils/types/webapi/AuthLog';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { AuthEventType } from '@/utils/types/webapi/AuthEventType';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Auth logs screen.
  */
 export default function AuthLogsScreen() : React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const webApi = useWebApi();
 
   const [logs, setLogs] = useState<AuthLogModel[]>([]);
@@ -26,16 +25,6 @@ export default function AuthLogsScreen() : React.ReactNode {
   const [isRefreshing, setIsRefreshing] = useMinDurationLoading(false, 200);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
-    contentContainer: {
-      paddingBottom: 40,
-    },
     detailText: {
       color: colors.textMuted,
       fontSize: 14,
@@ -55,9 +44,6 @@ export default function AuthLogsScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 16,
       fontWeight: '600',
-    },
-    header: {
-      paddingTop: 16,
     },
     headerText: {
       color: colors.textMuted,
@@ -188,9 +174,8 @@ export default function AuthLogsScreen() : React.ReactNode {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
+    <ThemedContainer>
+      <ThemedScrollView
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -200,15 +185,13 @@ export default function AuthLogsScreen() : React.ReactNode {
           />
         }
       >
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Below you can find an overview of recent login attempts to your account.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Below you can find an overview of recent login attempts to your account.
+        </ThemedText>
         <View style={styles.section}>
           {renderContent()}
         </View>
-      </ScrollView>
-    </ThemedView>
+      </ThemedScrollView>
+    </ThemedContainer>
   );
 }

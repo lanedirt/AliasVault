@@ -20,7 +20,7 @@ type AuthContextType = {
   username: string | null;
   isOffline: boolean;
   getEnabledAuthMethods: () => Promise<AuthMethod[]>;
-  isFaceIDEnabled: () => Promise<boolean>;
+  isBiometricsEnabled: () => Promise<boolean>;
   setAuthTokens: (username: string, accessToken: string, refreshToken: string) => Promise<void>;
   initializeAuth: () => Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }>;
   login: () => Promise<void>;
@@ -34,15 +34,15 @@ type AuthContextType = {
   getBiometricDisplayName: () => Promise<string>;
   setOfflineMode: (isOffline: boolean) => void;
   verifyPassword: (password: string) => Promise<string | null>;
-  // iOS Autofill methods
-  shouldShowIosAutofillReminder: boolean;
-  markIosAutofillConfigured: () => Promise<void>;
+  // Autofill methods
+  shouldShowAutofillReminder: boolean;
+  markAutofillConfigured: () => Promise<void>;
   // Return URL methods
   returnUrl: { path: string; params?: object } | null;
   setReturnUrl: (url: { path: string; params?: object } | null) => void;
 }
 
-const IOS_AUTOFILL_CONFIGURED_KEY = 'ios_autofill_configured';
+const AUTOFILL_CONFIGURED_KEY = 'autofill_configured';
 
 /**
  * Auth context.
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [globalMessage, setGlobalMessage] = useState<string | null>(null);
-  const [shouldShowIosAutofillReminder, setShouldShowIosAutofillReminder] = useState(false);
+  const [shouldShowAutofillReminder, setShouldShowAutofillReminder] = useState(false);
   const [returnUrl, setReturnUrl] = useState<{ path: string; params?: object } | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const appState = useRef(AppState.currentState);
@@ -92,9 +92,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Check if Face ID is enabled based on enabled auth methods
+   * Check if biometrics is enabled based on enabled auth methods
    */
-  const isFaceIDEnabled = useCallback(async (): Promise<boolean> => {
+  const isBiometricsEnabled = useCallback(async (): Promise<boolean> => {
     const methods = await getEnabledAuthMethods();
     return methods.includes('faceid');
   }, [getEnabledAuthMethods]);
@@ -171,11 +171,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Ensure password is always included
     const methodsToSave = methods.includes('password') ? methods : [...methods, 'password'];
 
-    // Update iOS credentials manager
+    // Update native credentials manager
     try {
       await NativeVaultManager.setAuthMethods(methodsToSave);
     } catch (error) {
-      console.error('Failed to update iOS auth methods:', error);
+      console.error('Failed to update native auth methods:', error);
     }
   }, []);
 
@@ -184,10 +184,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const getBiometricDisplayName = useCallback(async (): Promise<string> => {
     try {
-      const hasFaceID = await LocalAuthentication.hasHardwareAsync();
+      const hasBiometrics = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
 
-      if (!hasFaceID || !enrolled) {
+      // For Android, we use the term "Biometrics" for facial recognition and fingerprint.
+      if (Platform.OS === 'android') {
+        return 'Biometrics';
+      }
+
+      // For iOS, we check if the device has explicit Face ID or Touch ID support.
+      if (!hasBiometrics || !enrolled) {
         return 'Face ID / Touch ID';
       }
 
@@ -331,41 +337,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isVaultUnlocked, pathname]);
 
   /**
-   * Load iOS Autofill state from storage
+   * Load autofill state from storage
    */
-  const loadIosAutofillState = useCallback(async () => {
-    if (Platform.OS !== 'ios') {
-      setShouldShowIosAutofillReminder(false);
-      return;
-    }
-
-    const configured = await AsyncStorage.getItem(IOS_AUTOFILL_CONFIGURED_KEY);
-    setShouldShowIosAutofillReminder(configured !== 'true');
+  const loadAutofillState = useCallback(async () => {
+    const configured = await AsyncStorage.getItem(AUTOFILL_CONFIGURED_KEY);
+    setShouldShowAutofillReminder(configured !== 'true');
   }, []);
 
   /**
-   * Mark iOS Autofill as configured
+   * Mark autofill as configured for the current platform
    */
-  const markIosAutofillConfigured = useCallback(async () => {
-    await AsyncStorage.setItem(IOS_AUTOFILL_CONFIGURED_KEY, 'true');
-    setShouldShowIosAutofillReminder(false);
+  const markAutofillConfigured = useCallback(async () => {
+    await AsyncStorage.setItem(AUTOFILL_CONFIGURED_KEY, 'true');
+    setShouldShowAutofillReminder(false);
   }, []);
 
-  // Load iOS Autofill state on mount
+  // Load autofill state on mount
   useEffect(() => {
-    loadIosAutofillState();
-  }, [loadIosAutofillState]);
+    loadAutofillState();
+  }, [loadAutofillState]);
 
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
     username,
     globalMessage,
-    shouldShowIosAutofillReminder,
+    shouldShowAutofillReminder,
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
-    isFaceIDEnabled,
+    isBiometricsEnabled,
     setAuthTokens,
     initializeAuth,
     login,
@@ -376,7 +377,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
-    markIosAutofillConfigured,
+    markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
     setOfflineMode: setIsOffline,
@@ -385,11 +386,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInitialized,
     username,
     globalMessage,
-    shouldShowIosAutofillReminder,
+    shouldShowAutofillReminder,
     returnUrl,
     isOffline,
     getEnabledAuthMethods,
-    isFaceIDEnabled,
+    isBiometricsEnabled,
     setAuthTokens,
     initializeAuth,
     login,
@@ -400,7 +401,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
-    markIosAutofillConfigured,
+    markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
   ]);

@@ -28,7 +28,9 @@ extension VaultStore {
             throw NSError(domain: "VaultStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "No encrypted database found"])
         }
 
-        let encryptedDbData = Data(base64Encoded: encryptedDbBase64)!
+        guard let encryptedDbData = Data(base64Encoded: encryptedDbBase64) else {
+            throw NSError(domain: "VaultStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not base64 decode encrypted database"])
+        }
 
         do {
             let decryptedDbBase64 = try decrypt(data: encryptedDbData)

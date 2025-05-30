@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Auto-lock screen.
@@ -40,13 +40,6 @@ export default function AutoLockScreen() : React.ReactNode {
   ];
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      padding: 16,
-      paddingBottom: 0,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
@@ -62,7 +55,7 @@ export default function AutoLockScreen() : React.ReactNode {
     optionContainer: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
-      margin: 16,
+      marginTop: 16,
     },
     optionLast: {
       borderBottomWidth: 0,
@@ -79,13 +72,11 @@ export default function AutoLockScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ThemedScrollView>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
+        </ThemedText>
         <View style={styles.optionContainer}>
           {timeoutOptions.map((option, index) => {
             const isLast = index === timeoutOptions.length - 1;
@@ -107,6 +98,6 @@ export default function AutoLockScreen() : React.ReactNode {
           })}
         </View>
       </ThemedScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

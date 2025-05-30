@@ -34,6 +34,7 @@ export interface Spec extends TurboModule {
   setAutoLockTimeout(timeout: number): Promise<void>;
   getAutoLockTimeout(): Promise<number>;
   getAuthMethods(): Promise<string[]>;
+  openAutofillSettingsPage(): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NativeVaultManager');

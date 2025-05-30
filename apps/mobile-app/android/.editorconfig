@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+max_line_length = 160
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+ktlint_standard_no-wildcard-imports = true
+ktlint_standard_filename = true
+ktlint_standard_trailing-comma-on-call-site = true
+ktlint_standard_trailing-comma-on-declaration-site = true
+ktlint_standard_import-ordering = true
+ktlint_standard_comment-wrapping = true
+ktlint_standard_annotation = true
+ktlint_standard_public-method-documentation = true
+
+# Detekt rules
+detekt.style.PublicFunctionDocumentation = enabled

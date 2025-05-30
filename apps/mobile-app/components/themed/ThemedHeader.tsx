@@ -26,20 +26,16 @@ export function ThemedHeader(): React.ReactNode {
     },
   });
 
-  if (Platform.OS === 'ios') {
-    return (
-      <View style={styles.header}>
-        <BlurView
-          tint={colorScheme === 'dark' ? 'dark' : 'light'}
-          intensity={colorScheme === 'dark' ? 90 : 100}
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackground }]}
-        />
-        <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
-      </View>
-    );
-  }
-
-  return null;
+  return (
+    <View style={styles.header}>
+      <BlurView
+        tint={colorScheme === 'dark' ? 'dark' : 'light'}
+        intensity={colorScheme === 'dark' ? 90 : 100}
+        style={[StyleSheet.absoluteFill, { backgroundColor: colors.headerBackgroundIos }]}
+      />
+      <View style={[styles.headerBorder, { backgroundColor: colors.headerBorder }]} />
+    </View>
+  );
 }
 
 /**
@@ -48,10 +44,10 @@ export function ThemedHeader(): React.ReactNode {
  * @returns {Object} The default header options
  */
 export const defaultHeaderOptions = {
-  headerTransparent: true,
   /**
-   * Header background component that provides consistent styling.
-   * @returns {React.ReactNode} The themed header background component
+   * On iOS, we want the header to be transparent and use our custom header background.
+   * On Android, we want to use the native header.
    */
-  headerBackground: (): React.ReactNode => <ThemedHeader />,
+  headerTransparent: Platform.OS === 'ios',
+  headerBackground: Platform.OS === 'ios' ? (): React.ReactNode => <ThemedHeader /> : undefined,
 };

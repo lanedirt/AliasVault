@@ -15,5 +15,4 @@ public struct VaultConstants {
     static let encryptionKeyDerivationParamsKey = "aliasvault_encryption_key_derivation_params"
 
     static let defaultAutoLockTimeout: Int = 3600 // 1 hour in seconds
-    static let defaultAuthMethods: AuthMethods = [.password, .faceID]
 }

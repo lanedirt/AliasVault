@@ -1,10 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-  <uses-permission android:name="android.permission.VIBRATE"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>
@@ -12,10 +10,16 @@
       <data android:scheme="https"/>
     </intent>
   </queries>
-  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:roundIcon="@drawable/ic_launcher" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true">
+  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true" android:usesCleartextTraffic="true">
     <meta-data android:name="expo.modules.updates.ENABLED" android:value="false"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
+    <service android:name=".autofill.AutofillService" android:permission="android.permission.BIND_AUTOFILL_SERVICE" android:exported="true">
+      <intent-filter>
+        <action android:name="android.service.autofill.AutofillService"/>
+      </intent-filter>
+      <meta-data android:name="android.autofill" android:resource="@xml/autofill_service"/>
+    </service>
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
@@ -28,19 +32,8 @@
         <data android:scheme="aliasvault"/>
         <data android:scheme="net.aliasvault.app"/>
         <data android:scheme="exp+aliasvault"/>
+        <data android:scheme="net.aliasvault.app"/>
       </intent-filter>
     </activity>
-    <service
-        android:name=".AutofillService"
-        android:permission="android.permission.BIND_AUTOFILL_SERVICE"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.service.autofill.AutofillService" />
-        </intent-filter>
-
-        <meta-data
-            android:name="android.autofill"
-            android:resource="@xml/autofill_service" />
-    </service>
   </application>
 </manifest>

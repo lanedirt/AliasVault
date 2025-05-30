@@ -114,7 +114,6 @@ extension VaultStore {
         let encryptedBase64String = encryptedBase64Data.base64EncodedString()
 
         try storeEncryptedDatabase(encryptedBase64String)
-        try storeMetadata(getVaultMetadata()!)
 
         try FileManager.default.removeItem(at: tempDbPath)
     }
@@ -235,10 +234,10 @@ extension VaultStore {
                 let aliasCreatedAtString = row[26] as? String,
                 let aliasUpdatedAtString = row[27] as? String,
                 let aliasIsDeletedInt64 = row[28] as? Int64,
-               let aliasCreatedAt = parseDateString(aliasCreatedAtString),
-               let aliasUpdatedAt = parseDateString(aliasUpdatedAtString),
+                let aliasCreatedAt = parseDateString(aliasCreatedAtString),
+                let aliasUpdatedAt = parseDateString(aliasUpdatedAtString),
                 let aliasBirthDateString = row[24] as? String,
-               let aliasBirthDate = parseDateString(aliasBirthDateString) {
+                let aliasBirthDate = parseDateString(aliasBirthDateString) {
 
                 let aliasIsDeleted = aliasIsDeletedInt64 == 1
 

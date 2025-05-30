@@ -13,6 +13,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { IconSymbolName } from '@/components/ui/IconSymbolName';
 import emitter from '@/utils/EventEmitter';
 import { ThemedView } from '@/components/themed/ThemedView';
 
@@ -384,7 +385,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
               {associatedCredential && (
                 <>
                   <TouchableOpacity onPress={handleOpenCredential} style={styles.metadataCredential}>
-                    <IconSymbol size={16} name="key.fill" color={colors.primary} style={styles.metadataCredentialIcon} />
+                    <IconSymbol size={16} name={IconSymbolName.Key} color={colors.primary} style={styles.metadataCredentialIcon} />
                     <ThemedText style={[styles.metadataText, { color: colors.primary }]}>
                       {associatedCredential.ServiceName}
                     </ThemedText>

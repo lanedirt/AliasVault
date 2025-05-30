@@ -2,10 +2,8 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Ale
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState, useCallback } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useWebApi } from '@/context/WebApiContext';
 import { AppInfo } from '@/utils/AppInfo';
 import { useColors } from '@/hooks/useColorScheme';
@@ -15,6 +13,7 @@ import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Settings screen.
@@ -22,14 +21,13 @@ import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
-  const { getAuthMethodDisplay, shouldShowIosAutofillReminder } = useAuth();
+  const { getAuthMethodDisplay, shouldShowAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
   const [isFirstLoad, setIsFirstLoad] = useMinDurationLoading(true, 100);
-  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -125,16 +123,17 @@ export default function SettingsScreen() : React.ReactNode {
     router.push('/(tabs)/settings/ios-autofill');
   };
 
+  /**
+   * Handle the Android autofill press.
+   */
+  const handleAndroidAutofillPress = () : void => {
+    router.push('/(tabs)/settings/android-autofill');
+  };
+
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     scrollContent: {
       paddingBottom: 40,
-      paddingTop: 42,
+      paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     scrollView: {
       flex: 1,
@@ -212,7 +211,7 @@ export default function SettingsScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <CollapsibleHeader
         title="Settings"
         scrollY={scrollY}
@@ -243,7 +242,29 @@ export default function SettingsScreen() : React.ReactNode {
                 </View>
                 <View style={styles.settingItemContent}>
                   <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
-                  {shouldShowIosAutofillReminder && (
+                  {shouldShowAutofillReminder && (
+                    <View style={styles.settingItemBadge}>
+                      <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
+                    </View>
+                  )}
+                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                </View>
+              </TouchableOpacity>
+              <View style={styles.separator} />
+            </>
+          )}
+          {Platform.OS === 'android' && (
+            <>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={handleAndroidAutofillPress}
+              >
+                <View style={styles.settingItemIcon}>
+                  <Ionicons name="key-outline" size={20} color={colors.text} />
+                </View>
+                <View style={styles.settingItemContent}>
+                  <ThemedText style={styles.settingItemText}>Android Autofill</ThemedText>
+                  {shouldShowAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
                     </View>
@@ -324,6 +345,6 @@ export default function SettingsScreen() : React.ReactNode {
           <ThemedText style={styles.versionText}>App version {AppInfo.VERSION}</ThemedText>
         </View>
       </Animated.ScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

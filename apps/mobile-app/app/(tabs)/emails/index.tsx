@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated , Platform } from 'react-native';
 import { useNavigation } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
 import { useDb } from '@/context/DbContext';
@@ -14,12 +14,13 @@ import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useColors } from '@/hooks/useColorScheme';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { EmailCard } from '@/components/EmailCard';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useAuth } from '@/context/AuthContext';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+
 /**
  * Emails screen.
  */
@@ -155,15 +156,9 @@ export default function EmailsScreen() : React.ReactNode {
       justifyContent: 'center',
       padding: 20,
     },
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     contentContainer: {
-      paddingBottom: 40,
-      paddingTop: 42,
+      paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 10,
+      paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {
       color: colors.textMuted,
@@ -223,7 +218,7 @@ export default function EmailsScreen() : React.ReactNode {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <CollapsibleHeader
         title="Emails"
         scrollY={scrollY}
@@ -250,6 +245,6 @@ export default function EmailsScreen() : React.ReactNode {
         <TitleContainer title="Emails" />
         {renderContent()}
       </Animated.ScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

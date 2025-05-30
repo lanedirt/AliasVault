@@ -1,10 +1,8 @@
-import { StyleSheet, View, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
 import { ThemedButton } from '@/components/themed/ThemedButton';
@@ -12,6 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 
 /**
  * Change password screen.
@@ -19,7 +19,6 @@ import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
  */
 export default function ChangePasswordScreen(): React.ReactNode {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const authContext = useAuth();
   const { executeVaultPasswordChange, syncStatus } = useVaultMutate();
 
@@ -33,28 +32,16 @@ export default function ChangePasswordScreen(): React.ReactNode {
     button: {
       marginTop: 8,
     },
-    container: {
-      flex: 1,
-      marginTop: 42,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
-    contentContainer: {
-      paddingBottom: 40,
-    },
     form: {
       backgroundColor: colors.accentBackground,
       borderRadius: 10,
       marginTop: 20,
       padding: 16,
     },
-    header: {
-      paddingTop: 16,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+      marginBottom: 16,
     },
     inputContainer: {
       marginBottom: 16,
@@ -132,16 +119,11 @@ export default function ChangePasswordScreen(): React.ReactNode {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ThemedView style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.contentContainer}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.header}>
-              <ThemedText style={styles.headerText}>
+        <ThemedContainer>
+          <ThemedScrollView>
+            <ThemedText style={styles.headerText}>
               Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
-              </ThemedText>
-            </View>
+            </ThemedText>
             <UsernameDisplay />
             <View style={styles.form}>
               <View style={styles.inputContainer}>
@@ -181,8 +163,8 @@ export default function ChangePasswordScreen(): React.ReactNode {
                 style={styles.button}
               />
             </View>
-          </ScrollView>
-        </ThemedView>
+          </ThemedScrollView>
+        </ThemedContainer>
       </KeyboardAvoidingView>
     </>
   );

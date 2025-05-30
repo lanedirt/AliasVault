@@ -1,33 +1,37 @@
-import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 
+import NativeVaultManager from '@/specs/NativeVaultManager';
 import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
 import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * iOS autofill screen.
  */
 export default function IosAutofillScreen() : React.ReactNode {
   const colors = useColors();
-  const { markIosAutofillConfigured, shouldShowIosAutofillReminder } = useAuth();
+  const { markAutofillConfigured, shouldShowAutofillReminder } = useAuth();
 
   /**
    * Handle the configure press.
    */
   const handleConfigurePress = async () : Promise<void> => {
-    await markIosAutofillConfigured();
-    await Linking.openURL('App-Prefs:root');
-    router.back();
+    await markAutofillConfigured();
+    try {
+      await NativeVaultManager.openAutofillSettingsPage();
+    } catch (err) {
+      console.warn('Failed to open settings:', err);
+    }
   };
 
   /**
    * Handle the already configured press.
    */
   const handleAlreadyConfigured = async () : Promise<void> => {
-    await markIosAutofillConfigured();
+    await markAutofillConfigured();
     router.back();
   };
 
@@ -47,19 +51,13 @@ export default function IosAutofillScreen() : React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-    container: {
-      flex: 1,
-    },
-    header: {
-      padding: 16,
-      paddingBottom: 0,
-    },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+      textAlignVertical: 'top',
     },
     instructionContainer: {
-      padding: 16,
+      paddingTop: 16,
     },
     instructionStep: {
       color: colors.text,
@@ -94,13 +92,11 @@ export default function IosAutofillScreen() : React.ReactNode {
   });
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <ThemedScrollView>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerText}>
-            You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
-          </ThemedText>
-        </View>
+        <ThemedText style={styles.headerText}>
+          You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
+        </ThemedText>
 
         <View style={styles.instructionContainer}>
           <ThemedText style={styles.instructionTitle}>How to enable:</ThemedText>
@@ -133,7 +129,7 @@ export default function IosAutofillScreen() : React.ReactNode {
             Note: You&apos;ll need to authenticate with Face ID/Touch ID or your device passcode when using autofill.
           </ThemedText>
           <View style={styles.buttonContainer}>
-            {shouldShowIosAutofillReminder && (
+            {shouldShowAutofillReminder && (
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={handleAlreadyConfigured}
@@ -146,6 +142,6 @@ export default function IosAutofillScreen() : React.ReactNode {
           </View>
         </View>
       </ThemedScrollView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

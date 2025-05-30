@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "AliasVault",
+			"path": "../"
+		},
+		{
+			"name": "server",
+			"path": "../apps/server"
+		},
+		{
+			"name": "browser-extension",
+			"path": "../apps/browser-extension"
+		},
+		{
+			"name": "mobile-app",
+			"path": "../apps/mobile-app"
+		},
+		{
+			"path": "../docs"
+		}
+	],
+	"settings": {}
+}

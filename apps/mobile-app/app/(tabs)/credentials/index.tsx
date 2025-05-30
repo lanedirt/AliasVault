@@ -1,11 +1,11 @@
 import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -18,9 +18,12 @@ import { CredentialCard } from '@/components/credentials/CredentialCard';
 import { TitleContainer } from '@/components/ui/TitleContainer';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
 import emitter from '@/utils/EventEmitter';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useWebApi } from '@/context/WebApiContext';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ServiceUrlNotice } from '@/components/credentials/ServiceUrlNotice';
 
 /**
  * Credentials screen.
@@ -35,9 +38,11 @@ export default function CredentialsScreen() : React.ReactNode {
   const navigation = useNavigation();
   const [isTabFocused, setIsTabFocused] = useState(false);
   const router = useRouter();
+  const { serviceUrl: serviceUrlParam } = useLocalSearchParams<{ serviceUrl?: string }>();
   const [credentialsList, setCredentialsList] = useState<Credential[]>([]);
   const [isLoadingCredentials, setIsLoadingCredentials] = useMinDurationLoading(false, 200);
   const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
+  const [serviceUrl, setServiceUrl] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   const authContext = useAuth();
@@ -65,14 +70,14 @@ export default function CredentialsScreen() : React.ReactNode {
     }
   }, [dbContext.sqliteClient, setIsLoadingCredentials]);
 
-  const headerButtons = [{
+  const headerButtons = useMemo(() => [{
     icon: 'add' as const,
     position: 'right' as const,
     /**
      * Add credential.
      */
     onPress: () : void => router.push('/(tabs)/credentials/add-edit')
-  }];
+  }], [router]);
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -211,22 +216,15 @@ export default function CredentialsScreen() : React.ReactNode {
       padding: 4,
       position: 'absolute',
       right: 8,
-      top: '50%',
-      transform: [{ translateY: -12 }],
+      top: 4,
     },
     clearButtonText: {
       color: colors.textMuted,
       fontSize: 20,
     },
-    container: {
-      flex: 1,
-      paddingBottom: insets.bottom,
-      paddingHorizontal: 14,
-      paddingTop: insets.top,
-    },
     contentContainer: {
-      paddingBottom: 40,
-      paddingTop: 42,
+      paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 10,
+      paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {
       color: colors.textMuted,
@@ -250,8 +248,8 @@ export default function CredentialsScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 16,
       height: 40,
+      lineHeight: 20,
       marginBottom: 16,
-      padding: 12,
       paddingLeft: 40,
       paddingRight: Platform.OS === 'android' ? 40 : 12,
     },
@@ -261,8 +259,28 @@ export default function CredentialsScreen() : React.ReactNode {
     },
   });
 
+  // Set header buttons
+  useEffect(() => {
+    navigation.setOptions({
+      /**
+       * Define custom header which is shown on Android. iOS displays the custom CollapsibleHeader component instead.
+       * @returns
+       */
+      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" headerButtons={headerButtons} /> : <Text>Credentials</Text>,
+    });
+  }, [navigation, headerButtons]);
+
+  // Handle deep link parameters
+  useFocusEffect(
+    useCallback(() => {
+      // Always check the current serviceUrlParam when screen comes into focus
+      const currentServiceUrl = serviceUrlParam ? decodeURIComponent(serviceUrlParam) : null;
+      setServiceUrl(currentServiceUrl);
+    }, [serviceUrlParam])
+  );
+
   return (
-    <ThemedView style={styles.container}>
+    <ThemedContainer>
       <CollapsibleHeader
         title="Credentials"
         scrollY={scrollY}
@@ -286,10 +304,16 @@ export default function CredentialsScreen() : React.ReactNode {
           initialNumToRender={14}
           maxToRenderPerBatch={14}
           windowSize={7}
-          removeClippedSubviews={true}
+          removeClippedSubviews={false}
           ListHeaderComponent={
             <ThemedView>
               <TitleContainer title="Credentials" />
+              {serviceUrl && (
+                <ServiceUrlNotice
+                  serviceUrl={serviceUrl}
+                  onDismiss={() => setServiceUrl(null)}
+                />
+              )}
               <ThemedView style={styles.searchContainer}>
                 <MaterialIcons
                   name="search"
@@ -342,6 +366,6 @@ export default function CredentialsScreen() : React.ReactNode {
           }
         />
       </ThemedView>
-    </ThemedView>
+    </ThemedContainer>
   );
 }

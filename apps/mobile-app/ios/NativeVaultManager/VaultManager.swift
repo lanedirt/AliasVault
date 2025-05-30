@@ -5,7 +5,7 @@ import VaultStoreKit
 import VaultModels
 
 /**
- * This class is used as a bridge to allow React Native to interact with the VaultStore class.
+ * This class is used as a bridge to allow React Native to interact with the VaultStoreKit class.
  * The VaultStore class is implemented in Swift and used by both React Native and the native iOS
  * Autofill extension.
  */
@@ -305,6 +305,19 @@ public class VaultManager: NSObject {
             resolve(nil)
         } catch {
             reject("TRANSACTION_ERROR", "Failed to rollback transaction: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
+    func openAutofillSettingsPage(_ resolve: @escaping RCTPromiseResolveBlock,
+                                 rejecter reject: @escaping RCTPromiseRejectBlock) {
+        if let settingsUrl = URL(string: "App-Prefs:root") {
+            DispatchQueue.main.async {
+                UIApplication.shared.open(settingsUrl)
+                resolve(nil)
+            }
+        } else {
+            reject("SETTINGS_ERROR", "Cannot open settings", nil)
         }
     }
 
