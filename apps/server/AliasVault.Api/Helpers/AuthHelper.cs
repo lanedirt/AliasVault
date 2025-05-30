@@ -23,6 +23,11 @@ public static class AuthHelper
     public static readonly string CachePrefixEphemeral = "LoginEphemeral_";
 
     /// <summary>
+    /// Cache prefix for storing fake data for non-existent users.
+    /// </summary>
+    public static readonly string CachePrefixFakeData = "FakeData_";
+
+    /// <summary>
     /// Helper method that validates the SRP session based on provided username, ephemeral and proof.
     /// </summary>
     /// <param name="cache">IMemoryCache instance.</param>
