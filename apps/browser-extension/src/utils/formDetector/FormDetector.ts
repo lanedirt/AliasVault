@@ -22,7 +22,7 @@ export class FormDetector {
    * Detect login forms on the page based on the clicked element.
    */
   public containsLoginForm(): boolean {
-    let formWrapper = this.clickedElement?.closest('form, [role="dialog"]') as HTMLElement | null;
+    let formWrapper = this.getFormWrapper();
     if (formWrapper?.getAttribute('role') === 'dialog') {
       // If we hit a dialog, search for form only within the dialog
       formWrapper = formWrapper.querySelector('form') as HTMLElement | null ?? formWrapper;
@@ -58,7 +58,7 @@ export class FormDetector {
       return null;
     }
 
-    const formWrapper = this.clickedElement.closest('form') ?? this.document.body;
+    const formWrapper = this.getFormWrapper();
     return this.detectFormFields(formWrapper);
   }
 
@@ -163,6 +163,13 @@ export class FormDetector {
   }
 
   /**
+   * Get the form wrapper element.
+   */
+  private getFormWrapper(): HTMLElement | null {
+    return this.clickedElement?.closest('form, [role="dialog"]') as HTMLElement | null;
+  }
+
+  /**
    * Check if an element and all its parents are visible.
    * This checks for display:none, visibility:hidden, and opacity:0
    * Uses a cache to avoid redundant checks of the same elements.
@@ -242,73 +249,76 @@ export class FormDetector {
   }
 
   /**
-   * Find an input field based on common patterns in its attributes.
+   * Find all input/select elements matching patterns and types, ordered by best match.
    */
-  private findInputField(
+  private findAllInputFields(
     form: HTMLFormElement | null,
     patterns: string[],
     types: string[],
     excludeElements: HTMLInputElement[] = []
-  ): HTMLInputElement | null {
+  ): HTMLInputElement[] {
+    // Query for both standard input elements and any element with a type attribute
     const candidates = form
-      ? form.querySelectorAll<HTMLInputElement>('input, select')
-      : this.document.querySelectorAll<HTMLInputElement>('input, select');
+      ? form.querySelectorAll<HTMLElement>('input, select, [type]')
+      : this.document.querySelectorAll<HTMLElement>('input, select, [type]');
 
-    // Track best match and its pattern index
-    let bestMatch: HTMLInputElement | null = null;
-    let bestMatchIndex = patterns.length;
+    const matches: { input: HTMLInputElement; score: number }[] = [];
 
     for (const input of Array.from(candidates)) {
-      // Skip if this element is already used
-      if (excludeElements.includes(input)) {
+      if (excludeElements.includes(input as HTMLInputElement)) {
         continue;
       }
 
-      // Skip if element is not visible
       if (!this.isElementVisible(input)) {
         continue;
       }
 
-      // Handle both input and select elements
-      const type = input.tagName.toLowerCase() === 'select' ? 'select' : input.type.toLowerCase();
+      // Get type from either the element's type property or its type attribute
+      const type = input.tagName.toLowerCase() === 'select'
+        ? 'select'
+        : (input as HTMLInputElement).type?.toLowerCase() || input.getAttribute('type')?.toLowerCase() || '';
+
       if (!types.includes(type)) {
         continue;
       }
 
-      // Check for exact type match if types contains email, as that most likely is the email field.
-      if (types.includes('email') && input.type.toLowerCase() === 'email') {
-        return input;
+      if (types.includes('email') && type === 'email') {
+        matches.push({ input: input as HTMLInputElement, score: -1 });
+        continue;
       }
 
       // Collect all text attributes to check
-      const attributes = [
+      const attributesToCheck = [
         input.id,
-        input.name,
-        input.placeholder
-      ].map(attr => attr?.toLowerCase() ?? '');
+        input.getAttribute('name'),
+        input.getAttribute('placeholder')
+      ]
+        .map(a => a?.toLowerCase() ?? '');
 
       // Check for associated labels if input has an ID or name
-      if (input.id || input.name) {
-        const label = this.document.querySelector(`label[for="${input.id || input.name}"]`);
+      if (input.id || input.getAttribute('name')) {
+        const label = this.document.querySelector(`label[for="${input.id || input.getAttribute('name')}"]`);
         if (label) {
-          attributes.push(label.textContent?.toLowerCase() ?? '');
+          attributesToCheck.push(label.textContent?.toLowerCase() ?? '');
         }
       }
 
       // Check for sibling elements with class containing "label"
       const parent = input.parentElement;
       if (parent) {
-        const siblings = Array.from(parent.children);
-        for (const sibling of siblings) {
-          if (sibling !== input && Array.from(sibling.classList).some(c => c.toLowerCase().includes('label'))) {
-            attributes.push(sibling.textContent?.toLowerCase() ?? '');
+        for (const sib of Array.from(parent.children)) {
+          if (
+            sib !== input &&
+            Array.from(sib.classList).some(c => c.toLowerCase().includes('label'))
+          ) {
+            attributesToCheck.push(sib.textContent?.toLowerCase() ?? '');
           }
         }
       }
 
       // Check for parent label and table cell structure
-      let currentElement = input;
-      for (let i = 0; i < 5; i++) {
+      let currentElement: HTMLElement | null = input;
+      for (let depth = 0; depth < 5 && currentElement; depth++) {
         // Stop if we have too many child elements (near body)
         if (currentElement.children.length > 15) {
           break;
@@ -317,48 +327,65 @@ export class FormDetector {
         // Check for label - search both parent and child elements
         const childLabel = currentElement.querySelector('label');
         if (childLabel) {
-          attributes.push(childLabel.textContent?.toLowerCase() ?? '');
+          attributesToCheck.push(childLabel.textContent?.toLowerCase() ?? '');
           break;
         }
 
         // Check for table cell structure
-        const parentTd = currentElement.closest('td');
-        if (parentTd) {
+        const td = currentElement.closest('td');
+        if (td) {
           // Get the parent row
-          const parentTr = parentTd.closest('tr');
-          if (parentTr) {
+          const row = td.closest('tr');
+          if (row) {
             // Check all sibling cells in the row
-            const siblingTds = parentTr.querySelectorAll('td');
-            for (const td of siblingTds) {
-              if (td !== parentTd) { // Skip the cell containing the input
-                attributes.push(td.textContent?.toLowerCase() ?? '');
+            for (const cell of Array.from(row.querySelectorAll('td'))) {
+              if (cell !== td) {
+                attributesToCheck.push(cell.textContent?.toLowerCase() ?? '');
+                break;
               }
             }
           }
-          break; // Found table structure, no need to continue up the tree
+          break;
         }
 
-        if (currentElement.parentElement) {
-          currentElement = currentElement.parentElement as HTMLInputElement;
-        } else {
+        currentElement = currentElement.parentElement;
+      }
+
+      let bestIndex = patterns.length;
+      for (let i = 0; i < patterns.length; i++) {
+        if (attributesToCheck.some(a => a.includes(patterns[i]))) {
+          bestIndex = i;
           break;
         }
       }
-
-      // Find the earliest matching pattern
-      for (let i = 0; i < patterns.length; i++) {
-        if (i >= bestMatchIndex) {
-          break;
-        } // Skip if we already have a better match
-        if (attributes.some(attr => attr.includes(patterns[i]))) {
-          bestMatch = input;
-          bestMatchIndex = i;
-          break; // Found the best possible match for this input
-        }
+      if (bestIndex < patterns.length) {
+        matches.push({ input: input as HTMLInputElement, score: bestIndex });
       }
     }
 
-    return bestMatch;
+    return matches
+      .sort((a, b) => a.score - b.score)
+      .map(m => m.input);
+  }
+
+  /**
+   * Find a single input/select element based on common patterns in its attributes.
+   */
+  private findInputField(
+    form: HTMLFormElement | null,
+    patterns: string[],
+    types: string[],
+    excludeElements: HTMLInputElement[] = []
+  ): HTMLInputElement | null {
+    const all = this.findAllInputFields(form, patterns, types, excludeElements);
+    // if email type explicitly requested, prefer actual <input type="email">
+    if (types.includes('email')) {
+      const emailMatch = all.find(i => (i.type || '').toLowerCase() === 'email');
+      if (emailMatch) {
+        return emailMatch;
+      }
+    }
+    return all.length > 0 ? all[0] : null;
   }
 
   /**
@@ -546,15 +573,11 @@ export class FormDetector {
     primary: HTMLInputElement | null,
     confirm: HTMLInputElement | null
   } {
-    const candidates = form
-      ? form.querySelectorAll<HTMLInputElement>('input[type="password"]')
-      : this.document.querySelectorAll<HTMLInputElement>('input[type="password"]');
-
-    const visibleCandidates = Array.from(candidates).filter(input => this.isElementVisible(input));
+    const passwordFields = this.findAllInputFields(form, CombinedFieldPatterns.password, ['password']);
 
     return {
-      primary: visibleCandidates[0] ?? null,
-      confirm: visibleCandidates[1] ?? null
+      primary: passwordFields[0] ?? null,
+      confirm: passwordFields[1] ?? null
     };
   }
 
@@ -595,6 +618,34 @@ export class FormDetector {
     // Check if the form contains a last name field.
     const lastNameField = this.findInputField(wrapper as HTMLFormElement | null, CombinedFieldPatterns.lastName, ['text'], []);
     if (lastNameField && this.isElementVisible(lastNameField)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a field is an autofill-triggerable field (username, email, or password).
+   */
+  public isAutofillTriggerableField(): boolean {
+    // Check if it's a username, email or password field by reusing the existing detection logic
+    const formWrapper = this.getFormWrapper();
+
+    // Check if the clicked element is a username field.
+    const usernameFields = this.findAllInputFields(formWrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text']);
+    if (usernameFields.some(input => input === this.clickedElement)) {
+      return true;
+    }
+
+    // Check if the clicked element is a password field.
+    const passwordField = this.findPasswordField(formWrapper as HTMLFormElement | null);
+    if (passwordField.primary === this.clickedElement || passwordField.confirm === this.clickedElement) {
+      return true;
+    }
+
+    // Check if the clicked element is an email field.
+    const emailFields = this.findAllInputFields(formWrapper as HTMLFormElement | null, CombinedFieldPatterns.email, ['text', 'email']);
+    if (emailFields.some(input => input === this.clickedElement)) {
       return true;
     }
 

@@ -55,6 +55,11 @@ export default defineContentScript({
               return;
             }
 
+            // Only show popup for autofill-triggerable fields
+            if (!formDetector.isAutofillTriggerableField()) {
+              return;
+            }
+
             // Only inject icon and show popup if autofill popup is enabled
             if (await isAutoShowPopupEnabled()) {
               injectIcon(inputElement, container);
@@ -117,10 +122,10 @@ export default defineContentScript({
           }
 
           /**
-           * By default we check if the popup is not disabled (for current site)
+           * By default we check if the popup is not disabled (for current site) and if the field is autofill-triggerable
            * but if forceShow is true, we show the popup regardless.
            */
-          const canShowPopup = forceShow || (await isAutoShowPopupEnabled());
+          const canShowPopup = forceShow || (await isAutoShowPopupEnabled() && formDetector.isAutofillTriggerableField());
 
           if (canShowPopup) {
             injectIcon(inputElement, container);
