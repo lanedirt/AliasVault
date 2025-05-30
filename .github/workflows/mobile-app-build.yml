@@ -129,6 +129,19 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
+      - name: Configure signing
+        run: |
+          cat >> android/gradle.properties <<EOF
+          ALIASVAULT_UPLOAD_STORE_FILE=keystore.jks
+          ALIASVAULT_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          ALIASVAULT_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
       - name: Build JS bundle (Android - Expo)
         run: |
           mkdir -p build
@@ -150,9 +163,24 @@ jobs:
           path: apps/mobile-app/android/app/build/reports/tests/testDebugUnitTest/
           retention-days: 7
 
-      - name: Build Android App
+      - name: Build Signed APK & AAB
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew bundleRelease
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-apk
+          path: apps/mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-aab
+          path: apps/mobile-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
 
 
