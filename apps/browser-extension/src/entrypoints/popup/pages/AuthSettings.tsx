@@ -119,6 +119,7 @@ const AuthSettings: React.FC = () => {
         setErrors(prev => ({ ...prev, apiUrl: error.message }));
         // On error we revert back to the aliasvault.net official hosted instance.
         await storage.setItem('local:apiUrl', AppInfo.DEFAULT_API_URL);
+        await storage.setItem('local:clientUrl', AppInfo.DEFAULT_CLIENT_URL);
       }
     }
   };
