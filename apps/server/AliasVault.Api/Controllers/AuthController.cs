@@ -145,10 +145,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     public async Task<IActionResult> Login([FromBody] LoginInitiateRequest model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
+
+        // If user doesn't exist, generate or retrieve fake data to prevent user enumeration attacks.
         if (user == null)
         {
+            // Log the attempt internally
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidUsername);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            return FakeLoginResponse(model);
         }
 
         // Check if the account is locked out.
@@ -923,5 +926,40 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         await context.SaveChangesAsync();
         return new TokenModel { Token = accessToken, RefreshToken = refreshToken };
+    }
+
+    /// <summary>
+    /// Generate a fake login response for a user that does not exist to prevent user enumeration attacks.
+    /// </summary>
+    /// <param name="model">The login initiate request model.</param>
+    /// <returns>IActionResult.</returns>
+    private OkObjectResult FakeLoginResponse(LoginInitiateRequest model)
+    {
+        // Generate a cache key for fake data
+        var fakeDataCacheKey = AuthHelper.CachePrefixFakeData + model.Username;
+
+        // Try to get cached fake data first
+        if (!cache.TryGetValue(fakeDataCacheKey, out (string Salt, string Verifier) fakeData))
+        {
+            // Generate new fake data if not cached
+            var client = new SrpClient();
+            var fakeSalt = client.GenerateSalt();
+            var fakePrivateKey = client.DerivePrivateKey(fakeSalt, model.Username, "fakePassword");
+            var fakeVerifier = client.DeriveVerifier(fakePrivateKey);
+            fakeData = (fakeSalt, fakeVerifier);
+
+            // Cache the fake data for 4 hours
+            cache.Set(fakeDataCacheKey, fakeData, TimeSpan.FromHours(4));
+        }
+
+        // Always generate a new ephemeral for the fake data, as this is also done for existing users.
+        var fakeEphemeral = Srp.GenerateEphemeralServer(fakeData.Verifier);
+
+        // Return the same response format as for real users
+        return Ok(new LoginInitiateResponse(
+            fakeData.Salt,
+            fakeEphemeral.Public,
+            Defaults.EncryptionType,
+            Defaults.EncryptionSettings));
     }
 }
