@@ -96,7 +96,7 @@ else
                     <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">UserRefreshTokens (Logged in devices)</h3>
 
-                        <RefreshTokenTable RefreshTokenList="@RefreshTokenList" OnRevokeToken="@RevokeRefreshToken" />
+                        <RefreshTokenTable RefreshTokenList="@RefreshTokenList" OnRevokeToken="@RevokeRefreshToken" OnRevokeAllTokens="@RevokeAllTokens" />
                     </div>
                 </div>
             </div>
@@ -327,13 +327,29 @@ Do you want to proceed with the restoration?")) {
         {
             User.Blocked = !User.Blocked;
 
-            // If user is unblocked by the admin, also reset any lockout status, which can be 
+            // If user is unblocked by the admin, also reset any lockout status, which can be
             // automatically triggered by the system when user has entered an incorrect password too many times.
             if (!User.Blocked) {
                 User.AccessFailedCount = 0;
                 User.LockoutEnd = null;
             }
 
+            await dbContext.SaveChangesAsync();
+            await RefreshData();
+        }
+    }
+
+    /// <summary>
+    /// This method will revoke all refresh tokens for the user which will log out all their devices.
+    /// </summary>
+    private async Task RevokeAllTokens()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var tokens = await dbContext.AliasVaultUserRefreshTokens.Where(x => x.UserId == User!.Id).ToListAsync();
+
+        if (tokens.Any())
+        {
+            dbContext.AliasVaultUserRefreshTokens.RemoveRange(tokens);
             await dbContext.SaveChangesAsync();
             await RefreshData();
         }
