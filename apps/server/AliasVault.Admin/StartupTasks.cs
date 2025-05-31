@@ -53,6 +53,11 @@ public static class StartupTasks
             await userManager.CreateAsync(adminUser);
             adminUser.PasswordHash = adminPasswordHash;
             adminUser.LastPasswordChanged = DateTime.UtcNow;
+
+            // During password reset, also unblock the admin user in case it was blocked.
+            adminUser.LockoutEnabled = false;
+            adminUser.LockoutEnd = null;
+
             await userManager.UpdateAsync(adminUser);
 
             Console.WriteLine("Admin user created.");
