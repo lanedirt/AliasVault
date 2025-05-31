@@ -82,6 +82,10 @@ get_browser_extension_version() {
 
 # Function to extract version from mobile app
 get_mobile_app_version() {
+    grep "\"version\": " ../apps/mobile-app/app.json | tr -d '"' | tr -d ',' | tr -d ' ' | cut -d':' -f2
+}
+
+get_mobile_app_ts_version() {
     grep "public static readonly VERSION = " ../apps/mobile-app/utils/AppInfo.ts | tr -d "'" | tr -d ';' | tr -d ' ' | cut -d'=' -f2
 }
 
@@ -105,6 +109,7 @@ echo "Checking current versions..."
 server_version=$(get_server_version)
 browser_version=$(get_browser_extension_version)
 mobile_version=$(get_mobile_app_version)
+mobile_ts_version=$(get_mobile_app_ts_version)
 ios_version=$(get_ios_version)
 android_version=$(get_android_version)
 safari_version=$(get_safari_version)
@@ -114,6 +119,7 @@ declare -A versions
 versions["server"]="$server_version"
 versions["browser"]="$browser_version"
 versions["mobile"]="$mobile_version"
+versions["mobile_ts"]="$mobile_ts_version"
 versions["ios"]="$ios_version"
 versions["android"]="$android_version"
 versions["safari"]="$safari_version"
@@ -123,6 +129,7 @@ declare -A display_names
 display_names["server"]="Server"
 display_names["browser"]="Browser Extension"
 display_names["mobile"]="Mobile App"
+display_names["mobile_ts"]="Mobile App (TS)"
 display_names["ios"]="iOS App"
 display_names["android"]="Android App"
 display_names["safari"]="Safari Extension"
@@ -188,11 +195,15 @@ update_version "../apps/browser-extension/wxt.config.ts" \
     "version: \"[0-9]\+\.[0-9]\+\.[0-9]\+\"," \
     "version: \"$version\","
 
-# Update mobile app version
+# Update generic mobile app version
 echo "Updating mobile app version..."
 update_version "../apps/mobile-app/utils/AppInfo.ts" \
     "public static readonly VERSION = '[0-9]\+\.[0-9]\+\.[0-9]\+';" \
     "public static readonly VERSION = '$version';"
+update_version "../apps/mobile-app/app.json" \
+    "\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"," \
+    "\"version\": \"$version\","
+
 
 # Update iOS app version
 echo "Updating iOS app version..."
