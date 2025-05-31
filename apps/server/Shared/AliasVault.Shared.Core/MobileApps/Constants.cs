@@ -16,8 +16,7 @@ public static class Constants
     /// <summary>
     /// Gets the mobile apps available for AliasVault. This is used to render download links in the client.
     /// </summary>
-    public static IReadOnlyList<MobileAppInfo> MobileApps { get; } = new List<MobileAppInfo>
-    {
+    public static IReadOnlyList<MobileAppInfo> MobileApps { get; } = [
         new MobileAppInfo
         {
             Name = "iOS",
@@ -29,8 +28,8 @@ public static class Constants
         {
             Name = "Android",
             IconPath = "/img/mobile-icons/android.svg",
-            DownloadUrl = "https://play.google.com/store/apps/details?id=com.aliasvault.app",
-            IsAvailable = false,
+            DownloadUrl = "https://play.google.com/store/apps/details?id=net.aliasvault.app",
+            IsAvailable = true,
         },
-    };
+    ];
 }
