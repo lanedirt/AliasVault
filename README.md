@@ -114,8 +114,8 @@ Core features that are being worked on:
 - [x] Built-in TOTP authenticator
 - [x] Import passwords from traditional password managers
 - [x] iOS native app
-- [ ] Android native app
-- [ ] Data model improvements to support reusable identities in combination with aliases
+- [x] Android native app
+- [ ] Data model and usability improvements (more flexible aliases and credential types, folder support, editing in browser extension, bulk selecting etc.)
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
 - [ ] Adding support for family/team sharing (organization features)
 
