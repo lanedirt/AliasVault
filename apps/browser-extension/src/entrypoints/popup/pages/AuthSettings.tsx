@@ -17,7 +17,6 @@ const DEFAULT_OPTIONS: ApiOption[] = [
 // Validation schema for URLs
 const urlSchema = Yup.object().shape({
   apiUrl: Yup.string()
-    .url('Please enter a valid URL')
     .required('API URL is required')
     .test('is-valid-api-url', 'Please enter a valid API URL', (value: string | undefined) => {
       if (!value) {
@@ -31,7 +30,6 @@ const urlSchema = Yup.object().shape({
       }
     }),
   clientUrl: Yup.string()
-    .url('Please enter a valid URL')
     .required('Client URL is required')
     .test('is-valid-client-url', 'Please enter a valid client URL', (value: string | undefined) => {
       if (!value) {
