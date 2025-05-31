@@ -1,5 +1,9 @@
 ﻿@using AliasVault.RazorComponents.Tables
 
+<div class="mb-4">
+    <Button Color="danger" OnClick="RevokeAllTokens">Revoke All Tokens</Button>
+</div>
+
 <SortableTable Columns="@_refreshTokenTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
     @foreach (var entry in SortedRefreshTokenList)
     {
@@ -28,6 +32,12 @@
     /// </summary>
     [Parameter]
     public EventCallback<AliasVaultUserRefreshToken> OnRevokeToken { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback to revoke all refresh tokens.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnRevokeAllTokens { get; set; }
 
     private string SortColumn { get; set; } = "CreatedAt";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
@@ -66,5 +76,22 @@
     private async Task RevokeRefreshToken(AliasVaultUserRefreshToken entry)
     {
         await OnRevokeToken.InvokeAsync(entry);
+    }
+
+    private async Task RevokeAllTokens()
+    {
+        if (await ConfirmModalService.ShowConfirmation(
+            title: "Confirm Revoke All Tokens",
+            message: @"Are you sure you want to revoke all refresh tokens?
+
+Important notes:
+• This will log out the user from all their devices.
+• They will need to log in again on each device.
+• This action cannot be undone.
+
+Do you want to proceed with revoking all tokens?"))
+        {
+            await OnRevokeAllTokens.InvokeAsync();
+        }
     }
 }
