@@ -23,7 +23,8 @@ Follow the steps in the checklist below to prepare a new release.
 - [ ] Update `./apps/browser-extension/src/utils/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
 
 ## Versioning mobile apps
-- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the new version for the extension. This version should be equal to the git release tag.
+- [ ] Update `./apps/mobile-app/app.json` with the new version for the mobile app. This version should be equal to the git release tag.
+- [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the new version for the mobile app. This version should be equal to the git release tag.
 - [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported server version (in case of required API breaking changes).
 - [ ] Update `./apps/mobile-app/utils/AppInfo.ts` with the minimum supported client vault version (in case of required client vault model changes).
 - [ ] Update `./apps/mobile-app/ios/AliasVault.xcodeproj/project.pbxproj` and set the version in `MARKETING_VERSION` and increase the build number in `CURRENT_PROJECT_VERSION`. This is the version that will be shown in the iOS App Store.
