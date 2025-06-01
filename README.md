@@ -47,7 +47,7 @@ Built on 15 years of experience, AliasVault is open-source, self-hostable and co
 ## Cloud-hosted
 Use the official cloud version of AliasVault at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release.
 
-AliasVault is available on: [Web](https://app.aliasvault.net) | [iOS](https://apps.apple.com/app/id6745490915) | [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo) | [Safari](https://apps.apple.com/app/id6743163173)
+AliasVault is available on: [Web](https://app.aliasvault.net) | [iOS](https://apps.apple.com/app/id6745490915) | [Android](https://play.google.com/store/apps/details?id=net.aliasvault.app) | [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo) | [Safari](https://apps.apple.com/app/id6743163173)
 
 [<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
