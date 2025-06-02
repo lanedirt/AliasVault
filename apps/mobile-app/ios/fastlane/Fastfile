@@ -1,0 +1,34 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS App release"
+  lane :release do
+    app_store_connect_api_key(
+      key_id: ENV["API_KEY_ID"],
+      issuer_id: ENV["API_KEY_ISSUER_ID"],
+      key_filepath: ENV["API_KEY_PATH"],
+      in_house: false # set to true if using Enterprise account
+    )
+
+    build_app(scheme: "AliasVault",
+      workspace: "AliasVault.xcworkspace",
+      configuration: "Release",
+      archive_path: "AliasVault.xcarchive",
+    )
+  end
+end

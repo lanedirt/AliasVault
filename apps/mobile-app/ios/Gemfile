@@ -1,0 +1,3 @@
+source "https://rubygems.org"
+
+gem "fastlane", git: "https://github.com/visuallization/fastlane.git", ref: "6ba7b8bfe8338a3a72e7ff9f936c9d432227a54f"

@@ -28,3 +28,6 @@ project.xcworkspace
 
 # CocoaPods
 /Pods/
+
+# Fastlane JSON API key files
+fastlane/*.json

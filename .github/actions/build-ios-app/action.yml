@@ -41,8 +41,8 @@ runs:
         ruby-version: '3.2'
         bundler-cache: true
 
-    - name: Install Fastlane
-      run: gem install fastlane
+    - name: Install Fastlane dependencies via Ruby Bundler
+      run: bundle install
       shell: bash
 
     - name: Install CocoaPods
