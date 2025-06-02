@@ -43,11 +43,10 @@ runs:
       shell: bash
       working-directory: apps/browser-extension
 
-    - name: Rename zip with semver
+    - name: Extract version
       run: |
         VERSION=$(node -p "require('./package.json').version")
         echo "VERSION=$VERSION" >> $GITHUB_ENV
-        mv dist/aliasvault-browser-extension-*-${{ inputs.browser }}.zip dist/aliasvault-browser-extension-${VERSION}-${{ inputs.browser }}.zip
       shell: bash
       working-directory: apps/browser-extension
 
@@ -76,7 +75,7 @@ runs:
       if: ${{ inputs.browser == 'firefox' }}
       uses: actions/upload-artifact@v4
       with:
-        name: aliasvault-browser-extension-sources-${{ env.VERSION }}
+        name: aliasvault-browser-extension-${{ env.VERSION }}-sources
         path: apps/browser-extension/dist/sources-unpacked
 
     - name: Upload to GitHub Release
@@ -85,9 +84,13 @@ runs:
       with:
         files: |
           apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: Upload Firefox sources to Release
       if: ${{ inputs.upload_to_release == 'true' && inputs.browser == 'firefox' }}
       uses: softprops/action-gh-release@v1
       with:
         files: apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}

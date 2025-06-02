@@ -24,39 +24,47 @@ jobs:
           files: install.sh
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  package-browser-extensions:
+  build-chrome-extension:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/browser-extension
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build Chrome Extension
+        uses: ./.github/actions/build-browser-extension
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/browser-extension/package-lock.json
+          browser: chrome
+          upload_to_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci
+  build-firefox-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Zip extensions
-        run: |
-          npm run zip:chrome
-          npm run zip:firefox
-          npm run zip:edge
-
-      - name: Upload extensions to release
-        uses: softprops/action-gh-release@v2
+      - name: Build Firefox Extension
+        uses: ./.github/actions/build-browser-extension
         with:
-          files: |
-            apps/browser-extension/dist/aliasvault-browser-extension-*-chrome.zip
-            apps/browser-extension/dist/aliasvault-browser-extension-*-firefox.zip
-            apps/browser-extension/dist/aliasvault-browser-extension-*-edge.zip
-            apps/browser-extension/dist/aliasvault-browser-extension-*-sources.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
+          browser: firefox
+          upload_to_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-edge-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Edge Extension
+        uses: ./.github/actions/build-browser-extension
+        with:
+          browser: edge
+          upload_to_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-android-release:
     runs-on: ubuntu-latest
@@ -121,108 +129,3 @@ jobs:
           name: aliasvault-app-android-${{ github.ref_name }}.aab
           path: apps/mobile-app/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 14
-
-  build-and-push-docker:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Convert repository name to lowercase
-        run: |
-          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
-
-      - name: Build and push Postgres image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Databases/AliasServerDb/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:${{ github.ref_name }}
-
-      - name: Build and push API image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Api/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
-
-      - name: Build and push Client image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Client/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
-
-      - name: Build and push Admin image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Admin/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
-
-      - name: Build and push Reverse Proxy image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
-
-      - name: Build and push SMTP image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Services/AliasVault.SmtpService/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
-
-      - name: Build and push TaskRunner image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
-
-      - name: Build and push InstallCli image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
