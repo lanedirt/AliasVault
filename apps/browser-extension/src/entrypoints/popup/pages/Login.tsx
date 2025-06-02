@@ -13,6 +13,7 @@ import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
+import ConversionUtility from '../utils/ConversionUtility';
 
 /**
  * Login page
@@ -66,7 +67,7 @@ const Login: React.FC = () => {
       authContext.clearGlobalMessage();
 
       // Use the srpUtil instance instead of the imported singleton
-      const loginResponse = await srpUtil.initiateLogin(credentials.username);
+      const loginResponse = await srpUtil.initiateLogin(ConversionUtility.normalizeUsername(credentials.username));
 
       // 1. Derive key from password using Argon2id
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
@@ -84,7 +85,7 @@ const Login: React.FC = () => {
 
       // 2. Validate login with SRP protocol
       const validationResponse = await srpUtil.validateLogin(
-        credentials.username,
+        ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
         rememberMe,
         loginResponse
@@ -122,7 +123,7 @@ const Login: React.FC = () => {
       }
 
       // All is good. Store auth info which is required to make requests to the web API.
-      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+      await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
@@ -164,7 +165,7 @@ const Login: React.FC = () => {
       }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
-        credentials.username,
+        ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
         rememberMe,
         loginResponse,
@@ -189,7 +190,7 @@ const Login: React.FC = () => {
       }
 
       // All is good. Store auth info which is required to make requests to the web API.
-      await authContext.setAuthTokens(credentials.username, validationResponse.token.token, validationResponse.token.refreshToken);
+      await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
