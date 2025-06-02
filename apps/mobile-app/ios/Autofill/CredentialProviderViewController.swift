@@ -178,7 +178,12 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         // Check if Face ID/Touch ID is enabled
         let context = LAContext()
         var authMethod = "Face ID / Touch ID"
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
+        var biometricsAvailable = false
+        var biometricsError: NSError?
+
+        // Check if device supports biometrics
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &biometricsError) {
+            biometricsAvailable = true
             switch context.biometryType {
             case .faceID:
                 authMethod = "Face ID"
@@ -189,6 +194,24 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
             }
         }
 
+        // First check if biometrics are available on the device
+        if !biometricsAvailable {
+            let alert = UIAlertController(
+                title: "\(authMethod) Required",
+                message: "To use AliasVault Autofill, please enable \(authMethod) in your device settings and/or go to the AliasVault app settings to configure it.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext.cancelRequest(withError: NSError(
+                    domain: ASExtensionErrorDomain,
+                    code: ASExtensionError.userCanceled.rawValue
+                ))
+            })
+            present(alert, animated: true)
+            return false
+        }
+
+        // Then check if Face ID/Touch ID is enabled in the app settings
         if !vaultStore.getAuthMethods().contains(.faceID) {
             let alert = UIAlertController(
                 title: "\(authMethod) Required",

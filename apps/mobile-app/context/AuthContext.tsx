@@ -32,6 +32,7 @@ type AuthContextType = {
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
   getBiometricDisplayName: () => Promise<string>;
+  isBiometricsEnabledOnDevice: () => Promise<boolean>;
   setOfflineMode: (isOffline: boolean) => void;
   verifyPassword: (password: string) => Promise<string | null>;
   // Autofill methods
@@ -92,12 +93,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
+   * Check if biometrics is enabled on the device (regardless of whether it's enabled in the AliasVault app).
+   */
+  const isBiometricsEnabledOnDevice = useCallback(async (): Promise<boolean> => {
+    const hasBiometrics = await LocalAuthentication.hasHardwareAsync();
+    if (!hasBiometrics) {
+      return false;
+    }
+
+    return await LocalAuthentication.isEnrolledAsync();
+  }, []);
+
+  /**
    * Check if biometrics is enabled based on enabled auth methods
    */
   const isBiometricsEnabled = useCallback(async (): Promise<boolean> => {
+    const deviceHasBiometrics = await isBiometricsEnabledOnDevice();
+    if (!deviceHasBiometrics) {
+      return false;
+    }
+
     const methods = await getEnabledAuthMethods();
     return methods.includes('faceid');
-  }, [getEnabledAuthMethods]);
+  }, [getEnabledAuthMethods, isBiometricsEnabledOnDevice]);
 
   /**
    * Set auth tokens in storage as part of the login process. After db is initialized, the login method should be called as well.
@@ -222,8 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const methods = await getEnabledAuthMethods();
     if (methods.includes('faceid')) {
       try {
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        if (isEnrolled) {
+        if (await isBiometricsEnabledOnDevice()) {
           return await getBiometricDisplayName();
         }
       } catch (error) {
@@ -231,7 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     return 'Password';
-  }, [getEnabledAuthMethods, getBiometricDisplayName]);
+  }, [getEnabledAuthMethods, getBiometricDisplayName, isBiometricsEnabledOnDevice]);
 
   /**
    * Get the auto-lock timeout from the iOS credentials manager
@@ -374,6 +391,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplay,
+    isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,
@@ -398,6 +416,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplay,
+    isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
     getBiometricDisplayName,

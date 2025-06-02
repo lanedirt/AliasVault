@@ -106,48 +106,61 @@ export default function LoginScreen() : React.ReactNode {
   ) : Promise<void> => {
     // Get biometric display name
     const biometricDisplayName = await authContext.getBiometricDisplayName();
+    const isBiometricsEnabledOnDevice = await authContext.isBiometricsEnabledOnDevice();
 
-    // Show biometric prompt
-    Alert.alert(
-      `Enable ${biometricDisplayName}?`,
-      `Would you like to use ${biometricDisplayName} to unlock your vault?`,
-      [
-        {
-          text: 'No',
-          style: 'destructive',
-          /**
-           * Handle disabling biometric authentication
-           */
-          onPress: async () : Promise<void> => {
-            await authContext.setAuthMethods(['password']);
-            await continueProcessVaultResponse(
-              token,
-              refreshToken,
-              vaultResponseJson,
-              passwordHashBase64,
-              initiateLoginResponse
-            );
+    if (isBiometricsEnabledOnDevice) {
+      // Show biometric prompt if biometrics are available (faceid or fingerprint enrolled) on device.
+      Alert.alert(
+        `Enable ${biometricDisplayName}?`,
+        `Would you like to use ${biometricDisplayName} to unlock your vault?`,
+        [
+          {
+            text: 'No',
+            style: 'destructive',
+            /**
+             * Handle disabling biometric authentication
+             */
+            onPress: async () : Promise<void> => {
+              await authContext.setAuthMethods(['password']);
+              await continueProcessVaultResponse(
+                token,
+                refreshToken,
+                vaultResponseJson,
+                passwordHashBase64,
+                initiateLoginResponse
+              );
+            }
+          },
+          {
+            text: 'Yes',
+            isPreferred: true,
+            /**
+             * Handle enabling biometric authentication
+             */
+            onPress: async () : Promise<void> => {
+              await authContext.setAuthMethods(['faceid', 'password']);
+              await continueProcessVaultResponse(
+                token,
+                refreshToken,
+                vaultResponseJson,
+                passwordHashBase64,
+                initiateLoginResponse
+              );
+            }
           }
-        },
-        {
-          text: 'Yes',
-          isPreferred: true,
-          /**
-           * Handle enabling biometric authentication
-           */
-          onPress: async () : Promise<void> => {
-            await authContext.setAuthMethods(['faceid', 'password']);
-            await continueProcessVaultResponse(
-              token,
-              refreshToken,
-              vaultResponseJson,
-              passwordHashBase64,
-              initiateLoginResponse
-            );
-          }
-        }
-      ]
-    );
+        ]
+      );
+    } else {
+      // If biometrics are not available on device, only allow password authentication.
+      await authContext.setAuthMethods(['password']);
+      await continueProcessVaultResponse(
+        token,
+        refreshToken,
+        vaultResponseJson,
+        passwordHashBase64,
+        initiateLoginResponse
+      );
+    }
   };
 
   /**
