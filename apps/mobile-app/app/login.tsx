@@ -24,6 +24,7 @@ import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 import { useVaultSync } from '@/hooks/useVaultSync';
 import { InAppBrowserView } from '@/components/ui/InAppBrowserView';
+import ConversionUtility from '@/utils/ConversionUtility';
 
 /**
  * Login screen.
@@ -172,7 +173,7 @@ export default function LoginScreen() : React.ReactNode {
     };
 
     // Set auth tokens, store encryption key and key derivation params, and initialize database
-    await authContext.setAuthTokens(credentials.username, token, refreshToken);
+    await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), token, refreshToken);
     await dbContext.storeEncryptionKey(passwordHashBase64);
     await dbContext.storeEncryptionKeyDerivationParams(encryptionKeyDerivationParams);
     await dbContext.initializeDatabase(vaultResponseJson);
@@ -227,7 +228,7 @@ export default function LoginScreen() : React.ReactNode {
     try {
       authContext.clearGlobalMessage();
 
-      const initiateLoginResponse = await srpUtil.initiateLogin(credentials.username);
+      const initiateLoginResponse = await srpUtil.initiateLogin(ConversionUtility.normalizeUsername(credentials.username));
 
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
         credentials.password,
@@ -242,7 +243,7 @@ export default function LoginScreen() : React.ReactNode {
       setLoginStatus('Validating credentials');
       await new Promise(resolve => requestAnimationFrame(resolve));
       const validationResponse = await srpUtil.validateLogin(
-        credentials.username,
+        ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
         rememberMe,
         initiateLoginResponse
@@ -317,7 +318,7 @@ export default function LoginScreen() : React.ReactNode {
       }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
-        credentials.username,
+        ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
         rememberMe,
         initiateLoginResponse,
