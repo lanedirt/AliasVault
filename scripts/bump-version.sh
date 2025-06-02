@@ -80,6 +80,11 @@ get_browser_extension_version() {
     grep "version: " ../apps/browser-extension/wxt.config.ts | head -n1 | tr -d '"' | tr -d ',' | tr -d ' ' | cut -d':' -f2
 }
 
+# Function to extract version from browser extension package.json
+get_package_json_version() {
+    grep "\"version\": " ../apps/browser-extension/package.json | tr -d '"' | tr -d ',' | tr -d ' ' | cut -d':' -f2
+}
+
 # Function to extract version from mobile app
 get_mobile_app_version() {
     grep "\"version\": " ../apps/mobile-app/app.json | tr -d '"' | tr -d ',' | tr -d ' ' | cut -d':' -f2
@@ -107,7 +112,8 @@ get_safari_version() {
 # Check current versions
 echo "Checking current versions..."
 server_version=$(get_server_version)
-browser_version=$(get_browser_extension_version)
+browser_wxt_version=$(get_browser_extension_version)
+browser_package_version=$(get_package_json_version)
 mobile_version=$(get_mobile_app_version)
 mobile_ts_version=$(get_mobile_app_ts_version)
 ios_version=$(get_ios_version)
@@ -117,7 +123,8 @@ safari_version=$(get_safari_version)
 # Create associative array of versions
 declare -A versions
 versions["server"]="$server_version"
-versions["browser"]="$browser_version"
+versions["browser_wxt"]="$browser_wxt_version"
+versions["browser_package"]="$browser_package_version"
 versions["mobile"]="$mobile_version"
 versions["mobile_ts"]="$mobile_ts_version"
 versions["ios"]="$ios_version"
@@ -127,7 +134,8 @@ versions["safari"]="$safari_version"
 # Create display names for output
 declare -A display_names
 display_names["server"]="Server"
-display_names["browser"]="Browser Extension"
+display_names["browser_wxt"]="Browser Extension (wxt.config.ts)"
+display_names["browser_package"]="Browser Extension (package.json)"
 display_names["mobile"]="Mobile App"
 display_names["mobile_ts"]="Mobile App (TS)"
 display_names["ios"]="iOS App"
@@ -194,6 +202,12 @@ echo "Updating browser extension version..."
 update_version "../apps/browser-extension/wxt.config.ts" \
     "version: \"[0-9]\+\.[0-9]\+\.[0-9]\+\"," \
     "version: \"$version\","
+
+# Update package.json version
+echo "Updating package.json version..."
+update_version "../apps/browser-extension/package.json" \
+    "\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"," \
+    "\"version\": \"$version\","
 
 # Update generic mobile app version
 echo "Updating mobile app version..."
