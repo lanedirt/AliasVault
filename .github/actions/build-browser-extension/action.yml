@@ -1,0 +1,93 @@
+name: "Build Browser Extension"
+description: "Builds, tests, lints, zips, and optionally uploads a browser extension"
+inputs:
+  browser:
+    description: "Target browser to build for (chrome, firefox, edge)"
+    required: true
+  upload_to_release:
+    description: "Whether to upload the resulting zip to GitHub Release"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: apps/browser-extension/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Build extension
+      run: npm run build:${{ inputs.browser }}
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Run tests
+      run: npm run test
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Run linting
+      run: npm run lint
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Zip Extension
+      run: npm run zip:${{ inputs.browser }}
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Rename zip with semver
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        mv dist/aliasvault-browser-extension-*-${{ inputs.browser }}.zip dist/aliasvault-browser-extension-${VERSION}-${{ inputs.browser }}.zip
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Unzip extension
+      run: |
+        mkdir -p dist/${{ inputs.browser }}-unpacked
+        unzip dist/aliasvault-browser-extension-${VERSION}-${{ inputs.browser }}.zip -d dist/${{ inputs.browser }}-unpacked
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: aliasvault-browser-extension-${{ inputs.browser }}-${{ env.VERSION }}
+        path: apps/browser-extension/dist/${{ inputs.browser }}-unpacked
+
+    - name: Unzip and upload Firefox sources
+      if: ${{ inputs.browser == 'firefox' }}
+      run: |
+        mkdir -p dist/sources-unpacked
+        unzip dist/aliasvault-browser-extension-${VERSION}-sources.zip -d dist/sources-unpacked
+      shell: bash
+      working-directory: apps/browser-extension
+
+    - name: Upload Firefox sources artifact
+      if: ${{ inputs.browser == 'firefox' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aliasvault-browser-extension-sources-${{ env.VERSION }}
+        path: apps/browser-extension/dist/sources-unpacked
+
+    - name: Upload to GitHub Release
+      if: ${{ inputs.upload_to_release == 'true' }}
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip
+
+    - name: Upload Firefox sources to Release
+      if: ${{ inputs.upload_to_release == 'true' && inputs.browser == 'firefox' }}
+      uses: softprops/action-gh-release@v1
+      with:
+        files: apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip

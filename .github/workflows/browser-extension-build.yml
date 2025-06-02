@@ -63,157 +63,32 @@ jobs:
   build-chrome-extension:
     needs: build-shared-libraries
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/browser-extension
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build Chrome Extension
+        uses: ./.github/actions/build-browser-extension
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/browser-extension/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build extension
-        run: npm run build:chrome
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Zip Chrome Extension
-        run: npm run zip:chrome
-
-      - name: Unzip for artifact
-        run: |
-          mkdir -p dist/chrome-unpacked
-          unzip dist/aliasvault-browser-extension-*-chrome.zip -d dist/chrome-unpacked
-
-      - name: Upload dist artifact Chrome
-        uses: actions/upload-artifact@v4
-        with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-chrome
-          path: apps/browser-extension/dist/chrome-unpacked
-
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
+          browser: chrome
 
   build-firefox-extension:
     needs: build-shared-libraries
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/browser-extension
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build Firefox Extension
+        uses: ./.github/actions/build-browser-extension
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/browser-extension/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build extension
-        run: npm run build:firefox
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Zip Firefox Extension
-        run: npm run zip:firefox
-
-      - name: Unzip for artifact
-        run: |
-          mkdir -p dist/firefox-unpacked
-          unzip dist/aliasvault-browser-extension-*-firefox.zip -d dist/firefox-unpacked
-          mkdir -p dist/sources-unpacked
-          unzip dist/aliasvault-browser-extension-*-sources.zip -d dist/sources-unpacked
-
-      - name: Upload dist artifact Firefox
-        uses: actions/upload-artifact@v4
-        with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-firefox
-          path: apps/browser-extension/dist/firefox-unpacked
-
-      - name: Upload dist artifact Firefox sources
-        uses: actions/upload-artifact@v4
-        with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-sources
-          path: apps/browser-extension/dist/sources-unpacked
-
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
+          browser: firefox
 
   build-edge-extension:
     needs: build-shared-libraries
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/browser-extension
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build Edge Extension
+        uses: ./.github/actions/build-browser-extension
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/browser-extension/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build extension
-        run: npm run build:edge
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Zip Edge Extension
-        run: npm run zip:edge
-
-      - name: Unzip for artifact
-        run: |
-          mkdir -p dist/edge-unpacked
-          unzip dist/aliasvault-browser-extension-*-edge.zip -d dist/edge-unpacked
-
-      - name: Upload dist artifact Edge
-        uses: actions/upload-artifact@v4
-        with:
-          name: aliasvault-browser-extension-${{ github.event_name == 'release' && github.ref_name || (github.ref_name == 'main' && format('main-{0}', steps.vars.outputs.sha_short) || steps.vars.outputs.sha_short) }}-edge
-          path: apps/browser-extension/dist/edge-unpacked
-
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
+          browser: edge
