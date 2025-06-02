@@ -43,7 +43,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const webApi = useWebApi();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
@@ -121,6 +121,13 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       const serviceName = extractServiceNameFromUrl(decodedUrl);
       setValue('ServiceUrl', decodedUrl);
       setValue('ServiceName', serviceName);
+    }
+
+    // On create mode, focus the service name field after a short delay to ensure the component is mounted
+    if (!isEditMode) {
+      setTimeout(() => {
+        serviceNameRef.current?.focus();
+      }, 100);
     }
   }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router]);
 
@@ -217,7 +224,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
     Keyboard.dismiss();
 
-    setIsLoading(true);
+    setIsSyncing(true);
 
     // Assemble the credential to save
     const credentialToSave: Credential = {
@@ -308,9 +315,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         });
       }, 200);
 
-      setIsLoading(false);
+      setIsSyncing(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsLoading, isSaveDisabled]);
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsSyncing, isSaveDisabled]);
 
   /**
    * Generate a random username.
@@ -374,7 +381,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
            * Delete the credential.
            */
           onPress: async () : Promise<void> => {
-            setIsLoading(true);
+            setIsSyncing(true);
 
             await executeVaultMutation(async () => {
               await dbContext.sqliteClient!.deleteCredentialById(id);
@@ -389,7 +396,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
               });
             }, 200);
 
-            setIsLoading(false);
+            setIsSyncing(false);
 
             /*
              * Navigate back to the root of the navigation stack.
@@ -545,7 +552,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   return (
     <>
       <Stack.Screen options={{ title: isEditMode ? 'Edit Credential' : 'Add Credential' }} />
-      {(isLoading) && (
+      {(isSyncing) && (
         <LoadingOverlay status={syncStatus} />
       )}
       <KeyboardAvoidingView
