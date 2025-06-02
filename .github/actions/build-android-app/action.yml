@@ -1,0 +1,132 @@
+name: "Build Android App"
+description: "Builds Android APK/AAB, optionally signs and uploads to GitHub Release"
+inputs:
+  run_tests:
+    description: "Whether to run Android unit tests"
+    required: false
+    default: "false"
+  signed:
+    description: "Whether to sign the Android build"
+    required: false
+    default: "false"
+  upload_to_release:
+    description: "Whether to upload the APK to GitHub Release"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: apps/mobile-app/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Extract version
+      run: |
+        VERSION=$(node -p "require('./app.json').expo.version")
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Build JS bundle (Expo)
+      run: |
+        mkdir -p build
+        npx expo export \
+          --dev \
+          --output-dir ./build \
+          --platform android
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Run Android Unit Tests
+      if: ${{ inputs.run_tests == 'true' }}
+      run: |
+        cd android
+        ./gradlew :app:testDebugUnitTest --tests "net.aliasvault.app.*"
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Upload Android Test Reports
+      if: ${{ inputs.run_tests == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-test-reports
+        path: apps/mobile-app/android/app/build/reports/tests/testDebugUnitTest/
+        retention-days: 7
+
+    - name: Decode keystore
+      if: ${{ inputs.signed == 'true' }}
+      run: echo "${{ env.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Configure signing
+      if: ${{ inputs.signed == 'true' }}
+      run: |
+        cat >> android/gradle.properties <<EOF
+        ALIASVAULT_UPLOAD_STORE_FILE=keystore.jks
+        ALIASVAULT_UPLOAD_KEY_ALIAS=${{ env.ANDROID_KEY_ALIAS }}
+        ALIASVAULT_UPLOAD_STORE_PASSWORD=${{ env.ANDROID_KEYSTORE_PASSWORD }}
+        ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ env.ANDROID_KEY_PASSWORD }}
+        EOF
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Build APK & AAB (Release only if signed)
+      if: ${{ inputs.signed == 'true' }}
+      run: |
+        cd android
+        ./gradlew bundleRelease
+        ./gradlew assembleRelease
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Rename APK and AAB files
+      if: ${{ inputs.signed == 'true' }}
+      run: |
+        mv android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/aliasvault-${VERSION}-android.apk
+        mv android/app/build/outputs/bundle/release/app-release.aab android/app/build/outputs/bundle/release/aliasvault-${VERSION}-android.aab
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Upload AAB as artifact
+      if: ${{ inputs.signed == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aliasvault-${{ env.VERSION }}-android.aab
+        path: apps/mobile-app/android/app/build/outputs/bundle/release/aliasvault-${{ env.VERSION }}-android.aab
+        retention-days: 14
+
+    - name: Upload APK as artifact
+      if: ${{ inputs.signed == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aliasvault-${{ env.VERSION }}-android.apk
+        path: apps/mobile-app/android/app/build/outputs/apk/release/aliasvault-${{ env.VERSION }}-android.apk
+        retention-days: 14
+
+    - name: Upload APK to release
+      if: ${{ inputs.upload_to_release == 'true' }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: apps/mobile-app/android/app/build/outputs/apk/release/aliasvault-${{ env.VERSION }}-android.apk
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+
