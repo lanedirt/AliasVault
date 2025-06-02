@@ -53,7 +53,7 @@ runs:
     - name: Unzip extension
       run: |
         mkdir -p dist/${{ inputs.browser }}-unpacked
-        unzip dist/aliasvault-browser-extension-${VERSION}-${{ inputs.browser }}.zip -d dist/${{ inputs.browser }}-unpacked
+        unzip dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip -d dist/${{ inputs.browser }}-unpacked
       shell: bash
       working-directory: apps/browser-extension
 
@@ -81,9 +81,10 @@ runs:
     - name: Rename zip files
       run: |
         mv apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-${{ inputs.browser }}.zip
-        mv apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-browser-extension-sources.zip
+        if [ -f apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip ]; then
+          mv apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-browser-extension-sources.zip
+        fi
       shell: bash
-      working-directory: apps/browser-extension
 
     - name: Upload to GitHub Release
       if: ${{ inputs.upload_to_release == 'true' }}

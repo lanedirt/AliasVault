@@ -17,6 +17,11 @@ on:
         required: true
         type: boolean
         default: false
+      upload_to_app_store_connect:
+        description: 'Upload iOS IPA to App Store Connect'
+        required: true
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -153,75 +158,18 @@ jobs:
     needs: setup
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_ios_signed == 'true'
     runs-on: macos-15
-    defaults:
-      run:
-        working-directory: apps/mobile-app
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build iOS App
+        uses: ./.github/actions/build-ios-app
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: apps/mobile-app/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Install Fastlane
-        run: gem install fastlane
-
-      - name: Create ASC private key file
-        run: |
-          mkdir -p $RUNNER_TEMP/asc
-          echo "${{ secrets.ASC_PRIVATE_KEY_BASE64 }}" | base64 --decode > $RUNNER_TEMP/asc/AuthKey.p8
-
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install
-
-      - name: Build iOS IPA
+          signed: true
+          upload_to_app_store_connect: ${{ github.event.inputs.upload_to_app_store_connect }}
         env:
-          IDEFileSystemSynchronizedGroupsAreEnabled: NO
-          XCODE_WORKSPACE: AliasVault.xcworkspace
-          XCODE_SCHEME: AliasVault
-          XCODE_CONFIGURATION: Release
-          XCODE_ARCHIVE_PATH: AliasVault.xcarchive
-          XCODE_EXPORT_PATH: ./build
-          XCODE_SKIP_FILESYSTEM_SYNC: true
-        run: |
-          cd ios
-          xcodebuild clean -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration "$XCODE_CONFIGURATION"
-          xcodebuild -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration "$XCODE_CONFIGURATION" \
-            -archivePath "$XCODE_ARCHIVE_PATH" \
-            -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath $RUNNER_TEMP/asc/AuthKey.p8 \
-            -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
-            -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} \
-            archive
-          xcodebuild -exportArchive \
-            -archivePath "$XCODE_ARCHIVE_PATH" \
-            -exportOptionsPlist ../exportOptions.plist \
-            -exportPath "$XCODE_EXPORT_PATH"
-
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-ipa
-          path: apps/mobile-app/ios/build/AliasVault.ipa
-          retention-days: 14
-
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_TEAM_ID: ${{ secrets.ASC_TEAM_ID }}

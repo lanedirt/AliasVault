@@ -1,0 +1,118 @@
+name: "Build iOS App"
+description: "Builds iOS App, optionally signs and uploads to App Store Connect"
+inputs:
+  run_tests:
+    description: "Whether to run iOS unit tests"
+    required: false
+    default: "false"
+  signed:
+    description: "Whether to sign the iOS build"
+    required: false
+    default: "false"
+  upload_to_app_store_connect:
+    description: "Whether to upload the iOS App to App Store Connect"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: apps/mobile-app/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Extract version
+      run: |
+        VERSION=$(node -p "require('./app.json').expo.version")
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+
+    - name: Install Fastlane
+      run: gem install fastlane
+      shell: bash
+
+    - name: Install CocoaPods
+      run: |
+        sudo gem install cocoapods
+      shell: bash
+
+    - name: Create ASC private key file
+      if: ${{ inputs.signed == 'true' }}
+      run: |
+        mkdir -p $RUNNER_TEMP/asc
+        echo "${{ env.ASC_PRIVATE_KEY_BASE64 }}" | base64 --decode > $RUNNER_TEMP/asc/AuthKey.p8
+      shell: bash
+
+    - name: Install CocoaPods
+      run: |
+        cd ios
+        pod install
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Build iOS IPA
+      if: ${{ inputs.signed == 'true' }}
+      env:
+        IDEFileSystemSynchronizedGroupsAreEnabled: NO
+        XCODE_WORKSPACE: AliasVault.xcworkspace
+        XCODE_SCHEME: AliasVault
+        XCODE_CONFIGURATION: Release
+        XCODE_ARCHIVE_PATH: AliasVault.xcarchive
+        XCODE_EXPORT_PATH: ./build
+        XCODE_SKIP_FILESYSTEM_SYNC: true
+      run: |
+        cd ios
+        xcodebuild clean -workspace "$XCODE_WORKSPACE" \
+          -scheme "$XCODE_SCHEME" \
+          -configuration "$XCODE_CONFIGURATION"
+        xcodebuild -workspace "$XCODE_WORKSPACE" \
+          -scheme "$XCODE_SCHEME" \
+          -configuration "$XCODE_CONFIGURATION" \
+          -archivePath "$XCODE_ARCHIVE_PATH" \
+          -destination 'generic/platform=iOS' \
+          -allowProvisioningUpdates \
+          -authenticationKeyPath $RUNNER_TEMP/asc/AuthKey.p8 \
+          -authenticationKeyID ${{ env.ASC_KEY_ID }} \
+          -authenticationKeyIssuerID ${{ env.ASC_ISSUER_ID }} \
+          archive
+        xcodebuild -exportArchive \
+          -archivePath "$XCODE_ARCHIVE_PATH" \
+          -exportOptionsPlist ../exportOptions.plist \
+          -exportPath "$XCODE_EXPORT_PATH"
+      shell: bash
+      working-directory: apps/mobile-app
+
+    - name: Upload IPA as artifact
+      if: ${{ inputs.signed == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aliasvault-${{ env.VERSION }}-ios.ipa
+        path: apps/mobile-app/ios/build/AliasVault.ipa
+        retention-days: 14
+
+    - name: Upload to App Store Connect via Fastlane
+      if: ${{ inputs.upload_to_app_store_connect == 'true' }}
+      env:
+        ASC_KEY_ID: ${{ env.ASC_KEY_ID }}
+        ASC_ISSUER_ID: ${{ env.ASC_ISSUER_ID }}
+      run: |
+        cd apps/mobile-app/ios
+        fastlane pilot upload \
+          --ipa "./build/AliasVault.ipa" \
+          --api_key_path "$RUNNER_TEMP/asc/AuthKey.p8" \
+          --skip_waiting_for_build_processing true
+      shell: bash
