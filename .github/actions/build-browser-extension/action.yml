@@ -60,14 +60,14 @@ runs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: aliasvault-browser-extension-${{ inputs.browser }}-${{ env.VERSION }}
+        name: aliasvault-${{ env.VERSION }}-${{ inputs.browser }}
         path: apps/browser-extension/dist/${{ inputs.browser }}-unpacked
 
     - name: Unzip and upload Firefox sources
       if: ${{ inputs.browser == 'firefox' }}
       run: |
         mkdir -p dist/sources-unpacked
-        unzip dist/aliasvault-browser-extension-${VERSION}-sources.zip -d dist/sources-unpacked
+        unzip dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip -d dist/sources-unpacked
       shell: bash
       working-directory: apps/browser-extension
 
@@ -75,15 +75,22 @@ runs:
       if: ${{ inputs.browser == 'firefox' }}
       uses: actions/upload-artifact@v4
       with:
-        name: aliasvault-browser-extension-${{ env.VERSION }}-sources
+        name: aliasvault-${{ env.VERSION }}-browser-extension-sources
         path: apps/browser-extension/dist/sources-unpacked
+
+    - name: Rename zip files
+      run: |
+        mv apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-${{ inputs.browser }}.zip
+        mv apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-browser-extension-sources.zip
+      shell: bash
+      working-directory: apps/browser-extension
 
     - name: Upload to GitHub Release
       if: ${{ inputs.upload_to_release == 'true' }}
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-${{ inputs.browser }}.zip
+          apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-${{ inputs.browser }}.zip
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
@@ -91,6 +98,6 @@ runs:
       if: ${{ inputs.upload_to_release == 'true' && inputs.browser == 'firefox' }}
       uses: softprops/action-gh-release@v1
       with:
-        files: apps/browser-extension/dist/aliasvault-browser-extension-${{ env.VERSION }}-sources.zip
+        files: apps/browser-extension/dist/aliasvault-${{ env.VERSION }}-browser-extension-sources.zip
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
