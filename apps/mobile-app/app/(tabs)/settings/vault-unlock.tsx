@@ -201,7 +201,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
             </ThemedText>
             {!hasBiometrics && (
               <ThemedText style={[styles.helpText, { color: colors.errorBorder }]}>
-                {biometricDisplayName} is blocked in device settings. Tap to open settings and enable it.
+                {biometricDisplayName} is not available. Tap to open settings and/or go to your device settings to enable and configure it.
               </ThemedText>
             )}
           </TouchableOpacity>
