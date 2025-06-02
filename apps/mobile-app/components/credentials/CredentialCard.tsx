@@ -1,5 +1,8 @@
-import { StyleSheet, View, Text, TouchableOpacity, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
+import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
+import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-toast-message';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useColors } from '@/hooks/useColorScheme';
@@ -7,12 +10,13 @@ import { Credential } from '@/utils/types/Credential';
 
 type CredentialCardProps = {
   credential: Credential;
+  onCredentialDelete?: (credentialId: string) => Promise<void>;
 };
 
 /**
  * Credential card component.
  */
-export function CredentialCard({ credential }: CredentialCardProps) : React.ReactNode {
+export function CredentialCard({ credential, onCredentialDelete }: CredentialCardProps) : React.ReactNode {
   const colors = useColors();
 
   /**
@@ -50,6 +54,139 @@ export function CredentialCard({ credential }: CredentialCardProps) : React.Reac
     return returnValue.length > 33 ? returnValue.slice(0, 30) + '...' : returnValue;
   };
 
+  /**
+   * Handles the context menu action when an item is selected.
+   * @param event - The event object containing the selected action details
+   */
+  const handleContextMenuAction = (event: OnPressMenuItemEvent): void => {
+    const { name } = event.nativeEvent;
+
+    switch (name) {
+      case 'Edit':
+        Keyboard.dismiss();
+        router.push({
+          pathname: '/(tabs)/credentials/add-edit',
+          params: { id: credential.Id }
+        });
+        break;
+      case 'Delete':
+        Keyboard.dismiss();
+        Alert.alert(
+          "Delete Credential",
+          "Are you sure you want to delete this credential? This action cannot be undone.",
+          [
+            {
+              text: "Cancel",
+              style: "cancel"
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              /**
+               * Handles the delete credential action.
+               */
+              onPress: async () : Promise<void> => {
+                if (onCredentialDelete) {
+                  await onCredentialDelete(credential.Id);
+                }
+              }
+            }
+          ]
+        );
+        break;
+      case 'Copy Username':
+        if (credential.Username) {
+          Clipboard.setStringAsync(credential.Username);
+          Toast.show({
+            type: 'success',
+            text1: 'Username copied to clipboard',
+            position: 'bottom',
+          });
+        }
+        break;
+      case 'Copy Email':
+        if (credential.Alias?.Email) {
+          Clipboard.setStringAsync(credential.Alias.Email);
+          Toast.show({
+            type: 'success',
+            text1: 'Email copied to clipboard',
+            position: 'bottom',
+          });
+        }
+        break;
+      case 'Copy Password':
+        if (credential.Password) {
+          Clipboard.setStringAsync(credential.Password);
+          Toast.show({
+            type: 'success',
+            text1: 'Password copied to clipboard',
+            position: 'bottom',
+          });
+        }
+        break;
+    }
+  };
+
+  /**
+   * Gets the menu actions for the context menu based on available credential data.
+   * @returns Array of menu action objects with title and icon
+   */
+  const getMenuActions = (): {
+    title: string;
+    systemIcon: string;
+    destructive?: boolean;
+  }[] => {
+    const actions = [
+      {
+        title: 'Edit',
+        systemIcon: Platform.select({
+          ios: 'pencil',
+          android: 'baseline_edit',
+        }),
+      },
+      {
+        title: 'Delete',
+        systemIcon: Platform.select({
+          ios: 'trash',
+          android: 'baseline_delete',
+        }),
+        destructive: true,
+      },
+    ];
+
+    if (credential.Username) {
+      actions.push({
+        title: 'Copy Username',
+        systemIcon: Platform.select({
+          ios: 'person',
+          android: 'baseline_person',
+        }),
+      });
+    }
+
+    if (credential.Alias?.Email) {
+      actions.push({
+        title: 'Copy Email',
+        systemIcon: Platform.select({
+          ios: 'envelope',
+          android: 'baseline_email',
+        }),
+      });
+    }
+
+    if (credential.Password) {
+      actions.push({
+        title: 'Copy Password',
+        systemIcon: Platform.select({
+          ios: 'key',
+          android: 'baseline_key',
+        }),
+      });
+    }
+
+    return actions;
+  };
+
   const styles = StyleSheet.create({
     credentialCard: {
       backgroundColor: colors.accentBackground,
@@ -83,25 +220,31 @@ export function CredentialCard({ credential }: CredentialCardProps) : React.Reac
   });
 
   return (
-    <TouchableOpacity
-      style={styles.credentialCard}
-      onPress={() => {
-        Keyboard.dismiss();
-        router.push(`/(tabs)/credentials/${credential.Id}`);
-      }}
-      activeOpacity={0.7}
+    <ContextMenu
+      title="Credential Options"
+      actions={getMenuActions()}
+      onPress={handleContextMenuAction}
     >
-      <View style={styles.credentialContent}>
-        <CredentialIcon logo={credential.Logo} style={styles.logo} />
-        <View style={styles.credentialInfo}>
-          <Text style={styles.serviceName}>
-            {getCredentialServiceName(credential)}
-          </Text>
-          <Text style={styles.credentialText}>
-            {getCredentialDisplayText(credential)}
-          </Text>
+      <TouchableOpacity
+        style={styles.credentialCard}
+        onPress={() => {
+          Keyboard.dismiss();
+          router.push(`/(tabs)/credentials/${credential.Id}`);
+        }}
+        activeOpacity={0.7}
+      >
+        <View style={styles.credentialContent}>
+          <CredentialIcon logo={credential.Logo} style={styles.logo} />
+          <View style={styles.credentialInfo}>
+            <Text style={styles.serviceName}>
+              {getCredentialServiceName(credential)}
+            </Text>
+            <Text style={styles.credentialText}>
+              {getCredentialDisplayText(credential)}
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </ContextMenu>
   );
 }

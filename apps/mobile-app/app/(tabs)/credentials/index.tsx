@@ -24,6 +24,8 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useWebApi } from '@/context/WebApiContext';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ServiceUrlNotice } from '@/components/credentials/ServiceUrlNotice';
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
 
 /**
  * Credentials screen.
@@ -44,6 +46,8 @@ export default function CredentialsScreen() : React.ReactNode {
   const [refreshing, setRefreshing] = useMinDurationLoading(false, 200);
   const [serviceUrl, setServiceUrl] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const authContext = useAuth();
   const dbContext = useDb();
@@ -222,8 +226,12 @@ export default function CredentialsScreen() : React.ReactNode {
       color: colors.textMuted,
       fontSize: 20,
     },
+    container: {
+      paddingHorizontal: 0,
+    },
     contentContainer: {
       paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 10,
+      paddingHorizontal: 14,
       paddingTop: Platform.OS === 'ios' ? 42 : 16,
     },
     emptyText: {
@@ -270,6 +278,22 @@ export default function CredentialsScreen() : React.ReactNode {
     });
   }, [navigation, headerButtons]);
 
+  /**
+   * Delete a credential.
+   */
+  const onCredentialDelete = useCallback(async (credentialId: string) : Promise<void> => {
+    setIsSyncing(true);
+
+    await executeVaultMutation(async () => {
+      await dbContext.sqliteClient!.deleteCredentialById(credentialId);
+      setIsSyncing(false);
+    });
+
+    // Refresh list after deletion with a small delay to ensure feedback is visible.
+    await new Promise(resolve => setTimeout(resolve, 250));
+    await loadCredentials();
+  }, [dbContext.sqliteClient, executeVaultMutation, loadCredentials]);
+
   // Handle deep link parameters
   useFocusEffect(
     useCallback(() => {
@@ -280,7 +304,10 @@ export default function CredentialsScreen() : React.ReactNode {
   );
 
   return (
-    <ThemedContainer>
+    <ThemedContainer style={styles.container}>
+      {(isSyncing) && (
+        <LoadingOverlay status={syncStatus} />
+      )}
       <CollapsibleHeader
         title="Credentials"
         scrollY={scrollY}
@@ -354,7 +381,7 @@ export default function CredentialsScreen() : React.ReactNode {
             isLoadingCredentials ? (
               <SkeletonLoader count={1} height={60} parts={2} />
             ) : (
-              <CredentialCard credential={item} />
+              <CredentialCard credential={item} onCredentialDelete={onCredentialDelete} />
             )
           }
           ListEmptyComponent={
@@ -366,6 +393,7 @@ export default function CredentialsScreen() : React.ReactNode {
           }
         />
       </ThemedView>
+      {isLoading && <LoadingOverlay status={syncStatus || 'Deleting credential...'} />}
     </ThemedContainer>
   );
 }

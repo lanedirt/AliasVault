@@ -61,6 +61,7 @@
     "react-native": "0.76.9",
     "react-native-aes-gcm-crypto": "^0.2.2",
     "react-native-argon2": "^2.0.1",
+    "react-native-context-menu-view": "^1.19.0",
     "react-native-edge-to-edge": "^1.6.0",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-get-random-values": "^1.11.0",
