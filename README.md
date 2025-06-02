@@ -1,5 +1,5 @@
 # <img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="35" alt="AliasVault"> AliasVault
-End-to-end encrypted password manager with built-in alias and email generation — giving you full control over your online identity and safeguarding your privacy. AliasVault: the privacy toolbox that you control.
+The privacy-first password & email alias manager. Fully end-to-end encrypted, with built-in alias generation and email server — giving you full control over your online identity and safeguarding your privacy.
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
 [![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
