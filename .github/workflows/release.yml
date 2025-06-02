@@ -98,31 +98,29 @@ jobs:
           ALIASVAULT_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
-      - name: Build JS bundle (Android - Expo)
-        run: |
-          mkdir -p build
-          npx expo export \
-            --dev \
-            --output-dir ./build \
-            --platform android
-
       - name: Build Signed APK & AAB
         run: |
           cd android
           ./gradlew bundleRelease
           ./gradlew assembleRelease
 
+      - name: Rename APK and AAB files
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk aliasvault-app-android-${{ github.ref_name }}.apk
+          mv android/app/build/outputs/bundle/release/app-release.aab aliasvault-app-android-${{ github.ref_name }}.aab
+
       - name: Upload APK to release
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: aliasvault-app-android-${{ github.ref_name }}.apk
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload AAB to release
-        uses: softprops/action-gh-release@v2
+      - name: Upload AAB as a workflow artifact (for internal Play Store submission)
+        uses: actions/upload-artifact@v4
         with:
-          files: android/app/build/outputs/bundle/release/app-release.aab
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: aliasvault-app-android-${{ github.ref_name }}.aab
+          path: apps/mobile-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
 
   build-and-push-docker:
     runs-on: ubuntu-latest
