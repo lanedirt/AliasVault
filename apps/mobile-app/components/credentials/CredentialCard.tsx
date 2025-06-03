@@ -97,31 +97,37 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
       case 'Copy Username':
         if (credential.Username) {
           Clipboard.setStringAsync(credential.Username);
-          Toast.show({
-            type: 'success',
-            text1: 'Username copied to clipboard',
-            position: 'bottom',
-          });
+          if (Platform.OS === 'ios') {
+            Toast.show({
+              type: 'success',
+              text1: 'Username copied to clipboard',
+              position: 'bottom',
+            });
+          }
         }
         break;
       case 'Copy Email':
         if (credential.Alias?.Email) {
           Clipboard.setStringAsync(credential.Alias.Email);
-          Toast.show({
-            type: 'success',
-            text1: 'Email copied to clipboard',
-            position: 'bottom',
-          });
+          if (Platform.OS === 'ios') {
+            Toast.show({
+              type: 'success',
+              text1: 'Email copied to clipboard',
+              position: 'bottom',
+            });
+          }
         }
         break;
       case 'Copy Password':
         if (credential.Password) {
           Clipboard.setStringAsync(credential.Password);
-          Toast.show({
-            type: 'success',
-            text1: 'Password copied to clipboard',
-            position: 'bottom',
-          });
+          if (Platform.OS === 'ios') {
+            Toast.show({
+              type: 'success',
+              text1: 'Password copied to clipboard',
+              position: 'bottom',
+            });
+          }
         }
         break;
     }
@@ -224,12 +230,16 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
       title="Credential Options"
       actions={getMenuActions()}
       onPress={handleContextMenuAction}
+      previewBackgroundColor={colors.accentBackground}
     >
       <TouchableOpacity
         style={styles.credentialCard}
         onPress={() => {
           Keyboard.dismiss();
           router.push(`/(tabs)/credentials/${credential.Id}`);
+        }}
+        onLongPress={() => {
+          // Ignore long press to prevent context menu long press from triggering the credential card press.
         }}
         activeOpacity={0.7}
       >
