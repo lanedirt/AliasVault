@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import { View, TextInput, TextInputProps, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, TextInput, TextInputProps, StyleSheet, TouchableHighlight, Platform } from 'react-native';
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -38,6 +38,7 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
   const colors = useColors();
   const inputRef = React.useRef<TextInput>(null);
   const currentValue = useRef<string>('');
+  const [isFocused, setIsFocused] = React.useState(false);
 
   useImperativeHandle(ref, () => ({
     /**
@@ -62,6 +63,11 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
       borderLeftWidth: 1,
       padding: 10,
     },
+    clearButton: {
+      borderRadius: 6,
+      marginRight: 4,
+      padding: 6,
+    },
     errorText: {
       color: colorRed,
       fontSize: 12,
@@ -71,6 +77,7 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
       color: colors.text,
       flex: 1,
       fontSize: 16,
+      marginRight: 5,
       padding: 10,
     },
     inputContainer: {
@@ -104,6 +111,8 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
       name={name}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         currentValue.current = value as string;
+        const showClearButton = Platform.OS === 'android' && value && value.length > 0 && isFocused;
+
         return (
           <View style={styles.inputGroup}>
             <ThemedText style={styles.inputLabel}>{label} {required && <ThemedText style={styles.requiredIndicator}>*</ThemedText>}</ThemedText>
@@ -117,8 +126,20 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
                 autoCapitalize="none"
                 autoComplete="off"
                 autoCorrect={false}
+                clearButtonMode={Platform.OS === 'ios' ? "while-editing" : "never"}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 {...props}
               />
+              {showClearButton && (
+                <TouchableHighlight
+                  style={styles.clearButton}
+                  onPress={() => onChange('')}
+                  underlayColor={colors.accentBackground}
+                >
+                  <MaterialIcons name="close" size={16} color={colors.textMuted} />
+                </TouchableHighlight>
+              )}
               {buttons?.map((button, index) => (
                 <TouchableHighlight
                   key={index}
