@@ -173,7 +173,8 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       borderColor: colors.accentBorder,
       borderRadius: 8,
       borderWidth: 1,
-      marginBottom: 12,
+      marginBottom: 6,
+      marginTop: 8,
       padding: 12,
     },
     placeholderText: {
