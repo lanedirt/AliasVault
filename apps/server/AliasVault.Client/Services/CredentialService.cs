@@ -14,15 +14,13 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
-using AliasVault.Generators.Identity.Implementations.Factories;
-using AliasVault.Generators.Identity.Models;
 using AliasVault.Shared.Models.WebApi.Favicon;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Service class for credential operations.
 /// </summary>
-public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config)
+public sealed class CredentialService(HttpClient httpClient, DbService dbService, Config config, JsInteropService jsInteropService)
 {
     /// <summary>
     /// The default service URL used as placeholder in forms. When this value is set, the URL field is considered empty
@@ -73,15 +71,15 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
 
         do
         {
-            // Generate a random identity using the IIdentityGenerator implementation
-            var identity = await IdentityGeneratorFactory.CreateIdentityGenerator(dbService.Settings.DefaultIdentityLanguage).GenerateRandomIdentityAsync();
+            // Generate a random identity using the TypeScript library
+            var identity = await jsInteropService.GenerateRandomIdentityAsync(dbService.Settings.DefaultIdentityLanguage);
 
             // Generate random values for the Identity properties
             credential.Username = identity.NickName;
             credential.Alias.FirstName = identity.FirstName;
             credential.Alias.LastName = identity.LastName;
             credential.Alias.NickName = identity.NickName;
-            credential.Alias.Gender = identity.Gender == Gender.Male ? "Male" : "Female";
+            credential.Alias.Gender = identity.Gender;
             credential.Alias.BirthDate = identity.BirthDate;
 
             // Set the email
@@ -105,9 +103,9 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         }
         while (isEmailTaken && attempts < MaxAttempts);
 
-        // Generate password
+        // Generate password using the TypeScript library
         var passwordSettings = dbService.Settings.PasswordSettings;
-        credential.Passwords.First().Value = GenerateRandomPassword(passwordSettings);
+        credential.Passwords.First().Value = await jsInteropService.GenerateRandomPasswordAsync(passwordSettings);
 
         return credential;
     }

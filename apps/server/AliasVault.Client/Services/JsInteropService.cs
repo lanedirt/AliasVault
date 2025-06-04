@@ -9,7 +9,6 @@ namespace AliasVault.Client.Services;
 
 using System.Security.Cryptography;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -18,6 +17,19 @@ using Microsoft.JSInterop;
 /// <param name="jsRuntime">IJSRuntime.</param>
 public sealed class JsInteropService(IJSRuntime jsRuntime)
 {
+    private IJSObjectReference? _identityGeneratorModule;
+    private IJSObjectReference? _passwordGeneratorModule;
+
+    /// <summary>
+    /// Initialize the identity generator module.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task InitializeAsync()
+    {
+        _identityGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/shared/identity-generator/index.mjs");
+        _passwordGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/shared/password-generator/index.mjs");
+    }
+
     /// <summary>
     /// Symmetrically encrypts a string using the provided encryption key.
     /// </summary>
@@ -273,6 +285,73 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
 
         var base64Ciphertext = Convert.ToBase64String(cipherBytes);
         return await jsRuntime.InvokeAsync<byte[]>("cryptoInterop.decryptBytes", base64Ciphertext, encryptionKey);
+    }
+
+    /// <summary>
+    /// Generates a random identity using the specified language.
+    /// </summary>
+    /// <param name="language">The language to use for generating the identity (e.g. "en", "nl").</param>
+    /// <returns>A tuple containing the generated identity information.</returns>
+    public async Task<(string FirstName, string LastName, string NickName, string EmailPrefix, string Gender, DateTime BirthDate)> GenerateRandomIdentityAsync(string language)
+    {
+        try
+        {
+            if (_identityGeneratorModule == null)
+            {
+                await InitializeAsync();
+                if (_identityGeneratorModule == null)
+                {
+                    throw new InvalidOperationException("Failed to initialize identity generator module");
+                }
+            }
+
+            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("createGenerator", language);
+            var result = await generatorInstance.InvokeAsync<JsonElement>("generateRandomIdentity");
+
+            return (
+                result.GetProperty("firstName").GetString()!,
+                result.GetProperty("lastName").GetString()!,
+                result.GetProperty("nickName").GetString()!,
+                result.GetProperty("emailPrefix").GetString()!,
+                result.GetProperty("gender").GetString()!,
+                result.GetProperty("birthDate").GetDateTime());
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error generating identity: {ex.Message}");
+            throw new InvalidOperationException("Failed to generate random identity", ex);
+        }
+    }
+
+    /// <summary>
+    /// Generates a random password using the specified settings.
+    /// </summary>
+    /// <param name="settings">The password settings to use.</param>
+    /// <returns>The generated password.</returns>
+    public async Task<string> GenerateRandomPasswordAsync(PasswordSettings settings)
+    {
+        try
+        {
+            if (_passwordGeneratorModule == null)
+            {
+                await InitializeAsync();
+                if (_passwordGeneratorModule == null)
+                {
+                    throw new InvalidOperationException("Failed to initialize password generator module");
+                }
+            }
+
+            var generatorInstance = await _passwordGeneratorModule.InvokeAsync<IJSObjectReference>("createPasswordGenerator", settings);
+
+            var result = await generatorInstance.InvokeAsync<string>("generateRandomPassword");
+
+            return result;
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error generating password: {ex.Message}");
+            throw new InvalidOperationException("Failed to generate random password", ex);
+        }
     }
 
     /// <summary>
