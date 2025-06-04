@@ -233,8 +233,8 @@ var PasswordGenerator = class {
 };
 
 // src/factories/PasswordGeneratorFactory.ts
-var createPasswordGenerator = () => {
-  return new PasswordGenerator();
+var createPasswordGenerator = (settings) => {
+  return new PasswordGenerator(settings);
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

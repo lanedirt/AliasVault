@@ -206,8 +206,8 @@ var PasswordGenerator = class {
 };
 
 // src/factories/PasswordGeneratorFactory.ts
-var createPasswordGenerator = () => {
-  return new PasswordGenerator();
+var createPasswordGenerator = (settings) => {
+  return new PasswordGenerator(settings);
 };
 export {
   PasswordGenerator,
