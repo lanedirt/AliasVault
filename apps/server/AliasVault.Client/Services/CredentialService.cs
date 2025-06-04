@@ -33,29 +33,15 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     /// </summary>
     /// <param name="settings">PasswordSettings model.</param>
     /// <returns>Random password.</returns>
-    public static string GenerateRandomPassword(PasswordSettings settings)
+    public async Task<string> GenerateRandomPasswordAsync(PasswordSettings settings)
     {
-        // Generate a random password using a IPasswordGenerator implementation.
-        var passwordBuilder = new SpamOK.PasswordGenerator.BasicPasswordBuilder();
-
         // Sanity check: if all settings are false, then default to use lowercase letters only.
         if (!settings.UseLowercase && !settings.UseUppercase && !settings.UseNumbers && !settings.UseSpecialChars && !settings.UseNonAmbiguousChars)
         {
             settings.UseLowercase = true;
         }
 
-        // Apply the settings.
-        var password = passwordBuilder
-            .SetLength(settings.Length)
-            .UseLowercaseLetters(settings.UseLowercase)
-            .UseUppercaseLetters(settings.UseUppercase)
-            .UseNumbers(settings.UseNumbers)
-            .UseSpecialChars(settings.UseSpecialChars)
-            .UseNonAmbiguousChars(settings.UseNonAmbiguousChars)
-            .GeneratePassword()
-            .ToString();
-
-        return password;
+        return await jsInteropService.GenerateRandomPasswordAsync(settings);
     }
 
     /// <summary>

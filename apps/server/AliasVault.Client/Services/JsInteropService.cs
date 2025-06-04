@@ -291,8 +291,8 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// Generates a random identity using the specified language.
     /// </summary>
     /// <param name="language">The language to use for generating the identity (e.g. "en", "nl").</param>
-    /// <returns>A tuple containing the generated identity information.</returns>
-    public async Task<(string FirstName, string LastName, string NickName, string EmailPrefix, string Gender, DateTime BirthDate)> GenerateRandomIdentityAsync(string language)
+    /// <returns>A <see cref="IdentityGeneratorResult"/> containing the generated identity information.</returns>
+    public async Task<IdentityGeneratorResult> GenerateRandomIdentityAsync(string language)
     {
         try
         {
@@ -306,15 +306,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             }
 
             var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("createGenerator", language);
-            var result = await generatorInstance.InvokeAsync<JsonElement>("generateRandomIdentity");
+            var result = await generatorInstance.InvokeAsync<IdentityGeneratorResult>("generateRandomIdentity");
 
-            return (
-                result.GetProperty("firstName").GetString()!,
-                result.GetProperty("lastName").GetString()!,
-                result.GetProperty("nickName").GetString()!,
-                result.GetProperty("emailPrefix").GetString()!,
-                result.GetProperty("gender").GetString()!,
-                result.GetProperty("birthDate").GetDateTime());
+            return result;
         }
         catch (JSException ex)
         {
@@ -352,6 +346,42 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             await Console.Error.WriteLineAsync($"JavaScript error generating password: {ex.Message}");
             throw new InvalidOperationException("Failed to generate random password", ex);
         }
+    }
+
+    /// <summary>
+    /// Represents the result of a JavaScript identity generator operation.
+    /// </summary>
+    public sealed class IdentityGeneratorResult
+    {
+        /// <summary>
+        /// Gets the first name.
+        /// </summary>
+        public string? FirstName { get; init; }
+
+        /// <summary>
+        /// Gets the last name.
+        /// </summary>
+        public string? LastName { get; init; }
+
+        /// <summary>
+        /// Gets the birth date.
+        /// </summary>
+        public DateTime BirthDate { get; init; }
+
+        /// <summary>
+        /// Gets the email prefix.
+        /// </summary>
+        public string? EmailPrefix { get; init; }
+
+        /// <summary>
+        /// Gets the nickname.
+        /// </summary>
+        public string? NickName { get; init; }
+
+        /// <summary>
+        /// Gets the gender.
+        /// </summary>
+        public string? Gender { get; init; }
     }
 
     /// <summary>
