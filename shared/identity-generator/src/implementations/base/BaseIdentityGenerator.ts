@@ -44,7 +44,7 @@ export abstract class BaseIdentityGenerator implements IIdentityGenerator {
   /**
    * Generate a random identity.
    */
-  public async generateRandomIdentity(): Promise<Identity> {
+  public generateRandomIdentity(): Identity {
     const identity: Identity = {
       firstName: '',
       lastName: '',

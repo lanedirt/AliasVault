@@ -31,4 +31,4 @@ export type PasswordSettings = {
    * Whether to use non-ambiguous characters.
    */
   UseNonAmbiguousChars: boolean;
-} 
+}

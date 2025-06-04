@@ -14,7 +14,7 @@ const testIdentityGenerator = (
   describe(`IdentityGenerator${language}`, () => {
     describe('generateRandomIdentity', () => {
       it('should generate a random gender identity when no gender is specified', async () => {
-        const identity = await generator.generateRandomIdentity();
+        const identity = generator.generateRandomIdentity();
 
         expect(identity).toBeDefined();
         expect(identity.firstName).toBeTruthy();
@@ -23,14 +23,14 @@ const testIdentityGenerator = (
       });
 
       it('should generate unique identities on subsequent calls', async () => {
-        const identity1 = await generator.generateRandomIdentity();
-        const identity2 = await generator.generateRandomIdentity();
+        const identity1 = generator.generateRandomIdentity();
+        const identity2 = generator.generateRandomIdentity();
 
         expect(identity1).not.toEqual(identity2);
       });
 
       it('should generate an identity with all non-empty fields', async () => {
-        const identity = await generator.generateRandomIdentity();
+        const identity = generator.generateRandomIdentity();
 
         Object.entries(identity).forEach(([, value]) => {
           expect(value).toBeTruthy();
