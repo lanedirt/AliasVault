@@ -10,11 +10,13 @@ PACKAGES_DIR="./"
 IDENTITY_TARGETS=(
   "../apps/browser-extension/src/utils/shared/identity-generator"
   "../apps/mobile-app/utils/shared/identity-generator"
+  "../apps/server/AliasVault.Client/wwwroot/js/shared/identity-generator"
 )
 
 PASSWORD_TARGETS=(
   "../apps/browser-extension/src/utils/shared/password-generator"
   "../apps/mobile-app/utils/shared/password-generator"
+  "../apps/server/AliasVault.Client/wwwroot/js/shared/password-generator"
 )
 
 # Build and distribute a package
