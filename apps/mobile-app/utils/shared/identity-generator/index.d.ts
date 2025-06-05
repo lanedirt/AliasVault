@@ -50,7 +50,7 @@ declare class UsernameEmailGenerator {
 }
 
 interface IIdentityGenerator {
-    generateRandomIdentity(): Promise<Identity>;
+    generateRandomIdentity(): Identity;
 }
 
 /**
@@ -75,7 +75,7 @@ declare abstract class BaseIdentityGenerator implements IIdentityGenerator {
     /**
      * Generate a random identity.
      */
-    generateRandomIdentity(): Promise<Identity>;
+    generateRandomIdentity(): Identity;
 }
 
 /**
@@ -132,4 +132,11 @@ declare class IdentityHelperUtils {
     static isValidBirthDate(input: string | undefined): boolean;
 }
 
-export { BaseIdentityGenerator, Gender, type Identity, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator };
+/**
+ * Creates a new identity generator based on the language.
+ * @param language - The language to use for generating the identity (e.g. "en", "nl").
+ * @returns A new identity generator instance.
+ */
+declare const createGenerator: (language: string) => IIdentityGenerator;
+
+export { BaseIdentityGenerator, Gender, type Identity, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator, createGenerator };

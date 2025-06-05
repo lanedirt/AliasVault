@@ -253,7 +253,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
             identityGenerator = new IdentityGeneratorEn();
             break;
         }
-        const identity = await identityGenerator.generateRandomIdentity();
+        const identity = identityGenerator.generateRandomIdentity();
 
         // Get password settings from background
         const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
