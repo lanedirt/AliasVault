@@ -325,7 +325,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const generateRandomUsername = async () : Promise<void> => {
     try {
       const { identityGenerator } = await initializeGenerators();
-      const identity = await identityGenerator.generateRandomIdentity();
+      const identity = identityGenerator.generateRandomIdentity();
       setValue('Username', identity.nickName);
     } catch (error) {
       console.error('Error generating random username:', error);
