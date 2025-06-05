@@ -166,7 +166,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const generateRandomAlias = useCallback(async (): Promise<void> => {
     const { identityGenerator, passwordGenerator } = await initializeGenerators();
 
-    const identity = await identityGenerator.generateRandomIdentity();
+    const identity = identityGenerator.generateRandomIdentity();
     const password = passwordGenerator.generateRandomPassword();
     const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
     const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
