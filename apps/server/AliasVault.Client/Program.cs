@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using AliasVault.Client;
+using AliasVault.Client.Main.Services;
 using AliasVault.Client.Providers;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Core;
@@ -71,6 +72,7 @@ builder.Services.AddScoped<CredentialService>();
 builder.Services.AddScoped<DbService>();
 builder.Services.AddScoped<GlobalNotificationService>();
 builder.Services.AddScoped<GlobalLoadingService>();
+builder.Services.AddScoped<MinDurationLoadingService>();
 builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddScoped<EmailService>();
