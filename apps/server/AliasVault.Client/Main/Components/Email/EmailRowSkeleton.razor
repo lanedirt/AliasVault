@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Components
+
+<li class="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out">
+    <div class="p-4 flex justify-start items-start">
+        <div class="mr-4 flex-shrink-0">
+            <SkeletonBase Height="40" AdditionalClasses="rounded-full w-10">
+                <div class="w-full h-full rounded-full bg-gray-300 dark:bg-gray-700"></div>
+            </SkeletonBase>
+        </div>
+    <div class="flex-grow w-full">
+            <div class="flex items-center justify-between mb-2 mr-4">
+                <div>
+                    <div class="mb-2 flex items-center w-full">
+                        <SkeletonBase Height="24" AdditionalClasses="w-56">
+                            <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+                        </SkeletonBase>
+                    </div>
+                    <div class="text-sm w-full">
+                        <SkeletonBase Height="16" AdditionalClasses="w-56">
+                            <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+                        </SkeletonBase>
+                    </div>
+                </div>
+                <div class="justify-end hidden md:flex">
+                    <SkeletonBase Height="16" AdditionalClasses="w-24 mr-4">
+                        <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+                    </SkeletonBase>
+                    <SkeletonBase Height="16" AdditionalClasses="w-24">
+                        <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+                    </SkeletonBase>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

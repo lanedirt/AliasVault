@@ -6,9 +6,12 @@
 @using AliasVault.Shared.Models.Spamok
 @using AliasVault.Shared.Models.WebApi
 @using AliasVault.Shared.Models.WebApi.Email
+@using AliasVault.Client.Main.Components
+@using AliasVault.Client.Main.Services
 @inherits MainBase
 @inject HttpClient HttpClient
 @inject ILogger<Home> Logger
+@inject MinDurationLoadingService LoadingService
 
 <LayoutPageTitle>Emails</LayoutPageTitle>
 
@@ -28,7 +31,16 @@
 
 @if (IsLoading)
 {
-    <LoadingIndicator/>
+    <div class="overflow-x-auto px-4">
+        <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden mt-6">
+            <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+                @for (int i = 0; i < 5; i++)
+            {
+                <EmailRowSkeleton />
+            }
+            </ul>
+        </div>
+    </div>
 }
 else if (NoEmailClaims)
 {
@@ -55,35 +67,10 @@ else
                 {
                     @foreach (var email in EmailList)
                     {
-                        <li class="hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out">
-                            <div @onclick="() => ShowAliasVaultEmailInModal(email.Id)" class="p-4 flex justify-start items-start">
-                                <div class="mr-4 flex-shrink-0">
-                                    <SenderInitials SenderName="@email.FromName" SenderEmail="@email.FromEmail" />
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="flex items-center justify-between mb-2 mr-4">
-                                        <div>
-                                            <div class="text-gray-800 dark:text-gray-200 mb-2 flex items-center">
-                                                @email.Subject
-                                                @if (email.HasAttachments)
-                                                {
-                                                    <svg class="attachment-indicator w-4 h-4 ml-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                                    </svg>
-                                                }
-                                            </div>
-                                            <div class="text-sm text-gray-400 dark:text-gray-100 line-clamp-2">
-                                                @email.MessagePreview
-                                            </div>
-                                        </div>
-                                        <div class="flex justify-end">
-                                            <div @onclick="() => NavigateToCredential(email.CredentialId)" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer mr-4 hover:underline">@email.CredentialName</div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">@email.Date.ToString("yyyy-MM-dd")</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
+                        <EmailRow
+                            Email="email"
+                            OnEmailClick="ShowAliasVaultEmailInModal"
+                            OnCredentialClick="NavigateToCredential" />
                     }
                 }
             </ul>
@@ -93,7 +80,7 @@ else
 
 @code {
     private List<MailListViewModel> EmailList { get; set; } = [];
-    private bool IsLoading { get; set; } = true;
+    private bool IsLoading => LoadingService.IsLoading("emails");
     private int CurrentPage { get; set; } = 1;
     private int PageSize { get; set; } = 50;
     private int TotalRecords { get; set; }
@@ -120,18 +107,16 @@ else
 
     private async Task RefreshData()
     {
-        IsLoading = true;
+        LoadingService.StartLoading("emails", 500, StateHasChanged);
         NoEmailClaims = false;
-        StateHasChanged();
         CloseEmailModal();
 
         var emailClaimList = await DbService.GetEmailClaimListAsync();
 
         if (emailClaimList.Count == 0)
         {
-            IsLoading = false;
+            LoadingService.FinishLoading("emails", StateHasChanged);
             NoEmailClaims = true;
-            StateHasChanged();
             return;
         }
 
@@ -187,8 +172,7 @@ else
            Logger.LogError(ex, "An error occurred while refreshing data");
         }
 
-        IsLoading = false;
-        StateHasChanged();
+        LoadingService.FinishLoading("emails", StateHasChanged);
     }
 
     /// <summary>
