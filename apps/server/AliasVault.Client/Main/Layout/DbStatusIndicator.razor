@@ -2,7 +2,7 @@
 @inject DbService DbService
 
 <div class="ms-1 items-center flex">
-    <SmallLoadingIndicator Title="@LoadingIndicatorMessage" Spinning="@Loading">
+    <SmallLoadingIndicator Title="Sync vault data" Spinning="@Loading">
         @if (!Loading)
         {
             <button class="absolute p-2 hover:bg-gray-200 rounded-2xl" id="vault-refresh-btn" @onclick="OnRefreshClick">
