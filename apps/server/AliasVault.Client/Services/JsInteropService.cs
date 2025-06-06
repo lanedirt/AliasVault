@@ -291,8 +291,8 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// Generates a random identity using the specified language.
     /// </summary>
     /// <param name="language">The language to use for generating the identity (e.g. "en", "nl").</param>
-    /// <returns>A <see cref="IdentityGeneratorResult"/> containing the generated identity information.</returns>
-    public async Task<IdentityGeneratorResult> GenerateRandomIdentityAsync(string language)
+    /// <returns>A <see cref="AliasVaultIdentity"/> containing the generated identity information.</returns>
+    public async Task<AliasVaultIdentity> GenerateRandomIdentityAsync(string language)
     {
         try
         {
@@ -306,7 +306,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             }
 
             var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateIdentityGenerator", language);
-            var result = await generatorInstance.InvokeAsync<IdentityGeneratorResult>("generateRandomIdentity");
+            var result = await generatorInstance.InvokeAsync<AliasVaultIdentity>("generateRandomIdentity");
 
             return result;
         }
@@ -314,6 +314,66 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         {
             await Console.Error.WriteLineAsync($"JavaScript error generating identity: {ex.Message}");
             throw new InvalidOperationException("Failed to generate random identity", ex);
+        }
+    }
+
+    /// <summary>
+    /// Generates a random username.
+    /// </summary>
+    /// <param name="identity">The identity to use for generating the username.</param>
+    /// <returns>The generated username.</returns>
+    public async Task<string> GenerateRandomUsernameAsync(AliasVaultIdentity identity)
+    {
+        try
+        {
+            if (_identityGeneratorModule == null)
+            {
+                await InitializeAsync();
+                if (_identityGeneratorModule == null)
+                {
+                    throw new InvalidOperationException("Failed to initialize identity generator module");
+                }
+            }
+
+            Console.WriteLine($"Generating username for identity: {identity.FirstName} {identity.LastName} {identity.BirthDate} {identity.Gender} {identity.NickName}");
+
+            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
+            var result = await generatorInstance.InvokeAsync<string>("generateUsername", identity);
+            return result;
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error generating username: {ex.Message}");
+            throw new InvalidOperationException("Failed to generate random username", ex);
+        }
+    }
+
+    /// <summary>
+    /// Generates a random email prefix.
+    /// </summary>
+    /// <param name="identity">The identity to use for generating the email prefix.</param>
+    /// <returns>The generated email prefix.</returns>
+    public async Task<string> GenerateRandomEmailPrefixAsync(AliasVaultIdentity identity)
+    {
+        try
+        {
+            if (_identityGeneratorModule == null)
+            {
+                await InitializeAsync();
+                if (_identityGeneratorModule == null)
+                {
+                    throw new InvalidOperationException("Failed to initialize identity generator module");
+                }
+            }
+
+            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
+            var result = await generatorInstance.InvokeAsync<string>("generateEmailPrefix", identity);
+            return result;
+        }
+        catch (JSException ex)
+        {
+            await Console.Error.WriteLineAsync($"JavaScript error generating email prefix: {ex.Message}");
+            throw new InvalidOperationException("Failed to generate random email prefix", ex);
         }
     }
 
@@ -351,7 +411,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <summary>
     /// Represents the result of a JavaScript identity generator operation.
     /// </summary>
-    public sealed class IdentityGeneratorResult
+    public sealed class AliasVaultIdentity
     {
         /// <summary>
         /// Gets the first name.
@@ -366,7 +426,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         /// <summary>
         /// Gets the birth date.
         /// </summary>
-        public DateTime BirthDate { get; init; }
+        public string? BirthDate { get; init; }
 
         /// <summary>
         /// Gets the email prefix.

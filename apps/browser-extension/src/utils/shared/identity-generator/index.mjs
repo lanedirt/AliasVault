@@ -2,6 +2,14 @@
 // This file was automatically generated. Do not edit manually.
 
 
+// src/types/Gender.ts
+var Gender = /* @__PURE__ */ ((Gender2) => {
+  Gender2["Male"] = "Male";
+  Gender2["Female"] = "Female";
+  Gender2["Other"] = "Other";
+  return Gender2;
+})(Gender || {});
+
 // src/utils/UsernameEmailGenerator.ts
 var _UsernameEmailGenerator = class _UsernameEmailGenerator {
   constructor() {
@@ -25,6 +33,9 @@ var _UsernameEmailGenerator = class _UsernameEmailGenerator {
    */
   generateEmailPrefix(identity) {
     const parts = [];
+    if (typeof identity.birthDate === "string") {
+      identity.birthDate = new Date(identity.birthDate);
+    }
     switch (this.getSecureRandom(4)) {
       case 0:
         parts.push(identity.firstName.substring(0, 1).toLowerCase() + identity.lastName.toLowerCase());
@@ -99,14 +110,6 @@ var _UsernameEmailGenerator = class _UsernameEmailGenerator {
 _UsernameEmailGenerator.MIN_LENGTH = 6;
 _UsernameEmailGenerator.MAX_LENGTH = 20;
 var UsernameEmailGenerator = _UsernameEmailGenerator;
-
-// src/types/Gender.ts
-var Gender = /* @__PURE__ */ ((Gender2) => {
-  Gender2["Male"] = "Male";
-  Gender2["Female"] = "Female";
-  Gender2["Other"] = "Other";
-  return Gender2;
-})(Gender || {});
 
 // src/implementations/base/IdentityGenerator.ts
 var IdentityGenerator = class {
@@ -1696,8 +1699,14 @@ var CreateIdentityGenerator = (language) => {
   }
   throw new Error(`Unsupported language: ${language}`);
 };
+
+// src/factories/UsernameEmailGeneratorFactory.ts
+var CreateUsernameEmailGenerator = () => {
+  return new UsernameEmailGenerator();
+};
 export {
   CreateIdentityGenerator,
+  CreateUsernameEmailGenerator,
   Gender,
   IdentityGenerator,
   IdentityGeneratorEn,
