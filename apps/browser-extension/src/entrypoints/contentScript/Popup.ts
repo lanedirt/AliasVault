@@ -2,12 +2,11 @@ import { storage } from '#imports';
 import { sendMessage } from 'webext-bridge/content-script';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 import { filterCredentials } from '@/entrypoints/contentScript/Filter';
-import { IdentityGeneratorEn, IdentityGeneratorNl } from '@/utils/shared/identity-generator';
-import { PasswordGenerator } from '@/utils/shared/password-generator';
+import { CreateIdentityGenerator } from '@/utils/shared/identity-generator';
+import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import { SqliteClient } from '@/utils/SqliteClient';
-import { BaseIdentityGenerator } from '@/utils/shared/identity-generator';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { Credential } from '@/utils/types/Credential';
@@ -243,23 +242,21 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       } else {
         // Generate new random identity using identity generator.
         const identityLanguage = await sendMessage('GET_DEFAULT_IDENTITY_LANGUAGE', {}, 'background') as StringResponse;
-        let identityGenerator: BaseIdentityGenerator;
-        switch (identityLanguage.value) {
-          case 'nl':
-            identityGenerator = new IdentityGeneratorNl();
-            break;
-          case 'en':
-          default:
-            identityGenerator = new IdentityGeneratorEn();
-            break;
-        }
+        const identityGenerator = CreateIdentityGenerator(identityLanguage.value ?? 'en');
         const identity = identityGenerator.generateRandomIdentity();
 
         // Get password settings from background
         const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;
 
         // Initialize password generator with the retrieved settings
-        const passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
+        const passwordGenerator = CreatePasswordGenerator(passwordSettingsResponse.settings ?? {
+          Length: 12,
+          UseLowercase: true,
+          UseUppercase: true,
+          UseNumbers: true,
+          UseSpecialChars: true,
+          UseNonAmbiguousChars: true
+        });
         const password = passwordGenerator.generateRandomPassword();
 
         // Extract favicon from page and get the bytes
@@ -946,6 +943,22 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       }
     });
 
+    // Get password settings from background
+    let passwordGenerator: PasswordGenerator;
+    sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
+      const passwordSettingsResponse = response as PasswordSettingsResponse;
+      passwordGenerator = CreatePasswordGenerator(passwordSettingsResponse.settings ?? {
+        Length: 12,
+        UseLowercase: true,
+        UseUppercase: true,
+        UseNumbers: true,
+        UseSpecialChars: true,
+        UseNonAmbiguousChars: true
+      });
+      // Generate initial password after settings are loaded
+      passwordGenerator.generateRandomPassword();
+    });
+
     /**
      * Generate and set password.
      */
@@ -959,15 +972,6 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       passwordPreview.dataset.isGenerated = 'true';
       updateVisibilityIcon(true);
     };
-
-    // Get password settings from background
-    let passwordGenerator: PasswordGenerator;
-    sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
-      const passwordSettingsResponse = response as PasswordSettingsResponse;
-      passwordGenerator = new PasswordGenerator(passwordSettingsResponse.settings);
-      // Generate initial password after settings are loaded
-      generatePassword();
-    });
 
     // Handle regenerate button click
     regenerateBtn.addEventListener('click', generatePassword);

@@ -6,6 +6,6 @@ import { PasswordGenerator } from "src/utils/PasswordGenerator";
  * @param settings - The settings for the password generator.
  * @returns A new password generator instance.
  */
-export const createPasswordGenerator = (settings: PasswordSettings): PasswordGenerator => {
+export const CreatePasswordGenerator = (settings: PasswordSettings): PasswordGenerator => {
   return new PasswordGenerator(settings);
 };

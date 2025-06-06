@@ -56,7 +56,7 @@ interface IIdentityGenerator {
 /**
  * Base identity generator.
  */
-declare abstract class BaseIdentityGenerator implements IIdentityGenerator {
+declare abstract class IdentityGenerator implements IIdentityGenerator {
     protected firstNamesMale: string[];
     protected firstNamesFemale: string[];
     protected lastNames: string[];
@@ -81,7 +81,7 @@ declare abstract class BaseIdentityGenerator implements IIdentityGenerator {
 /**
  * Identity generator for English language using English word dictionaries.
  */
-declare class IdentityGeneratorEn extends BaseIdentityGenerator {
+declare class IdentityGeneratorEn extends IdentityGenerator {
     /**
      * Get the male first names.
      */
@@ -99,7 +99,7 @@ declare class IdentityGeneratorEn extends BaseIdentityGenerator {
 /**
  * Identity generator for Dutch language using Dutch word dictionaries.
  */
-declare class IdentityGeneratorNl extends BaseIdentityGenerator {
+declare class IdentityGeneratorNl extends IdentityGenerator {
     /**
      * Get the male first names.
      */
@@ -137,6 +137,6 @@ declare class IdentityHelperUtils {
  * @param language - The language to use for generating the identity (e.g. "en", "nl").
  * @returns A new identity generator instance.
  */
-declare const createGenerator: (language: string) => IIdentityGenerator;
+declare const CreateIdentityGenerator: (language: string) => IIdentityGenerator;
 
-export { BaseIdentityGenerator, Gender, type Identity, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator, createGenerator };
+export { CreateIdentityGenerator, Gender, type Identity, IdentityGenerator, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator };

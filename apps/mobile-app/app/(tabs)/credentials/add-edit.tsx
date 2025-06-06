@@ -17,8 +17,8 @@ import emitter from '@/utils/EventEmitter';
 import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { AliasVaultToast } from '@/components/Toast';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
-import { IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, BaseIdentityGenerator } from '@/utils/shared/identity-generator';
-import { PasswordGenerator } from '@/utils/shared/password-generator';
+import { CreateIdentityGenerator, IdentityHelperUtils, IIdentityGenerator } from '@/utils/shared/identity-generator';
+import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import { credentialSchema } from '@/utils/ValidationSchema';
 import LoadingOverlay from '@/components/LoadingOverlay';
@@ -133,29 +133,18 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
-   * @returns {identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator}
+   * @returns {identityGenerator: IIdentityGenerator, passwordGenerator: PasswordGenerator}
    */
-  const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: BaseIdentityGenerator, passwordGenerator: PasswordGenerator }> => {
+  const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: IIdentityGenerator, passwordGenerator: PasswordGenerator }> => {
     // Get default identity language from database
     const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
 
     // Initialize identity generator based on language
-    let identityGenerator: BaseIdentityGenerator;
-    switch (identityLanguage) {
-      case 'nl':
-        identityGenerator = new IdentityGeneratorNl();
-        break;
-      case 'en':
-      default:
-        identityGenerator = new IdentityGeneratorEn();
-        break;
-    }
+    const identityGenerator = CreateIdentityGenerator(identityLanguage);
 
-    // Get password settings from database
+    // Initialize password generator with settings from vault
     const passwordSettings = await dbContext.sqliteClient!.getPasswordSettings();
-
-    // Initialize password generator with settings
-    const passwordGenerator = new PasswordGenerator(passwordSettings);
+    const passwordGenerator = CreatePasswordGenerator(passwordSettings);
 
     return { identityGenerator, passwordGenerator };
   }, [dbContext.sqliteClient]);

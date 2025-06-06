@@ -23,8 +23,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  PasswordGenerator: () => PasswordGenerator,
-  createPasswordGenerator: () => createPasswordGenerator
+  CreatePasswordGenerator: () => CreatePasswordGenerator,
+  PasswordGenerator: () => PasswordGenerator
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -236,12 +236,12 @@ var PasswordGenerator = class {
 };
 
 // src/factories/PasswordGeneratorFactory.ts
-var createPasswordGenerator = (settings) => {
+var CreatePasswordGenerator = (settings) => {
   return new PasswordGenerator(settings);
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  PasswordGenerator,
-  createPasswordGenerator
+  CreatePasswordGenerator,
+  PasswordGenerator
 });
 //# sourceMappingURL=index.js.map

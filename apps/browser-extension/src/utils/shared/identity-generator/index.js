@@ -23,13 +23,13 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  BaseIdentityGenerator: () => BaseIdentityGenerator,
+  CreateIdentityGenerator: () => CreateIdentityGenerator,
   Gender: () => Gender,
+  IdentityGenerator: () => IdentityGenerator,
   IdentityGeneratorEn: () => IdentityGeneratorEn,
   IdentityGeneratorNl: () => IdentityGeneratorNl,
   IdentityHelperUtils: () => IdentityHelperUtils,
-  UsernameEmailGenerator: () => UsernameEmailGenerator,
-  createGenerator: () => createGenerator
+  UsernameEmailGenerator: () => UsernameEmailGenerator
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -139,8 +139,8 @@ var Gender = /* @__PURE__ */ ((Gender2) => {
   return Gender2;
 })(Gender || {});
 
-// src/implementations/base/BaseIdentityGenerator.ts
-var BaseIdentityGenerator = class {
+// src/implementations/base/IdentityGenerator.ts
+var IdentityGenerator = class {
   /**
    * Constructor.
    */
@@ -983,7 +983,7 @@ var lastnames_default = [
 ];
 
 // src/implementations/IdentityGeneratorEn.ts
-var IdentityGeneratorEn = class extends BaseIdentityGenerator {
+var IdentityGeneratorEn = class extends IdentityGenerator {
   /**
    * Get the male first names.
    */
@@ -1647,7 +1647,7 @@ var lastnames_default2 = [
 ];
 
 // src/implementations/IdentityGeneratorNl.ts
-var IdentityGeneratorNl = class extends BaseIdentityGenerator {
+var IdentityGeneratorNl = class extends IdentityGenerator {
   /**
    * Get the male first names.
    */
@@ -1718,7 +1718,7 @@ var IdentityHelperUtils = class {
 };
 
 // src/factories/IdentityGeneratorFactory.ts
-var createGenerator = (language) => {
+var CreateIdentityGenerator = (language) => {
   switch (language) {
     case "en":
       return new IdentityGeneratorEn();
@@ -1729,12 +1729,12 @@ var createGenerator = (language) => {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  BaseIdentityGenerator,
+  CreateIdentityGenerator,
   Gender,
+  IdentityGenerator,
   IdentityGeneratorEn,
   IdentityGeneratorNl,
   IdentityHelperUtils,
-  UsernameEmailGenerator,
-  createGenerator
+  UsernameEmailGenerator
 });
 //# sourceMappingURL=index.js.map

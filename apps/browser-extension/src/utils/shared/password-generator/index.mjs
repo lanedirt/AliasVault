@@ -210,11 +210,11 @@ var PasswordGenerator = class {
 };
 
 // src/factories/PasswordGeneratorFactory.ts
-var createPasswordGenerator = (settings) => {
+var CreatePasswordGenerator = (settings) => {
   return new PasswordGenerator(settings);
 };
 export {
-  PasswordGenerator,
-  createPasswordGenerator
+  CreatePasswordGenerator,
+  PasswordGenerator
 };
 //# sourceMappingURL=index.mjs.map
