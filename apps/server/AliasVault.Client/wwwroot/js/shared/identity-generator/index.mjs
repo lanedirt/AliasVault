@@ -108,8 +108,8 @@ var Gender = /* @__PURE__ */ ((Gender2) => {
   return Gender2;
 })(Gender || {});
 
-// src/implementations/base/BaseIdentityGenerator.ts
-var BaseIdentityGenerator = class {
+// src/implementations/base/IdentityGenerator.ts
+var IdentityGenerator = class {
   /**
    * Constructor.
    */
@@ -952,7 +952,7 @@ var lastnames_default = [
 ];
 
 // src/implementations/IdentityGeneratorEn.ts
-var IdentityGeneratorEn = class extends BaseIdentityGenerator {
+var IdentityGeneratorEn = class extends IdentityGenerator {
   /**
    * Get the male first names.
    */
@@ -1616,7 +1616,7 @@ var lastnames_default2 = [
 ];
 
 // src/implementations/IdentityGeneratorNl.ts
-var IdentityGeneratorNl = class extends BaseIdentityGenerator {
+var IdentityGeneratorNl = class extends IdentityGenerator {
   /**
    * Get the male first names.
    */
@@ -1687,7 +1687,7 @@ var IdentityHelperUtils = class {
 };
 
 // src/factories/IdentityGeneratorFactory.ts
-var createGenerator = (language) => {
+var CreateIdentityGenerator = (language) => {
   switch (language) {
     case "en":
       return new IdentityGeneratorEn();
@@ -1697,12 +1697,12 @@ var createGenerator = (language) => {
   throw new Error(`Unsupported language: ${language}`);
 };
 export {
-  BaseIdentityGenerator,
+  CreateIdentityGenerator,
   Gender,
+  IdentityGenerator,
   IdentityGeneratorEn,
   IdentityGeneratorNl,
   IdentityHelperUtils,
-  UsernameEmailGenerator,
-  createGenerator
+  UsernameEmailGenerator
 };
 //# sourceMappingURL=index.mjs.map

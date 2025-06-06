@@ -6,7 +6,7 @@ import { Identity } from '../../types/Identity';
 /**
  * Base identity generator.
  */
-export abstract class BaseIdentityGenerator implements IIdentityGenerator {
+export abstract class IdentityGenerator implements IIdentityGenerator {
   protected firstNamesMale: string[] = [];
   protected firstNamesFemale: string[] = [];
   protected lastNames: string[] = [];

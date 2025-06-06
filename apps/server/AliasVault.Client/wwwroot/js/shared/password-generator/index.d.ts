@@ -115,6 +115,6 @@ declare class PasswordGenerator {
  * @param settings - The settings for the password generator.
  * @returns A new password generator instance.
  */
-declare const createPasswordGenerator: (settings: PasswordSettings) => PasswordGenerator;
+declare const CreatePasswordGenerator: (settings: PasswordSettings) => PasswordGenerator;
 
-export { PasswordGenerator, type PasswordSettings, createPasswordGenerator };
+export { CreatePasswordGenerator, PasswordGenerator, type PasswordSettings };

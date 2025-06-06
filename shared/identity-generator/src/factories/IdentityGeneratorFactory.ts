@@ -7,7 +7,7 @@ import { IIdentityGenerator } from "src/interfaces/IIdentityGenerator";
  * @param language - The language to use for generating the identity (e.g. "en", "nl").
  * @returns A new identity generator instance.
  */
-export const createGenerator = (language: string): IIdentityGenerator => {
+export const CreateIdentityGenerator = (language: string): IIdentityGenerator => {
   switch (language) {
     case 'en':
       return new IdentityGeneratorEn();

@@ -305,7 +305,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
                 }
             }
 
-            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("createGenerator", language);
+            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateIdentityGenerator", language);
             var result = await generatorInstance.InvokeAsync<IdentityGeneratorResult>("generateRandomIdentity");
 
             return result;
@@ -335,7 +335,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
                 }
             }
 
-            var generatorInstance = await _passwordGeneratorModule.InvokeAsync<IJSObjectReference>("createPasswordGenerator", settings);
+            var generatorInstance = await _passwordGeneratorModule.InvokeAsync<IJSObjectReference>("CreatePasswordGenerator", settings);
 
             var result = await generatorInstance.InvokeAsync<string>("generateRandomPassword");
 
