@@ -32,6 +32,11 @@ export class UsernameEmailGenerator {
   public generateEmailPrefix(identity: Identity): string {
     const parts: string[] = [];
 
+    // Make sure the birth date is not a string which can happen when using the .NET Blazor WASM JSInterop.
+    if (typeof identity.birthDate === 'string') {
+      identity.birthDate = new Date(identity.birthDate);
+    }
+
     switch (this.getSecureRandom(4)) {
       case 0:
         // First initial + last name

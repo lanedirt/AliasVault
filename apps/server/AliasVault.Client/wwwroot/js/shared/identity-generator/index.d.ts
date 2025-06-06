@@ -16,39 +16,6 @@ type Identity = {
     nickName: string;
 };
 
-/**
- * Generate a username or email prefix.
- */
-declare class UsernameEmailGenerator {
-    private static readonly MIN_LENGTH;
-    private static readonly MAX_LENGTH;
-    private readonly symbols;
-    /**
-     * Generate a username based on an identity.
-     */
-    generateUsername(identity: Identity): string;
-    /**
-     * Generate an email prefix based on an identity.
-     */
-    generateEmailPrefix(identity: Identity): string;
-    /**
-     * Sanitize an email prefix.
-     */
-    private sanitizeEmailPrefix;
-    /**
-     * Get a random symbol.
-     */
-    private getRandomSymbol;
-    /**
-     * Generate a random string.
-     */
-    private generateRandomString;
-    /**
-     * Generate a secure random integer between 0 (inclusive) and max (exclusive)
-     */
-    private getSecureRandom;
-}
-
 interface IIdentityGenerator {
     generateRandomIdentity(): Identity;
 }
@@ -133,10 +100,50 @@ declare class IdentityHelperUtils {
 }
 
 /**
+ * Generate a username or email prefix.
+ */
+declare class UsernameEmailGenerator {
+    private static readonly MIN_LENGTH;
+    private static readonly MAX_LENGTH;
+    private readonly symbols;
+    /**
+     * Generate a username based on an identity.
+     */
+    generateUsername(identity: Identity): string;
+    /**
+     * Generate an email prefix based on an identity.
+     */
+    generateEmailPrefix(identity: Identity): string;
+    /**
+     * Sanitize an email prefix.
+     */
+    private sanitizeEmailPrefix;
+    /**
+     * Get a random symbol.
+     */
+    private getRandomSymbol;
+    /**
+     * Generate a random string.
+     */
+    private generateRandomString;
+    /**
+     * Generate a secure random integer between 0 (inclusive) and max (exclusive)
+     */
+    private getSecureRandom;
+}
+
+/**
  * Creates a new identity generator based on the language.
  * @param language - The language to use for generating the identity (e.g. "en", "nl").
  * @returns A new identity generator instance.
  */
 declare const CreateIdentityGenerator: (language: string) => IIdentityGenerator;
 
-export { CreateIdentityGenerator, Gender, type Identity, IdentityGenerator, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator };
+/**
+ * Creates a new username email generator. This is used by the .NET Blazor WASM JSinterop
+ * as it cannot create instances of classes directly, it has to use a factory method.
+ * @returns A new username email generator instance.
+ */
+declare const CreateUsernameEmailGenerator: () => UsernameEmailGenerator;
+
+export { CreateIdentityGenerator, CreateUsernameEmailGenerator, Gender, type Identity, IdentityGenerator, IdentityGeneratorEn, IdentityGeneratorNl, IdentityHelperUtils, UsernameEmailGenerator };

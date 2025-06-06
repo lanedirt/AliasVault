@@ -161,7 +161,7 @@
         }
 
         credential.Passwords = new List<Password> { new() };
-        await CredentialService.GenerateRandomIdentity(credential);
+        await CredentialService.GenerateRandomIdentityAsync(credential);
 
         var id = await CredentialService.InsertEntryAsync(credential);
         if (id == Guid.Empty)

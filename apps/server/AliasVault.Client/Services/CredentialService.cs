@@ -49,7 +49,7 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     /// </summary>
     /// <param name="credential">The credential object to update.</param>
     /// <returns>Task.</returns>
-    public async Task<Credential> GenerateRandomIdentity(Credential credential)
+    public async Task<Credential> GenerateRandomIdentityAsync(Credential credential)
     {
         const int MaxAttempts = 5;
         var attempts = 0;
@@ -60,13 +60,15 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             // Generate a random identity using the TypeScript library
             var identity = await jsInteropService.GenerateRandomIdentityAsync(dbService.Settings.DefaultIdentityLanguage);
 
+            Console.WriteLine($"Generated identity: {identity.FirstName} {identity.LastName} {identity.BirthDate} {identity.Gender} {identity.NickName}");
+
             // Generate random values for the Identity properties
             credential.Username = identity.NickName;
             credential.Alias.FirstName = identity.FirstName;
             credential.Alias.LastName = identity.LastName;
             credential.Alias.NickName = identity.NickName;
             credential.Alias.Gender = identity.Gender;
-            credential.Alias.BirthDate = identity.BirthDate;
+            credential.Alias.BirthDate = string.IsNullOrEmpty(identity.BirthDate) ? DateTime.MinValue : DateTime.Parse(identity.BirthDate);
 
             // Set the email
             var emailDomain = GetDefaultEmailDomain();
