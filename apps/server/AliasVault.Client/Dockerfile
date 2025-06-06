@@ -6,11 +6,7 @@ ARG TARGETARCH
 ARG BUILD_CONFIGURATION=Release
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV MSBUILDDEBUGPATH=/src/msbuild-logs
-# We make the workdir src/src on purpose, as otherwise the identity generator will not be able to find the dictionaries
-# which in non-docker environments are also located two levels up in the root directory. When the identity generator
-# is moved from .NET to a shared Typescript implementation, this double directory structure can be replaced with a single
-# /src directory structure.
-WORKDIR /src/src
+WORKDIR /src
 
 # Create the debug directory
 RUN mkdir -p /src/msbuild-logs
@@ -24,11 +20,8 @@ RUN dotnet workload install wasm-tools
 # Copy all project files
 COPY apps/server .
 
-# Copy shared dictionaries to root for the identity generator
-COPY dictionaries ../../dictionaries
-
 # Build the Client project
-WORKDIR "/src/src/AliasVault.Client"
+WORKDIR "/src/AliasVault.Client"
 RUN dotnet build "AliasVault.Client.csproj" \
     -c "$BUILD_CONFIGURATION" \
     -o /app/build \
