@@ -76,6 +76,19 @@ public class MinDurationLoadingService : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _loadingStates.Clear();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Protected implementation of Dispose pattern.
+    /// </summary>
+    /// <param name="disposing">True if called from Dispose, false if called from finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _loadingStates.Clear();
+        }
     }
 }
