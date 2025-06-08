@@ -6,6 +6,31 @@ set -u  # Treat unset variables as errors
 # Define the root path to your packages
 PACKAGES_DIR="./"
 
+# Define output targets and their file patterns for each package
+declare -A IDENTITY_FILES
+IDENTITY_FILES=(
+  ["index.js"]=1
+  ["index.mjs"]=1
+  ["index.d.ts"]=1
+  ["index.js.map"]=1
+  ["index.mjs.map"]=1
+)
+
+declare -A PASSWORD_FILES
+PASSWORD_FILES=(
+  ["index.js"]=1
+  ["index.mjs"]=1
+  ["index.d.ts"]=1
+  ["index.js.map"]=1
+  ["index.mjs.map"]=1
+)
+
+declare -A MODELS_FILES
+MODELS_FILES=(
+  ["*.ts"]=1
+  ["*.d.ts"]=1
+)
+
 # Define output targets for each package
 IDENTITY_TARGETS=(
   "../apps/browser-extension/src/utils/shared/identity-generator"
@@ -19,11 +44,16 @@ PASSWORD_TARGETS=(
   "../apps/server/AliasVault.Client/wwwroot/js/shared/password-generator"
 )
 
+MODELS_TARGETS=(
+  "../apps/browser-extension/src/utils/shared/models"
+)
+
 # Build and distribute a package
 build_and_copy() {
   local package_name="$1"
   shift
   local targets=("$@")
+  local -n files_to_copy="$1"  # Use nameref to access the associative array
 
   local package_path="$PACKAGES_DIR/$package_name"
 
@@ -31,15 +61,22 @@ build_and_copy() {
   (cd "$package_path" && npm install && npm run lint && npm run test && npm run build)
 
   local dist_path="$package_path/dist"
-  local files_to_copy=("index.js" "index.mjs" "index.d.ts" "index.js.map" "index.mjs" "index.mjs.map")
 
   for target in "${targets[@]}"; do
     echo "📂 Copying $package_name → $target"
     mkdir -p "$target"
 
-    # Copy specific build outputs
-    for file in "${files_to_copy[@]}"; do
-      cp "$dist_path/$file" "$target/"
+    # Copy files based on the patterns defined in the associative array
+    for pattern in "${!files_to_copy[@]}"; do
+      if [[ "$pattern" == *"*"* ]]; then
+        # Handle wildcard patterns
+        find "$dist_path" -maxdepth 1 -name "$pattern" -exec cp {} "$target/" \;
+      else
+        # Handle specific files
+        if [ -f "$dist_path/$pattern" ]; then
+          cp "$dist_path/$pattern" "$target/"
+        fi
+      fi
     done
 
     # Write README
@@ -58,7 +95,8 @@ EOF
 }
 
 # Run build + copy for each module
-build_and_copy "identity-generator" "${IDENTITY_TARGETS[@]}"
-build_and_copy "password-generator" "${PASSWORD_TARGETS[@]}"
+build_and_copy "identity-generator" "${IDENTITY_TARGETS[@]}" IDENTITY_FILES
+build_and_copy "password-generator" "${PASSWORD_TARGETS[@]}" PASSWORD_FILES
+build_and_copy "models" "${MODELS_TARGETS[@]}" MODELS_FILES
 
 echo "✅ All builds, copies, and readme updates completed."
