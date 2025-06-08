@@ -16,7 +16,7 @@ echo "📦 Building $package_name..."
 npm install && npm run lint && npm run build
 
 dist_path="dist"
-files_to_copy=("index.d.mts" "index.mjs")
+files_to_copy=("index.d.ts" "index.js" "index.js.map")
 
 for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"
