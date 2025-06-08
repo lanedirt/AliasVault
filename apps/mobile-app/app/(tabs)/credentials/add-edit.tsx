@@ -1,30 +1,32 @@
-import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Toast from 'react-native-toast-message';
-import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import * as Haptics from 'expo-haptics';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Resolver, useForm } from 'react-hook-form';
+import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
 
-import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
-import { useDb } from '@/context/DbContext';
-import { useWebApi } from '@/context/WebApiContext';
-import { Credential } from '@/utils/types/Credential';
 import emitter from '@/utils/EventEmitter';
-import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
-import { AliasVaultToast } from '@/components/Toast';
-import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { CreateIdentityGenerator, IdentityHelperUtils, IIdentityGenerator } from '@/utils/shared/identity-generator';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
-import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
-import { credentialSchema } from '@/utils/ValidationSchema';
-import LoadingOverlay from '@/components/LoadingOverlay';
-import { useAuth } from '@/context/AuthContext';
-import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { Credential } from '@/utils/types/Credential';
+import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
+import { credentialSchema } from '@/utils/ValidationSchema';
+
+import { useColors } from '@/hooks/useColorScheme';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
+
+import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { AliasVaultToast } from '@/components/Toast';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 type CredentialMode = 'random' | 'manual';
 

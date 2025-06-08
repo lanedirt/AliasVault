@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet, Linking, Pressable } from 'react-native';
 
+import { Credential } from '@/utils/types/Credential';
+
+import { useColors } from '@/hooks/useColorScheme';
+
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { Credential } from '@/utils/types/Credential';
-import { useColors } from '@/hooks/useColorScheme';
 
 type NotesSectionProps = {
   credential: Credential;

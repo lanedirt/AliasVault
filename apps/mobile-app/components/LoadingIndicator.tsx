@@ -1,5 +1,5 @@
-import { StyleSheet, View, Text, Animated, useColorScheme } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, Text, Animated, useColorScheme } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 

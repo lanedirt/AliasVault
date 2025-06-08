@@ -1,21 +1,23 @@
+import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
 import { WebView } from 'react-native-webview';
-import * as FileSystem from 'expo-file-system';
-import { Ionicons } from '@expo/vector-icons';
 
-import { Email } from '@/utils/types/webapi/Email';
-import { Credential } from '@/utils/types/Credential';
-import { useDb } from '@/context/DbContext';
-import { useWebApi } from '@/context/WebApiContext';
-import { ThemedText } from '@/components/themed/ThemedText';
 import EncryptionUtility from '@/utils/EncryptionUtility';
+import emitter from '@/utils/EventEmitter';
+import { Credential } from '@/utils/types/Credential';
+import { Email } from '@/utils/types/webapi/Email';
+
 import { useColors } from '@/hooks/useColorScheme';
+
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { IconSymbolName } from '@/components/ui/IconSymbolName';
-import emitter from '@/utils/EventEmitter';
-import { ThemedView } from '@/components/themed/ThemedView';
+import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Email details screen.

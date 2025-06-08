@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
-import LoadingIndicator from '@/components/LoadingIndicator';
 import { useColors } from '@/hooks/useColorScheme';
+
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 type LoadingOverlayProps = {
   status: string;

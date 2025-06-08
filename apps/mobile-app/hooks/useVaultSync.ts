@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { AppInfo } from '@/utils/AppInfo';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { AppInfo } from '@/utils/AppInfo';
 
 /**
  * Utility function to ensure a minimum time has elapsed for an operation
@@ -58,9 +58,6 @@ export const useVaultSync = () : {
         // Not authenticated, return false immediately
         return false;
       }
-
-      // Update last check time
-      await AsyncStorage.setItem('lastVaultCheck', Date.now().toString());
 
       // Check app status and vault revision
       onStatus?.('Checking vault updates');

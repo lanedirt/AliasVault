@@ -1,14 +1,16 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+
+import { Credential } from '@/utils/types/Credential';
+import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+
+import { useColors } from '@/hooks/useColorScheme';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
-import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
-import { useDb } from '@/context/DbContext';
-import { Credential } from '@/utils/types/Credential';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { IconSymbolName } from '@/components/ui/IconSymbolName';
+import { useDb } from '@/context/DbContext';
 
 type EmailCardProps = {
   email: MailboxEmail;

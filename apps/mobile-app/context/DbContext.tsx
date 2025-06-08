@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
-import NativeVaultManager from '@/specs/NativeVaultManager';
 import SqliteClient from '@/utils/SqliteClient';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
+import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
+import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;

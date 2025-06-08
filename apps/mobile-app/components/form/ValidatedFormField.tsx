@@ -1,10 +1,11 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import { View, TextInput, TextInputProps, StyleSheet, TouchableHighlight, Platform } from 'react-native';
-import { Controller, Control, FieldValues, Path } from 'react-hook-form';
 import { MaterialIcons } from '@expo/vector-icons';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import { Controller, Control, FieldValues, Path } from 'react-hook-form';
+import { View, TextInput, TextInputProps, StyleSheet, TouchableHighlight, Platform } from 'react-native';
+
+import { useColors } from '@/hooks/useColorScheme';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
 
 type FormFieldButton = {
   icon: keyof typeof MaterialIcons.glyphMap;

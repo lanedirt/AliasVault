@@ -1,12 +1,13 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
-import { SettingsHeader } from '@/components/ui/SettingsHeader';
+
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { SettingsHeader } from '@/components/ui/SettingsHeader';
 
 /**
  * Security settings screen.

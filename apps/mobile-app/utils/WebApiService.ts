@@ -1,11 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { RefreshToken } from './types/webapi/RefreshToken';
-import { AuthLogModel } from './types/webapi/AuthLog';
-
 import { AppInfo } from '@/utils/AppInfo';
 import { StatusResponse } from '@/utils/types/webapi/StatusResponse';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+
+import { AuthLogModel } from './types/webapi/AuthLog';
+import { RefreshToken } from './types/webapi/RefreshToken';
 
 type RequestInit = globalThis.RequestInit;
 

@@ -1,12 +1,14 @@
-import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
-import { router } from 'expo-router';
-import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import * as Clipboard from 'expo-clipboard';
+import { router } from 'expo-router';
+import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
+import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
 
-import { CredentialIcon } from '@/components/credentials/CredentialIcon';
-import { useColors } from '@/hooks/useColorScheme';
 import { Credential } from '@/utils/types/Credential';
+
+import { useColors } from '@/hooks/useColorScheme';
+
+import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 
 type CredentialCardProps = {
   credential: Credential;

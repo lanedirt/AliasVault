@@ -1,9 +1,10 @@
 import { StyleSheet, View, Image } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
-import { useAuth } from '@/context/AuthContext';
+
 import avatarImage from '@/assets/images/avatar.webp';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Username display component.

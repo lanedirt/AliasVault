@@ -1,25 +1,27 @@
+import * as Haptics from 'expo-haptics';
+import { useNavigation } from 'expo-router';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated , Platform } from 'react-native';
-import { useNavigation } from 'expo-router';
-import Toast from 'react-native-toast-message';
-import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import emitter from '@/utils/EventEmitter';
+import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
 import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+
+import { useColors } from '@/hooks/useColorScheme';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+
+import { EmailCard } from '@/components/EmailCard';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { TitleContainer } from '@/components/ui/TitleContainer';
+import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import { ThemedText } from '@/components/themed/ThemedText';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
-import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import { useColors } from '@/hooks/useColorScheme';
-import { EmailCard } from '@/components/EmailCard';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
-import emitter from '@/utils/EventEmitter';
-import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import { useAuth } from '@/context/AuthContext';
-import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Emails screen.

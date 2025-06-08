@@ -1,12 +1,13 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
-import { useAuth } from '@/context/AuthContext';
-import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Auto-lock screen.

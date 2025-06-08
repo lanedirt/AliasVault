@@ -1,16 +1,18 @@
-import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
-import { useState, useEffect, useCallback } from 'react';
 import * as Haptics from 'expo-haptics';
+import { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
-import { useWebApi } from '@/context/WebApiContext';
 import { RefreshToken } from '@/utils/types/webapi/RefreshToken';
+
+import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { useWebApi } from '@/context/WebApiContext';
 /**
  * Active sessions screen.
  */

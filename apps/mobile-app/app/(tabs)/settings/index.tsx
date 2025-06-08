@@ -1,19 +1,21 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
 import { useRef, useState, useCallback } from 'react';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
-import { useWebApi } from '@/context/WebApiContext';
 import { AppInfo } from '@/utils/AppInfo';
+
 import { useColors } from '@/hooks/useColorScheme';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { useAuth } from '@/context/AuthContext';
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedText } from '@/components/themed/ThemedText';
 import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
 import { InlineSkeletonLoader } from '@/components/ui/InlineSkeletonLoader';
-import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import { TitleContainer } from '@/components/ui/TitleContainer';
 import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
-import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { useAuth } from '@/context/AuthContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Settings screen.

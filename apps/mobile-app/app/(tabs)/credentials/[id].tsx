@@ -1,23 +1,25 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable } from 'react-native';
 import Toast from 'react-native-toast-message';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+import emitter from '@/utils/EventEmitter';
+import { Credential } from '@/utils/types/Credential';
+
+import { useColors } from '@/hooks/useColorScheme';
+
+import { CredentialIcon } from '@/components/credentials/CredentialIcon';
+import { AliasDetails } from '@/components/credentials/details/AliasDetails';
+import { EmailPreview } from '@/components/credentials/details/EmailPreview';
+import { LoginCredentials } from '@/components/credentials/details/LoginCredentials';
+import { NotesSection } from '@/components/credentials/details/NotesSection';
+import { TotpSection } from '@/components/credentials/details/TotpSection';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
-import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useDb } from '@/context/DbContext';
-import { Credential } from '@/utils/types/Credential';
-import { LoginCredentials } from '@/components/credentials/details/LoginCredentials';
-import { AliasDetails } from '@/components/credentials/details/AliasDetails';
-import { NotesSection } from '@/components/credentials/details/NotesSection';
-import { EmailPreview } from '@/components/credentials/details/EmailPreview';
-import { TotpSection } from '@/components/credentials/details/TotpSection';
-import { useColors } from '@/hooks/useColorScheme';
-import emitter from '@/utils/EventEmitter';
-import { ThemedContainer } from '@/components/themed/ThemedContainer';
 
 /**
  * Credential details screen.
