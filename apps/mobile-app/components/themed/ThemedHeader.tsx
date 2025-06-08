@@ -1,5 +1,5 @@
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 

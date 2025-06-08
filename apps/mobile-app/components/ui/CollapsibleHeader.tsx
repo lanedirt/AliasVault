@@ -1,12 +1,13 @@
-import React from 'react';
-import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { Stack } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { BlurView } from 'expo-blur';
+import { Stack } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Platform, Animated, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
+
+import { ThemedText } from '@/components/themed/ThemedText';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 

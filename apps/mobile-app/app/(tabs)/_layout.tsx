@@ -2,14 +2,16 @@ import { Tabs, router } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
+import emitter from '@/utils/EventEmitter';
+
+import { useColors } from '@/hooks/useColorScheme';
+
+import { ThemedText } from '@/components/themed/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { IconSymbolName } from '@/components/ui/IconSymbolName';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { useColors } from '@/hooks/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
-import emitter from '@/utils/EventEmitter';
-import { ThemedText } from '@/components/themed/ThemedText';
 
 /**
  * This is the main layout for the app. It is used to navigate between the tabs.

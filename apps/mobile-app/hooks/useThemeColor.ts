@@ -3,8 +3,9 @@
  * https://docs.expo.dev/guides/color-schemes/
  */
 
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+import { Colors } from '@/constants/Colors';
 
 /**
  * Get the color for the current theme.

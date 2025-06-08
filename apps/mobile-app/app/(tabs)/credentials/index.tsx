@@ -1,31 +1,33 @@
-import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import Toast from 'react-native-toast-message';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
-import { ThemedText } from '@/components/themed/ThemedText';
-import { ThemedView } from '@/components/themed/ThemedView';
-import { useDb } from '@/context/DbContext';
-import { useAuth } from '@/context/AuthContext';
-import { Credential } from '@/utils/types/Credential';
-import { useVaultSync } from '@/hooks/useVaultSync';
-import { useColors } from '@/hooks/useColorScheme';
-import { CredentialCard } from '@/components/credentials/CredentialCard';
-import { TitleContainer } from '@/components/ui/TitleContainer';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
-import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
-import { AndroidHeader } from '@/components/ui/AndroidHeader';
 import emitter from '@/utils/EventEmitter';
+import { Credential } from '@/utils/types/Credential';
+
+import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import { useWebApi } from '@/context/WebApiContext';
-import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
+import { useVaultSync } from '@/hooks/useVaultSync';
+
+import { CredentialCard } from '@/components/credentials/CredentialCard';
 import { ServiceUrlNotice } from '@/components/credentials/ServiceUrlNotice';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { useVaultMutate } from '@/hooks/useVaultMutate';
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { AndroidHeader } from '@/components/ui/AndroidHeader';
+import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { TitleContainer } from '@/components/ui/TitleContainer';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Credentials screen.

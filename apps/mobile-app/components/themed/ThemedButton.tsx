@@ -1,8 +1,9 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
+
+import { ThemedText } from '@/components/themed/ThemedText';
 
 type ThemedButtonProps = {
   title: string;

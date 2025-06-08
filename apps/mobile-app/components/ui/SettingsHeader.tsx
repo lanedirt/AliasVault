@@ -1,10 +1,11 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { useColors } from '@/hooks/useColorScheme';
 
 import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
 
 type SettingsHeaderProps = {
   title: string;

@@ -132,7 +132,6 @@ module.exports = {
         }
       }
     ],
-
     // JSDoc
     "jsdoc/require-jsdoc": [
       "error",

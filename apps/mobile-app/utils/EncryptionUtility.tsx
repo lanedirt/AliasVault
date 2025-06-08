@@ -1,10 +1,10 @@
 import { Buffer } from 'buffer';
 
-import argon2 from 'react-native-argon2';
 import AesGcmCrypto from 'react-native-aes-gcm-crypto';
+import argon2 from 'react-native-argon2';
 
-import { Email } from './types/webapi/Email';
 import { EncryptionKey } from './types/EncryptionKey';
+import { Email } from './types/webapi/Email';
 import { MailboxEmail } from './types/webapi/MailboxEmail';
 
 /**

@@ -1,6 +1,6 @@
-import { Appearance } from 'react-native';
-import { useEffect, useState } from 'react';
 import _ from 'lodash';
+import { useEffect, useState } from 'react';
+import { Appearance } from 'react-native';
 
 import { Colors, ThemeColors } from '@/constants/Colors';
 

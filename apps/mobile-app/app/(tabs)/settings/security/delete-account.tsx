@@ -1,20 +1,22 @@
-import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import srp from 'secure-remote-password/client';
 
-import { ThemedText } from '@/components/themed/ThemedText';
-import { useColors } from '@/hooks/useColorScheme';
-import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
-import { ThemedButton } from '@/components/themed/ThemedButton';
-import { useWebApi } from '@/context/WebApiContext';
-import { useAuth } from '@/context/AuthContext';
 import { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse } from '@/utils/types/webapi/DeleteAccountInitiate';
 import { DeleteAccountRequest } from '@/utils/types/webapi/DeleteAccountRequest';
-import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+
+import { useColors } from '@/hooks/useColorScheme';
+
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { ThemedButton } from '@/components/themed/ThemedButton';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
+import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { useAuth } from '@/context/AuthContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Delete account screen.

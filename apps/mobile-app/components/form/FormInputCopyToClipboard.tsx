@@ -1,8 +1,8 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { useColors } from '@/hooks/useColorScheme';
 

@@ -1,19 +1,21 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
-import { router } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
 
-import { useWebApi } from '@/context/WebApiContext';
-import { useDb } from '@/context/DbContext';
-import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
-import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import { useColors } from '@/hooks/useColorScheme';
 import { AppInfo } from '@/utils/AppInfo';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import { MailboxBulkRequest, MailboxBulkResponse } from '@/utils/types/webapi/MailboxBulk';
+import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+
+import { useColors } from '@/hooks/useColorScheme';
+
 import { PulseDot } from '@/components/PulseDot';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 type EmailPreviewProps = {
   email: string | undefined;

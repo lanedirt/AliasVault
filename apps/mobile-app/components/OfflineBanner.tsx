@@ -1,12 +1,13 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
+
+import { useColors } from '@/hooks/useColorScheme';
+import { useVaultSync } from '@/hooks/useVaultSync';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useAuth } from '@/context/AuthContext';
-import { useVaultSync } from '@/hooks/useVaultSync';
-import { useColors } from '@/hooks/useColorScheme';
 
 /**
  * A banner component that displays when the app is in offline mode.

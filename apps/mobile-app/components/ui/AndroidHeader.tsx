@@ -1,9 +1,10 @@
-import { View, StyleSheet, Pressable } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { View, StyleSheet, Pressable } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
+
 import Logo from '@/assets/images/logo.svg';
+import { ThemedText } from '@/components/themed/ThemedText';
 
 type HeaderButton = {
   icon: keyof typeof MaterialIcons.glyphMap;

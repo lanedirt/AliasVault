@@ -1,6 +1,6 @@
-import { StyleSheet, View, Animated, ViewStyle, DimensionValue } from 'react-native';
-import { useEffect, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useRef } from 'react';
+import { StyleSheet, View, Animated, ViewStyle, DimensionValue } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 

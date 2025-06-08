@@ -1,30 +1,32 @@
 import { Buffer } from 'buffer';
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Alert } from 'react-native';
 
-import { ThemedView } from '@/components/themed/ThemedView';
-import { useDb } from '@/context/DbContext';
-import { useAuth } from '@/context/AuthContext';
-import { SrpUtility } from '@/utils/SrpUtility';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
-import { useWebApi } from '@/context/WebApiContext';
-import { useColors } from '@/hooks/useColorScheme';
-import Logo from '@/assets/images/logo.svg';
 import { AppInfo } from '@/utils/AppInfo';
-import LoadingIndicator from '@/components/LoadingIndicator';
+import ConversionUtility from '@/utils/ConversionUtility';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import { SrpUtility } from '@/utils/SrpUtility';
+import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
+import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 import { LoginResponse } from '@/utils/types/webapi/Login';
 import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
+
+import { useColors } from '@/hooks/useColorScheme';
 import { useVaultSync } from '@/hooks/useVaultSync';
+
+import Logo from '@/assets/images/logo.svg';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { InAppBrowserView } from '@/components/ui/InAppBrowserView';
-import ConversionUtility from '@/utils/ConversionUtility';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import { useWebApi } from '@/context/WebApiContext';
 
 /**
  * Login screen.

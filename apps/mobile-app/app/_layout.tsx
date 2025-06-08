@@ -1,23 +1,24 @@
-import { Linking, StyleSheet, Alert } from 'react-native';
-import { useEffect, useRef, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Href, Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, StyleSheet, Alert } from 'react-native';
 import 'react-native-reanimated';
 import 'react-native-get-random-values';
 import { install } from 'react-native-quick-crypto';
 
 import { useColors, useColorScheme } from '@/hooks/useColorScheme';
-import { DbProvider, useDb } from '@/context/DbContext';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { useWebApi, WebApiProvider } from '@/context/WebApiContext';
-import { AliasVaultToast } from '@/components/Toast';
-import NativeVaultManager from '@/specs/NativeVaultManager';
 import { useVaultSync } from '@/hooks/useVaultSync';
+
 import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { ThemedView } from '@/components/themed/ThemedView';
+import { AliasVaultToast } from '@/components/Toast';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { DbProvider, useDb } from '@/context/DbContext';
+import { useWebApi, WebApiProvider } from '@/context/WebApiContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 SplashScreen.preventAutoHideAsync();
 

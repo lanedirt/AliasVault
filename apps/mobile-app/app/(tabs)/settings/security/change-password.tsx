@@ -1,17 +1,18 @@
-import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { useState } from 'react';
 import { router } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
-import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
-import { ThemedButton } from '@/components/themed/ThemedButton';
-import { useAuth } from '@/context/AuthContext';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
+
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { ThemedButton } from '@/components/themed/ThemedButton';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedTextInput } from '@/components/themed/ThemedTextInput';
+import { UsernameDisplay } from '@/components/ui/UsernameDisplay';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Change password screen.

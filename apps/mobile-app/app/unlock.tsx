@@ -1,20 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Text } from 'react-native';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Text } from 'react-native';
 
+import EncryptionUtility from '@/utils/EncryptionUtility';
+
+import { useColors } from '@/hooks/useColorScheme';
+
+import avatarImage from '@/assets/images/avatar.webp';
+import Logo from '@/assets/images/logo.svg';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
-import { ThemedView } from '@/components/themed/ThemedView';
-import { ThemedText } from '@/components/themed/ThemedText';
-import LoadingIndicator from '@/components/LoadingIndicator';
-import { useColors } from '@/hooks/useColorScheme';
-import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useWebApi } from '@/context/WebApiContext';
-import avatarImage from '@/assets/images/avatar.webp';
 import NativeVaultManager from '@/specs/NativeVaultManager';
-import Logo from '@/assets/images/logo.svg';
 
 /**
  * Unlock screen.

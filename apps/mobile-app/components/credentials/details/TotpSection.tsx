@@ -1,15 +1,17 @@
+import * as Clipboard from 'expo-clipboard';
+import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import * as OTPAuth from 'otpauth';
-import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
+
+import { Credential } from '@/utils/types/Credential';
+import { TotpCode } from '@/utils/types/TotpCode';
+
+import { useColors } from '@/hooks/useColorScheme';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { Credential } from '@/utils/types/Credential';
-import { TotpCode } from '@/utils/types/TotpCode';
 import { useDb } from '@/context/DbContext';
-import { useColors } from '@/hooks/useColorScheme';
 
 type TotpSectionProps = {
   credential: Credential;

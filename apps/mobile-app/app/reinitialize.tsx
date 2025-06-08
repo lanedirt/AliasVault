@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
 import { Href, router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 
-import NativeVaultManager from '@/specs/NativeVaultManager';
-import { useAuth } from '@/context/AuthContext';
-import { useVaultSync } from '@/hooks/useVaultSync';
-import { ThemedView } from '@/components/themed/ThemedView';
-import LoadingIndicator from '@/components/LoadingIndicator';
-import { useDb } from '@/context/DbContext';
-import { ThemedText } from '@/components/themed/ThemedText';
 import { useColors } from '@/hooks/useColorScheme';
+import { useVaultSync } from '@/hooks/useVaultSync';
+
+import LoadingIndicator from '@/components/LoadingIndicator';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { useAuth } from '@/context/AuthContext';
+import { useDb } from '@/context/DbContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 /**
  * Reinitialize screen which is triggered when the app was still open but the database in memory

@@ -1,10 +1,12 @@
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+
+import { AppInfo } from '@/utils/AppInfo';
 
 import { useColors } from '@/hooks/useColorScheme';
+
 import { ThemedView } from '@/components/themed/ThemedView';
-import { AppInfo } from '@/utils/AppInfo';
 
 type ApiOption = {
   label: string;
