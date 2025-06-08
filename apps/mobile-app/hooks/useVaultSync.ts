@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import type { VaultResponse } from '@/utils/shared/models';
 
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';

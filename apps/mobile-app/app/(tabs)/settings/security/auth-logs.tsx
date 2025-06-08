@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { AuthEventType } from '@/utils/types/webapi/AuthEventType';
-import { AuthLogModel } from '@/utils/types/webapi/AuthLog';
+import type { AuthLogModel } from '@/utils/shared/models';
+import { AuthEventType } from '@/utils/shared/models';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';

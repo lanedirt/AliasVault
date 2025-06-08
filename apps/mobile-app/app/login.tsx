@@ -11,11 +11,10 @@ import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, Acti
 import { AppInfo } from '@/utils/AppInfo';
 import ConversionUtility from '@/utils/ConversionUtility';
 import EncryptionUtility from '@/utils/EncryptionUtility';
+import type { LoginResponse, VaultResponse } from '@/utils/shared/models';
 import { SrpUtility } from '@/utils/SrpUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
-import { LoginResponse } from '@/utils/types/webapi/Login';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultSync } from '@/hooks/useVaultSync';

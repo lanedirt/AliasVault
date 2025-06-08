@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { RefreshToken } from '@/utils/types/webapi/RefreshToken';
+import type { RefreshToken } from '@/utils/shared/models';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
