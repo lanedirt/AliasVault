@@ -3,9 +3,8 @@ import { Buffer } from 'buffer';
 import AesGcmCrypto from 'react-native-aes-gcm-crypto';
 import argon2 from 'react-native-argon2';
 
+import type { EncryptionKey } from '@/utils/shared/models/vault';
 import type { Email, MailboxEmail } from '@/utils/shared/models/webapi';
-
-import { EncryptionKey } from './types/EncryptionKey';
 
 /**
  * Utility class for encryption operations including:

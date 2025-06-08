@@ -1,9 +1,6 @@
-import { Credential } from '@/utils/types/Credential';
-import { EncryptionKey } from '@/utils/types/EncryptionKey';
+import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/shared/models/vault';
 import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
 import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
-import { PasswordSettings } from '@/utils/types/PasswordSettings';
-import { TotpCode } from '@/utils/types/TotpCode';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
 

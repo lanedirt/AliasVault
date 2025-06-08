@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Linking, Pressable } from 'react-native';
 
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 

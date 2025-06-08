@@ -1,4 +1,4 @@
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 import FormInputCopyToClipboard from '@/components/form/FormInputCopyToClipboard';
 import { ThemedText } from '@/components/themed/ThemedText';

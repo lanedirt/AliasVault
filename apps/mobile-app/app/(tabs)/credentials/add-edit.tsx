@@ -10,9 +10,9 @@ import Toast from 'react-native-toast-message';
 
 import emitter from '@/utils/EventEmitter';
 import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/shared/identity-generator';
+import type { Credential } from '@/utils/shared/models/vault';
 import type { FaviconExtractModel } from '@/utils/shared/models/webapi';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
-import { Credential } from '@/utils/types/Credential';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 import { credentialSchema } from '@/utils/ValidationSchema';
 

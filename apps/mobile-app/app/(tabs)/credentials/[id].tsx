@@ -5,7 +5,7 @@ import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, P
 import Toast from 'react-native-toast-message';
 
 import emitter from '@/utils/EventEmitter';
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 
