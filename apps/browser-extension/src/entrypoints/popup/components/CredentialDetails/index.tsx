@@ -1,9 +1,9 @@
-import HeaderBlock from './HeaderBlock';
-import EmailBlock from './EmailBlock';
-import TotpBlock from './TotpBlock';
-import LoginCredentialsBlock from './LoginCredentialsBlock';
 import AliasBlock from './AliasBlock';
+import EmailBlock from './EmailBlock';
+import HeaderBlock from './HeaderBlock';
+import LoginCredentialsBlock from './LoginCredentialsBlock';
 import NotesBlock from './NotesBlock';
+import TotpBlock from './TotpBlock';
 
 export {
   HeaderBlock,

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { FormField, testField } from './TestUtils';
 
 describe('FormDetector English tests', () => {

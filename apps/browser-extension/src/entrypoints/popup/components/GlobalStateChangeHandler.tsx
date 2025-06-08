@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 
 /**

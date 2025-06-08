@@ -299,4 +299,12 @@ type VaultPasswordChangeRequest = Vault & {
     newPasswordVerifier: string;
 };
 
-export type { Attachment, AuthLogModel, DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest, Email, FaviconExtractModel, LoginRequest, LoginResponse, MailboxBulkRequest, MailboxBulkResponse, MailboxEmail, PasswordChangeInitiateResponse, RefreshToken, StatusResponse, ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse, Vault, VaultPasswordChangeRequest, VaultPostResponse, VaultResponse };
+type BadRequestResponse = {
+    type: string;
+    title: string;
+    status: number;
+    errors: Record<string, string[]>;
+    traceId: string;
+};
+
+export type { Attachment, AuthLogModel, BadRequestResponse, DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest, Email, FaviconExtractModel, LoginRequest, LoginResponse, MailboxBulkRequest, MailboxBulkResponse, MailboxEmail, PasswordChangeInitiateResponse, RefreshToken, StatusResponse, ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse, Vault, VaultPasswordChangeRequest, VaultPostResponse, VaultResponse };

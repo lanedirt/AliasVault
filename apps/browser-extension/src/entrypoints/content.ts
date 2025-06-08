@@ -1,9 +1,12 @@
 import '@/entrypoints/contentScript/style.css';
-import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from '@/entrypoints/contentScript/Popup';
-import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/entrypoints/contentScript/Form';
 import { onMessage } from "webext-bridge/content-script";
+
+import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/entrypoints/contentScript/Form';
+import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from '@/entrypoints/contentScript/Popup';
+
+import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
+
 import { defineContentScript } from '#imports';
 import { createShadowRootUi } from '#imports';
 

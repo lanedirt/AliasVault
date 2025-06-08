@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { ClipboardCopyService } from '@/entrypoints/popup/utils/ClipboardCopyService';
 
 /**

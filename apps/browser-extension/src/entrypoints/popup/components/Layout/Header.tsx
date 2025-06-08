@@ -1,9 +1,12 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { storage } from '#imports';
+
 import { UserMenu } from '@/entrypoints/popup/components/Layout/UserMenu';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+
 import { AppInfo } from '@/utils/AppInfo';
+
+import { storage } from '#imports';
 
 /**
  * Header props.

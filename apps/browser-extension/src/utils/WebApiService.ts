@@ -1,6 +1,7 @@
+import type { StatusResponse, VaultResponse } from '@/utils/shared/models';
+
 import { AppInfo } from "./AppInfo";
-import { StatusResponse } from "./types/webapi/StatusResponse";
-import { VaultResponse } from "./types/webapi/VaultResponse";
+
 import { storage } from '#imports';
 
 type RequestInit = globalThis.RequestInit;

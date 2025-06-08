@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createTestDocument } from './TestUtils';
+
 import { FormDetector } from '../FormDetector';
+
+import { createTestDocument } from './TestUtils';
 
 describe('FormDetector.getSuggestedServiceName (Dutch)', () => {
   it('should extract service name from title with divider and include domain', () => {

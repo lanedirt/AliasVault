@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 /**

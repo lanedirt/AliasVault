@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
-import { storage } from '#imports';
+
+import React, { useEffect, useState } from 'react';
+
+import Button from '@/entrypoints/popup/components/Button';
+import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
-import { AppInfo } from '@/utils/AppInfo';
-import Button from '@/entrypoints/popup/components/Button';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { LoginResponse } from '@/utils/types/webapi/Login';
-import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
+
+import { AppInfo } from '@/utils/AppInfo';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import type { VaultResponse, LoginResponse } from '@/utils/shared/models';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
+
 import ConversionUtility from '../utils/ConversionUtility';
+
+import { storage } from '#imports';
 
 /**
  * Login page

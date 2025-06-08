@@ -1,16 +1,20 @@
+import { Buffer } from 'buffer';
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Buffer } from 'buffer';
-import { storage } from '#imports';
-import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+
 import Button from '@/entrypoints/popup/components/Button';
-import EncryptionUtility from '@/utils/EncryptionUtility';
-import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
+
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import type { VaultResponse } from '@/utils/shared/models';
+
+import { storage } from '#imports';
 
 /**
  * Unlock page

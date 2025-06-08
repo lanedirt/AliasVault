@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { EmailPreview } from '@/entrypoints/popup/components/EmailPreview';
 
 type EmailBlockProps = {
