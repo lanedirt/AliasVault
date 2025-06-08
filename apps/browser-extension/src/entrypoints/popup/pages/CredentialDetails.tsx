@@ -12,7 +12,7 @@ import {
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 /**
  * Credential details page.

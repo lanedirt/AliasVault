@@ -1,5 +1,5 @@
 import { CombinedStopWords } from '@/utils/formDetector/FieldPatterns';
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 type CredentialWithPriority = Credential & {
   priority: number;

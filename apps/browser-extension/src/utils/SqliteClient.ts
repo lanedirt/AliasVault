@@ -1,9 +1,6 @@
 import initSqlJs, { Database } from 'sql.js';
 
-import { Credential } from './types/Credential';
-import { EncryptionKey } from './types/EncryptionKey';
-import { PasswordSettings } from './types/PasswordSettings';
-import { TotpCode } from './types/TotpCode';
+import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/shared/models/vault';
 
 /**
  * Placeholder base64 image for credentials without a logo.
