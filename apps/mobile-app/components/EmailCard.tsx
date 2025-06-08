@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 
-import type { MailboxEmail } from '@/utils/shared/models';
+import type { MailboxEmail } from '@/utils/shared/models/webapi';
 import { Credential } from '@/utils/types/Credential';
 
 import { useColors } from '@/hooks/useColorScheme';

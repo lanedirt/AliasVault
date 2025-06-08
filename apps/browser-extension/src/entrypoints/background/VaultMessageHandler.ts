@@ -2,7 +2,7 @@
 import { storage } from 'wxt/utils/storage';
 
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/shared/models';
+import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/shared/models/webapi';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';

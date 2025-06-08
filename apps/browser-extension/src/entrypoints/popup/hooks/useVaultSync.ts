@@ -5,7 +5,7 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import { AppInfo } from '@/utils/AppInfo';
-import type { VaultResponse } from '@/utils/shared/models';
+import type { VaultResponse } from '@/utils/shared/models/webapi';
 
 /**
  * Utility function to ensure a minimum time has elapsed for an operation

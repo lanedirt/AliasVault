@@ -7,7 +7,7 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models';
+import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 

@@ -7,7 +7,7 @@ import Toast from 'react-native-toast-message';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import emitter from '@/utils/EventEmitter';
-import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models';
+import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
