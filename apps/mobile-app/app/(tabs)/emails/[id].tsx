@@ -7,8 +7,8 @@ import { WebView } from 'react-native-webview';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import emitter from '@/utils/EventEmitter';
-import { Credential } from '@/utils/types/Credential';
-import { Email } from '@/utils/types/webapi/Email';
+import type { Email } from '@/utils/shared/models';
+import type { Credential } from '@/utils/types/Credential';
 
 import { useColors } from '@/hooks/useColorScheme';
 

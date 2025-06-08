@@ -9,10 +9,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-toast-message';
 
 import emitter from '@/utils/EventEmitter';
-import { CreateIdentityGenerator, IdentityHelperUtils, IIdentityGenerator } from '@/utils/shared/identity-generator';
+import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/shared/identity-generator';
+import type { FaviconExtractModel } from '@/utils/shared/models';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
 import { Credential } from '@/utils/types/Credential';
-import { FaviconExtractModel } from '@/utils/types/webapi/FaviconExtractModel';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 import { credentialSchema } from '@/utils/ValidationSchema';
 
@@ -135,9 +135,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
-   * @returns {identityGenerator: IIdentityGenerator, passwordGenerator: PasswordGenerator}
+   * @returns {identityGenerator: IdentityGenerator, passwordGenerator: PasswordGenerator}
    */
-  const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: IIdentityGenerator, passwordGenerator: PasswordGenerator }> => {
+  const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: IdentityGenerator, passwordGenerator: PasswordGenerator }> => {
     // Get default identity language from database
     const identityLanguage = await dbContext.sqliteClient!.getDefaultIdentityLanguage();
 
