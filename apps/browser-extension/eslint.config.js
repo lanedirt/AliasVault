@@ -105,8 +105,14 @@ export default [
             ],
             "react-hooks/exhaustive-deps": "warn",
             "react/jsx-no-constructed-context-values": "error",
+            "import/no-unresolved": "error",
         },
         settings: {
+            'import/resolver': {
+                typescript: {
+                project: './tsconfig.json',
+                },
+            },
             react: {
                 version: "detect",
             },
