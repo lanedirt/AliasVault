@@ -52,6 +52,7 @@
     "@wxt-dev/module-react": "^1.1.2",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.19.0",
+    "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^50.6.3",
     "eslint-plugin-react": "^7.37.4",
