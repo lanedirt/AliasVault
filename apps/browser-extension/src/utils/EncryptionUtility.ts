@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 
 import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
 
-import type { Email, MailboxEmail } from '@/utils/shared/models';
+import type { Email, MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { EncryptionKey } from './types/EncryptionKey';
 

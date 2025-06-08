@@ -17,15 +17,18 @@ echo "📦 Building $package_name..."
 npm install && npm run lint && npm run build
 
 dist_path="dist"
-files_to_copy=("index.d.ts" "index.js" "index.js.map")
+files_to_copy=("webapi" "vault")
 
 for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"
   mkdir -p "$target"
 
-  # Copy specific build outputs
+  # Remove any existing files in the target directory
+  rm -rf "$target/*"
+
+  # Copy specific build outputs (files and folders)
   for file in "${files_to_copy[@]}"; do
-    cp "$dist_path/$file" "$target/"
+    cp -R "$dist_path/$file" "$target/"
   done
 
   # Write README

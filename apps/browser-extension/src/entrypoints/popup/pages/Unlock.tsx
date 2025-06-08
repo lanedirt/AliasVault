@@ -12,7 +12,7 @@ import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { VaultResponse } from '@/utils/shared/models';
+import type { VaultResponse } from '@/utils/shared/models/webapi';
 
 import { storage } from '#imports';
 

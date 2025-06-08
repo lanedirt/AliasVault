@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { sendMessage } from 'webext-bridge/popup';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { VaultResponse } from '@/utils/shared/models';
+import type { VaultResponse } from '@/utils/shared/models/webapi';
 import SqliteClient from '@/utils/SqliteClient';
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 

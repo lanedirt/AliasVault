@@ -1,6 +1,6 @@
 import srp from 'secure-remote-password/client'
 
-import type { LoginRequest, LoginResponse, ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse, BadRequestResponse } from '@/utils/shared/models';
+import type { LoginRequest, LoginResponse, ValidateLoginRequest, ValidateLoginRequest2Fa, ValidateLoginResponse, BadRequestResponse } from '@/utils/shared/models/webapi';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 import { WebApiService } from '@/utils/WebApiService';
 

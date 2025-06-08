@@ -24,6 +24,9 @@ for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"
   mkdir -p "$target"
 
+  # Remove any existing files in the target directory
+  rm -rf "$target/*"
+
   # Copy specific build outputs
   for file in "${files_to_copy[@]}"; do
     cp "$dist_path/$file" "$target/"

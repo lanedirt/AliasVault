@@ -8,7 +8,7 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
-import type { VaultResponse } from '@/utils/shared/models';
+import type { VaultResponse } from '@/utils/shared/models/webapi';
 import { Credential } from '@/utils/types/Credential';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';

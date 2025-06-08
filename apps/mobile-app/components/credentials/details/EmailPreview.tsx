@@ -5,7 +5,7 @@ import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-nat
 
 import { AppInfo } from '@/utils/AppInfo';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models';
+import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { useColors } from '@/hooks/useColorScheme';
 

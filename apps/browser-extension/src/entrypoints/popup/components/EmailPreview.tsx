@@ -6,7 +6,7 @@ import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import { AppInfo } from '@/utils/AppInfo';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import type { MailboxEmail } from '@/utils/shared/models';
+import type { MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { storage } from '#imports';
 
