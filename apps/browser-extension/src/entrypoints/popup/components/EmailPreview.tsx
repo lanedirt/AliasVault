@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { storage } from '#imports';
-import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+
 import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import { MailboxEmail } from '@/utils/types/webapi/MailboxEmail';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+
 import { AppInfo } from '@/utils/AppInfo';
+import { EncryptionUtility } from '@/utils/EncryptionUtility';
+import type { MailboxEmail } from '@/utils/shared/models';
+
+import { storage } from '#imports';
 
 type EmailPreviewProps = {
   email: string;

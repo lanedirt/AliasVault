@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createTestDom } from './TestUtils';
+
 import { FormDetector } from '../FormDetector';
+
+import { createTestDom } from './TestUtils';
 
 describe('FormDetector generic tests', () => {
   describe('Invalid form not detected as login form 1', () => {

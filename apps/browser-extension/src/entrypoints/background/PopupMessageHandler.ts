@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { browser } from '#imports';
 import { BoolResponse } from '@/utils/types/messaging/BoolResponse';
+
 import { setupContextMenus } from './ContextMenu';
+
+import { browser } from '#imports';
 
 /**
  * Handle opening the popup.

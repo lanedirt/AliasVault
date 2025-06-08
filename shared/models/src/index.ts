@@ -16,3 +16,4 @@ export * from './webapi/DeleteAccountInitiate';
 export * from './webapi/DeleteAccountRequest';
 export * from './webapi/PasswordChangeInitiateResponse';
 export * from './webapi/VaultPasswordChangeRequest';
+export * from './webapi/BadRequestResponse';

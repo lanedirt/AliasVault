@@ -1,5 +1,6 @@
-import { AppInfo } from '../AppInfo';
 import { describe, it, expect } from 'vitest';
+
+import { AppInfo } from '../AppInfo';
 
 describe('AppInfo', () => {
   describe('isVersionSupported', () => {

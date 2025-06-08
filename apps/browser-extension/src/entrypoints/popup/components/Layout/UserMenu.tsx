@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 

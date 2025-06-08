@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { AppInfo } from '@/utils/AppInfo';
-import { storage } from '#imports';
-import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
 import * as Yup from 'yup';
+
+import { AppInfo } from '@/utils/AppInfo';
+import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+
+import { storage } from '#imports';
 
 type ApiOption = {
   label: string;

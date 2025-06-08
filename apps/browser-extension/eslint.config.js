@@ -105,8 +105,51 @@ export default [
             ],
             "react-hooks/exhaustive-deps": "warn",
             "react/jsx-no-constructed-context-values": "error",
-            "import/no-unresolved": "error",
-        },
+            "import/no-unresolved": [
+                "error",
+                {
+                  ignore: ['^#imports$'] // Ignore virtual imports from WXT which are not resolved by the typescript compiler
+                }
+              ],
+            "import/order": [
+                "error",
+                {
+                    "groups": [
+                    "builtin",    // Node "fs", "path", etc.
+                    "external",   // "react", "lodash", etc.
+                    "internal",   // Aliased paths like "@/utils"
+                    "parent",     // "../"
+                    "sibling",    // "./"
+                    "index",      // "./index"
+                    "object",     // import 'foo'
+                    "type"        // import type ...
+                    ],
+                    "pathGroups": [
+                    {
+                        pattern: "@/entrypoints/**",
+                        group: "internal",
+                        position: "before"
+                    },
+                    {
+                        pattern: "@/utils/**",
+                        group: "internal",
+                        position: "before"
+                    },
+                    {
+                        pattern: "@/hooks/**",
+                        group: "internal",
+                        position: "before"
+                    }
+                    ],
+                    "pathGroupsExcludedImportTypes": ["builtin"],
+                    "newlines-between": "always",
+                    "alphabetize": {
+                    order: "asc",
+                    caseInsensitive: true
+                    }
+                }
+              ],
+            },
         settings: {
             'import/resolver': {
                 typescript: {

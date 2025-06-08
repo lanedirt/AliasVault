@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import Unlock from '@/entrypoints/popup/pages/Unlock';
-import Login from '@/entrypoints/popup/pages/Login';
-import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
 import { useNavigate } from 'react-router-dom';
+
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import Login from '@/entrypoints/popup/pages/Login';
+import Unlock from '@/entrypoints/popup/pages/Unlock';
+import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
 
 /**
  * Home page that shows the correct page based on the user's authentication state.

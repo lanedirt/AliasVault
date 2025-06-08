@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { FormFiller } from '../FormFiller';
 import { JSDOM } from 'jsdom';
-import { setupTestDOM, createMockFormFields, createMockCredential, wasTriggerCalledFor, createDateSelects } from './TestUtils';
-import { FormFields } from '../types/FormFields';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { Credential } from '../../types/Credential';
+import { FormFiller } from '../FormFiller';
+import { FormFields } from '../types/FormFields';
+
+import { setupTestDOM, createMockFormFields, createMockCredential, wasTriggerCalledFor, createDateSelects } from './TestUtils';
 
 const { window } = new JSDOM('<!DOCTYPE html>');
 global.HTMLSelectElement = window.HTMLSelectElement;

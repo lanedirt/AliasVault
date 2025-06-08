@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { storage } from 'wxt/utils/storage';
+
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
+import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/shared/models';
 import { SqliteClient } from '@/utils/SqliteClient';
-import { WebApiService } from '@/utils/WebApiService';
-import { Vault } from '@/utils/types/webapi/Vault';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import { VaultPostResponse } from '@/utils/types/webapi/VaultPostResponse';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
-import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
-import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
+import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
+import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
+import { WebApiService } from '@/utils/WebApiService';
 
 /**
  * Check if the user is logged in and if the vault is locked.

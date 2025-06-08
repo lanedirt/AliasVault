@@ -1,16 +1,19 @@
-import { storage } from '#imports';
 import { sendMessage } from 'webext-bridge/content-script';
-import { fillCredential } from '@/entrypoints/contentScript/Form';
+
 import { filterCredentials } from '@/entrypoints/contentScript/Filter';
+import { fillCredential } from '@/entrypoints/contentScript/Form';
+
+import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { CreateIdentityGenerator } from '@/utils/shared/identity-generator';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
+import { SqliteClient } from '@/utils/SqliteClient';
+import { Credential } from '@/utils/types/Credential';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
-import { SqliteClient } from '@/utils/SqliteClient';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
-import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { Credential } from '@/utils/types/Credential';
-import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+
+import { storage } from '#imports';
 
 /**
  * WeakMap to store event listeners for popup containers

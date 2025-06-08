@@ -1,8 +1,9 @@
 import initSqlJs, { Database } from 'sql.js';
+
 import { Credential } from './types/Credential';
 import { EncryptionKey } from './types/EncryptionKey';
-import { TotpCode } from './types/TotpCode';
 import { PasswordSettings } from './types/PasswordSettings';
+import { TotpCode } from './types/TotpCode';
 
 /**
  * Placeholder base64 image for credentials without a logo.

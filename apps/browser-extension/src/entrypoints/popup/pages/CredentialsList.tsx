@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { sendMessage } from 'webext-bridge/popup';
+
+import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { Credential } from '@/utils/types/Credential';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
-import { VaultResponse } from '@/utils/types/webapi/VaultResponse';
-import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
-import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+
+import type { VaultResponse } from '@/utils/shared/models';
+import { Credential } from '@/utils/types/Credential';
+
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
 
 /**
  * Credentials list page.

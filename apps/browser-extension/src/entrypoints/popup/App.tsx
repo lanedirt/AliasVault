@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
-import Header from '@/entrypoints/popup/components/Layout/Header';
-import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
-import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
-import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
-import EmailsList from '@/entrypoints/popup/pages/EmailsList';
-import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
-import Home from '@/entrypoints/popup/pages/Home';
-import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
-import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
-import Settings from '@/entrypoints/popup/pages/Settings';
+
 import GlobalStateChangeHandler from '@/entrypoints/popup/components/GlobalStateChangeHandler';
+import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
+import Header from '@/entrypoints/popup/components/Layout/Header';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
+import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
+import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
+import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
+import EmailsList from '@/entrypoints/popup/pages/EmailsList';
+import Home from '@/entrypoints/popup/pages/Home';
 import Logout from '@/entrypoints/popup/pages/Logout';
+import Settings from '@/entrypoints/popup/pages/Settings';
+
+import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import '@/entrypoints/popup/style.css';
 
 /**

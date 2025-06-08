@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { storage } from '#imports';
 import { sendMessage } from 'webext-bridge/popup';
+
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+
+import { storage } from '#imports';
 
 type AuthContextType = {
   isLoggedIn: boolean;

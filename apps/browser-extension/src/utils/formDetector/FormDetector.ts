@@ -1,5 +1,5 @@
-import { FormFields } from "./types/FormFields";
 import { CombinedFieldPatterns, CombinedGenderOptionPatterns, CombinedStopWords } from "./FieldPatterns";
+import { FormFields } from "./types/FormFields";
 
 /**
  * Form detector.
