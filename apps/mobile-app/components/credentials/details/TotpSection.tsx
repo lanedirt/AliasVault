@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { Credential } from '@/utils/types/Credential';
-import { TotpCode } from '@/utils/types/TotpCode';
+import type { Credential, TotpCode } from '@/utils/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 
