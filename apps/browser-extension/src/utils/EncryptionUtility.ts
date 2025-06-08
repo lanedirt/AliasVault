@@ -2,9 +2,8 @@ import { Buffer } from 'buffer';
 
 import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
 
+import type { EncryptionKey } from '@/utils/shared/models/vault';
 import type { Email, MailboxEmail } from '@/utils/shared/models/webapi';
-
-import { EncryptionKey } from './types/EncryptionKey';
 
 /**
  * Utility class for encryption operations including:

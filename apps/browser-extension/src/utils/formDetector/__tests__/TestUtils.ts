@@ -7,7 +7,7 @@ import { it, expect, vi } from 'vitest';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { FormFields } from '@/utils/formDetector/types/FormFields';
 import { Gender } from '@/utils/shared/identity-generator';
-import { Credential } from '@/utils/types/Credential';
+import type { Credential } from '@/utils/shared/models/vault';
 
 export enum FormField {
   Username = 'username',
