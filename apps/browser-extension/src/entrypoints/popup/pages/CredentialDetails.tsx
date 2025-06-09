@@ -27,7 +27,6 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   const [credential, setCredential] = useState<Credential | null>(null);
   const { setIsInitialLoading } = useLoading();
   const { setHeaderButtons } = useHeaderButtons();
-  const [headerButtonsConfigured, setHeaderButtonsConfigured] = useState(false);
 
   /**
    * Check if the current page is an expanded popup.
@@ -102,28 +101,23 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
-    // Only set the header buttons once on mount.
-    if (!headerButtonsConfigured) {
-      const headerButtonsJSX = (
-        <div className="flex items-center gap-2">
-          <HeaderButton
-            onClick={openInNewPopup}
-            title="Open in new window"
-            iconType={HeaderIconType.EXPAND}
-          />
-          <HeaderButton
-            onClick={handleEdit}
-            title="Edit credential"
-            iconType={HeaderIconType.EDIT}
-          />
-        </div>
-      );
-
-      setHeaderButtons(headerButtonsJSX);
-      setHeaderButtonsConfigured(true);
-    }
+    const headerButtonsJSX = (
+      <div className="flex items-center gap-2">
+        <HeaderButton
+          onClick={openInNewPopup}
+          title="Open in new window"
+          iconType={HeaderIconType.EXPAND}
+        />
+        <HeaderButton
+          onClick={handleEdit}
+          title="Edit credential"
+          iconType={HeaderIconType.EDIT}
+        />
+      </div>
+    );
+    setHeaderButtons(headerButtonsJSX);
     return () => {};
-  }, [setHeaderButtons, headerButtonsConfigured, handleEdit, openInNewPopup]);
+  }, [setHeaderButtons, handleEdit, openInNewPopup]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {

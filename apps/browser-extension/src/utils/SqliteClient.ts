@@ -623,6 +623,167 @@ export class SqliteClient {
   }
 
   /**
+   * Update an existing credential with associated entities
+   * @param credential The credential object to update
+   * @returns The number of rows modified
+   */
+  public async updateCredentialById(credential: Credential): Promise<number> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      this.beginTransaction();
+      const currentDateTime = new Date().toISOString()
+        .replace('T', ' ')
+        .replace('Z', '')
+        .substring(0, 23);
+
+      // Get existing credential to compare changes
+      const existingCredential = this.getCredentialById(credential.Id);
+      if (!existingCredential) {
+        throw new Error('Credential not found');
+      }
+
+      // 1. Update Service
+      const serviceQuery = `
+        UPDATE Services
+        SET Name = ?,
+            Url = ?,
+            Logo = COALESCE(?, Logo),
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT ServiceId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      let logoData = null;
+      try {
+        if (credential.Logo) {
+          // Handle object-like array conversion
+          if (typeof credential.Logo === 'object' && !ArrayBuffer.isView(credential.Logo)) {
+            const values = Object.values(credential.Logo);
+            logoData = new Uint8Array(values);
+          // Handle existing array types
+          } else if (Array.isArray(credential.Logo) || credential.Logo instanceof ArrayBuffer || credential.Logo instanceof Uint8Array) {
+            logoData = new Uint8Array(credential.Logo);
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to convert logo to Uint8Array:', error);
+        logoData = null;
+      }
+
+      this.executeUpdate(serviceQuery, [
+        credential.ServiceName,
+        credential.ServiceUrl ?? null,
+        logoData,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 2. Update Alias
+      const aliasQuery = `
+        UPDATE Aliases
+        SET FirstName = ?,
+            LastName = ?,
+            NickName = ?,
+            BirthDate = ?,
+            Gender = ?,
+            Email = ?,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT AliasId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      // Only update BirthDate if it's actually different (accounting for format differences)
+      let birthDate = credential.Alias.BirthDate;
+      if (birthDate && existingCredential.Alias.BirthDate) {
+        const newDate = new Date(birthDate);
+        const existingDate = new Date(existingCredential.Alias.BirthDate);
+        if (newDate.getTime() === existingDate.getTime()) {
+          birthDate = existingCredential.Alias.BirthDate;
+        }
+      }
+
+      this.executeUpdate(aliasQuery, [
+        credential.Alias.FirstName ?? null,
+        credential.Alias.LastName ?? null,
+        credential.Alias.NickName ?? null,
+        birthDate ?? null,
+        credential.Alias.Gender ?? null,
+        credential.Alias.Email ?? null,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 3. Update Credential
+      const credentialQuery = `
+        UPDATE Credentials
+        SET Username = ?,
+            Notes = ?,
+            UpdatedAt = ?
+        WHERE Id = ?`;
+
+      this.executeUpdate(credentialQuery, [
+        credential.Username ?? null,
+        credential.Notes ?? null,
+        currentDateTime,
+        credential.Id
+      ]);
+
+      // 4. Update Password if changed
+      if (credential.Password !== existingCredential.Password) {
+        // Check if a password record already exists for this credential, if not, then create one.
+        const passwordRecordExistsQuery = `
+          SELECT Id
+          FROM Passwords
+          WHERE CredentialId = ?`;
+        const passwordResults = this.executeQuery(passwordRecordExistsQuery, [credential.Id]);
+
+        if (passwordResults.length === 0) {
+          // Create a new password record
+          const passwordQuery = `
+            INSERT INTO Passwords (Id, Value, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+            VALUES (?, ?, ?, ?, ?, ?)`;
+
+          this.executeUpdate(passwordQuery, [
+            crypto.randomUUID().toUpperCase(),
+            credential.Password,
+            credential.Id,
+            currentDateTime,
+            currentDateTime,
+            0
+          ]);
+        } else {
+          // Update the existing password record
+          const passwordQuery = `
+            UPDATE Passwords
+            SET Value = ?, UpdatedAt = ?
+            WHERE CredentialId = ?`;
+
+          this.executeUpdate(passwordQuery, [
+            credential.Password,
+            currentDateTime,
+            credential.Id
+          ]);
+        }
+      }
+
+      await this.commitTransaction();
+      return 1;
+
+    } catch (error) {
+      this.rollbackTransaction();
+      console.error('Error updating credential:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Convert binary data to a base64 encoded image source.
    */
   public static imgSrcFromBytes(bytes: Uint8Array<ArrayBufferLike> | number[] | undefined): string {
