@@ -1,13 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-
-import { AppInfo } from '@/utils/AppInfo';
-
-import { storage } from '#imports';
 
 /**
  * Header props.
@@ -31,19 +25,6 @@ const Header: React.FC<HeaderProps> = ({
   const authContext = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  /**
-   * Open the client tab.
-   */
-  const openClientTab = async () : Promise<void> => {
-    const settingClientUrl = await storage.getItem('local:clientUrl') as string;
-    let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
-    if (settingClientUrl && settingClientUrl.length > 0) {
-      clientUrl = settingClientUrl;
-    }
-
-    window.open(clientUrl, '_blank');
-  };
 
   // Updated route matching logic to handle URL parameters
   const currentRoute = routes?.find(route => {
@@ -112,13 +93,6 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex-grow" />
 
         <div className="flex items-center gap-2">
-          {!currentRoute?.showBackButton && (
-            <HeaderButton
-              onClick={openClientTab}
-              title="Open Client"
-              iconType={HeaderIconType.EXTERNAL_LINK}
-            />
-          )}
           {!authContext.isLoggedIn ? (
             <button
               id="settings"

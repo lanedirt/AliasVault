@@ -341,9 +341,41 @@ export class SqliteClient {
 
   /**
    * Get the default email domain from the database.
+   * @param privateEmailDomains - Array of private email domains
+   * @param publicEmailDomains - Array of public email domains
+   * @returns The default email domain or null if no valid domain is found
    */
-  public getDefaultEmailDomain(): string {
-    return this.getSetting('DefaultEmailDomain');
+  public getDefaultEmailDomain(privateEmailDomains: string[], publicEmailDomains: string[]): string | null {
+    const defaultEmailDomain = this.getSetting('DefaultEmailDomain');
+
+    /**
+     * Check if a domain is valid.
+     */
+    const isValidDomain = (domain: string): boolean => {
+      return Boolean(domain &&
+        domain !== 'DISABLED.TLD' &&
+        (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain)));
+    };
+
+    // First check if the default domain that is configured in the vault is still valid.
+    if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
+      return defaultEmailDomain;
+    }
+
+    // If default domain is not valid, fall back to first available private domain.
+    const firstPrivate = privateEmailDomains.find(isValidDomain);
+    if (firstPrivate) {
+      return firstPrivate;
+    }
+
+    // Return first valid public domain if no private domains are available.
+    const firstPublic = publicEmailDomains.find(isValidDomain);
+    if (firstPublic) {
+      return firstPublic;
+    }
+
+    // Return null if no valid domains are found
+    return null;
   }
 
   /**
@@ -383,9 +415,9 @@ export class SqliteClient {
   /**
    * Create a new credential with associated entities
    * @param credential The credential object to insert
-   * @returns The number of rows modified
+   * @returns The ID of the created credential
    */
-  public async createCredential(credential: Credential): Promise<number> {
+  public async createCredential(credential: Credential): Promise<string> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -480,7 +512,7 @@ export class SqliteClient {
       }
 
       await this.commitTransaction();
-      return 1;
+      return credentialId;
 
     } catch (error) {
       this.rollbackTransaction();

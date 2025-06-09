@@ -9,8 +9,8 @@ import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
+import CredentialAddEdit from '@/entrypoints/popup/pages/CredentialAddEdit';
 import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
-import CredentialEdit from '@/entrypoints/popup/pages/CredentialEdit';
 import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
 import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
 import EmailsList from '@/entrypoints/popup/pages/EmailsList';
@@ -46,8 +46,9 @@ const App: React.FC = () => {
     { path: '/', element: <Home />, showBackButton: false },
     { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
+    { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: 'Add credential' },
     { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential details' },
-    { path: '/credentials/:id/edit', element: <CredentialEdit />, showBackButton: true, title: 'Edit credential' },
+    { path: '/credentials/:id/edit', element: <CredentialAddEdit />, showBackButton: true, title: 'Edit credential' },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
     { path: '/settings', element: <Settings />, showBackButton: false },

@@ -226,48 +226,16 @@ export async function getEmailAddressesForVault(
 /**
  * Get default email domain for a vault.
  */
-export function handleGetDefaultEmailDomain(
-) : Promise<stringResponse> {
-  return (async () : Promise<stringResponse> => {
+export function handleGetDefaultEmailDomain(): Promise<stringResponse> {
+  return (async (): Promise<stringResponse> => {
     try {
       const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
       const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];
 
       const sqliteClient = await createVaultSqliteClient();
-      const defaultEmailDomain = sqliteClient.getDefaultEmailDomain();
+      const defaultEmailDomain = sqliteClient.getDefaultEmailDomain(privateEmailDomains, publicEmailDomains);
 
-      /**
-       * Check if a domain is valid.
-       */
-      const isValidDomain = (domain: string) : boolean => {
-        const isValid = (domain &&
-                    domain !== 'DISABLED.TLD' &&
-                    (privateEmailDomains.includes(domain) || publicEmailDomains.includes(domain))) as boolean;
-
-        return isValid;
-      };
-
-      // First check if the default domain that is configured in the vault is still valid.
-      if (defaultEmailDomain && isValidDomain(defaultEmailDomain)) {
-        return { success: true, value: defaultEmailDomain };
-      }
-
-      // If default domain is not valid, fall back to first available private domain.
-      const firstPrivate = privateEmailDomains.find(isValidDomain);
-
-      if (firstPrivate) {
-        return { success: true, value: firstPrivate };
-      }
-
-      // Return first valid public domain if no private domains are available.
-      const firstPublic = publicEmailDomains.find(isValidDomain);
-
-      if (firstPublic) {
-        return { success: true, value: firstPublic };
-      }
-
-      // Return null if no valid domains are found
-      return { success: true };
+      return { success: true, value: defaultEmailDomain ?? undefined };
     } catch (error) {
       console.error('Error getting default email domain:', error);
       return { success: false, error: 'Failed to get default email domain' };
