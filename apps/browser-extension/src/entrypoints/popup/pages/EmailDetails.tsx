@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import ConversionUtility from '@/entrypoints/popup/utils/ConversionUtility';
@@ -12,10 +13,13 @@ import type { EmailAttachment, Email } from '@/utils/shared/models/webapi';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
+import HeaderButton from '../components/HeaderButton';
+import { HeaderIconType } from '../components/icons/HeaderIcons';
+
 /**
  * Email details page.
  */
-const EmailDetails: React.FC = () => {
+const EmailDetails: React.FC = (): React.ReactElement => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dbContext = useDb();
@@ -24,6 +28,8 @@ const EmailDetails: React.FC = () => {
   const [email, setEmail] = useState<Email | null>(null);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
   const { setIsInitialLoading } = useLoading();
+  const { setHeaderButtons } = useHeaderButtons();
+  const [headerButtonsConfigured, setHeaderButtonsConfigured] = useState(false);
 
   /**
    * Make sure the initial loading state is set to false when this component is loaded itself.
@@ -73,14 +79,18 @@ const EmailDetails: React.FC = () => {
   /**
    * Handle deleting an email.
    */
-  const handleDelete = async () : Promise<void> => {
+  const handleDelete = useCallback(async () : Promise<void> => {
     try {
       await webApi.delete(`Email/${id}`);
-      navigate('/emails');
+      if (isPopup()) {
+        window.close();
+      } else {
+        navigate('/emails');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete email');
     }
-  };
+  }, [id, webApi, navigate]);
 
   /**
    * Check if the current page is an expanded popup.
@@ -93,7 +103,7 @@ const EmailDetails: React.FC = () => {
   /**
    * Open the credential details in a new expanded popup.
    */
-  const openInNewPopup = () : void => {
+  const openInNewPopup = useCallback((): void => {
     const width = 800;
     const height = 1000;
     const left = window.screen.width / 2 - width / 2;
@@ -107,7 +117,7 @@ const EmailDetails: React.FC = () => {
 
     // Close the current tab
     window.close();
-  };
+  }, [id]);
 
   /**
    * Handle downloading an attachment.
@@ -153,6 +163,37 @@ const EmailDetails: React.FC = () => {
     }
   };
 
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    // Only set the header buttons once on mount.
+    if (!headerButtonsConfigured) {
+      const headerButtonsJSX = (
+        <div className="flex items-center gap-2">
+          <HeaderButton
+            onClick={openInNewPopup}
+            title="Open in new window"
+            iconType={HeaderIconType.EXPAND}
+          />
+          <HeaderButton
+            onClick={handleDelete}
+            title="Delete email"
+            iconType={HeaderIconType.DELETE}
+            variant="danger"
+          />
+        </div>
+      );
+
+      setHeaderButtons(headerButtonsJSX);
+      setHeaderButtonsConfigured(true);
+    }
+    return () => {};
+  }, [setHeaderButtons, headerButtonsConfigured, handleDelete, openInNewPopup]);
+
+  // Clear header buttons on unmount
+  useEffect((): (() => void) => {
+    return () => setHeaderButtons(null);
+  }, [setHeaderButtons]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -176,48 +217,6 @@ const EmailDetails: React.FC = () => {
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{email.subject}</h1>
-            <div className="flex space-x-2">
-              <button
-                onClick={openInNewPopup}
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                title="Open in new window"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-2 text-red-500 hover:text-red-600 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20"
-                title="Delete email"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            </div>
           </div>
           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
             <p>From: {email.fromDisplay} ({email.fromLocal}@{email.fromDomain})</p>
