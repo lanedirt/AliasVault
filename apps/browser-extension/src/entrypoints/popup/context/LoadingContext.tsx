@@ -4,7 +4,8 @@ import LoadingSpinnerFullScreen from '@/entrypoints/popup/components/LoadingSpin
 
 type LoadingContextType = {
   isLoading: boolean;
-  showLoading: () => void;
+  loadingMessage?: string;
+  showLoading: (message?: string) => void;
   hideLoading: () => void;
   isInitialLoading: boolean;
   setIsInitialLoading: (isInitialLoading: boolean) => void;
@@ -30,31 +31,39 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
    * Loading state that can be used by other components during normal operation.
    */
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | undefined>(undefined);
 
   /**
-   * Show loading spinner
+   * Show loading spinner with optional message
    */
-  const showLoading = (): void => setIsLoading(true);
+  const showLoading = (message?: string): void => {
+    setIsLoading(true);
+    setLoadingMessage(message);
+  };
 
   /**
-   * Hide loading spinner
+   * Hide loading spinner and clear message
    */
-  const hideLoading = (): void => setIsLoading(false);
+  const hideLoading = (): void => {
+    setIsLoading(false);
+    setLoadingMessage(undefined);
+  };
 
   const value = useMemo(
     () => ({
       isLoading,
+      loadingMessage,
       showLoading,
       hideLoading,
       isInitialLoading,
       setIsInitialLoading,
     }),
-    [isLoading, isInitialLoading]
+    [isLoading, loadingMessage, isInitialLoading]
   );
 
   return (
     <LoadingContext.Provider value={value}>
-      <LoadingSpinnerFullScreen />
+      <LoadingSpinnerFullScreen message={loadingMessage} />
       {children}
     </LoadingContext.Provider>
   );

@@ -4,12 +4,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import LoadingSpinnerFullScreen from '@/entrypoints/popup/components/LoadingSpinnerFullScreen';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
-import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
 import type { Credential } from '@/utils/shared/models/vault';
+
+import { useLoading } from '../context/LoadingContext';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -21,10 +24,10 @@ const CredentialAddEdit: React.FC = () => {
   const navigate = useNavigate();
   const dbContext = useDb();
   const [credential, setCredential] = useState<Credential | null>(null);
-  const { setIsInitialLoading } = useLoading();
   const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
   const [mode, setMode] = useState<CredentialMode>('random');
   const { setHeaderButtons } = useHeaderButtons();
+  const { setIsInitialLoading } = useLoading();
 
   // If we received an ID, we're in edit mode
   const isEditMode = id !== undefined && id.length > 0;
@@ -41,7 +44,6 @@ const CredentialAddEdit: React.FC = () => {
       const result = dbContext.sqliteClient.getCredentialById(id);
       if (result) {
         setCredential(result);
-        setIsInitialLoading(false);
         // If credential has alias data, switch to manual mode
         if (result.Alias?.FirstName || result.Alias?.LastName) {
           setMode('manual');
@@ -97,7 +99,7 @@ const CredentialAddEdit: React.FC = () => {
       onSuccess: () => {
         // Pop the current page from the history stack
         navigate(-1);
-      }
+      },
     });
   }, [credential, isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate]);
 
@@ -140,8 +142,11 @@ const CredentialAddEdit: React.FC = () => {
   return (
     <div className="space-y-4">
       {isLoading && (
-        <div className="text-sm text-gray-500">
-          {syncStatus}
+        <div className="fixed inset-0 flex flex-col justify-center items-center bg-white dark:bg-gray-900 bg-opacity-90 dark:bg-opacity-90 z-50">
+          <LoadingSpinner />
+          <div className="text-sm text-gray-500 mt-2">
+            {syncStatus}
+          </div>
         </div>
       )}
 
@@ -167,7 +172,7 @@ const CredentialAddEdit: React.FC = () => {
       )}
 
       <div className="space-y-6">
-        <div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Service</h2>
           <div className="space-y-4">
             <FormInput
@@ -188,7 +193,7 @@ const CredentialAddEdit: React.FC = () => {
 
         {(mode === 'manual' || isEditMode) && (
           <>
-            <div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Login Credentials</h2>
               <div className="space-y-4">
                 <FormInput
@@ -222,7 +227,7 @@ const CredentialAddEdit: React.FC = () => {
               </div>
             </div>
 
-            <div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Alias</h2>
               <div className="space-y-4">
                 <FormInput
@@ -274,7 +279,7 @@ const CredentialAddEdit: React.FC = () => {
               </div>
             </div>
 
-            <div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Metadata</h2>
               <div className="space-y-4">
                 <FormInput
