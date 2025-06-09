@@ -41,6 +41,7 @@ export function useVaultMutate() : {
     try {
       // Trigger the background worker to upload the current vault to the server
       const response = await sendMessage('UPLOAD_VAULT', {}, 'background') as messageVaultUploadResponse;
+      console.log('Vault upload response:', response);
 
       /*
        * If we get here, it means we have a valid connection to the server.
@@ -49,6 +50,7 @@ export function useVaultMutate() : {
        */
 
       if (response.status === 0 && response.newRevisionNumber) {
+        console.log('Vault upload successful, setting revision number:', response.newRevisionNumber);
         await dbContext.setCurrentVaultRevisionNumber(response.newRevisionNumber);
         options.onSuccess?.();
       } else if (response.status === 1) {

@@ -50,6 +50,13 @@ const CredentialDetails: React.FC = () => {
     window.close();
   };
 
+  /**
+   * Navigate to the edit page for this credential.
+   */
+  const handleEdit = (): void => {
+    navigate(`/credentials/${id}/edit`);
+  };
+
   useEffect(() => {
     if (isPopup()) {
       window.history.replaceState({}, '', `popup.html#/credentials`);
@@ -80,7 +87,15 @@ const CredentialDetails: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <HeaderBlock credential={credential} onOpenNewPopup={openInNewPopup} />
+      <div className="flex justify-between items-center px-4">
+        <HeaderBlock credential={credential} onOpenNewPopup={openInNewPopup} />
+        <button
+          onClick={handleEdit}
+          className="text-blue-500 hover:text-blue-700"
+        >
+          Edit
+        </button>
+      </div>
       {credential.Alias?.Email && (
         <EmailBlock
           email={credential.Alias.Email}
