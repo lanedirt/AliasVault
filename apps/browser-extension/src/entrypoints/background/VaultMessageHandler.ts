@@ -9,6 +9,7 @@ import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
+import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types/messaging/VaultUploadResponse';
 import { WebApiService } from '@/utils/WebApiService';
 
 /**
@@ -300,9 +301,24 @@ export async function handleGetDerivedKey(
 }
 
 /**
+ * Upload the vault to the server.
+ */
+export async function handleUploadVault(
+) : Promise<messageVaultUploadResponse> {
+  try {
+    const sqliteClient = await createVaultSqliteClient();
+    const response = await uploadNewVaultToServer(sqliteClient);
+    return { success: true, status: response.status, newRevisionNumber: response.newRevisionNumber };
+  } catch (error) {
+    console.error('Failed to upload vault:', error);
+    return { success: false, error: 'Failed to upload vault' };
+  }
+}
+
+/**
  * Upload a new version of the vault to the server using the provided sqlite client.
  */
-async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void> {
+async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<VaultPostResponse> {
   const updatedVaultData = sqliteClient.exportToBase64();
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
@@ -346,6 +362,8 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<void
   } else {
     throw new Error('Failed to upload new vault to server');
   }
+
+  return response;
 }
 
 /**
