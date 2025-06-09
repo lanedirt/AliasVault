@@ -1,6 +1,8 @@
 import initSqlJs, { Database } from 'sql.js';
+import { sendMessage } from 'webext-bridge/popup';
 
 import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/shared/models/vault';
+import { StoreVaultRequest } from './types/messaging/StoreVaultRequest';
 
 /**
  * Placeholder base64 image for credentials without a logo.
@@ -12,6 +14,7 @@ const placeholderBase64 = 'UklGRjoEAABXRUJQVlA4IC4EAAAwFwCdASqAAIAAPpFCm0olo6Ihp
  */
 export class SqliteClient {
   private db: Database | null = null;
+  private isInTransaction: boolean = false;
 
   /**
    * Initialize the SQLite database from a base64 string
@@ -39,6 +42,81 @@ export class SqliteClient {
       this.db = new SQL.Database(bytes);
     } catch (error) {
       console.error('Error initializing SQLite database:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Begin a new transaction
+   */
+  public beginTransaction(): void {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    if (this.isInTransaction) {
+      throw new Error('Transaction already in progress');
+    }
+
+    try {
+      this.db.run('BEGIN TRANSACTION');
+      this.isInTransaction = true;
+    } catch (error) {
+      console.error('Error beginning transaction:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Commit the current transaction and persist changes to the vault
+   */
+  public async commitTransaction(): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    if (!this.isInTransaction) {
+      throw new Error('No transaction in progress');
+    }
+
+    try {
+      this.db.run('COMMIT');
+      this.isInTransaction = false;
+
+      // Export the current database state and store it in the background worker
+      const updatedVaultBlob = this.exportToBase64();
+
+      /**
+       * Store encrypted vault in background worker.
+       */
+      const request: StoreVaultRequest = {
+        vaultBlob: updatedVaultBlob,
+      };
+
+      await sendMessage('STORE_VAULT', request, 'background');
+    } catch (error) {
+      console.error('Error committing transaction:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Rollback the current transaction
+   */
+  public rollbackTransaction(): void {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    if (!this.isInTransaction) {
+      throw new Error('No transaction in progress');
+    }
+
+    try {
+      this.db.run('ROLLBACK');
+      this.isInTransaction = false;
+    } catch (error) {
+      console.error('Error rolling back transaction:', error);
       throw error;
     }
   }
@@ -321,13 +399,13 @@ export class SqliteClient {
    * @param credential The credential object to insert
    * @returns The number of rows modified
    */
-  public createCredential(credential: Credential): number {
+  public async createCredential(credential: Credential): Promise<number> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
 
     try {
-      this.db.run('BEGIN TRANSACTION');
+      this.beginTransaction();
 
       // 1. Insert Service
       let logoData = null;
@@ -415,11 +493,11 @@ export class SqliteClient {
         ]);
       }
 
-      this.db.run('COMMIT');
+      await this.commitTransaction();
       return 1;
 
     } catch (error) {
-      this.db.run('ROLLBACK');
+      this.rollbackTransaction();
       console.error('Error creating credential:', error);
       throw error;
     }
@@ -497,6 +575,64 @@ export class SqliteClient {
       console.error('Error getting TOTP codes:', error);
       // Return empty array instead of throwing to be robust
       return [];
+    }
+  }
+
+  /**
+   * Delete a credential by ID
+   * @param credentialId - The ID of the credential to delete
+   * @returns The number of rows deleted
+   */
+  public async deleteCredentialById(credentialId: string): Promise<number> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      this.beginTransaction();
+
+      const currentDateTime = new Date().toISOString()
+        .replace('T', ' ')
+        .replace('Z', '')
+        .substring(0, 23);
+
+      // Update the credential, alias, and service to be deleted
+      const query = `
+        UPDATE Credentials
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = ?`;
+
+      const aliasQuery = `
+        UPDATE Aliases
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT AliasId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      const serviceQuery = `
+        UPDATE Services
+        SET IsDeleted = 1,
+            UpdatedAt = ?
+        WHERE Id = (
+          SELECT ServiceId
+          FROM Credentials
+          WHERE Id = ?
+        )`;
+
+      const results = this.executeUpdate(query, [currentDateTime, credentialId]);
+      this.executeUpdate(aliasQuery, [currentDateTime, credentialId]);
+      this.executeUpdate(serviceQuery, [currentDateTime, credentialId]);
+
+      await this.commitTransaction();
+      return results;
+    } catch (error) {
+      this.rollbackTransaction();
+      console.error('Error deleting credential:', error);
+      throw error;
     }
   }
 

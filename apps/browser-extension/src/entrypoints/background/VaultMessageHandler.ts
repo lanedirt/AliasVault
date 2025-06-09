@@ -11,6 +11,7 @@ import { StringResponse as stringResponse } from '@/utils/types/messaging/String
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types/messaging/VaultUploadResponse';
 import { WebApiService } from '@/utils/WebApiService';
+import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 
 /**
  * Check if the user is logged in and if the vault is locked.
@@ -33,20 +34,33 @@ export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, i
  * Store the vault in browser storage.
  */
 export async function handleStoreVault(
-  message: any,
+  message: StoreVaultRequest,
 ) : Promise<messageBoolResponse> {
   try {
-    const vaultResponse = message.vaultResponse as VaultResponse;
-    const encryptedVaultBlob = vaultResponse.vault.blob;
+    // Store new encrypted vault in session storage.
+    await storage.setItem('session:encryptedVault', message.vaultBlob);
 
-    // Store encrypted vault and derived key in session storage.
-    await storage.setItems([
-      { key: 'session:encryptedVault', value: encryptedVaultBlob },
-      { key: 'session:derivedKey', value: message.derivedKey },
-      { key: 'session:publicEmailDomains', value: vaultResponse.vault.publicEmailDomainList },
-      { key: 'session:privateEmailDomains', value: vaultResponse.vault.privateEmailDomainList },
-      { key: 'session:vaultRevisionNumber', value: vaultResponse.vault.currentRevisionNumber }
-    ]);
+    /*
+     * For all other values, check if they have a value and store them in session storage if they do.
+     * Some updates, e.g. when mutating local database, these values will not be set.
+     */
+
+    // Store derived key in session storage (if it has a value)
+    if (message.derivedKey) {
+      await storage.setItem('session:derivedKey', message.derivedKey);
+    }
+
+    if (message.publicEmailDomainList) {
+      await storage.setItem('session:publicEmailDomains', message.publicEmailDomainList);
+    }
+
+    if (message.privateEmailDomainList) {
+      await storage.setItem('session:privateEmailDomains', message.privateEmailDomainList);
+    }
+
+    if (message.vaultRevisionNumber) {
+      await storage.setItem('session:vaultRevisionNumber', message.vaultRevisionNumber);
+    }
 
     return { success: true };
   } catch (error) {

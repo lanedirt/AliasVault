@@ -6,6 +6,7 @@ import type { VaultMetadata } from '@/utils/shared/models/metadata';
 import type { VaultResponse } from '@/utils/shared/models/webapi';
 import SqliteClient from '@/utils/SqliteClient';
 import type { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
+import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
@@ -63,13 +64,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber,
     });
 
-    /*
+    /**
      * Store encrypted vault in background worker.
      */
-    sendMessage('STORE_VAULT', {
+    const request: StoreVaultRequest = {
+      vaultBlob: vaultResponse.vault.blob,
       derivedKey: derivedKey,
-      vaultResponse: vaultResponse,
-    }, 'background');
+      publicEmailDomainList: vaultResponse.vault.publicEmailDomainList,
+      privateEmailDomainList: vaultResponse.vault.privateEmailDomainList,
+      vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber,
+    };
+
+    await sendMessage('STORE_VAULT', request, 'background');
   }, []);
 
   const checkStoredVault = useCallback(async () => {
