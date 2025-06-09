@@ -14,6 +14,7 @@ type DbContextType = {
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
+  setCurrentVaultRevisionNumber: (revisionNumber: number) => Promise<void>;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -105,6 +106,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [vaultMetadata]);
 
   /**
+   * Set the current vault revision number.
+   */
+  const setCurrentVaultRevisionNumber = useCallback(async (revisionNumber: number) => {
+    setVaultMetadata({
+      publicEmailDomains: vaultMetadata?.publicEmailDomains ?? [],
+      privateEmailDomains: vaultMetadata?.privateEmailDomains ?? [],
+      vaultRevisionNumber: revisionNumber,
+    });
+  }, [vaultMetadata]);
+
+  /**
    * Check if database is initialized and try to retrieve vault from background
    */
   useEffect(() : void => {
@@ -129,7 +141,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     initializeDatabase,
     clearDatabase,
     getVaultMetadata,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata]);
+    setCurrentVaultRevisionNumber,
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber]);
 
   return (
     <DbContext.Provider value={contextValue}>
