@@ -67,7 +67,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
 
       window.open(
         `popup.html?expanded=true#/credentials/${id}/edit`,
-        'CredentialEdit',
+        'CredentialAddEdit',
         `width=${width},height=${height},left=${left},top=${top},popup=true`
       );
     } else {

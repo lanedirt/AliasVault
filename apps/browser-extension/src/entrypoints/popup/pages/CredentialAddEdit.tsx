@@ -11,8 +11,9 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
-import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
+import { IdentityHelperUtils, CreateIdentityGenerator } from '@/utils/shared/identity-generator';
 import type { Credential } from '@/utils/shared/models/vault';
+import { CreatePasswordGenerator } from '@/utils/shared/password-generator';
 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useLoading } from '../context/LoadingContext';
@@ -138,12 +139,89 @@ const CredentialAddEdit: React.FC = () => {
   }, [id, executeVaultMutation, dbContext.sqliteClient, navigate]);
 
   /**
+   * Initialize the identity and password generators with settings from user's vault.
+   */
+  const initializeGenerators = useCallback(async () => {
+    // Get default identity language from database
+    const identityLanguage = dbContext.sqliteClient!.getDefaultIdentityLanguage();
+
+    // Initialize identity generator based on language
+    const identityGenerator = CreateIdentityGenerator(identityLanguage);
+
+    // Initialize password generator with settings from vault
+    const passwordSettings = dbContext.sqliteClient!.getPasswordSettings();
+    const passwordGenerator = CreatePasswordGenerator(passwordSettings);
+
+    return { identityGenerator, passwordGenerator };
+  }, [dbContext.sqliteClient]);
+
+  /**
+   * Generate a random alias and password.
+   */
+  const generateRandomAlias = useCallback(async () => {
+    const { identityGenerator, passwordGenerator } = await initializeGenerators();
+
+    const identity = identityGenerator.generateRandomIdentity();
+    const password = passwordGenerator.generateRandomPassword();
+
+    const metadata = await dbContext!.getVaultMetadata();
+
+    const privateEmailDomains = metadata?.privateEmailDomains ?? [];
+    const publicEmailDomains = metadata?.publicEmailDomains ?? [];
+    const defaultEmailDomain = dbContext.sqliteClient!.getDefaultEmailDomain(privateEmailDomains, publicEmailDomains);
+    const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
+
+    setValue('Alias.Email', email);
+    setValue('Alias.FirstName', identity.firstName);
+    setValue('Alias.LastName', identity.lastName);
+    setValue('Alias.NickName', identity.nickName);
+    setValue('Alias.Gender', identity.gender);
+    setValue('Alias.BirthDate', IdentityHelperUtils.normalizeBirthDateForDisplay(identity.birthDate.toISOString()));
+
+    // In edit mode, preserve existing username and password if they exist
+    if (isEditMode && watch('Username')) {
+      // Keep the existing username in edit mode, so don't do anything here.
+    } else {
+      // Use the newly generated username
+      setValue('Username', identity.nickName);
+    }
+
+    if (isEditMode && watch('Password')) {
+      // Keep the existing password in edit mode, so don't do anything here.
+    } else {
+      // Use the newly generated password
+      setValue('Password', password);
+    }
+  }, [isEditMode, watch, setValue, initializeGenerators, dbContext]);
+
+  /**
+   * Handle the generate random alias button press.
+   */
+  const handleGenerateRandomAlias = useCallback(() => {
+    void generateRandomAlias();
+  }, [generateRandomAlias]);
+
+  /**
    * Handle form submission.
    */
   const onSubmit = useCallback(async (data: Credential): Promise<void> => {
     // Normalize the birth date for database entry.
     if (data?.Alias?.BirthDate) {
       data.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDb(data.Alias.BirthDate);
+    }
+
+    // If we're creating a new credential and mode is random, generate random values here
+    if (!isEditMode && mode === 'random') {
+      // Generate random values now and then read them from the form fields to manually assign to the credentialToSave object
+      await generateRandomAlias();
+      data.Username = watch('Username');
+      data.Password = watch('Password');
+      data.Alias.FirstName = watch('Alias.FirstName');
+      data.Alias.LastName = watch('Alias.LastName');
+      data.Alias.NickName = watch('Alias.NickName');
+      data.Alias.BirthDate = watch('Alias.BirthDate');
+      data.Alias.Gender = watch('Alias.Gender');
+      data.Alias.Email = watch('Alias.Email');
     }
 
     executeVaultMutation(async () => {
@@ -158,11 +236,17 @@ const CredentialAddEdit: React.FC = () => {
        * Navigate to the credential details page on success.
        */
       onSuccess: () => {
-        // Pop the current page from the history stack
-        navigate(-1);
+        // If in add mode, navigate to the credential details page.
+        if (!isEditMode) {
+          // Navigate to the credential details page.
+          navigate(`/credentials/${data.Id}`, { replace: true });
+        } else {
+          // If in edit mode, pop the current page from the history stack to end up on details page as well.
+          navigate(-1);
+        }
       },
     });
-  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate]);
+  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -194,7 +278,7 @@ const CredentialAddEdit: React.FC = () => {
     return () => setHeaderButtons(null);
   }, [setHeaderButtons]);
 
-  if (!isEditMode && !watch('ServiceName')) {
+  if (isEditMode && !watch('ServiceName')) {
     return <div>Loading...</div>;
   }
 
@@ -214,7 +298,7 @@ const CredentialAddEdit: React.FC = () => {
           <button
             onClick={() => setMode('random')}
             className={`flex-1 py-2 px-4 rounded ${
-              mode === 'random' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              mode === 'random' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
             Random Alias
@@ -222,7 +306,7 @@ const CredentialAddEdit: React.FC = () => {
           <button
             onClick={() => setMode('manual')}
             className={`flex-1 py-2 px-4 rounded ${
-              mode === 'manual' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              mode === 'manual' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
             Manual
@@ -237,7 +321,7 @@ const CredentialAddEdit: React.FC = () => {
             <FormInput
               id="serviceName"
               label="Service Name"
-              value={watch('ServiceName')}
+              value={watch('ServiceName') ?? ''}
               onChange={(value) => setValue('ServiceName', value)}
               required
               error={errors.ServiceName?.message}
@@ -245,7 +329,7 @@ const CredentialAddEdit: React.FC = () => {
             <FormInput
               id="serviceUrl"
               label="Service URL"
-              value={watch('ServiceUrl')}
+              value={watch('ServiceUrl') ?? ''}
               onChange={(value) => setValue('ServiceUrl', value)}
               error={errors.ServiceUrl?.message}
             />
@@ -260,7 +344,7 @@ const CredentialAddEdit: React.FC = () => {
                 <FormInput
                   id="username"
                   label="Username"
-                  value={watch('Username')}
+                  value={watch('Username') ?? ''}
                   onChange={(value) => setValue('Username', value)}
                   error={errors.Username?.message}
                 />
@@ -268,20 +352,20 @@ const CredentialAddEdit: React.FC = () => {
                   id="password"
                   label="Password"
                   type="password"
-                  value={watch('Password')}
+                  value={watch('Password') ?? ''}
                   onChange={(value) => setValue('Password', value)}
                   error={errors.Password?.message}
                 />
                 <button
-                  onClick={() => {/* TODO: Implement generate random alias */}}
-                  className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  onClick={handleGenerateRandomAlias}
+                  className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Generate Random Alias
                 </button>
                 <FormInput
                   id="email"
                   label="Email"
-                  value={watch('Alias.Email')}
+                  value={watch('Alias.Email') ?? ''}
                   onChange={(value) => setValue('Alias.Email', value)}
                   error={errors.Alias?.Email?.message}
                 />
@@ -294,28 +378,28 @@ const CredentialAddEdit: React.FC = () => {
                 <FormInput
                   id="firstName"
                   label="First Name"
-                  value={watch('Alias.FirstName')}
+                  value={watch('Alias.FirstName') ?? ''}
                   onChange={(value) => setValue('Alias.FirstName', value)}
                   error={errors.Alias?.FirstName?.message}
                 />
                 <FormInput
                   id="lastName"
                   label="Last Name"
-                  value={watch('Alias.LastName')}
+                  value={watch('Alias.LastName') ?? ''}
                   onChange={(value) => setValue('Alias.LastName', value)}
                   error={errors.Alias?.LastName?.message}
                 />
                 <FormInput
                   id="nickName"
                   label="Nick Name"
-                  value={watch('Alias.NickName')}
+                  value={watch('Alias.NickName') ?? ''}
                   onChange={(value) => setValue('Alias.NickName', value)}
                   error={errors.Alias?.NickName?.message}
                 />
                 <FormInput
                   id="gender"
                   label="Gender"
-                  value={watch('Alias.Gender')}
+                  value={watch('Alias.Gender') ?? ''}
                   onChange={(value) => setValue('Alias.Gender', value)}
                   error={errors.Alias?.Gender?.message}
                 />
@@ -323,7 +407,7 @@ const CredentialAddEdit: React.FC = () => {
                   id="birthDate"
                   label="Birth Date"
                   placeholder="YYYY-MM-DD"
-                  value={watch('Alias.BirthDate')}
+                  value={watch('Alias.BirthDate') ?? ''}
                   onChange={(value) => setValue('Alias.BirthDate', value)}
                   error={errors.Alias?.BirthDate?.message}
                 />
@@ -336,7 +420,7 @@ const CredentialAddEdit: React.FC = () => {
                 <FormInput
                   id="notes"
                   label="Notes"
-                  value={watch('Notes')}
+                  value={watch('Notes') ?? ''}
                   onChange={(value) => setValue('Notes', value)}
                   multiline
                   rows={4}

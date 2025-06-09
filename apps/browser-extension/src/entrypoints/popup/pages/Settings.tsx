@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { sendMessage } from 'webext-bridge/popup';
 
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -28,6 +31,7 @@ type PopupSettings = {
 const Settings: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const authContext = useAuth();
+  const { setHeaderButtons } = useHeaderButtons();
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
     temporaryDisabledUrls: {},
@@ -45,6 +49,35 @@ const Settings: React.FC = () => {
     const [tab] = await browser.tabs.query(queryOptions);
     return tab;
   };
+
+  /**
+   * Open the client tab.
+   */
+  const openClientTab = async () : Promise<void> => {
+    const settingClientUrl = await storage.getItem('local:clientUrl') as string;
+    let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
+    if (settingClientUrl && settingClientUrl.length > 0) {
+      clientUrl = settingClientUrl;
+    }
+
+    window.open(clientUrl, '_blank');
+  };
+
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    const headerButtonsJSX = (
+      <div className="flex items-center gap-2">
+        <HeaderButton
+          onClick={openClientTab}
+          title="Open Client"
+          iconType={HeaderIconType.EXTERNAL_LINK}
+        />
+      </div>
+    );
+
+    setHeaderButtons(headerButtonsJSX);
+    return () => setHeaderButtons(null);
+  }, [setHeaderButtons]);
 
   /**
    * Load settings.

@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
@@ -18,7 +22,9 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 const CredentialsList: React.FC = () => {
   const dbContext = useDb();
   const webApi = useWebApi();
+  const navigate = useNavigate();
   const { syncVault } = useVaultSync();
+  const { setHeaderButtons } = useHeaderButtons();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
@@ -27,6 +33,13 @@ const CredentialsList: React.FC = () => {
    * Loading state with minimum duration for more fluid UX.
    */
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 100);
+
+  /**
+   * Handle add new credential.
+   */
+  const handleAddCredential = useCallback(() : void => {
+    navigate('/credentials/add');
+  }, [navigate]);
 
   /**
    * Retrieve latest vault and refresh the credentials list.
@@ -43,14 +56,12 @@ const CredentialsList: React.FC = () => {
          * On success.
          */
         onSuccess: async (_hasNewVault) => {
-          // Refresh credentials list, whether there is a new vault or not.
-          const results = dbContext.sqliteClient?.getAllCredentials() ?? [];
-          setCredentials(results);
+          // Credentials list is refreshed automatically when the (new) sqlite client is available via useEffect hook below.
         },
         /**
          * On offline.
          */
-        onOffline: () => {
+        _onOffline: () => {
           // Not implemented for browser extension yet.
         },
         /**
@@ -75,6 +86,22 @@ const CredentialsList: React.FC = () => {
     await onRefresh();
     hideLoading();
   };
+
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    const headerButtonsJSX = (
+      <div className="flex items-center gap-2">
+        <HeaderButton
+          onClick={handleAddCredential}
+          title="Add new credential"
+          iconType={HeaderIconType.PLUS}
+        />
+      </div>
+    );
+
+    setHeaderButtons(headerButtonsJSX);
+    return () => setHeaderButtons(null);
+  }, [setHeaderButtons, handleAddCredential]);
 
   /**
    * Load credentials list on mount and on sqlite client change.
