@@ -1,89 +1,49 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 /**
  * User menu component.
  */
-export const UserMenu: React.FC = () => {
+const UserMenu: React.FC = () => {
   const authContext = useAuth();
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
-  const { showLoading, hideLoading } = useLoading();
-
-  useEffect(() => {
-    /**
-     * Handle clicking outside the user menu.
-     */
-    const handleClickOutside = (event: MouseEvent) : void => {
-      if (
-        menuRef.current &&
-        buttonRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () : void => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   /**
-   * Toggle the user menu.
+   * Handle logout.
    */
-  const toggleUserMenu = () : void => {
-    setIsUserMenuOpen(!isUserMenuOpen);
-  };
-
-  /**
-   * Handle logging out.
-   */
-  const onLogout = async () : Promise<void> => {
-    showLoading();
-    navigate('/logout', { replace: true });
-    hideLoading();
+  const handleLogout = async () : Promise<void> => {
+    await authContext.logout();
+    navigate('/');
   };
 
   return (
-    <div className="relative flex items-center">
-      <div className="relative">
-        <button
-          ref={buttonRef}
-          onClick={toggleUserMenu}
-          className="flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <span className="sr-only">Open menu</span>
-          <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-          </svg>
-        </button>
-
-        {isUserMenuOpen && (
-          <div
-            ref={menuRef}
-            className="absolute right-0 z-50 mt-2 w-48 py-1 bg-white rounded-lg shadow-lg dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
-          >
-            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
-              <span className="block text-sm font-semibold text-gray-900 dark:text-white">
-                {authContext.username}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div className="flex items-center space-x-3">
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+              <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
+                {authContext.username?.[0]?.toUpperCase() || '?'}
               </span>
             </div>
-            <button
-              onClick={onLogout}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-600"
-            >
-              Logout
-            </button>
           </div>
-        )}
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {authContext.username}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Logged in
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

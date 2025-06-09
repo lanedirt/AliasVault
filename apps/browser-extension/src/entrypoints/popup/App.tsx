@@ -6,6 +6,7 @@ import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
 import Header from '@/entrypoints/popup/components/Layout/Header';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
 import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   const { isInitialLoading } = useLoading();
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
   const [message, setMessage] = useState<string | null>(null);
+  const { headerButtons } = useHeaderButtons();
 
   // Add these route configurations
   const routes: RouteConfig[] = [
@@ -81,6 +83,7 @@ const App: React.FC = () => {
         <GlobalStateChangeHandler />
         <Header
           routes={routes}
+          rightButtons={headerButtons}
         />
 
         <main

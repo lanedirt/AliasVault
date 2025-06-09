@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -9,7 +9,10 @@ import {
   AliasBlock,
   NotesBlock
 } from '@/entrypoints/popup/components/CredentialDetails';
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import type { Credential } from '@/utils/shared/models/vault';
@@ -17,12 +20,14 @@ import type { Credential } from '@/utils/shared/models/vault';
 /**
  * Credential details page.
  */
-const CredentialDetails: React.FC = () => {
+const CredentialDetails: React.FC = (): React.ReactElement => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
   const [credential, setCredential] = useState<Credential | null>(null);
   const { setIsInitialLoading } = useLoading();
+  const { setHeaderButtons } = useHeaderButtons();
+  const [headerButtonsConfigured, setHeaderButtonsConfigured] = useState(false);
 
   /**
    * Check if the current page is an expanded popup.
@@ -35,7 +40,7 @@ const CredentialDetails: React.FC = () => {
   /**
    * Open the credential details in a new expanded popup.
    */
-  const openInNewPopup = (): void => {
+  const openInNewPopup = useCallback((): void => {
     const width = 380;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -48,14 +53,28 @@ const CredentialDetails: React.FC = () => {
     );
 
     window.close();
-  };
+  }, [id]);
 
   /**
    * Navigate to the edit page for this credential.
    */
-  const handleEdit = (): void => {
-    navigate(`/credentials/${id}/edit`);
-  };
+  const handleEdit = useCallback((): void => {
+    if (isPopup()) {
+      window.close();
+      const width = 380;
+      const height = 600;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+
+      window.open(
+        `popup.html?expanded=true#/credentials/${id}/edit`,
+        'CredentialEdit',
+        `width=${width},height=${height},left=${left},top=${top},popup=true`
+      );
+    } else {
+      navigate(`/credentials/${id}/edit`);
+    }
+  }, [id, navigate]);
 
   useEffect(() => {
     if (isPopup()) {
@@ -81,20 +100,44 @@ const CredentialDetails: React.FC = () => {
     }
   }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading]);
 
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    // Only set the header buttons once on mount.
+    if (!headerButtonsConfigured) {
+      const headerButtonsJSX = (
+        <div className="flex items-center gap-2">
+          <HeaderButton
+            onClick={openInNewPopup}
+            title="Open in new window"
+            iconType={HeaderIconType.EXPAND}
+          />
+          <HeaderButton
+            onClick={handleEdit}
+            title="Edit credential"
+            iconType={HeaderIconType.EDIT}
+          />
+        </div>
+      );
+
+      setHeaderButtons(headerButtonsJSX);
+      setHeaderButtonsConfigured(true);
+    }
+    return () => {};
+  }, [setHeaderButtons, headerButtonsConfigured, handleEdit, openInNewPopup]);
+
+  // Clear header buttons on unmount
+  useEffect((): (() => void) => {
+    return () => setHeaderButtons(null);
+  }, [setHeaderButtons]);
+
   if (!credential) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center px-4">
-        <HeaderBlock credential={credential} onOpenNewPopup={openInNewPopup} />
-        <button
-          onClick={handleEdit}
-          className="text-blue-500 hover:text-blue-700"
-        >
-          Edit
-        </button>
+      <div className="flex justify-between items-center">
+        <HeaderBlock credential={credential} />
       </div>
       {credential.Alias?.Email && (
         <EmailBlock
