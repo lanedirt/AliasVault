@@ -144,7 +144,7 @@ type MailboxBulkResponse = {
 /**
  * Email attachment type.
  */
-type Attachment = {
+type EmailAttachment = {
     /** The ID of the attachment */
     id: number;
     /** The ID of the email the attachment belongs to */
@@ -190,7 +190,7 @@ type Email = {
     /** The public key of the user used to encrypt the symmetric key */
     encryptionKey: string;
     /** The attachments of the email */
-    attachments: Attachment[];
+    attachments: EmailAttachment[];
 };
 
 /**
@@ -353,4 +353,4 @@ declare enum AuthEventType {
     AccountDeletion = 99
 }
 
-export { type Attachment, AuthEventType, type AuthLogModel, type BadRequestResponse, type DeleteAccountInitiateRequest, type DeleteAccountInitiateResponse, type DeleteAccountRequest, type Email, type FaviconExtractModel, type LoginRequest, type LoginResponse, type MailboxBulkRequest, type MailboxBulkResponse, type MailboxEmail, type PasswordChangeInitiateResponse, type RefreshToken, type StatusResponse, type ValidateLoginRequest, type ValidateLoginRequest2Fa, type ValidateLoginResponse, type Vault, type VaultPasswordChangeRequest, type VaultPostResponse, type VaultResponse };
+export { AuthEventType, type AuthLogModel, type BadRequestResponse, type DeleteAccountInitiateRequest, type DeleteAccountInitiateResponse, type DeleteAccountRequest, type Email, type EmailAttachment, type FaviconExtractModel, type LoginRequest, type LoginResponse, type MailboxBulkRequest, type MailboxBulkResponse, type MailboxEmail, type PasswordChangeInitiateResponse, type RefreshToken, type StatusResponse, type ValidateLoginRequest, type ValidateLoginRequest2Fa, type ValidateLoginResponse, type Vault, type VaultPasswordChangeRequest, type VaultPostResponse, type VaultResponse };

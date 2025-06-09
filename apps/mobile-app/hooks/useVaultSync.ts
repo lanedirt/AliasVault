@@ -13,9 +13,10 @@ import { useWebApi } from '@/context/WebApiContext';
 const withMinimumDelay = async <T>(
   operation: () => Promise<T>,
   minDelayMs: number,
-  initialSync: boolean
+  enableDelay: boolean = true
 ): Promise<T> => {
-  if (!initialSync) {
+  if (!enableDelay) {
+    // If delay is disabled, return the result immediately.
     return operation();
   }
 
@@ -51,6 +52,9 @@ export const useVaultSync = () : {
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
     const { initialSync = false, onSuccess, onError, onStatus, onOffline } = options;
 
+    // For the initial sync, we add an artifical delay to various steps which makes it feel more fluid.
+    const enableDelay = initialSync;
+
     try {
       const { isLoggedIn } = await authContext.initializeAuth();
 
@@ -61,11 +65,7 @@ export const useVaultSync = () : {
 
       // Check app status and vault revision
       onStatus?.('Checking vault updates');
-      const statusResponse = await withMinimumDelay(
-        () => webApi.getStatus(),
-        300,
-        initialSync
-      );
+      const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       if (statusResponse.serverVersion === '0.0.0') {
         // Server is not available, go into offline mode
@@ -94,11 +94,7 @@ export const useVaultSync = () : {
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
         onStatus?.('Syncing updated vault');
-        const vaultResponseJson = await withMinimumDelay(
-          () => webApi.get<VaultResponse>('Vault'),
-          1000,
-          initialSync
-        );
+        const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
         if (vaultError) {
@@ -124,11 +120,7 @@ export const useVaultSync = () : {
         }
       }
 
-      await withMinimumDelay(
-        () => Promise.resolve(onSuccess?.(false)),
-        300,
-        initialSync
-      );
+      await withMinimumDelay(() => Promise.resolve(onSuccess?.(false)), 300, enableDelay);
       return false;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';

@@ -1,7 +1,7 @@
 /**
  * Email attachment type.
  */
-export type Attachment = {
+export type EmailAttachment = {
     /** The ID of the attachment */
     id: number;
 

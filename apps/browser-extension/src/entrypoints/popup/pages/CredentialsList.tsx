@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { sendMessage } from 'webext-bridge/popup';
 
 import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
@@ -7,9 +6,9 @@ import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
 
 import type { Credential } from '@/utils/shared/models/vault';
-import type { VaultResponse } from '@/utils/shared/models/webapi';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
@@ -19,6 +18,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 const CredentialsList: React.FC = () => {
   const dbContext = useDb();
   const webApi = useWebApi();
+  const { syncVault } = useVaultSync();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
@@ -36,53 +36,36 @@ const CredentialsList: React.FC = () => {
       return;
     }
 
-    // Do status check first to ensure the extension is (still) supported.
-    const statusResponse = await webApi.getStatus();
-    const statusError = webApi.validateStatusResponse(statusResponse);
-    if (statusError !== null) {
-      await webApi.logout(statusError);
-      return;
-    }
-
     try {
-      // If the vault revision is the same or lower, (re)load existing credentials.
-      if (statusResponse.vaultRevision <= dbContext.vaultRevision) {
-        const results = dbContext.sqliteClient.getAllCredentials();
-        setCredentials(results);
-        return;
-      }
-
-      /**
-       * If the vault revision is higher, fetch the latest vault and initialize the SQLite context again.
-       * This will trigger a new credentials list refresh.
-       */
-      const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
-
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
-      if (vaultError) {
-        await webApi.logout(vaultError);
-        hideLoading();
-        return;
-      }
-
-      // Get derived key from background worker
-      const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
-
-      // Initialize the SQLite context again with the newly retrieved decrypted blob)
-      try {
-        await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-      } catch {
+      // Sync vault and load credentials
+      await syncVault({
         /**
-         * If error occurs during database initialization, it most likely has to do with decryption that
-         * failed. This is most likely due to the user changing their password.
-         * So we logout the user here to force them to re-authenticate.
+         * On success.
          */
-        await webApi.logout('Vault could not be decrypted, please re-authenticate.');
-      }
+        onSuccess: async (_hasNewVault) => {
+          // Refresh credentials list, whether there is a new vault or not.
+          const results = dbContext.sqliteClient?.getAllCredentials() ?? [];
+          setCredentials(results);
+        },
+        /**
+         * On offline.
+         */
+        onOffline: () => {
+          // Not implemented for browser extension yet.
+        },
+        /**
+         * On error.
+         */
+        onError: async (error) => {
+          console.error('Error syncing vault:', error);
+          await webApi.logout('Error while syncing vault, please re-authenticate.');
+        },
+      });
     } catch (err) {
-      console.error('Refresh error:', err);
+      console.error('Error refreshing credentials:', err);
+      await webApi.logout('Error while syncing vault, please re-authenticate.');
     }
-  }, [dbContext, webApi, hideLoading]);
+  }, [dbContext, webApi, syncVault]);
 
   /**
    * Manually refresh the credentials list.
@@ -103,7 +86,8 @@ const CredentialsList: React.FC = () => {
     const refreshCredentials = async () : Promise<void> => {
       if (dbContext?.sqliteClient) {
         setIsLoading(true);
-        await onRefresh();
+        const results = dbContext.sqliteClient?.getAllCredentials() ?? [];
+        setCredentials(results);
         setIsLoading(false);
 
         // Hide the global app initial loading state after the credentials list is loaded.
@@ -112,7 +96,7 @@ const CredentialsList: React.FC = () => {
     };
 
     refreshCredentials();
-  }, [dbContext?.sqliteClient, onRefresh, setIsLoading, setIsInitialLoading]);
+  }, [dbContext?.sqliteClient, setIsLoading, setIsInitialLoading]);
 
   // Add this function to filter credentials
   const filteredCredentials = credentials.filter(cred => {

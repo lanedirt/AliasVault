@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
+import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/shared/models/metadata';
 import type { VaultResponse } from '@/utils/shared/models/webapi';
 import SqliteClient from '@/utils/SqliteClient';
-import { EncryptionKeyDerivationParams } from '@/utils/types/messaging/EncryptionKeyDerivationParams';
-import { VaultMetadata } from '@/utils/types/messaging/VaultMetadata';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
 

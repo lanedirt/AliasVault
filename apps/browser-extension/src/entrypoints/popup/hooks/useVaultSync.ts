@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
+import { sendMessage } from 'webext-bridge/popup';
 
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
-import { AppInfo } from '@/utils/AppInfo';
 import type { VaultResponse } from '@/utils/shared/models/webapi';
 
 /**
@@ -13,9 +13,10 @@ import type { VaultResponse } from '@/utils/shared/models/webapi';
 const withMinimumDelay = async <T>(
   operation: () => Promise<T>,
   minDelayMs: number,
-  initialSync: boolean
+  enableDelay: boolean = true
 ): Promise<T> => {
-  if (!initialSync) {
+  if (!enableDelay) {
+    // If delay is disabled, return the result immediately.
     return operation();
   }
 
@@ -35,7 +36,7 @@ type VaultSyncOptions = {
   onSuccess?: (hasNewVault: boolean) => void;
   onError?: (error: string) => void;
   onStatus?: (message: string) => void;
-  onOffline?: () => void;
+  _onOffline?: () => void;
 }
 
 /**
@@ -49,7 +50,10 @@ export const useVaultSync = () : {
   const webApi = useWebApi();
 
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
-    const { initialSync = false, onSuccess, onError, onStatus, onOffline } = options;
+    const { initialSync = false, onSuccess, onError, onStatus, _onOffline } = options;
+
+    // For the initial sync, we add an artifical delay to various steps which makes it feel more fluid.
+    const enableDelay = initialSync;
 
     try {
       const { isLoggedIn } = await authContext.initializeAuth();
@@ -61,26 +65,15 @@ export const useVaultSync = () : {
 
       // Check app status and vault revision
       onStatus?.('Checking vault updates');
-      const statusResponse = await withMinimumDelay(
-        () => webApi.getStatus(),
-        300,
-        initialSync
-      );
+      const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
+      // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
       if (statusResponse.serverVersion === '0.0.0') {
-        // Server is not available, go into offline mode
-        onOffline?.();
-        return false;
+        // Offline mode is not implemented for browser extension yet, let it fail below due to the validateStatusResponse check.
       }
 
-      if (!statusResponse.clientVersionSupported) {
-        const statusError = 'This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.';
-        onError?.(statusError);
-        return false;
-      }
-
-      if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-        const statusError = 'The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.';
+      const statusError = webApi.validateStatusResponse(statusResponse);
+      if (statusError) {
         onError?.(statusError);
         return false;
       }
@@ -97,11 +90,7 @@ export const useVaultSync = () : {
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
         onStatus?.('Syncing updated vault');
-        const vaultResponseJson = await withMinimumDelay(
-          () => webApi.get<VaultResponse>('Vault'),
-          1000,
-          initialSync
-        );
+        const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
         if (vaultError) {
@@ -122,7 +111,9 @@ export const useVaultSync = () : {
         }
 
         try {
-          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse);
+          // Get derived key from background worker
+          const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
+          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, passwordHashBase64);
           onSuccess?.(true);
           return true;
         } catch {
@@ -131,11 +122,7 @@ export const useVaultSync = () : {
         }
       }
 
-      await withMinimumDelay(
-        () => Promise.resolve(onSuccess?.(false)),
-        300,
-        initialSync
-      );
+      await withMinimumDelay(() => Promise.resolve(onSuccess?.(false)), 300, enableDelay);
       return false;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';

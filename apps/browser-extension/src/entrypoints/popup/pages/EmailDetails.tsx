@@ -8,7 +8,7 @@ import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import ConversionUtility from '@/entrypoints/popup/utils/ConversionUtility';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { Attachment, Email } from '@/utils/shared/models/webapi';
+import type { EmailAttachment, Email } from '@/utils/shared/models/webapi';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
@@ -112,7 +112,7 @@ const EmailDetails: React.FC = () => {
   /**
    * Handle downloading an attachment.
    */
-  const handleDownloadAttachment = async (attachment: Attachment): Promise<void> => {
+  const handleDownloadAttachment = async (attachment: EmailAttachment): Promise<void> => {
     try {
       // Get the encrypted attachment bytes from the API
       const base64EncryptedAttachment = await webApi.downloadBlobAndConvertToBase64(`Email/${id}/attachments/${attachment.id}`);

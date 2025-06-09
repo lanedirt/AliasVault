@@ -17,7 +17,7 @@ echo "📦 Building $package_name..."
 npm install && npm run lint && npm run build
 
 dist_path="dist"
-files_to_copy=("webapi" "vault")
+files_to_copy=("webapi" "vault" "metadata")
 
 for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"

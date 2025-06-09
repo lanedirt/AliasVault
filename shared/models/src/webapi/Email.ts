@@ -1,4 +1,4 @@
-import { Attachment } from "./Attachment";
+import { EmailAttachment } from "./EmailAttachment";
 
 export type Email = {
     /** The body of the email message */
@@ -47,5 +47,5 @@ export type Email = {
     encryptionKey: string;
 
     /** The attachments of the email */
-    attachments: Attachment[];
+    attachments: EmailAttachment[];
 }

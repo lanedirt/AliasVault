@@ -1,3 +1,6 @@
+/**
+ * Export all web API models that are returned by the web API.
+ */
 export * from './VaultResponse';
 export * from './Vault';
 export * from './VaultPostResponse';
@@ -7,7 +10,7 @@ export * from './ValidateLogin';
 export * from './MailboxBulk';
 export * from './MailboxEmail';
 export * from './Email';
-export * from './Attachment';
+export * from './EmailAttachment';
 export * from './AuthLog';
 export * from './RefreshToken';
 export * from './FaviconExtractModel';
