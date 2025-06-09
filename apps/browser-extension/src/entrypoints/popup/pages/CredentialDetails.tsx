@@ -50,23 +50,6 @@ const CredentialDetails: React.FC = () => {
     window.close();
   };
 
-  /**
-   * Check if the email domain is supported.
-   */
-  const isEmailDomainSupported = (email: string): boolean => {
-    const domain = email.split('@')[1]?.toLowerCase();
-    if (!domain) {
-      return false;
-    }
-
-    const publicDomains = dbContext.publicEmailDomains ?? [];
-    const privateDomains = dbContext.privateEmailDomains ?? [];
-
-    return [...publicDomains, ...privateDomains].some(supportedDomain =>
-      domain === supportedDomain || domain.endsWith(`.${supportedDomain}`)
-    );
-  };
-
   useEffect(() => {
     if (isPopup()) {
       window.history.replaceState({}, '', `popup.html#/credentials`);
@@ -101,7 +84,6 @@ const CredentialDetails: React.FC = () => {
       {credential.Alias?.Email && (
         <EmailBlock
           email={credential.Alias.Email}
-          isSupported={isEmailDomainSupported(credential.Alias.Email)}
         />
       )}
       <NotesBlock notes={credential.Notes} />
