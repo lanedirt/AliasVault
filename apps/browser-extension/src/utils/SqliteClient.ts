@@ -1,8 +1,6 @@
 import initSqlJs, { Database } from 'sql.js';
-import { sendMessage } from 'webext-bridge/popup';
 
 import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/shared/models/vault';
-import { StoreVaultRequest } from './types/messaging/StoreVaultRequest';
 
 /**
  * Placeholder base64 image for credentials without a logo.
@@ -82,18 +80,6 @@ export class SqliteClient {
     try {
       this.db.run('COMMIT');
       this.isInTransaction = false;
-
-      // Export the current database state and store it in the background worker
-      const updatedVaultBlob = this.exportToBase64();
-
-      /**
-       * Store encrypted vault in background worker.
-       */
-      const request: StoreVaultRequest = {
-        vaultBlob: updatedVaultBlob,
-      };
-
-      await sendMessage('STORE_VAULT', request, 'background');
     } catch (error) {
       console.error('Error committing transaction:', error);
       throw error;

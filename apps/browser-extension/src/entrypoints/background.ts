@@ -16,7 +16,7 @@ export default defineBackground({
     // Listen for messages using webext-bridge
     onMessage('CHECK_AUTH_STATUS', () => handleCheckAuthStatus());
     onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
-    onMessage('UPLOAD_VAULT', () => handleUploadVault());
+    onMessage('UPLOAD_VAULT', ({ data }) => handleUploadVault(data));
     onMessage('SYNC_VAULT', () => handleSyncVault());
     onMessage('GET_VAULT', () => handleGetVault());
     onMessage('CLEAR_VAULT', () => handleClearVault());
