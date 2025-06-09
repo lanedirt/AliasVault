@@ -4,6 +4,8 @@ import { sendMessage } from 'webext-bridge/popup';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
 
+import { EncryptionUtility } from '@/utils/EncryptionUtility';
+import { UploadVaultRequest } from '@/utils/types/messaging/UploadVaultRequest';
 import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types/messaging/VaultUploadResponse';
 
 type VaultMutationOptions = {
@@ -39,9 +41,23 @@ export function useVaultMutate() : {
     setSyncStatus('Uploading vault to server');
 
     try {
-      // Trigger the background worker to upload the current vault to the server
-      const response = await sendMessage('UPLOAD_VAULT', {}, 'background') as messageVaultUploadResponse;
-      console.log('Vault upload response:', response);
+      // Upload the updated vault to the server.
+      const base64Vault = dbContext.sqliteClient!.exportToBase64();
+
+      // Get derived key from background worker
+      const derivedKey = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
+
+      // Encrypt the vault.
+      const encryptedVaultBlob = await EncryptionUtility.symmetricEncrypt(
+        base64Vault,
+        derivedKey
+      );
+
+      const request: UploadVaultRequest = {
+        vaultBlob: encryptedVaultBlob,
+      };
+
+      const response = await sendMessage('UPLOAD_VAULT', request, 'background') as messageVaultUploadResponse;
 
       /*
        * If we get here, it means we have a valid connection to the server.
@@ -50,7 +66,6 @@ export function useVaultMutate() : {
        */
 
       if (response.status === 0 && response.newRevisionNumber) {
-        console.log('Vault upload successful, setting revision number:', response.newRevisionNumber);
         await dbContext.setCurrentVaultRevisionNumber(response.newRevisionNumber);
         options.onSuccess?.();
       } else if (response.status === 1) {

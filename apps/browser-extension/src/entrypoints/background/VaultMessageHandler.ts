@@ -7,11 +7,11 @@ import { SqliteClient } from '@/utils/SqliteClient';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
+import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types/messaging/VaultUploadResponse';
 import { WebApiService } from '@/utils/WebApiService';
-import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 
 /**
  * Check if the user is logged in and if the vault is locked.
@@ -34,11 +34,13 @@ export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, i
  * Store the vault in browser storage.
  */
 export async function handleStoreVault(
-  message: StoreVaultRequest,
+  message: any,
 ) : Promise<messageBoolResponse> {
   try {
+    const vaultRequest = message as StoreVaultRequest;
+
     // Store new encrypted vault in session storage.
-    await storage.setItem('session:encryptedVault', message.vaultBlob);
+    await storage.setItem('session:encryptedVault', vaultRequest.vaultBlob);
 
     /*
      * For all other values, check if they have a value and store them in session storage if they do.
@@ -46,20 +48,20 @@ export async function handleStoreVault(
      */
 
     // Store derived key in session storage (if it has a value)
-    if (message.derivedKey) {
-      await storage.setItem('session:derivedKey', message.derivedKey);
+    if (vaultRequest.derivedKey) {
+      await storage.setItem('session:derivedKey', vaultRequest.derivedKey);
     }
 
-    if (message.publicEmailDomainList) {
-      await storage.setItem('session:publicEmailDomains', message.publicEmailDomainList);
+    if (vaultRequest.publicEmailDomainList) {
+      await storage.setItem('session:publicEmailDomains', vaultRequest.publicEmailDomainList);
     }
 
-    if (message.privateEmailDomainList) {
-      await storage.setItem('session:privateEmailDomains', message.privateEmailDomainList);
+    if (vaultRequest.privateEmailDomainList) {
+      await storage.setItem('session:privateEmailDomains', vaultRequest.privateEmailDomainList);
     }
 
-    if (message.vaultRevisionNumber) {
-      await storage.setItem('session:vaultRevisionNumber', message.vaultRevisionNumber);
+    if (vaultRequest.vaultRevisionNumber) {
+      await storage.setItem('session:vaultRevisionNumber', vaultRequest.vaultRevisionNumber);
     }
 
     return { success: true };
@@ -318,9 +320,16 @@ export async function handleGetDerivedKey(
  * Upload the vault to the server.
  */
 export async function handleUploadVault(
+  message: any
 ) : Promise<messageVaultUploadResponse> {
   try {
+    // Store the new vault blob in session storage.
+    await storage.setItem('session:encryptedVault', message.vaultBlob);
+
+    // Create new sqlite client which will use the new vault blob.
     const sqliteClient = await createVaultSqliteClient();
+
+    // Upload the new vault to the server.
     const response = await uploadNewVaultToServer(sqliteClient);
     return { success: true, status: response.status, newRevisionNumber: response.newRevisionNumber };
   } catch (error) {
@@ -386,7 +395,6 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
 async function createVaultSqliteClient() : Promise<SqliteClient> {
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
   const derivedKey = await storage.getItem('session:derivedKey') as string;
-
   if (!encryptedVault || !derivedKey) {
     throw new Error('No vault or derived key found');
   }

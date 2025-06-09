@@ -5,8 +5,8 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import type { VaultMetadata } from '@/utils/shared/models/metadata';
 import type { VaultResponse } from '@/utils/shared/models/webapi';
 import SqliteClient from '@/utils/SqliteClient';
-import type { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
+import type { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 
 type DbContextType = {
   sqliteClient: SqliteClient | null;
