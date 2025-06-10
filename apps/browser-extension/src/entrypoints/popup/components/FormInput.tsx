@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 /**
  * Form input props.
@@ -19,7 +19,7 @@ type FormInputProps = {
 /**
  * Form input component.
  */
-export const FormInput: React.FC<FormInputProps> = ({
+export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   id,
   label,
   value,
@@ -30,7 +30,7 @@ export const FormInput: React.FC<FormInputProps> = ({
   multiline = false,
   rows = 1,
   error
-}) => {
+}, ref) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   const inputClasses = `mt-1 block w-full rounded-md ${
@@ -55,6 +55,7 @@ export const FormInput: React.FC<FormInputProps> = ({
           />
         ) : (
           <input
+            ref={ref}
             type={type === 'password' && !showPassword ? 'password' : 'text'}
             id={id}
             value={value}
@@ -79,4 +80,6 @@ export const FormInput: React.FC<FormInputProps> = ({
       )}
     </div>
   );
-};
+});
+
+FormInput.displayName = 'FormInput';
