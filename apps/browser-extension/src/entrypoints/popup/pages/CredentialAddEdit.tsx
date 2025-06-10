@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,6 +11,7 @@ import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
+import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
 import { IdentityHelperUtils, CreateIdentityGenerator } from '@/utils/shared/identity-generator';
@@ -24,32 +27,31 @@ type CredentialMode = 'random' | 'manual';
  * Validation schema for the credential form.
  */
 const credentialSchema = Yup.object().shape({
-  Id: Yup.string().optional(),
+  Id: Yup.string(),
   ServiceName: Yup.string().required('Service name is required'),
-  ServiceUrl: Yup.string().url('Invalid URL format').nullable().notRequired(),
+  ServiceUrl: Yup.string().url('Invalid URL format').optional(),
   Alias: Yup.object().shape({
-    FirstName: Yup.string().nullable().notRequired(),
-    LastName: Yup.string().nullable().notRequired(),
-    NickName: Yup.string().nullable().notRequired(),
+    FirstName: Yup.string().optional(),
+    LastName: Yup.string().optional(),
+    NickName: Yup.string().optional(),
     BirthDate: Yup.string()
-      .nullable()
-      .notRequired()
+      .optional()
       .test(
         'is-valid-date-format',
         'Date must be in YYYY-MM-DD format',
         value => {
           if (!value) {
             return true;
-          } // allow empty
+          }
           return /^\d{4}-\d{2}-\d{2}$/.test(value);
         },
       ),
-    Gender: Yup.string().nullable().notRequired(),
-    Email: Yup.string().email('Invalid email format').nullable().notRequired()
+    Gender: Yup.string().nullable().optional(),
+    Email: Yup.string().email('Invalid email format').optional()
   }),
-  Username: Yup.string().nullable().notRequired(),
-  Password: Yup.string().nullable().notRequired(),
-  Notes: Yup.string().nullable().notRequired()
+  Username: Yup.string().optional(),
+  Password: Yup.string().nullable().optional(),
+  Notes: Yup.string().optional()
 });
 
 /**
@@ -63,11 +65,13 @@ const CredentialAddEdit: React.FC = () => {
   const [mode, setMode] = useState<CredentialMode>('random');
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
+  const [localLoading, setLocalLoading] = useState(false);
+  const webApi = useWebApi();
 
   const serviceNameRef = useRef<HTMLInputElement>(null);
 
   const { handleSubmit, setValue, watch, formState: { errors } } = useForm<Credential>({
-    resolver: yupResolver(credentialSchema),
+    resolver: yupResolver(credentialSchema as Yup.ObjectSchema<Credential>),
     defaultValues: {
       Id: "",
       Username: "",
@@ -231,7 +235,29 @@ const CredentialAddEdit: React.FC = () => {
       data.Alias.Email = watch('Alias.Email');
     }
 
+    // Extract favicon from service URL if the credential has one
+    if (data.ServiceUrl) {
+      setLocalLoading(true);
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Favicon extraction timed out')), 5000)
+        );
+
+        const faviconPromise = webApi.get<{ image: string }>('Favicon/Extract?url=' + data.ServiceUrl);
+        const faviconResponse = await Promise.race([faviconPromise, timeoutPromise]) as { image: string };
+
+        if (faviconResponse?.image) {
+          const decodedImage = Uint8Array.from(Buffer.from(faviconResponse.image, 'base64'));
+          data.Logo = decodedImage;
+        }
+      } catch {
+        // Favicon extraction failed or timed out, this is not a critical error so we can ignore it.
+      }
+    }
+
     executeVaultMutation(async () => {
+      setLocalLoading(false);
+
       if (isEditMode) {
         await dbContext.sqliteClient!.updateCredentialById(data);
       } else {
@@ -253,7 +279,7 @@ const CredentialAddEdit: React.FC = () => {
         }
       },
     });
-  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias]);
+  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias, webApi]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -290,8 +316,9 @@ const CredentialAddEdit: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {isLoading && (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <button type="submit" style={{ display: 'none' }} />
+      {(localLoading || isLoading) && (
         <div className="fixed inset-0 flex flex-col justify-center items-center bg-white dark:bg-gray-900 bg-opacity-90 dark:bg-opacity-90 z-50">
           <LoadingSpinner />
           <div className="text-sm text-gray-500 mt-2">
@@ -303,6 +330,7 @@ const CredentialAddEdit: React.FC = () => {
       {!isEditMode && (
         <div className="flex space-x-2">
           <button
+            type="button"
             onClick={() => setMode('random')}
             className={`flex-1 py-2 px-4 rounded ${
               mode === 'random' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -311,6 +339,7 @@ const CredentialAddEdit: React.FC = () => {
             Random Alias
           </button>
           <button
+            type="button"
             onClick={() => setMode('manual')}
             className={`flex-1 py-2 px-4 rounded ${
               mode === 'manual' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -365,6 +394,7 @@ const CredentialAddEdit: React.FC = () => {
                   error={errors.Password?.message}
                 />
                 <button
+                  type="button"
                   onClick={handleGenerateRandomAlias}
                   className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
@@ -439,7 +469,7 @@ const CredentialAddEdit: React.FC = () => {
           </>
         )}
       </div>
-    </div>
+    </form>
   );
 };
 
