@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -64,6 +64,8 @@ const CredentialAddEdit: React.FC = () => {
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
 
+  const serviceNameRef = useRef<HTMLInputElement>(null);
+
   const { handleSubmit, setValue, watch, formState: { errors } } = useForm<Credential>({
     resolver: yupResolver(credentialSchema),
     defaultValues: {
@@ -92,6 +94,11 @@ const CredentialAddEdit: React.FC = () => {
    */
   useEffect(() => {
     if (!dbContext?.sqliteClient || !id) {
+      // On create mode, focus the service name field after a short delay to ensure the component is mounted.
+      setTimeout(() => {
+        serviceNameRef.current?.focus();
+      }, 100);
+
       return;
     }
 
@@ -105,10 +112,10 @@ const CredentialAddEdit: React.FC = () => {
         Object.entries(result).forEach(([key, value]) => {
           setValue(key as keyof Credential, value);
         });
-        // If credential has alias data, switch to manual mode
-        if (result.Alias?.FirstName || result.Alias?.LastName) {
-          setMode('manual');
-        }
+
+        setMode('manual');
+
+        // On create mode, focus the service name field after a short delay to ensure the component is mounted
       } else {
         console.error('Credential not found');
         navigate('/credentials');
@@ -321,6 +328,7 @@ const CredentialAddEdit: React.FC = () => {
             <FormInput
               id="serviceName"
               label="Service Name"
+              ref={serviceNameRef}
               value={watch('ServiceName') ?? ''}
               onChange={(value) => setValue('ServiceName', value)}
               required
