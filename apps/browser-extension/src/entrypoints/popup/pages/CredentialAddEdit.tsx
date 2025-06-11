@@ -328,29 +328,41 @@ const CredentialAddEdit: React.FC = () => {
       )}
 
       {!isEditMode && (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mb-4">
           <button
             type="button"
             onClick={() => setMode('random')}
-            className={`flex-1 py-2 px-4 rounded ${
+            className={`flex-1 py-2 px-4 rounded flex items-center justify-center gap-2 ${
               mode === 'random' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
+            <svg className='w-5 h-5' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8" cy="8" r="1"/>
+              <circle cx="16" cy="8" r="1"/>
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="8" cy="16" r="1"/>
+              <circle cx="16" cy="16" r="1"/>
+            </svg>
             Random Alias
           </button>
           <button
             type="button"
             onClick={() => setMode('manual')}
-            className={`flex-1 py-2 px-4 rounded ${
+            className={`flex-1 py-2 px-4 rounded flex items-center justify-center gap-2 ${
               mode === 'manual' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="7" r="4"/>
+              <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
+            </svg>
             Manual
           </button>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Service</h2>
           <div className="space-y-4">

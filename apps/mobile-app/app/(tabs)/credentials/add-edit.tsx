@@ -458,6 +458,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       alignItems: 'center',
       borderRadius: 6,
       flex: 1,
+      flexDirection: 'row',
+      gap: 6,
+      justifyContent: 'center',
       padding: 8,
     },
     modeButtonActive: {
@@ -563,6 +566,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                   style={[styles.modeButton, mode === 'random' && styles.modeButtonActive]}
                   onPress={() => setMode('random')}
                 >
+                  <MaterialIcons
+                    name="auto-fix-high"
+                    size={20}
+                    color={mode === 'random' ? colors.primarySurfaceText : colors.text}
+                  />
                   <ThemedText style={[styles.modeButtonText, mode === 'random' && styles.modeButtonTextActive]}>
                     Random Alias
                   </ThemedText>
@@ -571,6 +579,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                   style={[styles.modeButton, mode === 'manual' && styles.modeButtonActive]}
                   onPress={() => setMode('manual')}
                 >
+                  <MaterialIcons
+                    name="person"
+                    size={20}
+                    color={mode === 'manual' ? colors.primarySurfaceText : colors.text}
+                  />
                   <ThemedText style={[styles.modeButtonText, mode === 'manual' && styles.modeButtonTextActive]}>
                     Manual
                   </ThemedText>
