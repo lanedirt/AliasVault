@@ -14,7 +14,7 @@ import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsConte
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
-import { IdentityHelperUtils, CreateIdentityGenerator } from '@/utils/shared/identity-generator';
+import { IdentityHelperUtils, CreateIdentityGenerator, CreateUsernameEmailGenerator, Identity, Gender } from '@/utils/shared/identity-generator';
 import type { Credential } from '@/utils/shared/models/vault';
 import { CreatePasswordGenerator } from '@/utils/shared/password-generator';
 
@@ -66,6 +66,7 @@ const CredentialAddEdit: React.FC = () => {
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
   const [localLoading, setLocalLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const webApi = useWebApi();
 
   const serviceNameRef = useRef<HTMLInputElement>(null);
@@ -175,7 +176,7 @@ const CredentialAddEdit: React.FC = () => {
     const identity = identityGenerator.generateRandomIdentity();
     const password = passwordGenerator.generateRandomPassword();
 
-    const metadata = await dbContext!.getVaultMetadata();
+    const metadata = await dbContext.getVaultMetadata();
 
     const privateEmailDomains = metadata?.privateEmailDomains ?? [];
     const publicEmailDomains = metadata?.publicEmailDomains ?? [];
@@ -211,6 +212,44 @@ const CredentialAddEdit: React.FC = () => {
   const handleGenerateRandomAlias = useCallback(() => {
     void generateRandomAlias();
   }, [generateRandomAlias]);
+
+  const generateRandomUsername = useCallback(async () => {
+    try {
+      const usernameEmailGenerator = CreateUsernameEmailGenerator();
+
+      let gender = Gender.Other;
+      try {
+        gender = watch('Alias.Gender') as Gender;
+      } catch {
+        // Gender parsing failed, default to other.
+      }
+
+      const identity: Identity = {
+        firstName: watch('Alias.FirstName') ?? '',
+        lastName: watch('Alias.LastName') ?? '',
+        nickName: watch('Alias.NickName') ?? '',
+        gender: gender,
+        birthDate: new Date(watch('Alias.BirthDate') ?? ''),
+        emailPrefix: watch('Alias.Email') ?? '',
+      };
+
+      const username = usernameEmailGenerator.generateUsername(identity);
+      setValue('Username', username);
+    } catch (error) {
+      console.error('Error generating random username:', error);
+    }
+  }, [setValue, watch]);
+
+  const generateRandomPassword = useCallback(async () => {
+    try {
+      const { passwordGenerator } = await initializeGenerators();
+      const password = passwordGenerator.generateRandomPassword();
+      setValue('Password', password);
+      setShowPassword(true);
+    } catch (error) {
+      console.error('Error generating random password:', error);
+    }
+  }, [initializeGenerators, setValue]);
 
   /**
    * Handle form submission.
@@ -336,7 +375,7 @@ const CredentialAddEdit: React.FC = () => {
               mode === 'random' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            <svg className='w-5 h-5' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg className='w-5 h-5' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
               <circle cx="8" cy="8" r="1"/>
               <circle cx="16" cy="8" r="1"/>
@@ -396,6 +435,13 @@ const CredentialAddEdit: React.FC = () => {
                   value={watch('Username') ?? ''}
                   onChange={(value) => setValue('Username', value)}
                   error={errors.Username?.message}
+                  buttons={[
+                    {
+                      icon: 'refresh',
+                      onClick: generateRandomUsername,
+                      title: 'Generate random username'
+                    }
+                  ]}
                 />
                 <FormInput
                   id="password"
@@ -404,6 +450,15 @@ const CredentialAddEdit: React.FC = () => {
                   value={watch('Password') ?? ''}
                   onChange={(value) => setValue('Password', value)}
                   error={errors.Password?.message}
+                  showPassword={showPassword}
+                  onShowPasswordChange={setShowPassword}
+                  buttons={[
+                    {
+                      icon: 'refresh',
+                      onClick: generateRandomPassword,
+                      title: 'Generate random password'
+                    }
+                  ]}
                 />
                 <button
                   type="button"
