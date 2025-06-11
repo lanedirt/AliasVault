@@ -42,7 +42,8 @@ export class WebApiService {
   public async authFetch<T>(
     endpoint: string,
     options: RequestInit = {},
-    parseJson: boolean = true
+    parseJson: boolean = true,
+    throwOnError: boolean = true
   ): Promise<T> {
     const headers = new Headers(options.headers ?? {});
 
@@ -80,7 +81,7 @@ export class WebApiService {
         }
       }
 
-      if (!response.ok) {
+      if (!response.ok && throwOnError) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -309,6 +310,25 @@ export class WebApiService {
 
     if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
       return 'Your vault is outdated. Please login via the web client to update your vault.';
+    }
+
+    return null;
+  }
+
+  /**
+   * Validates the status response and returns an error message if validation fails.
+   */
+  public validateStatusResponse(statusResponse: StatusResponse): string | null {
+    if (statusResponse.serverVersion === '0.0.0') {
+      return 'The AliasVault server is not available. Please try again later or contact support if the problem persists.';
+    }
+
+    if (!statusResponse.clientVersionSupported) {
+      return 'This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.';
+    }
+
+    if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
+      return 'The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.';
     }
 
     return null;

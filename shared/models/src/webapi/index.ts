@@ -1,6 +1,7 @@
 /**
  * Export all web API models that are returned by the web API.
  */
+export * from './ApiErrorResponse';
 export * from './VaultResponse';
 export * from './Vault';
 export * from './VaultPostResponse';

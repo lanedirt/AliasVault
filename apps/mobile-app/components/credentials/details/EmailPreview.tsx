@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
 
 import { AppInfo } from '@/utils/AppInfo';
-import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
+import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -29,6 +29,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
   const [isComponentVisible, setIsComponentVisible] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const webApi = useWebApi();
   const dbContext = useDb();
   const authContext = useAuth();
@@ -96,6 +97,12 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
               'X-Asdasd-Platform-Version': AppInfo.VERSION,
             }
           });
+
+          if (!response.ok) {
+            setError('An error occurred while loading emails. Please try again later.');
+            return;
+          }
+
           const data = await response.json();
 
           // Only show the latest 2 emails to save space in UI
@@ -115,41 +122,59 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
             return;
           }
 
-          // Get all encryption keys
-          const encryptionKeys = await dbContext.sqliteClient.getAllEncryptionKeys();
+          try {
+            // Get all encryption keys
+            const encryptionKeys = await dbContext.sqliteClient.getAllEncryptionKeys();
 
-          // Only fetch emails for the provided email address
-          const data = await webApi.post<MailboxBulkRequest, MailboxBulkResponse>('EmailBox/bulk', {
-            addresses: [email],
-            page: 1,
-            pageSize: 2,
-          });
+            // Use single emailbox operator instead of bulk
+            const response = await webApi.authFetch(`EmailBox/${email}`, { method: 'GET' }, true, false);
+            try {
+              const data = response as { mails: MailboxEmail[] };
 
-          // For each email, find its matching encryption key based on the public key
-          const decryptedEmails = await Promise.all(data.mails.map(async (mail) => {
-            const matchingKey = encryptionKeys.find(key => key.PublicKey === mail.encryptionKey);
-            if (!matchingKey) {
-              console.error('No encryption key found for email:', mail.id);
-              return null;
+              // Only show the latest 2 emails to save space in UI
+              const latestMails = data.mails
+                .sort((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
+                .slice(0, 2);
+
+              if (latestMails) {
+                // Loop through all emails and decrypt them locally
+                const decryptedEmails = await EncryptionUtility.decryptEmailList(
+                  latestMails,
+                  encryptionKeys
+                );
+
+                if (loading && decryptedEmails.length > 0) {
+                  setLastEmailId(decryptedEmails[0].id);
+                }
+
+                setEmails(decryptedEmails);
+
+                // Reset error
+                setError(null);
+              }
+            } catch {
+              // Try to parse as error response instead
+              const apiErrorResponse = response as ApiErrorResponse;
+
+              if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
+                setError('The current chosen email address is already in use. Please change the email address by editing this credential.');
+              } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
+                setError('An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.');
+              } else {
+                setError('An error occurred while loading emails. Please try again later.');
+              }
+              return;
             }
-            return await EncryptionUtility.decryptEmailList([mail], [matchingKey]);
-          }));
-
-          // Filter out any null results and set the emails
-          const validEmails = decryptedEmails
-            .filter((result): result is MailboxEmail[] => result !== null)
-            .flat();
-
-          if (loading && validEmails.length > 0) {
-            setLastEmailId(validEmails[0].id);
+          } catch {
+            setError('An error occurred while loading emails. Please try again later.');
+            return;
+          } finally {
+            setLoading(false);
           }
-
-          setEmails(validEmails);
         }
       } catch (err) {
         console.error('Error loading emails:', err);
-      } finally {
-        setLoading(false);
+        setError('An unexpected error occurred while loading emails. Please try again later.');
       }
     };
 
@@ -178,6 +203,18 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       marginTop: 8,
       padding: 12,
     },
+    errorContainer: {
+      backgroundColor: colors.errorBackground,
+      borderColor: colors.errorBorder,
+      borderRadius: 8,
+      borderWidth: 1,
+      marginTop: 8,
+      padding: 12,
+    },
+    errorText: {
+      color: colors.errorText,
+      fontSize: 14,
+    },
     placeholderText: {
       color: colors.textMuted,
       marginBottom: 8,
@@ -205,6 +242,19 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   // Sanity check: if no email is provided, don't render anything.
   if (!email) {
     return null;
+  }
+
+  if (error) {
+    return (
+      <ThemedView style={styles.section}>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+        </View>
+        <View style={styles.errorContainer}>
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+        </View>
+      </ThemedView>
+    );
   }
 
   if (loading) {

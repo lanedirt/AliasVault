@@ -1,4 +1,30 @@
 /**
+ * Represents the error response returned by the API.
+ */
+type ApiErrorResponse = {
+    /**
+     * The main error message.
+     */
+    message: string;
+    /**
+     * The error code associated with this error.
+     */
+    code: string;
+    /**
+     * Additional details about the error.
+     */
+    details: Record<string, unknown>;
+    /**
+     * The HTTP status code associated with this error.
+     */
+    statusCode: number;
+    /**
+     * The timestamp when the error occurred.
+     */
+    timestamp: string;
+};
+
+/**
  * Vault type.
  */
 type Vault = {
@@ -353,4 +379,4 @@ declare enum AuthEventType {
     AccountDeletion = 99
 }
 
-export { AuthEventType, type AuthLogModel, type BadRequestResponse, type DeleteAccountInitiateRequest, type DeleteAccountInitiateResponse, type DeleteAccountRequest, type Email, type EmailAttachment, type FaviconExtractModel, type LoginRequest, type LoginResponse, type MailboxBulkRequest, type MailboxBulkResponse, type MailboxEmail, type PasswordChangeInitiateResponse, type RefreshToken, type StatusResponse, type ValidateLoginRequest, type ValidateLoginRequest2Fa, type ValidateLoginResponse, type Vault, type VaultPasswordChangeRequest, type VaultPostResponse, type VaultResponse };
+export { type ApiErrorResponse, AuthEventType, type AuthLogModel, type BadRequestResponse, type DeleteAccountInitiateRequest, type DeleteAccountInitiateResponse, type DeleteAccountRequest, type Email, type EmailAttachment, type FaviconExtractModel, type LoginRequest, type LoginResponse, type MailboxBulkRequest, type MailboxBulkResponse, type MailboxEmail, type PasswordChangeInitiateResponse, type RefreshToken, type StatusResponse, type ValidateLoginRequest, type ValidateLoginRequest2Fa, type ValidateLoginResponse, type Vault, type VaultPasswordChangeRequest, type VaultPostResponse, type VaultResponse };

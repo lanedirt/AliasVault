@@ -5,7 +5,7 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import { AppInfo } from '@/utils/AppInfo';
-import type { MailboxEmail } from '@/utils/dist/shared/models/webapi';
+import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
 
 import { storage } from '#imports';
@@ -22,6 +22,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const webApi = useWebApi();
   const dbContext = useDb();
 
@@ -40,6 +41,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
      */
     const loadEmails = async (): Promise<void> => {
       try {
+        setError(null);
         const isPublic = await isPublicDomain(email);
         setIsSpamOk(isPublic);
 
@@ -52,6 +54,12 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
               'X-Asdasd-Platform-Version': AppInfo.VERSION,
             }
           });
+
+          if (!response.ok) {
+            setError('An error occurred while loading emails. Please try again later.');
+            return;
+          }
+
           const data = await response.json();
 
           // Only show the latest 2 emails to save space in UI
@@ -67,30 +75,55 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           setEmails(latestMails);
         } else {
           // For private domains, use existing encrypted email logic
-          const response = await webApi.get(`EmailBox/${email}`);
-          const data = response as { mails: MailboxEmail[] };
+          try {
+            /**
+             * We use authFetch here because we don't want to the inner method to throw an error if HTTP status is not 200.
+             * Instead we want to catch the error ourselves.
+             */
+            const response = await webApi.authFetch(`EmailBox/${email}`, { method: 'GET' }, true, false);
+            try {
+              const data = response as { mails: MailboxEmail[] };
 
-          // Only show the latest 2 emails to save space in UI
-          const latestMails = data.mails
-            .toSorted((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-            .slice(0, 2);
+              // Only show the latest 2 emails to save space in UI
+              const latestMails = data.mails
+                .toSorted((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
+                .slice(0, 2);
 
-          if (latestMails) {
-            // Loop through all emails and decrypt them locally
-            const decryptedEmails: MailboxEmail[] = await EncryptionUtility.decryptEmailList(
-              latestMails,
-              dbContext.sqliteClient!.getAllEncryptionKeys()
-            );
+              if (latestMails) {
+                // Loop through all emails and decrypt them locally
+                const decryptedEmails: MailboxEmail[] = await EncryptionUtility.decryptEmailList(
+                  latestMails,
+                  dbContext.sqliteClient!.getAllEncryptionKeys()
+                );
 
-            if (loading && decryptedEmails.length > 0) {
-              setLastEmailId(decryptedEmails[0].id);
+                if (loading && decryptedEmails.length > 0) {
+                  setLastEmailId(decryptedEmails[0].id);
+                }
+
+                setEmails(decryptedEmails);
+              }
+            } catch {
+              // Try to parse as error response instead
+              const apiErrorResponse = response as ApiErrorResponse;
+
+              if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
+                setError('The current chosen email address is already in use. Please change the email address by editing this credential.');
+              } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
+                setError('An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.');
+              } else {
+                setError('An error occurred while loading emails. Please try again later.');
+              }
+
+              return;
             }
-
-            setEmails(decryptedEmails);
+          } catch {
+            setError('An error occurred while loading emails. Please try again later.');
+            return;
           }
         }
       } catch (err) {
         console.error('Error loading emails:', err);
+        setError('An unexpected error occurred while loading emails. Please try again later.');
       }
       setLoading(false);
     };
@@ -100,6 +133,19 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     const interval = setInterval(loadEmails, 2000);
     return () : void => clearInterval(interval);
   }, [email, loading, webApi, dbContext]);
+
+  if (error) {
+    return (
+      <div className="text-gray-500 dark:text-gray-400 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent emails</h2>
+        </div>
+        <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
