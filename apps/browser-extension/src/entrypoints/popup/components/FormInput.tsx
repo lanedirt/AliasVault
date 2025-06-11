@@ -1,6 +1,47 @@
 import React, { forwardRef } from 'react';
 
 /**
+ * Button configuration for form input.
+ */
+type FormInputButton = {
+  icon: string;
+  onClick: () => void;
+  title?: string;
+}
+
+/**
+ * Icon component for form input buttons.
+ */
+const Icon: React.FC<{ name: string }> = ({ name }) => {
+  switch (name) {
+    case 'visibility':
+      return (
+        <>
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </>
+      );
+    case 'visibility-off':
+      return (
+        <>
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </>
+      );
+    case 'refresh':
+      return (
+        <>
+          <path d="M23 4v6h-6" />
+          <path d="M1 20v-6h6" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+        </>
+      );
+    default:
+      return null;
+  }
+};
+
+/**
  * Form input props.
  */
 type FormInputProps = {
@@ -14,6 +55,9 @@ type FormInputProps = {
   multiline?: boolean;
   rows?: number;
   error?: string;
+  buttons?: FormInputButton[];
+  showPassword?: boolean;
+  onShowPasswordChange?: (show: boolean) => void;
 }
 
 /**
@@ -29,13 +73,48 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   required = false,
   multiline = false,
   rows = 1,
-  error
+  error,
+  buttons = [],
+  showPassword: controlledShowPassword,
+  onShowPasswordChange
 }, ref) => {
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [internalShowPassword, setInternalShowPassword] = React.useState(false);
+
+  /**
+   * Use controlled or uncontrolled showPassword state.
+   * If controlledShowPassword is provided, use that value and call onShowPasswordChange.
+   * Otherwise, use internal state.
+   */
+  const showPassword = controlledShowPassword !== undefined ? controlledShowPassword : internalShowPassword;
+
+  /**
+   * Set the showPassword state.
+   * If controlledShowPassword is provided, use that value and call onShowPasswordChange.
+   * Otherwise, use internal state.
+   */
+  const setShowPassword = (value: boolean): void => {
+    if (controlledShowPassword !== undefined) {
+      onShowPasswordChange?.(value);
+    } else {
+      setInternalShowPassword(value);
+    }
+  };
 
   const inputClasses = `mt-1 block w-full rounded-md ${
     error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
-  } text-gray-900 sm:text-sm rounded-lg shadow-sm border focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 p-3`;
+  } text-gray-900 sm:text-sm rounded-lg shadow-sm border focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 py-2 px-3`;
+
+  // Add password visibility button if type is password
+  const allButtons = type === 'password'
+    ? [...buttons, {
+      icon: showPassword ? 'visibility-off' : 'visibility',
+      /**
+       * Toggle password visibility.
+       */
+      onClick: (): void => setShowPassword(!showPassword),
+      title: showPassword ? 'Hide password' : 'Show password'
+    }]
+    : buttons;
 
   return (
     <div>
@@ -64,14 +143,21 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
             className={inputClasses}
           />
         )}
-        {type === 'password' && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            <button
-              onClick={() => setShowPassword(!showPassword)}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
+        {allButtons.length > 0 && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {allButtons.map((button, index) => (
+              <button
+                type="button"
+                key={index}
+                onClick={button.onClick}
+                title={button.title}
+                className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <Icon name={button.icon} />
+                </svg>
+              </button>
+            ))}
           </div>
         )}
       </div>
