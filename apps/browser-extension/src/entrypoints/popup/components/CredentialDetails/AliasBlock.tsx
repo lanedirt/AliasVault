@@ -2,8 +2,8 @@ import React from 'react';
 
 import { FormInputCopyToClipboard } from '@/entrypoints/popup/components/FormInputCopyToClipboard';
 
-import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
+import { IdentityHelperUtils } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 type AliasBlockProps = {
   credential: Credential;

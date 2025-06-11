@@ -1,8 +1,8 @@
 import { openAutofillPopup } from '@/entrypoints/contentScript/Popup';
 
+import type { Credential } from '@/utils/dist/shared/models/vault';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { FormFiller } from '@/utils/formDetector/FormFiller';
-import type { Credential } from '@/utils/shared/models/vault';
 
 /**
  * Global timestamp to track popup debounce time.

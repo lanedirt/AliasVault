@@ -4,10 +4,10 @@ import { filterCredentials } from '@/entrypoints/contentScript/Filter';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 
 import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
+import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { CreateIdentityGenerator } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
-import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';

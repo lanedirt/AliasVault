@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
 
 import { AppInfo } from '@/utils/AppInfo';
+import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { useColors } from '@/hooks/useColorScheme';
 

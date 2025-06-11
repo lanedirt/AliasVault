@@ -8,8 +8,8 @@ import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import ConversionUtility from '@/entrypoints/popup/utils/ConversionUtility';
 
+import type { EmailAttachment, Email } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { EmailAttachment, Email } from '@/utils/shared/models/webapi';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 

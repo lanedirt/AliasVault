@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import srp from 'secure-remote-password/client';
 
+import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
+import type { PasswordChangeInitiateResponse, Vault, VaultPasswordChangeRequest } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { EncryptionKeyDerivationParams } from '@/utils/shared/models/metadata';
-import type { PasswordChangeInitiateResponse, Vault, VaultPasswordChangeRequest } from '@/utils/shared/models/webapi';
 
 import { useVaultSync } from '@/hooks/useVaultSync';
 

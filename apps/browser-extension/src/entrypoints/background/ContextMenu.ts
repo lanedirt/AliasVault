@@ -1,7 +1,7 @@
 import { type Browser } from '@wxt-dev/browser';
 import { sendMessage } from 'webext-bridge/background';
 
-import { PasswordGenerator } from '@/utils/shared/password-generator';
+import { PasswordGenerator } from '@/utils/dist/shared/password-generator';
 
 import { browser } from "#imports";
 

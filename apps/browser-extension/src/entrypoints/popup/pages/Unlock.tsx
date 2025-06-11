@@ -11,8 +11,8 @@ import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import type { VaultResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { VaultResponse } from '@/utils/shared/models/webapi';
 
 import { storage } from '#imports';
 

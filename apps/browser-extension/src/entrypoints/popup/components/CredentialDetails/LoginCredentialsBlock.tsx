@@ -2,7 +2,7 @@ import React from 'react';
 
 import { FormInputCopyToClipboard } from '@/entrypoints/popup/components/FormInputCopyToClipboard';
 
-import type { Credential } from '@/utils/shared/models/vault';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 type LoginCredentialsBlockProps = {
   credential: Credential;

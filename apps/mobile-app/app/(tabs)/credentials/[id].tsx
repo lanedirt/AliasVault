@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+import type { Credential } from '@/utils/dist/shared/models/vault';
 import emitter from '@/utils/EventEmitter';
-import type { Credential } from '@/utils/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 

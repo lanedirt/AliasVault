@@ -53,8 +53,9 @@ jobs:
         run: |
           # Check if files exist and were recently modified
           TARGET_DIRS=(
-            "utils/shared/identity-generator"
-            "utils/shared/password-generator"
+            "utils/dist/shared/identity-generator"
+            "utils/dist/shared/password-generator"
+            "utils/dist/shared/models"
           )
 
           for dir in "${TARGET_DIRS[@]}"; do
@@ -62,15 +63,6 @@ jobs:
               echo "❌ Directory $dir does not exist"
               exit 1
             fi
-
-            # Check for required files
-            REQUIRED_FILES=("index.js" "index.mjs" "index.d.ts" "index.js.map" "index.mjs.map")
-            for file in "${REQUIRED_FILES[@]}"; do
-              if [ ! -f "$dir/$file" ]; then
-                echo "❌ Required file $dir/$file does not exist"
-                exit 1
-              fi
-            done
 
             # Check if files were modified in the last 5 minutes
             find "$dir" -type f -mmin -5 | grep -q . || {

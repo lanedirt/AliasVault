@@ -1,5 +1,5 @@
-import { IdentityHelperUtils } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
+import { IdentityHelperUtils } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 import FormInputCopyToClipboard from '@/components/form/FormInputCopyToClipboard';
 import { ThemedText } from '@/components/themed/ThemedText';

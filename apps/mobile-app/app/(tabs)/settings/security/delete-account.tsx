@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import srp from 'secure-remote-password/client';
 
-import type { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest } from '@/utils/shared/models/webapi';
+import type { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest } from '@/utils/dist/shared/models/webapi';
 
 import { useColors } from '@/hooks/useColorScheme';
 
