@@ -29,12 +29,13 @@ type CredentialMode = 'random' | 'manual';
 const credentialSchema = Yup.object().shape({
   Id: Yup.string(),
   ServiceName: Yup.string().required('Service name is required'),
-  ServiceUrl: Yup.string().url('Invalid URL format').optional(),
+  ServiceUrl: Yup.string().url('Invalid URL format').nullable().optional(),
   Alias: Yup.object().shape({
-    FirstName: Yup.string().optional(),
-    LastName: Yup.string().optional(),
-    NickName: Yup.string().optional(),
+    FirstName: Yup.string().nullable().optional(),
+    LastName: Yup.string().nullable().optional(),
+    NickName: Yup.string().nullable().optional(),
     BirthDate: Yup.string()
+      .nullable()
       .optional()
       .test(
         'is-valid-date-format',
@@ -47,11 +48,11 @@ const credentialSchema = Yup.object().shape({
         },
       ),
     Gender: Yup.string().nullable().optional(),
-    Email: Yup.string().email('Invalid email format').optional()
+    Email: Yup.string().email('Invalid email format').nullable().optional()
   }),
-  Username: Yup.string().optional(),
+  Username: Yup.string().nullable().optional(),
   Password: Yup.string().nullable().optional(),
-  Notes: Yup.string().optional()
+  Notes: Yup.string().nullable().optional()
 });
 
 /**
