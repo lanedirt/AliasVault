@@ -164,9 +164,9 @@ export class WebApiService {
   }
 
   /**
-   * Issue GET request to the API expecting a file download and return it as a Base64 string.
+   * Issue GET request to the API expecting a file download and return it as raw bytes.
    */
-  public async downloadBlobAndConvertToBase64(endpoint: string): Promise<string> {
+  public async downloadBlob(endpoint: string): Promise<Uint8Array> {
     try {
       const response = await this.authFetch<Response>(endpoint, {
         method: 'GET',
@@ -175,11 +175,11 @@ export class WebApiService {
         }
       }, false);
 
-      // Ensure we get the response as a blob
-      const blob = await response.blob();
-      return await this.blobToBase64(blob);
+      // Get the response as an ArrayBuffer
+      const arrayBuffer = await response.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
     } catch (error) {
-      console.error('Error fetching and converting to Base64:', error);
+      console.error('Error downloading blob:', error);
       throw error;
     }
   }
