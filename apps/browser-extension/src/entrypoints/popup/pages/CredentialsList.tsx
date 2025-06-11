@@ -27,7 +27,7 @@ const CredentialsList: React.FC = () => {
   const { setHeaderButtons } = useHeaderButtons();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
+  const { setIsInitialLoading } = useLoading();
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -82,9 +82,9 @@ const CredentialsList: React.FC = () => {
    * Manually refresh the credentials list.
    */
   const onManualRefresh = async (): Promise<void> => {
-    showLoading();
+    setIsLoading(true);
     await onRefresh();
-    hideLoading();
+    setIsLoading(false);
   };
 
   // Set header buttons on mount and clear on unmount
