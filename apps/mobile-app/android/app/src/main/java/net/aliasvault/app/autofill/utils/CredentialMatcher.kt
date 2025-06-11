@@ -21,7 +21,9 @@ object CredentialMatcher {
         credentials: List<Credential>,
         appInfo: String,
     ): List<Credential> {
-        if (appInfo.isBlank()) return credentials
+        if (appInfo.isBlank()) {
+            return credentials
+        }
 
         val input = appInfo.trim().lowercase()
         val isUrlLike = input.contains('.') && !input.contains(' ')
