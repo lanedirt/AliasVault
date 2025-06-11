@@ -5,8 +5,8 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import { AppInfo } from '@/utils/AppInfo';
+import type { MailboxEmail } from '@/utils/dist/shared/models/webapi';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import type { MailboxEmail } from '@/utils/shared/models/webapi';
 
 import { storage } from '#imports';
 

@@ -8,11 +8,11 @@ import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingVi
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
 
+import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
+import type { FaviconExtractModel } from '@/utils/dist/shared/models/webapi';
+import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import emitter from '@/utils/EventEmitter';
-import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
-import type { FaviconExtractModel } from '@/utils/shared/models/webapi';
-import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/shared/password-generator';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 import { credentialSchema } from '@/utils/ValidationSchema';
 

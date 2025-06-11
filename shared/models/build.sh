@@ -5,8 +5,8 @@ set -u  # Treat unset variables as errors
 
 # Define output targets for models
 TARGETS=(
-  "../../apps/browser-extension/src/utils/shared/models"
-  "../../apps/mobile-app/utils/shared/models"
+  "../../apps/browser-extension/src/utils/dist/shared/models"
+  "../../apps/mobile-app/utils/dist/shared/models"
 )
 
 # Build and distribute models

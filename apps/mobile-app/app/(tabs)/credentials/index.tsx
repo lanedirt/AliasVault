@@ -7,8 +7,8 @@ import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
+import type { Credential } from '@/utils/dist/shared/models/vault';
 import emitter from '@/utils/EventEmitter';
-import type { Credential } from '@/utils/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';

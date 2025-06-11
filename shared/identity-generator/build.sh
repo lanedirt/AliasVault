@@ -5,9 +5,9 @@ set -u  # Treat unset variables as errors
 
 # Define output targets for identity-generator
 TARGETS=(
-  "../../apps/browser-extension/src/utils/shared/identity-generator"
-  "../../apps/mobile-app/utils/shared/identity-generator"
-  "../../apps/server/AliasVault.Client/wwwroot/js/shared/identity-generator"
+  "../../apps/browser-extension/src/utils/dist/shared/identity-generator"
+  "../../apps/mobile-app/utils/dist/shared/identity-generator"
+  "../../apps/server/AliasVault.Client/wwwroot/js/dist/shared/identity-generator"
 )
 
 # Build and distribute identity-generator

@@ -11,8 +11,8 @@ import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
+import type { VaultResponse, LoginResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { VaultResponse, LoginResponse } from '@/utils/shared/models/webapi';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 
 import ConversionUtility from '../utils/ConversionUtility';

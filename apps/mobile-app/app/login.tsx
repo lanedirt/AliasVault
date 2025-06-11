@@ -10,9 +10,9 @@ import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, Acti
 
 import { AppInfo } from '@/utils/AppInfo';
 import ConversionUtility from '@/utils/ConversionUtility';
+import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
+import type { LoginResponse, VaultResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { EncryptionKeyDerivationParams } from '@/utils/shared/models/metadata';
-import type { LoginResponse, VaultResponse } from '@/utils/shared/models/webapi';
 import { SrpUtility } from '@/utils/SrpUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 

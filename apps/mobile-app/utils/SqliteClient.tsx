@@ -1,5 +1,5 @@
-import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/shared/models/metadata';
-import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/shared/models/vault';
+import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/dist/shared/models/metadata';
+import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
 

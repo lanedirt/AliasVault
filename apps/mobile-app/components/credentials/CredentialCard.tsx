@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } f
 import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
 
-import type { Credential } from '@/utils/shared/models/vault';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 

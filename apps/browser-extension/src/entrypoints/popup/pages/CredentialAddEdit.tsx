@@ -14,9 +14,9 @@ import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsConte
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
-import { IdentityHelperUtils, CreateIdentityGenerator, CreateUsernameEmailGenerator, Identity, Gender } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
-import { CreatePasswordGenerator } from '@/utils/shared/password-generator';
+import { IdentityHelperUtils, CreateIdentityGenerator, CreateUsernameEmailGenerator, Identity, Gender } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
+import { CreatePasswordGenerator } from '@/utils/dist/shared/password-generator';
 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useLoading } from '../context/LoadingContext';

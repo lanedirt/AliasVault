@@ -1,4 +1,4 @@
-import type { StatusResponse, VaultResponse } from '@/utils/shared/models/webapi';
+import type { StatusResponse, VaultResponse } from '@/utils/dist/shared/models/webapi';
 
 import { AppInfo } from "./AppInfo";
 

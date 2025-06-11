@@ -5,9 +5,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+import type { Email } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import emitter from '@/utils/EventEmitter';
-import type { Email } from '@/utils/shared/models/webapi';
 import type { Credential } from '@/utils/types/Credential';
 
 import { useColors } from '@/hooks/useColorScheme';

@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { sendMessage } from 'webext-bridge/popup';
 
+import type { VaultMetadata } from '@/utils/dist/shared/models/metadata';
+import type { VaultResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-import type { VaultMetadata } from '@/utils/shared/models/metadata';
-import type { VaultResponse } from '@/utils/shared/models/webapi';
 import SqliteClient from '@/utils/SqliteClient';
 import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 import type { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';

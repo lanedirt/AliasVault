@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 
-import type { TotpCode } from '@/utils/shared/models/vault';
+import type { TotpCode } from '@/utils/dist/shared/models/vault';
 
 type TotpBlockProps = {
   credentialId: string;

@@ -12,7 +12,7 @@ import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
 
-import type { Credential } from '@/utils/shared/models/vault';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 

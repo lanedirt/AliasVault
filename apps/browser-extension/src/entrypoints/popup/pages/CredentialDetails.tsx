@@ -15,7 +15,7 @@ import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
-import type { Credential } from '@/utils/shared/models/vault';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 
 /**
  * Credential details page.

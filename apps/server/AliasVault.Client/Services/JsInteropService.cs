@@ -26,8 +26,8 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeAsync()
     {
-        _identityGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/shared/identity-generator/index.mjs");
-        _passwordGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/shared/password-generator/index.mjs");
+        _identityGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dist/shared/identity-generator/index.mjs");
+        _passwordGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dist/shared/password-generator/index.mjs");
     }
 
     /// <summary>

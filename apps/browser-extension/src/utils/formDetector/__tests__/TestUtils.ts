@@ -4,10 +4,10 @@ import { join } from 'path';
 import { JSDOM, DOMWindow } from 'jsdom';
 import { it, expect, vi } from 'vitest';
 
+import { Gender } from '@/utils/dist/shared/identity-generator';
+import type { Credential } from '@/utils/dist/shared/models/vault';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { FormFields } from '@/utils/formDetector/types/FormFields';
-import { Gender } from '@/utils/shared/identity-generator';
-import type { Credential } from '@/utils/shared/models/vault';
 
 export enum FormField {
   Username = 'username',
