@@ -107,7 +107,7 @@ else
 
     private async Task RefreshData()
     {
-        LoadingService.StartLoading("emails", 500, StateHasChanged);
+        LoadingService.StartLoading("emails", 300, StateHasChanged);
         NoEmailClaims = false;
         CloseEmailModal();
 
