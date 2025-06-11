@@ -114,7 +114,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               className="p-1 text-green-500 dark:text-green-400 transition-colors duration-200"
               title="Copied!"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="check" />
               </svg>
             </button>
@@ -125,7 +125,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
               title="Copy to clipboard"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="copy" />
               </svg>
             </button>
@@ -137,7 +137,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
               title={showPassword ? 'Hide password' : 'Show password'}
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name={showPassword ? 'visibility-off' : 'visibility'} />
               </svg>
             </button>

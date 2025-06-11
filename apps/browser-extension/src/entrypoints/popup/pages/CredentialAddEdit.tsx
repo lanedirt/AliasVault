@@ -256,8 +256,9 @@ const CredentialAddEdit: React.FC = () => {
    */
   const onSubmit = useCallback(async (data: Credential): Promise<void> => {
     // Normalize the birth date for database entry.
-    if (data?.Alias?.BirthDate) {
-      data.Alias.BirthDate = IdentityHelperUtils.normalizeBirthDateForDb(data.Alias.BirthDate);
+    let birthdate = data.Alias.BirthDate;
+    if (birthdate) {
+      birthdate = IdentityHelperUtils.normalizeBirthDateForDb(birthdate);
     }
 
     // If we're creating a new credential and mode is random, generate random values here
@@ -269,7 +270,7 @@ const CredentialAddEdit: React.FC = () => {
       data.Alias.FirstName = watch('Alias.FirstName');
       data.Alias.LastName = watch('Alias.LastName');
       data.Alias.NickName = watch('Alias.NickName');
-      data.Alias.BirthDate = watch('Alias.BirthDate');
+      data.Alias.BirthDate = birthdate;
       data.Alias.Gender = watch('Alias.Gender');
       data.Alias.Email = watch('Alias.Email');
     }
