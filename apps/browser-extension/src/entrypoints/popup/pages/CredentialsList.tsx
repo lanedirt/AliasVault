@@ -79,13 +79,14 @@ const CredentialsList: React.FC = () => {
   }, [dbContext, webApi, syncVault]);
 
   /**
-   * Manually refresh the credentials list.
+   * Get latest vault from server and refresh the credentials list.
    */
-  const onManualRefresh = async (): Promise<void> => {
+  const syncVaultAndRefresh = useCallback(async () : Promise<void> => {
     setIsLoading(true);
     await onRefresh();
     setIsLoading(false);
-  };
+    setIsInitialLoading(false);
+  }, [onRefresh, setIsLoading, setIsInitialLoading]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -108,7 +109,7 @@ const CredentialsList: React.FC = () => {
    */
   useEffect(() => {
     /**
-     * Refresh credentials list when sqlite client is available.
+     * Refresh credentials list when a (new) sqlite client is available.
      */
     const refreshCredentials = async () : Promise<void> => {
       if (dbContext?.sqliteClient) {
@@ -116,14 +117,16 @@ const CredentialsList: React.FC = () => {
         const results = dbContext.sqliteClient?.getAllCredentials() ?? [];
         setCredentials(results);
         setIsLoading(false);
-
-        // Hide the global app initial loading state after the credentials list is loaded.
-        setIsInitialLoading(false);
       }
     };
 
     refreshCredentials();
-  }, [dbContext?.sqliteClient, setIsLoading, setIsInitialLoading]);
+  }, [dbContext?.sqliteClient, setIsLoading]);
+
+  // Call syncVaultAndRefresh when the page first mounts
+  useEffect(() => {
+    syncVaultAndRefresh();
+  }, [syncVaultAndRefresh]);
 
   // Add this function to filter credentials
   const filteredCredentials = credentials.filter(cred => {
@@ -149,7 +152,7 @@ const CredentialsList: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-gray-900 dark:text-white text-xl">Credentials</h2>
-        <ReloadButton onClick={onManualRefresh} />
+        <ReloadButton onClick={syncVaultAndRefresh} />
       </div>
 
       {credentials.length > 0 ? (
