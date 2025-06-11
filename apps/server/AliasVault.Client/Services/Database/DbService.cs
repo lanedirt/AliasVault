@@ -608,6 +608,9 @@ public sealed class DbService : IDisposable
                 string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(vault.Blob, _authService.GetEncryptionKeyAsBase64Async());
                 await ImportDbContextFromBase64Async(decryptedBase64String, _sqlConnection!);
 
+                // Refresh the db context with the new database to invalidate any cached data if the _dbContext was already used.
+                _dbContext = new AliasClientDbContext(_sqlConnection!, log => _logger.LogDebug("{Message}", log));
+
                 // Check if database is up-to-date with migrations.
                 var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
                 if (pendingMigrations.Any())
