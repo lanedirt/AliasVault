@@ -297,7 +297,7 @@
     /// <returns></returns>
     private async Task ManualRefresh()
     {
-        LoadingService.StartLoading("recentemails", 500, StateHasChanged);
+        LoadingService.StartLoading("recentemails", 300, StateHasChanged);
         StateHasChanged();
         CloseEmailModal();
         await LoadRecentEmailsAsync();
