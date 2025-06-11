@@ -5,10 +5,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+import type { Credential } from '@/utils/dist/shared/models/vault';
 import type { Email } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import emitter from '@/utils/EventEmitter';
-import type { Credential } from '@/utils/types/Credential';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -122,7 +122,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
    */
   const handleDownloadAttachment = async (attachment: Email['attachments'][0]) : Promise<void> => {
     try {
-      const base64EncryptedAttachment = await webApi.downloadBlobAndConvertToBase64(
+      const encryptedBytes = await webApi.downloadBlob(
         `Email/${id}/attachments/${attachment.id}`
       );
 
@@ -133,7 +133,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
       const encryptionKeys = await dbContext.sqliteClient.getAllEncryptionKeys();
       const decryptedBytes = await EncryptionUtility.decryptAttachment(
-        base64EncryptedAttachment,
+        encryptedBytes,
         email,
         encryptionKeys
       );
@@ -143,8 +143,10 @@ export default function EmailDetailsScreen() : React.ReactNode {
         return;
       }
 
+      // Convert decrypted bytes to base64 for FileSystem.writeAsStringAsync
+      const base64Data = Buffer.from(decryptedBytes).toString('base64');
       const tempFile = `${FileSystem.cacheDirectory}${attachment.filename}`;
-      await FileSystem.writeAsStringAsync(tempFile, decryptedBytes, {
+      await FileSystem.writeAsStringAsync(tempFile, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -187,6 +189,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
       borderTopColor: colors.accentBorder,
       borderTopWidth: 1,
       padding: 16,
+      paddingBottom: 100,
     },
     attachmentsTitle: {
       color: colors.text,
