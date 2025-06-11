@@ -43,7 +43,8 @@ export class WebApiService {
   public async authFetch<T>(
     endpoint: string,
     options: RequestInit = {},
-    parseJson: boolean = true
+    parseJson: boolean = true,
+    throwOnError: boolean = true
   ): Promise<T> {
     const headers = new Headers(options.headers ?? {});
 
@@ -81,7 +82,7 @@ export class WebApiService {
         }
       }
 
-      if (!response.ok) {
+      if (!response.ok && throwOnError) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

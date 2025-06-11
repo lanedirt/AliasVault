@@ -32,82 +32,82 @@ type PasswordSettings = {
  * Generate a random password.
  */
 declare class PasswordGenerator {
-  private readonly lowercaseChars;
-  private readonly uppercaseChars;
-  private readonly numberChars;
-  private readonly specialChars;
-  private readonly ambiguousChars;
-  private length;
-  private useLowercase;
-  private useUppercase;
-  private useNumbers;
-  private useSpecial;
-  private useNonAmbiguous;
-  /**
-   * Create a new instance of PasswordGenerator.
-   * @param settings Optional password settings to initialize with.
-   */
-  constructor(settings?: PasswordSettings);
-  /**
-   * Apply password settings to this generator.
-   */
-  applySettings(settings: PasswordSettings): this;
-  /**
-   * Set the length of the password.
-   */
-  setLength(length: number): this;
-  /**
-   * Set if lowercase letters should be used.
-   */
-  useLowercaseLetters(use: boolean): this;
-  /**
-   * Set if uppercase letters should be used.
-   */
-  useUppercaseLetters(use: boolean): this;
-  /**
-   * Set if numeric characters should be used.
-   */
-  useNumericCharacters(use: boolean): this;
-  /**
-   * Set if special characters should be used.
-   */
-  useSpecialCharacters(use: boolean): this;
-  /**
-   * Set if only non-ambiguous characters should be used.
-   */
-  useNonAmbiguousCharacters(use: boolean): this;
-  /**
-   * Get a random index from the crypto module.
-   */
-  private getUnbiasedRandomIndex;
-  /**
-   * Generate a random password.
-   */
-  generateRandomPassword(): string;
-  /**
-   * Build character set based on selected options.
-   */
-  private buildCharacterSet;
-  /**
-   * Remove ambiguous characters from a character set.
-   */
-  private removeAmbiguousCharacters;
-  /**
-   * Generate initial random password.
-   */
-  private generateInitialPassword;
-  /**
-   * Ensure the generated password meets all specified requirements.
-   */
-  private ensureRequirements;
-  /**
-   * Get a character set with ambiguous characters removed if needed.
-   */
-  private getSafeCharacterSet;
-  /**
-   * Add a character from the given set at a random position in the password.
-   */
-  private addCharacterFromSet;
+    private readonly lowercaseChars;
+    private readonly uppercaseChars;
+    private readonly numberChars;
+    private readonly specialChars;
+    private readonly ambiguousChars;
+    private length;
+    private useLowercase;
+    private useUppercase;
+    private useNumbers;
+    private useSpecial;
+    private useNonAmbiguous;
+    /**
+     * Create a new instance of PasswordGenerator.
+     * @param settings Optional password settings to initialize with.
+     */
+    constructor(settings?: PasswordSettings);
+    /**
+     * Apply password settings to this generator.
+     */
+    applySettings(settings: PasswordSettings): this;
+    /**
+     * Set the length of the password.
+     */
+    setLength(length: number): this;
+    /**
+     * Set if lowercase letters should be used.
+     */
+    useLowercaseLetters(use: boolean): this;
+    /**
+     * Set if uppercase letters should be used.
+     */
+    useUppercaseLetters(use: boolean): this;
+    /**
+     * Set if numeric characters should be used.
+     */
+    useNumericCharacters(use: boolean): this;
+    /**
+     * Set if special characters should be used.
+     */
+    useSpecialCharacters(use: boolean): this;
+    /**
+     * Set if only non-ambiguous characters should be used.
+     */
+    useNonAmbiguousCharacters(use: boolean): this;
+    /**
+     * Get a random index from the crypto module.
+     */
+    private getUnbiasedRandomIndex;
+    /**
+     * Generate a random password.
+     */
+    generateRandomPassword(): string;
+    /**
+     * Build character set based on selected options.
+     */
+    private buildCharacterSet;
+    /**
+     * Remove ambiguous characters from a character set.
+     */
+    private removeAmbiguousCharacters;
+    /**
+     * Generate initial random password.
+     */
+    private generateInitialPassword;
+    /**
+     * Ensure the generated password meets all specified requirements.
+     */
+    private ensureRequirements;
+    /**
+     * Get a character set with ambiguous characters removed if needed.
+     */
+    private getSafeCharacterSet;
+    /**
+     * Add a character from the given set at a random position in the password.
+     */
+    private addCharacterFromSet;
 }
 
 /**
