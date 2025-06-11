@@ -219,13 +219,21 @@ class AutofillService : AutofillService() {
                             field.first,
                             AutofillValue.forText(credential.alias.email),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                        if (credential.alias.email.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.alias.email})"
+                        } else if (!credential.username.isNullOrEmpty()) {
+                            presentationDisplayValue += " (${credential.username})"
+                        }
                     } else if (credential.username != null) {
                         dataSetBuilder.setValue(
                             field.first,
                             AutofillValue.forText(credential.username),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                        if (credential.username.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.username})"
+                        } else if ((credential.alias?.email ?: "").isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.alias?.email})"
+                        }
                     }
                 }
                 FieldType.USERNAME -> {
@@ -234,13 +242,19 @@ class AutofillService : AutofillService() {
                             field.first,
                             AutofillValue.forText(credential.username),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                        if (credential.username.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.username})"
+                        } else if ((credential.alias?.email ?: "").isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.alias?.email})"
+                        }
                     } else if (credential.alias?.email != null) {
                         dataSetBuilder.setValue(
                             field.first,
                             AutofillValue.forText(credential.alias.email),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                        if (credential.alias.email.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.alias.email})"
+                        }
                     }
                 }
                 else -> {
@@ -250,13 +264,17 @@ class AutofillService : AutofillService() {
                             field.first,
                             AutofillValue.forText(credential.alias.email),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.alias.email})"
+                        if (credential.alias.email.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.alias.email})"
+                        }
                     } else if (credential.username != null) {
                         dataSetBuilder.setValue(
                             field.first,
                             AutofillValue.forText(credential.username),
                         )
-                        presentationDisplayValue = "${credential.service.name} (${credential.username})"
+                        if (credential.username.isNotEmpty()) {
+                            presentationDisplayValue += " (${credential.username})"
+                        }
                     }
                 }
             }
