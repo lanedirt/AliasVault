@@ -224,17 +224,11 @@ public sealed class AuthService(HttpClient httpClient, ILocalStorageService loca
     {
         await localStorage.SetItemAsStringAsync("webAuthnEnabled", enabled.ToString().ToLower());
 
-        Console.WriteLine($"Set webAuthnEnabled to {enabled}");
-
         // Encrypt the current encryption key with the webauthn derived key and store it in local storage.
         if (enabled && !string.IsNullOrEmpty(webauthCredentialId) && !string.IsNullOrEmpty(webauthSalt) && !string.IsNullOrEmpty(webauthCredentialDerivedKey))
         {
-            Console.WriteLine("Encrypting encryption key with webauthn derived key");
             var encryptionKeyBase64 = Convert.ToBase64String(GetEncryptionKey());
-            Console.WriteLine($"encryptionKeyBase64: {encryptionKeyBase64}");
             var encryptedEncryptionKey = await jsInteropService.SymmetricEncrypt(encryptionKeyBase64, webauthCredentialDerivedKey);
-            Console.WriteLine($"encryptedEncryptionKey: {encryptedEncryptionKey}");
-            Console.WriteLine($"webauthCredentialDerivedKey: {webauthCredentialDerivedKey}");
             await localStorage.SetItemAsStringAsync("webAuthnCredentialId", webauthCredentialId);
             await localStorage.SetItemAsStringAsync("webAuthnSalt", webauthSalt);
             await localStorage.SetItemAsStringAsync("webAuthnEncryptedEncryptionKey", encryptedEncryptionKey);
