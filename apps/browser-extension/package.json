@@ -8,6 +8,7 @@
     "dev:chrome": "wxt -b chrome",
     "dev:firefox": "wxt -b firefox",
     "dev:edge": "wxt -b edge",
+    "dev:safari": "wxt -b safari",
     "build:chrome": "wxt build -b chrome",
     "build:firefox": "wxt build -b firefox",
     "build:edge": "wxt build -b edge",

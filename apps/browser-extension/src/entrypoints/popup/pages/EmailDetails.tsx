@@ -31,15 +31,6 @@ const EmailDetails: React.FC = (): React.ReactElement => {
   const { setHeaderButtons } = useHeaderButtons();
   const [headerButtonsConfigured, setHeaderButtonsConfigured] = useState(false);
 
-  /**
-   * Make sure the initial loading state is set to false when this component is loaded itself.
-   */
-  useEffect(() => {
-    if (!isLoading) {
-      setIsInitialLoading(false);
-    }
-  }, [setIsInitialLoading, isLoading]);
-
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation
     if (isPopup()) {
@@ -70,11 +61,12 @@ const EmailDetails: React.FC = (): React.ReactElement => {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setIsLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
     loadEmail();
-  }, [id, dbContext?.sqliteClient, webApi, setIsLoading]);
+  }, [id, dbContext?.sqliteClient, webApi, setIsLoading, setIsInitialLoading]);
 
   /**
    * Handle deleting an email.
