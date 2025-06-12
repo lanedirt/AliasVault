@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import Modal from '@/entrypoints/popup/components/Modal';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
@@ -27,6 +28,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<Email | null>(null);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { setIsInitialLoading } = useLoading();
   const { setHeaderButtons } = useHeaderButtons();
   const [headerButtonsConfigured, setHeaderButtonsConfigured] = useState(false);
@@ -169,7 +171,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
             iconType={HeaderIconType.EXPAND}
           />
           <HeaderButton
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             title="Delete email"
             iconType={HeaderIconType.DELETE}
             variant="danger"
@@ -181,7 +183,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
       setHeaderButtonsConfigured(true);
     }
     return () => {};
-  }, [setHeaderButtons, headerButtonsConfigured, handleDelete, openInNewPopup]);
+  }, [setHeaderButtons, headerButtonsConfigured, openInNewPopup]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {
@@ -206,6 +208,19 @@ const EmailDetails: React.FC = (): React.ReactElement => {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          setShowDeleteModal(false);
+          void handleDelete();
+        }}
+        title="Delete Email"
+        message="Are you sure you want to delete this email? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
+
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">

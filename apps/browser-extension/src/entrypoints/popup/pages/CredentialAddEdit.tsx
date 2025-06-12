@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import Modal from '@/entrypoints/popup/components/Modal';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
@@ -68,6 +69,7 @@ const CredentialAddEdit: React.FC = () => {
   const { setIsInitialLoading } = useLoading();
   const [localLoading, setLocalLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const webApi = useWebApi();
 
   const serviceNameRef = useRef<HTMLInputElement>(null);
@@ -135,7 +137,7 @@ const CredentialAddEdit: React.FC = () => {
    * Handle the delete button click.
    */
   const handleDelete = useCallback(async (): Promise<void> => {
-    if (!id || !window.confirm('Are you sure you want to delete this credential? This action cannot be undone.')) {
+    if (!id) {
       return;
     }
 
@@ -329,7 +331,7 @@ const CredentialAddEdit: React.FC = () => {
       <div className="flex items-center gap-2">
         {isEditMode && (
           <HeaderButton
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             title="Delete credential"
             iconType={HeaderIconType.DELETE}
             variant="danger"
@@ -345,7 +347,7 @@ const CredentialAddEdit: React.FC = () => {
 
     setHeaderButtons(headerButtonsJSX);
     return () => {};
-  }, [setHeaderButtons, handleSubmit, onSubmit, isEditMode, handleDelete]);
+  }, [setHeaderButtons, handleSubmit, onSubmit, isEditMode]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {
@@ -367,6 +369,19 @@ const CredentialAddEdit: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          setShowDeleteModal(false);
+          void handleDelete();
+        }}
+        title="Delete Credential"
+        message="Are you sure you want to delete this credential? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
 
       {!isEditMode && (
         <div className="flex space-x-2 mb-4">
