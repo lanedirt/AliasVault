@@ -22,14 +22,13 @@
     </div>
 
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Browsers</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions
                 .Where(x => x.Key != BrowserType.Unknown)
                 .Select(x => x.Value))
             {
-                <div class="p-4 border rounded-lg dark:border-gray-700">
-                    <div class="flex items-center mb-4">
+                <div class="p-4 border rounded-lg dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex items-center">
                         <img src="@extension.IconPath" alt="@extension.Name" class="w-8 h-8 mr-3">
                         <h4 class="text-lg font-medium text-gray-900 dark:text-white">@extension.Name</h4>
                     </div>
@@ -38,7 +37,7 @@
                         <a href="@extension.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install for @extension.Name
+                            Install
                         </a>
                     }
                     else
@@ -54,16 +53,16 @@
 
     <div class="mb-6">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Mobile Apps</h3>
-        <p class="text-gray-600 dark:text-gray-400">
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
             The AliasVault mobile app allows you to access your aliases and identities on the go, view and manage received emails, and generate new aliases anytime. Your data is fully protected with on-device biometric authentication.
         </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         @foreach (var app in Shared.Core.MobileApps.Constants.MobileApps)
         {
-            <div class="p-4 border rounded-lg dark:border-gray-700">
-                <div class="flex items-center mb-4">
+            <div class="p-4 border rounded-lg dark:border-gray-700 flex justify-between items-center">
+                <div class="flex items-center">
                     <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mr-3">
                     <h4 class="text-lg font-medium text-gray-900 dark:text-white">@app.Name</h4>
                 </div>
@@ -72,7 +71,7 @@
                     <a href="@app.DownloadUrl"
                        target="_blank"
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                        Download for @app.Name
+                        Download
                     </a>
                 }
                 else
@@ -87,17 +86,9 @@
 </div>
 
 @code {
-    /// <summary>
-    /// The current browser of the user.
-    /// </summary>
     private BrowserType CurrentBrowser { get; set; }
-
-    /// <summary>
-    /// Information for extension for the current browser of the user.
-    /// </summary>
     private BrowserExtensionInfo? CurrentBrowserExtension { get; set; } = null;
 
-    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -114,15 +105,10 @@
         }
     }
 
-    /// <summary>
-    /// Determine current browser.
-    /// </summary>
-    /// <returns>Browser type enum value.</returns>
     private async Task<BrowserType> DetermineBrowser()
     {
         try
         {
-            // First check if it's Brave.
             var isBrave = await JsRuntime.InvokeAsync<bool>("eval", "navigator.brave?.isBrave() || false");
             if (isBrave)
             {
