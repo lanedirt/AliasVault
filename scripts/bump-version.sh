@@ -81,8 +81,13 @@ get_browser_extension_version() {
 }
 
 # Function to extract version from browser extension package.json
-get_package_json_version() {
+get_browser_extension_package_json_version() {
     grep "\"version\": " ../apps/browser-extension/package.json | tr -d '"' | tr -d ',' | tr -d ' ' | cut -d':' -f2
+}
+
+# Function to extract version from browser extension AppInfo.ts
+get_browser_extension_ts_version() {
+    grep "public static readonly VERSION = " ../apps/browser-extension/src/utils/AppInfo.ts | tr -d "'" | tr -d ';' | tr -d ' ' | cut -d'=' -f2
 }
 
 # Function to extract version from mobile app
@@ -113,7 +118,8 @@ get_safari_version() {
 echo "Checking current versions..."
 server_version=$(get_server_version)
 browser_wxt_version=$(get_browser_extension_version)
-browser_package_version=$(get_package_json_version)
+browser_package_version=$(get_browser_extension_package_json_version)
+browser_ts_version=$(get_browser_extension_ts_version)
 mobile_version=$(get_mobile_app_version)
 mobile_ts_version=$(get_mobile_app_ts_version)
 ios_version=$(get_ios_version)
@@ -125,6 +131,7 @@ declare -A versions
 versions["server"]="$server_version"
 versions["browser_wxt"]="$browser_wxt_version"
 versions["browser_package"]="$browser_package_version"
+versions["browser_ts"]="$browser_ts_version"
 versions["mobile"]="$mobile_version"
 versions["mobile_ts"]="$mobile_ts_version"
 versions["ios"]="$ios_version"
@@ -136,6 +143,7 @@ declare -A display_names
 display_names["server"]="Server"
 display_names["browser_wxt"]="Browser Extension (wxt.config.ts)"
 display_names["browser_package"]="Browser Extension (package.json)"
+display_names["browser_ts"]="Browser Extension (AppInfo.ts)"
 display_names["mobile"]="Mobile App"
 display_names["mobile_ts"]="Mobile App (TS)"
 display_names["ios"]="iOS App"
@@ -208,6 +216,12 @@ echo "Updating package.json version..."
 update_version "../apps/browser-extension/package.json" \
     "\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"," \
     "\"version\": \"$version\","
+
+# Update browser extension AppInfo.ts version
+echo "Updating browser extension AppInfo.ts version..."
+update_version "../apps/browser-extension/src/utils/AppInfo.ts" \
+    "public static readonly VERSION = '[0-9]\+\.[0-9]\+\.[0-9]\+';" \
+    "public static readonly VERSION = '$version';"
 
 # Update generic mobile app version
 echo "Updating mobile app version..."

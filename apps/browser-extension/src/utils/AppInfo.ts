@@ -6,7 +6,7 @@ export class AppInfo {
   /**
    * The current extension version. This should be updated with each release of the extension.
    */
-  public static readonly VERSION = '0.17.3';
+  public static readonly VERSION = '0.18.1';
 
   /**
    * The minimum supported AliasVault server (API) version. If the server version is below this, the
