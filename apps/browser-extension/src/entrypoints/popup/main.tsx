@@ -8,11 +8,6 @@ import { LoadingProvider } from '@/entrypoints/popup/context/LoadingContext';
 import { ThemeProvider } from '@/entrypoints/popup/context/ThemeContext';
 import { WebApiProvider } from '@/entrypoints/popup/context/WebApiContext';
 
-import { setupExpandedMode } from '@/utils/ExpandedMode';
-
-// Run before React initializes to ensure the popup is always a fixed width except for when explicitly expanded.
-setupExpandedMode();
-
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <DbProvider>

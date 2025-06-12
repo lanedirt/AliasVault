@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 
 import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
@@ -19,6 +20,7 @@ const EmailsList: React.FC = () => {
   const webApi = useWebApi();
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
+  const { setIsInitialLoading } = useLoading();
 
   /**
    * Loading state with minimum duration for more fluid UX.
@@ -63,8 +65,9 @@ const EmailsList: React.FC = () => {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
+      setIsInitialLoading(false);
     }
-  }, [dbContext?.sqliteClient, webApi, setIsLoading]);
+  }, [dbContext?.sqliteClient, webApi, setIsLoading, setIsInitialLoading]);
 
   useEffect(() => {
     loadEmails();

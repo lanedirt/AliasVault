@@ -10,8 +10,9 @@ import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
 import { AppInfo } from '@/utils/AppInfo';
 import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY } from '@/utils/Constants';
 
-import { storage } from "#imports";
-import { browser } from "#imports";
+import { useLoading } from '../context/LoadingContext';
+
+import { storage, browser } from "#imports";
 
 /**
  * Popup settings type.
@@ -32,6 +33,7 @@ const Settings: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const authContext = useAuth();
   const { setHeaderButtons } = useHeaderButtons();
+  const { setIsInitialLoading } = useLoading();
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
     temporaryDisabledUrls: {},
@@ -69,7 +71,7 @@ const Settings: React.FC = () => {
       <div className="flex items-center gap-2">
         <HeaderButton
           onClick={openClientTab}
-          title="Open Client"
+          title="Open web app"
           iconType={HeaderIconType.EXTERNAL_LINK}
         />
       </div>
@@ -110,7 +112,8 @@ const Settings: React.FC = () => {
       isGloballyEnabled,
       isContextMenuEnabled
     });
-  }, []);
+    setIsInitialLoading(false);
+  }, [setIsInitialLoading]);
 
   useEffect(() => {
     loadSettings();

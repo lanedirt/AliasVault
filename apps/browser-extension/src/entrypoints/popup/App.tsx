@@ -74,7 +74,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col">
+      <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col max-h-[600px]">
         {isLoading && (
           <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
             <LoadingSpinner />
@@ -92,7 +92,6 @@ const App: React.FC = () => {
           style={{
             paddingTop: '64px',
             height: 'calc(100% - 120px)',
-            maxHeight: '600px',
           }}
         >
           <div className="p-4 mb-16">

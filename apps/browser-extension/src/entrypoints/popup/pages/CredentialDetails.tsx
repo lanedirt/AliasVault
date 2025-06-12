@@ -40,8 +40,8 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
    * Open the credential details in a new expanded popup.
    */
   const openInNewPopup = useCallback((): void => {
-    const width = 380;
-    const height = 600;
+    const width = 800;
+    const height = 1000;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
@@ -58,21 +58,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
    * Navigate to the edit page for this credential.
    */
   const handleEdit = useCallback((): void => {
-    if (isPopup()) {
-      window.close();
-      const width = 380;
-      const height = 600;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
-
-      window.open(
-        `popup.html?expanded=true#/credentials/${id}/edit`,
-        'CredentialAddEdit',
-        `width=${width},height=${height},left=${left},top=${top},popup=true`
-      );
-    } else {
-      navigate(`/credentials/${id}/edit`);
-    }
+    navigate(`/credentials/${id}/edit`);
   }, [id, navigate]);
 
   useEffect(() => {
