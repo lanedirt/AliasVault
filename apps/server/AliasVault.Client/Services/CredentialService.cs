@@ -60,8 +60,6 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
             // Generate a random identity using the TypeScript library
             var identity = await jsInteropService.GenerateRandomIdentityAsync(dbService.Settings.DefaultIdentityLanguage);
 
-            Console.WriteLine($"Generated identity: {identity.FirstName} {identity.LastName} {identity.BirthDate} {identity.Gender} {identity.NickName}");
-
             // Generate random values for the Identity properties
             credential.Username = identity.NickName;
             credential.Alias.FirstName = identity.FirstName;
