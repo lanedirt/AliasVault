@@ -423,7 +423,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
     private async Task UpdateUserEmailClaims(AliasServerDbContext context, AliasVaultUser user, List<string> newEmailAddresses)
     {
         // Get all existing user email claims.
-        var existingEmailClaims = await context.UserEmailClaims
+        var userOwnedEmailClaims = await context.UserEmailClaims
             .Where(x => x.UserId == user.Id)
             .ToListAsync();
 
@@ -458,15 +458,23 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             }
 
             // If email address is already claimed by current user, we don't need to claim it again.
-            if (existingEmailClaims.Any(x => x.Address == sanitizedEmail))
+            var existingUserClaim = userOwnedEmailClaims.FirstOrDefault(x => x.Address == sanitizedEmail);
+            if (existingUserClaim != null)
             {
+                // Claim already exists but is disabled, so we can re-enable it.
+                if (existingUserClaim.Disabled)
+                {
+                    existingUserClaim.Disabled = false;
+                    existingUserClaim.UpdatedAt = timeProvider.UtcNow;
+                }
+
+                // If the claim already exists and is not disabled, everything is good, we don't need to do anything.
                 continue;
             }
 
             // Check if the email address is already claimed (by another user).
-            var existingClaim = await context.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
-
-            if (existingClaim != null && existingClaim.UserId != user.Id)
+            var existingForeignClaim = await context.UserEmailClaims.FirstOrDefaultAsync(x => x.Address == sanitizedEmail);
+            if (existingForeignClaim != null && existingForeignClaim.UserId != user.Id)
             {
                 // Email address is already claimed by another user. Log the error and continue.
                 logger.LogWarning("{User} tried to claim email address: {Email} but it is already claimed by another user.", user.UserName, sanitizedEmail);
@@ -497,12 +505,13 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Important: we do not delete email claims ever, as they may be re-used by the user in the future.
         // We also don't want to allow other users to re-use emails used by other users.
         // Email claims are considered permanent.
-        foreach (var existingClaim in existingEmailClaims.Where(x => !x.Disabled).ToList())
+        foreach (var existingClaim in userOwnedEmailClaims.Where(x => !x.Disabled).ToList())
         {
             if (!processedEmailAddresses.Contains(existingClaim.Address))
             {
                 // Email address is no longer in the new list and has not been disabled yet, so disable it.
                 existingClaim.Disabled = true;
+                existingClaim.UpdatedAt = timeProvider.UtcNow;
             }
         }
 
