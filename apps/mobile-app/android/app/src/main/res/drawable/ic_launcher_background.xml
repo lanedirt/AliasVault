@@ -1,6 +1,10 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@color/splashscreen_background"/>
-  <item>
-    <bitmap android:gravity="center" android:src="@drawable/splashscreen_logo"/>
-  </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#444444"
+                android:endColor="#000000"
+                android:angle="315" />
+        </shape>
+    </item>
 </layer-list>
