@@ -26,6 +26,7 @@ public static class SeedData
         var settings = new List<ServerSetting>
         {
             new() { Key = "EmailRetentionDays", Value = "30" },
+            new() { Key = "DisabledEmailRetentionDays", Value = "30" },
             new() { Key = "GeneralLogRetentionDays", Value = "45" },
             new() { Key = "AuthLogRetentionDays", Value = "60" },
             new() { Key = "MaxEmailsPerUser", Value = "100" },
