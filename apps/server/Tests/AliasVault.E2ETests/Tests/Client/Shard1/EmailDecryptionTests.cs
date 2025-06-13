@@ -398,6 +398,17 @@ public class EmailDecryptionTests : ClientPlaywrightTest
             Assert.That(claim1.Disabled, Is.True, "Claim for deleted alias is not marked as disabled after deletion.");
             Assert.That(claim2.Disabled, Is.False, "Claim for existing email address is marked disabled after deleting another claim.");
         });
+
+        // Create a new credential with the same email as the one that was disabled.
+        await CreateCredentialEntry(new Dictionary<string, string>
+        {
+            { "service-name", serviceName1 },
+            { "email", email1 },
+        });
+
+        // Assert that the first email claim is enabled again.
+        claim1 = await ApiDbContext.UserEmailClaims.AsNoTracking().FirstAsync(x => x.Address == email1);
+        Assert.That(claim1.Disabled, Is.False, "Claim is not marked as (re)enabled when user re-claims it after having previously deleted it.");
     }
 
     /// <summary>
