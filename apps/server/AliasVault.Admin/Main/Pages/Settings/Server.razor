@@ -41,23 +41,29 @@
         <div>
             <label for="generalLogRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">General Log Retention (days)</label>
             <input type="number" @bind="Settings.GeneralLogRetentionDays" id="generalLogRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Number of days to keep general logs before deletion. Set to 0 to disable automatic cleanup.</p>
         </div>
         <div>
             <label for="authLogRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Auth Log Retention (days)</label>
             <input type="number" @bind="Settings.AuthLogRetentionDays" id="authLogRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Number of days to keep auth logs before deletion. Set to 0 to disable automatic cleanup.</p>
         </div>
         <div>
-            <label for="emailRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email Retention (days)</label>
+            <label for="emailRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">General Email Retention (days)</label>
             <input type="number" @bind="Settings.EmailRetentionDays" id="emailRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 to disable automatic cleanup</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Number of days to keep emails before deletion. This affects all emails for all users. Set to 0 to disable automatic cleanup.</p>
+        </div>
+        <div>
+            <label for="disabledEmailRetention" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Disabled Email Retention (days)</label>
+            <input type="number" @bind="Settings.DisabledEmailRetentionDays" id="disabledEmailRetention" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Number of days to keep emails for disabled aliases before deletion. A disabled alias is an alias that was originally claimed by a user, but has since been changed or deleted. Set to 0 to disable automatic cleanup.</p>
         </div>
         <div>
             <label for="maxEmails" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Max Emails per User</label>
             <input type="number" @bind="Settings.MaxEmailsPerUser" id="maxEmails" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Set to 0 for unlimited emails</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Number of emails a user can have in total. Emails exceeding this limit will be deleted, oldest first. Set to 0 for unlimited emails</p>
         </div>
+
     </div>
 </div>
 

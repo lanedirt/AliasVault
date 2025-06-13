@@ -28,6 +28,12 @@ public class ServerSettingsModel
     public int EmailRetentionDays { get; set; }
 
     /// <summary>
+    /// Gets or sets the number of days to keep emails for disabled aliases before deletion. Defaults to 0 (unlimited).
+    /// Set to 0 to disable automatic cleanup.
+    /// </summary>
+    public int DisabledEmailRetentionDays { get; set; }
+
+    /// <summary>
     /// Gets or sets the max emails per user. Defaults to 0 (unlimited).
     /// </summary>
     public int MaxEmailsPerUser { get; set; }
