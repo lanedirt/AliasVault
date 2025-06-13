@@ -118,6 +118,11 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
             model.EmailRetentionDays = emailDays;
         }
 
+        if (int.TryParse(settings.GetValueOrDefault("DisabledEmailRetentionDays"), out var disabledEmailDays))
+        {
+            model.DisabledEmailRetentionDays = disabledEmailDays;
+        }
+
         if (int.TryParse(settings.GetValueOrDefault("MaxEmailsPerUser"), out var maxEmails))
         {
             model.MaxEmailsPerUser = maxEmails;
@@ -168,6 +173,7 @@ public class ServerSettingsService(IAliasServerDbContextFactory dbContextFactory
         await SetSettingAsync("GeneralLogRetentionDays", model.GeneralLogRetentionDays.ToString());
         await SetSettingAsync("AuthLogRetentionDays", model.AuthLogRetentionDays.ToString());
         await SetSettingAsync("EmailRetentionDays", model.EmailRetentionDays.ToString());
+        await SetSettingAsync("DisabledEmailRetentionDays", model.DisabledEmailRetentionDays.ToString());
         await SetSettingAsync("MaxEmailsPerUser", model.MaxEmailsPerUser.ToString());
         await SetSettingAsync("MaintenanceTime", model.MaintenanceTime.ToString("HH:mm", CultureInfo.InvariantCulture));
         await SetSettingAsync("TaskRunnerDays", string.Join(",", model.TaskRunnerDays));
