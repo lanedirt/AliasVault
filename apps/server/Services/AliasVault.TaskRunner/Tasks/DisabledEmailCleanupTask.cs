@@ -71,7 +71,7 @@ public class DisabledEmailCleanupTask : IMaintenanceTask
 
         if (deletedCount > 0)
         {
-            _logger.LogWarning("Deleted {Count} emails for {AliasCount} disabled aliases that were disabled before {CutoffDate}", deletedCount, disabledAliasAddresses.Count, cutoffDate);
+            _logger.LogWarning("Deleted {Count} emails for {AliasCount} disabled aliases.", deletedCount, disabledAliasAddresses.Count);
         }
     }
 }
