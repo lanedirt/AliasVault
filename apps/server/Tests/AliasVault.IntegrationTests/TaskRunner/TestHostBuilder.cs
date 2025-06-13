@@ -37,6 +37,7 @@ public class TestHostBuilder : AbstractTestHostBuilder
             services.AddTransient<IMaintenanceTask, LogCleanupTask>();
             services.AddTransient<IMaintenanceTask, EmailCleanupTask>();
             services.AddTransient<IMaintenanceTask, EmailQuotaCleanupTask>();
+            services.AddTransient<IMaintenanceTask, DisabledEmailCleanupTask>();
 
             // Add the TaskRunner worker
             services.AddHostedService<TaskRunnerWorker>();

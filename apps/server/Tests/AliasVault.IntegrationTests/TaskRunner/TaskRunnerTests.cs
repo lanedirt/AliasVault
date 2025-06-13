@@ -7,6 +7,7 @@
 
 namespace AliasVault.IntegrationTests.TaskRunner;
 
+using AliasServerDb;
 using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -99,7 +100,67 @@ public class TaskRunnerTests
         Assert.That(authLogs, Has.Count.EqualTo(50), "Only recent auth logs should remain");
     }
 
-     /// <summary>
+    /// <summary>
+    /// Tests the DisabledEmailCleanup task with 30 days retention.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task DisabledEmailCleanup_30DaysRetention()
+    {
+        // Arrange
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SetupDisabledEmailCleanupTest();
+
+        // Set disabled email retention to 30 days in database
+        var setting = new ServerSetting
+        {
+            Key = "DisabledEmailRetentionDays",
+            Value = "30",
+        };
+        dbContext.ServerSettings.Add(setting);
+        await dbContext.SaveChangesAsync();
+
+        // Act - Run the cleanup
+        await _testHost.StartAsync();
+        await WaitForMaintenanceJobCompletion();
+
+        // Assert
+        var remainingEmails = await dbContext.Emails.CountAsync();
+        const int expectedEmails = 190; // 3*50 for enabled aliases + 2*20 for disabled aliases (10 10-day and 10 20-day old emails)
+        Assert.That(remainingEmails, Is.EqualTo(expectedEmails), $"Expected {expectedEmails} emails to remain with 30-day retention, but found {remainingEmails}");
+    }
+
+    /// <summary>
+    /// Tests the DisabledEmailCleanup task with 15 days retention.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task DisabledEmailCleanup_15DaysRetention()
+    {
+        // Arrange
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SetupDisabledEmailCleanupTest();
+
+        // Set disabled email retention to 10 days in database
+        var setting = new ServerSetting
+        {
+            Key = "DisabledEmailRetentionDays",
+            Value = "15",
+        };
+        dbContext.ServerSettings.Add(setting);
+        await dbContext.SaveChangesAsync();
+
+        // Act - Run the cleanup
+        await _testHost.StartAsync();
+        await WaitForMaintenanceJobCompletion();
+
+        // Assert
+        var remainingEmails = await dbContext.Emails.CountAsync();
+        const int expectedEmails = 170; // 3*50 for enabled aliases + 2*10 for disabled aliases (10 10-day old emails)
+        Assert.That(remainingEmails, Is.EqualTo(expectedEmails), $"Expected {expectedEmails} emails to remain with 10-day retention, but found {remainingEmails}");
+    }
+
+    /// <summary>
     /// Tests that the TaskRunner does not run tasks before the maintenance time.
     /// </summary>
     /// <returns>Task.</returns>
@@ -225,5 +286,139 @@ public class TaskRunnerTests
         }
 
         Assert.Fail($"Maintenance job did not complete within {timeoutSeconds} seconds");
+    }
+
+    /// <summary>
+    /// Creates a base email with static required fields.
+    /// </summary>
+    /// <param name="to">The recipient email address.</param>
+    /// <param name="userEncryptionKey">The to be associated user encryption key.</param>
+    /// <param name="subject">The email subject.</param>
+    /// <param name="date">The email date.</param>
+    /// <returns>A new Email object with static fields pre-filled.</returns>
+    private static Email CreateTestEmail(string to, UserEncryptionKey userEncryptionKey, string subject, DateTime date)
+    {
+        return new Email
+        {
+            UserEncryptionKeyId = userEncryptionKey.Id,
+            From = "n/a",
+            FromLocal = "n/a",
+            FromDomain = "n/a",
+            To = to,
+            ToLocal = "n/a",
+            ToDomain = "n/a",
+            MessageSource = "n/a",
+            MessagePlain = "n/a",
+            MessageHtml = "n/a",
+            MessagePreview = "n/a",
+            Subject = subject,
+            EncryptedSymmetricKey = "n/a",
+            Date = date,
+            DateSystem = date,
+        };
+    }
+
+    /// <summary>
+    /// Sets up test data for disabled email cleanup tests.
+    /// </summary>
+    /// <returns>Task containing the test user and encryption key.</returns>
+    private async Task SetupDisabledEmailCleanupTest()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+
+        // Create test user
+        var user = new AliasVaultUser
+        {
+            UserName = "testuser",
+            Email = "testuser@example.tld",
+        };
+        dbContext.AliasVaultUsers.Add(user);
+        await dbContext.SaveChangesAsync();
+
+        // Create encryption key for the user
+        var encryptionKey = new UserEncryptionKey
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            PublicKey = "test-encryption-key",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.UserEncryptionKeys.Add(encryptionKey);
+        await dbContext.SaveChangesAsync();
+
+        // Create 5 aliases
+        var aliases = new List<UserEmailClaim>();
+        for (var i = 0; i < 5; i++)
+        {
+            var alias = new UserEmailClaim
+            {
+                UserId = user.Id,
+                Address = $"alias{i}@example.tld",
+                AddressLocal = $"alias{i}",
+                AddressDomain = "example.tld",
+                Disabled = i < 2, // First two aliases are disabled
+                CreatedAt = DateTime.UtcNow.AddDays(-60),
+                UpdatedAt = DateTime.UtcNow.AddDays(-60),
+            };
+            aliases.Add(alias);
+            dbContext.UserEmailClaims.Add(alias);
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        // Add emails to each alias
+        foreach (var alias in aliases)
+        {
+            // Add 50 random emails for enabled aliases
+            if (!alias.Disabled)
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    var randomDate = DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 60));
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Test Email {i}", randomDate));
+                }
+            }
+            else
+            {
+                // For disabled aliases, add emails in specific age groups
+                // 10 emails from 50 days ago
+                var date50DaysAgo = DateTime.UtcNow.AddDays(-50);
+                for (int i = 0; i < 10; i++)
+                {
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Old Email {i}", date50DaysAgo));
+                }
+
+                // 10 emails from 40 days ago
+                var date40DaysAgo = DateTime.UtcNow.AddDays(-40);
+                for (int i = 0; i < 10; i++)
+                {
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Old Email {i}", date40DaysAgo));
+                }
+
+                // 10 emails from 30 days ago
+                var date30DaysAgo = DateTime.UtcNow.AddDays(-30);
+                for (int i = 0; i < 10; i++)
+                {
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Old Email {i}", date30DaysAgo));
+                }
+
+                // 10 emails from 20 days ago
+                var date20DaysAgo = DateTime.UtcNow.AddDays(-20);
+                for (int i = 0; i < 10; i++)
+                {
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Recent Email {i}", date20DaysAgo));
+                }
+
+                // 10 emails from 10 days ago
+                var date10DaysAgo = DateTime.UtcNow.AddDays(-10);
+                for (int i = 0; i < 10; i++)
+                {
+                    dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Recent Email {i}", date10DaysAgo));
+                }
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 }
