@@ -76,15 +76,6 @@ export default function CredentialsScreen() : React.ReactNode {
     }
   }, [dbContext.sqliteClient, setIsLoadingCredentials]);
 
-  const headerButtons = useMemo(() => [{
-    icon: 'add' as const,
-    position: 'right' as const,
-    /**
-     * Add credential.
-     */
-    onPress: () : void => router.push('/(tabs)/credentials/add-edit')
-  }], [router]);
-
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
       setIsTabFocused(true);
@@ -243,6 +234,30 @@ export default function CredentialsScreen() : React.ReactNode {
       opacity: 0.7,
       textAlign: 'center',
     },
+    fab: {
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      borderRadius: 28,
+      bottom: Platform.OS === 'ios' ? insets.bottom + 60 : 16,
+      elevation: 4,
+      height: 56,
+      justifyContent: 'center',
+      position: 'absolute',
+      right: 16,
+      shadowColor: colors.black,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      width: 56,
+      zIndex: 1000,
+    },
+    fabIcon: {
+      color: colors.primarySurfaceText,
+      fontSize: 24,
+    },
     searchContainer: {
       position: 'relative',
     },
@@ -276,9 +291,9 @@ export default function CredentialsScreen() : React.ReactNode {
        * Define custom header which is shown on Android. iOS displays the custom CollapsibleHeader component instead.
        * @returns
        */
-      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" headerButtons={headerButtons} /> : <Text>Credentials</Text>,
+      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" /> : <Text>Credentials</Text>,
     });
-  }, [navigation, headerButtons]);
+  }, [navigation]);
 
   /**
    * Delete a credential.
@@ -315,8 +330,17 @@ export default function CredentialsScreen() : React.ReactNode {
         scrollY={scrollY}
         showNavigationHeader={true}
         alwaysVisible={true}
-        headerButtons={headerButtons}
       />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          router.push('/(tabs)/credentials/add-edit');
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="add" style={styles.fabIcon} />
+      </TouchableOpacity>
       <ThemedView style={styles.stepContainer}>
         <Animated.FlatList
           ref={flatListRef}
