@@ -1,25 +1,20 @@
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 
-import avatarImage from '@/assets/images/avatar.webp';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useAuth } from '@/context/AuthContext';
 
+import { Avatar } from './Avatar';
+
 /**
- * Username display component.
+ * Username display component that shows the avatar and "Logged in as" text.
  */
 export function UsernameDisplay(): React.ReactNode {
   const colors = useColors();
   const { username } = useAuth();
 
   const styles = StyleSheet.create({
-    avatar: {
-      borderRadius: 20,
-      height: 40,
-      marginRight: 12,
-      width: 40,
-    },
     userInfoContainer: {
       alignItems: 'center',
       backgroundColor: colors.background,
@@ -31,15 +26,11 @@ export function UsernameDisplay(): React.ReactNode {
       fontSize: 16,
       fontWeight: '600',
     },
-
   });
 
   return (
     <View style={styles.userInfoContainer}>
-      <Image
-        source={avatarImage}
-        style={styles.avatar}
-      />
+      <Avatar />
       <ThemedText style={styles.usernameText}>Logged in as: {username}</ThemedText>
     </View>
   );
