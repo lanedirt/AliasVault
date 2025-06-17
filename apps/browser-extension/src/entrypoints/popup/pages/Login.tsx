@@ -29,7 +29,7 @@ const Login: React.FC = () => {
     username: '',
     password: '',
   });
-  const { showLoading, hideLoading } = useLoading();
+  const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
   const [rememberMe, setRememberMe] = useState(true);
   const [loginResponse, setLoginResponse] = useState<LoginResponse | null>(null);
   const [passwordHashString, setPasswordHashString] = useState<string | null>(null);
@@ -53,9 +53,10 @@ const Login: React.FC = () => {
       }
 
       setClientUrl(clientUrl);
+      setIsInitialLoading(false);
     };
     loadClientUrl();
-  }, []);
+  }, [setIsInitialLoading]);
 
   /**
    * Handle submit

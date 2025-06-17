@@ -18,9 +18,13 @@ const BottomNav: React.FC = () => {
 
   // Add effect to update currentTab based on route
   useEffect(() => {
-    const path = location.pathname.substring(1) as TabName;
-    if (['credentials', 'emails', 'settings'].includes(path)) {
-      setCurrentTab(path);
+    const path = location.pathname.substring(1); // Remove leading slash
+    const tabNames: TabName[] = ['credentials', 'emails', 'settings'];
+
+    // Find the first tab name that matches the start of the path
+    const matchingTab = tabNames.find(tab => path === tab || path.startsWith(`${tab}/`));
+    if (matchingTab) {
+      setCurrentTab(matchingTab);
     }
   }, [location]);
 
