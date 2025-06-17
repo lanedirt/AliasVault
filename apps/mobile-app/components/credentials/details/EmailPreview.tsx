@@ -30,6 +30,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   const [isSpamOk, setIsSpamOk] = useState(false);
   const [isComponentVisible, setIsComponentVisible] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSupportedDomain, setIsSupportedDomain] = useState(false);
   const webApi = useWebApi();
   const dbContext = useDb();
   const authContext = useAuth();
@@ -46,6 +47,19 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     }
 
     return metadata.publicEmailDomains.includes(emailAddress.split('@')[1]);
+  }, [dbContext]);
+
+  /**
+   * Check if the email is a private domain.
+   */
+  const isPrivateDomain = useCallback(async (emailAddress: string): Promise<boolean> => {
+    // Get private domains from stored metadata
+    const metadata = await dbContext?.sqliteClient?.getVaultMetadata();
+    if (!metadata) {
+      return false;
+    }
+
+    return metadata.privateEmailDomains.includes(emailAddress.split('@')[1]);
   }, [dbContext]);
 
   // Handle app state changes
@@ -86,7 +100,15 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
         }
 
         const isPublic = await isPublicDomain(email);
+        const isPrivate = await isPrivateDomain(email);
+        const isSupported = isPublic || isPrivate;
+
         setIsSpamOk(isPublic);
+        setIsSupportedDomain(isSupported);
+
+        if (!isSupported) {
+          return;
+        }
 
         if (isPublic) {
           // For public domains (SpamOK), use the SpamOK API directly
@@ -116,7 +138,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
           }
 
           setEmails(latestMails);
-        } else {
+        } else if (isPrivate) {
           // For private domains, use existing encrypted email logic
           if (!dbContext?.sqliteClient) {
             return;
@@ -186,7 +208,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
         clearInterval(interval);
       }
     };
-  }, [email, loading, webApi, dbContext, isPublicDomain, authContext.isOffline, isComponentVisible]);
+  }, [email, loading, webApi, dbContext, isPublicDomain, isPrivateDomain, authContext.isOffline, isComponentVisible]);
 
   const styles = StyleSheet.create({
     date: {
@@ -241,6 +263,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
 
   // Sanity check: if no email is provided, don't render anything.
   if (!email) {
+    return null;
+  }
+
+  // Don't render anything if the domain is not supported
+  if (!isSupportedDomain) {
     return null;
   }
 

@@ -23,6 +23,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSupportedDomain, setIsSupportedDomain] = useState(false);
   const webApi = useWebApi();
   const dbContext = useDb();
 
@@ -35,6 +36,15 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return publicEmailDomains.some(domain => emailAddress.toLowerCase().endsWith(domain));
   };
 
+  /**
+   * Checks if the email is a private domain.
+   */
+  const isPrivateDomain = async (emailAddress: string): Promise<boolean> => {
+    // Get metadata from storage
+    const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[] ?? [];
+    return privateEmailDomains.some(domain => emailAddress.toLowerCase().endsWith(domain));
+  };
+
   useEffect(() => {
     /**
      * Loads the latest emails from the server and decrypts them locally if needed.
@@ -43,7 +53,15 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
       try {
         setError(null);
         const isPublic = await isPublicDomain(email);
+        const isPrivate = await isPrivateDomain(email);
+        const isSupported = isPublic || isPrivate;
+
         setIsSpamOk(isPublic);
+        setIsSupportedDomain(isSupported);
+
+        if (!isSupported) {
+          return;
+        }
 
         if (isPublic) {
           // For public domains (SpamOK), use the SpamOK API directly
@@ -73,7 +91,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           }
 
           setEmails(latestMails);
-        } else {
+        } else if (isPrivate) {
           // For private domains, use existing encrypted email logic
           try {
             /**
@@ -133,6 +151,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     const interval = setInterval(loadEmails, 2000);
     return () : void => clearInterval(interval);
   }, [email, loading, webApi, dbContext]);
+
+  // Don't render anything if the domain is not supported
+  if (!isSupportedDomain) {
+    return null;
+  }
 
   if (error) {
     return (
