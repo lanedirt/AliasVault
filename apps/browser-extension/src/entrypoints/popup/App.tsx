@@ -19,7 +19,9 @@ import Logout from '@/entrypoints/popup/pages/Logout';
 import Settings from '@/entrypoints/popup/pages/Settings';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+
 import '@/entrypoints/popup/style.css';
+import { NavigationProvider } from './context/NavigationContext';
 
 /**
  * Route configuration.
@@ -74,44 +76,45 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col max-h-[600px]">
-        {isLoading && (
-          <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        )}
+      <NavigationProvider>
+        <div className="min-h-screen min-w-[350px] bg-white dark:bg-gray-900 flex flex-col max-h-[600px]">
+          {isLoading && (
+            <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          )}
 
-        <GlobalStateChangeHandler />
-        <Header
-          routes={routes}
-          rightButtons={headerButtons}
-        />
+          <GlobalStateChangeHandler />
+          <Header
+            routes={routes}
+            rightButtons={headerButtons}
+          />
 
-        <main
-          className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
-          style={{
-            paddingTop: '64px',
-            height: 'calc(100% - 120px)',
-          }}
-        >
-          <div className="p-4 mb-16">
-            {message && (
-              <p className="text-red-500 mb-4">{message}</p>
-            )}
-            <Routes>
-              {routes.map((route) => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={route.element}
-                />
-              ))}
-            </Routes>
-          </div>
-        </main>
-
-        <BottomNav />
-      </div>
+          <main
+            className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
+            style={{
+              paddingTop: '64px',
+              height: 'calc(100% - 120px)',
+            }}
+          >
+            <div className="p-4 mb-16">
+              {message && (
+                <p className="text-red-500 mb-4">{message}</p>
+              )}
+              <Routes>
+                {routes.map((route) => (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={route.element}
+                  />
+                ))}
+              </Routes>
+            </div>
+          </main>
+          <BottomNav />
+        </div>
+      </NavigationProvider>
     </Router>
   );
 };

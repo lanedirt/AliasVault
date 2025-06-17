@@ -106,7 +106,7 @@ const CredentialAddEdit: React.FC = () => {
       setTimeout(() => {
         serviceNameRef.current?.focus();
       }, 100);
-
+      setIsInitialLoading(false);
       return;
     }
 
@@ -122,6 +122,7 @@ const CredentialAddEdit: React.FC = () => {
         });
 
         setMode('manual');
+        setIsInitialLoading(false);
 
         // On create mode, focus the service name field after a short delay to ensure the component is mounted
       } else {
@@ -130,6 +131,7 @@ const CredentialAddEdit: React.FC = () => {
       }
     } catch (err) {
       console.error('Error loading credential:', err);
+      setIsInitialLoading(false);
     }
   }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue]);
 

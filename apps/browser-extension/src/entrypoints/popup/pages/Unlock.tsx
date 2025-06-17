@@ -29,7 +29,7 @@ const Unlock: React.FC = () => {
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const { showLoading, hideLoading } = useLoading();
+  const { showLoading, hideLoading, setIsInitialLoading } = useLoading();
 
   useEffect(() => {
     /**
@@ -41,10 +41,11 @@ const Unlock: React.FC = () => {
       if (statusError !== null) {
         await webApi.logout(statusError);
       }
+      setIsInitialLoading(false);
     };
 
     checkStatus();
-  }, [webApi, authContext]);
+  }, [webApi, authContext, setIsInitialLoading]);
 
   /**
    * Handle submit

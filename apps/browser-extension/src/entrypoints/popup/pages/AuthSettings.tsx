@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import * as Yup from 'yup';
 
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+
 import { AppInfo } from '@/utils/AppInfo';
 import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
 
@@ -55,6 +57,7 @@ const AuthSettings: React.FC = () => {
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
   const [isGloballyEnabled, setIsGloballyEnabled] = useState<boolean>(true);
   const [errors, setErrors] = useState<{ apiUrl?: string; clientUrl?: string }>({});
+  const { setIsInitialLoading } = useLoading();
 
   useEffect(() => {
     /**
@@ -83,10 +86,11 @@ const AuthSettings: React.FC = () => {
       } else {
         setSelectedOption(DEFAULT_OPTIONS[0].value);
       }
+      setIsInitialLoading(false);
     };
 
     loadStoredSettings();
-  }, []);
+  }, [setIsInitialLoading]);
 
   /**
    * Handle option change
