@@ -121,7 +121,7 @@ public struct CredentialCard: View {
                         Text(copyToastMessage)
                             .padding()
                             .background(Color.black.opacity(0.7))
-                            .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.accentBackground : ColorConstants.Light.accentBackground)
+                            .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
                             .cornerRadius(8)
                             .padding(.bottom, 20)
                     }
