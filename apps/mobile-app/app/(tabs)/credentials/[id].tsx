@@ -132,9 +132,9 @@ export default function CredentialDetailsScreen() : React.ReactNode {
         </ThemedView>
         <EmailPreview email={credential.Alias.Email} />
         <TotpSection credential={credential} />
-        <NotesSection credential={credential} />
         <LoginCredentials credential={credential} />
         <AliasDetails credential={credential} />
+        <NotesSection credential={credential} />
       </ThemedScrollView>
     </ThemedContainer>
   );

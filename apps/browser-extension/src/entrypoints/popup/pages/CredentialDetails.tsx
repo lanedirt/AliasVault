@@ -124,10 +124,10 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
           email={credential.Alias.Email}
         />
       )}
-      <NotesBlock notes={credential.Notes} />
       <TotpBlock credentialId={credential.Id} />
       <LoginCredentialsBlock credential={credential} />
       <AliasBlock credential={credential} />
+      <NotesBlock notes={credential.Notes} />
     </div>
   );
 };
