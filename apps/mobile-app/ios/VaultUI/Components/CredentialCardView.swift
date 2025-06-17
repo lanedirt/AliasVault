@@ -5,9 +5,16 @@ import VaultModels
 public struct CredentialCard: View {
     let credential: Credential
     let action: () -> Void
+    let onCopy: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     @State private var showCopyToast = false
     @State private var copyToastMessage = ""
+
+    public init(credential: Credential, action: @escaping () -> Void, onCopy: @escaping () -> Void) {
+        self.credential = credential
+        self.action = action
+        self.onCopy = onCopy
+    }
 
     public var body: some View {
         Button(action: action) {
@@ -42,39 +49,56 @@ public struct CredentialCard: View {
             .cornerRadius(8)
         }
         .contextMenu(menuItems: {
-            Button(action: {
-                if let username = credential.username {
+            if let username = credential.username, !username.isEmpty {
+                Button(action: {
                     UIPasteboard.general.string = username
                     copyToastMessage = "Username copied"
                     showCopyToast = true
-                }
-            }, label: {
-                Label("Copy Username", systemImage: "person")
-            })
-            Button(action: {
-                if let password = credential.password?.value {
+                    // Delay for 1 second before calling onCopy which dismisses the view
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        onCopy()
+                    }
+                }, label: {
+                    Label("Copy Username", systemImage: "person")
+                })
+            }
+
+            if let password = credential.password?.value, !password.isEmpty {
+                Button(action: {
                     UIPasteboard.general.string = password
                     copyToastMessage = "Password copied"
                     showCopyToast = true
-                }
-            }, label: {
-                Label("Copy Password", systemImage: "key")
-            })
+                    // Delay for 1 second before calling onCopy which dismisses the view
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        onCopy()
+                    }
+                }, label: {
+                    Label("Copy Password", systemImage: "key")
+                })
+            }
 
-            Button(action: {
-                if let email = credential.alias?.email {
+            if let email = credential.alias?.email, !email.isEmpty {
+                Button(action: {
                     UIPasteboard.general.string = email
                     copyToastMessage = "Email copied"
                     showCopyToast = true
-                }
-            }, label: {
-                Label("Copy Email", systemImage: "envelope")
-            })
+                    // Delay for 1 second before calling onCopy which dismisses the view
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        onCopy()
+                    }
+                }, label: {
+                    Label("Copy Email", systemImage: "envelope")
+                })
+            }
 
-            Divider()
+            if (credential.username != nil && !credential.username!.isEmpty) ||
+               (credential.password?.value != nil && !credential.password!.value.isEmpty) ||
+               (credential.alias?.email != nil && !credential.alias!.email!.isEmpty) {
+                Divider()
+            }
 
             Button(action: {
-                if let url = URL(string: "aliasvault://credentials/\(credential.id.uuidString)") {
+                if let url = URL(string: "net.aliasvault.app://credentials/\(credential.id.uuidString)") {
                     UIApplication.shared.open(url)
                 }
             }, label: {
@@ -82,7 +106,7 @@ public struct CredentialCard: View {
             })
 
             Button(action: {
-                if let url = URL(string: "aliasvault://credentials/add-edit-page?id=\(credential.id.uuidString)") {
+                if let url = URL(string: "net.aliasvault.app://credentials/add-edit-page?id=\(credential.id.uuidString)") {
                     UIApplication.shared.open(url)
                 }
             }, label: {
@@ -176,6 +200,7 @@ public func truncateText(_ text: String?, limit: Int) -> String {
             updatedAt: Date(),
             isDeleted: false
         ),
-        action: {}
+        action: {},
+        onCopy: {}
     )
 }
