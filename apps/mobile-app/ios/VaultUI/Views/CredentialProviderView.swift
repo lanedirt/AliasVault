@@ -81,9 +81,11 @@ public struct CredentialProviderView: View {
                             } else {
                                 LazyVStack(spacing: 8) {
                                     ForEach(viewModel.filteredCredentials, id: \.service) { credential in
-                                        CredentialCard(credential: credential) {
+                                        CredentialCard(credential: credential, action: {
                                             viewModel.selectCredential(credential)
-                                        }
+                                        }, onCopy: {
+                                            viewModel.cancel()
+                                        })
                                     }
                                 }
                                 .padding(.horizontal)
