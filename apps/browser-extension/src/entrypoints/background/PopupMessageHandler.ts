@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BoolResponse } from '@/utils/types/messaging/BoolResponse';
+import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 
-import { setupContextMenus } from './ContextMenu';
+import { BoolResponse } from '@/utils/types/messaging/BoolResponse';
 
 import { browser } from '#imports';
 
