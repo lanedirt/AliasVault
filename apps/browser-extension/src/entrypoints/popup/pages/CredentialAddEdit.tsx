@@ -153,11 +153,6 @@ const CredentialAddEdit: React.FC = () => {
    * @returns Promise that resolves when the form values are loaded
    */
   const loadPersistedValues = useCallback(async (): Promise<void> => {
-    if (localLoading) {
-      // Do not load persisted values if the page is still loading.
-      return;
-    }
-
     const persistedData = await sendMessage('GET_PERSISTED_FORM_VALUES', null, 'background') as string | null;
 
     // Try to parse the persisted data as a JSON object.
@@ -171,7 +166,14 @@ const CredentialAddEdit: React.FC = () => {
         console.error('Error parsing persisted data:', error);
       }
 
-      // Check if the persisted credential ID matches the current page ID (equal value or both null)
+      // Check if the object has a value and is not null
+      const objectEmpty = persistedDataObject === null || persistedDataObject === undefined;
+      if (objectEmpty) {
+        // If the persisted data object is empty, we don't have any values to restore and can exit early.
+        setLocalLoading(false);
+        return;
+      }
+
       const isCurrentPage = persistedDataObject?.credentialId == id;
       if (persistedDataObject && isCurrentPage) {
         // Only restore if the persisted credential ID matches current page
@@ -185,7 +187,10 @@ const CredentialAddEdit: React.FC = () => {
     } catch (error) {
       console.error('Error loading persisted data:', error);
     }
-  }, [setValue, id, setMode, localLoading]);
+
+    // Set local loading state to false which also activates the persisting of form value changes from this point on.
+    setLocalLoading(false);
+  }, [setValue, id, setMode, setLocalLoading]);
 
   /**
    * Clears persisted form values from storage
@@ -216,10 +221,9 @@ const CredentialAddEdit: React.FC = () => {
         serviceNameRef.current?.focus();
       }, 100);
       setIsInitialLoading(false);
-      setLocalLoading(false);
 
       // Load persisted form values if they exist.
-      void loadPersistedValues();
+      loadPersistedValues();
       return;
     }
 
@@ -236,10 +240,9 @@ const CredentialAddEdit: React.FC = () => {
 
         setMode('manual');
         setIsInitialLoading(false);
-        setLocalLoading(false);
 
         // Check for persisted values that might override the loaded values if they exist.
-        void loadPersistedValues();
+        loadPersistedValues();
       } else {
         console.error('Credential not found');
         navigate('/credentials');
