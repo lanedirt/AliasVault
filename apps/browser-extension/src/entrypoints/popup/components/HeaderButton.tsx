@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { HeaderIcon, HeaderIconType } from './icons/HeaderIcons';
+import { HeaderIcon, HeaderIconType } from './Icons/HeaderIcons';
 
 type HeaderButtonProps = {
   onClick: () => void;
