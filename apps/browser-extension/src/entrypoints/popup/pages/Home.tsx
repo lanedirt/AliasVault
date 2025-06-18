@@ -1,62 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
-import Login from '@/entrypoints/popup/pages/Login';
-import Unlock from '@/entrypoints/popup/pages/Unlock';
-import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
+import { useNavigation } from '@/entrypoints/popup/context/NavigationContext';
 
 /**
  * Home page that shows the correct page based on the user's authentication state.
+ * Most of the navigation logic is now handled by NavigationContext.
  */
 const Home: React.FC = () => {
-  const authContext = useAuth();
-  const dbContext = useDb();
-  const navigate = useNavigate();
-  const { setIsInitialLoading } = useLoading();
-  const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
+  const { isFullyInitialized } = useNavigation();
 
-  // Initialization state.
-  const isFullyInitialized = authContext.isInitialized && dbContext.dbInitialized;
-  const isAuthenticated = authContext.isLoggedIn;
-  const isDatabaseAvailable = dbContext.dbAvailable;
-  const requireLoginOrUnlock = isFullyInitialized && (!isAuthenticated || !isDatabaseAvailable || isInlineUnlockMode);
-
-  useEffect(() => {
-    // Detect if the user is coming from the unlock page with mode=inline_unlock.
-    const urlParams = new URLSearchParams(window.location.search);
-    const isInlineUnlockMode = urlParams.get('mode') === 'inline_unlock';
-    setIsInlineUnlockMode(isInlineUnlockMode);
-
-    // Redirect to credentials if fully initialized and doesn't need unlock.
-    if (isFullyInitialized && !requireLoginOrUnlock) {
-      navigate('/credentials', { replace: true });
-    }
-  }, [isFullyInitialized, requireLoginOrUnlock, isInlineUnlockMode, navigate]);
-
-  // Show loading state if not fully initialized or when about to redirect to credentials.
-  if (!isFullyInitialized || (isFullyInitialized && !requireLoginOrUnlock)) {
-    // Global loading spinner will be shown by the parent component.
+  if (!isFullyInitialized) {
     return null;
   }
 
-  setIsInitialLoading(false);
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
-  if (!isDatabaseAvailable) {
-    return <Unlock />;
-  }
-
-  if (isInlineUnlockMode) {
-    return <UnlockSuccess onClose={() => setIsInlineUnlockMode(false)} />;
-  }
-
-  return null;
+  return <Navigate to="/credentials" replace />;
 };
 
 export default Home;

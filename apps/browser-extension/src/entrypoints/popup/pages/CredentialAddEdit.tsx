@@ -102,9 +102,6 @@ const CredentialAddEdit: React.FC = () => {
     }
   });
 
-  // If we received an ID, we're in edit mode
-  const isEditMode = id !== undefined && id.length > 0;
-
   /**
    * Persists the current form values to storage
    * @returns Promise that resolves when the form values are persisted
@@ -126,6 +123,26 @@ const CredentialAddEdit: React.FC = () => {
     };
     await sendMessage('PERSIST_FORM_VALUES', JSON.stringify(persistedData), 'background');
   }, [watch, id, mode, localLoading]);
+
+  /**
+   * Watch for mode changes and persist form values
+   */
+  useEffect(() => {
+    if (!localLoading) {
+      void persistFormValues();
+    }
+  }, [mode, persistFormValues, localLoading]);
+
+  // Watch for form changes and persist them
+  useEffect(() => {
+    const subscription = watch(() => {
+      void persistFormValues();
+    });
+    return (): void => subscription.unsubscribe();
+  }, [watch, persistFormValues]);
+
+  // If we received an ID, we're in edit mode
+  const isEditMode = id !== undefined && id.length > 0;
 
   /**
    * Loads persisted form values from storage. This is used to keep track of form changes
@@ -232,14 +249,6 @@ const CredentialAddEdit: React.FC = () => {
       setIsInitialLoading(false);
     }
   }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue, loadPersistedValues]);
-
-  // Watch for form changes and persist them
-  useEffect(() => {
-    const subscription = watch(() => {
-      void persistFormValues();
-    });
-    return (): void => subscription.unsubscribe();
-  }, [watch, persistFormValues]);
 
   /**
    * Handle the delete button click.

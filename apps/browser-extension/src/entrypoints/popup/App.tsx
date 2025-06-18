@@ -8,6 +8,7 @@ import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import { NavigationProvider } from '@/entrypoints/popup/context/NavigationContext';
 import AuthSettings from '@/entrypoints/popup/pages/AuthSettings';
 import CredentialAddEdit from '@/entrypoints/popup/pages/CredentialAddEdit';
 import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
@@ -15,13 +16,15 @@ import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
 import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
 import EmailsList from '@/entrypoints/popup/pages/EmailsList';
 import Home from '@/entrypoints/popup/pages/Home';
+import Login from '@/entrypoints/popup/pages/Login';
 import Logout from '@/entrypoints/popup/pages/Logout';
 import Settings from '@/entrypoints/popup/pages/Settings';
+import Unlock from '@/entrypoints/popup/pages/Unlock';
+import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
 import '@/entrypoints/popup/style.css';
-import { NavigationProvider } from './context/NavigationContext';
 
 /**
  * Route configuration.
@@ -46,6 +49,9 @@ const App: React.FC = () => {
   // Add these route configurations
   const routes: RouteConfig[] = [
     { path: '/', element: <Home />, showBackButton: false },
+    { path: '/login', element: <Login />, showBackButton: false },
+    { path: '/unlock', element: <Unlock />, showBackButton: false },
+    { path: '/unlock-success', element: <UnlockSuccess onClose={() => window.location.search = ''} />, showBackButton: false },
     { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
     { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: 'Add credential' },
