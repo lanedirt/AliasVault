@@ -56,19 +56,18 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // Only store the page if we're fully initialized and don't need auth
     if (isFullyInitialized && !requiresAuth && !notAllowedPaths.includes(location.pathname)) {
-      // Get the current history entries from the session history
+      // Split the path into segments and build up the history
+      const segments = location.pathname.split('/').filter(Boolean);
       const historyEntries: NavigationHistoryEntry[] = [];
-      if (window.history.state?.usr?.history) {
-        historyEntries.push(...window.history.state.usr.history);
-      }
-      // Add current location if not already in history
-      const currentEntry = {
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
-      };
-      if (!historyEntries.some(entry => entry.pathname === currentEntry.pathname)) {
-        historyEntries.push(currentEntry);
+
+      let currentPath = '';
+      for (const segment of segments) {
+        currentPath += '/' + segment;
+        historyEntries.push({
+          pathname: currentPath,
+          search: location.search,
+          hash: location.hash,
+        });
       }
 
       await Promise.all([
@@ -167,7 +166,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (isInitialized) {
       storeCurrentPage();
     }
-  }, [location.pathname, isInitialized, storeCurrentPage]);
+  }, [location.pathname, location.search, location.hash, isInitialized, storeCurrentPage]);
 
   const contextValue = useMemo(() => ({
     storeCurrentPage,
