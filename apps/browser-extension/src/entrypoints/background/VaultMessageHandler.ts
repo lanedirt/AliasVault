@@ -308,16 +308,45 @@ export async function handleUploadVault(
 
 /**
  * Handle persisting form values to storage.
+ * Data is encrypted using the derived key for additional security.
  */
 export async function handlePersistFormValues(data: any): Promise<void> {
-  await storage.setItem('session:persistedFormValues', data);
+  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  if (!derivedKey) {
+    throw new Error('No derived key available for encryption');
+  }
+
+  // Always stringify the data properly
+  const serializedData = JSON.stringify(data);
+  const encryptedData = await EncryptionUtility.symmetricEncrypt(
+    serializedData,
+    derivedKey
+  );
+  await storage.setItem('session:persistedFormValues', encryptedData);
 }
 
 /**
  * Handle retrieving persisted form values from storage.
+ * Data is decrypted using the derived key.
  */
-export async function handleGetPersistedFormValues(): Promise<string | null> {
-  return await storage.getItem('session:persistedFormValues');
+export async function handleGetPersistedFormValues(): Promise<any | null> {
+  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  const encryptedData = await storage.getItem('session:persistedFormValues') as string | null;
+
+  if (!encryptedData || !derivedKey) {
+    return null;
+  }
+
+  try {
+    const decryptedData = await EncryptionUtility.symmetricDecrypt(
+      encryptedData,
+      derivedKey
+    );
+    return JSON.parse(decryptedData);
+  } catch (error) {
+    console.error('Failed to decrypt or parse persisted form values:', error);
+    return null;
+  }
 }
 
 /**
