@@ -307,6 +307,27 @@ export async function handleUploadVault(
 }
 
 /**
+ * Handle persisting form values to storage.
+ */
+export async function handlePersistFormValues(data: any): Promise<void> {
+  await storage.setItem('session:persistedFormValues', data);
+}
+
+/**
+ * Handle retrieving persisted form values from storage.
+ */
+export async function handleGetPersistedFormValues(): Promise<string | null> {
+  return await storage.getItem('session:persistedFormValues');
+}
+
+/**
+ * Handle clearing persisted form values from storage.
+ */
+export async function handleClearPersistedFormValues(): Promise<void> {
+  await storage.removeItem('session:persistedFormValues');
+}
+
+/**
  * Upload a new version of the vault to the server using the provided sqlite client.
  */
 async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<VaultPostResponse> {
