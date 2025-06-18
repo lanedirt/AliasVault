@@ -15,7 +15,7 @@ import EncryptionUtility from '@/utils/EncryptionUtility';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
 import HeaderButton from '../components/HeaderButton';
-import { HeaderIconType } from '../components/icons/HeaderIcons';
+import { HeaderIconType } from '../components/Icons/HeaderIcons';
 
 /**
  * Email details page.

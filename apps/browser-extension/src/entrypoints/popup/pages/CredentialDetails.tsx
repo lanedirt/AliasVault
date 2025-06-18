@@ -10,7 +10,7 @@ import {
   NotesBlock
 } from '@/entrypoints/popup/components/CredentialDetails';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';

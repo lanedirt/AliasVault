@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';

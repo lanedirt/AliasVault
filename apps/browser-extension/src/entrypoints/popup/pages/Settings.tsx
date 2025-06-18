@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { sendMessage } from 'webext-bridge/popup';
 
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';

@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import { HeaderIconType } from '@/entrypoints/popup/components/icons/HeaderIcons';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import Modal from '@/entrypoints/popup/components/Modal';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
