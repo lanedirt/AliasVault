@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
+import { sendMessage } from 'webext-bridge/popup';
 import * as Yup from 'yup';
 
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
@@ -23,6 +24,13 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { useLoading } from '../context/LoadingContext';
 
 type CredentialMode = 'random' | 'manual';
+
+// Persisted form data type used for JSON serialization.
+type PersistedFormData = {
+  credentialId: string | null;
+  mode: CredentialMode;
+  formValues: Omit<Credential, 'Logo'> & { Logo?: string | null };
+}
 
 /**
  * Validation schema for the credential form.
@@ -67,7 +75,7 @@ const CredentialAddEdit: React.FC = () => {
   const [mode, setMode] = useState<CredentialMode>('random');
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
-  const [localLoading, setLocalLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const webApi = useWebApi();
@@ -98,15 +106,103 @@ const CredentialAddEdit: React.FC = () => {
   const isEditMode = id !== undefined && id.length > 0;
 
   /**
+   * Persists the current form values to storage
+   * @returns Promise that resolves when the form values are persisted
+   */
+  const persistFormValues = useCallback(async (): Promise<void> => {
+    if (localLoading) {
+      // Do not persist values if the page is still loading.
+      return;
+    }
+
+    const formValues = watch();
+    const persistedData: PersistedFormData = {
+      credentialId: id || null,
+      mode,
+      formValues: {
+        ...formValues,
+        Logo: null // Don't persist the Logo field as it can't be user modified in the UI.
+      }
+    };
+    await sendMessage('PERSIST_FORM_VALUES', JSON.stringify(persistedData), 'background');
+  }, [watch, id, mode, localLoading]);
+
+  /**
+   * Loads persisted form values from storage. This is used to keep track of form changes
+   * and restore them when the page is reloaded. The browser extension popup will close
+   * automatically by clicking outside of the popup, but with this logic we can restore
+   * the form values when the page is reloaded so the user can continue their mutation operation.
+   *
+   * @returns Promise that resolves when the form values are loaded
+   */
+  const loadPersistedValues = useCallback(async (): Promise<void> => {
+    if (localLoading) {
+      // Do not load persisted values if the page is still loading.
+      return;
+    }
+
+    const persistedData = await sendMessage('GET_PERSISTED_FORM_VALUES', null, 'background') as string | null;
+
+    // Try to parse the persisted data as a JSON object.
+    try {
+      let persistedDataObject: PersistedFormData | null = null;
+      try {
+        if (persistedData) {
+          persistedDataObject = JSON.parse(persistedData) as PersistedFormData;
+        }
+      } catch (error) {
+        console.error('Error parsing persisted data:', error);
+      }
+
+      // Check if the persisted credential ID matches the current page ID (equal value or both null)
+      const isCurrentPage = persistedDataObject?.credentialId == id;
+      if (persistedDataObject && isCurrentPage) {
+        // Only restore if the persisted credential ID matches current page
+        setMode(persistedDataObject.mode);
+        Object.entries(persistedDataObject.formValues).forEach(([key, value]) => {
+          setValue(key as keyof Credential, value as Credential[keyof Credential]);
+        });
+      } else {
+        console.error('Persisted values do not match current page');
+      }
+    } catch (error) {
+      console.error('Error loading persisted data:', error);
+    }
+  }, [setValue, id, setMode, localLoading]);
+
+  /**
+   * Clears persisted form values from storage
+   * @returns Promise that resolves when the form values are cleared
+   */
+  const clearPersistedValues = useCallback(async (): Promise<void> => {
+    await sendMessage('CLEAR_PERSISTED_FORM_VALUES', null, 'background');
+  }, []);
+
+  // Clear persisted values when the page is unmounted.
+  useEffect(() => {
+    return (): void => {
+      void clearPersistedValues();
+    };
+  }, [clearPersistedValues]);
+
+  /**
    * Load an existing credential from the database in edit mode.
    */
   useEffect(() => {
-    if (!dbContext?.sqliteClient || !id) {
+    if (!dbContext?.sqliteClient) {
+      return;
+    }
+
+    if (!id) {
       // On create mode, focus the service name field after a short delay to ensure the component is mounted.
       setTimeout(() => {
         serviceNameRef.current?.focus();
       }, 100);
       setIsInitialLoading(false);
+      setLocalLoading(false);
+
+      // Load persisted form values if they exist.
+      void loadPersistedValues();
       return;
     }
 
@@ -123,8 +219,10 @@ const CredentialAddEdit: React.FC = () => {
 
         setMode('manual');
         setIsInitialLoading(false);
+        setLocalLoading(false);
 
-        // On create mode, focus the service name field after a short delay to ensure the component is mounted
+        // Check for persisted values that might override the loaded values if they exist.
+        void loadPersistedValues();
       } else {
         console.error('Credential not found');
         navigate('/credentials');
@@ -133,7 +231,15 @@ const CredentialAddEdit: React.FC = () => {
       console.error('Error loading credential:', err);
       setIsInitialLoading(false);
     }
-  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue]);
+  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue, loadPersistedValues]);
+
+  // Watch for form changes and persist them
+  useEffect(() => {
+    const subscription = watch(() => {
+      void persistFormValues();
+    });
+    return (): void => subscription.unsubscribe();
+  }, [watch, persistFormValues]);
 
   /**
    * Handle the delete button click.
@@ -150,10 +256,11 @@ const CredentialAddEdit: React.FC = () => {
        * Navigate to the credentials list page on success.
        */
       onSuccess: () => {
+        void clearPersistedValues();
         navigate('/credentials');
       }
     });
-  }, [id, executeVaultMutation, dbContext.sqliteClient, navigate]);
+  }, [id, executeVaultMutation, dbContext.sqliteClient, navigate, clearPersistedValues]);
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
@@ -314,6 +421,7 @@ const CredentialAddEdit: React.FC = () => {
        * Navigate to the credential details page on success.
        */
       onSuccess: () => {
+        void clearPersistedValues();
         // If in add mode, navigate to the credential details page.
         if (!isEditMode) {
           // Navigate to the credential details page.
@@ -324,7 +432,7 @@ const CredentialAddEdit: React.FC = () => {
         }
       },
     });
-  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias, webApi]);
+  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias, webApi, clearPersistedValues]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
