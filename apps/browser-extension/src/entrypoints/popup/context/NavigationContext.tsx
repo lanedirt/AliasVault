@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { sendMessage } from 'webext-bridge/popup';
 
 import { storage } from '#imports';
 
-const LAST_VISITED_PAGE_KEY = 'local:lastVisitedPage';
-const LAST_VISITED_TIME_KEY = 'local:lastVisitedTime';
+const LAST_VISITED_PAGE_KEY = 'session:lastVisitedPage';
+const LAST_VISITED_TIME_KEY = 'session:lastVisitedTime';
 const PAGE_MEMORY_DURATION = 120 * 1000; // 2 minutes in milliseconds
 
 type NavigationContextType = {
@@ -41,6 +42,13 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const timeSinceLastVisit = Date.now() - lastVisitTime;
       if (timeSinceLastVisit <= PAGE_MEMORY_DURATION) {
         navigate(lastPage);
+      } else {
+        // Duration has expired, clear the last visited page and time.
+        await storage.removeItem(LAST_VISITED_PAGE_KEY);
+        await storage.removeItem(LAST_VISITED_TIME_KEY);
+
+        // Clear persisted form values if they exist.
+        await sendMessage('CLEAR_PERSISTED_FORM_VALUES', null, 'background');
       }
     }
   }, [navigate]);
