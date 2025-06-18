@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { HeaderIcon, HeaderIconType } from './Icons/HeaderIcons';
+import { HeaderIcon, HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 
 type HeaderButtonProps = {
   onClick: () => void;
