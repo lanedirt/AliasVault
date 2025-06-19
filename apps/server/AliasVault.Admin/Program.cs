@@ -104,6 +104,16 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 
 var app = builder.Build();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost,
+    RequireHeaderSymmetry = false,
+    ForwardLimit = null,
+    ForwardedProtoHeaderName = "X-Forwarded-Proto",
+    ForwardedHostHeaderName = "X-Forwarded-Host",
+    ForwardedForHeaderName = "X-Forwarded-For",
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -122,13 +132,6 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBAS
 {
     app.UsePathBase(Environment.GetEnvironmentVariable("ASPNETCORE_PATHBASE"));
 }
-
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost,
-    RequireHeaderSymmetry = false,
-    ForwardLimit = null,
-});
 
 app.UseStaticFiles();
 app.UseRouting();
