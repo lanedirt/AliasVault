@@ -36,7 +36,6 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const location = useLocation();
   const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isInlineUnlockMode, setIsInlineUnlockMode] = useState(false);
   const { setIsInitialLoading } = useLoading();
 
   // Auth and DB state
@@ -45,7 +44,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Derived state
   const isFullyInitialized = authInitialized && dbInitialized;
-  const requiresAuth = isFullyInitialized && (!isLoggedIn || !dbAvailable || isInlineUnlockMode);
+  const requiresAuth = isFullyInitialized && (!isLoggedIn || !dbAvailable);
 
   /**
    * Store the current page path, timestamp, and navigation history in storage.
@@ -132,7 +131,6 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Check for inline unlock mode
     const urlParams = new URLSearchParams(window.location.search);
     const inlineUnlock = urlParams.get('mode') === 'inline_unlock';
-    setIsInlineUnlockMode(inlineUnlock);
 
     if (isFullyInitialized) {
       setIsInitialLoading(false);
@@ -149,9 +147,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           navigate('/login', { replace: true });
         } else if (!dbAvailable) {
           navigate('/unlock', { replace: true });
-        } else if (inlineUnlock) {
-          navigate('/unlock-success', { replace: true });
         }
+      } else if (inlineUnlock) {
+        navigate('/unlock-success', { replace: true });
       } else if (!isInitialized) {
         // First initialization, try to restore last page or go to credentials
         restoreLastPage().then(() => {
