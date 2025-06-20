@@ -1,0 +1,21 @@
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@inject ILogger<ImportServiceLastPass> Logger
+
+<ImportServiceCard
+    ServiceName="LastPass"
+    Description="Import passwords from your LastPass vault"
+    LogoUrl="img/importers/lastpass.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your LastPass vault, you need to export it as a CSV file. You can do this by logging into your LastPass account, going to 'Advanced Options' in the left sidebar and selecting 'Export' > 'LastPass CSV File'.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+</ImportServiceCard>
+
+@code {
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await LastPassImporter.ImportFromCsvAsync(fileContents);
+    }
+}
