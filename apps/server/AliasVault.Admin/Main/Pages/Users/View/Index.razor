@@ -104,6 +104,18 @@ else
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <div class="items-center">
                     <div>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Recent authentication logs</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Shows the last 5 authentication attempts for this user. Click "View all auth logs" to see complete history.
+                        </p>
+                        <AuthLogTable Username="@(User?.UserName ?? string.Empty)" AuthLogList="@AuthLogList" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <div class="items-center">
+                    <div>
                         <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Email claims</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Email claims represent the email addresses that the user has (historically) used. Whenever a user deletes an email alias
@@ -130,6 +142,7 @@ else
     private int TwoFactorKeysCount { get; set; }
     private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
     private List<Vault> VaultList { get; set; } = [];
+    private List<AuthLog> AuthLogList { get; set; } = [];
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -202,6 +215,13 @@ else
                 Client = x.Client,
             })
             .OrderBy(x => x.UpdatedAt)
+            .ToListAsync();
+
+        // Load recent auth logs for this user (last 3 records).
+        AuthLogList = await dbContext.AuthLogs
+            .Where(x => x.Username == User.UserName)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(5)
             .ToListAsync();
 
         IsLoading = false;

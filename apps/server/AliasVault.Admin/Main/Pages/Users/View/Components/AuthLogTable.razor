@@ -1,0 +1,84 @@
+﻿@using AliasVault.RazorComponents.Tables
+@using AliasVault.Shared.Models.Enums
+
+<div class="mb-4 mt-3">
+    <LinkButton Color="primary" Href="@($"logging/auth?search={Uri.EscapeDataString(Username)}")" Text="View all auth logs for this user" />
+</div>
+
+@if (AuthLogList.Any())
+{
+    <SortableTable Columns="@_authLogTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
+        @foreach (var log in SortedAuthLogList)
+        {
+            <SortableTableRow>
+                <SortableTableColumn IsPrimary="true">@log.Id</SortableTableColumn>
+                <SortableTableColumn>@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
+                <SortableTableColumn>@log.EventType</SortableTableColumn>
+                <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="@log.FailureReason.ToString()" /></SortableTableColumn>
+                <SortableTableColumn>@log.IpAddress</SortableTableColumn>
+                <SortableTableColumn>@log.Client</SortableTableColumn>
+            </SortableTableRow>
+        }
+    </SortableTable>
+}
+else
+{
+    <div class="flex items-center justify-center py-8">
+        <div class="text-center">
+            <div class="text-gray-500 dark:text-gray-400">
+                <i class="fas fa-history text-4xl mb-4"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No authentication logs</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">This user has no recent authentication attempts.</p>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the username for linking to full auth logs.
+    /// </summary>
+    [Parameter]
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the list of auth logs to display (should be limited to recent logs).
+    /// </summary>
+    [Parameter]
+    public List<AuthLog> AuthLogList { get; set; } = [];
+
+    private string SortColumn { get; set; } = "Timestamp";
+    private SortDirection SortDirection { get; set; } = SortDirection.Descending;
+
+    private readonly List<TableColumn> _authLogTableColumns = [
+        new TableColumn { Title = "ID", PropertyName = "Id" },
+        new TableColumn { Title = "Time", PropertyName = "Timestamp" },
+        new TableColumn { Title = "Event", PropertyName = "EventType" },
+        new TableColumn { Title = "Success", PropertyName = "IsSuccess" },
+        new TableColumn { Title = "IP", PropertyName = "IpAddress" },
+        new TableColumn { Title = "Client", PropertyName = "Client" },
+    ];
+
+    private IEnumerable<AuthLog> SortedAuthLogList => SortList(AuthLogList, SortColumn, SortDirection);
+
+    private void HandleSortChanged((string column, SortDirection direction) sort)
+    {
+        SortColumn = sort.column;
+        SortDirection = sort.direction;
+        StateHasChanged();
+    }
+
+    private static IEnumerable<AuthLog> SortList(List<AuthLog> authLogs, string sortColumn, SortDirection sortDirection)
+    {
+        return sortColumn switch
+        {
+            "Id" => SortableTable.SortListByProperty(authLogs, a => a.Id, sortDirection),
+            "Timestamp" => SortableTable.SortListByProperty(authLogs, a => a.Timestamp, sortDirection),
+            "EventType" => SortableTable.SortListByProperty(authLogs, a => a.EventType, sortDirection),
+            "IsSuccess" => SortableTable.SortListByProperty(authLogs, a => a.IsSuccess, sortDirection),
+            "IpAddress" => SortableTable.SortListByProperty(authLogs, a => a.IpAddress, sortDirection),
+            "Client" => SortableTable.SortListByProperty(authLogs, a => a.Client, sortDirection),
+            _ => authLogs
+        };
+    }
+}

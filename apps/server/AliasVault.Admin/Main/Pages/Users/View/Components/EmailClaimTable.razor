@@ -1,7 +1,7 @@
 ﻿@using AliasVault.RazorComponents.Tables
 
 <div class="d-flex justify-content-between mb-3">
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2 mt-2">
         <Button Color="secondary" OnClick="ToggleShowDisabled">
             @(ShowDisabled ? "Hide Disabled Claims" : "Show Disabled Claims")
         </Button>
@@ -134,7 +134,7 @@ else
         StateHasChanged();
     }
 
-    /// <summary>   
+    /// <summary>
     /// This method will toggle the disabled status of an email claim.
     /// </summary>
     private async Task ToggleEmailClaimStatus(UserEmailClaimWithCount entry)
