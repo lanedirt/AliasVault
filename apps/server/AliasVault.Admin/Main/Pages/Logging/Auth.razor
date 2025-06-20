@@ -1,7 +1,10 @@
 ﻿@page "/logging/auth"
 @using AliasVault.RazorComponents.Tables
 @using AliasVault.Shared.Models.Enums
+@using Microsoft.AspNetCore.WebUtilities
 @inherits MainBase
+@inject NavigationManager Navigation
+@implements IDisposable
 
 <LayoutPageTitle>Auth logs</LayoutPageTitle>
 
@@ -55,7 +58,18 @@ else
                 <SortableTableRow>
                     <SortableTableColumn IsPrimary="true">@log.Id</SortableTableColumn>
                     <SortableTableColumn>@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</SortableTableColumn>
-                    <SortableTableColumn>@log.Username</SortableTableColumn>
+                    <SortableTableColumn>
+                        @if (UserLookup.TryGetValue(log.Username, out var userId))
+                        {
+                            <a href="/users/@userId">
+                                @log.Username
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="italic">@log.Username</span>
+                        }
+                    </SortableTableColumn>
                     <SortableTableColumn>@log.Client</SortableTableColumn>
                     <SortableTableColumn>@log.EventType</SortableTableColumn>
                     <SortableTableColumn><StatusPill Enabled="log.IsSuccess" TextTrue="Success" TextFalse="@log.FailureReason.ToString()" /></SortableTableColumn>
@@ -78,6 +92,7 @@ else
     ];
 
     private List<AuthLog> LogList { get; set; } = [];
+    private Dictionary<string, string> UserLookup { get; set; } = [];
     private bool IsInitialized { get; set; } = false;
     private bool IsLoading { get; set; } = true;
     private int CurrentPage { get; set; } = 1;
@@ -124,12 +139,44 @@ else
     }
 
     /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        await base.OnInitializedAsync();
+
+        Navigation.LocationChanged += OnLocationChanged;
+        ParseQueryAndRefresh();
+        await RefreshData();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        ParseQueryAndRefresh();
+    }
+
+    private void ParseQueryAndRefresh()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var queryParameters = QueryHelpers.ParseQuery(uri.Query);
+
+        if (queryParameters.TryGetValue("search", out var searchValue))
         {
-            await RefreshData();
+            _searchTerm = searchValue.FirstOrDefault() ?? string.Empty;
         }
+        else
+        {
+            _searchTerm = string.Empty;
+        }
+
+        if (_searchTerm != _lastSearchTerm)
+        {
+            _lastSearchTerm = _searchTerm;
+            _ = RefreshData(); // Fire and forget
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private void HandlePageChanged(int newPage)
@@ -185,6 +232,15 @@ else
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
+
+        // Create user lookup dictionary for the current page
+        var usernames = LogList.Select(x => x.Username).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToList();
+        var users = await dbContext.AliasVaultUsers
+            .Where(u => u.UserName != null && usernames.Contains(u.UserName))
+            .Select(u => new { u.UserName, u.Id })
+            .ToListAsync();
+
+        UserLookup = users.Where(u => u.UserName != null).ToDictionary(u => u.UserName!, u => u.Id);
 
         IsLoading = false;
         IsInitialized = true;
