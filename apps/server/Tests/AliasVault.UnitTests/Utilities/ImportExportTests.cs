@@ -457,4 +457,73 @@ public class ImportExportTests
             Assert.That(localCredential.Notes, Is.EqualTo("testnote\nAlternative username 1: testusernamealternative"));
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from LastPass CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromLastPassCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.lastpass.csv");
+
+        // Act
+        var importedCredentials = await LastPassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert - Should import 5 records
+        Assert.That(importedCredentials, Has.Count.EqualTo(5));
+
+        // Test regular login credential
+        var exampleCredential = importedCredentials.First(c => c.ServiceName == "Examplename");
+        Assert.Multiple(() =>
+        {
+            Assert.That(exampleCredential.ServiceName, Is.EqualTo("Examplename"));
+            Assert.That(exampleCredential.ServiceUrl, Is.EqualTo("https://example.com"));
+            Assert.That(exampleCredential.Username, Is.EqualTo("Exampleusername"));
+            Assert.That(exampleCredential.Password, Is.EqualTo("examplepassword"));
+            Assert.That(exampleCredential.Notes, Is.EqualTo("Examplenotes"));
+            Assert.That(exampleCredential.TwoFactorSecret, Is.Empty);
+        });
+
+        // Test credential without URL (LastPass uses "http://" for these)
+        var userWithoutUrlCredential = importedCredentials.First(c => c.ServiceName == "Userwithouturlornotes");
+        Assert.Multiple(() =>
+        {
+            Assert.That(userWithoutUrlCredential.ServiceName, Is.EqualTo("Userwithouturlornotes"));
+            Assert.That(userWithoutUrlCredential.ServiceUrl, Is.Null);
+            Assert.That(userWithoutUrlCredential.Username, Is.EqualTo("userwithouturlornotes"));
+            Assert.That(userWithoutUrlCredential.Password, Is.EqualTo("userpass"));
+            Assert.That(userWithoutUrlCredential.Notes, Is.Empty);
+            Assert.That(userWithoutUrlCredential.TwoFactorSecret, Is.Empty);
+        });
+
+        // Test secure note (LastPass uses "http://sn" for these)
+        var secureNoteCredential = importedCredentials.First(c => c.ServiceName == "securenote1");
+        Assert.Multiple(() =>
+        {
+            Assert.That(secureNoteCredential.ServiceName, Is.EqualTo("securenote1"));
+            Assert.That(secureNoteCredential.ServiceUrl, Is.Null);
+            Assert.That(secureNoteCredential.Username, Is.Empty);
+            Assert.That(secureNoteCredential.Password, Is.Empty);
+            Assert.That(secureNoteCredential.Notes, Is.EqualTo("Securenotecontent here"));
+            Assert.That(secureNoteCredential.TwoFactorSecret, Is.Empty);
+        });
+
+        // Test credit card entry (stored as note-only credential)
+        var creditCardCredential = importedCredentials.First(c => c.ServiceName == "Paymentcard1");
+        Assert.Multiple(() =>
+        {
+            Assert.That(creditCardCredential.ServiceName, Is.EqualTo("Paymentcard1"));
+            Assert.That(creditCardCredential.ServiceUrl, Is.Null); // Should be normalized to null
+            Assert.That(creditCardCredential.Username, Is.Empty);
+            Assert.That(creditCardCredential.Password, Is.Empty);
+            Assert.That(creditCardCredential.Notes, Does.Contain("NoteType:Credit Card"));
+            Assert.That(creditCardCredential.Notes, Does.Contain("Name on Card:Cardname"));
+            Assert.That(creditCardCredential.Notes, Does.Contain("Number:123456781234"));
+            Assert.That(creditCardCredential.Notes, Does.Contain("Security Code:1234"));
+            Assert.That(creditCardCredential.Notes, Does.Contain("Creditcardnotes here"));
+            Assert.That(creditCardCredential.TwoFactorSecret, Is.Empty);
+        });
+    }
 }
