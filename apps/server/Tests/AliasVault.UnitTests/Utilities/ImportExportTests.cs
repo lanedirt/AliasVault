@@ -526,4 +526,91 @@ public class ImportExportTests
             Assert.That(creditCardCredential.TwoFactorSecret, Is.Empty);
         });
     }
+
+    /// <summary>
+    /// Test case for importing credentials from Generic CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromGenericCsv()
+    {
+        // Arrange - Use the template that users actually download
+        var fileContent = GenericCsvImporter.GetCsvTemplate();
+
+        // Act
+        var importedCredentials = await GenericCsvImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert - Should import 4 records from the template
+        Assert.That(importedCredentials, Has.Count.EqualTo(4));
+
+        // Test Gmail credential from template
+        var gmailCredential = importedCredentials.First(c => c.ServiceName == "Gmail");
+        Assert.Multiple(() =>
+        {
+            Assert.That(gmailCredential.ServiceName, Is.EqualTo("Gmail"));
+            Assert.That(gmailCredential.ServiceUrl, Is.EqualTo("https://gmail.com"));
+            Assert.That(gmailCredential.Username, Is.EqualTo("your.email@gmail.com"));
+            Assert.That(gmailCredential.Password, Is.EqualTo("your_password"));
+            Assert.That(gmailCredential.Notes, Is.EqualTo("Important email account"));
+            Assert.That(gmailCredential.TwoFactorSecret, Is.Empty);
+        });
+
+        // Test Facebook credential from template
+        var facebookCredential = importedCredentials.First(c => c.ServiceName == "Facebook");
+        Assert.Multiple(() =>
+        {
+            Assert.That(facebookCredential.ServiceName, Is.EqualTo("Facebook"));
+            Assert.That(facebookCredential.ServiceUrl, Is.EqualTo("https://facebook.com"));
+            Assert.That(facebookCredential.Username, Is.EqualTo("your.username"));
+            Assert.That(facebookCredential.Password, Is.EqualTo("your_password"));
+            Assert.That(facebookCredential.Notes, Is.EqualTo("Social media account"));
+            Assert.That(facebookCredential.TwoFactorSecret, Is.Empty);
+        });
+
+        // Test GitHub credential with TOTP from template
+        var githubCredential = importedCredentials.First(c => c.ServiceName == "GitHub");
+        Assert.Multiple(() =>
+        {
+            Assert.That(githubCredential.ServiceName, Is.EqualTo("GitHub"));
+            Assert.That(githubCredential.ServiceUrl, Is.EqualTo("https://github.com"));
+            Assert.That(githubCredential.Username, Is.EqualTo("developer_username"));
+            Assert.That(githubCredential.Password, Is.EqualTo("your_password"));
+            Assert.That(githubCredential.Notes, Is.EqualTo("Development platform"));
+            Assert.That(githubCredential.TwoFactorSecret, Is.EqualTo("your_totp_secret_here"));
+        });
+
+        // Test Secure Note (no username/password) from template
+        var secureNoteCredential = importedCredentials.First(c => c.ServiceName == "Secure Note");
+        Assert.Multiple(() =>
+        {
+            Assert.That(secureNoteCredential.ServiceName, Is.EqualTo("Secure Note"));
+            Assert.That(secureNoteCredential.ServiceUrl, Is.Null);
+            Assert.That(secureNoteCredential.Username, Is.Empty);
+            Assert.That(secureNoteCredential.Password, Is.Empty);
+            Assert.That(secureNoteCredential.Notes, Is.EqualTo("Important information or notes without login credentials"));
+            Assert.That(secureNoteCredential.TwoFactorSecret, Is.Empty);
+        });
+    }
+
+    /// <summary>
+    /// Test case for getting the CSV template structure.
+    /// </summary>
+    [Test]
+    public void GetGenericCsvTemplate()
+    {
+        // Act
+        var template = GenericCsvImporter.GetCsvTemplate();
+
+        // Assert
+        Assert.That(template, Is.Not.Null);
+        Assert.That(template, Does.Contain("service_name,url,username,password,totp_secret,notes"));
+        Assert.That(template, Does.Contain("Gmail"));
+        Assert.That(template, Does.Contain("Facebook"));
+        Assert.That(template, Does.Contain("GitHub"));
+        Assert.That(template, Does.Contain("Secure Note"));
+
+        // Verify it has example data
+        Assert.That(template, Does.Contain("your.email@gmail.com"));
+        Assert.That(template, Does.Contain("your_totp_secret_here"));
+    }
 }
