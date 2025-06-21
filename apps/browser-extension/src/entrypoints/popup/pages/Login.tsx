@@ -3,11 +3,15 @@ import { Buffer } from 'buffer';
 import React, { useEffect, useState } from 'react';
 
 import Button from '@/entrypoints/popup/components/Button';
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -25,6 +29,7 @@ import { storage } from '#imports';
 const Login: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
+  const { setHeaderButtons } = useHeaderButtons();
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -57,6 +62,30 @@ const Login: React.FC = () => {
     };
     loadClientUrl();
   }, [setIsInitialLoading]);
+
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    const headerButtonsJSX = !PopoutUtility.isPopup() ? (
+      <>
+        <HeaderButton
+          onClick={() => PopoutUtility.openInNewPopup()}
+          title="Open in new window"
+          iconType={HeaderIconType.EXPAND}
+        />
+        <HeaderButton
+          onClick={() => PopoutUtility.openInNewTab()}
+          title="Open in new tab"
+          iconType={HeaderIconType.TAB}
+        />
+      </>
+    ) : null;
+
+    setHeaderButtons(headerButtonsJSX);
+
+    return () => {
+      setHeaderButtons(null);
+    };
+  }, [setHeaderButtons]);
 
   /**
    * Handle submit
@@ -235,7 +264,7 @@ const Login: React.FC = () => {
 
   if (twoFactorRequired) {
     return (
-      <div className="max-w-md">
+      <div>
         <form onSubmit={handleTwoFactorSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
           {error && (
             <div className="mb-4 text-red-500 dark:text-red-400 text-sm">
@@ -292,7 +321,7 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="max-w-md">
+    <div>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         {error && (
           <div className="mb-4 text-red-500 dark:text-red-400 text-sm">

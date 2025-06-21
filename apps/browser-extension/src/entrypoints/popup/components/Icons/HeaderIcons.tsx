@@ -8,7 +8,8 @@ export enum HeaderIconType {
   RELOAD = 'reload',
   EXTERNAL_LINK = 'external_link',
   SAVE = 'save',
-  PLUS = 'plus'
+  PLUS = 'plus',
+  TAB = 'tab'
 }
 
 type HeaderIconProps = {
@@ -155,6 +156,28 @@ export const HeaderIcon: React.FC<HeaderIconProps> = ({ type, className = 'w-5 h
         xmlns="http://www.w3.org/2000/svg"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      </svg>
+    ),
+    [HeaderIconType.TAB]: (
+      <svg
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
+        />
       </svg>
     )
   };

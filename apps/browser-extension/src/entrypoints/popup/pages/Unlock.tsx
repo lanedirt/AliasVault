@@ -4,10 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Button from '@/entrypoints/popup/components/Button';
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
@@ -23,6 +27,7 @@ const Unlock: React.FC = () => {
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
+  const { setHeaderButtons } = useHeaderButtons();
 
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
@@ -46,6 +51,23 @@ const Unlock: React.FC = () => {
 
     checkStatus();
   }, [webApi, authContext, setIsInitialLoading]);
+
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    const headerButtonsJSX = !PopoutUtility.isPopup() ? (
+      <HeaderButton
+        onClick={() => PopoutUtility.openInNewPopup()}
+        title="Open in new window"
+        iconType={HeaderIconType.EXPAND}
+      />
+    ) : null;
+
+    setHeaderButtons(headerButtonsJSX);
+
+    return () => {
+      setHeaderButtons(null);
+    };
+  }, [setHeaderButtons]);
 
   /**
    * Handle submit
@@ -101,7 +123,7 @@ const Unlock: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md">
+    <div>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white break-all overflow-hidden mb-4">{authContext.username}</h2>
 
