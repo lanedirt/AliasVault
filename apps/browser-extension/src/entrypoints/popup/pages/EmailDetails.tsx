@@ -8,6 +8,7 @@ import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsConte
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import ConversionUtility from '@/entrypoints/popup/utils/ConversionUtility';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import type { EmailAttachment, Email } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
@@ -35,7 +36,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     // For popup windows, ensure we have proper history state for navigation
-    if (isPopup()) {
+    if (PopoutUtility.isPopup()) {
       // Clear existing history and create fresh entries
       window.history.replaceState({}, '', `popup.html#/emails`);
       window.history.pushState({}, '', `popup.html#/emails/${id}`);
@@ -76,7 +77,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
   const handleDelete = useCallback(async () : Promise<void> => {
     try {
       await webApi.delete(`Email/${id}`);
-      if (isPopup()) {
+      if (PopoutUtility.isPopup()) {
         window.close();
       } else {
         navigate('/emails');
@@ -87,30 +88,10 @@ const EmailDetails: React.FC = (): React.ReactElement => {
   }, [id, webApi, navigate]);
 
   /**
-   * Check if the current page is an expanded popup.
-   */
-  const isPopup = () : boolean => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('expanded') === 'true';
-  };
-
-  /**
-   * Open the credential details in a new expanded popup.
+   * Open the email details in a new expanded popup.
    */
   const openInNewPopup = useCallback((): void => {
-    const width = 800;
-    const height = 1000;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    window.open(
-      `popup.html?expanded=true#/emails/${id}`,
-      'EmailDetails',
-      `width=${width},height=${height},left=${left},top=${top},popup=true`
-    );
-
-    // Close the current tab
-    window.close();
+    PopoutUtility.openInNewPopup(`/emails/${id}`);
   }, [id]);
 
   /**
@@ -165,11 +146,13 @@ const EmailDetails: React.FC = (): React.ReactElement => {
     if (!headerButtonsConfigured) {
       const headerButtonsJSX = (
         <div className="flex items-center gap-2">
-          <HeaderButton
-            onClick={openInNewPopup}
-            title="Open in new window"
-            iconType={HeaderIconType.EXPAND}
-          />
+          {!PopoutUtility.isPopup() && (
+            <HeaderButton
+              onClick={openInNewPopup}
+              title="Open in new window"
+              iconType={HeaderIconType.EXPAND}
+            />
+          )}
           <HeaderButton
             onClick={() => setShowDeleteModal(true)}
             title="Delete email"
