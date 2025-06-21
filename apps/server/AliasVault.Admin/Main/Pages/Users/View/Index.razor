@@ -108,7 +108,7 @@ else
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Shows the last 5 authentication attempts for this user. Click "View all auth logs" to see complete history.
                         </p>
-                        <AuthLogTable Username="@(User?.UserName ?? string.Empty)" AuthLogList="@AuthLogList" />
+                        <AuthLogTable Username="@(User.UserName ?? string.Empty)" AuthLogList="@AuthLogList" />
                     </div>
                 </div>
             </div>
