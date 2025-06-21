@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
+import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import ReloadButton from '@/entrypoints/popup/components/ReloadButton';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
+import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import type { MailboxBulkRequest, MailboxBulkResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
@@ -18,6 +22,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 const EmailsList: React.FC = () => {
   const dbContext = useDb();
   const webApi = useWebApi();
+  const { setHeaderButtons } = useHeaderButtons();
   const [error, setError] = useState<string | null>(null);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const { setIsInitialLoading } = useLoading();
@@ -72,6 +77,23 @@ const EmailsList: React.FC = () => {
   useEffect(() => {
     loadEmails();
   }, [loadEmails]);
+
+  // Set header buttons on mount and clear on unmount
+  useEffect((): (() => void) => {
+    const headerButtonsJSX = !PopoutUtility.isPopup() ? (
+      <HeaderButton
+        onClick={() => PopoutUtility.openInNewPopup()}
+        title="Open in new window"
+        iconType={HeaderIconType.EXPAND}
+      />
+    ) : null;
+
+    setHeaderButtons(headerButtonsJSX);
+
+    return () => {
+      setHeaderButtons(null);
+    };
+  }, [setHeaderButtons]);
 
   /**
    * Formats the date display for emails

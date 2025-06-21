@@ -11,6 +11,7 @@ import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsConte
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
@@ -92,6 +93,13 @@ const CredentialsList: React.FC = () => {
   useEffect((): (() => void) => {
     const headerButtonsJSX = (
       <div className="flex items-center gap-2">
+        {!PopoutUtility.isPopup() && (
+          <HeaderButton
+            onClick={() => PopoutUtility.openInNewPopup()}
+            title="Open in new window"
+            iconType={HeaderIconType.EXPAND}
+          />
+        )}
         <HeaderButton
           onClick={handleAddCredential}
           title="Add new credential"

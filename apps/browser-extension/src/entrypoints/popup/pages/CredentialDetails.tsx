@@ -14,6 +14,7 @@ import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
@@ -29,29 +30,10 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   const { setHeaderButtons } = useHeaderButtons();
 
   /**
-   * Check if the current page is an expanded popup.
-   */
-  const isPopup = (): boolean => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('expanded') === 'true';
-  };
-
-  /**
    * Open the credential details in a new expanded popup.
    */
   const openInNewPopup = useCallback((): void => {
-    const width = 800;
-    const height = 1000;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    window.open(
-      `popup.html?expanded=true#/credentials/${id}`,
-      'CredentialDetails',
-      `width=${width},height=${height},left=${left},top=${top},popup=true`
-    );
-
-    window.close();
+    PopoutUtility.openInNewPopup(`/credentials/${id}`);
   }, [id]);
 
   /**
@@ -62,7 +44,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   }, [id, navigate]);
 
   useEffect(() => {
-    if (isPopup()) {
+    if (PopoutUtility.isPopup()) {
       window.history.replaceState({}, '', `popup.html#/credentials`);
       window.history.pushState({}, '', `popup.html#/credentials/${id}`);
     }
@@ -89,11 +71,13 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   useEffect((): (() => void) => {
     const headerButtonsJSX = (
       <div className="flex items-center gap-2">
-        <HeaderButton
-          onClick={openInNewPopup}
-          title="Open in new window"
-          iconType={HeaderIconType.EXPAND}
-        />
+        {!PopoutUtility.isPopup() && (
+          <HeaderButton
+            onClick={openInNewPopup}
+            title="Open in new window"
+            iconType={HeaderIconType.EXPAND}
+          />
+        )}
         <HeaderButton
           onClick={handleEdit}
           title="Edit credential"

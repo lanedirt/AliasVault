@@ -6,6 +6,7 @@ import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
+import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
 import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY } from '@/utils/Constants';
@@ -69,6 +70,20 @@ const Settings: React.FC = () => {
   useEffect((): (() => void) => {
     const headerButtonsJSX = (
       <div className="flex items-center gap-2">
+        {!PopoutUtility.isPopup() && (
+          <>
+            <HeaderButton
+              onClick={() => PopoutUtility.openInNewPopup()}
+              title="Open in new window"
+              iconType={HeaderIconType.EXPAND}
+            />
+            <HeaderButton
+              onClick={() => PopoutUtility.openInNewTab()}
+              title="Open in new tab"
+              iconType={HeaderIconType.TAB}
+            />
+          </>
+        )}
         <HeaderButton
           onClick={openClientTab}
           title="Open web app"
