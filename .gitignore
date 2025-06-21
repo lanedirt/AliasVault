@@ -378,6 +378,10 @@ FodyWeavers.xsd
 # Codebuddy Rider plugin
 .codebuddy
 
+# Claude Code
+.claude
+CLAUDE.md
+
 # -------------------
 # AliasVault specifics
 # -------------------
