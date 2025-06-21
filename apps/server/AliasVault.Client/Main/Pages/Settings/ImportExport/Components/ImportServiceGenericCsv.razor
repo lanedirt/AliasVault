@@ -1,0 +1,60 @@
+@using AliasVault.ImportExport.Models
+@using AliasVault.ImportExport.Importers
+@inject NavigationManager NavigationManager
+@inject GlobalNotificationService GlobalNotificationService
+@inject ILogger<ImportServiceGenericCsv> Logger
+@inject JsInteropService JsInteropService
+
+<ImportServiceCard
+    ServiceName="Generic CSV"
+    Description="Import credentials using a template CSV format"
+    LogoUrl="img/importers/generic-csv.svg"
+    ProcessFileCallback="ProcessFile">
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Is the password manager you are using not supported? You can always import your credentials into AliasVault using a generic CSV template format instead.</p>
+    <ol class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
+        <li class="flex items-start space-x-2">
+            <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">1</span>
+            <span>Download the <button @onclick="DownloadTemplate" class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 underline">AliasVault Import CSV template</button></span>
+        </li>
+        <li class="flex items-start space-x-2">
+            <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">2</span>
+            <span>Open it in a spreadsheet program (Microsoft Excel, Google Sheets, etc.)</span>
+        </li>
+        <li class="flex items-start space-x-2">
+            <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">3</span>
+            <span>Fill in your credentials (replace the example data)</span>
+        </li>
+        <li class="flex items-start space-x-2">
+            <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">4</span>
+            <span>Save as CSV format and upload it below</span>
+        </li>
+    </ol>
+</ImportServiceCard>
+
+@code {
+    private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
+    {
+        return await GenericCsvImporter.ImportFromCsvAsync(fileContents);
+    }
+
+    private async Task DownloadTemplate()
+    {
+        try
+        {
+            var csvBytes = GenericCsvImporter.GetCsvTemplateBytes();
+            var fileName = $"aliasvault-import-template.csv";
+
+            // Create a memory stream from the byte array
+            using (MemoryStream memoryStream = new MemoryStream(csvBytes))
+            {
+                // Invoke JavaScript to initiate the download
+                await JsInteropService.DownloadFileFromStream(fileName, memoryStream.ToArray());
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error downloading CSV template");
+            GlobalNotificationService.AddErrorMessage("Failed to download CSV template. Please try again.", true);
+        }
+    }
+}
