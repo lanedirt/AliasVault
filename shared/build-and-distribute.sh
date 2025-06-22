@@ -7,6 +7,7 @@ set -u  # Treat unset variables as errors
 chmod +x ./identity-generator/build.sh
 chmod +x ./password-generator/build.sh
 chmod +x ./models/build.sh
+chmod +x ./vault-sql/build.sh
 
 # Run all build scripts
 echo "🚀 Starting build process for all modules..."
@@ -17,6 +18,9 @@ cd ../password-generator
 ./build.sh
 
 cd ../models
+./build.sh
+
+cd ../vault-sql
 ./build.sh
 
 echo "✅ All builds completed successfully."
