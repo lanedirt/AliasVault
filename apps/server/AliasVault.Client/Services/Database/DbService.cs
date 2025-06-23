@@ -190,8 +190,6 @@ public sealed class DbService : IDisposable
                 await connection.DisposeAsync();
             }
 
-            await _dbContext.Database.MigrateAsync();
-
             // Update the current vault revision number to the highest revision number in the merged database(s).
             // This is important so the server knows that the local client has successfully merged the databases
             // and should overwrite the existing database on the server with the new merged database.
@@ -354,7 +352,6 @@ public sealed class DbService : IDisposable
             // Get latest version from JsInteropService.
             var latestVersion = await _jsInteropService.GetLatestVaultVersionAsync();
 
-            // TODO: migrate database to the latest version via JS interop...
             // Call JS interop to get SQL commands to create a new vault with the latest schema.
             var sqlCommands = await _jsInteropService.GetUpgradeVaultSqlAsync(currentVersion.Revision, latestVersion.Revision);
 
@@ -374,6 +371,21 @@ public sealed class DbService : IDisposable
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Checks if there are any pending migrations.
+    /// </summary>
+    /// <returns>Bool which indicates if there are any pending migrations.</returns>
+    public async Task<bool> HasPendingMigrationsAsync()
+    {
+        // Get current version of database.
+        var currentVersion = await GetCurrentDatabaseVersionAsync();
+
+        // Get latest version from JsInteropService.
+        var latestVersion = await _jsInteropService.GetLatestVaultVersionAsync();
+
+        return currentVersion.Revision < latestVersion.Revision;
     }
 
     /// <summary>
@@ -659,8 +671,7 @@ public sealed class DbService : IDisposable
                 _dbContext = new AliasClientDbContext(_sqlConnection!, log => _logger.LogDebug("{Message}", log));
 
                 // Check if database is up-to-date with migrations.
-                var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
+                if (await HasPendingMigrationsAsync())
                 {
                     _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
                     return false;
