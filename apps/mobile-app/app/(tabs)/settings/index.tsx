@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useRef, useState, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 
+import { useApiUrl } from '@/utils/ApiUrlUtility';
 import { AppInfo } from '@/utils/AppInfo';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -25,6 +26,7 @@ export default function SettingsScreen() : React.ReactNode {
   const colors = useColors();
   const { getAuthMethodDisplay, shouldShowAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
+  const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
@@ -73,12 +75,12 @@ export default function SettingsScreen() : React.ReactNode {
        * Load all settings data.
        */
       const loadData = async () : Promise<void> => {
-        await Promise.all([loadAutoLockDisplay(), loadAuthMethodDisplay()]);
+        await Promise.all([loadAutoLockDisplay(), loadAuthMethodDisplay(), loadApiUrl()]);
         setIsFirstLoad(false);
       };
 
       loadData();
-    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad])
+    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad, loadApiUrl])
   );
 
   /**
@@ -133,6 +135,14 @@ export default function SettingsScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
+    connectionStatus: {
+      alignItems: 'center',
+    },
+    connectionStatusText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      textAlign: 'center',
+    },
     scrollContent: {
       paddingBottom: 40,
       paddingTop: Platform.OS === 'ios' ? 42 : 16,
@@ -344,7 +354,7 @@ export default function SettingsScreen() : React.ReactNode {
         </View>
 
         <View style={styles.versionContainer}>
-          <ThemedText style={styles.versionText}>App version {AppInfo.VERSION}</ThemedText>
+          <ThemedText style={styles.versionText}>App version {AppInfo.VERSION} ({getDisplayUrl()})</ThemedText>
         </View>
       </Animated.ScrollView>
     </ThemedContainer>
