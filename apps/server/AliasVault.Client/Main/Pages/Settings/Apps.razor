@@ -89,6 +89,7 @@
     private BrowserType CurrentBrowser { get; set; }
     private BrowserExtensionInfo? CurrentBrowserExtension { get; set; } = null;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();

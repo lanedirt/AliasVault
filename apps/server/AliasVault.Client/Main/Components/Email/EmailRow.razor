@@ -31,12 +31,21 @@
 </li>
 
 @code {
+    /// <summary>
+    /// The email model.
+    /// </summary>
     [Parameter]
     public required MailListViewModel Email { get; set; }
 
+    /// <summary>
+    /// OnClick handler for email.
+    /// </summary>
     [Parameter]
     public EventCallback<int> OnEmailClick { get; set; }
 
+    /// <summary>
+    /// OnClick handler for credential.
+    /// </summary>
     [Parameter]
     public EventCallback<Guid> OnCredentialClick { get; set; }
 }
