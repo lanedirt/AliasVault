@@ -1,14 +1,13 @@
 import { Buffer } from 'buffer';
 
 import { MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Alert } from 'react-native';
 
-import { AppInfo } from '@/utils/AppInfo';
+import { useApiUrl } from '@/utils/ApiUrlUtility';
 import ConversionUtility from '@/utils/ConversionUtility';
 import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
 import type { LoginResponse, VaultResponse } from '@/utils/dist/shared/models/webapi';
@@ -33,19 +32,7 @@ import { useWebApi } from '@/context/WebApiContext';
 export default function LoginScreen() : React.ReactNode {
   const colors = useColors();
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [apiUrl, setApiUrl] = useState<string>(AppInfo.DEFAULT_API_URL);
-
-  /**
-   * Load the API URL.
-   */
-  const loadApiUrl = async () : Promise<void> => {
-    const storedUrl = await AsyncStorage.getItem('apiUrl');
-    if (storedUrl && storedUrl.length > 0) {
-      setApiUrl(storedUrl);
-    } else {
-      setApiUrl(AppInfo.DEFAULT_API_URL);
-    }
-  };
+  const { loadApiUrl, getDisplayUrl } = useApiUrl();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -54,20 +41,12 @@ export default function LoginScreen() : React.ReactNode {
       useNativeDriver: true,
     }).start();
     loadApiUrl();
-  }, [fadeAnim]);
+  }, [fadeAnim, loadApiUrl]);
 
   // Update URL when returning from settings
   useFocusEffect(() => {
     loadApiUrl();
   });
-
-  /**
-   * Get the display URL.
-   */
-  const getDisplayUrl = () : string => {
-    const cleanUrl = apiUrl.replace('https://', '').replace('/api', '');
-    return cleanUrl === 'app.aliasvault.net' ? 'aliasvault.net' : cleanUrl;
-  };
 
   const [credentials, setCredentials] = useState({
     username: '',
