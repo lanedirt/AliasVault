@@ -15,9 +15,16 @@ interface IVaultVersion {
      */
     description: string;
     /**
-     * Release date
+     * Date that this vault version was released.
      */
     releaseDate: string;
+    /**
+     * The AliasVault release that this vault version was introduced in (e.g., "0.14.0").
+     * This value is shown to the user in the UI instead of the actual vault version in order to
+     * avoid potential confusion. The "version" field is the actual vault database version. While
+     * this field is just for display purposes.
+     */
+    releaseVersion: string;
 }
 
 /**
@@ -81,11 +88,11 @@ declare class VaultSqlGenerator {
     /**
      * Get all available vault versions
      */
-    getAvailableVersions(): IVaultVersion[];
+    getAllVersions(): IVaultVersion[];
     /**
      * Get current/latest vault version info
      */
-    getCurrentVersion(): IVaultVersion;
+    getLatestVersion(): IVaultVersion;
     /**
      * Get specific migration SQL by migration number
      */
@@ -102,7 +109,9 @@ declare class VaultSqlGenerator {
  */
 
 /**
- * Available vault versions in chronological order
+ * All vault migrations/versions in chronological order. When adding a new migration, make sure to
+ * update the "releaseVersion" field to the correct AliasVault release version that introduced this
+ * migration.
  */
 declare const VAULT_VERSIONS: IVaultVersion[];
 

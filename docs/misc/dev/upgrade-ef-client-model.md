@@ -12,11 +12,12 @@ This guide explains how to upgrade the AliasVault client database structure. The
 
 ## Overview
 
-The upgrade process involves three main steps:
+The upgrade process involves four main steps:
 
 1. **Update .NET Entity Framework model** - Modify the EF model and create migrations
 2. **Generate SQL scripts** - Convert EF migrations to SQL scripts for cross-platform use
-3. **Rebuild vault-sql shared library** - Compile and distribute the updated SQL scripts
+3. **Add new migrations to VaultVersions** - Manually update the TypeScript version list
+4. **Rebuild vault-sql shared library** - Compile and distribute the updated SQL scripts
 
 ---
 
@@ -55,16 +56,25 @@ The script will:
 
 ---
 
-## 3. Rebuild vault-sql Shared Library
+## 3. Add New Migrations to VaultVersions
 
-### Step 3.1: Compile and Distribute
+### Step 3.1: Update VaultVersions.ts
+Manually update the `shared/vault-sql/src/sql/VaultVersions.ts` file to include the new migration(s) with the proper fields.
+
+This step ensures that the TypeScript version list is synchronized with the generated SQL scripts and maintains proper version tracking across all client platforms. This list is also used by the client app to detect if there are new migrations that should be applied, and what information to show to the user.
+
+---
+
+## 4. Rebuild vault-sql Shared Library
+
+### Step 4.1: Compile and Distribute
 The vault-sql TypeScript library is consumed by web apps, browser extensions, and mobile apps for vault creation and updates. After generating the SQL scripts, rebuild the library:
 
 ```bash
 shared/build-and-distribute.sh
 ```
 
-### Step 3.2: Verify Distribution
+### Step 4.2: Verify Distribution
 Ensure the updated library is properly distributed to all consuming applications.
 
 ---

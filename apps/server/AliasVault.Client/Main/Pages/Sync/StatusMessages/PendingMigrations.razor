@@ -1,4 +1,5 @@
-﻿@inject DbService DbService
+﻿@using AliasVault.Client.Services.JsInterop.Models
+@inject DbService DbService
 @inject GlobalNotificationService GlobalNotificationService
 
 <div class="relative p-6 sm:p-8 bg-white dark:bg-gray-700 rounded-lg sm:shadow-xl max-w-md w-full mx-auto">
@@ -14,11 +15,11 @@
                 <div class="space-y-2">
                     <p class="flex justify-between items-center">
                         <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Your vault:</span>
-                        <span class="text-base font-bold text-blue-600 dark:text-blue-400">@CurrentVersion</span>
+                        <span class="text-base font-bold text-blue-600 dark:text-blue-400">@(CurrentVersion?.ReleaseVersion ?? "...")</span>
                     </p>
                     <p class="flex justify-between items-center">
                         <span class="text-sm font-medium text-gray-600 dark:text-gray-400">AliasVault latest version:</span>
-                        <span class="text-base font-bold text-green-600 dark:text-green-400">@LatestVersion</span>
+                        <span class="text-base font-bold text-green-600 dark:text-green-400">@(LatestVersion?.ReleaseVersion ?? "...")</span>
                     </p>
                 </div>
             </div>
@@ -47,8 +48,8 @@
 @code {
     private bool IsPendingMigrations { get; set; } = false;
     private string ErrorMessage { get; set; } = string.Empty;
-    private string CurrentVersion { get; set; } = string.Empty;
-    private string LatestVersion { get; set; } = string.Empty;
+    private SqlVaultVersion? CurrentVersion { get; set; }
+    private SqlVaultVersion? LatestVersion { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()

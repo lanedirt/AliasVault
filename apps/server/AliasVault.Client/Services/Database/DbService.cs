@@ -10,7 +10,9 @@ namespace AliasVault.Client.Services.Database;
 using System.Data;
 using System.Net.Http.Json;
 using AliasClientDb;
+using AliasVault.Client.Services;
 using AliasVault.Client.Services.Auth;
+using AliasVault.Client.Services.JsInterop.Models;
 using AliasVault.Shared.Models.Enums;
 using AliasVault.Shared.Models.WebApi.Vault;
 using Microsoft.Data.Sqlite;
@@ -346,9 +348,15 @@ public sealed class DbService : IDisposable
     {
         try
         {
+            // Get current version of database.
+            var currentVersion = await GetCurrentDatabaseVersionAsync();
+
+            // Get latest version from JsInteropService.
+            var latestVersion = await _jsInteropService.GetLatestVaultVersionAsync();
+
             // TODO: migrate database to the latest version via JS interop...
             // Call JS interop to get SQL commands to create a new vault with the latest schema.
-            var sqlCommands = await _jsInteropService.GetCreateVaultSqlAsync();
+            var sqlCommands = await _jsInteropService.GetUpgradeVaultSqlAsync(currentVersion.Revision, latestVersion.Revision);
 
             // Execute the SQL commands to create a new vault with the latest schema.
             foreach (var sqlCommand in sqlCommands.SqlCommands)
@@ -372,10 +380,11 @@ public sealed class DbService : IDisposable
     /// Get the current version (applied migration) of the database that is loaded in memory.
     /// </summary>
     /// <returns>Version as string.</returns>
-    public async Task<string> GetCurrentDatabaseVersionAsync()
+    public async Task<SqlVaultVersion> GetCurrentDatabaseVersionAsync()
     {
         var migrations = await _dbContext.Database.GetAppliedMigrationsAsync();
         var lastMigration = migrations.LastOrDefault();
+        var currentVersion = "Unknown";
 
         // Convert migration Id in the form of "20240708094944_1.0.0-InitialMigration" to "1.0.0".
         if (lastMigration is not null)
@@ -386,38 +395,41 @@ public sealed class DbService : IDisposable
                 var versionPart = parts[1].Split('-')[0];
                 if (Version.TryParse(versionPart, out _))
                 {
-                    return versionPart;
+                    currentVersion = versionPart;
                 }
             }
         }
 
-        return "Unknown";
+        // Get all available vault versions to get the revision number of the current version.
+        var allVersions = await _jsInteropService.GetAllVaultVersionsAsync();
+        var currentVersionRevision = allVersions.FirstOrDefault(v => v.Version == currentVersion);
+
+        return currentVersionRevision ?? new SqlVaultVersion
+        {
+            Revision = 0,
+            Version = "Unknown",
+            Description = "Unknown",
+            ReleaseDate = DateTime.MinValue,
+            ReleaseVersion = "Unknown",
+        };
     }
 
     /// <summary>
     /// Get the latest available version (EF migration) as defined in code.
     /// </summary>
     /// <returns>Version as string.</returns>
-    public async Task<string> GetLatestDatabaseVersionAsync()
+    public async Task<SqlVaultVersion> GetLatestDatabaseVersionAsync()
     {
-        var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
-        var lastMigration = migrations.LastOrDefault();
+        var allVersions = await _jsInteropService.GetAllVaultVersionsAsync();
+        var latestVersion = allVersions.LastOrDefault();
 
-        // Convert migration Id in the form of "20240708094944_1.0.0-InitialMigration" to "1.0.0".
-        if (lastMigration is not null)
+        return latestVersion ?? new SqlVaultVersion
         {
-            var parts = lastMigration.Split('_');
-            if (parts.Length > 1)
-            {
-                var versionPart = parts[1].Split('-')[0];
-                if (Version.TryParse(versionPart, out _))
-                {
-                    return versionPart;
-                }
-            }
-        }
-
-        return "Unknown";
+            Revision = 0,
+            Version = "Unknown",
+            Description = "Unknown",
+            ReleaseDate = DateTime.MinValue,
+        };
     }
 
     /// <summary>
@@ -436,7 +448,7 @@ public sealed class DbService : IDisposable
         {
             Username = username,
             Blob = encryptedDatabase,
-            Version = databaseVersion,
+            Version = databaseVersion.Version,
             CurrentRevisionNumber = _vaultRevisionNumber,
             EncryptionPublicKey = encryptionKey.PublicKey,
             CredentialsCount = credentialsCount,
