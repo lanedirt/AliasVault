@@ -1,11 +1,11 @@
 import { COMPLETE_SCHEMA_SQL, MIGRATION_SCRIPTS } from './SqlConstants';
 import { VAULT_VERSIONS } from './VaultVersions';
-import { type IVaultVersion } from '../types/VaultVersion';
+import { type VaultVersion } from '../types/VaultVersion';
 
 /**
  * Result of SQL generation operations
  */
-export interface ISqlGenerationResult {
+export type SqlGenerationResult = {
   success: boolean;
   sqlCommands: string[];
   version: string;
@@ -16,13 +16,13 @@ export interface ISqlGenerationResult {
 /**
  * Information about vault version requirements
  */
-export interface IVaultVersionInfo {
+export type VaultVersionInfo = {
   currentVersion: string;
   currentMigrationNumber: number;
   targetVersion: string;
   targetMigrationNumber: number;
   needsUpgrade: boolean;
-  availableUpgrades: IVaultVersion[];
+  availableUpgrades: VaultVersion[];
 }
 
 /**
@@ -33,7 +33,7 @@ export class VaultSqlGenerator {
   /**
    * Get SQL commands to create a new vault with the latest schema
    */
-  getCreateVaultSql(): ISqlGenerationResult {
+  getCreateVaultSql(): SqlGenerationResult {
     try {
       const sqlCommands = [
         'PRAGMA foreign_keys = ON;',
@@ -65,7 +65,7 @@ export class VaultSqlGenerator {
   /**
    * Get SQL commands to upgrade vault from current version to target version
    */
-  getUpgradeVaultSql(currentMigrationNumber: number, targetMigrationNumber?: number): ISqlGenerationResult {
+  getUpgradeVaultSql(currentMigrationNumber: number, targetMigrationNumber?: number): SqlGenerationResult {
     try {
       const targetMigration = targetMigrationNumber ?? VAULT_VERSIONS[VAULT_VERSIONS.length - 1].revision;
       const targetVersionInfo = VAULT_VERSIONS.find(v => v.revision === targetMigration);
@@ -136,14 +136,14 @@ export class VaultSqlGenerator {
   /**
    * Get SQL commands to upgrade vault to latest version
    */
-  getUpgradeToLatestSql(currentMigrationNumber: number): ISqlGenerationResult {
+  getUpgradeToLatestSql(currentMigrationNumber: number): SqlGenerationResult {
     return this.getUpgradeVaultSql(currentMigrationNumber);
   }
 
   /**
    * Get SQL commands to upgrade vault to a specific version
    */
-  getUpgradeToVersionSql(currentMigrationNumber: number, targetVersion: string): ISqlGenerationResult {
+  getUpgradeToVersionSql(currentMigrationNumber: number, targetVersion: string): SqlGenerationResult {
     const targetVersionInfo = VAULT_VERSIONS.find(v => v.version === targetVersion);
 
     if (!targetVersionInfo) {
@@ -188,7 +188,7 @@ export class VaultSqlGenerator {
     settingsTableExists: boolean,
     versionResult?: string,
     migrationResult?: string
-  ): IVaultVersionInfo {
+  ): VaultVersionInfo {
     let currentVersion = '0.0.0';
     let currentMigrationNumber = 0;
 
@@ -234,14 +234,14 @@ export class VaultSqlGenerator {
   /**
    * Get all available vault versions
    */
-  getAllVersions(): IVaultVersion[] {
+  getAllVersions(): VaultVersion[] {
     return [...VAULT_VERSIONS];
   }
 
   /**
    * Get current/latest vault version info
    */
-  getLatestVersion(): IVaultVersion {
+  getLatestVersion(): VaultVersion {
     return VAULT_VERSIONS[VAULT_VERSIONS.length - 1];
   }
 

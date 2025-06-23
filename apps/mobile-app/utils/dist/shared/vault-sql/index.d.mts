@@ -1,7 +1,7 @@
 /**
  * Vault database version information
  */
-interface IVaultVersion {
+type VaultVersion = {
     /**
      * The migration revision number
      */
@@ -15,39 +15,35 @@ interface IVaultVersion {
      */
     description: string;
     /**
-     * Date that this vault version was released.
-     */
-    releaseDate: string;
-    /**
      * The AliasVault release that this vault version was introduced in (e.g., "0.14.0").
      * This value is shown to the user in the UI instead of the actual vault version in order to
      * avoid potential confusion. The "version" field is the actual vault database version. While
      * this field is just for display purposes.
      */
     releaseVersion: string;
-}
+};
 
 /**
  * Result of SQL generation operations
  */
-interface ISqlGenerationResult {
+type SqlGenerationResult = {
     success: boolean;
     sqlCommands: string[];
     version: string;
     migrationNumber: number;
     error?: string;
-}
+};
 /**
  * Information about vault version requirements
  */
-interface IVaultVersionInfo {
+type VaultVersionInfo = {
     currentVersion: string;
     currentMigrationNumber: number;
     targetVersion: string;
     targetMigrationNumber: number;
     needsUpgrade: boolean;
-    availableUpgrades: IVaultVersion[];
-}
+    availableUpgrades: VaultVersion[];
+};
 /**
  * Vault SQL generator utility class
  * Provides SQL statements for vault creation and migration without database execution
@@ -56,19 +52,19 @@ declare class VaultSqlGenerator {
     /**
      * Get SQL commands to create a new vault with the latest schema
      */
-    getCreateVaultSql(): ISqlGenerationResult;
+    getCreateVaultSql(): SqlGenerationResult;
     /**
      * Get SQL commands to upgrade vault from current version to target version
      */
-    getUpgradeVaultSql(currentMigrationNumber: number, targetMigrationNumber?: number): ISqlGenerationResult;
+    getUpgradeVaultSql(currentMigrationNumber: number, targetMigrationNumber?: number): SqlGenerationResult;
     /**
      * Get SQL commands to upgrade vault to latest version
      */
-    getUpgradeToLatestSql(currentMigrationNumber: number): ISqlGenerationResult;
+    getUpgradeToLatestSql(currentMigrationNumber: number): SqlGenerationResult;
     /**
      * Get SQL commands to upgrade vault to a specific version
      */
-    getUpgradeToVersionSql(currentMigrationNumber: number, targetVersion: string): ISqlGenerationResult;
+    getUpgradeToVersionSql(currentMigrationNumber: number, targetVersion: string): SqlGenerationResult;
     /**
      * Get SQL commands to check current vault version
      */
@@ -80,7 +76,7 @@ declare class VaultSqlGenerator {
     /**
      * Parse vault version information from query results
      */
-    parseVaultVersionInfo(settingsTableExists: boolean, versionResult?: string, migrationResult?: string): IVaultVersionInfo;
+    parseVaultVersionInfo(settingsTableExists: boolean, versionResult?: string, migrationResult?: string): VaultVersionInfo;
     /**
      * Validate vault structure from table names
      */
@@ -88,11 +84,11 @@ declare class VaultSqlGenerator {
     /**
      * Get all available vault versions
      */
-    getAllVersions(): IVaultVersion[];
+    getAllVersions(): VaultVersion[];
     /**
      * Get current/latest vault version info
      */
-    getLatestVersion(): IVaultVersion;
+    getLatestVersion(): VaultVersion;
     /**
      * Get specific migration SQL by migration number
      */
@@ -113,7 +109,7 @@ declare class VaultSqlGenerator {
  * update the "releaseVersion" field to the correct AliasVault release version that introduced this
  * migration.
  */
-declare const VAULT_VERSIONS: IVaultVersion[];
+declare const VAULT_VERSIONS: VaultVersion[];
 
 /**
  * Complete database schema SQL (latest version)
@@ -132,4 +128,4 @@ declare const MIGRATION_SCRIPTS: Record<number, string>;
  */
 declare const CreateVaultSqlGenerator: () => VaultSqlGenerator;
 
-export { COMPLETE_SCHEMA_SQL, CreateVaultSqlGenerator, type ISqlGenerationResult, type IVaultVersion, type IVaultVersionInfo, MIGRATION_SCRIPTS, VAULT_VERSIONS, VaultSqlGenerator };
+export { COMPLETE_SCHEMA_SQL, CreateVaultSqlGenerator, MIGRATION_SCRIPTS, type SqlGenerationResult, VAULT_VERSIONS, VaultSqlGenerator, type VaultVersion, type VaultVersionInfo };

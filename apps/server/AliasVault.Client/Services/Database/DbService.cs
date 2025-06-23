@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 public sealed class DbService : IDisposable
 {
+    private const string _UNKNOWN_VERSION = "Unknown";
     private readonly AuthService _authService;
     private readonly JsInteropService _jsInteropService;
     private readonly HttpClient _httpClient;
@@ -396,7 +397,7 @@ public sealed class DbService : IDisposable
     {
         var migrations = await _dbContext.Database.GetAppliedMigrationsAsync();
         var lastMigration = migrations.LastOrDefault();
-        var currentVersion = "Unknown";
+        var currentVersion = _UNKNOWN_VERSION;
 
         // Convert migration Id in the form of "20240708094944_1.0.0-InitialMigration" to "1.0.0".
         if (lastMigration is not null)
@@ -419,10 +420,9 @@ public sealed class DbService : IDisposable
         return currentVersionRevision ?? new SqlVaultVersion
         {
             Revision = 0,
-            Version = "Unknown",
-            Description = "Unknown",
-            ReleaseDate = DateTime.MinValue,
-            ReleaseVersion = "Unknown",
+            Version = _UNKNOWN_VERSION,
+            Description = _UNKNOWN_VERSION,
+            ReleaseVersion = _UNKNOWN_VERSION,
         };
     }
 
@@ -438,9 +438,9 @@ public sealed class DbService : IDisposable
         return latestVersion ?? new SqlVaultVersion
         {
             Revision = 0,
-            Version = "Unknown",
-            Description = "Unknown",
-            ReleaseDate = DateTime.MinValue,
+            Version = _UNKNOWN_VERSION,
+            Description = _UNKNOWN_VERSION,
+            ReleaseVersion = _UNKNOWN_VERSION,
         };
     }
 

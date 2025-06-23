@@ -1,7 +1,7 @@
 /**
  * Vault database version information
  */
-export interface IVaultVersion {
+export type VaultVersion = {
   /**
    * The migration revision number
    */
@@ -16,11 +16,6 @@ export interface IVaultVersion {
    * Description of changes in this version
    */
   description: string;
-
-  /**
-   * Date that this vault version was released.
-   */
-  releaseDate: string;
 
   /**
    * The AliasVault release that this vault version was introduced in (e.g., "0.14.0").

@@ -28,11 +28,6 @@ public sealed class SqlVaultVersion
     public string Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the release date.
-    /// </summary>
-    public DateTime ReleaseDate { get; init; } = DateTime.MinValue;
-
-    /// <summary>
     /// Gets the AliasVault release version that this vault version was introduced in.
     /// </summary>
     public string ReleaseVersion { get; init; } = string.Empty;
