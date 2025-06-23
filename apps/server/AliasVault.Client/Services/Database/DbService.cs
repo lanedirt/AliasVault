@@ -313,6 +313,32 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Creates a new vault with the latest schema.
+    /// </summary>
+    /// <returns>Bool which indicates if creating a new vault was successful.</returns>
+    public async Task<bool> CreateNewVaultAsync()
+    {
+        try
+        {
+            // Call JS interop to get SQL commands to create a new vault with the latest schema.
+            var sqlCommands = await _jsInteropService.GetCreateVaultSqlAsync();
+
+            // Execute the SQL commands to create a new vault with the latest schema.
+            foreach (var sqlCommand in sqlCommands.SqlCommands)
+            {
+                await _dbContext.Database.ExecuteSqlRawAsync(sqlCommand);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating new vault.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Migrate the database structure to the latest version.
     /// </summary>
     /// <returns>Bool which indicates if migration was successful.</returns>
@@ -320,7 +346,16 @@ public sealed class DbService : IDisposable
     {
         try
         {
-            await _dbContext.Database.MigrateAsync();
+            // TODO: migrate database to the latest version via JS interop...
+            // Call JS interop to get SQL commands to create a new vault with the latest schema.
+            var sqlCommands = await _jsInteropService.GetCreateVaultSqlAsync();
+
+            // Execute the SQL commands to create a new vault with the latest schema.
+            foreach (var sqlCommand in sqlCommands.SqlCommands)
+            {
+                await _dbContext.Database.ExecuteSqlRawAsync(sqlCommand);
+            }
+
             _isSuccessfullyInitialized = true;
             await _settingsService.InitializeAsync(this);
         }

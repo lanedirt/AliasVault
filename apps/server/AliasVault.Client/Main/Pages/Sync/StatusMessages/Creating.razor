@@ -50,7 +50,7 @@
         await Task.Delay(1000);
 
         // Migrate (create) the database.
-        if (await DbService.MigrateDatabaseAsync())
+        if (await DbService.CreateNewVaultAsync())
         {
             // Save the database to the server.
             if (await DbService.SaveDatabaseAsync())
