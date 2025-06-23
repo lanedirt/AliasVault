@@ -27,6 +27,7 @@ export interface Spec extends TurboModule {
   // SQL operations
   executeQuery(query: string, params: (string | number | null)[]): Promise<string[]>;
   executeUpdate(query: string, params:(string | number | null)[]): Promise<number>;
+  executeRaw(query: string): Promise<void>;
   beginTransaction(): Promise<void>;
   commitTransaction(): Promise<void>;
   rollbackTransaction(): Promise<void>;

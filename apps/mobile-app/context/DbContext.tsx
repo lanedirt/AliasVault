@@ -13,6 +13,7 @@ type DbContextType = {
   storeEncryptionKey: (derivedKey: string) => Promise<void>;
   storeEncryptionKeyDerivationParams: (keyDerivationParams: EncryptionKeyDerivationParams) => Promise<void>;
   initializeDatabase: (vaultResponse: VaultResponse) => Promise<void>;
+  hasPendingMigrations: () => Promise<boolean>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   testDatabaseConnection: (derivedKey: string) => Promise<boolean>;
@@ -97,6 +98,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setDbAvailable(true);
   }, [sqliteClient, unlockVault]);
 
+  /**
+   * Check if there are any pending migrations.
+   */
+  const hasPendingMigrations = useCallback(async () => {
+    const currentVersion = await sqliteClient.getDatabaseVersion();
+    const latestVersion = await sqliteClient.getLatestDatabaseVersion();
+
+    return currentVersion.revision < latestVersion.revision;
+  }, [sqliteClient]);
+
   const checkStoredVault = useCallback(async () => {
     try {
       const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
@@ -166,7 +177,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       // Try to get the database version as a simple test query
       const version = await sqliteClient.getDatabaseVersion();
-      if (version && version.length > 0) {
+      if (version && version.version && version.version.length > 0) {
         return true;
       }
 
@@ -182,13 +193,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     dbInitialized,
     dbAvailable,
     initializeDatabase,
+    hasPendingMigrations,
     clearDatabase,
     getVaultMetadata,
     testDatabaseConnection,
     unlockVault,
     storeEncryptionKey,
     storeEncryptionKeyDerivationParams,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault, storeEncryptionKey, storeEncryptionKeyDerivationParams]);
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, hasPendingMigrations, clearDatabase, getVaultMetadata, testDatabaseConnection, unlockVault, storeEncryptionKey, storeEncryptionKeyDerivationParams]);
 
   return (
     <DbContext.Provider value={contextValue}>

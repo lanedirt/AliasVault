@@ -1,5 +1,6 @@
 import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/dist/shared/models/metadata';
 import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import { VaultSqlGenerator, VaultVersion } from '@/utils/dist/shared/vault-sql';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
@@ -560,8 +561,10 @@ class SqliteClient {
    * Returns the semantic version (e.g., "1.4.1") from the latest migration.
    * Returns null if no migrations are found.
    */
-  public async getDatabaseVersion(): Promise<string | null> {
+  public async getDatabaseVersion(): Promise<VaultVersion> {
     try {
+      let currentVersion = '';
+
       // Query the migrations history table for the latest migration
       const results = await this.executeQuery<{ MigrationId: string }>(`
         SELECT MigrationId
@@ -570,7 +573,7 @@ class SqliteClient {
         LIMIT 1`);
 
       if (results.length === 0) {
-        return null;
+        throw new Error('No migrations found');
       }
 
       // Extract version using regex - matches patterns like "20240917191243_1.4.1-RenameAttachmentsPlural"
@@ -579,14 +582,32 @@ class SqliteClient {
       const versionMatch = versionRegex.exec(migrationId);
 
       if (versionMatch?.[1]) {
-        return versionMatch[1];
+        currentVersion = versionMatch[1];
       }
 
-      return null;
+      // Get all available vault versions to get the revision number of the current version.
+      const vaultSqlGenerator = new VaultSqlGenerator();
+      const allVersions = vaultSqlGenerator.getAllVersions();
+      const currentVersionRevision = allVersions.find(v => v.version === currentVersion);
+
+      if (!currentVersionRevision) {
+        throw new Error(`Current version ${currentVersion} not found in available vault versions.`);
+      }
+
+      return currentVersionRevision;
     } catch (error) {
       console.error('Error getting database version:', error);
       throw error;
     }
+  }
+
+  /**
+   * Returns the version info of the latest available vault migration.
+   */
+  public async getLatestDatabaseVersion(): Promise<VaultVersion> {
+    const vaultSqlGenerator = new VaultSqlGenerator();
+    const allVersions = vaultSqlGenerator.getAllVersions();
+    return allVersions[allVersions.length - 1];
   }
 
   /**

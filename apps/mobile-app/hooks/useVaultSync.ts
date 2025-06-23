@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -37,6 +38,7 @@ type VaultSyncOptions = {
   onError?: (error: string) => void;
   onStatus?: (message: string) => void;
   onOffline?: () => void;
+  onUpgradeRequired?: () => void;
 }
 
 /**
@@ -50,7 +52,7 @@ export const useVaultSync = () : {
   const webApi = useWebApi();
 
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
-    const { initialSync = false, onSuccess, onError, onStatus, onOffline } = options;
+    const { initialSync = false, onSuccess, onError, onStatus, onOffline, onUpgradeRequired } = options;
 
     // For the initial sync, we add an artifical delay to various steps which makes it feel more fluid.
     const enableDelay = initialSync;
@@ -112,12 +114,29 @@ export const useVaultSync = () : {
 
         try {
           await dbContext.initializeDatabase(vaultResponseJson as VaultResponse);
+
+          // Check if the vault is up to date, if not, redirect to the upgrade page.
+          console.log('Checking for pending migrations');
+          if (await dbContext.hasPendingMigrations()) {
+            console.log('Pending migrations, redirecting to upgrade page');
+            onUpgradeRequired?.();
+            return false;
+          }
+
           onSuccess?.(true);
           return true;
         } catch {
           // Vault could not be decrypted, throw an error
           throw new Error('Vault could not be decrypted, if problem persists please logout and login again.');
         }
+      }
+
+      // Check if the vault is up to date, if not, redirect to the upgrade page.
+      console.log('Checking for pending migrations');
+      if (await dbContext.hasPendingMigrations()) {
+        console.log('Pending migrations, redirecting to upgrade page');
+        onUpgradeRequired?.();
+        return false;
       }
 
       await withMinimumDelay(() => Promise.resolve(onSuccess?.(false)), 300, enableDelay);

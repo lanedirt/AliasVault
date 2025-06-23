@@ -45,6 +45,10 @@
     [vaultManager executeUpdate:query params:params resolver:resolve rejecter:reject];
 }
 
+- (void)executeRaw:(NSString *)query resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager executeRaw:query resolver:resolve rejecter:reject];
+}
+
 - (void)beginTransaction:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     [vaultManager beginTransaction:resolve rejecter:reject];
 }

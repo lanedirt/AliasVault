@@ -160,7 +160,14 @@ function RootLayoutNav() : React.ReactNode {
           await webApi.logout(error);
           setRedirectTarget('/login');
           setBootComplete(true);
-        }
+        },
+        /**
+         * On upgrade required.
+         */
+        onUpgradeRequired: () : void => {
+          setRedirectTarget('/upgrade');
+          setBootComplete(true);
+        },
       });
     };
 
@@ -262,6 +269,7 @@ function RootLayoutNav() : React.ReactNode {
         <Stack.Screen name="login-settings" options={{ title: 'Login Settings' }} />
         <Stack.Screen name="reinitialize" options={{ headerShown: false }} />
         <Stack.Screen name="unlock" options={{ headerShown: false }} />
+        <Stack.Screen name="upgrade" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
