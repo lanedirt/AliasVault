@@ -11,9 +11,15 @@
 </div>
 
 @code {
+    /// <summary>
+    /// The height of the skeleton loader element.
+    /// </summary>
     [Parameter]
     public int Height { get; set; } = 60;
 
+    /// <summary>
+    /// Amount of skeleton parts to render.
+    /// </summary>
     [Parameter]
     public int Parts { get; set; } = 2;
 }

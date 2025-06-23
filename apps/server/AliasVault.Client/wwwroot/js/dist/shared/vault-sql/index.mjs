@@ -448,6 +448,13 @@ COMMIT;`
 // src/sql/VaultVersions.ts
 var VAULT_VERSIONS = [
   {
+    revision: 0,
+    version: "1.0.0",
+    description: "Initial Migration",
+    releaseDate: "2024-07-08",
+    releaseVersion: "0.1.0"
+  },
+  {
     revision: 1,
     version: "1.0.1",
     description: "Empty Test Migration",
@@ -702,7 +709,7 @@ var VaultSqlGenerator = class {
   /**
    * Get complete schema SQL for creating new vault
    */
-  getCompleteSchemaeSql() {
+  getCompleteSchemaSql() {
     return COMPLETE_SCHEMA_SQL;
   }
 };

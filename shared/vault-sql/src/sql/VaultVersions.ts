@@ -12,6 +12,13 @@ import { IVaultVersion } from "../types/VaultVersion";
  */
 export const VAULT_VERSIONS: IVaultVersion[] = [
   {
+    revision: 0,
+    version: '1.0.0',
+    description: 'Initial Migration',
+    releaseDate: '2024-07-08',
+    releaseVersion: '0.1.0',
+  },
+  {
     revision: 1,
     version: '1.0.1',
     description: 'Empty Test Migration',

@@ -100,7 +100,7 @@ declare class VaultSqlGenerator {
     /**
      * Get complete schema SQL for creating new vault
      */
-    getCompleteSchemaeSql(): string;
+    getCompleteSchemaSql(): string;
 }
 
 /**

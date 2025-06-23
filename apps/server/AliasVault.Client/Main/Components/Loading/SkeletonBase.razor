@@ -1,17 +1,24 @@
-@using Microsoft.AspNetCore.Components
-
 <div class="skeleton-base @AdditionalClasses" style="@($"height: {Height}px;")">
     @ChildContent
     <div class="skeleton-shimmer"></div>
 </div>
 
 @code {
+    /// <summary>
+    /// The height of the skeleton loader.
+    /// </summary>
     [Parameter]
     public int Height { get; set; } = 60;
 
+    /// <summary>
+    /// Additional CSS classes to include.
+    /// </summary>
     [Parameter]
     public string AdditionalClasses { get; set; } = "";
 
+    /// <summary>
+    /// Child content to render within the skeleton loader.
+    /// </summary>
     [Parameter]
     public RenderFragment ChildContent { get; set; } = null!;
 }
