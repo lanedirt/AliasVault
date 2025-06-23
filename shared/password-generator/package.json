@@ -16,7 +16,7 @@
     "files": [
         "dist"
     ],
-    "license": "MIT",
+    "license": "AGPL-3.0",
     "dependencies": {
         "vitest": "^3.0.8"
     },

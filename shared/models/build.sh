@@ -21,10 +21,12 @@ files_to_copy=("webapi" "vault" "metadata")
 
 for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"
-  mkdir -p "$target"
 
   # Remove any existing files in the target directory
-  rm -rf "$target/*"
+  rm -rf "$target"
+
+  # (Re)create the target directory
+  mkdir -p "$target"
 
   # Copy specific build outputs (files and folders)
   for file in "${files_to_copy[@]}"; do

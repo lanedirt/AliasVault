@@ -22,10 +22,12 @@ files_to_copy=("index.js" "index.mjs" "index.d.ts" "index.js.map" "index.mjs" "i
 
 for target in "${TARGETS[@]}"; do
   echo "📂 Copying $package_name → $target"
-  mkdir -p "$target"
 
   # Remove any existing files in the target directory
-  rm -rf "$target/*"
+  rm -rf "$target"
+
+  # (Re)create the target directory
+  mkdir -p "$target"
 
   # Copy specific build outputs
   for file in "${files_to_copy[@]}"; do
