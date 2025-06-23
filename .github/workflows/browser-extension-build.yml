@@ -35,6 +35,7 @@ jobs:
             "apps/browser-extension/src/utils/dist/shared/identity-generator"
             "apps/browser-extension/src/utils/dist/shared/password-generator"
             "apps/browser-extension/src/utils/dist/shared/models"
+            "apps/browser-extension/src/utils/dist/shared/vault-sql"
           )
 
           for dir in "${TARGET_DIRS[@]}"; do
