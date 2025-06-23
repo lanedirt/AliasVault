@@ -1,21 +1,22 @@
 {
     "name": "@aliasvault/vault-sql",
     "version": "1.0.0",
-    "type": "module",
-    "main": "dist/index.mjs",
-    "types": "dist/index.d.mts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsup",
-        "clean": "rm -rf dist",
-        "lint": "eslint src",
-        "lint:fix": "eslint src --fix",
-        "test": "vitest",
-        "test:coverage": "vitest --coverage"
-    },
+      "build": "tsup",
+      "clean": "rm -rf dist",
+      "test": "vitest run",
+      "test:watch": "vitest",
+      "test:coverage": "vitest run --coverage",
+      "lint": "eslint src",
+      "lint:custom": "eslint",
+      "lint:fix": "eslint src --fix"
+  },
     "files": [
         "dist"
     ],
-    "license": "MIT",
+    "license": "AGPL-3.0",
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.21.0",
         "@typescript-eslint/parser": "^8.21.0",
