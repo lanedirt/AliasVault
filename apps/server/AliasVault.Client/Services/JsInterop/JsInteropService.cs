@@ -18,6 +18,9 @@ using Microsoft.JSInterop;
 /// <param name="jsRuntime">IJSRuntime.</param>
 public sealed class JsInteropService(IJSRuntime jsRuntime)
 {
+    private const string _DEFAULT_VERSION = "0.0.0";
+    private const string _VAULT_SQL_GENERATOR_FACTORY_FUNCTION = "CreateVaultSqlGenerator";
+
     private IJSObjectReference? _identityGeneratorModule;
     private IJSObjectReference? _passwordGeneratorModule;
     private IJSObjectReference? _vaultSqlInteropModule;
@@ -29,8 +32,22 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     public async Task InitializeAsync()
     {
         _identityGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dist/shared/identity-generator/index.mjs");
+        if (_identityGeneratorModule == null)
+        {
+            throw new InvalidOperationException("Failed to initialize identity generator module");
+        }
+
         _passwordGeneratorModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dist/shared/password-generator/index.mjs");
+        if (_passwordGeneratorModule == null)
+        {
+            throw new InvalidOperationException("Failed to initialize password generator module");
+        }
+
         _vaultSqlInteropModule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dist/shared/vault-sql/index.mjs");
+        if (_vaultSqlInteropModule == null)
+        {
+            throw new InvalidOperationException("Failed to initialize vault SQL generator module");
+        }
     }
 
     /// <summary>
@@ -302,13 +319,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_identityGeneratorModule == null)
             {
                 await InitializeAsync();
-                if (_identityGeneratorModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
-            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateIdentityGenerator", language);
+            var generatorInstance = await _identityGeneratorModule!.InvokeAsync<IJSObjectReference>("CreateIdentityGenerator", language);
             var result = await generatorInstance.InvokeAsync<AliasVaultIdentity>("generateRandomIdentity");
 
             return result;
@@ -332,15 +345,11 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_identityGeneratorModule == null)
             {
                 await InitializeAsync();
-                if (_identityGeneratorModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
             Console.WriteLine($"Generating username for identity: {identity.FirstName} {identity.LastName} {identity.BirthDate} {identity.Gender} {identity.NickName}");
 
-            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
+            var generatorInstance = await _identityGeneratorModule!.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
             var result = await generatorInstance.InvokeAsync<string>("generateUsername", identity);
             return result;
         }
@@ -363,13 +372,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_identityGeneratorModule == null)
             {
                 await InitializeAsync();
-                if (_identityGeneratorModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
-            var generatorInstance = await _identityGeneratorModule.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
+            var generatorInstance = await _identityGeneratorModule!.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
             var result = await generatorInstance.InvokeAsync<string>("generateEmailPrefix", identity);
             return result;
         }
@@ -392,13 +397,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_passwordGeneratorModule == null)
             {
                 await InitializeAsync();
-                if (_passwordGeneratorModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize password generator module");
-                }
             }
 
-            var generatorInstance = await _passwordGeneratorModule.InvokeAsync<IJSObjectReference>("CreatePasswordGenerator", settings);
+            var generatorInstance = await _passwordGeneratorModule!.InvokeAsync<IJSObjectReference>("CreatePasswordGenerator", settings);
 
             var result = await generatorInstance.InvokeAsync<string>("generateRandomPassword");
 
@@ -422,13 +423,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_vaultSqlInteropModule == null)
             {
                 await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+            var vaultGenerator = await _vaultSqlInteropModule!.InvokeAsync<IJSObjectReference>(_VAULT_SQL_GENERATOR_FACTORY_FUNCTION);
             var result = await vaultGenerator.InvokeAsync<JsonElement>("getCreateVaultSql");
 
             return new SqlGenerationResult
@@ -437,7 +434,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
                 SqlCommands = [.. result.GetProperty("sqlCommands").EnumerateArray()
                     .Select(x => x.GetString() ?? string.Empty)
                     .Where(x => !string.IsNullOrEmpty(x))],
-                Version = result.GetProperty("version").GetString() ?? "0.0.0",
+                Version = result.GetProperty("version").GetString() ?? _DEFAULT_VERSION,
                 MigrationNumber = result.GetProperty("migrationNumber").GetInt32(),
                 Error = result.TryGetProperty("error", out var errorElement) ? errorElement.GetString() : null,
             };
@@ -448,7 +445,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             {
                 Success = false,
                 SqlCommands = [],
-                Version = "0.0.0",
+                Version = _DEFAULT_VERSION,
                 MigrationNumber = 0,
                 Error = $"JavaScript error: {ex.Message}",
             };
@@ -464,20 +461,15 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         if (_vaultSqlInteropModule == null)
         {
             await InitializeAsync();
-            if (_vaultSqlInteropModule == null)
-            {
-                throw new InvalidOperationException("Failed to initialize identity generator module");
-            }
         }
 
-        var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+        var vaultGenerator = await _vaultSqlInteropModule!.InvokeAsync<IJSObjectReference>(_VAULT_SQL_GENERATOR_FACTORY_FUNCTION);
         var result = await vaultGenerator.InvokeAsync<JsonElement>("getAllVersions");
         return result.EnumerateArray().Select(x => new SqlVaultVersion
         {
             Revision = x.GetProperty("revision").GetInt32(),
             Version = x.GetProperty("version").GetString() ?? string.Empty,
             Description = x.GetProperty("description").GetString() ?? string.Empty,
-            ReleaseDate = DateTime.Parse(x.GetProperty("releaseDate").GetString() ?? string.Empty),
             ReleaseVersion = x.GetProperty("releaseVersion").GetString() ?? string.Empty,
         }).ToList();
     }
@@ -491,48 +483,17 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         if (_vaultSqlInteropModule == null)
         {
             await InitializeAsync();
-            if (_vaultSqlInteropModule == null)
-            {
-                throw new InvalidOperationException("Failed to initialize identity generator module");
-            }
         }
 
-        var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+        var vaultGenerator = await _vaultSqlInteropModule!.InvokeAsync<IJSObjectReference>(_VAULT_SQL_GENERATOR_FACTORY_FUNCTION);
         var result = await vaultGenerator.InvokeAsync<JsonElement>("getLatestVersion");
         return new SqlVaultVersion
         {
             Revision = result.GetProperty("revision").GetInt32(),
             Version = result.GetProperty("version").GetString() ?? string.Empty,
             Description = result.GetProperty("description").GetString() ?? string.Empty,
-            ReleaseDate = DateTime.Parse(result.GetProperty("releaseDate").GetString() ?? string.Empty),
             ReleaseVersion = result.GetProperty("releaseVersion").GetString() ?? string.Empty,
         };
-    }
-
-    /// <summary>
-    /// Gets SQL command to validate vault structure.
-    /// </summary>
-    /// <returns>SQL command to validate vault.</returns>
-    public async Task<string> GetVaultValidationSqlAsync()
-    {
-        try
-        {
-            if (_vaultSqlInteropModule == null)
-            {
-                await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
-            }
-
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
-            return await vaultGenerator.InvokeAsync<string>("getVaultValidationSql");
-        }
-        catch (JSException)
-        {
-            return string.Empty;
-        }
     }
 
     /// <summary>
@@ -548,13 +509,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_vaultSqlInteropModule == null)
             {
                 await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+            var vaultGenerator = await _vaultSqlInteropModule!.InvokeAsync<IJSObjectReference>(_VAULT_SQL_GENERATOR_FACTORY_FUNCTION);
             var result = targetMigrationNumber.HasValue
                 ? await vaultGenerator.InvokeAsync<JsonElement>("getUpgradeVaultSql", currentMigrationNumber, targetMigrationNumber.Value)
                 : await vaultGenerator.InvokeAsync<JsonElement>("getUpgradeToLatestSql", currentMigrationNumber);
@@ -565,7 +522,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
                 SqlCommands = [.. result.GetProperty("sqlCommands").EnumerateArray()
                     .Select(x => x.GetString() ?? string.Empty)
                     .Where(x => !string.IsNullOrEmpty(x))],
-                Version = result.GetProperty("version").GetString() ?? "0.0.0",
+                Version = result.GetProperty("version").GetString() ?? _DEFAULT_VERSION,
                 MigrationNumber = result.GetProperty("migrationNumber").GetInt32(),
                 Error = result.TryGetProperty("error", out var errorElement) ? errorElement.GetString() : null,
             };
@@ -576,7 +533,7 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             {
                 Success = false,
                 SqlCommands = [],
-                Version = "0.0.0",
+                Version = _DEFAULT_VERSION,
                 MigrationNumber = 0,
                 Error = $"JavaScript error: {ex.Message}",
             };
@@ -595,13 +552,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             if (_vaultSqlInteropModule == null)
             {
                 await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
             }
 
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+            var vaultGenerator = await _vaultSqlInteropModule!.InvokeAsync<IJSObjectReference>(_VAULT_SQL_GENERATOR_FACTORY_FUNCTION);
             return await vaultGenerator.InvokeAsync<bool>("validateVaultStructure", tableNames);
         }
         catch (JSException)
