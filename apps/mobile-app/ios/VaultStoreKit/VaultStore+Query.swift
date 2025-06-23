@@ -74,6 +74,30 @@ extension VaultStore {
         return dbConnection.changes
     }
 
+    /// Execute a raw SQL command on the database without parameters (for DDL operations like CREATE TABLE).
+    public func executeRaw(_ query: String) throws {
+        guard let dbConnection = self.dbConnection else {
+            throw NSError(domain: "VaultStore", code: 4, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+
+        // Split the query by semicolons to handle multiple statements
+        let statements = query.components(separatedBy: ";")
+        
+        for statement in statements {
+            let trimmedStatement = statement.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Skip empty statements and transaction control statements (handled externally)
+            if trimmedStatement.isEmpty ||
+               trimmedStatement.uppercased().hasPrefix("BEGIN TRANSACTION") ||
+               trimmedStatement.uppercased().hasPrefix("COMMIT") ||
+               trimmedStatement.uppercased().hasPrefix("ROLLBACK") {
+                continue
+            }
+            
+            try dbConnection.execute(trimmedStatement)
+        }
+    }
+
     /// Begin a transaction on the database. This is required for all database operations that modify the database.
     public func beginTransaction() throws {
         guard let dbConnection = self.dbConnection else {

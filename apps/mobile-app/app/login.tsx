@@ -192,6 +192,7 @@ export default function LoginScreen() : React.ReactNode {
     await dbContext.storeEncryptionKeyDerivationParams(encryptionKeyDerivationParams);
     await dbContext.initializeDatabase(vaultResponseJson);
 
+    let checkSuccess = true;
     /**
      * After setting auth tokens, execute a server status check immediately
      * which takes care of certain sanity checks such as ensuring client/server
@@ -203,11 +204,31 @@ export default function LoginScreen() : React.ReactNode {
        * Handle the status update.
        */
       onError: (message) => {
+        checkSuccess = false;
+
         // Show modal with error message
         Alert.alert('Error', message);
         webApi.logout(message);
-      }
+      },
+      /**
+       * On upgrade required.
+       */
+      onUpgradeRequired: async () : Promise<void> => {
+        checkSuccess = false;
+
+        // Still login to ensure the user is logged in.
+        await authContext.login();
+
+        // But after login, redirect to upgrade screen immediately.
+        router.replace('/upgrade');
+        return;
+      },
     });
+
+    if (!checkSuccess) {
+      // If the syncvault checks have failed, we can't continue with the login process.
+      return;
+    }
 
     await authContext.login();
 

@@ -163,7 +163,13 @@ export default function ReinitializeScreen() : React.ReactNode {
               }
             ]
           );
-        }
+        },
+        /**
+         * On upgrade required.
+         */
+        onUpgradeRequired: () : void => {
+          router.replace('/upgrade');
+        },
       });
     };
 

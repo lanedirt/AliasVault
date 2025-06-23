@@ -164,6 +164,19 @@ public class VaultManager: NSObject {
     }
 
     @objc
+    func executeRaw(_ query: String,
+                    resolver resolve: @escaping RCTPromiseResolveBlock,
+                    rejecter reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            // Execute the raw query through the vault store
+            try vaultStore.executeRaw(query)
+            resolve(nil)
+        } catch {
+            reject("RAW_ERROR", "Failed to execute raw query: \(error.localizedDescription)", error)
+        }
+    }
+
+    @objc
     func clearVault() {
         do {
             try vaultStore.clearVault()

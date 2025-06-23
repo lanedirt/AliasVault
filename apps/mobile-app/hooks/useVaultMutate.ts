@@ -85,7 +85,7 @@ export function useVaultMutate() : {
       client: '', // Empty on purpose, API will not use this for vault updates
       updatedAt: new Date().toISOString(),
       username: username,
-      version: await dbContext.sqliteClient!.getDatabaseVersion() ?? '0.0.0'
+      version: (await dbContext.sqliteClient!.getDatabaseVersion())?.version ?? '0.0.0'
     };
   }, [dbContext, authContext]);
 

@@ -175,6 +175,12 @@ export default function CredentialsScreen() : React.ReactNode {
           // Logout user
           await webApi.logout(error);
         },
+        /**
+         * On upgrade required.
+         */
+        onUpgradeRequired: () : void => {
+          router.replace('/upgrade');
+        },
       });
     } catch (err) {
       console.error('Error refreshing credentials:', err);
@@ -186,7 +192,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials, setRefreshing, webApi, authContext]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, setRefreshing, webApi, authContext, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
