@@ -55,9 +55,6 @@ public static class AppInfo
         { "edge", MinimumClientVersion },
         { "safari", MinimumClientVersion },
 
-        // Note: Brave currently identifies as "chrome" in the user agent string, so this version definition might be obsolete.
-        { "brave", MinimumClientVersion },
-
         // Fallback for unknown browsers.
         { "browser", MinimumClientVersion },
 
