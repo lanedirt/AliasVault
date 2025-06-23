@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { AppInfo } from '@/utils/AppInfo';
 
 import { useColors } from '@/hooks/useColorScheme';
 
+import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { ThemedView } from '@/components/themed/ThemedView';
 
 type ApiOption = {
@@ -72,13 +74,8 @@ export default function SettingsScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.background,
-      flex: 1,
-    },
     content: {
       flex: 1,
-      padding: 16,
     },
     formContainer: {
       gap: 16,
@@ -138,58 +135,61 @@ export default function SettingsScreen() : React.ReactNode {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </SafeAreaView>
+      <ThemedContainer>
+        <ThemedScrollView>
+          <View style={styles.content}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        </ThemedScrollView>
+      </ThemedContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>API Connection</Text>
-        </View>
+    <ThemedContainer>
+      <ThemedScrollView>
+        <ThemedView style={styles.content}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>API Connection</Text>
+          </View>
 
-        <View style={styles.formContainer}>
-          {DEFAULT_OPTIONS.map(option => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.optionButton,
-                selectedOption === option.value && styles.optionButtonSelected
-              ]}
-              onPress={() => handleOptionChange(option.value)}
-            >
-              <Text style={[
-                styles.optionButtonText,
-                selectedOption === option.value && styles.optionButtonTextSelected
-              ]}>
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <View style={styles.formContainer}>
+            {DEFAULT_OPTIONS.map(option => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.optionButton,
+                  selectedOption === option.value && styles.optionButtonSelected
+                ]}
+                onPress={() => handleOptionChange(option.value)}
+              >
+                <Text style={[
+                  styles.optionButtonText,
+                  selectedOption === option.value && styles.optionButtonTextSelected
+                ]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
 
-          {selectedOption === 'custom' && (
-            <View>
-              <Text style={styles.label}>Custom API URL</Text>
-              <TextInput
-                style={styles.input}
-                value={customUrl}
-                onChangeText={handleCustomUrlChange}
-                placeholder="https://my-aliasvault-instance.com/api"
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.versionText}>Version: {AppInfo.VERSION}</Text>
-      </ThemedView>
-    </SafeAreaView>
+            {selectedOption === 'custom' && (
+              <View>
+                <Text style={styles.label}>Custom API URL</Text>
+                <TextInput
+                  style={styles.input}
+                  value={customUrl}
+                  onChangeText={handleCustomUrlChange}
+                  placeholder="https://my-aliasvault-instance.com/api"
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            )}
+          </View>
+          <Text style={styles.versionText}>Version: {AppInfo.VERSION}</Text>
+        </ThemedView>
+      </ThemedScrollView>
+    </ThemedContainer>
   );
 }
