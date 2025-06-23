@@ -1,0 +1,20 @@
+﻿BEGIN TRANSACTION;
+ALTER TABLE "Settings" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "Services" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "Passwords" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "EncryptionKeys" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "Credentials" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "Attachment" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "Aliases" ADD "IsDeleted" INTEGER NOT NULL DEFAULT 0;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20240916105320_1.4.0-AddSyncSupport', '9.0.4');
+
+COMMIT;
+

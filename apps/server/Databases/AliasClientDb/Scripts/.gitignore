@@ -1,3 +1,5 @@
-# Ignore generated files
-MigrationSql
+# Ignore generated TS files
 MigrationTs
+
+# Include generated SQL files in version control for documentation purposes
+!MigrationSql/*.sql
