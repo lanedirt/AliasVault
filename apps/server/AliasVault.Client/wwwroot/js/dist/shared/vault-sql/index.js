@@ -546,13 +546,7 @@ var VaultSqlGenerator = class {
   getCreateVaultSql() {
     try {
       const sqlCommands = [
-        "PRAGMA foreign_keys = ON;",
-        COMPLETE_SCHEMA_SQL,
-        // Insert version tracking
-        `INSERT INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_version', '${VAULT_VERSIONS[VAULT_VERSIONS.length - 1].version}', datetime('now'), datetime('now'), 0);`,
-        `INSERT INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_migration_number', '${VAULT_VERSIONS[VAULT_VERSIONS.length - 1].revision}', datetime('now'), datetime('now'), 0);`
+        COMPLETE_SCHEMA_SQL
       ];
       return {
         success: true,
@@ -597,21 +591,13 @@ var VaultSqlGenerator = class {
       const migrationsToApply = VAULT_VERSIONS.filter(
         (v) => v.revision > currentMigrationNumber && v.revision <= targetMigration
       );
-      const sqlCommands = ["PRAGMA foreign_keys = ON;"];
+      const sqlCommands = [];
       for (const migration of migrationsToApply) {
         const migrationSql = MIGRATION_SCRIPTS[migration.revision];
         if (migrationSql) {
           sqlCommands.push(migrationSql);
         }
       }
-      sqlCommands.push(
-        `INSERT OR REPLACE INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_version', '${targetVersionInfo.version}', datetime('now'), datetime('now'), 0);`
-      );
-      sqlCommands.push(
-        `INSERT OR REPLACE INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_migration_number', '${targetMigration}', datetime('now'), datetime('now'), 0);`
-      );
       return {
         success: true,
         sqlCommands,
