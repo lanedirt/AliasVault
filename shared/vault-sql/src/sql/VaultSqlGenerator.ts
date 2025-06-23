@@ -36,13 +36,7 @@ export class VaultSqlGenerator {
   getCreateVaultSql(): SqlGenerationResult {
     try {
       const sqlCommands = [
-        'PRAGMA foreign_keys = ON;',
         COMPLETE_SCHEMA_SQL,
-        // Insert version tracking
-        `INSERT INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_version', '${VAULT_VERSIONS[VAULT_VERSIONS.length - 1].version}', datetime('now'), datetime('now'), 0);`,
-        `INSERT INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_migration_number', '${VAULT_VERSIONS[VAULT_VERSIONS.length - 1].revision}', datetime('now'), datetime('now'), 0);`
       ];
 
       return {
@@ -96,7 +90,7 @@ export class VaultSqlGenerator {
              v.revision <= targetMigration
       );
 
-      const sqlCommands: string[] = ['PRAGMA foreign_keys = ON;'];
+      const sqlCommands: string[] = [];
 
       // Add migration SQL commands
       for (const migration of migrationsToApply) {
@@ -105,16 +99,6 @@ export class VaultSqlGenerator {
           sqlCommands.push(migrationSql);
         }
       }
-
-      // Update version tracking
-      sqlCommands.push(
-        `INSERT OR REPLACE INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_version', '${targetVersionInfo.version}', datetime('now'), datetime('now'), 0);`
-      );
-      sqlCommands.push(
-        `INSERT OR REPLACE INTO "Settings" ("Key", "Value", "CreatedAt", "UpdatedAt", "IsDeleted")
-         VALUES ('vault_migration_number', '${targetMigration}', datetime('now'), datetime('now'), 0);`
-      );
 
       return {
         success: true,
