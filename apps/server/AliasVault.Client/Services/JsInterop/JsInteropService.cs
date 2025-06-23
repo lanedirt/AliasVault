@@ -5,10 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Client.Services;
+namespace AliasVault.Client.Services.JsInterop;
 
 using System.Security.Cryptography;
 using System.Text.Json;
+using AliasVault.Client.Services.JsInterop.Models;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -455,33 +456,57 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     }
 
     /// <summary>
+    /// Gets all available vault versions.
+    /// </summary>
+    /// <returns>List of vault versions.</returns>
+    public async Task<List<SqlVaultVersion>> GetAllVaultVersionsAsync()
+    {
+        if (_vaultSqlInteropModule == null)
+        {
+            await InitializeAsync();
+            if (_vaultSqlInteropModule == null)
+            {
+                throw new InvalidOperationException("Failed to initialize identity generator module");
+            }
+        }
+
+        var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+        var result = await vaultGenerator.InvokeAsync<JsonElement>("getAllVersions");
+        return result.EnumerateArray().Select(x => new SqlVaultVersion
+        {
+            Revision = x.GetProperty("revision").GetInt32(),
+            Version = x.GetProperty("version").GetString() ?? string.Empty,
+            Description = x.GetProperty("description").GetString() ?? string.Empty,
+            ReleaseDate = DateTime.Parse(x.GetProperty("releaseDate").GetString() ?? string.Empty),
+            ReleaseVersion = x.GetProperty("releaseVersion").GetString() ?? string.Empty,
+        }).ToList();
+    }
+
+    /// <summary>
     /// Gets SQL commands to check current vault version.
     /// </summary>
     /// <returns>Array of SQL commands to execute.</returns>
-    public async Task<string[]> GetVersionCheckSqlAsync()
+    public async Task<SqlVaultVersion> GetLatestVaultVersionAsync()
     {
-        try
+        if (_vaultSqlInteropModule == null)
         {
+            await InitializeAsync();
             if (_vaultSqlInteropModule == null)
             {
-                await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
+                throw new InvalidOperationException("Failed to initialize identity generator module");
             }
+        }
 
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
-            var result = await vaultGenerator.InvokeAsync<JsonElement>("getVersionCheckSql");
-            return result.EnumerateArray()
-                .Select(x => x.GetString() ?? string.Empty)
-                .Where(x => !string.IsNullOrEmpty(x))
-                .ToArray();
-        }
-        catch (JSException)
+        var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
+        var result = await vaultGenerator.InvokeAsync<JsonElement>("getLatestVersion");
+        return new SqlVaultVersion
         {
-            return [];
-        }
+            Revision = result.GetProperty("revision").GetInt32(),
+            Version = result.GetProperty("version").GetString() ?? string.Empty,
+            Description = result.GetProperty("description").GetString() ?? string.Empty,
+            ReleaseDate = DateTime.Parse(result.GetProperty("releaseDate").GetString() ?? string.Empty),
+            ReleaseVersion = result.GetProperty("releaseVersion").GetString() ?? string.Empty,
+        };
     }
 
     /// <summary>
@@ -559,52 +584,6 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     }
 
     /// <summary>
-    /// Parses vault version information from query results.
-    /// </summary>
-    /// <param name="settingsTableExists">Whether Settings table exists.</param>
-    /// <param name="versionResult">Version query result.</param>
-    /// <param name="migrationResult">Migration number query result.</param>
-    /// <returns>Parsed vault version information.</returns>
-    public async Task<VaultVersionInfo> ParseVaultVersionInfoAsync(bool settingsTableExists, string? versionResult = null, string? migrationResult = null)
-    {
-        try
-        {
-            if (_vaultSqlInteropModule == null)
-            {
-                await InitializeAsync();
-                if (_vaultSqlInteropModule == null)
-                {
-                    throw new InvalidOperationException("Failed to initialize identity generator module");
-                }
-            }
-
-            var vaultGenerator = await _vaultSqlInteropModule.InvokeAsync<IJSObjectReference>("CreateVaultSqlGenerator");
-            var result = await vaultGenerator.InvokeAsync<JsonElement>("parseVaultVersionInfo", settingsTableExists, versionResult, migrationResult);
-
-            return new VaultVersionInfo
-            {
-                CurrentVersion = result.GetProperty("currentVersion").GetString() ?? "0.0.0",
-                CurrentMigrationNumber = result.GetProperty("currentMigrationNumber").GetInt32(),
-                TargetVersion = result.GetProperty("targetVersion").GetString() ?? "0.0.0",
-                TargetMigrationNumber = result.GetProperty("targetMigrationNumber").GetInt32(),
-                NeedsUpgrade = result.GetProperty("needsUpgrade").GetBoolean(),
-            };
-        }
-        catch (JSException ex)
-        {
-            return new VaultVersionInfo
-            {
-                CurrentVersion = "0.0.0",
-                CurrentMigrationNumber = 0,
-                TargetVersion = "0.0.0",
-                TargetMigrationNumber = 0,
-                NeedsUpgrade = true,
-                Error = $"JavaScript error: {ex.Message}",
-            };
-        }
-    }
-
-    /// <summary>
     /// Validates vault structure from table names.
     /// </summary>
     /// <param name="tableNames">List of table names found in database.</param>
@@ -629,109 +608,6 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         {
             return false;
         }
-    }
-
-   /// <summary>
-    /// Represents the result of a JavaScript identity generator operation.
-    /// </summary>
-    public sealed class AliasVaultIdentity
-    {
-        /// <summary>
-        /// Gets the first name.
-        /// </summary>
-        public string? FirstName { get; init; }
-
-        /// <summary>
-        /// Gets the last name.
-        /// </summary>
-        public string? LastName { get; init; }
-
-        /// <summary>
-        /// Gets the birth date.
-        /// </summary>
-        public string? BirthDate { get; init; }
-
-        /// <summary>
-        /// Gets the email prefix.
-        /// </summary>
-        public string? EmailPrefix { get; init; }
-
-        /// <summary>
-        /// Gets the nickname.
-        /// </summary>
-        public string? NickName { get; init; }
-
-        /// <summary>
-        /// Gets the gender.
-        /// </summary>
-        public string? Gender { get; init; }
-    }
-
-    /// <summary>
-    /// Represents the result of SQL generation for vault operations.
-    /// </summary>
-    public sealed class SqlGenerationResult
-    {
-        /// <summary>
-        /// Gets a value indicating whether the SQL generation was successful.
-        /// </summary>
-        public bool Success { get; init; }
-
-        /// <summary>
-        /// Gets the generated SQL commands to execute.
-        /// </summary>
-        public List<string> SqlCommands { get; init; } = [];
-
-        /// <summary>
-        /// Gets the vault version.
-        /// </summary>
-        public string Version { get; init; } = "0.0.0";
-
-        /// <summary>
-        /// Gets the migration number.
-        /// </summary>
-        public int MigrationNumber { get; init; }
-
-        /// <summary>
-        /// Gets the optional error message.
-        /// </summary>
-        public string? Error { get; init; }
-    }
-
-    /// <summary>
-    /// Represents vault version information.
-    /// </summary>
-    public sealed class VaultVersionInfo
-    {
-        /// <summary>
-        /// Gets the current vault version.
-        /// </summary>
-        public string CurrentVersion { get; init; } = "0.0.0";
-
-        /// <summary>
-        /// Gets the current migration number.
-        /// </summary>
-        public int CurrentMigrationNumber { get; init; }
-
-        /// <summary>
-        /// Gets the target vault version.
-        /// </summary>
-        public string TargetVersion { get; init; } = "0.0.0";
-
-        /// <summary>
-        /// Gets the target migration number.
-        /// </summary>
-        public int TargetMigrationNumber { get; init; }
-
-        /// <summary>
-        /// Gets a value indicating whether the vault needs to be upgraded.
-        /// </summary>
-        public bool NeedsUpgrade { get; init; }
-
-        /// <summary>
-        /// Gets the optional error message.
-        /// </summary>
-        public string? Error { get; init; }
     }
 
     /// <summary>

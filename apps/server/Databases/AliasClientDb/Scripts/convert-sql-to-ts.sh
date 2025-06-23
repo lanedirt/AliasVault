@@ -151,63 +151,6 @@ EOF
 echo "TypeScript constants file generated: $OUTPUT_FILE"
 echo "Total migrations processed: ${#migration_files[@]}"
 
-# Now generate the vault versions file
-echo ""
-echo "Generating vault versions mapping..."
-
-# Start building the vault versions file
-cat > "$VERSIONS_FILE" << 'EOF'
-/**
- * Vault version information
- * Auto-generated from EF Core migration filenames
- */
-
-import { IVaultVersion } from "../types/VaultVersion";
-
-/**
- * Available vault versions in chronological order
- */
-export const VAULT_VERSIONS: IVaultVersion[] = [
-EOF
-
-# Remove: declare -A versions_seen
-last_version=""
-for file in "${migration_files[@]}"; do
-    filename=$(basename "$file")
-    # Extract revision from filename prefix
-    revision=$(echo "$filename" | sed -n 's/^0*\([0-9]*\)_.*$/\1/p')
-    # Debug: print filename
-    echo "DEBUG: Processing file $filename"
-    last_segment=$(echo "$filename" | awk -F'_to_' '{print $NF}' | sed 's/\.sql$//')
-    echo "DEBUG: Last segment: $last_segment"
-    version_info=$(extract_version_info "$filename")
-    version=$(echo "$version_info" | cut -d'|' -f1)
-    description=$(echo "$version_info" | cut -d'|' -f2)
-    release_date=$(echo "$version_info" | cut -d'|' -f3)
-
-    echo "DEBUG: $filename -> revision='$revision', version='$version', description='$description', release_date='$release_date'"
-
-    # Only output if version is not empty and not a duplicate of the last one
-    if [ -n "$version" ] && [ -n "$description" ] && [ "$version" != "$last_version" ]; then
-        last_version="$version"
-        echo "Found version $version: $description ($release_date)"
-        cat >> "$VERSIONS_FILE" << EOF
-  {
-    revision: $revision,
-    version: '$version',
-    description: '$description',
-    releaseDate: '$release_date'
-  },
-EOF
-    fi
-done
-
-# Close the vault versions file
-cat >> "$VERSIONS_FILE" << 'EOF'
-];
-EOF
-
-echo "Vault versions file generated: $VERSIONS_FILE"
 
 # Copy generated files to shared vault-sql directory
 echo ""
@@ -222,9 +165,6 @@ fi
 
 # Copy SqlConstants.ts
 copy_to_shared_sql "$OUTPUT_FILE" "$SHARED_SQL_DIR/SqlConstants.ts"
-
-# Copy VaultVersions.ts
-copy_to_shared_sql "$VERSIONS_FILE" "$SHARED_SQL_DIR/VaultVersions.ts"
 
 echo ""
 echo "Done!"

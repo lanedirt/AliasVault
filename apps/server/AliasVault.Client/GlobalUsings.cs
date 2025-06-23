@@ -12,4 +12,5 @@
 global using AliasVault.Client.Main.Models;
 global using AliasVault.Client.Services;
 global using AliasVault.Client.Services.Auth;
+global using AliasVault.Client.Services.JsInterop;
 global using AliasVault.Client.Services.Database;

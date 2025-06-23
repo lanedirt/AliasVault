@@ -234,14 +234,14 @@ export class VaultSqlGenerator {
   /**
    * Get all available vault versions
    */
-  getAvailableVersions(): IVaultVersion[] {
+  getAllVersions(): IVaultVersion[] {
     return [...VAULT_VERSIONS];
   }
 
   /**
    * Get current/latest vault version info
    */
-  getCurrentVersion(): IVaultVersion {
+  getLatestVersion(): IVaultVersion {
     return VAULT_VERSIONS[VAULT_VERSIONS.length - 1];
   }
 
@@ -255,7 +255,7 @@ export class VaultSqlGenerator {
   /**
    * Get complete schema SQL for creating new vault
    */
-  getCompleteSchemaeSql(): string {
+  getCompleteSchemaSql(): string {
     return COMPLETE_SCHEMA_SQL;
   }
 }
