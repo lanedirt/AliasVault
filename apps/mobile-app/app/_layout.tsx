@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font';
 import { Href, Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
-import { Linking, StyleSheet, Alert } from 'react-native';
+import { Linking, StyleSheet, Alert, Platform } from 'react-native';
 import 'react-native-reanimated';
 import 'react-native-get-random-values';
 import { install } from 'react-native-quick-crypto';
@@ -247,7 +247,7 @@ function RootLayoutNav() : React.ReactNode {
         screenOptions={{
           headerShown: true,
           animation: 'none',
-          headerTransparent: true,
+          headerTransparent: Platform.OS === 'ios',
           headerStyle: {
             backgroundColor: colors.accentBackground,
           },
