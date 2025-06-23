@@ -56,6 +56,7 @@ jobs:
             "utils/dist/shared/identity-generator"
             "utils/dist/shared/password-generator"
             "utils/dist/shared/models"
+            "utils/dist/shared/vault-sql"
           )
 
           for dir in "${TARGET_DIRS[@]}"; do
