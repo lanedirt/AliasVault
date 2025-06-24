@@ -21,6 +21,7 @@ import Logout from '@/entrypoints/popup/pages/Logout';
 import Settings from '@/entrypoints/popup/pages/Settings';
 import Unlock from '@/entrypoints/popup/pages/Unlock';
 import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
+import Upgrade from '@/entrypoints/popup/pages/Upgrade';
 
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 
@@ -52,6 +53,7 @@ const App: React.FC = () => {
     { path: '/login', element: <Login />, showBackButton: false },
     { path: '/unlock', element: <Unlock />, showBackButton: false },
     { path: '/unlock-success', element: <UnlockSuccess onClose={() => window.location.search = ''} />, showBackButton: false },
+    { path: '/upgrade', element: <Upgrade />, showBackButton: false },
     { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
     { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: 'Add credential' },
