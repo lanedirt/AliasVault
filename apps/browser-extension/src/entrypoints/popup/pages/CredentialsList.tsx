@@ -88,8 +88,7 @@ const CredentialsList: React.FC = () => {
     setIsLoading(true);
     await onRefresh();
     setIsLoading(false);
-    setIsInitialLoading(false);
-  }, [onRefresh, setIsLoading, setIsInitialLoading]);
+  }, [onRefresh, setIsLoading]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -127,16 +126,12 @@ const CredentialsList: React.FC = () => {
         const results = dbContext.sqliteClient?.getAllCredentials() ?? [];
         setCredentials(results);
         setIsLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
     refreshCredentials();
-  }, [dbContext?.sqliteClient, setIsLoading]);
-
-  // Call syncVaultAndRefresh when the page first mounts
-  useEffect(() => {
-    syncVaultAndRefresh();
-  }, [syncVaultAndRefresh]);
+  }, [dbContext?.sqliteClient, setIsLoading, setIsInitialLoading]);
 
   // Add this function to filter credentials
   const filteredCredentials = credentials.filter(cred => {
