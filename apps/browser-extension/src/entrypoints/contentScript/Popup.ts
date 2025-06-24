@@ -1462,3 +1462,92 @@ function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => vo
     isMouseDown = false;
   }, { capture: true });
 }
+
+/**
+ * Create upgrade required popup.
+ */
+export function createUpgradeRequiredPopup(input: HTMLInputElement, rootContainer: HTMLElement, errorMessage: string): void {
+  /**
+   * Handle upgrade click.
+   */
+  const handleUpgradeClick = () : void => {
+    sendMessage('OPEN_POPUP', {}, 'background');
+    removeExistingPopup(rootContainer);
+  }
+
+  const popup = createBasePopup(input, rootContainer);
+  popup.classList.add('av-upgrade-required');
+
+  // Create container for message and button
+  const container = document.createElement('div');
+  container.className = 'av-upgrade-required-container';
+
+  // Make the entire container clickable
+  addReliableClickHandler(container, handleUpgradeClick);
+  container.style.cursor = 'pointer';
+
+  // Add message
+  const messageElement = document.createElement('div');
+  messageElement.className = 'av-upgrade-required-message';
+  messageElement.textContent = errorMessage;
+  container.appendChild(messageElement);
+
+  // Add upgrade button with SVG icon
+  const button = document.createElement('button');
+  button.title = 'Open AliasVault to upgrade';
+  button.className = 'av-upgrade-required-button';
+  button.innerHTML = `
+    <svg class="av-icon-upgrade" viewBox="0 0 24 24">
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+    </svg>
+  `;
+  container.appendChild(button);
+
+  // Add the container to the popup
+  popup.appendChild(container);
+
+  // Add close button as a separate element positioned to the right
+  const closeButton = document.createElement('button');
+  closeButton.className = 'av-button av-button-close av-upgrade-required-close';
+  closeButton.title = 'Dismiss popup';
+  closeButton.innerHTML = `
+    <svg class="av-icon" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  `;
+
+  // Position the close button to the right of the container
+  closeButton.style.position = 'absolute';
+  closeButton.style.right = '8px';
+  closeButton.style.top = '50%';
+  closeButton.style.transform = 'translateY(-50%)';
+
+  // Handle close button click
+  addReliableClickHandler(closeButton, (e) => {
+    e.stopPropagation(); // Prevent opening the upgrade popup
+    removeExistingPopup(rootContainer);
+  });
+
+  popup.appendChild(closeButton);
+
+  /**
+   * Add event listener to document to close popup when clicking outside.
+   */
+  const handleClickOutside = (event: MouseEvent): void => {
+    const target = event.target as Node;
+    const targetElement = event.target as HTMLElement;
+
+    // Check if the click is outside the popup and outside the shadow UI
+    if (popup && !popup.contains(target) && !input.contains(target) && targetElement.tagName !== 'ALIASVAULT-UI') {
+      removeExistingPopup(rootContainer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+  };
+
+  setTimeout(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+  }, 100);
+
+  rootContainer.appendChild(popup);
+}

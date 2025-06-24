@@ -14,9 +14,9 @@ import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types
 import { WebApiService } from '@/utils/WebApiService';
 
 /**
- * Check if the user is logged in and if the vault is locked.
+ * Check if the user is logged in and if the vault is locked, and also check for pending migrations.
  */
-export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, isVaultLocked: boolean }> {
+export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, isVaultLocked: boolean, hasPendingMigrations: boolean, error?: string }> {
   const username = await storage.getItem('local:username');
   const accessToken = await storage.getItem('local:accessToken');
   const vaultData = await storage.getItem('session:encryptedVault');
@@ -24,10 +24,42 @@ export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, i
   const isLoggedIn = username !== null && accessToken !== null;
   const isVaultLocked = isLoggedIn && vaultData === null;
 
-  return {
-    isLoggedIn,
-    isVaultLocked
-  };
+  // If vault is locked, we can't check for pending migrations
+  if (isVaultLocked) {
+    return {
+      isLoggedIn,
+      isVaultLocked,
+      hasPendingMigrations: false
+    };
+  }
+
+  // If not logged in, no need to check migrations
+  if (!isLoggedIn) {
+    return {
+      isLoggedIn,
+      isVaultLocked,
+      hasPendingMigrations: false
+    };
+  }
+
+  // Vault is unlocked, check for pending migrations
+  try {
+    const sqliteClient = await createVaultSqliteClient();
+    const hasPendingMigrations = await sqliteClient.hasPendingMigrations();
+    return {
+      isLoggedIn,
+      isVaultLocked,
+      hasPendingMigrations
+    };
+  } catch (error) {
+    console.error('Error checking pending migrations:', error);
+    return {
+      isLoggedIn,
+      isVaultLocked,
+      hasPendingMigrations: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+  }
 }
 
 /**

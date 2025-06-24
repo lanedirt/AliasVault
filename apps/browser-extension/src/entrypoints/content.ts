@@ -2,7 +2,7 @@ import '@/entrypoints/contentScript/style.css';
 import { onMessage } from "webext-bridge/content-script";
 
 import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/entrypoints/contentScript/Form';
-import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup } from '@/entrypoints/contentScript/Popup';
+import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup, createUpgradeRequiredPopup } from '@/entrypoints/contentScript/Popup';
 
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
@@ -69,7 +69,7 @@ export default defineContentScript({
 
               // Only show popup if debounce time has passed
               if (popupDebounceTimeHasPassed()) {
-                openAutofillPopup(inputElement, container);
+                await showPopupWithAuthCheck(inputElement, container);
               }
             }
           }
@@ -132,6 +132,48 @@ export default defineContentScript({
 
           if (canShowPopup) {
             injectIcon(inputElement, container);
+            await showPopupWithAuthCheck(inputElement, container);
+          }
+        }
+
+        /**
+         * Show popup with auth check.
+         */
+        async function showPopupWithAuthCheck(inputElement: HTMLInputElement, container: HTMLElement) : Promise<void> {
+          try {
+            // Check auth status and pending migrations in a single call
+            const { sendMessage } = await import('webext-bridge/content-script');
+            const authStatus = await sendMessage('CHECK_AUTH_STATUS', {}, 'background') as {
+              isLoggedIn: boolean,
+              isVaultLocked: boolean,
+              hasPendingMigrations: boolean,
+              error?: string
+            };
+
+            if (authStatus.isVaultLocked) {
+              // Vault is locked, show vault locked popup
+              const { createVaultLockedPopup } = await import('@/entrypoints/contentScript/Popup');
+              createVaultLockedPopup(inputElement, container);
+              return;
+            }
+
+            if (authStatus.hasPendingMigrations) {
+              // Show upgrade required popup
+              createUpgradeRequiredPopup(inputElement, container, 'Vault upgrade required.');
+              return;
+            }
+
+            if (authStatus.error) {
+              // Show upgrade required popup for version-related errors
+              createUpgradeRequiredPopup(inputElement, container, authStatus.error);
+              return;
+            }
+
+            // No upgrade required, show normal autofill popup
+            openAutofillPopup(inputElement, container);
+          } catch (error) {
+            console.error('Error checking vault status:', error);
+            // Fall back to normal autofill popup if check fails
             openAutofillPopup(inputElement, container);
           }
         }
