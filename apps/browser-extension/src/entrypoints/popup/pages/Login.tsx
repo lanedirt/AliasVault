@@ -169,8 +169,8 @@ const Login: React.FC = () => {
         return;
       }
 
-      // Navigate to credentials page after successful login
-      navigate('/credentials', { replace: true });
+      // Navigate to reinitialize page which will take care of the proper redirect.
+      navigate('/reinitialize', { replace: true });
 
       // Show app.
       hideLoading();
@@ -245,8 +245,8 @@ const Login: React.FC = () => {
         return;
       }
 
-      // Navigate to credentials page after successful login
-      navigate('/credentials', { replace: true });
+      // Navigate to reinitialize page which will take care of the proper redirect.
+      navigate('/reinitialize', { replace: true });
 
       // Reset 2FA state and login response as it's no longer needed
       setTwoFactorRequired(false);
