@@ -29,12 +29,17 @@ export class WebApiService {
    * Get the base URL for the API from settings.
    */
   private async getBaseUrl(): Promise<string> {
-    const result = await storage.getItem('local:apiUrl') as string;
-    if (result && result.length > 0) {
-      return result.replace(/\/$/, '') + '/v1/';
-    }
+    const apiUrl = await this.getApiUrl();
+    return apiUrl.replace(/\/$/, '') + '/v1/';
+  }
 
-    return AppInfo.DEFAULT_API_URL.replace(/\/$/, '') + '/v1/';
+
+  /**
+   * Check if the current server is self-hosted.
+   */
+  public async isSelfHosted(): Promise<boolean> {
+    const apiUrl = await this.getApiUrl();
+    return apiUrl !== AppInfo.DEFAULT_API_URL;
   }
 
   /**
@@ -298,9 +303,6 @@ export class WebApiService {
       return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
     }
 
-    if (!AppInfo.isVaultVersionSupported(vaultResponseJson.vault.version)) {
-      return 'Your vault is outdated. Please login via the web client to update your vault.';
-    }
 
     return null;
   }
@@ -327,6 +329,14 @@ export class WebApiService {
   private async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
     await storage.setItem('local:accessToken', accessToken);
     await storage.setItem('local:refreshToken', refreshToken);
+  }
+
+  /**
+   * Get the API URL from settings.
+   */
+  private async getApiUrl(): Promise<string> {
+    const result = await storage.getItem('local:apiUrl') as string;
+    return result ?? AppInfo.DEFAULT_API_URL;
   }
 
   /**
