@@ -384,6 +384,22 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     }
 
     /**
+     * Execute a raw SQL query on the vault without parameters.
+     * @param query The raw SQL query
+     * @param promise The promise to resolve
+     */
+    @ReactMethod
+    override fun executeRaw(query: String, promise: Promise) {
+        try {
+            vaultStore.executeRaw(query)
+            promise.resolve(null)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error executing raw query", e)
+            promise.reject("ERR_EXECUTE_RAW", "Failed to execute raw query: ${e.message}", e)
+        }
+    }
+
+    /**
      * Begin a transaction on the vault.
      * @param promise The promise to resolve
      */
