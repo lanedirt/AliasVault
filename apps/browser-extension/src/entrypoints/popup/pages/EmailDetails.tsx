@@ -201,6 +201,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
         title="Delete Email"
         message="Are you sure you want to delete this email? This action cannot be undone."
         confirmText="Delete"
+        cancelText="Cancel"
         variant="danger"
       />
 

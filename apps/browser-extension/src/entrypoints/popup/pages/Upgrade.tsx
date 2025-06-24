@@ -5,6 +5,7 @@ import Button from '@/entrypoints/popup/components/Button';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
+import Modal from '@/entrypoints/popup/components/Modal';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
@@ -29,6 +30,8 @@ const Upgrade: React.FC = () => {
   const [currentVersion, setCurrentVersion] = useState<VaultVersion | null>(null);
   const [latestVersion, setLatestVersion] = useState<VaultVersion | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showSelfHostedWarning, setShowSelfHostedWarning] = useState(false);
+  const [showVersionInfo, setShowVersionInfo] = useState(false);
   const { setIsInitialLoading } = useLoading();
   const webApi = useWebApi();
   const { executeVaultMutation, isLoading: isVaultMutationLoading, syncStatus } = useVaultMutate();
@@ -87,14 +90,8 @@ const Upgrade: React.FC = () => {
 
     // Check if this is a self-hosted instance and show warning if needed
     if (await webApi.isSelfHosted()) {
-      const confirmed = window.confirm(
-        'Self-Hosted Server\n\n' +
-        "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.\n\n" +
-        'Do you want to continue with the upgrade?'
-      );
-      if (!confirmed) {
-        return;
-      }
+      setShowSelfHostedWarning(true);
+      return;
     }
 
     await performUpgrade();
@@ -222,10 +219,7 @@ const Upgrade: React.FC = () => {
    * Show version description dialog.
    */
   const showVersionDialog = (): void => {
-    alert(
-      "What's New\n\n" +
-      `An upgrade is required to support the following changes:\n\n${latestVersion?.description ?? 'No description available for this version.'}`
-    );
+    setShowVersionInfo(true);
   };
 
   return (
@@ -239,6 +233,29 @@ const Upgrade: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Self-hosted warning modal */}
+      <Modal
+        isOpen={showSelfHostedWarning}
+        onClose={() => setShowSelfHostedWarning(false)}
+        onConfirm={() => {
+          setShowSelfHostedWarning(false);
+          void performUpgrade();
+        }}
+        title="Self-Hosted Server"
+        message="If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working. Do you want to continue with the upgrade?"
+        confirmText="Continue"
+        cancelText="Cancel"
+      />
+
+      {/* Version info modal */}
+      <Modal
+        isOpen={showVersionInfo}
+        onClose={() => setShowVersionInfo(false)}
+        onConfirm={() => setShowVersionInfo(false)}
+        title="What's New"
+        message={`An upgrade is required to support the following changes:\n\n${latestVersion?.description ?? 'No description available for this version.'}`}
+      />
 
       <form className="w-full px-2 pt-2 pb-2 mb-4">
         {error && (

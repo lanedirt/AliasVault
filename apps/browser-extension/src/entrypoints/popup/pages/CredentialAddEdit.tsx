@@ -502,6 +502,7 @@ const CredentialAddEdit: React.FC = () => {
         title="Delete Credential"
         message="Are you sure you want to delete this credential? This action cannot be undone."
         confirmText="Delete"
+        cancelText="Cancel"
         variant="danger"
       />
 
