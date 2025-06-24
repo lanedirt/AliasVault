@@ -188,6 +188,7 @@ export default function LoginScreen() : React.ReactNode {
         // Show modal with error message
         Alert.alert('Error', message);
         webApi.logout(message);
+        setIsLoading(false);
       },
       /**
        * On upgrade required.

@@ -99,7 +99,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [sqliteClient, unlockVault]);
 
   /**
-   * Check if there are any pending migrations.
+   * Check if there are any pending migrations. This method also checks if the current vault version is known to the client.
+   * If the current vault version is not known to the client, the method will throw an exception which causes the app to logout.
    */
   const hasPendingMigrations = useCallback(async () => {
     const currentVersion = await sqliteClient.getDatabaseVersion();
