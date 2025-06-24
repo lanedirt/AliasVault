@@ -27,14 +27,11 @@ const Upgrade: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<VaultVersion | null>(null);
   const [latestVersion, setLatestVersion] = useState<VaultVersion | null>(null);
-  const [upgradeStatus, setUpgradeStatus] = useState('Preparing upgrade...');
   const [error, setError] = useState<string | null>(null);
   const { setIsInitialLoading } = useLoading();
   const webApi = useWebApi();
   const { syncVault } = useVaultSync();
   const navigate = useNavigate();
-
-  console.log('upgrade page mounted');
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -111,12 +108,10 @@ const Upgrade: React.FC = () => {
     }
 
     setIsLoading(true);
-    setUpgradeStatus('Preparing upgrade...');
     setError(null);
 
     try {
       // Get upgrade SQL commands from vault-sql shared library
-      setUpgradeStatus('Generating upgrade SQL...');
       const vaultSqlGenerator = new VaultSqlGenerator();
       const upgradeResult = vaultSqlGenerator.getUpgradeVaultSql(currentVersion.revision, latestVersion.revision);
 
@@ -126,21 +121,16 @@ const Upgrade: React.FC = () => {
 
       if (upgradeResult.sqlCommands.length === 0) {
         // No upgrade needed, vault is already up to date
-        setUpgradeStatus('Vault is already up to date');
-        await new Promise(resolve => setTimeout(resolve, 1000));
         await handleUpgradeSuccess();
         return;
       }
 
       // Begin transaction
-      setUpgradeStatus('Starting database transaction...');
       sqliteClient.beginTransaction();
 
       // Execute each SQL command
-      setUpgradeStatus('Applying database migrations...');
       for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
         const sqlCommand = upgradeResult.sqlCommands[i];
-        setUpgradeStatus(`Applying migration ${i + 1} of ${upgradeResult.sqlCommands.length}...`);
 
         try {
           sqliteClient.executeRaw(sqlCommand);
@@ -152,15 +142,12 @@ const Upgrade: React.FC = () => {
       }
 
       // Commit transaction
-      setUpgradeStatus('Committing changes...');
       sqliteClient.commitTransaction();
 
       // Upload to server
-      setUpgradeStatus('Uploading vault to server...');
       await uploadVaultToServer();
 
       // Sync and navigate to credentials
-      setUpgradeStatus('Finalizing upgrade...');
       await handleUpgradeSuccess();
 
     } catch (error) {
@@ -168,7 +155,6 @@ const Upgrade: React.FC = () => {
       setError(error instanceof Error ? error.message : 'An unknown error occurred during the upgrade. Please try again.');
     } finally {
       setIsLoading(false);
-      setUpgradeStatus('Preparing upgrade...');
     }
   };
 
@@ -236,11 +222,6 @@ const Upgrade: React.FC = () => {
       // Sync vault to ensure we have the latest data
       await syncVault({
         /**
-         * Update status message during sync.
-         * @param message Status message
-         */
-        onStatus: (message: string) => setUpgradeStatus(message),
-        /**
          * Handle successful sync completion.
          */
         onSuccess: () => {
@@ -282,7 +263,7 @@ const Upgrade: React.FC = () => {
   };
 
   if (isLoading) {
-    return <LoadingSpinnerFullScreen status={upgradeStatus} />;
+    return <LoadingSpinnerFullScreen />;
   }
 
   return (
@@ -293,26 +274,21 @@ const Upgrade: React.FC = () => {
             {error}
           </div>
         )}
-        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">Upgrade Required</h2>
+        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">Upgrade Vault</h2>
 
         {/* User display section like settings page */}
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
-                  {username?.[0]?.toUpperCase() || '?'}
-                </span>
-              </div>
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+              <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
+                {username?.[0]?.toUpperCase() || '?'}
+              </span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {username}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Logged in
-              </p>
-            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {username}
+            </p>
           </div>
         </div>
 
@@ -354,17 +330,16 @@ const Upgrade: React.FC = () => {
           <Button
             type="button"
             onClick={handleUpgrade}
-            disabled={isLoading || !currentVersion || !latestVersion}
           >
             {isLoading ? 'Upgrading...' : 'Upgrade Vault'}
           </Button>
-          <Button
+          <button
             type="button"
             onClick={handleLogout}
-            variant="secondary"
+            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium py-2"
           >
             Logout
-          </Button>
+          </button>
         </div>
       </form>
     </div>

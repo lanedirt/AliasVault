@@ -45,6 +45,11 @@ const Header: React.FC<HeaderProps> = ({
    * Handle logo click.
    */
   const logoClick = () : void => {
+    // Don't navigate if on upgrade page or login page
+    if (location.pathname === '/upgrade' || location.pathname === '/login') {
+      return;
+    }
+
     // If logged in, navigate to credentials.
     if (authContext.isLoggedIn) {
       navigate('/credentials');
