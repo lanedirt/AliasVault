@@ -8,6 +8,7 @@ import LoadingSpinnerFullScreen from '@/entrypoints/popup/components/LoadingSpin
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
@@ -28,9 +29,12 @@ const Upgrade: React.FC = () => {
   const [latestVersion, setLatestVersion] = useState<VaultVersion | null>(null);
   const [upgradeStatus, setUpgradeStatus] = useState('Preparing upgrade...');
   const [error, setError] = useState<string | null>(null);
+  const { setIsInitialLoading } = useLoading();
   const webApi = useWebApi();
   const { syncVault } = useVaultSync();
   const navigate = useNavigate();
+
+  console.log('upgrade page mounted');
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -57,11 +61,12 @@ const Upgrade: React.FC = () => {
   const loadVersionInfo = useCallback(async () => {
     try {
       if (sqliteClient) {
-        const current = sqliteClient.getDatabaseVersionInfo();
-        const latest = sqliteClient.getLatestDatabaseVersion();
+        const current = sqliteClient.getDatabaseVersion();
+        const latest = await sqliteClient.getLatestDatabaseVersion();
         setCurrentVersion(current);
         setLatestVersion(latest);
       }
+      setIsInitialLoading(false);
     } catch (error) {
       console.error('Failed to load version information:', error);
       setError('Failed to load version information. Please try again.');
@@ -185,32 +190,20 @@ const Upgrade: React.FC = () => {
         throw new Error('Failed to get encrypted database');
       }
 
-      // Get all private email domains from credentials in order to claim them on server
-      const privateEmailDomains = sqliteClient.getPrivateEmailDomains();
-
-      const credentials = sqliteClient.getAllCredentials();
-      const privateEmailAddresses = credentials
-        .filter(cred => cred.Alias?.Email != null)
-        .map(cred => cred.Alias!.Email!)
-        .filter((email, index, self) => self.indexOf(email) === index)
-        .filter(email => {
-          return privateEmailDomains.some(domain => email.toLowerCase().endsWith(`@${domain.toLowerCase()}`));
-        });
-
-      // Create vault object for upload
+      // TODO: this needs to use the useVaultSync hook instead..
       const newVault = {
         blob: encryptedDb,
         createdAt: new Date().toISOString(),
-        credentialsCount: credentials.length,
+        credentialsCount: 0,
         currentRevisionNumber: currentRevision,
-        emailAddressList: privateEmailAddresses,
+        emailAddressList: [],
         privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
         publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
         encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
         client: '', // Empty on purpose, API will not use this for vault updates
         updatedAt: new Date().toISOString(),
         username: username,
-        version: sqliteClient.getDatabaseVersionInfo()?.version ?? '0.0.0'
+        version: sqliteClient.getDatabaseVersion().version
       };
 
       // Upload to server
@@ -275,8 +268,7 @@ const Upgrade: React.FC = () => {
    * Handle the logout.
    */
   const handleLogout = async (): Promise<void> => {
-    await webApi.logout();
-    navigate('/login');
+    navigate('/logout');
   };
 
   /**
