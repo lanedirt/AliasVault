@@ -45,12 +45,13 @@ const Unlock: React.FC = () => {
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
         await webApi.logout(statusError);
+        navigate('/logout');
       }
       setIsInitialLoading(false);
     };
 
     checkStatus();
-  }, [webApi, authContext, setIsInitialLoading]);
+  }, [webApi, authContext, setIsInitialLoading, navigate]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {

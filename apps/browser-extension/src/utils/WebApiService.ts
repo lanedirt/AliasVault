@@ -232,14 +232,12 @@ export class WebApiService {
     // Logout and revoke tokens via WebApi.
     try {
       const refreshToken = await this.getRefreshToken();
-      if (!refreshToken) {
-        return;
+      if (refreshToken) {
+        await this.post('Auth/revoke', {
+          token: await this.getAccessToken(),
+          refreshToken: refreshToken,
+        }, false);
       }
-
-      await this.post('Auth/revoke', {
-        token: await this.getAccessToken(),
-        refreshToken: refreshToken,
-      }, false);
     } catch (err) {
       console.error('WebApi logout error:', err);
     }
