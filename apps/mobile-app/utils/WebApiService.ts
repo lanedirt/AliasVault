@@ -27,13 +27,19 @@ export class WebApiService {
   /**
    * Get the base URL for the API from settings.
    */
-  private async getBaseUrl(): Promise<string> {
-    const result = await AsyncStorage.getItem('apiUrl') as string;
-    if (result && result.length > 0) {
-      return result.replace(/\/$/, '') + '/v1/';
-    }
+  public async getBaseUrl(): Promise<string> {
+    const apiUrl = await this.getApiUrl();
+    return apiUrl.replace(/\/$/, '') + '/v1/';
+  }
 
-    return AppInfo.DEFAULT_API_URL.replace(/\/$/, '') + '/v1/';
+  /**
+   * Check if the API URL is for a self-hosted instance.
+   */
+  public async isSelfHosted(): Promise<boolean> {
+    const apiUrl = await this.getApiUrl();
+
+    // If the currently configured API URL is not the default, it's a self-hosted instance.
+    return apiUrl !== AppInfo.DEFAULT_API_URL;
   }
 
   /**
@@ -309,6 +315,18 @@ export class WebApiService {
     }
 
     return null;
+  }
+
+  /**
+   * Get the currently configured API URL from async storage.
+   */
+  private async getApiUrl(): Promise<string> {
+    const result = await AsyncStorage.getItem('apiUrl') as string;
+    if (result && result.length > 0) {
+      return result;
+    }
+
+    return AppInfo.DEFAULT_API_URL;
   }
 
   /**
