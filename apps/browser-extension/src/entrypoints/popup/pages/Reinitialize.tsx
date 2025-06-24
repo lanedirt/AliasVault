@@ -117,7 +117,6 @@ const Reinitialize: React.FC = () => {
               navigate('/unlock-success', { replace: true });
             } else {
               await restoreLastPage();
-              setIsInitialLoading(false);
             }
           },
           /**
