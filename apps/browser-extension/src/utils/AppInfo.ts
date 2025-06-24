@@ -14,7 +14,6 @@ export class AppInfo {
    */
   public static readonly MIN_SERVER_VERSION = '0.12.0-dev';
 
-
   /**
    * The client name to use in the X-AliasVault-Client header.
    * Detects the specific browser being used.
@@ -56,7 +55,6 @@ export class AppInfo {
    * Prevent instantiation of this utility class
    */
   private constructor() {}
-
 
   /**
    * Checks if a given server version is supported
