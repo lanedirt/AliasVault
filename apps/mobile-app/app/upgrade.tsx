@@ -56,7 +56,40 @@ export default function UpgradeScreen() : React.ReactNode {
   /**
    * Handle the vault upgrade.
    */
-  const handleUpgrade = async () : Promise<void> => {
+  const handleUpgrade = async (): Promise<void> => {
+    if (!sqliteClient || !currentVersion || !latestVersion) {
+      Alert.alert('Error', 'Unable to get version information. Please try again.');
+      return;
+    }
+
+    // Check if this is a self-hosted instance and show warning if needed
+    if (await webApi.isSelfHosted()) {
+      Alert.alert(
+        'Self-Hosted Server',
+        "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Continue Upgrade',
+            style: 'default',
+            /**
+             * Continue upgrade.
+             */
+            onPress: async () : Promise<void> => {
+              await performUpgrade();
+            }
+          }
+        ]
+      );
+    } else {
+      await performUpgrade();
+    }
+  };
+
+  /**
+   * Perform the actual vault upgrade.
+   */
+  const performUpgrade = async (): Promise<void> => {
     if (!sqliteClient || !currentVersion || !latestVersion) {
       Alert.alert('Error', 'Unable to get version information. Please try again.');
       return;
