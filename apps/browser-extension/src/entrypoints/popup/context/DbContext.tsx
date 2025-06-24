@@ -151,15 +151,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Set the current vault revision number.
    */
   const setCurrentVaultRevisionNumber = useCallback(async (revisionNumber: number) => {
-    if (sqliteClient) {
-      sqliteClient.setCurrentVaultRevisionNumber(revisionNumber);
-    }
     setVaultMetadata({
       publicEmailDomains: vaultMetadata?.publicEmailDomains ?? [],
       privateEmailDomains: vaultMetadata?.privateEmailDomains ?? [],
       vaultRevisionNumber: revisionNumber,
     });
-  }, [vaultMetadata, sqliteClient]);
+  }, [vaultMetadata]);
 
   /**
    * Check if there are pending migrations.
