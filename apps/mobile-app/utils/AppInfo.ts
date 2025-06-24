@@ -17,11 +17,6 @@ export class AppInfo {
   public static readonly MIN_SERVER_VERSION = '0.12.0-dev';
 
   /**
-   * The minimum supported AliasVault client vault version.
-   */
-  public static readonly MIN_VAULT_VERSION = '1.4.1';
-
-  /**
    * The client name to use in the X-AliasVault-Client header.
    * Detects the specific browser being used.
    */
@@ -53,15 +48,6 @@ export class AppInfo {
    * Prevent instantiation of this utility class
    */
   private constructor() {}
-
-  /**
-   * Checks if a given vault version is supported
-   * @param vaultVersion The version to check
-   * @returns boolean indicating if the version is supported
-   */
-  public static isVaultVersionSupported(vaultVersion: string): boolean {
-    return this.versionGreaterThanOrEqualTo(vaultVersion, this.MIN_VAULT_VERSION);
-  }
 
   /**
    * Checks if a given server version is supported

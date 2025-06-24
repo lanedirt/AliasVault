@@ -558,8 +558,8 @@ class SqliteClient {
 
   /**
    * Get the current database version from the migrations history.
-   * Returns the semantic version (e.g., "1.4.1") from the latest migration.
-   * Returns null if no migrations are found.
+   * Returns the internal version information that matches the current database version.
+   * Returns null if no matching version is found.
    */
   public async getDatabaseVersion(): Promise<VaultVersion> {
     try {
@@ -591,7 +591,7 @@ class SqliteClient {
       const currentVersionRevision = allVersions.find(v => v.version === currentVersion);
 
       if (!currentVersionRevision) {
-        throw new Error(`Current version ${currentVersion} not found in available vault versions.`);
+        throw new Error(`This app is outdated and cannot be used to access this vault. Please update this app to continue.`);
       }
 
       return currentVersionRevision;
