@@ -170,7 +170,10 @@ const Login: React.FC = () => {
           return;
         }
       } catch (err) {
+        await authContext.logout();
         setError(err instanceof Error ? err.message : 'An error occurred while checking for pending migrations.');
+        hideLoading();
+        return;
       }
 
       // Navigate to reinitialize page which will take care of the proper redirect.
@@ -251,7 +254,10 @@ const Login: React.FC = () => {
           return;
         }
       } catch (err) {
+        await authContext.logout();
         setError(err instanceof Error ? err.message : 'An error occurred while checking for pending migrations.');
+        hideLoading();
+        return;
       }
 
       // Navigate to reinitialize page which will take care of the proper redirect.
