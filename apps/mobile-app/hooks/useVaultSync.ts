@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -116,9 +115,7 @@ export const useVaultSync = () : {
           await dbContext.initializeDatabase(vaultResponseJson as VaultResponse);
 
           // Check if the vault is up to date, if not, redirect to the upgrade page.
-          console.log('Checking for pending migrations');
           if (await dbContext.hasPendingMigrations()) {
-            console.log('Pending migrations, redirecting to upgrade page');
             onUpgradeRequired?.();
             return false;
           }
@@ -132,9 +129,7 @@ export const useVaultSync = () : {
       }
 
       // Check if the vault is up to date, if not, redirect to the upgrade page.
-      console.log('Checking for pending migrations');
       if (await dbContext.hasPendingMigrations()) {
-        console.log('Pending migrations, redirecting to upgrade page');
         onUpgradeRequired?.();
         return false;
       }

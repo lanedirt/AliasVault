@@ -135,14 +135,6 @@ export default function SettingsScreen() : React.ReactNode {
   };
 
   const styles = StyleSheet.create({
-    connectionStatus: {
-      alignItems: 'center',
-    },
-    connectionStatusText: {
-      color: colors.textMuted,
-      fontSize: 14,
-      textAlign: 'center',
-    },
     scrollContent: {
       paddingBottom: 40,
       paddingTop: Platform.OS === 'ios' ? 42 : 16,
