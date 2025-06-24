@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { useAuth } from '@/entrypoints/popup/context/AuthContext';
-import { useDb } from '@/entrypoints/popup/context/DbContext';
-
 type TabName = 'credentials' | 'emails' | 'settings';
 
 /**
  * Bottom nav component.
  */
 const BottomNav: React.FC = () => {
-  const authContext = useAuth();
-  const dbContext = useDb();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentTab, setCurrentTab] = useState<TabName>('credentials');
@@ -36,7 +31,12 @@ const BottomNav: React.FC = () => {
     navigate(`/${tab}`);
   };
 
-  if (!authContext.isLoggedIn || !dbContext.dbAvailable) {
+
+  // Auth pages that don't show bottom navigation but still show header
+  const authPages = ['/login', '/unlock', '/unlock-success', '/upgrade'];
+  const isAuthPage = authPages.includes(location.pathname);
+
+  if (isAuthPage) {
     return null;
   }
 
