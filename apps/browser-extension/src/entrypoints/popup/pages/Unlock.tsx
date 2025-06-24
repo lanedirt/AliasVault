@@ -129,11 +129,29 @@ const Unlock: React.FC = () => {
   return (
     <div>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white break-all overflow-hidden mb-4">{authContext.username}</h2>
+        {/* Instruction Title */}
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Unlock your vault
+        </h2>
 
-        <p className="text-base text-gray-500 dark:text-gray-200 mb-6">
-          Enter your master password to unlock your vault.
-        </p>
+        {/* User Avatar and Username Section */}
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+              <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
+                {authContext.username?.[0]?.toUpperCase() || '?'}
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {authContext.username}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Logged in
+            </p>
+          </div>
+        </div>
 
         {error && (
           <div className="mb-4 text-red-500 dark:text-red-400 text-sm">

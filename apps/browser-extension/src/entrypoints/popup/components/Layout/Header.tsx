@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
    */
   const logoClick = () : void => {
     // Don't navigate if on upgrade page or login page
-    if (location.pathname === '/upgrade' || location.pathname === '/login') {
+    if (location.pathname === '/upgrade' || location.pathname === '/login' || location.pathname === '/unlock') {
       return;
     }
 
