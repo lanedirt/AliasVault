@@ -1,6 +1,8 @@
 import initSqlJs, { Database } from 'sql.js';
 
 import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import type { VaultVersion } from '@/utils/dist/shared/vault-sql';
+import { VaultSqlGenerator } from '@/utils/dist/shared/vault-sql';
 
 /**
  * Placeholder base64 image for credentials without a logo.
@@ -526,7 +528,7 @@ export class SqliteClient {
    * Returns the semantic version (e.g., "1.4.1") from the latest migration.
    * Returns null if no migrations are found.
    */
-  public getDatabaseVersion(): string | null {
+  public getDatabaseVersion(): VaultVersion {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -540,7 +542,7 @@ export class SqliteClient {
         LIMIT 1`);
 
       if (results.length === 0) {
-        return null;
+        throw new Error('No migrations found in the database.');
       }
 
       // Extract version using regex - matches patterns like "20240917191243_1.4.1-RenameAttachmentsPlural"
@@ -548,13 +550,49 @@ export class SqliteClient {
       const versionRegex = /_(\d+\.\d+\.\d+)-/;
       const versionMatch = versionRegex.exec(migrationId);
 
+      let currentVersion = null;
       if (versionMatch?.[1]) {
-        return versionMatch[1];
+        currentVersion = versionMatch[1];
       }
 
-      return null;
+      // Get all available vault versions to get the revision number of the current version.
+      const vaultSqlGenerator = new VaultSqlGenerator();
+      const allVersions = vaultSqlGenerator.getAllVersions();
+      const currentVersionRevision = allVersions.find(v => v.version === currentVersion);
+
+      if (!currentVersionRevision) {
+        throw new Error('This browser extension is outdated and cannot be used to access this vault. Please update this extension to continue.');
+      }
+
+      return currentVersionRevision;
     } catch (error) {
       console.error('Error getting database version:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the latest available database version
+   * @returns The latest VaultVersion
+   */
+  public async getLatestDatabaseVersion(): Promise<VaultVersion> {
+    const vaultSqlGenerator = new VaultSqlGenerator();
+    const allVersions = vaultSqlGenerator.getAllVersions();
+    return allVersions[allVersions.length - 1];
+  }
+
+  /**
+   * Check if there are pending migrations
+   * @returns True if there are pending migrations, false otherwise
+   */
+  public async hasPendingMigrations(): Promise<boolean> {
+    try {
+      const currentVersion = this.getDatabaseVersion();
+      const latestVersion = await this.getLatestDatabaseVersion();
+
+      return currentVersion.revision < latestVersion.revision;
+    } catch (error) {
+      console.error('Error checking pending migrations:', error);
       throw error;
     }
   }
@@ -929,6 +967,38 @@ export class SqliteClient {
     } catch (error) {
       console.error(`Error checking if table ${tableName} exists:`, error);
       return false;
+    }
+  }
+
+  /**
+   * Execute raw SQL command
+   * @param query - The SQL command to execute
+   */
+  public executeRaw(query: string): void {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      // Split the query by semicolons to handle multiple statements
+      const statements = query.split(';');
+
+      for (const statement of statements) {
+        const trimmedStatement = statement.trim();
+
+        // Skip empty statements and transaction control statements (handled externally)
+        if (trimmedStatement.length === 0 ||
+            trimmedStatement.toUpperCase().startsWith('BEGIN TRANSACTION') ||
+            trimmedStatement.toUpperCase().startsWith('COMMIT') ||
+            trimmedStatement.toUpperCase().startsWith('ROLLBACK')) {
+          continue;
+        }
+
+        this.db.run(trimmedStatement);
+      }
+    } catch (error) {
+      console.error('Error executing raw SQL:', error);
+      throw error;
     }
   }
 }

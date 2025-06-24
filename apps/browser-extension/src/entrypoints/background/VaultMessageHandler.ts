@@ -391,7 +391,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
     client: '', // Empty on purpose, API will not use this for vault updates.
     updatedAt: new Date().toISOString(),
     username: username,
-    version: sqliteClient.getDatabaseVersion() ?? '0.0.0'
+    version: sqliteClient.getDatabaseVersion().version
   };
 
   const webApi = new WebApiService(() => {});
