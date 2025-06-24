@@ -210,7 +210,7 @@ const Upgrade: React.FC = () => {
       const response = await webApi.post<typeof newVault, { status: number; newRevisionNumber: number }>('Vault', newVault);
 
       if (response.status === 0) {
-        sqliteClient.setCurrentVaultRevisionNumber(response.newRevisionNumber);
+        dbContext.setCurrentVaultRevisionNumber(response.newRevisionNumber);
       } else if (response.status === 1) {
         throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
       } else {
