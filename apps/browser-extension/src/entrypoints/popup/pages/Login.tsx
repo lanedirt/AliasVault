@@ -163,10 +163,14 @@ const Login: React.FC = () => {
       await authContext.login();
 
       // If there are pending migrations, redirect to the upgrade page.
-      if (await sqliteClient.hasPendingMigrations()) {
-        navigate('/upgrade', { replace: true });
-        hideLoading();
-        return;
+      try {
+        if (await sqliteClient.hasPendingMigrations()) {
+          navigate('/upgrade', { replace: true });
+          hideLoading();
+          return;
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while checking for pending migrations.');
       }
 
       // Navigate to reinitialize page which will take care of the proper redirect.
@@ -240,9 +244,14 @@ const Login: React.FC = () => {
       await authContext.login();
 
       // If there are pending migrations, redirect to the upgrade page.
-      if (await sqliteClient.hasPendingMigrations()) {
-        navigate('/upgrade', { replace: true });
-        return;
+      try {
+        if (await sqliteClient.hasPendingMigrations()) {
+          navigate('/upgrade', { replace: true });
+          hideLoading();
+          return;
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while checking for pending migrations.');
       }
 
       // Navigate to reinitialize page which will take care of the proper redirect.

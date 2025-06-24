@@ -561,7 +561,7 @@ export class SqliteClient {
       const currentVersionRevision = allVersions.find(v => v.version === currentVersion);
 
       if (!currentVersionRevision) {
-        throw new Error('This browser extension is outdated and cannot be used to access this vault. Please update this extension to continue.');
+        throw new Error('This browser extension is outdated and cannot be used to access this vault. Please update this browser extension to continue.');
       }
 
       return currentVersionRevision;
