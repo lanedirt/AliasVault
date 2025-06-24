@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '@/entrypoints/popup/components/Button';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
@@ -27,6 +28,7 @@ import { storage } from '#imports';
  * Login page
  */
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const authContext = useAuth();
   const dbContext = useDb();
   const { setHeaderButtons } = useHeaderButtons();
@@ -155,10 +157,20 @@ const Login: React.FC = () => {
       await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
-      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+      const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
       // Set logged in status to true which refreshes the app.
       await authContext.login();
+
+      // If there are pending migrations, redirect to the upgrade page.
+      if (await sqliteClient.hasPendingMigrations()) {
+        navigate('/upgrade', { replace: true });
+        hideLoading();
+        return;
+      }
+
+      // Navigate to credentials page after successful login
+      navigate('/credentials', { replace: true });
 
       // Show app.
       hideLoading();
@@ -222,10 +234,19 @@ const Login: React.FC = () => {
       await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
 
       // Initialize the SQLite context with the new vault data.
-      await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+      const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
       // Set logged in status to true which refreshes the app.
       await authContext.login();
+
+      // If there are pending migrations, redirect to the upgrade page.
+      if (await sqliteClient.hasPendingMigrations()) {
+        navigate('/upgrade', { replace: true });
+        return;
+      }
+
+      // Navigate to credentials page after successful login
+      navigate('/credentials', { replace: true });
 
       // Reset 2FA state and login response as it's no longer needed
       setTwoFactorRequired(false);

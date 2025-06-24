@@ -14,7 +14,7 @@ const Home: React.FC = () => {
     return null;
   }
 
-  return <Navigate to="/credentials" replace />;
+  return <Navigate to="/reinitialize" replace />;
 };
 
 export default Home;

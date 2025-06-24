@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
-import GlobalStateChangeHandler from '@/entrypoints/popup/components/GlobalStateChangeHandler';
 import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
 import Header from '@/entrypoints/popup/components/Layout/Header';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
@@ -15,9 +14,10 @@ import CredentialDetails from '@/entrypoints/popup/pages/CredentialDetails';
 import CredentialsList from '@/entrypoints/popup/pages/CredentialsList';
 import EmailDetails from '@/entrypoints/popup/pages/EmailDetails';
 import EmailsList from '@/entrypoints/popup/pages/EmailsList';
-import Home from '@/entrypoints/popup/pages/Home';
+import Index from '@/entrypoints/popup/pages/Index';
 import Login from '@/entrypoints/popup/pages/Login';
 import Logout from '@/entrypoints/popup/pages/Logout';
+import Reinitialize from '@/entrypoints/popup/pages/Reinitialize';
 import Settings from '@/entrypoints/popup/pages/Settings';
 import Unlock from '@/entrypoints/popup/pages/Unlock';
 import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
@@ -49,7 +49,8 @@ const App: React.FC = () => {
 
   // Add these route configurations
   const routes: RouteConfig[] = [
-    { path: '/', element: <Home />, showBackButton: false },
+    { path: '/', element: <Index />, showBackButton: false },
+    { path: '/reinitialize', element: <Reinitialize />, showBackButton: false },
     { path: '/login', element: <Login />, showBackButton: false },
     { path: '/unlock', element: <Unlock />, showBackButton: false },
     { path: '/unlock-success', element: <UnlockSuccess onClose={() => window.location.search = ''} />, showBackButton: false },
@@ -92,7 +93,6 @@ const App: React.FC = () => {
             </div>
           )}
 
-          <GlobalStateChangeHandler />
           <Header
             routes={routes}
             rightButtons={headerButtons}

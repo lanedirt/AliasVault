@@ -1,17 +1,14 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { sendMessage } from 'webext-bridge/popup';
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
-import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import { storage } from '#imports';
 
 const LAST_VISITED_PAGE_KEY = 'session:lastVisitedPage';
 const LAST_VISITED_TIME_KEY = 'session:lastVisitedTime';
 const NAVIGATION_HISTORY_KEY = 'session:navigationHistory';
-const PAGE_MEMORY_DURATION = 120 * 1000; // 2 minutes in milliseconds
 
 type NavigationHistoryEntry = {
   pathname: string;
@@ -21,7 +18,6 @@ type NavigationHistoryEntry = {
 
 type NavigationContextType = {
   storeCurrentPage: () => Promise<void>;
-  restoreLastPage: () => Promise<void>;
   isFullyInitialized: boolean;
   requiresAuth: boolean;
 };
@@ -29,29 +25,25 @@ type NavigationContextType = {
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 /**
- * Navigation provider component that handles storing and restoring the last visited page,
- * as well as managing initialization and auth state redirects.
+ * Navigation provider component that handles storing the last visited page.
  */
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [isInitialized, setIsInitialized] = useState(false);
-  const { setIsInitialLoading } = useLoading();
 
   // Auth and DB state
   const { isInitialized: authInitialized, isLoggedIn } = useAuth();
-  const { dbInitialized, dbAvailable } = useDb();
+  const { dbInitialized, dbAvailable, upgradeRequired } = useDb();
 
   // Derived state
   const isFullyInitialized = authInitialized && dbInitialized;
-  const requiresAuth = isFullyInitialized && (!isLoggedIn || !dbAvailable);
+  const requiresAuth = isFullyInitialized && (!isLoggedIn || (!dbAvailable && !upgradeRequired));
 
   /**
    * Store the current page path, timestamp, and navigation history in storage.
    */
   const storeCurrentPage = useCallback(async (): Promise<void> => {
     // Pages that are not allowed to be stored as these are auth conditional pages.
-    const notAllowedPaths = ['/', '/login', '/unlock', '/unlock-success', '/auth-settings'];
+    const notAllowedPaths = ['/', '/reinitialize', '/login', '/unlock', '/unlock-success', '/auth-settings', '/upgrade'];
 
     // Only store the page if we're fully initialized and don't need auth
     if (isFullyInitialized && !requiresAuth && !notAllowedPaths.includes(location.pathname)) {
@@ -77,101 +69,18 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [location, isFullyInitialized, requiresAuth]);
 
-  /**
-   * Restore the last visited page and navigation history if it was visited within the memory duration.
-   */
-  const restoreLastPage = useCallback(async (): Promise<void> => {
-    // Only restore if we're fully initialized and don't need auth
-    if (!isFullyInitialized || requiresAuth) {
-      return;
-    }
-
-    const [lastPage, lastVisitTime, savedHistory] = await Promise.all([
-      storage.getItem(LAST_VISITED_PAGE_KEY) as Promise<string>,
-      storage.getItem(LAST_VISITED_TIME_KEY) as Promise<number>,
-      storage.getItem(NAVIGATION_HISTORY_KEY) as Promise<NavigationHistoryEntry[]>,
-    ]);
-
-    if (lastPage && lastVisitTime) {
-      const timeSinceLastVisit = Date.now() - lastVisitTime;
-      if (timeSinceLastVisit <= PAGE_MEMORY_DURATION) {
-        // Restore the navigation history
-        if (savedHistory?.length) {
-          // First navigate to credentials page as the base
-          navigate('/credentials', { replace: true });
-
-          // Then restore the history stack
-          for (const entry of savedHistory) {
-            navigate(entry.pathname + entry.search + entry.hash);
-          }
-          return;
-        }
-
-        // Fallback to simple navigation if no history
-        navigate('/credentials', { replace: true });
-        navigate(lastPage, { replace: true });
-        return;
-      }
-    }
-
-    // Duration has expired, clear all stored navigation data
-    await Promise.all([
-      storage.removeItem(LAST_VISITED_PAGE_KEY),
-      storage.removeItem(LAST_VISITED_TIME_KEY),
-      storage.removeItem(NAVIGATION_HISTORY_KEY),
-      sendMessage('CLEAR_PERSISTED_FORM_VALUES', null, 'background'),
-    ]);
-
-    // Navigate to the credentials page as default entry page.
-    navigate('/credentials', { replace: true });
-  }, [navigate, isFullyInitialized, requiresAuth]);
-
-  // Handle initialization and auth state changes
-  useEffect(() => {
-    // Check for inline unlock mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const inlineUnlock = urlParams.get('mode') === 'inline_unlock';
-
-    if (isFullyInitialized) {
-      setIsInitialLoading(false);
-
-      if (requiresAuth) {
-        const allowedPaths = ['/login', '/unlock', '/unlock-success', '/auth-settings'];
-        if (allowedPaths.includes(location.pathname)) {
-          // Do not override the navigation if the current path is in the allowed paths.
-          return;
-        }
-
-        // Determine which auth page to show
-        if (!isLoggedIn) {
-          navigate('/login', { replace: true });
-        } else if (!dbAvailable) {
-          navigate('/unlock', { replace: true });
-        }
-      } else if (inlineUnlock) {
-        navigate('/unlock-success', { replace: true });
-      } else if (!isInitialized) {
-        // First initialization, try to restore last page or go to credentials
-        restoreLastPage().then(() => {
-          setIsInitialized(true);
-        });
-      }
-    }
-  }, [isFullyInitialized, requiresAuth, isLoggedIn, dbAvailable, isInitialized, navigate, restoreLastPage, setIsInitialLoading, location.pathname]);
-
   // Store the current page whenever it changes
   useEffect(() => {
-    if (isInitialized) {
+    if (isFullyInitialized) {
       storeCurrentPage();
     }
-  }, [location.pathname, location.search, location.hash, isInitialized, storeCurrentPage]);
+  }, [location.pathname, location.search, location.hash, isFullyInitialized, storeCurrentPage]);
 
   const contextValue = useMemo(() => ({
     storeCurrentPage,
-    restoreLastPage,
     isFullyInitialized,
     requiresAuth
-  }), [storeCurrentPage, restoreLastPage, isFullyInitialized, requiresAuth]);
+  }), [storeCurrentPage, isFullyInitialized, requiresAuth]);
 
   return (
     <NavigationContext.Provider value={contextValue}>

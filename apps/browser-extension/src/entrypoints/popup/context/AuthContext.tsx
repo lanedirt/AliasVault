@@ -40,17 +40,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * @returns object containing whether the user is logged in.
    */
   const initializeAuth = useCallback(async () : Promise<{ isLoggedIn: boolean }> => {
+    let isLoggedIn = false;
+
     const accessToken = await storage.getItem('local:accessToken') as string;
     const refreshToken = await storage.getItem('local:refreshToken') as string;
     const username = await storage.getItem('local:username') as string;
     if (accessToken && refreshToken && username) {
       setUsername(username);
       setIsLoggedIn(true);
+      isLoggedIn = true;
     }
     setIsInitialized(true);
 
     return { isLoggedIn };
-  }, [setUsername, setIsLoggedIn, isLoggedIn]);
+  }, [setUsername, setIsLoggedIn]);
 
   /**
    * Check for tokens in browser local storage on initial load when this context is mounted.
@@ -94,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setUsername(null);
+    console.log('setting isLoggedIn to false');
     setIsLoggedIn(false);
   }, [dbContext]);
 

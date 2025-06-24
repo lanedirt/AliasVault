@@ -33,7 +33,6 @@ export class WebApiService {
     return apiUrl.replace(/\/$/, '') + '/v1/';
   }
 
-
   /**
    * Check if the current server is self-hosted.
    */
