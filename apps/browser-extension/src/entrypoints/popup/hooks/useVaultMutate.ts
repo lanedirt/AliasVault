@@ -11,6 +11,7 @@ import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types
 type VaultMutationOptions = {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
+  skipSyncCheck?: boolean;
 }
 
 /**
@@ -98,6 +99,13 @@ export function useVaultMutate() : {
     try {
       setIsLoading(true);
       setSyncStatus('Checking for vault updates');
+
+      // Skip sync check if requested (e.g., during upgrade operations)
+      if (options.skipSyncCheck) {
+        setSyncStatus('Executing operation...');
+        await executeMutateOperation(operation, options);
+        return;
+      }
 
       await syncVault({
         /**
