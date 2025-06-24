@@ -240,13 +240,12 @@ const Upgrade: React.FC = () => {
         </div>
       )}
 
-      <form className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <form className="w-full px-2 pt-2 pb-2 mb-4">
         {error && (
           <div className="mb-4 text-red-500 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
-        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">Upgrade Vault</h2>
 
         {/* User display section like settings page */}
         <div className="flex items-center space-x-3 mb-4">
@@ -263,6 +262,8 @@ const Upgrade: React.FC = () => {
             </p>
           </div>
         </div>
+
+        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">Upgrade Vault</h2>
 
         <div className="mb-6">
           <p className="text-gray-700 dark:text-gray-200 text-sm mb-4">

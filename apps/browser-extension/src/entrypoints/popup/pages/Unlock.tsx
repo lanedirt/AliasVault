@@ -129,11 +129,6 @@ const Unlock: React.FC = () => {
   return (
     <div>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        {/* Instruction Title */}
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Unlock your vault
-        </h2>
-
         {/* User Avatar and Username Section */}
         <div className="flex items-center space-x-3 mb-6">
           <div className="flex-shrink-0">
@@ -152,6 +147,11 @@ const Unlock: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Instruction Title */}
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Unlock your vault
+        </h2>
 
         {error && (
           <div className="mb-4 text-red-500 dark:text-red-400 text-sm">
