@@ -381,6 +381,33 @@ class VaultStore(
     }
 
     /**
+     * Execute a raw SQL command on the vault without parameters (for DDL operations like CREATE TABLE).
+     * @param query The SQL query
+     */
+    fun executeRaw(query: String) {
+        dbConnection?.let { db ->
+            // Split the query by semicolons to handle multiple statements
+            val statements = query.split(";")
+
+            for (statement in statements) {
+                // Remove problematic invisible characters from string
+                val trimmedStatement = statement.smartTrim()
+
+                // Skip empty statements and transaction control statements (handled externally)
+                if (trimmedStatement.isEmpty() ||
+                    trimmedStatement.uppercase().startsWith("BEGIN") ||
+                    trimmedStatement.uppercase().startsWith("COMMIT") ||
+                    trimmedStatement.uppercase().startsWith("ROLLBACK")
+                ) {
+                    continue
+                }
+
+                db.execSQL(trimmedStatement)
+            }
+        }
+    }
+
+    /**
      * Begin a SQL transaction on the vault.
      */
     fun beginTransaction() {
@@ -949,5 +976,14 @@ class VaultStore(
 
         Log.e(TAG, "Error parsing date: $dateString")
         return null
+    }
+
+    /**
+     * Remove problematic invisible characters from string.
+     * @return The trimmed string
+     */
+    private fun String.smartTrim(): String {
+        val invisible = "[\\uFEFF\\u200B\\u00A0\\u202A-\\u202E\\u2060\\u180E]"
+        return this.replace(Regex("^($invisible)+|($invisible)+$"), "").trim()
     }
 }

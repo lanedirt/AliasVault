@@ -82,10 +82,10 @@ extension VaultStore {
 
         // Split the query by semicolons to handle multiple statements
         let statements = query.components(separatedBy: ";")
-        
+
         for statement in statements {
-            let trimmedStatement = statement.trimmingCharacters(in: .whitespacesAndNewlines)
-            
+            let trimmedStatement = statement.smartTrim()
+
             // Skip empty statements and transaction control statements (handled externally)
             if trimmedStatement.isEmpty ||
                trimmedStatement.uppercased().hasPrefix("BEGIN TRANSACTION") ||
@@ -93,7 +93,7 @@ extension VaultStore {
                trimmedStatement.uppercased().hasPrefix("ROLLBACK") {
                 continue
             }
-            
+
             try dbConnection.execute(trimmedStatement)
         }
     }
