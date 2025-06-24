@@ -100,9 +100,6 @@ const Reinitialize: React.FC = () => {
         } else if (!dbAvailable) {
           navigate('/unlock', { replace: true });
         }
-      } else if (inlineUnlock) {
-        setIsInitialLoading(false);
-        navigate('/unlock-success', { replace: true });
       } else if (shouldRunSync) {
         // Only perform vault sync once during initialization
         hasInitialized.current = true;
@@ -115,8 +112,13 @@ const Reinitialize: React.FC = () => {
            */
           onSuccess: async () => {
             // After successful sync, try to restore last page or go to credentials
-            await restoreLastPage();
-            setIsInitialLoading(false);
+            if (inlineUnlock) {
+              setIsInitialLoading(false);
+              navigate('/unlock-success', { replace: true });
+            } else {
+              await restoreLastPage();
+              setIsInitialLoading(false);
+            }
           },
           /**
            * Handle vault sync error.
