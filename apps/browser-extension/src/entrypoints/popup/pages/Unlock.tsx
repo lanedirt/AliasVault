@@ -159,7 +159,7 @@ const Unlock: React.FC = () => {
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="mb-2">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
             Password
           </label>
