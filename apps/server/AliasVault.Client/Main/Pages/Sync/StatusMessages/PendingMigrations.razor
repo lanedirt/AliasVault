@@ -5,13 +5,28 @@
 <div class="relative p-6 sm:p-8 bg-white dark:bg-gray-700 rounded-lg sm:shadow-xl max-w-md w-full mx-auto">
     <div class="text-center">
         <div class="space-y-4">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Vault needs to be upgraded.</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Upgrade Vault</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                AliasVault has been updated. Your personal vault needs to be upgraded in order to be compatible with the new data model.
-                This upgrade should only take a few seconds.
+                AliasVault has been updated and your vault needs to be upgraded.
+                Normally this only takes a few seconds.
             </p>
             <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Version Information</h3>
+                <div class="flex items-center justify-center mb-3">
+                    <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300">Version Information</h3>
+                    <button @onclick="ToggleVersionDescription" class="ml-2 w-6 h-6 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                        <span class="text-sm font-bold">?</span>
+                    </button>
+                </div>
+
+                @if (ShowVersionDescription)
+                {
+                    <div class="mb-4 p-3 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 rounded-lg">
+                        <p class="text-sm text-orange-800 dark:text-orange-200">
+                            An upgrade is required to support the following changes: @(LatestVersion?.Description ?? "No description available for this version.")
+                        </p>
+                    </div>
+                }
+
                 <div class="space-y-2">
                     <p class="flex justify-between items-center">
                         <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Your vault:</span>
@@ -50,6 +65,7 @@
     private string ErrorMessage { get; set; } = string.Empty;
     private SqlVaultVersion? CurrentVersion { get; set; }
     private SqlVaultVersion? LatestVersion { get; set; }
+    private bool ShowVersionDescription { get; set; } = false;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -59,6 +75,12 @@
         // Get current and latest available database version
         CurrentVersion = await DbService.GetCurrentDatabaseVersionAsync();
         LatestVersion = await DbService.GetLatestDatabaseVersionAsync();
+    }
+
+    private void ToggleVersionDescription()
+    {
+        ShowVersionDescription = !ShowVersionDescription;
+        StateHasChanged();
     }
 
     private async Task MigrateDatabase()
