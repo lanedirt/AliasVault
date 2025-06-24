@@ -71,13 +71,15 @@ const CredentialsList: React.FC = () => {
         onError: async (error) => {
           console.error('Error syncing vault:', error);
           await webApi.logout('Error while syncing vault, please re-authenticate.');
+          navigate('/logout');
         },
       });
     } catch (err) {
       console.error('Error refreshing credentials:', err);
       await webApi.logout('Error while syncing vault, please re-authenticate.');
+      navigate('/logout');
     }
-  }, [dbContext, webApi, syncVault]);
+  }, [dbContext, webApi, syncVault, navigate]);
 
   /**
    * Get latest vault from server and refresh the credentials list.

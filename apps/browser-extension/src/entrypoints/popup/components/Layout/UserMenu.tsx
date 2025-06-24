@@ -14,8 +14,7 @@ const UserMenu: React.FC = () => {
    * Handle logout.
    */
   const handleLogout = async () : Promise<void> => {
-    await authContext.logout();
-    navigate('/');
+    navigate('/logout');
   };
 
   return (

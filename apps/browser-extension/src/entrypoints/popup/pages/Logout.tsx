@@ -20,7 +20,7 @@ const Logout: React.FC = () => {
      */
     const performLogout = async () : Promise<void> => {
       await webApi.logout();
-      navigate('/');
+      navigate('/login');
     };
 
     performLogout();

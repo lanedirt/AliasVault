@@ -95,10 +95,6 @@ const Reinitialize: React.FC = () => {
       if (requiresUpgrade) {
         // Upgrade is required, navigate to upgrade page
         navigate('/upgrade', { replace: true });
-        // Keep loading active until upgrade navigation completes
-        setTimeout(() => {
-          setIsInitialLoading(false);
-        }, 50);
       } else if (requiresAuth) {
         setIsInitialLoading(false);
 

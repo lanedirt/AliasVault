@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
 import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
@@ -12,7 +14,6 @@ import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 import { AppInfo } from '@/utils/AppInfo';
 import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY } from '@/utils/Constants';
 
-import { useLoading } from '../context/LoadingContext';
 
 import { storage, browser } from "#imports";
 
@@ -37,6 +38,7 @@ const Settings: React.FC = () => {
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
     temporaryDisabledUrls: {},
@@ -248,7 +250,7 @@ const Settings: React.FC = () => {
    * Handle logout.
    */
   const handleLogout = async () : Promise<void> => {
-    await authContext.logout();
+    navigate('/logout', { replace: true });
   };
 
   return (
