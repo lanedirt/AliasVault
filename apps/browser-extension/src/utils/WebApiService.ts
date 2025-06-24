@@ -303,7 +303,6 @@ export class WebApiService {
       return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
     }
 
-
     return null;
   }
 
