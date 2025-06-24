@@ -97,7 +97,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setUsername(null);
-    console.log('setting isLoggedIn to false');
     setIsLoggedIn(false);
   }, [dbContext]);
 

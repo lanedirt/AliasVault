@@ -66,7 +66,6 @@ export const useVaultSync = () : {
 
       // Check app status and vault revision
       onStatus?.('Checking vault updates');
-      console.log('Checking vault updates');
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
