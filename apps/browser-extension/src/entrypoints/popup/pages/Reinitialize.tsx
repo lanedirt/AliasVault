@@ -133,7 +133,6 @@ const Reinitialize: React.FC = () => {
            * Handle upgrade required.
            */
           onUpgradeRequired: () => {
-            // This shouldn't happen anymore since we check in DbContext
             navigate('/upgrade', { replace: true });
             setIsInitialLoading(false);
           }

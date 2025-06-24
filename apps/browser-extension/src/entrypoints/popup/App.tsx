@@ -53,7 +53,7 @@ const App: React.FC = () => {
     { path: '/reinitialize', element: <Reinitialize />, showBackButton: false },
     { path: '/login', element: <Login />, showBackButton: false },
     { path: '/unlock', element: <Unlock />, showBackButton: false },
-    { path: '/unlock-success', element: <UnlockSuccess onClose={() => window.location.search = ''} />, showBackButton: false },
+    { path: '/unlock-success', element: <UnlockSuccess />, showBackButton: false },
     { path: '/upgrade', element: <Upgrade />, showBackButton: false },
     { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
