@@ -6,6 +6,7 @@ import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useTheme } from '@/entrypoints/popup/context/ThemeContext';
+import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -35,6 +36,7 @@ const Settings: React.FC = () => {
   const authContext = useAuth();
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
+  const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const [settings, setSettings] = useState<PopupSettings>({
     disabledUrls: [],
     temporaryDisabledUrls: {},
@@ -77,11 +79,6 @@ const Settings: React.FC = () => {
               title="Open in new window"
               iconType={HeaderIconType.EXPAND}
             />
-            <HeaderButton
-              onClick={() => PopoutUtility.openInNewTab()}
-              title="Open in new tab"
-              iconType={HeaderIconType.TAB}
-            />
           </>
         )}
         <HeaderButton
@@ -119,6 +116,9 @@ const Settings: React.FC = () => {
       await storage.setItem(TEMPORARY_DISABLED_SITES_KEY, cleanedTemporaryDisabledUrls);
     }
 
+    // Load API URL
+    await loadApiUrl();
+
     setSettings({
       disabledUrls,
       temporaryDisabledUrls: cleanedTemporaryDisabledUrls,
@@ -128,7 +128,7 @@ const Settings: React.FC = () => {
       isContextMenuEnabled
     });
     setIsInitialLoading(false);
-  }, [setIsInitialLoading]);
+  }, [setIsInitialLoading, loadApiUrl]);
 
   useEffect(() => {
     loadSettings();
@@ -451,7 +451,7 @@ const Settings: React.FC = () => {
       )}
 
       <div className="text-center text-gray-400 dark:text-gray-600">
-        Version: {AppInfo.VERSION}
+        Version {AppInfo.VERSION} ({getDisplayUrl()})
       </div>
     </div>
   );

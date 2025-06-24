@@ -72,11 +72,6 @@ const Login: React.FC = () => {
           title="Open in new window"
           iconType={HeaderIconType.EXPAND}
         />
-        <HeaderButton
-          onClick={() => PopoutUtility.openInNewTab()}
-          title="Open in new tab"
-          iconType={HeaderIconType.TAB}
-        />
       </>
     ) : null;
 
