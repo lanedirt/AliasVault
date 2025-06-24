@@ -533,7 +533,7 @@ var VAULT_VERSIONS = [
   {
     revision: 9,
     version: "1.5.0",
-    description: "Add Totp Codes",
+    description: "Add 2FA Tokens to credentials",
     releaseVersion: "0.14.0"
   }
 ];
