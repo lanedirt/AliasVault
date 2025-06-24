@@ -12,10 +12,12 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
-  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<void>;
+  upgradeRequired: boolean;
+  initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<SqliteClient>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   setCurrentVaultRevisionNumber: (revisionNumber: number) => Promise<void>;
+  hasPendingMigrations: () => Promise<boolean>;
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -38,6 +40,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Database availability state. If true, the database is available. If false, the database is not available and needs to be unlocked or retrieved again from the API.
    */
   const [dbAvailable, setDbAvailable] = useState(false);
+
+  /**
+   * Upgrade required state. If true, the vault needs to be upgraded.
+   */
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
 
   /**
    * Vault revision.
@@ -76,6 +83,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     await sendMessage('STORE_VAULT', request, 'background');
+
+    return client;
   }, []);
 
   const checkStoredVault = useCallback(async () => {
@@ -87,7 +96,32 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
         setSqliteClient(client);
         setDbInitialized(true);
-        setDbAvailable(true);
+
+        // Check if upgrade is required before setting dbAvailable
+        try {
+          const needsUpgrade = await client.hasPendingMigrations();
+          if (needsUpgrade) {
+            setUpgradeRequired(true);
+            setDbAvailable(false); // Keep as false to prevent normal navigation
+          } else {
+            setUpgradeRequired(false);
+            setDbAvailable(true);
+          }
+        } catch (upgradeCheckError) {
+          // If we can't check for upgrades, assume it's an unknown version (app needs update)
+          console.error('Error checking for upgrades:', upgradeCheckError);
+          if (upgradeCheckError instanceof Error && upgradeCheckError.message.includes('This browser extension is outdated')) {
+            // This is a version error, trigger logout
+            setDbInitialized(true);
+            setDbAvailable(false);
+            setUpgradeRequired(false);
+            return;
+          }
+          // For other errors, assume no upgrade needed
+          setUpgradeRequired(false);
+          setDbAvailable(true);
+        }
+
         setVaultMetadata({
           publicEmailDomains: response.publicEmailDomains ?? [],
           privateEmailDomains: response.privateEmailDomains ?? [],
@@ -96,11 +130,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       } else {
         setDbInitialized(true);
         setDbAvailable(false);
+        setUpgradeRequired(false);
       }
     } catch (error) {
       console.error('Error retrieving vault from background:', error);
       setDbInitialized(true);
       setDbAvailable(false);
+      setUpgradeRequired(false);
     }
   }, []);
 
@@ -115,12 +151,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Set the current vault revision number.
    */
   const setCurrentVaultRevisionNumber = useCallback(async (revisionNumber: number) => {
+    if (sqliteClient) {
+      sqliteClient.setCurrentVaultRevisionNumber(revisionNumber);
+    }
     setVaultMetadata({
       publicEmailDomains: vaultMetadata?.publicEmailDomains ?? [],
       privateEmailDomains: vaultMetadata?.privateEmailDomains ?? [],
       vaultRevisionNumber: revisionNumber,
     });
-  }, [vaultMetadata]);
+  }, [vaultMetadata, sqliteClient]);
+
+  /**
+   * Check if there are pending migrations.
+   */
+  const hasPendingMigrations = useCallback(async () => {
+    if (!sqliteClient) {
+      return false;
+    }
+    return await sqliteClient.hasPendingMigrations();
+  }, [sqliteClient]);
 
   /**
    * Check if database is initialized and try to retrieve vault from background
@@ -137,6 +186,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const clearDatabase = useCallback(() : void => {
     setSqliteClient(null);
     setDbInitialized(false);
+    setDbAvailable(false);
+    setUpgradeRequired(false);
     sendMessage('CLEAR_VAULT', {}, 'background');
   }, []);
 
@@ -144,11 +195,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     sqliteClient,
     dbInitialized,
     dbAvailable,
+    upgradeRequired,
     initializeDatabase,
     clearDatabase,
     getVaultMetadata,
     setCurrentVaultRevisionNumber,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber]);
+    hasPendingMigrations,
+  }), [sqliteClient, dbInitialized, dbAvailable, upgradeRequired, initializeDatabase, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
 
   return (
     <DbContext.Provider value={contextValue}>

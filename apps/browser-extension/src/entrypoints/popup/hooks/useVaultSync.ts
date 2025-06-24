@@ -37,6 +37,7 @@ type VaultSyncOptions = {
   onError?: (error: string) => void;
   onStatus?: (message: string) => void;
   _onOffline?: () => void;
+  onUpgradeRequired?: () => void;
 }
 
 /**
@@ -50,7 +51,7 @@ export const useVaultSync = () : {
   const webApi = useWebApi();
 
   const syncVault = useCallback(async (options: VaultSyncOptions = {}) => {
-    const { initialSync = false, onSuccess, onError, onStatus, _onOffline } = options;
+    const { initialSync = false, onSuccess, onError, onStatus, _onOffline, onUpgradeRequired } = options;
 
     // For the initial sync, we add an artifical delay to various steps which makes it feel more fluid.
     const enableDelay = initialSync;
@@ -114,12 +115,31 @@ export const useVaultSync = () : {
           // Get derived key from background worker
           const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
           await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, passwordHashBase64);
+
+          // Check if the current vault version is known and up to date, if not known trigger an exception, if not up to date redirect to the upgrade page.
+          if (await dbContext.hasPendingMigrations()) {
+            onUpgradeRequired?.();
+            return false;
+          }
+
           onSuccess?.(true);
           return true;
-        } catch {
+        } catch (error) {
+          // Check if it's a version-related error (app needs to be updated)
+          if (error instanceof Error && error.message.includes('This browser extension is outdated')) {
+            await webApi.logout(error.message);
+            onError?.(error.message);
+            return false;
+          }
           // Vault could not be decrypted, throw an error
           throw new Error('Vault could not be decrypted, if problem persists please logout and login again.');
         }
+      }
+
+      // Check if the vault is up to date, if not, redirect to the upgrade page.
+      if (await dbContext.hasPendingMigrations()) {
+        onUpgradeRequired?.();
+        return false;
       }
 
       await withMinimumDelay(() => Promise.resolve(onSuccess?.(false)), 300, enableDelay);
@@ -127,6 +147,13 @@ export const useVaultSync = () : {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';
       console.error('Vault sync error:', err);
+
+      // Check if it's a version-related error (app needs to be updated)
+      if (errorMessage.includes('This browser extension is outdated')) {
+        await webApi.logout(errorMessage);
+        onError?.(errorMessage);
+        return false;
+      }
 
       /*
        * Check if it's a network error
