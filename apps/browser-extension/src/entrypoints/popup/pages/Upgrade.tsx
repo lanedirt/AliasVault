@@ -70,7 +70,7 @@ const Upgrade: React.FC = () => {
       console.error('Failed to load version information:', error);
       setError('Failed to load version information. Please try again.');
     }
-  }, [sqliteClient]);
+  }, [sqliteClient, setIsInitialLoading]);
 
   useEffect(() => {
     loadVersionInfo();
