@@ -108,6 +108,9 @@ const Unlock: React.FC = () => {
 
       // Clear dismiss until (which can be enabled after user has dimissed vault is locked popup) to ensure popup is shown.
       await storage.setItem(VAULT_LOCKED_DISMISS_UNTIL_KEY, 0);
+
+      // Redirect to reinitialize page
+      navigate('/reinitialize', { replace: true });
     } catch (err) {
       setError('Failed to unlock vault. Please check your password and try again.');
       console.error('Unlock error:', err);

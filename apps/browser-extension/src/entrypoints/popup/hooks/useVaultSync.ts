@@ -66,6 +66,7 @@ export const useVaultSync = () : {
 
       // Check app status and vault revision
       onStatus?.('Checking vault updates');
+      console.log('Checking vault updates');
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
@@ -114,10 +115,10 @@ export const useVaultSync = () : {
         try {
           // Get derived key from background worker
           const passwordHashBase64 = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
-          await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, passwordHashBase64);
+          const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson as VaultResponse, passwordHashBase64);
 
           // Check if the current vault version is known and up to date, if not known trigger an exception, if not up to date redirect to the upgrade page.
-          if (await dbContext.hasPendingMigrations()) {
+          if (await sqliteClient.hasPendingMigrations()) {
             onUpgradeRequired?.();
             return false;
           }

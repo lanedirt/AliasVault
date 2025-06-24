@@ -32,12 +32,11 @@ const Reinitialize: React.FC = () => {
 
   // Auth and DB state
   const { isInitialized: authInitialized, isLoggedIn } = useAuth();
-  const { dbInitialized, dbAvailable, upgradeRequired } = useDb();
+  const { dbInitialized, dbAvailable } = useDb();
 
   // Derived state
   const isFullyInitialized = authInitialized && dbInitialized;
-  const requiresAuth = isFullyInitialized && (!isLoggedIn || (!dbAvailable && !upgradeRequired));
-  const requiresUpgrade = isFullyInitialized && isLoggedIn && upgradeRequired;
+  const requiresAuth = isFullyInitialized && (!isLoggedIn || !dbAvailable);
 
   /**
    * Restore the last visited page and navigation history if it was visited within the memory duration.
@@ -92,10 +91,7 @@ const Reinitialize: React.FC = () => {
       // Prevent multiple vault syncs (only run sync once)
       const shouldRunSync = !hasInitialized.current;
 
-      if (requiresUpgrade) {
-        // Upgrade is required, navigate to upgrade page
-        navigate('/upgrade', { replace: true });
-      } else if (requiresAuth) {
+      if (requiresAuth) {
         setIsInitialLoading(false);
 
         // Determine which auth page to show
@@ -113,7 +109,7 @@ const Reinitialize: React.FC = () => {
 
         // Perform vault sync and restore state
         syncVault({
-          initialSync: true,
+          initialSync: false,
           /**
            * Handle successful vault sync.
            */
@@ -148,7 +144,7 @@ const Reinitialize: React.FC = () => {
         restoreLastPage();
       }
     }
-  }, [isFullyInitialized, requiresAuth, requiresUpgrade, isLoggedIn, dbAvailable, upgradeRequired, navigate, setIsInitialLoading, syncVault, restoreLastPage]);
+  }, [isFullyInitialized, requiresAuth, isLoggedIn, dbAvailable, navigate, setIsInitialLoading, syncVault, restoreLastPage]);
 
   // This component doesn't render anything visible - it just handles initialization
   return null;

@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@/entrypoints/popup/components/Button';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
-import LoadingSpinnerFullScreen from '@/entrypoints/popup/components/LoadingSpinnerFullScreen';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
+import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 import { useVaultSync } from '@/entrypoints/popup/hooks/useVaultSync';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
@@ -30,6 +31,7 @@ const Upgrade: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { setIsInitialLoading } = useLoading();
   const webApi = useWebApi();
+  const { executeVaultMutation, isLoading: isVaultMutationLoading, syncStatus } = useVaultMutate();
   const { syncVault } = useVaultSync();
   const navigate = useNavigate();
 
@@ -125,31 +127,51 @@ const Upgrade: React.FC = () => {
         return;
       }
 
-      // Begin transaction
-      sqliteClient.beginTransaction();
+      // Use the useVaultMutate hook to handle the upgrade and vault upload
+      console.debug('executeVaultMutation');
+      await executeVaultMutation(async () => {
+        // Begin transaction
+        console.debug('beginTransaction');
+        sqliteClient.beginTransaction();
 
-      // Execute each SQL command
-      for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
-        const sqlCommand = upgradeResult.sqlCommands[i];
+        // Execute each SQL command
+        console.debug('executeRaw', upgradeResult.sqlCommands.length);
+        for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
+          const sqlCommand = upgradeResult.sqlCommands[i];
 
-        try {
-          sqliteClient.executeRaw(sqlCommand);
-        } catch (error) {
-          console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
-          sqliteClient.rollbackTransaction();
-          throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          try {
+            console.debug('executeRaw', sqlCommand);
+            sqliteClient.executeRaw(sqlCommand);
+          } catch (error) {
+            console.debug('error', error);
+            console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
+            sqliteClient.rollbackTransaction();
+            throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          }
         }
-      }
 
-      // Commit transaction
-      sqliteClient.commitTransaction();
-
-      // Upload to server
-      await uploadVaultToServer();
-
-      // Sync and navigate to credentials
-      await handleUpgradeSuccess();
-
+        // Commit transaction
+        console.debug('commitTransaction');
+        sqliteClient.commitTransaction();
+      }, {
+        skipSyncCheck: true, // Skip sync check during upgrade to prevent loop
+        /**
+         * Handle successful upgrade completion.
+         */
+        onSuccess: () => {
+          console.debug('onSuccess');
+          void handleUpgradeSuccess();
+        },
+        /**
+         * Handle upgrade error.
+         */
+        onError: (error: Error) => {
+          console.debug('onError');
+          console.error('Upgrade failed:', error);
+          setError(error.message);
+        }
+      });
+      console.debug('executeVaultMutation done?');
     } catch (error) {
       console.error('Upgrade failed:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred during the upgrade. Please try again.');
@@ -159,66 +181,10 @@ const Upgrade: React.FC = () => {
   };
 
   /**
-   * Upload the upgraded vault to the server.
-   */
-  const uploadVaultToServer = async (): Promise<void> => {
-    try {
-      if (!sqliteClient || !username) {
-        throw new Error('Required data not available');
-      }
-
-      // Get the current vault revision number
-      const currentRevision = sqliteClient.getCurrentVaultRevisionNumber();
-
-      // Get the encrypted database
-      const encryptedDb = sqliteClient.getEncryptedDatabase();
-      if (!encryptedDb) {
-        throw new Error('Failed to get encrypted database');
-      }
-
-      // TODO: this needs to use the useVaultSync hook instead..
-      const newVault = {
-        blob: encryptedDb,
-        createdAt: new Date().toISOString(),
-        credentialsCount: 0,
-        currentRevisionNumber: currentRevision,
-        emailAddressList: [],
-        privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
-        client: '', // Empty on purpose, API will not use this for vault updates
-        updatedAt: new Date().toISOString(),
-        username: username,
-        version: sqliteClient.getDatabaseVersion().version
-      };
-
-      // Upload to server
-      const response = await webApi.post<typeof newVault, { status: number; newRevisionNumber: number }>('Vault', newVault);
-
-      if (response.status === 0) {
-        dbContext.setCurrentVaultRevisionNumber(response.newRevisionNumber);
-      } else if (response.status === 1) {
-        throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
-      } else {
-        throw new Error('Failed to upload vault to server');
-      }
-    } catch (error) {
-      console.error('Error uploading vault:', error);
-      throw error;
-    }
-  };
-
-  /**
    * Handle successful upgrade completion.
    */
   const handleUpgradeSuccess = async (): Promise<void> => {
     try {
-      /*
-       * After successful upgrade, we need to reload the vault to clear the upgrade state.
-       * This will trigger a re-check of pending migrations.
-       */
-      dbContext.clearDatabase();
-
       // Sync vault to ensure we have the latest data
       await syncVault({
         /**
@@ -262,12 +228,18 @@ const Upgrade: React.FC = () => {
     );
   };
 
-  if (isLoading) {
-    return <LoadingSpinnerFullScreen />;
-  }
-
   return (
     <div>
+      {/* Full loading screen overlay */}
+      {(isLoading || isVaultMutationLoading) && (
+        <div className="fixed inset-0 flex flex-col justify-center items-center bg-white dark:bg-gray-900 bg-opacity-90 dark:bg-opacity-90 z-50">
+          <LoadingSpinner />
+          <div className="text-sm text-gray-500 mt-2">
+            {syncStatus || 'Upgrading vault...'}
+          </div>
+        </div>
+      )}
+
       <form className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
         {error && (
           <div className="mb-4 text-red-500 dark:text-red-400 text-sm">
@@ -331,12 +303,13 @@ const Upgrade: React.FC = () => {
             type="button"
             onClick={handleUpgrade}
           >
-            {isLoading ? 'Upgrading...' : 'Upgrade Vault'}
+            {isLoading || isVaultMutationLoading ? (syncStatus || 'Upgrading...') : 'Upgrade Vault'}
           </Button>
           <button
             type="button"
             onClick={handleLogout}
             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium py-2"
+            disabled={isLoading || isVaultMutationLoading}
           >
             Logout
           </button>
