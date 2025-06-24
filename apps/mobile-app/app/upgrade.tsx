@@ -91,8 +91,6 @@ export default function UpgradeScreen() : React.ReactNode {
       setUpgradeStatus('Applying database migrations...');
       for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
         const sqlCommand = upgradeResult.sqlCommands[i];
-        console.log('update sql command', i);
-        console.log('Executing SQL command:', sqlCommand);
         setUpgradeStatus(`Applying migration ${i + 1} of ${upgradeResult.sqlCommands.length}...`);
 
         try {
@@ -234,6 +232,19 @@ export default function UpgradeScreen() : React.ReactNode {
     router.replace('/login');
   };
 
+  /**
+   * Show native dialog with version description.
+   */
+  const showVersionDialog = (): void => {
+    Alert.alert(
+      "What's New",
+      `An upgrade is required to support the following changes:\n\n${latestVersion?.description ?? 'No description available for this version.'}`,
+      [
+        { text: 'Okay', style: 'default' }
+      ]
+    );
+  };
+
   const styles = StyleSheet.create({
     appName: {
       color: colors.text,
@@ -270,16 +281,8 @@ export default function UpgradeScreen() : React.ReactNode {
       padding: 20,
       width: '100%',
     },
-    faceIdButton: {
-      alignItems: 'center',
-      height: 50,
-      justifyContent: 'center',
-      width: '100%',
-    },
-    faceIdButtonText: {
+    currentVersionValue: {
       color: colors.primary,
-      fontSize: 16,
-      fontWeight: '600',
     },
     gradientContainer: {
       height: Dimensions.get('window').height * 0.4,
@@ -293,29 +296,25 @@ export default function UpgradeScreen() : React.ReactNode {
       paddingHorizontal: 16,
       paddingTop: 24,
     },
-    input: {
-      backgroundColor: colors.background,
-      borderRadius: 8,
-      color: colors.text,
-      flex: 1,
-      fontSize: 16,
-      height: 50,
-      paddingHorizontal: 16,
-    },
-    inputContainer: {
+    helpButton: {
       alignItems: 'center',
-      backgroundColor: colors.background,
-      borderColor: colors.accentBorder,
-      borderRadius: 8,
-      borderWidth: 1,
-      flexDirection: 'row',
-      marginBottom: 16,
+      backgroundColor: colors.accentBackground,
+      borderRadius: 20,
+      height: 24,
+      justifyContent: 'center',
+      marginLeft: 8,
+      width: 24,
     },
-    inputIcon: {
-      padding: 12,
+    helpButtonText: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: 'bold',
     },
     keyboardAvoidingView: {
       flex: 1,
+    },
+    latestVersionValue: {
+      color: colors.greenBackground,
     },
     loadingContainer: {
       alignItems: 'center',
@@ -341,18 +340,12 @@ export default function UpgradeScreen() : React.ReactNode {
       paddingBottom: 40,
       paddingHorizontal: 20,
     },
-    currentVersionValue: {
-      color: colors.primary,
-    },
-    latestVersionValue: {
-      color: '#10B981',
-    },
     scrollContent: {
       flexGrow: 1,
     },
     subtitle: {
       color: colors.text,
-      fontSize: 16,
+      fontSize: 14,
       marginBottom: 24,
       opacity: 0.7,
       textAlign: 'center',
@@ -368,6 +361,12 @@ export default function UpgradeScreen() : React.ReactNode {
       borderRadius: 8,
       marginBottom: 16,
       padding: 16,
+    },
+    versionHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginBottom: 12,
     },
     versionLabel: {
       color: colors.text,
@@ -385,7 +384,6 @@ export default function UpgradeScreen() : React.ReactNode {
       color: colors.text,
       fontSize: 18,
       fontWeight: '600',
-      marginBottom: 12,
       textAlign: 'center',
     },
     versionValue: {
@@ -427,10 +425,18 @@ export default function UpgradeScreen() : React.ReactNode {
                     <Avatar />
                     <ThemedText style={styles.username}>{username}</ThemedText>
                   </View>
-                  <ThemedText style={styles.subtitle}>AliasVault has updated and your vault needs to be upgraded.</ThemedText>
+                  <ThemedText style={styles.subtitle}>AliasVault has updated and your vault needs to be upgraded. Normally this only takes a few seconds.</ThemedText>
 
                   <View style={styles.versionContainer}>
-                    <ThemedText style={styles.versionTitle}>Version Information</ThemedText>
+                    <View style={styles.versionHeader}>
+                      <ThemedText style={styles.versionTitle}>Version Information</ThemedText>
+                      <TouchableOpacity
+                        style={styles.helpButton}
+                        onPress={showVersionDialog}
+                      >
+                        <ThemedText style={styles.helpButtonText}>?</ThemedText>
+                      </TouchableOpacity>
+                    </View>
                     <View style={styles.versionRow}>
                       <ThemedText style={styles.versionLabel}>Your vault:</ThemedText>
                       <ThemedText style={[styles.versionValue, styles.currentVersionValue]}>
