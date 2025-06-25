@@ -116,9 +116,12 @@ export function useVaultMutate() : {
         await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
         options.onSuccess?.();
       } else if (response.status === 1) {
+        // Note: vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are rejected. So this check can be removed later.
         throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
+      } else if (response.status === 2) {
+        throw new Error('Your vault is outdated. Please login on the AliasVault website and follow the steps.');
       } else {
-        throw new Error('Failed to upload vault to server');
+        throw new Error('Failed to upload vault to server. Please try again by re-opening the app.');
       }
     } catch (error) {
       // Check if it's a network error

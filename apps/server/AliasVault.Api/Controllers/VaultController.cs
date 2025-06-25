@@ -117,6 +117,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
 
         // Check if there are no other vaults with the same revision number.
         // If there are, return a merge required status.
+        // NOTE: a vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are now rejected.
+        // So the logic below can be removed later, together with the local merge logic in the WASM client.
+        // We do probably want to still keep this until the datamodel has been updated to accomodate improved offline mode which might warrant
+        // a new and improved merge logic. So we keep this here for reference purposes for now.
         var duplicateRevisionCount = await context.Vaults
             .Where(x => x.UserId == user.Id && x.RevisionNumber == vault.RevisionNumber)
             .CountAsync();
@@ -237,10 +241,10 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
 
         // Check if the latest vault revision number is equal to or higher than the new revision number.
-        // If so, reject update and return a merge required status.
+        // If so it means the client's vault is outdated and the client should fetch the latest vault from the server before saving can continue.
         if (latestVault.RevisionNumber >= newRevisionNumber)
         {
-            return Ok(new VaultUpdateResponse { Status = VaultStatus.MergeRequired, NewRevisionNumber = latestVault.RevisionNumber });
+            return Ok(new VaultUpdateResponse { Status = VaultStatus.Outdated, NewRevisionNumber = latestVault.RevisionNumber });
         }
 
         // Create new vault entry with salt and verifier of current vault.
@@ -332,10 +336,14 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         }
 
         // Calculate the new revision number for the vault.
-        // Note: it is possible multiple clients are updating the vault at the same time which would cause
-        // multiple vaults with the same revision number. This is expected and will trigger a vault
-        // synchronize/merge process on the client side.
         var newRevisionNumber = model.CurrentRevisionNumber + 1;
+
+        // Check if the latest vault revision number is equal to or higher than the new revision number.
+        // If so it means the client's vault is outdated and the client should fetch the latest vault from the server before saving can continue.
+        if (latestVault.RevisionNumber >= newRevisionNumber)
+        {
+            return Ok(new VaultUpdateResponse { Status = VaultStatus.Outdated, NewRevisionNumber = latestVault.RevisionNumber });
+        }
 
         // Create new vault entry with salt and verifier of current vault.
         var newVault = new AliasServerDb.Vault

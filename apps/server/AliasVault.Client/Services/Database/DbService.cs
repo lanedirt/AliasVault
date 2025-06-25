@@ -724,6 +724,11 @@ public sealed class DbService : IDisposable
                     _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
                     return await MergeDatabasesAsync();
                 }
+                else if (vaultUpdateResponse.Status == VaultStatus.Outdated)
+                {
+                    // If the server responds with an outdated status, we need to fetch the latest vault from the server before we can continue.
+                    return false;
+                }
 
                 _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
                 return true;

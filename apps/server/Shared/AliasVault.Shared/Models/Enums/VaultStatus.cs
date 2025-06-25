@@ -15,10 +15,15 @@ public enum VaultStatus
     /// <summary>
     /// The vault was retrieved or updated successfully.
     /// </summary>
-    Ok,
+    Ok = 0,
 
     /// <summary>
     /// A client-side merge is required before the vault can be retrieved or updated.
     /// </summary>
-    MergeRequired,
+    MergeRequired = 1,
+
+    /// <summary>
+    /// The local vault is outdated and the client should fetch the latest vault from the server before saving can continue.
+    /// </summary>
+    Outdated = 2,
 }
