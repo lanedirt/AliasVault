@@ -1,9 +1,10 @@
 import { Redirect } from 'expo-router';
 
 /**
- * App index which is the entry point of the app and redirects to the sync screen, which will
- * redirect to the login screen if the user is not logged in or to the main tabs screen if the user is logged in.
+ * App index which is the entry point of the app and redirects to the credentials screen.
+ * If user is not logged in, they will automatically be redirected to the login screen instead
+ * by global navigation handlers.
  */
 export default function AppIndex() : React.ReactNode {
-  return <Redirect href={'/reinitialize'} />
+  return <Redirect href={'/credentials'} />;
 }
