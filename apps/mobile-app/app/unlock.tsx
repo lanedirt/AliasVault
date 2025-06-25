@@ -23,7 +23,7 @@ import NativeVaultManager from '@/specs/NativeVaultManager';
  */
 export default function UnlockScreen() : React.ReactNode {
   const { isLoggedIn, username, isBiometricsEnabled } = useAuth();
-  const { testDatabaseConnection } = useDb();
+  const dbContext = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isBiometricsAvailable, setIsBiometricsAvailable] = useState(false);
@@ -100,7 +100,13 @@ export default function UnlockScreen() : React.ReactNode {
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 
       // Initialize the database with the vault response and password
-      if (await testDatabaseConnection(passwordHashBase64)) {
+      if (await dbContext.testDatabaseConnection(passwordHashBase64)) {
+        // Check if the vault is up to date, if not, redirect to the upgrade page.
+        if (await dbContext.hasPendingMigrations()) {
+          router.replace('/upgrade');
+          return;
+        }
+
         // Navigate to credentials
         router.replace('/(tabs)/credentials');
       } else {
