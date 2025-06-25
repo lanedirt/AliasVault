@@ -306,9 +306,15 @@ export class WebApiService {
     /**
      * Status 0 = OK, vault is ready.
      * Status 1 = Merge required, which only the web client supports.
+     * Status 2 = Outdated, which means the local vault is outdated and the client should fetch the latest vault from the server before saving can continue.
      */
-    if (vaultResponseJson.status !== 0) {
+    if (vaultResponseJson.status === 1) {
+      // Note: vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are rejected. So this check can be removed later.
       return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
+    }
+
+    if (vaultResponseJson.status === 2) {
+      return 'Your vault is outdated. Please login on the AliasVault website and follow the steps.';
     }
 
     if (!vaultResponseJson.vault?.blob) {

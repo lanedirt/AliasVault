@@ -132,7 +132,7 @@ export const useVaultSync = () : {
             return false;
           }
           // Vault could not be decrypted, throw an error
-          throw new Error('Vault could not be decrypted, if problem persists please logout and login again.');
+          throw new Error('Vault could not be decrypted, if the problem persists please logout and login again.');
         }
       }
 

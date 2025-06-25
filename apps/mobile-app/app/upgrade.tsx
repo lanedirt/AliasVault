@@ -135,7 +135,7 @@ export default function UpgradeScreen() : React.ReactNode {
           } catch (error) {
             console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
             await NativeVaultManager.rollbackTransaction();
-            throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(`Failed to apply migration (${i + 1} of ${upgradeResult.sqlCommands.length})`);
           }
         }
 
