@@ -375,21 +375,6 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
-    /// Checks if there are any pending migrations.
-    /// </summary>
-    /// <returns>Bool which indicates if there are any pending migrations.</returns>
-    public async Task<bool> HasPendingMigrationsAsync()
-    {
-        // Get current version of database.
-        var currentVersion = await GetCurrentDatabaseVersionAsync();
-
-        // Get latest version from JsInteropService.
-        var latestVersion = await _jsInteropService.GetLatestVaultVersionAsync();
-
-        return currentVersion.Revision < latestVersion.Revision;
-    }
-
-    /// <summary>
     /// Get the current version (applied migration) of the database that is loaded in memory.
     /// </summary>
     /// <returns>Version as string.</returns>
@@ -628,6 +613,27 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Checks if there are any pending migrations.
+    /// </summary>
+    /// <returns>Bool which indicates if there are any pending migrations.</returns>
+    private async Task<bool> HasPendingMigrationsAsync()
+    {
+        // Get current version of database.
+        var currentVersion = await GetCurrentDatabaseVersionAsync();
+        if (currentVersion.Revision == 0)
+        {
+            // Revision 0 means current version could not be found because it's unknown
+            // by the current client, most likely a newer version. Throw error.
+            throw new DataException("Current vault version could not be determined.");
+        }
+
+        // Get latest version from JsInteropService.
+        var latestVersion = await _jsInteropService.GetLatestVaultVersionAsync();
+
+        return currentVersion.Revision < latestVersion.Revision;
+    }
+
+    /// <summary>
     /// Loads the database from the server.
     /// </summary>
     /// <returns>Task.</returns>
@@ -671,9 +677,17 @@ public sealed class DbService : IDisposable
                 _dbContext = new AliasClientDbContext(_sqlConnection!, log => _logger.LogDebug("{Message}", log));
 
                 // Check if database is up-to-date with migrations.
-                if (await HasPendingMigrationsAsync())
+                try
                 {
-                    _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+                    if (await HasPendingMigrationsAsync())
+                    {
+                        _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+                        return false;
+                    }
+                }
+                catch (DataException)
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.VaultVersionUnrecognized);
                     return false;
                 }
 

@@ -16,6 +16,10 @@
     {
         <ErrorVaultDecrypt />
     }
+    else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.VaultVersionUnrecognized)
+    {
+        <ErrorVaultNotSupported />
+    }
     else if (CurrentDbState.Status == DbServiceState.DatabaseStatus.PendingMigrations)
     {
         <PendingMigrations />

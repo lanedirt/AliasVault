@@ -56,6 +56,11 @@ public sealed class DbServiceState
         DecryptionFailed,
 
         /// <summary>
+        /// The loaded vault version is not recognized by the current client (most likely a new version).
+        /// </summary>
+        VaultVersionUnrecognized,
+
+        /// <summary>
         /// Database has been decrypted but has pending migrations and needs to be updated.
         /// </summary>
         PendingMigrations,
