@@ -1,19 +1,19 @@
 # <img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="35" alt="AliasVault"> AliasVault
-The privacy-first password & email alias manager. Fully end-to-end encrypted, with built-in alias generation and email server — giving you full control over your online identity and safeguarding your privacy.
+AliasVault is a privacy-first password and email alias manager. Create unique identities, strong passwords, and random email aliases for every website you use. Fully end-to-end encrypted, with a built-in email server and zero third-party dependencies.
 
 [<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
 [![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=Sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 [<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=Discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
+ 
+<a href="https://app.aliasvault.net">Try the cloud version 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">Website </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation </a> | <a href="#self-hosting">Self-host instructions</a> 
 
-<a href="https://app.aliasvault.net">Try the cloud version 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">Website </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation </a> | <a href="#self-hosting">Self-host instructions</a>
+⭐ Star us on GitHub — it motivates us a lot!
 
 ## About
-AliasVault helps protect your privacy online by generating a unique password, identity, and email alias for every service you use. Everything is end-to-end encrypted and under your control — whether in the cloud or self-hosted.
+Built on 15 years of experience, AliasVault is independent, open-source, self-hostable and community-driven. It’s the response to a web that tracks everything: a way to take back control of your digital privacy and help you stay secure online.
 
-Built on 15 years of experience, AliasVault is open-source, self-hostable and community-driven. It’s the response to a web that tracks everything: a way to take back control of your digital privacy and help you stay secure online.
-
-– Leendert de Borst (@lanedirt), Creator of AliasVault
+– Leendert de Borst ([@lanedirt](https://github.com/lanedirt)), Creator of AliasVault
 
 ## Screenshots
 
@@ -47,7 +47,17 @@ Built on 15 years of experience, AliasVault is open-source, self-hostable and co
 ## Cloud-hosted
 Use the official cloud version of AliasVault at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release.
 
-AliasVault is available on: [Web](https://app.aliasvault.net) | [iOS](https://apps.apple.com/app/id6745490915) | [Android](https://play.google.com/store/apps/details?id=net.aliasvault.app) | [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo) | [Safari](https://apps.apple.com/app/id6743163173)
+AliasVault is available on: 
+- [Web (universal)](https://app.aliasvault.net)
+- [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/)
+- [Edge](https://microsoftedge.microsoft.com/addons/detail/aliasvault/kabaanafahnjkfkplbnllebdmppdemfo)
+- [Safari](https://apps.apple.com/app/id6743163173)
+
+<p>
+  <a href="https://apps.apple.com/app/id6745490915" style="display: inline-block; margin-right: 20px;"><img src="https://github.com/user-attachments/assets/bad09b85-2635-4e3e-b154-9f348b88f6d6" style="height: 40px;margin-right:10px;"  alt="Download on the App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=net.aliasvault.app" style="display: inline-block;"><img src="https://github.com/user-attachments/assets/b28979c9-f4b8-4090-8735-e384a7fdaa47" style="height: 40px;" alt="Get it on Google Play"></a>
+</p>
 
 [<img width="700" alt="Screenshot of AliasVault" src="docs/assets/img/screenshot.png">](https://app.aliasvault.net)
 
@@ -115,7 +125,8 @@ Core features that are being worked on:
 - [x] Import passwords from traditional password managers
 - [x] iOS native app
 - [x] Android native app
-- [ ] Data model and usability improvements (more flexible aliases and credential types, folder support, editing in browser extension, bulk selecting etc.)
+- [x] Editing in browser extension
+- [ ] Data model and usability improvements (more flexible aliases and credential types, folder support, bulk selecting etc.)
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
 - [ ] Adding support for family/team sharing (organization features)
 
@@ -127,5 +138,4 @@ Feel free to open an issue or join our [Discord](https://discord.gg/DsaXMTEtpF)!
 ### Support the mission
 Your donation helps me dedicate more time and resources to improving AliasVault, making the internet safer for everyone!
 
-<a href="https://www.buymeacoffee.com/lanedirt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
+<a href="https://www.buymeacoffee.com/lanedirt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;" ></a>
