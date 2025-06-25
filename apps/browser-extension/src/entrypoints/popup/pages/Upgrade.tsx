@@ -284,9 +284,8 @@ const Upgrade: React.FC = () => {
 
         <div className="mb-6">
           <p className="text-gray-700 dark:text-gray-200 text-sm mb-4">
-            AliasVault has updated and your vault needs to be upgraded. Normally this only takes a few seconds.
+            AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.
           </p>
-
           <div className="bg-gray-50 dark:bg-gray-800 rounded p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Version Information</span>

@@ -407,8 +407,7 @@ export default function UpgradeScreen() : React.ReactNode {
                     <Avatar />
                     <ThemedText style={styles.username}>{username}</ThemedText>
                   </View>
-                  <ThemedText style={styles.subtitle}>AliasVault has updated and your vault needs to be upgraded. Normally this only takes a few seconds.</ThemedText>
-
+                  <ThemedText style={styles.subtitle}>AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.</ThemedText>
                   <View style={styles.versionContainer}>
                     <View style={styles.versionHeader}>
                       <ThemedText style={styles.versionTitle}>Version Information</ThemedText>
