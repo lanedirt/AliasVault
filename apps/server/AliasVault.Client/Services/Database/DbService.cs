@@ -726,8 +726,13 @@ public sealed class DbService : IDisposable
                 }
                 else if (vaultUpdateResponse.Status == VaultStatus.Outdated)
                 {
-                    // If the server responds with an outdated status, we need to fetch the latest vault from the server before we can continue.
-                    return false;
+                    // If the server responds with "outdated", it means we need to re-fetch the latest vault.
+                    // Because of how the WASM client works now, it mutates the current database in memory so we need to
+                    // merge the newly fetched database with the local database. For this we still need the
+                    // merge databases logic. So for outdated responses, we still call the MergeDatabasesAsync() method.
+                    // TODO: when changing datamodel and improving offline mode and batched mutations, update this logic and flow as well.
+                    _state.UpdateState(DbServiceState.DatabaseStatus.MergeRequired);
+                    return await MergeDatabasesAsync();
                 }
 
                 _vaultRevisionNumber = vaultUpdateResponse.NewRevisionNumber;
