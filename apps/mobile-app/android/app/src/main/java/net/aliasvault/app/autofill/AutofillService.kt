@@ -47,37 +47,70 @@ class AutofillService : AutofillService() {
         cancellationSignal: CancellationSignal,
         callback: FillCallback,
     ) {
-        Log.d(TAG, "onFillRequest called")
+        var callbackCalled = false
 
-        // Check if request was cancelled
-        if (cancellationSignal.isCanceled) {
-            return
+        fun safeCallback(response: FillResponse? = null) {
+            if (!callbackCalled) {
+                callbackCalled = true
+                callback.onSuccess(response)
+            }
         }
 
-        // Get the autofill contexts for this request
-        val contexts = request.fillContexts
-        val context = contexts.last()
-        val structure = context.structure
+        try {
+            Log.d(TAG, "onFillRequest called")
 
-        // Find any autofillable fields in the form
-        val fieldFinder = FieldFinder(structure)
-        fieldFinder.parseStructure()
+            // Check if request was cancelled
+            if (cancellationSignal.isCanceled) {
+                return
+            }
 
-        // If no password field was found, return an empty response
-        if (!fieldFinder.foundPasswordField && !fieldFinder.foundUsernameField) {
-            Log.d(TAG, "No password or username field found, skipping autofill")
-            callback.onSuccess(null)
-            return
+            // Get the autofill contexts for this request
+            val contexts = request.fillContexts
+            val context = contexts.last()
+            val structure = context.structure
+
+            // Find any autofillable fields in the form
+            val fieldFinder = FieldFinder(structure)
+            fieldFinder.parseStructure()
+
+            // If no password field was found, return an empty response
+            if (!fieldFinder.foundPasswordField && !fieldFinder.foundUsernameField) {
+                Log.d(TAG, "No password or username field found, skipping autofill")
+                safeCallback()
+                return
+            }
+
+            launchActivityForAutofill(fieldFinder) { response -> safeCallback(response) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error in onFillRequest", e)
+            // Provide a simple fallback response to prevent white flash
+            try {
+                val responseBuilder = FillResponse.Builder()
+                val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+                presentation.setTextViewText(R.id.text, "Failed to retrieve, open app")
+
+                val dataSetBuilder = Dataset.Builder(presentation)
+
+                // Add a click listener to open AliasVault app
+                val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra("OPEN_CREDENTIALS", true)
+                }
+                val pendingIntent = PendingIntent.getActivity(
+                    this@AutofillService,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
+                dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+                responseBuilder.addDataset(dataSetBuilder.build())
+                safeCallback(responseBuilder.build())
+            } catch (fallbackError: Exception) {
+                Log.e(TAG, "Error creating fallback response", fallbackError)
+                safeCallback()
+            }
         }
-
-        // If we found a password field but no username field, and we have a last field,
-        // assume it's the username field
-        /*if (!fieldFinder.foundUsernameField && fieldFinder.lastField != null) {
-            fieldFinder.autofillableFields.add(Pair(fieldFinder.lastField!!, FieldType.USERNAME))
-            Log.d(TAG, "Using last field as username field: ${fieldFinder.lastField}")
-        }*/
-
-        launchActivityForAutofill(fieldFinder, callback)
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
@@ -90,7 +123,7 @@ class AutofillService : AutofillService() {
         callback.onSuccess()
     }
 
-    private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: FillCallback) {
+    private fun launchActivityForAutofill(fieldFinder: FieldFinder, callback: (FillResponse?) -> Unit) {
         Log.d(TAG, "Launching activity for autofill authentication")
 
         // Get the app/website information from assist structure.
@@ -100,7 +133,7 @@ class AutofillService : AutofillService() {
         // Ignore requests from our own unlock page as this would cause a loop
         if (appInfo == "net.aliasvault.app") {
             Log.d(TAG, "Skipping autofill request from AliasVault app itself")
-            callback.onSuccess(null)
+            callback(null)
             return
         }
 
@@ -116,7 +149,7 @@ class AutofillService : AutofillService() {
                             if (result.isEmpty()) {
                                 // No credentials available
                                 Log.d(TAG, "No credentials available")
-                                callback.onSuccess(null)
+                                callback(null)
                                 return
                             }
 
@@ -153,16 +186,22 @@ class AutofillService : AutofillService() {
                                 responseBuilder.addDataset(createOpenAppDataset(fieldFinder))
                             }
 
-                            callback.onSuccess(responseBuilder.build())
+                            callback(responseBuilder.build())
                         } catch (e: Exception) {
                             Log.e(TAG, "Error parsing credentials", e)
-                            callback.onSuccess(null)
+                            // Show "Failed to retrieve, open app" option instead of failing
+                            val responseBuilder = FillResponse.Builder()
+                            responseBuilder.addDataset(createFailedToRetrieveDataset(fieldFinder))
+                            callback(responseBuilder.build())
                         }
                     }
 
                     override fun onError(e: Exception) {
                         Log.e(TAG, "Error getting credentials", e)
-                        callback.onSuccess(null)
+                        // Show "Failed to retrieve, open app" option instead of failing
+                        val responseBuilder = FillResponse.Builder()
+                        responseBuilder.addDataset(createFailedToRetrieveDataset(fieldFinder))
+                        callback(responseBuilder.build())
                     }
                 })
             ) {
@@ -178,7 +217,7 @@ class AutofillService : AutofillService() {
 
         val responseBuilder = FillResponse.Builder()
         responseBuilder.addDataset(createVaultLockedDataset(fieldFinder))
-        callback.onSuccess(responseBuilder.build())
+        callback(responseBuilder.build())
     }
 
     /**
@@ -406,6 +445,47 @@ class AutofillService : AutofillService() {
         val intent = Intent(this@AutofillService, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("OPEN_CREDENTIALS", true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this@AutofillService,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        dataSetBuilder.setAuthentication(pendingIntent.intentSender)
+
+        // Add a placeholder value to both username and password fields to satisfy the requirement that at least one value must be set
+        if (fieldFinder.autofillableFields.isNotEmpty()) {
+            for (field in fieldFinder.autofillableFields) {
+                dataSetBuilder.setValue(field.first, AutofillValue.forText(""))
+            }
+        }
+
+        return dataSetBuilder.build()
+    }
+
+    /**
+     * Create a dataset for the "failed to retrieve" option.
+     * @param fieldFinder The field finder
+     * @return The dataset
+     */
+    private fun createFailedToRetrieveDataset(fieldFinder: FieldFinder): Dataset {
+        // Create presentation for the "failed to retrieve" option
+        val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
+        presentation.setTextViewText(
+            R.id.text,
+            "Failed to retrieve, open app",
+        )
+
+        val dataSetBuilder = Dataset.Builder(presentation)
+
+        // Create deep link URL
+        val deepLinkUrl = "net.aliasvault.app://reinitialize"
+
+        // Add a click listener to open AliasVault app with deep link
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(deepLinkUrl)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val pendingIntent = PendingIntent.getActivity(
             this@AutofillService,
