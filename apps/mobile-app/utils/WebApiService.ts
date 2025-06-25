@@ -237,7 +237,8 @@ export class WebApiService {
         return;
       }
 
-      await this.post('Auth/revoke', {
+      // We do not await this as we want to continue with the logout even if the revoke fails or takes a long time.
+      this.post('Auth/revoke', {
         token: await this.getAccessToken(),
         refreshToken: refreshToken,
       }, false);
