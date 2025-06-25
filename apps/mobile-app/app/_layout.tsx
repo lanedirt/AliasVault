@@ -71,6 +71,14 @@ function RootLayoutNav() : React.ReactNode {
             await new Promise(resolve => setTimeout(resolve, 750));
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 750));
+
+            // Check if the vault is up to date, if not, redirect to the upgrade page.
+            if (await dbContext.hasPendingMigrations()) {
+              setRedirectTarget('/upgrade');
+              setBootComplete(true);
+              return;
+            }
+
             setBootComplete(true);
             return;
           }

@@ -95,6 +95,13 @@ export default function ReinitializeScreen() : React.ReactNode {
             await new Promise(resolve => setTimeout(resolve, 1000));
             setStatus('Decrypting vault');
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Check if the vault is up to date, if not, redirect to the upgrade page.
+            if (await dbContext.hasPendingMigrations()) {
+              router.replace('/upgrade');
+              return;
+            }
+
             redirectToReturnUrl();
             return;
           }
@@ -115,6 +122,12 @@ export default function ReinitializeScreen() : React.ReactNode {
       // If user is not logged in, navigate to login immediately
       if (!isLoggedIn) {
         router.replace('/login');
+        return;
+      }
+
+      // If we already have an unlocked vault, we can skip the sync and go straight to the credentials screen
+      if (await NativeVaultManager.isVaultUnlocked()) {
+        router.replace('/(tabs)/credentials');
         return;
       }
 
