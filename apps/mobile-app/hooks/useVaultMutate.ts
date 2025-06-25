@@ -21,6 +21,7 @@ type VaultPostResponse = {
 type VaultMutationOptions = {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
+  skipSyncCheck?: boolean;
 }
 
 /**
@@ -244,6 +245,13 @@ export function useVaultMutate() : {
     try {
       setIsLoading(true);
       setSyncStatus('Checking for vault updates');
+
+      // Skip sync check if requested (e.g., during upgrade operations)
+      if (options.skipSyncCheck) {
+        setSyncStatus('Executing operation...');
+        await executeMutateOperation(operation, options);
+        return;
+      }
 
       // If we're in offline mode, try to sync once to see if we can get back online
       if (authContext.isOffline) {

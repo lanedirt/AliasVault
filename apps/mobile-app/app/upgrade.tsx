@@ -7,6 +7,7 @@ import type { VaultVersion } from '@/utils/dist/shared/vault-sql';
 import { VaultSqlGenerator } from '@/utils/dist/shared/vault-sql';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useVaultMutate } from '@/hooks/useVaultMutate';
 import { useVaultSync } from '@/hooks/useVaultSync';
 
 import Logo from '@/assets/images/logo.svg';
@@ -31,6 +32,7 @@ export default function UpgradeScreen() : React.ReactNode {
   const [upgradeStatus, setUpgradeStatus] = useState('Preparing upgrade...');
   const colors = useColors();
   const webApi = useWebApi();
+  const { executeVaultMutation, isLoading: isVaultMutationLoading, syncStatus } = useVaultMutate();
   const { syncVault } = useVaultSync();
 
   /**
@@ -116,36 +118,46 @@ export default function UpgradeScreen() : React.ReactNode {
         return;
       }
 
-      // Begin transaction
-      setUpgradeStatus('Starting database transaction...');
-      await NativeVaultManager.beginTransaction();
+      // Use the useVaultMutate hook to handle the upgrade and vault upload
+      await executeVaultMutation(async () => {
+        // Begin transaction
+        setUpgradeStatus('Starting database transaction...');
+        await NativeVaultManager.beginTransaction();
 
-      // Execute each SQL command
-      setUpgradeStatus('Applying database migrations...');
-      for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
-        const sqlCommand = upgradeResult.sqlCommands[i];
-        setUpgradeStatus(`Applying migration ${i + 1} of ${upgradeResult.sqlCommands.length}...`);
+        // Execute each SQL command
+        setUpgradeStatus('Applying database migrations...');
+        for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
+          const sqlCommand = upgradeResult.sqlCommands[i];
+          setUpgradeStatus(`Applying migration ${i + 1} of ${upgradeResult.sqlCommands.length}...`);
 
-        try {
-          await NativeVaultManager.executeRaw(sqlCommand);
-        } catch (error) {
-          console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
-          await NativeVaultManager.rollbackTransaction();
-          throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          try {
+            await NativeVaultManager.executeRaw(sqlCommand);
+          } catch (error) {
+            console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
+            await NativeVaultManager.rollbackTransaction();
+            throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          }
         }
-      }
 
-      // Commit transaction
-      setUpgradeStatus('Committing changes...');
-      await NativeVaultManager.commitTransaction();
-
-      // Upload to server
-      setUpgradeStatus('Uploading vault to server...');
-      await uploadVaultToServer();
-
-      // Sync and navigate to credentials
-      setUpgradeStatus('Finalizing upgrade...');
-      await handleUpgradeSuccess();
+        // Commit transaction
+        setUpgradeStatus('Committing changes...');
+        await NativeVaultManager.commitTransaction();
+      }, {
+        skipSyncCheck: true, // Skip sync check during upgrade to prevent loop
+        /**
+         * Handle successful upgrade completion.
+         */
+        onSuccess: () => {
+          void handleUpgradeSuccess();
+        },
+        /**
+         * Handle upgrade error.
+         */
+        onError: (error: Error) => {
+          console.error('Upgrade failed:', error);
+          Alert.alert('Upgrade Failed', error.message);
+        }
+      });
 
     } catch (error) {
       console.error('Upgrade failed:', error);
@@ -153,69 +165,6 @@ export default function UpgradeScreen() : React.ReactNode {
     } finally {
       setIsLoading(false);
       setUpgradeStatus('Preparing upgrade...');
-    }
-  };
-
-  /**
-   * Upload the upgraded vault to the server.
-   */
-  const uploadVaultToServer = async () : Promise<void> => {
-    try {
-      // Get the current vault revision number
-      const currentRevision = await NativeVaultManager.getCurrentVaultRevisionNumber();
-
-      // Get the encrypted database
-      const encryptedDb = await NativeVaultManager.getEncryptedDatabase();
-      if (!encryptedDb) {
-        throw new Error('Failed to get encrypted database');
-      }
-
-      // Get all private email domains from credentials in order to claim them on server
-      const privateEmailDomains = await sqliteClient!.getPrivateEmailDomains();
-
-      const credentials = await sqliteClient!.getAllCredentials();
-      const privateEmailAddresses = credentials
-        .filter(cred => cred.Alias?.Email != null)
-        .map(cred => cred.Alias!.Email!)
-        .filter((email, index, self) => self.indexOf(email) === index)
-        .filter(email => {
-          return privateEmailDomains.some(domain => email.toLowerCase().endsWith(`@${domain.toLowerCase()}`));
-        });
-
-      // Get username from the auth context
-      if (!username) {
-        throw new Error('Username not found');
-      }
-
-      // Create vault object for upload
-      const newVault = {
-        blob: encryptedDb,
-        createdAt: new Date().toISOString(),
-        credentialsCount: credentials.length,
-        currentRevisionNumber: currentRevision,
-        emailAddressList: privateEmailAddresses,
-        privateEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        publicEmailDomainList: [], // Empty on purpose, API will not use this for vault updates
-        encryptionPublicKey: '', // Empty on purpose, only required if new public/private key pair is generated
-        client: '', // Empty on purpose, API will not use this for vault updates
-        updatedAt: new Date().toISOString(),
-        username: username,
-        version: (await sqliteClient!.getDatabaseVersion())?.version ?? '0.0.0'
-      };
-
-      // Upload to server
-      const response = await webApi.post<typeof newVault, { status: number; newRevisionNumber: number }>('Vault', newVault);
-
-      if (response.status === 0) {
-        await NativeVaultManager.setCurrentVaultRevisionNumber(response.newRevisionNumber);
-      } else if (response.status === 1) {
-        throw new Error('Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.');
-      } else {
-        throw new Error('Failed to upload vault to server');
-      }
-    } catch (error) {
-      console.error('Error uploading vault:', error);
-      throw error;
     }
   };
 
@@ -428,9 +377,9 @@ export default function UpgradeScreen() : React.ReactNode {
 
   return (
     <ThemedView style={styles.container}>
-      {isLoading ? (
+      {(isLoading || isVaultMutationLoading) ? (
         <View style={styles.loadingContainer}>
-          <LoadingIndicator status={upgradeStatus} />
+          <LoadingIndicator status={syncStatus || upgradeStatus} />
         </View>
       ) : (
         <KeyboardAvoidingView
@@ -487,10 +436,10 @@ export default function UpgradeScreen() : React.ReactNode {
                   <TouchableOpacity
                     style={styles.button}
                     onPress={handleUpgrade}
-                    disabled={isLoading}
+                    disabled={isLoading || isVaultMutationLoading}
                   >
                     <ThemedText style={styles.buttonText}>
-                      {isLoading ? 'Upgrading...' : 'Upgrade'}
+                      {isLoading || isVaultMutationLoading ? (syncStatus || 'Upgrading...') : 'Upgrade'}
                     </ThemedText>
                   </TouchableOpacity>
 
