@@ -343,33 +343,4 @@ export class WebApiService {
 
     return result;
   }
-
-  /**
-   * Convert a Blob to a Base64 string.
-   */
-  private async blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      /**
-       * When the reader has finished loading, convert the result to a Base64 string.
-       */
-      reader.onloadend = (): void => {
-        const result = reader.result;
-        if (typeof result === 'string') {
-          resolve(result.split(',')[1]); // Remove the data URL prefix
-        } else {
-          reject(new Error('Failed to convert Blob to Base64.'));
-        }
-      };
-
-      /**
-       * If the reader encounters an error, reject the promise with a proper Error object.
-       */
-      reader.onerror = (): void => {
-        reject(new Error('Failed to read blob as Data URL'));
-      };
-      reader.readAsDataURL(blob);
-    });
-  }
 }
