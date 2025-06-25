@@ -240,7 +240,9 @@ public class CredentialProviderViewModel: ObservableObject {
             filterCredentials()
             isLoading = false
         } catch {
-            handleError(error)
+            isLoading = false
+            errorMessage = "Failed to load credentials. Please open the AliasVault app to check for updates."
+            showError = true
         }
     }
 
@@ -376,14 +378,6 @@ public class CredentialProviderViewModel: ObservableObject {
 
     func dismissError() {
         showError = false
-    }
-
-    private func handleError(_ error: Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.isLoading = false
-            self?.errorMessage = error.localizedDescription
-            self?.showError = true
-        }
     }
 }
 

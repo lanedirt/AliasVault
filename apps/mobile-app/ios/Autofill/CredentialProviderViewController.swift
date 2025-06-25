@@ -47,11 +47,29 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
 
         // Only set up the view if we haven't already
         if hostingController == nil {
-            setupView(vaultStore: vaultStore)
+            do {
+                try setupView(vaultStore: vaultStore)
+            } catch {
+                print("Failed to setup view: \(error)")
+                let alert = UIAlertController(
+                    title: "Loading Error",
+                    message: "Loading credentials went wrong. Please open the AliasVault app to check for updates.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                    self?.extensionContext.cancelRequest(withError: NSError(
+                        domain: ASExtensionErrorDomain,
+                        code: ASExtensionError.failed.rawValue,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to load credentials"]
+                    ))
+                })
+                present(alert, animated: true)
+                return
+            }
         }
     }
 
-    private func setupView(vaultStore: VaultStore) {
+    private func setupView(vaultStore: VaultStore) throws {
         // Create the ViewModel with injected behaviors
         let viewModel = CredentialProviderViewModel(
             loader: {
