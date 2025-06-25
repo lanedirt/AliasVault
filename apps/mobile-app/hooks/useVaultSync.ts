@@ -6,6 +6,7 @@ import type { VaultResponse } from '@/utils/dist/shared/models/webapi';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 /**
  * Utility function to ensure a minimum time has elapsed for an operation
@@ -129,7 +130,7 @@ export const useVaultSync = () : {
       }
 
       // Check if the vault is up to date, if not, redirect to the upgrade page.
-      if (await dbContext.hasPendingMigrations()) {
+      if (await NativeVaultManager.isVaultUnlocked() && await dbContext.hasPendingMigrations()) {
         onUpgradeRequired?.();
         return false;
       }
