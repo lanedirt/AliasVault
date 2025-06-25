@@ -116,7 +116,7 @@ export const useVaultSync = () : {
           await dbContext.initializeDatabase(vaultResponseJson as VaultResponse);
 
           // Check if the current vault version is known and up to date, if not known trigger an exception, if not up to date redirect to the upgrade page.
-          if (await dbContext.hasPendingMigrations()) {
+          if (await NativeVaultManager.isVaultUnlocked() && await dbContext.hasPendingMigrations()) {
             onUpgradeRequired?.();
             return false;
           }
