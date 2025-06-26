@@ -350,8 +350,32 @@ check_dependencies() {
 
         # Check if Docker daemon is running
         if ! docker info > /dev/null 2>&1; then
-            log_error "Docker daemon is not running. Please start Docker first."
+            log_error "Docker daemon cannot be reached. Please check if Docker is running and try again. If the problem persists, check the output of 'docker info' for more information."
+            # Potential fix: sudo usermod -aG docker $USER
             return 1
+        fi
+
+        # Test if Docker can actually run containers (lightweight test)
+        if [ "$has_issues" != true ]; then
+            local docker_test_output
+            docker_test_output=$(docker run --rm alpine:latest echo "test" 2>&1 >/dev/null)
+
+            if [ $? -ne 0 ]; then
+                log_error "Docker cannot run containers properly. Error output:"
+                printf "  ${RED}%s${NC}\\n\\n" "$docker_test_output"
+
+                printf "  Possible causes:\\n"
+                printf "  ${YELLOW}•${NC} Docker daemon configuration issues\\n"
+                printf "  ${YELLOW}•${NC} Insufficient permissions\\n"
+                printf "  ${YELLOW}•${NC} SELinux/AppArmor restrictions\\n"
+                printf "  ${YELLOW}•${NC} Storage driver problems\\n"
+                printf "  ${YELLOW}•${NC} Kernel compatibility issues\\n"
+                printf "\\n"
+                printf "  ${CYAN}To debug, try running:${NC}\\n"
+                printf "  ${DIM}docker run --rm alpine:latest echo \"test\"${NC}\\n"
+                printf "\\n"
+                return 1
+            fi
         fi
     fi
 
@@ -366,7 +390,18 @@ check_dependencies() {
         fi
     elif command -v docker-compose > /dev/null 2>&1; then
         local compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
-        log_warning "Using legacy docker-compose v1 ($compose_version). Consider upgrading to Docker Compose v2."
+        log_error "Docker Compose v1 detected ($compose_version). AliasVault requires Docker Compose v2."
+        printf "\n"
+        printf "${RED}${BOLD}Docker Compose v1 is not supported.${NC}\n"
+        printf "\n"
+        printf "${CYAN}To upgrade to Docker Compose v2:${NC}\n"
+        printf "  ${YELLOW}•${NC} Uninstall docker-compose v1: sudo apt remove docker-compose (Ubuntu/Debian)\n"
+        printf "  ${YELLOW}•${NC} Install Docker Compose v2 plugin: https://docs.docker.com/compose/install/linux/#install-using-the-repository\n"
+        printf "\n"
+        printf "${CYAN}After installation, verify with:${NC}\n"
+        printf "  docker compose version\n"
+        printf "\n"
+        return 1
     else
         missing_deps+=("docker-compose")
         has_issues=true
@@ -405,10 +440,7 @@ check_dependencies() {
                 printf "\n\n"
             elif command -v yum > /dev/null 2>&1; then
                 printf "${CYAN}To install missing dependencies on CentOS/RHEL:${NC}\n"
-                printf "  sudo yum install -y"
-                for dep in "${missing_deps[@]}"; do
-                    printf " %s" "$dep"
-                done
+                printf "  Follow the instructions on the Docker website: https://docs.docker.com/engine/install/centos/#set-up-the-repository"
                 printf "\n\n"
             elif command -v brew > /dev/null 2>&1; then
                 printf "${CYAN}To install missing dependencies on macOS:${NC}\n"
@@ -518,7 +550,6 @@ main() {
         "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"configure-ssl"|"configure-email"|"configure-registration"|"configure-hostname"|"configure-ip-logging"|"update"|"configure-dev-db"|"db-export"|"db-import")
             # Full dependency check for operations that require Docker
             if ! check_dependencies; then
-                printf "\n${RED}${BOLD}Dependency check failed. Please install missing dependencies before proceeding.${NC}\n"
                 exit 1
             fi
 
