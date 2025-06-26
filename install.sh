@@ -227,31 +227,46 @@ show_spinner() {
     local message="$2"
     local delay=0.1
     local spinstr='|/-\\'
+    local i=0
 
-    printf "${CYAN}> %s${NC}" "$message"
+    printf "${CYAN}ℹ %s${NC} " "$message"
 
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\b%c" "${spinstr:$i:1}"
         sleep $delay
-        printf "\b\b\b\b\b"
+        ((i = (i + 1) % 4))
     done
-    printf "    \b\b\b\b"
+
+    printf "\b ${GREEN}✓${NC}\n"
 }
 
 show_progress_bar() {
     local current=$1
     local total=$2
     local message="$3"
-    local width=50
+    local width=30
     local percentage=$((current * 100 / total))
     local completed=$((width * current / total))
 
-    printf "\r${CYAN}> %s${NC} [" "$message"
+    printf "\r${CYAN}ℹ %s${NC} " "$message"
     for ((i=0; i<completed; i++)); do printf "█"; done
     for ((i=completed; i<width; i++)); do printf " "; done
-    printf "] %d%% (%d/%d)" $percentage $current $total
+    printf " %d%% (%d/%d)" $percentage $current $total
+}
+
+# Simple spinner for operations without PID tracking
+show_simple_spinner() {
+    local message="$1"
+    local delay=0.1
+    local spinstr='|/-\\'
+    local i=0
+
+    printf "${CYAN}ℹ %s${NC} " "$message"
+
+    # This will be called in a loop, so we just advance the spinner
+    printf "\b%c" "${spinstr:$i:1}"
+    sleep $delay
+    ((i = (i + 1) % 4))
 }
 
 log_info() {
@@ -277,7 +292,7 @@ version_ge() {
 
 # Network connectivity check
 check_connectivity() {
-    log_info "Checking network connectivity..."
+    printf "${CYAN}ℹ Checking network connectivity...${NC} "
 
     local test_urls=(
         "https://api.github.com"
@@ -285,24 +300,36 @@ check_connectivity() {
         "https://ghcr.io"
     )
 
+    local spinstr='|/-\\'
+    local i=0
+
     for url in "${test_urls[@]}"; do
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
+
         if ! curl -s --connect-timeout 10 --max-time 30 "$url" > /dev/null 2>&1; then
+            printf "\b ${RED}✗${NC}\n"
             log_error "Cannot reach $url. Please check your internet connection."
             return 1
         fi
     done
 
-    log_success "Network connectivity verified"
+    printf "\b ${GREEN}✓${NC}\n"
     return 0
 }
 
 # Disk space check
 check_disk_space() {
-    log_info "Checking disk space..."
+    printf "${CYAN}ℹ Checking disk space...${NC} "
 
     local available_gb=""
+    local spinstr='|/-\\'
+    local i=0
 
     if command -v df >/dev/null 2>&1; then
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
+
         # Use portable df command and parse available size in KB
         local available_kb
         available_kb=$(df -k . 2>/dev/null | awk 'NR==2 {print $4}')
@@ -313,29 +340,256 @@ check_disk_space() {
 
         if [ -n "$available_gb" ] && [ "$available_gb" -gt 0 ] 2>/dev/null; then
             if [ "$available_gb" -lt "$MIN_DISK_SPACE_GB" ]; then
+                printf "\b ${RED}✗${NC}\n"
                 log_error "Insufficient disk space. Required: ${MIN_DISK_SPACE_GB}GB, Available: ${available_gb}GB"
                 return 1
             fi
-            log_success "Disk space verified (${available_gb}GB available)"
+            printf "\b ${GREEN}✓${NC}\n"
+            printf "  ${GREEN}✓ Disk space verified (${available_gb}GB available)${NC}\n"
         else
+            printf "\b ${YELLOW}⚠${NC}\n"
             log_warning "Cannot determine available disk space, skipping check"
         fi
     else
+        printf "\b ${YELLOW}⚠${NC}\n"
         log_warning "Cannot check disk space (df command not available)"
     fi
 
     return 0
 }
 
+# Read port configuration from .env file with fallbacks
+get_port_config() {
+    local http_port=80
+    local https_port=443
+    local smtp_port=25
+
+    if [ -f "$ENV_FILE" ]; then
+        # Read ports from .env file if it exists
+        local env_http_port
+        local env_https_port
+        local env_smtp_port
+
+        env_http_port=$(grep -E "^HTTP_PORT=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2 | tr -d ' ')
+        env_https_port=$(grep -E "^HTTPS_PORT=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2 | tr -d ' ')
+        env_smtp_port=$(grep -E "^SMTP_PORT=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2 | tr -d ' ')
+
+        # Use .env values if they're valid numbers
+        if [[ "$env_http_port" =~ ^[0-9]+$ ]] && [ "$env_http_port" -gt 0 ] && [ "$env_http_port" -le 65535 ]; then
+            http_port="$env_http_port"
+        fi
+        if [[ "$env_https_port" =~ ^[0-9]+$ ]] && [ "$env_https_port" -gt 0 ] && [ "$env_https_port" -le 65535 ]; then
+            https_port="$env_https_port"
+        fi
+        if [[ "$env_smtp_port" =~ ^[0-9]+$ ]] && [ "$env_smtp_port" -gt 0 ] && [ "$env_smtp_port" -le 65535 ]; then
+            smtp_port="$env_smtp_port"
+        fi
+    fi
+
+    # Return the ports as space-separated values
+    echo "$http_port $https_port $smtp_port"
+}
+
+# Check if ports are available (not in use by non-AliasVault processes)
+check_port_availability() {
+    printf "${CYAN}ℹ Checking port availability...${NC} "
+
+    local ports_config
+    ports_config=$(get_port_config)
+    read -r http_port https_port smtp_port <<< "$ports_config"
+
+    local ports_to_check=("$http_port" "$https_port" "$smtp_port")
+    local port_issues=()
+    local has_issues=false
+    local spinstr='|/-\\'
+    local i=0
+
+    # Get current directory name as potential project name
+    local current_project_name
+    current_project_name=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]//g')
+
+    # Get list of running AliasVault containers to exclude from checks
+    local aliasvault_containers=()
+    local aliasvault_project_containers=()
+
+    if command -v docker > /dev/null 2>&1 && docker info > /dev/null 2>&1; then
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
+
+        # Get all running containers
+        while IFS= read -r container_info; do
+            if [ -n "$container_info" ]; then
+                # Parse container name and project
+                local container_name
+                local project_name
+                container_name=$(echo "$container_info" | cut -d'|' -f1)
+                project_name=$(echo "$container_info" | cut -d'|' -f2)
+
+                # Check if it's an AliasVault container by name or project
+                if [[ "$container_name" =~ aliasvault ]] || [[ "$project_name" =~ aliasvault ]] || [[ "$project_name" == "$current_project_name" ]]; then
+                    aliasvault_containers+=("$container_name")
+                    aliasvault_project_containers+=("$project_name")
+                fi
+            fi
+        done < <(docker ps --format "{{.Names}}|{{.Label \"com.docker.compose.project\"}}" 2>/dev/null | grep -v "^$" || true)
+    fi
+
+    for port in "${ports_to_check[@]}"; do
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
+
+        local port_in_use=false
+        local blocking_process=""
+        local is_aliasvault_port=false
+
+        # Check if port is in use using netstat/ss
+        if command -v ss > /dev/null 2>&1; then
+            # Use ss (more modern)
+            local ss_output
+            ss_output=$(ss -tuln 2>/dev/null | grep ":${port} " || true)
+            if [ -n "$ss_output" ]; then
+                port_in_use=true
+                # Try to get process info
+                local process_info
+                process_info=$(ss -tulpn 2>/dev/null | grep ":${port} " | head -n1 || true)
+                if [ -n "$process_info" ]; then
+                    blocking_process=$(echo "$process_info" | sed -n 's/.*users:((\"\([^\"]*\)\".*/\1/p' || true)
+                fi
+            fi
+        elif command -v netstat > /dev/null 2>&1; then
+            # Fallback to netstat
+            local netstat_output
+            netstat_output=$(netstat -tuln 2>/dev/null | grep ":${port} " || true)
+            if [ -n "$netstat_output" ]; then
+                port_in_use=true
+                # Try to get process info with netstat -tulpn if available
+                local process_info
+                process_info=$(netstat -tulpn 2>/dev/null | grep ":${port} " | head -n1 || true)
+                if [ -n "$process_info" ]; then
+                    blocking_process=$(echo "$process_info" | awk '{print $7}' | cut -d'/' -f2 || true)
+                fi
+            fi
+        else
+            # Last resort: try to bind to the port temporarily
+            if command -v nc > /dev/null 2>&1; then
+                if ! nc -z localhost "$port" 2>/dev/null; then
+                    port_in_use=false
+                else
+                    port_in_use=true
+                fi
+            else
+                log_warning "Cannot check port $port availability (no netstat, ss, or nc available)"
+                continue
+            fi
+        fi
+
+        # If port is in use, check if it's used by AliasVault containers
+        if [ "$port_in_use" = true ]; then
+            # First, check if any AliasVault containers are using this port directly
+            for container in "${aliasvault_containers[@]}"; do
+                if command -v docker > /dev/null 2>&1; then
+                    local container_ports
+                    container_ports=$(docker port "$container" 2>/dev/null || true)
+                    if echo "$container_ports" | grep -q ":${port}$" || echo "$container_ports" | grep -q ":${port}->" ; then
+                        is_aliasvault_port=true
+                        break
+                    fi
+                fi
+            done
+
+            # If not found in direct container ports, check if it's docker-proxy for AliasVault
+            if [ "$is_aliasvault_port" = false ] && [ "$blocking_process" = "docker-proxy" ]; then
+                # Check if there are any AliasVault containers running
+                if [ ${#aliasvault_containers[@]} -gt 0 ]; then
+                    # If we have AliasVault containers and docker-proxy is using the port,
+                    # it's likely for AliasVault (especially during installation/updates)
+                    is_aliasvault_port=true
+                fi
+            fi
+
+            # Additional check: if we're in an AliasVault directory and docker-proxy is using the port,
+            # it's very likely for AliasVault
+            if [ "$is_aliasvault_port" = false ] && [ "$blocking_process" = "docker-proxy" ]; then
+                # Check if we're in an AliasVault project directory
+                if [ -f "docker-compose.yml" ] || [ -f ".env" ]; then
+                    # If we have docker-compose.yml or .env file, this is likely an AliasVault project
+                    is_aliasvault_port=true
+                fi
+            fi
+
+            # Only report as an issue if it's not used by AliasVault
+            if [ "$is_aliasvault_port" = false ]; then
+                has_issues=true
+                local port_name=""
+                case "$port" in
+                    "$http_port") port_name="HTTP" ;;
+                    "$https_port") port_name="HTTPS" ;;
+                    "$smtp_port") port_name="SMTP" ;;
+                esac
+
+                if [ -n "$blocking_process" ]; then
+                    port_issues+=("Port $port ($port_name) is in use by: $blocking_process")
+                else
+                    port_issues+=("Port $port ($port_name) is in use by an unknown process")
+                fi
+            fi
+        fi
+    done
+
+    if [ "$has_issues" = true ]; then
+        printf "\b ${RED}✗${NC}\n"
+        log_error "Port availability issues detected:"
+        for issue in "${port_issues[@]}"; do
+            printf "  ${RED}•${NC} %s\n" "$issue"
+        done
+
+        printf "\n${YELLOW}Common solutions:${NC}\n"
+
+        # Show specific help based on which ports are in use
+        local smtp_in_use=false
+        local http_https_in_use=false
+
+        for issue in "${port_issues[@]}"; do
+            if [[ "$issue" == *"SMTP"* ]]; then
+                smtp_in_use=true
+            fi
+            if [[ "$issue" == *"HTTP"* ]] || [[ "$issue" == *"HTTPS"* ]]; then
+                http_https_in_use=true
+            fi
+        done
+
+        if [ "$smtp_in_use" = true ]; then
+            printf "  ${YELLOW}•${NC} Try disabling the postfix service with 'sudo systemctl stop postfix && sudo systemctl disable postfix'\n"
+        fi
+
+        if [ "$http_https_in_use" = true ]; then
+            printf "  ${YELLOW}•${NC} Try stopping nginx/apache with 'sudo systemctl stop nginx apache2'\n"
+        fi
+
+        printf "\nIf this still doesn't work, try finding out which services are running on the specified ports and read documentation for your distribution on how to disable them.\n"
+        printf "\n"
+
+        return 1
+    fi
+
+    printf "\b ${GREEN}✓${NC}\n"
+    printf "  ${GREEN}✓ Port availability verified (HTTP:$http_port, HTTPS:$https_port, SMTP:$smtp_port)${NC}\n"
+    return 0
+}
+
 # Comprehensive dependency checks
 check_dependencies() {
-    log_info "Checking dependencies..."
+    printf "${CYAN}ℹ Checking dependencies...${NC} "
 
     local missing_deps=()
     local version_issues=()
     local has_issues=false
+    local spinstr='|/-\\'
+    local i=0
 
     # Check Docker
+    printf "\b%c" "${spinstr:$i:1}"
+    ((i = (i + 1) % 4))
     if ! command -v docker > /dev/null 2>&1; then
         missing_deps+=("docker")
         has_issues=true
@@ -349,18 +603,34 @@ check_dependencies() {
         fi
 
         # Check if Docker daemon is running
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
         if ! docker info > /dev/null 2>&1; then
-            log_error "Docker daemon cannot be reached. Please check if Docker is running and try again. If the problem persists, check the output of 'docker info' for more information."
-            # Potential fix: sudo usermod -aG docker $USER
+            printf "\b ${RED}✗${NC}\n"
+            log_error "Docker daemon cannot be reached."
+            printf "\n"
+            printf "${CYAN}To resolve this issue:${NC}\n"
+            printf "\n"
+            printf "${YELLOW}Step 1:${NC} Manually test Docker daemon status:\n"
+            printf "  ${DIM}docker info${NC}\n"
+            printf "\n"
+            printf "${YELLOW}Step 2:${NC} If Docker is not installed or not running, follow the official installation instructions:\n"
+            printf "  ${CYAN}https://docs.docker.com/engine/install/${NC}\n"
+            printf "\n"
+            printf "Please install the latest version of Docker and ensure the Docker daemon is running.\n"
+            printf "\n"
             return 1
         fi
 
         # Test if Docker can actually run containers (lightweight test)
         if [ "$has_issues" != true ]; then
+            printf "\b%c" "${spinstr:$i:1}"
+            ((i = (i + 1) % 4))
             local docker_test_output
             docker_test_output=$(docker run --rm alpine:latest echo "test" 2>&1 >/dev/null)
 
             if [ $? -ne 0 ]; then
+                printf "\b ${RED}✗${NC}\n"
                 log_error "Docker cannot run containers properly. Error output:"
                 printf "  ${RED}%s${NC}\\n\\n" "$docker_test_output"
 
@@ -380,6 +650,8 @@ check_dependencies() {
     fi
 
     # Check Docker Compose
+    printf "\b%c" "${spinstr:$i:1}"
+    ((i = (i + 1) % 4))
     if docker compose version > /dev/null 2>&1; then
         local compose_version=$(docker compose version --short 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
         if [ -n "$compose_version" ]; then
@@ -389,6 +661,7 @@ check_dependencies() {
             fi
         fi
     elif command -v docker-compose > /dev/null 2>&1; then
+        printf "\b ${RED}✗${NC}\n"
         local compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
         log_error "Docker Compose v1 detected ($compose_version). AliasVault requires Docker Compose v2."
         printf "\n"
@@ -408,6 +681,8 @@ check_dependencies() {
     fi
 
     # Check essential tools
+    printf "\b%c" "${spinstr:$i:1}"
+    ((i = (i + 1) % 4))
     for tool in curl openssl grep sed; do
         if ! command -v "$tool" > /dev/null 2>&1; then
             missing_deps+=("$tool")
@@ -415,44 +690,27 @@ check_dependencies() {
         fi
     done
 
-    # Only show detailed output if there are issues
+    # Show final result
     if [ "$has_issues" = true ]; then
+        printf "\b ${RED}✗${NC}\n"
         printf "\n"
 
         if [ ${#missing_deps[@]} -gt 0 ]; then
             printf "${RED}${BOLD}Missing required dependencies:${NC}\n"
             for dep in "${missing_deps[@]}"; do
-                printf "  ${RED}✗${NC} %s\n" "$dep"
+                case $dep in
+                    "docker")
+                        printf "  ${RED}✗${NC} %s (install manual: https://docs.docker.com/engine/install/)\n" "$dep"
+                        ;;
+                    "docker-compose")
+                        printf "  ${RED}✗${NC} %s (install manual: https://docs.docker.com/compose/install/linux/#install-using-the-repository)\n" "$dep"
+                        ;;
+                    *)
+                        printf "  ${RED}✗${NC} %s\n" "$dep"
+                        ;;
+                esac
             done
             printf "\n"
-
-            # Provide installation hints based on OS
-            if command -v apt-get > /dev/null 2>&1; then
-                printf "${CYAN}To install missing dependencies on Ubuntu/Debian:${NC}\n"
-                printf "  sudo apt-get update && sudo apt-get install -y"
-                for dep in "${missing_deps[@]}"; do
-                    case $dep in
-                        "docker") printf " docker.io" ;;
-                        "docker-compose") printf " docker-compose" ;;
-                        *) printf " %s" "$dep" ;;
-                    esac
-                done
-                printf "\n\n"
-            elif command -v yum > /dev/null 2>&1; then
-                printf "${CYAN}To install missing dependencies on CentOS/RHEL:${NC}\n"
-                printf "  Follow the instructions on the Docker website: https://docs.docker.com/engine/install/centos/#set-up-the-repository"
-                printf "\n\n"
-            elif command -v brew > /dev/null 2>&1; then
-                printf "${CYAN}To install missing dependencies on macOS:${NC}\n"
-                printf "  brew install"
-                for dep in "${missing_deps[@]}"; do
-                    case $dep in
-                        "docker") printf " --cask docker" ;;
-                        *) printf " %s" "$dep" ;;
-                    esac
-                done
-                printf "\n\n"
-            fi
         fi
 
         if [ ${#version_issues[@]} -gt 0 ]; then
@@ -468,7 +726,7 @@ check_dependencies() {
             return 1
         fi
     else
-        log_success "Dependencies verified"
+        printf "\b ${GREEN}✓${NC}\n"
     fi
 
     return 0
@@ -514,10 +772,7 @@ enhanced_docker_pull() {
             wait $pull_pid
             local exit_code=$?
 
-            if [ $exit_code -eq 0 ]; then
-                printf " ${GREEN}✓${NC}\n"
-            else
-                printf " ${RED}✗${NC}\n"
+            if [ $exit_code -ne 0 ]; then
                 cat /tmp/docker_pull_${image_name//[:\/]/_}.log >&2
             fi
 
@@ -559,6 +814,9 @@ main() {
                     exit 1
                 fi
                 if ! check_disk_space; then
+                    exit 1
+                fi
+                if ! check_port_availability; then
                     exit 1
                 fi
             fi
@@ -645,28 +903,23 @@ get_latest_version() {
 
 # Function to create required directories
 create_directories() {
-    printf "${CYAN}> Checking workspace...${NC}\n"
+    printf "${CYAN}ℹ Checking workspace...${NC} ${GREEN}✓${NC}\n"
 
     local dirs_needed=false
     for dir in "${REQUIRED_DIRS[@]}"; do
         if [ ! -d "$dir" ]; then
             if [ "$dirs_needed" = false ]; then
-                printf "  ${CYAN}> Creating required directories...${NC}\n"
+                printf "\n  ${CYAN}> Creating required directories...${NC}\n"
                 dirs_needed=true
             fi
             mkdir -p "$dir"
             chmod -R 755 "$dir"
             if [ $? -ne 0 ]; then
-                printf "  ${RED}> Failed to create directory: $dir${NC}\n"
+                printf "\n  ${RED}> Failed to create directory: $dir${NC}\n"
                 exit 1
             fi
         fi
     done
-    if [ "$dirs_needed" = true ]; then
-        printf "  ${GREEN}> Directories created successfully.${NC}\n"
-    else
-        printf "  ${GREEN}> All required directories already exist.${NC}\n"
-    fi
 }
 
 # Function to initialize workspace
@@ -677,32 +930,25 @@ initialize_workspace() {
 # Function to handle docker-compose.yml
 handle_docker_compose() {
     local version_tag="$1"
-    log_info "Downloading docker-compose files for version ${version_tag}..."
+    printf "${CYAN}ℹ Downloading docker-compose files for version ${version_tag}...${NC} "
 
     local files_to_download=(
         "docker-compose.yml"
         "docker-compose.letsencrypt.yml"
     )
 
-    local total_files=${#files_to_download[@]}
-    local current_file=0
+    local spinstr='|/-\\'
+    local i=0
 
     for file in "${files_to_download[@]}"; do
-        ((current_file++))
-
-        if [ "$VERBOSE" != true ]; then
-            show_progress_bar $current_file $total_files "Downloading compose files"
-        else
-            log_info "Downloading $file..."
-        fi
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
 
         local temp_file="${file}.tmp"
         local download_url="${GITHUB_RAW_URL_REPO}/${version_tag}/${file}"
 
         if ! retry_command 3 2 curl -sSf "$download_url" -o "$temp_file"; then
-            if [ "$VERBOSE" != true ]; then
-                printf "\n"
-            fi
+            printf "\b ${RED}✗${NC}\n"
             log_error "Failed to download $file from $download_url"
             log_error "Please check your internet connection and try again."
             log_info "Alternatively, download manually and place in the current directory."
@@ -723,22 +969,20 @@ handle_docker_compose() {
         fi
     done
 
-    if [ "$VERBOSE" != true ]; then
-        printf "\n"
-    fi
-    log_success "Docker compose files downloaded successfully"
+    printf "\b ${GREEN}✓${NC}\n"
     return 0
 }
 
 # Function to check and update install.sh for specific version
 check_install_script_version() {
     local target_version="$1"
-    printf "${CYAN}> Checking install script version for ${target_version}...${NC}\n"
+    printf "${CYAN}ℹ Checking install script version for ${target_version}...${NC}"
 
     # Get remote install.sh for target version
     if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${target_version}/install.sh" -o "install.sh.tmp"; then
-        printf "${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
+        printf "\n${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
+        printf " ${GREEN}✓${NC}\n"
         return 1
     fi
 
@@ -748,22 +992,23 @@ check_install_script_version() {
 
     # Check if versions could be extracted
     if [ -z "$current_version" ] || [ -z "$target_script_version" ]; then
-        printf "${YELLOW}> Could not determine script versions. Falling back to file comparison...${NC}\n"
+        printf "\n${YELLOW}> Could not determine script versions. Falling back to file comparison...${NC}\n"
         if ! cmp -s "install.sh" "install.sh.tmp"; then
             printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            rm -f install.sh.tmp
+            printf " ${GREEN}✓${NC}\n"
             return 2
         fi
     else
-        printf "${CYAN}> Current install script version: ${current_version}${NC}\n"
-        printf "${CYAN}> Target install script version: ${target_script_version}${NC}\n"
-
         if [ "$current_version" != "$target_script_version" ]; then
             printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
+            rm -f install.sh.tmp
+            printf " ${GREEN}✓${NC}\n"
             return 2
         fi
     fi
 
-    printf "${GREEN}> Install script is up to date for version ${target_version}.${NC}\n"
+    printf " ${GREEN}✓${NC}\n"
     rm -f install.sh.tmp
     return 0
 }
@@ -771,40 +1016,45 @@ check_install_script_version() {
 # Function to print the logo
 print_logo() {
     printf "${MAGENTA}" >&2
+    printf "==================================================\n" >&2
     printf "    _    _ _           __      __         _ _   \n" >&2
     printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n" >&2
     printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n" >&2
     printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n" >&2
     printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n" >&2
-    printf "${NC}\n" >&2
+    printf "\n" >&2
+    printf "==================================================\n" >&2
 }
 
 # Function to create .env file
 create_env_file() {
-    printf "${CYAN}> Checking .env file...${NC}\n"
+    printf "${CYAN}ℹ Checking .env file...${NC}"
     if [ ! -f "$ENV_FILE" ]; then
         if [ ! -f "$ENV_EXAMPLE_FILE" ]; then
             # Get latest release version
             local latest_version=$(get_latest_version) || {
-                printf "  ${YELLOW}> Failed to check latest version. Creating blank .env file.${NC}\n"
+                printf "\n  ${YELLOW}> Failed to check latest version. Creating blank .env file.${NC}\n"
                 touch "$ENV_FILE"
+                printf " ${GREEN}✓${NC}\n"
                 return 0
             }
 
-            printf "  ${CYAN}> Downloading .env.example...${NC}"
+            printf "\n  ${CYAN}> Downloading .env.example...${NC}"
             if curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
                 printf "\n  ${GREEN}> .env.example downloaded successfully.${NC}\n"
             else
                 printf "\n  ${YELLOW}> Failed to download .env.example. Creating blank .env file.${NC}\n"
                 touch "$ENV_FILE"
+                printf " ${GREEN}✓${NC}\n"
                 return 0
             fi
         fi
 
+        printf " ${GREEN}✓${NC}\n"
         cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
-        printf "  ${GREEN}> New .env file created from .env.example.${NC}\n"
+        printf "\n  ${GREEN}> New .env file created from .env.example.${NC}\n"
     else
-        printf "  ${GREEN}> .env file already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
@@ -828,103 +1078,105 @@ populate_hostname() {
 
 # Environment setup functions
 populate_jwt_key() {
-    printf "${CYAN}> Checking JWT_KEY...${NC}\n"
+    printf "${CYAN}> Checking JWT_KEY...${NC}"
     if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         JWT_KEY=$(openssl rand -base64 32)
         update_env_var "JWT_KEY" "$JWT_KEY"
     else
-        printf "  ${GREEN}> JWT_KEY already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 populate_data_protection_cert_pass() {
-    printf "${CYAN}> Checking DATA_PROTECTION_CERT_PASS...${NC}\n"
+    printf "${CYAN}> Checking DATA_PROTECTION_CERT_PASS...${NC}"
     if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         CERT_PASS=$(openssl rand -base64 32)
         update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
     else
-        printf "  ${GREEN}> DATA_PROTECTION_CERT_PASS already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 populate_postgres_credentials() {
     printf "${CYAN}> Checking Postgres credentials...${NC}\n"
 
+    printf "  POSTGRES_DB..."
     if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "POSTGRES_DB" "aliasvault"
     else
-        printf "  ${GREEN}> POSTGRES_DB already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 
+    printf "  POSTGRES_USER..."
     if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "POSTGRES_USER" "aliasvault"
     else
-        printf "  ${GREEN}> POSTGRES_USER already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 
+    printf "  POSTGRES_PASSWORD..."
     if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        # Generate a strong random password with 32 characters
         POSTGRES_PASS=$(openssl rand -base64 32)
         update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
     else
-        printf "  ${GREEN}> POSTGRES_PASSWORD already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 set_private_email_domains() {
-    printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}\n"
+    printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}"
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
     fi
 
     private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
     if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf "  ${GREEN}> Email server is disabled. To enable use ./install.sh configure-email command.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     else
-        printf "  ${GREEN}> PRIVATE_EMAIL_DOMAINS already exists. Email server is enabled.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 set_smtp_tls_enabled() {
-    printf "${CYAN}> Checking SMTP_TLS_ENABLED...${NC}\n"
+    printf "${CYAN}> Checking SMTP_TLS_ENABLED...${NC}"
     if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
         update_env_var "SMTP_TLS_ENABLED" "false"
     else
-        printf "  ${GREEN}> SMTP_TLS_ENABLED already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 set_support_email() {
-    printf "${CYAN}> Checking SUPPORT_EMAIL...${NC}\n"
+    printf "${CYAN}> Checking SUPPORT_EMAIL...${NC}"
     if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
         read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
         update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
     else
-        printf "  ${GREEN}> SUPPORT_EMAIL already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 set_public_registration() {
-    printf "${CYAN}> Checking PUBLIC_REGISTRATION_ENABLED...${NC}\n"
+    printf "${CYAN}> Checking PUBLIC_REGISTRATION_ENABLED...${NC}"
     if ! grep -q "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
     else
-        printf "  ${GREEN}> PUBLIC_REGISTRATION_ENABLED already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 set_ip_logging() {
-    printf "${CYAN}> Checking IP_LOGGING_ENABLED...${NC}\n"
+    printf "${CYAN}> Checking IP_LOGGING_ENABLED...${NC}"
     if ! grep -q "^IP_LOGGING_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^IP_LOGGING_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "IP_LOGGING_ENABLED" "true"
     else
-        printf "  ${GREEN}> IP_LOGGING_ENABLED already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
 # Function to generate admin password
 generate_admin_password() {
-    printf "${CYAN}> Generating admin password...${NC}\n"
+    printf "${CYAN}ℹ Generating admin password...${NC} ${GREEN}✓${NC}\n"
     PASSWORD=$(openssl rand -base64 12)
 
     # Build locally if in build mode or if pre-built image is not available
@@ -943,15 +1195,13 @@ generate_admin_password() {
                 wait $BUILD_PID
                 BUILD_EXIT_CODE=$?
 
-                if [ $BUILD_EXIT_CODE -eq 0 ]; then
-                    printf " ${GREEN}✓${NC}\n"
-                    rm -f install_build_output.log
-                else
-                    printf " ${RED}✗${NC}\n"
+                if [ $BUILD_EXIT_CODE -ne 0 ]; then
                     log_error "Failed to build InstallCli Docker image. Build output:"
                     cat install_build_output.log >&2
                     exit $BUILD_EXIT_CODE
                 fi
+
+                rm -f install_build_output.log
             )
         fi
         HASH=$(docker run --rm installcli hash-password "$PASSWORD")
@@ -960,7 +1210,7 @@ generate_admin_password() {
     fi
 
     if [ -z "$HASH" ]; then
-        printf "${RED}> Error: Failed to generate password hash${NC}\n"
+        printf "\n${RED}> Error: Failed to generate password hash${NC}\n"
         exit 1
     fi
 
@@ -973,30 +1223,32 @@ generate_admin_password() {
 set_default_ports() {
     printf "${CYAN}> Checking default ports...${NC}\n"
 
-    # Web ports
+    printf "  HTTP_PORT..."
     if ! grep -q "^HTTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "HTTP_PORT" "80"
     else
-        printf "  ${GREEN}> HTTP_PORT already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 
+    printf "  HTTPS_PORT..."
     if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "HTTPS_PORT" "443"
     else
-        printf "  ${GREEN}> HTTPS_PORT already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 
-    # SMTP ports
+    printf "  SMTP_PORT..."
     if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_PORT" "25"
     else
-        printf "  ${GREEN}> SMTP_PORT already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 
+    printf "  SMTP_TLS_PORT..."
     if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_TLS_PORT" "587"
     else
-        printf "  ${GREEN}> SMTP_TLS_PORT already exists.${NC}\n"
+        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
@@ -1036,38 +1288,37 @@ delete_env_var() {
 # Function to print success message
 print_success_message() {
     printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
+    printf "${MAGENTA}╔══════════════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${MAGENTA}║${NC}                            ${GREEN}✓ SUCCESS!${NC}                                ${MAGENTA}║${NC}\n"
+    printf "${MAGENTA}║${NC}              ${BOLD}AliasVault is successfully installed!${NC}                   ${MAGENTA}║${NC}\n"
+    printf "${MAGENTA}╚══════════════════════════════════════════════════════════════════════╝${NC}\n"
     printf "\n"
-    printf "${GREEN}AliasVault is successfully installed!${NC}\n"
-    printf "\n"
-    printf "${CYAN}To configure the server, login to the admin panel:${NC}\n"
-    printf "\n"
+    printf "${BOLD}To configure the server, login to the admin panel:${NC}\n"
     if [ -n "$PASSWORD" ]; then
-        printf "Admin Panel: https://localhost/admin\n"
-        printf "Username: admin\n"
-        printf "Password: $PASSWORD\n"
+        printf "  ${CYAN}Admin Panel:${NC} https://localhost/admin\n"
+        printf "  ${CYAN}Username:${NC} admin\n"
+        printf "  ${CYAN}Password:${NC} $PASSWORD\n"
         printf "\n"
-        printf "${YELLOW}(!) Caution: Make sure to backup the above credentials in a safe place, they won't be shown again!${NC}\n"
+        printf "${YELLOW}⚠  IMPORTANT: Make sure to backup the above credentials in a safe place,${NC}\n"
+        printf "${YELLOW}   they won't be shown again!${NC}\n"
     else
-        printf "Admin Panel: https://localhost/admin\n"
-        printf "Username: admin\n"
-        printf "Password: (Previously set. Use ./install.sh reset-admin-password to generate new one.)\n"
+        printf "  ${CYAN}Admin Panel:${NC} https://localhost/admin\n"
+        printf "  ${CYAN}Username:${NC} admin\n"
+        printf "  ${CYAN}Password:${NC} (Previously set. Use ./install.sh reset-admin-password to generate new one.)\n"
     fi
     printf "\n"
-    printf "${CYAN}===========================${NC}\n"
+    printf "${BOLD}To start using AliasVault, log into the client website:${NC}\n"
+    printf "  ${CYAN}Client Website:${NC} https://localhost/\n"
     printf "\n"
-    printf "${CYAN}In order to start using AliasVault, log into the client website:${NC}\n"
-    printf "\n"
-    printf "Client Website: https://localhost/\n"
-    printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
+    printf "${MAGENTA}══════════════════════════════════════════════════════════════════${NC}\n"
 }
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    log_info "(Re)creating Docker containers..."
+    printf "${CYAN}ℹ (Re)creating Docker containers...${NC} "
 
     if [ "$VERBOSE" = true ]; then
+        printf "\b${NC}\n"
         if ! $(get_docker_compose_command) up -d --force-recreate; then
             log_error "Failed to recreate Docker containers"
             exit 1
@@ -1080,18 +1331,16 @@ recreate_docker_containers() {
             wait $RECREATE_PID
             RECREATE_EXIT_CODE=$?
 
-            if [ $RECREATE_EXIT_CODE -eq 0 ]; then
-                printf " ${GREEN}✓${NC}\n"
-                rm -f /tmp/docker_recreate.log
-            else
-                printf " ${RED}✗${NC}\n"
+            if [ $RECREATE_EXIT_CODE -ne 0 ]; then
                 log_error "Failed to recreate Docker containers. Output:"
                 cat /tmp/docker_recreate.log >&2
                 exit 1
             fi
+
+            rm -f /tmp/docker_recreate.log
         )
     fi
-    log_success "Docker containers (re)created successfully"
+    printf "${GREEN}✓ Docker containers (re)created successfully${NC}\n"
 }
 
 # Function to print password reset success message
@@ -1211,12 +1460,16 @@ handle_install() {
         if grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
             current_version=$(grep "^ALIASVAULT_VERSION=" "$ENV_FILE" | cut -d '=' -f2)
             printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
-            printf "${YELLOW}> AliasVault is already installed.${NC}\n"
+            printf "\n"
+            printf "==================================================\n"
+            printf "AliasVault is already installed.\n"
+            printf "==================================================\n"
             printf "1. To reinstall the current version (${current_version}), continue with this script\n"
             printf "2. To check for updates and to install the latest version, use: ./install.sh update\n"
             printf "3. To install a specific version, use: ./install.sh install <version>\n\n"
 
             read -p "Would you like to reinstall the current version? [y/N]: " REPLY
+            printf "\n"
             if [[ ! $REPLY =~ ^[Yy]$ ]]; then
                 printf "${YELLOW}> Installation cancelled.${NC}\n"
                 exit 0
@@ -1258,15 +1511,7 @@ handle_build() {
     fi
 
     # Initialize environment with proper error handling
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
-    populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
-    populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
-    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
-    set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
-    set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
-    set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
-    set_ip_logging || { printf "${RED}> Failed to set IP logging${NC}\n"; exit 1; }
+    check_and_populate_env
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -1274,10 +1519,10 @@ handle_build() {
     fi
 
     printf "\n${YELLOW}+++ Building and starting services +++${NC}\n"
-    printf "\n"
 
-    log_info "Building Docker Compose stack..."
+    printf "${CYAN}ℹ Building Docker Compose stack...${NC} "
     if [ "$VERBOSE" = true ]; then
+        printf "\b${NC}\n"
         if ! $(get_docker_compose_command) build; then
             log_error "Failed to build Docker Compose stack"
             exit 1
@@ -1290,24 +1535,22 @@ handle_build() {
             wait $BUILD_PID
             BUILD_EXIT_CODE=$?
 
-            if [ $BUILD_EXIT_CODE -eq 0 ]; then
-                printf " ${GREEN}✓${NC}\n"
-                rm -f install_compose_build_output.log
-            else
-                printf " ${RED}✗${NC}\n"
+            if [ $BUILD_EXIT_CODE -ne 0 ]; then
                 log_error "Failed to build Docker Compose stack. Build output:"
                 cat install_compose_build_output.log >&2
                 exit 1
             fi
+
+            rm -f install_compose_build_output.log
         )
     fi
-    log_success "Docker Compose stack built successfully"
+    printf "${GREEN}✓ Docker Compose stack built successfully${NC}\n"
 
-    printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
+    printf "${CYAN}ℹ Starting Docker Compose stack...${NC}\n"
 
     recreate_docker_containers
 
-    printf "${GREEN}> Docker Compose stack started successfully.${NC}\n"
+    printf "${GREEN}✓ Docker Compose stack started successfully${NC}\n"
 
     # Only show success message if we made it here without errors
     print_success_message
@@ -1949,10 +2192,6 @@ handle_install_version() {
     printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
 
-    # Set deployment mode to install to ensure container lifecycle uses install configuration
-    set_deployment_mode "install"
-    printf "\n"
-
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
 
@@ -1997,15 +2236,10 @@ handle_install_version() {
     fi
 
     # Initialize environment
-    set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
-    populate_jwt_key || { printf "${RED}> Failed to set JWT key${NC}\n"; exit 1; }
-    populate_data_protection_cert_pass || { printf "${RED}> Failed to set certificate password${NC}\n"; exit 1; }
-    populate_postgres_credentials || { printf "${RED}> Failed to set PostgreSQL credentials${NC}\n"; exit 1; }
-    set_private_email_domains || { printf "${RED}> Failed to set email domains${NC}\n"; exit 1; }
-    set_smtp_tls_enabled || { printf "${RED}> Failed to set SMTP TLS${NC}\n"; exit 1; }
-    set_default_ports || { printf "${RED}> Failed to set default ports${NC}\n"; exit 1; }
-    set_public_registration || { printf "${RED}> Failed to set public registration${NC}\n"; exit 1; }
-    set_ip_logging || { printf "${RED}> Failed to set IP logging${NC}\n"; exit 1; }
+    check_and_populate_env
+
+    # Set deployment mode to install to ensure container lifecycle uses install configuration
+    set_deployment_mode "install"
 
     # Only generate admin password if not already set
     if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
@@ -2014,9 +2248,7 @@ handle_install_version() {
 
     # Pull images from GitHub Container Registry
     printf "\n${YELLOW}+++ Pulling Docker images +++${NC}\n"
-    printf "\n"
-
-    log_info "Installing version: ${target_version}"
+    printf "${CYAN}ℹ Installing version: ${target_version}${NC}\n"
 
     images=(
         "${GITHUB_CONTAINER_REGISTRY}-postgres:${target_version}"
@@ -2028,37 +2260,23 @@ handle_install_version() {
         "${GITHUB_CONTAINER_REGISTRY}-task-runner:${target_version}"
     )
 
-    local total_images=${#images[@]}
-    local current_image=0
-
     for image in "${images[@]}"; do
-        ((current_image++))
-        if [ "$VERBOSE" != true ]; then
-            show_progress_bar $current_image $total_images "Pulling Docker images"
-        fi
-
         if ! retry_command 3 5 enhanced_docker_pull "$image"; then
-            if [ "$VERBOSE" != true ]; then
-                printf "\n"
-            fi
             log_warning "Failed to pull image: $image - continuing anyway"
         fi
     done
 
-    if [ "$VERBOSE" != true ]; then
-        printf "\n"
-    fi
-    log_success "Docker image pulling completed"
+    printf "${GREEN}✓ Docker image pulling completed${NC}\n"
 
     # Save version to .env
     update_env_var "ALIASVAULT_VERSION" "$target_version"
 
     # Start containers
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
-    printf "\n"
 
-    log_info "Starting Docker containers..."
     if [ "$VERBOSE" = true ]; then
+        printf "${CYAN}ℹ Starting Docker containers...${NC} "
+        printf "\b${NC}\n"
         if ! docker compose up -d --force-recreate; then
             log_error "Failed to start Docker containers"
             exit 1
@@ -2067,22 +2285,20 @@ handle_install_version() {
         (
             docker compose up -d --force-recreate > /tmp/docker_start.log 2>&1 &
             START_PID=$!
-            show_spinner $START_PID "Starting containers"
+            show_spinner $START_PID "Starting Docker containers"
             wait $START_PID
             START_EXIT_CODE=$?
 
-            if [ $START_EXIT_CODE -eq 0 ]; then
-                printf " ${GREEN}✓${NC}\n"
-                rm -f /tmp/docker_start.log
-            else
-                printf " ${RED}✗${NC}\n"
+            if [ $START_EXIT_CODE -ne 0 ]; then
                 log_error "Failed to start Docker containers. Output:"
                 cat /tmp/docker_start.log >&2
                 exit 1
             fi
+
+            rm -f /tmp/docker_start.log
         )
     fi
-    log_success "Docker containers started successfully"
+    printf "${GREEN}✓ Docker containers started successfully${NC}\n"
 
     # Only show success message if we made it here without errors
     print_success_message
@@ -2485,6 +2701,94 @@ handle_ip_logging_configuration() {
             return 1
             ;;
     esac
+}
+
+check_and_populate_env() {
+    printf "${CYAN}ℹ Checking .env values...${NC} ${GREEN}✓${NC}\n"
+    local any_missing=false
+
+    # SUPPORT_EMAIL
+    if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
+        read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
+        update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
+        printf "  Set SUPPORT_EMAIL\n"
+        any_missing=true
+    fi
+
+    # JWT_KEY
+    if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        JWT_KEY=$(openssl rand -base64 32)
+        update_env_var "JWT_KEY" "$JWT_KEY"
+        printf "  Set JWT_KEY\n"
+        any_missing=true
+    fi
+
+    # DATA_PROTECTION_CERT_PASS
+    if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        CERT_PASS=$(openssl rand -base64 32)
+        update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
+        printf "  Set DATA_PROTECTION_CERT_PASS\n"
+        any_missing=true
+    fi
+
+    # POSTGRES_DB
+    if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_DB" "aliasvault"
+        printf "  Set POSTGRES_DB\n"
+        any_missing=true
+    fi
+    # POSTGRES_USER
+    if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "POSTGRES_USER" "aliasvault"
+        printf "  Set POSTGRES_USER\n"
+        any_missing=true
+    fi
+    # POSTGRES_PASSWORD
+    if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        POSTGRES_PASS=$(openssl rand -base64 32)
+        update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
+        printf "  Generated POSTGRES_PASSWORD\n"
+        any_missing=true
+    fi
+
+    # PRIVATE_EMAIL_DOMAINS
+    if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
+        printf "  Set PRIVATE_EMAIL_DOMAINS\n"
+        any_missing=true
+    fi
+
+    # SMTP_TLS_ENABLED
+    if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
+        update_env_var "SMTP_TLS_ENABLED" "false"
+        printf "  Set SMTP_TLS_ENABLED\n"
+        any_missing=true
+    fi
+
+    # HTTP_PORT
+    if ! grep -q "^HTTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "HTTP_PORT" "80"
+        printf "  Set HTTP_PORT\n"
+        any_missing=true
+    fi
+    # HTTPS_PORT
+    if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "HTTPS_PORT" "443"
+        printf "  Set HTTPS_PORT\n"
+        any_missing=true
+    fi
+    # SMTP_PORT
+    if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "SMTP_PORT" "25"
+        printf "  Set SMTP_PORT\n"
+        any_missing=true
+    fi
+    # SMTP_TLS_PORT
+    if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+        update_env_var "SMTP_TLS_PORT" "587"
+        printf "  Set SMTP_TLS_PORT\n"
+        any_missing=true
+    fi
 }
 
 main "$@"
