@@ -830,7 +830,7 @@ main() {
                 exit 1
             fi
             ;;
-        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"update"|"configure-dev-db"|"db-export"|"db-import")
+        "install"|"build"|"update"|"configure-dev-db")
             # Full dependency check for operations that require Docker
             if ! check_dependencies; then
                 exit 1
@@ -1357,6 +1357,7 @@ print_install_success_message() {
     print_success_box "AliasVault is successfully installed!"
     printf "\n"
     printf "${BOLD}To configure the server, login to the admin panel:${NC}\n"
+    printf "\n"
     if [ -n "$PASSWORD" ]; then
         printf "  ${CYAN}Admin Panel:${NC} https://localhost/admin\n"
         printf "  ${CYAN}Username:${NC} admin\n"
@@ -1371,9 +1372,9 @@ print_install_success_message() {
     fi
     printf "\n"
     printf "${BOLD}To start using AliasVault, log into the client website:${NC}\n"
+    printf "\n"
     printf "  ${CYAN}Client Website:${NC} https://localhost/\n"
     printf "\n"
-    printf "${MAGENTA}══════════════════════════════════════════════════════════════════${NC}\n"
 }
 
 # Function to recreate (restart) Docker containers
@@ -1474,7 +1475,6 @@ handle_registration_configuration() {
     case $reg_option in
         1)
             update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
-            printf "${GREEN}> Public registration has been enabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
             read -p "Restart now? (y/n): " restart_confirm
@@ -1485,10 +1485,13 @@ handle_registration_configuration() {
             fi
 
             handle_restart
+
+            # Print success message
+            printf "\n"
+            print_success_box "Public registration has been enabled!"
             ;;
         2)
             update_env_var "PUBLIC_REGISTRATION_ENABLED" "false"
-            printf "${YELLOW}> Public registration has been disabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
             read -p "Restart now? (y/n): " restart_confirm
@@ -1499,6 +1502,10 @@ handle_registration_configuration() {
             fi
 
             handle_restart
+
+            # Print success message
+            printf "\n"
+            print_success_box "Public registration has been disabled!"
             ;;
         3)
             printf "${YELLOW}Registration configuration cancelled.${NC}\n"
@@ -1684,18 +1691,12 @@ handle_uninstall() {
 
     # Only show success message if we made it here without errors
     printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
-    printf "\n"
-    printf "${GREEN}AliasVault has been successfully uninstalled!${NC}\n"
+    print_success_box "AliasVault has been successfully uninstalled!"
     printf "\n"
     printf "All Docker containers and images related to AliasVault have been removed.\n"
-    printf "The current directory, including logs and .env files, has been left intact.\n"
+    printf "The current directory, including database, logs and .env files, has been left intact.\n"
     printf "\n"
-    printf "If you wish to remove the remaining files, you can do so manually.\n"
-    printf "\n"
-    printf "Thank you for using AliasVault!\n"
-    printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
+    printf "If you wish to remove the remaining files, it's safe to do so now.\n"
 }
 
 # Function to handle SSL configuration
@@ -1780,7 +1781,7 @@ handle_email_configuration() {
     printf "${CYAN}About Email Server:${NC}\n"
     printf "AliasVault includes a built-in email server for handling virtual email addresses.\n"
     printf "When enabled, it can receive emails for one or more configured domains.\n"
-    printf "Each domain must have an MX record in DNS configuration pointing to this server's hostname.\n"
+    printf "Each domain must have an MX DNS record pointing to this server's hostname.\n"
     printf "\n"
     printf "${CYAN}Current Configuration:${NC}\n"
 
@@ -1842,15 +1843,16 @@ handle_email_configuration() {
                 exit 0
             fi
 
-            printf "Restarting AliasVault services...\n"
-
             if ! handle_restart; then
                 printf "${RED}Failed to restart services.${NC}\n"
                 exit 1
             fi
 
-            # Only show next steps if everything succeeded
-            printf "\n${CYAN}The email server is now successfully configured.${NC}\n"
+            # Print success message
+            printf "\n"
+            print_success_box "The email server is now successfully configured!"
+
+            # Print next steps
             printf "\n"
             printf "To test the email server:\n"
             printf "   a. Log in to your AliasVault account\n"
@@ -1865,7 +1867,7 @@ handle_email_configuration() {
             printf "\n"
             ;;
         2)
-            printf "${YELLOW}Warning: Docker containers need to be restarted after disabling the email server.${NC}\n"
+            printf "\n${YELLOW}Warning: Docker containers need to be restarted after disabling the email server.${NC}\n"
             read -p "Continue with disable and restart? (y/n): " disable_confirm
 
             if [ "$disable_confirm" != "y" ] && [ "$disable_confirm" != "Y" ]; then
@@ -1879,13 +1881,14 @@ handle_email_configuration() {
                 exit 1
             fi
 
-            printf "${YELLOW}Email server disabled${NC}\n"
-            printf "Restarting AliasVault services...\n"
-
             if ! handle_restart; then
                 printf "${RED}Failed to restart services.${NC}\n"
                 exit 1
             fi
+
+            # Print success message
+            printf "\n"
+            print_success_box "The email server has been disabled successfully!"
             ;;
         3)
             printf "${YELLOW}Email configuration cancelled.${NC}\n"
@@ -2045,7 +2048,7 @@ handle_stop() {
 }
 
 handle_restart() {
-    printf "${CYAN}> Restarting AliasVault containers...${NC}\n"
+    printf "\n${CYAN}> Restarting AliasVault containers...${NC}\n"
     $(get_docker_compose_command) down
     $(get_docker_compose_command) up -d
     printf "${GREEN}> AliasVault containers restarted successfully.${NC}\n"
@@ -2053,15 +2056,15 @@ handle_restart() {
 
 # Function to handle updates
 handle_update() {
-    printf "${YELLOW}+++ Checking for AliasVault updates +++${NC}\n"
-    printf "\n"
+    printf "\n${YELLOW}+++ Checking for AliasVault updates +++${NC}\n"
 
     # First check for install.sh updates
     check_install_script_update || true
 
     # Check current version
     if ! grep -q "^ALIASVAULT_VERSION=" "$ENV_FILE"; then
-        printf "${YELLOW}> No version information found. Running first-time update check...${NC}\n"
+        printf "${CYAN}> No version information found. Running first-time update check...${NC}\n"
+        printf "\n"
         handle_install_version "latest"
         return
     fi
@@ -2077,39 +2080,36 @@ handle_update() {
         exit 1
     fi
 
-    printf "${CYAN}> Current AliasVault version: ${current_version}${NC}\n"
-    printf "${CYAN}> Latest AliasVault version: ${latest_version}${NC}\n"
-    printf "\n"
-
     if [ "$current_version" = "$latest_version" ]; then
-        printf "${GREEN}> You are already running the latest version of AliasVault!${NC}\n"
+        printf "\n"
+        printf "You are already running the latest version of AliasVault (${current_version})!\n"
         exit 0
     fi
 
     if [ "$FORCE_YES" = true ]; then
-        printf "${CYAN}> Updating AliasVault to the latest version...${NC}\n"
+        printf "${CYAN}> Updating AliasVault to the latest version (${latest_version})...${NC}\n"
         handle_install_version "$latest_version"
         printf "${GREEN}> Update completed successfully!${NC}\n"
         return
     fi
 
-    printf "${YELLOW}> A new version of AliasVault is available!${NC}\n"
+    printf "\n"
+    printf "A new version of AliasVault is available (${latest_version})!\n"
     printf "\n"
     printf "${MAGENTA}Important:${NC}\n"
-    printf "1. It's recommended to backup your database before updating\n"
+    printf "1. It's recommended to backup your database before updating (./install.sh db-export > backup.sql.gz)\n"
     printf "2. The update process will restart all containers\n"
     printf "\n"
 
-    read -p "Would you like to update to the latest version? [y/N]: " REPLY
+    read -p "Would you like to continue with the update? [y/N]: " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         printf "${YELLOW}> Update cancelled.${NC}\n"
         exit 0
     fi
 
     printf "${CYAN}> Updating AliasVault...${NC}\n"
+    printf "\n"
     handle_install_version "$latest_version"
-
-    printf "${GREEN}> Update completed successfully!${NC}\n"
 }
 
 # Function to extract version
@@ -2184,9 +2184,6 @@ check_install_script_update() {
             return 0
         fi
     else
-        printf "${CYAN}> Current install script version: ${current_version}${NC}\n"
-        printf "${CYAN}> Latest install script version: ${new_version}${NC}\n"
-
         # Compare versions using semver comparison
         if [ "$current_version" = "$new_version" ]; then
             printf "${GREEN}> Install script is up to date.${NC}\n"
@@ -2516,11 +2513,9 @@ set_deployment_mode() {
 handle_db_export() {
     # Print logo and headers to stderr
     printf "${YELLOW}+++ Exporting Database +++${NC}\n" >&2
-    printf "\n" >&2
 
     # Check if output redirection is present
     if [ -t 1 ]; then
-        printf "${RED}Error: Output redirection is required.${NC}\n" >&2
         printf "Usage: ./install.sh db-export [--dev] > backup.sql.gz\n" >&2
         printf "\n" >&2
         printf "Options:\n" >&2
@@ -2752,7 +2747,6 @@ handle_ip_logging_configuration() {
     case $choice in
         1)
             update_env_var "IP_LOGGING_ENABLED" "true"
-            printf "${GREEN}> IP address logging enabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
             read -p "Restart now? (y/n): " restart_confirm
@@ -2763,10 +2757,13 @@ handle_ip_logging_configuration() {
             fi
 
             handle_restart
+
+            # Print success message
+            printf "\n"
+            print_success_box "IP address logging has been enabled!"
             ;;
         2)
             update_env_var "IP_LOGGING_ENABLED" "false"
-            printf "${GREEN}> IP address logging disabled.${NC}\n"
 
             printf "\n${YELLOW}Warning: Docker containers need to be restarted to apply these changes.${NC}\n"
             read -p "Restart now? (y/n): " restart_confirm
@@ -2777,6 +2774,10 @@ handle_ip_logging_configuration() {
             fi
 
             handle_restart
+
+            # Print success message
+            printf "\n"
+            print_success_box "IP address logging has been disabled!"
             ;;
         *)
             printf "${RED}Invalid option selected.${NC}\n"
