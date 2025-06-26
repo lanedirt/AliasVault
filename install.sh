@@ -24,6 +24,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 MAGENTA='\033[0;35m'
+ORANGE='\033[0;33m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 DIM='\033[2m'
@@ -69,8 +70,7 @@ show_usage() {
     printf "Options:\n"
     printf "  --verbose         Show detailed output\n"
     printf "  -y, --yes         Automatic yes to prompts\n"
-    printf "  --dev             Target development database for db import/export operations\n"
-    printf "\n"
+    printf "  --dev             Target development database for db import/export operations"
 }
 
 # Function to print the logo
@@ -251,41 +251,8 @@ show_spinner() {
     printf "\b ${GREEN}✓${NC}\n"
 }
 
-show_progress_bar() {
-    local current=$1
-    local total=$2
-    local message="$3"
-    local width=30
-    local percentage=$((current * 100 / total))
-    local completed=$((width * current / total))
-
-    printf "\r${CYAN}ℹ %s${NC} " "$message"
-    for ((i=0; i<completed; i++)); do printf "█"; done
-    for ((i=completed; i<width; i++)); do printf " "; done
-    printf " %d%% (%d/%d)" $percentage $current $total
-}
-
-# Simple spinner for operations without PID tracking
-show_simple_spinner() {
-    local message="$1"
-    local delay=0.1
-    local spinstr='|/-\\'
-    local i=0
-
-    printf "${CYAN}ℹ %s${NC} " "$message"
-
-    # This will be called in a loop, so we just advance the spinner
-    printf "\b%c" "${spinstr:$i:1}"
-    sleep $delay
-    ((i = (i + 1) % 4))
-}
-
 log_info() {
     printf "${CYAN}ℹ ${NC}%s\n" "$1"
-}
-
-log_success() {
-    printf "${GREEN}✓ ${NC}%s\n" "$1"
 }
 
 log_warning() {
@@ -1114,104 +1081,6 @@ populate_hostname() {
     fi
 }
 
-# Environment setup functions
-populate_jwt_key() {
-    printf "${CYAN}> Checking JWT_KEY...${NC}"
-    if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        JWT_KEY=$(openssl rand -base64 32)
-        update_env_var "JWT_KEY" "$JWT_KEY"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-populate_data_protection_cert_pass() {
-    printf "${CYAN}> Checking DATA_PROTECTION_CERT_PASS...${NC}"
-    if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        CERT_PASS=$(openssl rand -base64 32)
-        update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-populate_postgres_credentials() {
-    printf "${CYAN}> Checking Postgres credentials...${NC}\n"
-
-    printf "  POSTGRES_DB..."
-    if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "POSTGRES_DB" "aliasvault"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-
-    printf "  POSTGRES_USER..."
-    if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "POSTGRES_USER" "aliasvault"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-
-    printf "  POSTGRES_PASSWORD..."
-    if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        POSTGRES_PASS=$(openssl rand -base64 32)
-        update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-set_private_email_domains() {
-    printf "${CYAN}> Checking PRIVATE_EMAIL_DOMAINS...${NC}"
-    if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
-    fi
-
-    private_email_domains=$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)
-    if [ "$private_email_domains" = "DISABLED.TLD" ]; then
-        printf " ${GREEN}✓${NC}\n"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-set_smtp_tls_enabled() {
-    printf "${CYAN}> Checking SMTP_TLS_ENABLED...${NC}"
-    if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
-        update_env_var "SMTP_TLS_ENABLED" "false"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-set_support_email() {
-    printf "${CYAN}> Checking SUPPORT_EMAIL...${NC}"
-    if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
-        read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
-        update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-set_public_registration() {
-    printf "${CYAN}> Checking PUBLIC_REGISTRATION_ENABLED...${NC}"
-    if ! grep -q "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "PUBLIC_REGISTRATION_ENABLED" "true"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
-set_ip_logging() {
-    printf "${CYAN}> Checking IP_LOGGING_ENABLED...${NC}"
-    if ! grep -q "^IP_LOGGING_ENABLED=" "$ENV_FILE" || [ -z "$(grep "^IP_LOGGING_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "IP_LOGGING_ENABLED" "true"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-}
-
 # Function to generate admin password
 generate_admin_password() {
     printf "${CYAN}ℹ Generating admin password...${NC} ${GREEN}✓${NC}\n"
@@ -1254,39 +1123,6 @@ generate_admin_password() {
 
     update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
     update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-}
-
-# Function to set default ports
-set_default_ports() {
-    printf "${CYAN}> Checking default ports...${NC}\n"
-
-    printf "  HTTP_PORT..."
-    if ! grep -q "^HTTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "HTTP_PORT" "80"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-
-    printf "  HTTPS_PORT..."
-    if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "HTTPS_PORT" "443"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-
-    printf "  SMTP_PORT..."
-    if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "SMTP_PORT" "25"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
-
-    printf "  SMTP_TLS_PORT..."
-    if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "SMTP_TLS_PORT" "587"
-    else
-        printf " ${GREEN}✓${NC}\n"
-    fi
 }
 
 # Helper function to update environment variables
@@ -1374,7 +1210,6 @@ print_install_success_message() {
     printf "${BOLD}To start using AliasVault, log into the client website:${NC}\n"
     printf "\n"
     printf "  ${CYAN}Client Website:${NC} https://localhost/\n"
-    printf "\n"
 }
 
 # Function to recreate (restart) Docker containers
@@ -2511,7 +2346,6 @@ set_deployment_mode() {
 
 # Function to handle database export
 handle_db_export() {
-    # Print logo and headers to stderr
     printf "${YELLOW}+++ Exporting Database +++${NC}\n" >&2
 
     # Check if output redirection is present
