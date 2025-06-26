@@ -22,7 +22,10 @@ To get AliasVault up and running quickly, run the install script to pull pre-bui
 - 1 vCPU
 - 1GB RAM
 - 16GB disk space
-- Docker installed
+- Docker
+  - Docker CE (minimum version 20.10)
+  - Docker Compose (minimum version 2.0)
+  - Refer to the official installation instructions: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
 ### Installation steps
 1. Download the install script to a directory of your choice. All AliasVault files and directories will be created in this directory.
@@ -46,7 +49,7 @@ chmod +x install.sh
   - Client: `https://localhost`
   - Admin: `https://localhost/admin`
 
-> Note: if you do not wish to run the `install.sh` wizard but want to use Docker commands directly, follow the [manual setup guide](advanced/manual-setup.md). We do however encourage the use of `install.sh` as it will guide you through all configuration steps and allow for easy updating your AliasVault instance later.
+> Note: if you do not wish to run the `install.sh` wizard but want to use Docker commands directly, follow the [manual setup guide](advanced/manual-setup.md). We do however encourage the use of `install.sh` as it will guide you through all configuration steps and allow you to easily update your AliasVault instance later.
 
 ---
 
