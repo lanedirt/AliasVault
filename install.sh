@@ -1070,7 +1070,7 @@ create_env_file() {
                 return 0
             }
 
-            printf "\n  ${CYAN}> Downloading .env.example...${NC}"
+            printf "  ${CYAN}> Downloading .env.example...${NC}"
 
             # Check if .env.example exists for this version
             local env_example_url="${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example"
@@ -1542,7 +1542,6 @@ handle_install() {
             printf "3. To install a specific version, use: ./install.sh install <version>\n\n"
 
             read -p "Would you like to reinstall the current version? [y/N]: " REPLY
-            printf "\n"
             if [[ ! $REPLY =~ ^[Yy]$ ]]; then
                 printf "${YELLOW}> Installation cancelled.${NC}\n"
                 exit 0
@@ -2267,7 +2266,7 @@ handle_install_version() {
         fi
     fi
 
-    printf "${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
+    printf "\n${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
     create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
 
     # Initialize workspace which makes sure all required directories and files exist
