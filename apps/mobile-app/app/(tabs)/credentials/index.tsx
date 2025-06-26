@@ -203,6 +203,39 @@ export default function CredentialsScreen() : React.ReactNode {
     loadCredentials();
   }, [isAuthenticated, isDatabaseAvailable, loadCredentials, setIsLoadingCredentials]);
 
+  /**
+   * Check if tutorial should be shown (no credentials and tutorial not done)
+   */
+  useEffect(() => {
+    /**
+     * Check tutorial status and show welcome screen if needed
+     */
+    const checkTutorialStatus = async (): Promise<void> => {
+      if (!isAuthenticated || !isDatabaseAvailable || isLoadingCredentials) {
+        return;
+      }
+
+      try {
+        // Check if user has any credentials
+        const hasCredentials = credentialsList.length > 0;
+        
+        if (!hasCredentials) {
+          // Check if tutorial has been completed
+          const tutorialDone = await dbContext.sqliteClient?.getSetting('TutorialDone', 'false');
+          if (tutorialDone.toLowerCase() !== 'true') {
+            // Show tutorial
+            router.replace('/welcome');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error checking tutorial status:', error);
+      }
+    };
+
+    checkTutorialStatus();
+  }, [isAuthenticated, isDatabaseAvailable, isLoadingCredentials, credentialsList.length, dbContext.sqliteClient, router]);
+
   const filteredCredentials = credentialsList.filter(credential => {
     const searchLower = searchQuery.toLowerCase();
 

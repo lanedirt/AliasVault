@@ -418,6 +418,32 @@ class SqliteClient {
   }
 
   /**
+   * Set a setting in the database. Creates or updates the setting.
+   * @param key The setting key
+   * @param value The setting value
+   */
+  public async setSetting(key: string, value: string): Promise<void> {
+    try {
+      const currentDateTime = new Date().toISOString()
+        .replace('T', ' ')
+        .replace('Z', '')
+        .substring(0, 23);
+
+      // Use INSERT OR REPLACE to handle both create and update cases
+      const query = `
+        INSERT OR REPLACE INTO Settings (Key, Value, CreatedAt, UpdatedAt)
+        VALUES (?, ?, 
+          COALESCE((SELECT CreatedAt FROM Settings WHERE Key = ?), ?), 
+          ?)`;
+      
+      await this.executeUpdate(query, [key, value, key, currentDateTime, currentDateTime]);
+    } catch (error) {
+      console.error('Error setting setting:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get the default identity language from the database.
    */
   public async getDefaultIdentityLanguage(): Promise<string> {

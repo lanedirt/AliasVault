@@ -21,7 +21,6 @@ import { useVaultSync } from '@/hooks/useVaultSync';
 import Logo from '@/assets/images/logo.svg';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import { ThemedView } from '@/components/themed/ThemedView';
-import { InAppBrowserView } from '@/components/ui/InAppBrowserView';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -688,11 +687,12 @@ export default function LoginScreen() : React.ReactNode {
                   </TouchableOpacity>
                   <View style={styles.createNewVaultContainer}>
                     <Text style={styles.textMuted}>No account yet? </Text>
-                    <InAppBrowserView
-                      url="https://app.aliasvault.net/user/setup"
-                      title="Create new vault"
-                      textStyle={styles.clickableLink}
-                    />
+                    <Text
+                      style={styles.clickableLink}
+                      onPress={() => router.push('/setup')}
+                    >
+                      Create new vault
+                    </Text>
                   </View>
                 </View>
               )}
