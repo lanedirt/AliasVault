@@ -2211,8 +2211,9 @@ check_install_script_update() {
         exit 0
     fi
 
-    printf "${YELLOW}> A new version of the install script is available.${NC}\n"
-    printf "Would you like to update the install script before proceeding? [Y/n]: "
+    printf "${YELLOW}> A new version of the install script is available (${new_version}).${NC}\n"
+    printf "\n"
+    printf "Would you like to update the install script? [Y/n]: "
     read -r reply
 
     if [[ ! $reply =~ ^[Nn]$ ]]; then
@@ -2585,7 +2586,6 @@ handle_db_import() {
 
     # Check if we're getting input from a pipe
     if [ -t 0 ]; then
-        printf "${RED}Error: No input file provided${NC}\n"
         printf "Usage: ./install.sh db-import [--dev] < backup.sql.gz\n"
         exit 1
     fi
