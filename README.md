@@ -5,8 +5,8 @@ AliasVault is a privacy-first password and email alias manager. Create unique id
 [![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=Sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 [<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=Discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
- 
-<a href="https://app.aliasvault.net">Try the cloud version 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">Website </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation </a> | <a href="#self-hosting">Self-host instructions</a> 
+
+<a href="https://app.aliasvault.net">Try the cloud version 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">Website </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">Documentation </a> | <a href="#self-hosting">Self-host instructions</a>
 
 ⭐ Star us on GitHub — it motivates us a lot!
 
@@ -47,7 +47,7 @@ Built on 15 years of experience, AliasVault is independent, open-source, self-ho
 ## Cloud-hosted
 Use the official cloud version of AliasVault at [app.aliasvault.net](https://app.aliasvault.net). This fully supported platform is always up to date with our latest release.
 
-AliasVault is available on: 
+AliasVault is available on:
 - [Web (universal)](https://app.aliasvault.net)
 - [Chrome](https://chromewebstore.google.com/detail/aliasvault/bmoggiinmnodjphdjnmpcnlleamkfedj)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/aliasvault/)
@@ -72,7 +72,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 - 1 vCPU
 - 1GB RAM
 - 16GB disk space
-- Docker installed
+- Docker (20.10+) and Docker Compose (2.0+)
 
 ```bash
 # Download install script from latest stable release

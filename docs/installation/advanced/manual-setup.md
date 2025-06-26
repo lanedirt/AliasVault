@@ -10,7 +10,8 @@ nav_order: 1
 If you prefer to manually set up AliasVault instead of using the `install.sh` script, this README provides step-by-step instructions.
 
 **Prerequisities:**
-- Docker and Docker Compose installed on your system
+- Docker (20.10+) and Docker Compose (2.0+) installed on your system
+  - See instructions: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 - Knowledge of working with direct Docker commands
 - Knowledge of .env files
 - OpenSSL for generating random passwords
