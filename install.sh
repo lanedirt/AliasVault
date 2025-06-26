@@ -830,7 +830,7 @@ main() {
                 exit 1
             fi
             ;;
-        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"configure-ssl"|"configure-email"|"update"|"configure-dev-db"|"db-export"|"db-import")
+        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"update"|"configure-dev-db"|"db-export"|"db-import")
             # Full dependency check for operations that require Docker
             if ! check_dependencies; then
                 exit 1
@@ -1111,7 +1111,6 @@ populate_hostname() {
         update_env_var "HOSTNAME" "$HOSTNAME"
     else
         HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
-        printf "  ${GREEN}> HOSTNAME already exists.${NC}\n"
     fi
 }
 
@@ -1716,30 +1715,28 @@ handle_ssl_configuration() {
     CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
     LETSENCRYPT_ENABLED=$(grep "^LETSENCRYPT_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
 
-    printf "${CYAN}About SSL Certificates:${NC}\n"
-    printf "A default installation of AliasVault comes with a self-signed SSL certificate.\n"
-    printf "While self-signed certificates provide encryption, they will show security warnings in browsers.\n"
+    printf "${CYAN}SSL Certificate Options:${NC}\n"
+    printf "AliasVault uses a self-signed SSL certificate by default.\n"
+    printf "This provides encryption but may trigger browser warnings.\n"
     printf "\n"
-    printf "AliasVault also supports generating valid SSL certificates via Let's Encrypt.\n"
-    printf "Let's Encrypt certificates are trusted by browsers and will not show security warnings.\n"
-    printf "However, Let's Encrypt requires that:\n"
-    printf "  - AliasVault is reachable from the internet via port 80/443\n"
-    printf "  - You have configured a valid domain name (not localhost)\n"
+    printf "You can switch to a trusted Let's Encrypt certificate, which:\n"
+    printf "  - Avoids browser warnings\n"
+    printf "  - Requires a public domain (not localhost)\n"
+    printf "  - Needs ports 80 and 443 open to the internet\n"
     printf "\n"
-    printf "Let's Encrypt certificates will be automatically renewed before expiry.\n"
+    printf "Let's Encrypt certificates auto-renew before expiry.\n"
     printf "\n"
     printf "${CYAN}Current Configuration:${NC}\n"
     if [ "$LETSENCRYPT_ENABLED" = "true" ]; then
-        printf "Currently using: ${GREEN}Let's Encrypt certificates${NC}\n"
+        printf "Using: ${GREEN}Let's Encrypt${NC}\n"
     else
-        printf "Currently using: ${YELLOW}Self-signed certificates${NC}\n"
+        printf "Using: ${YELLOW}Self-signed${NC}\n"
     fi
-
-    printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC} (To change this, run: ./install.sh configure-hostname)\n"
+    printf "Hostname: ${CYAN}${CURRENT_HOSTNAME}${NC} (change via: ./install.sh configure-hostname)\n"
     printf "\n"
-    printf "SSL Options:\n"
-    printf "1) Activate and/or request new Let's Encrypt certificate (recommended for production)\n"
-    printf "2) Activate and/or generate new self-signed certificate\n"
+    printf "Choose an option:\n"
+    printf "1) Use Let's Encrypt certificate (recommended)\n"
+    printf "2) Use self-signed certificate\n"
     printf "3) Cancel\n"
     printf "\n"
 
@@ -1998,7 +1995,9 @@ configure_letsencrypt() {
     printf "${CYAN}> Starting new certbot container to renew certificates automatically...${NC}\n"
     $(get_docker_compose_command) up -d certbot
 
-    printf "${GREEN}> Let's Encrypt SSL certificate has been configured successfully!${NC}\n"
+    # Print success message
+    printf "\n"
+    print_success_box "Let's Encrypt SSL certificate has been configured successfully!"
 }
 
 # Function to generate self-signed certificate
@@ -2022,7 +2021,9 @@ generate_self_signed_cert() {
     printf "${CYAN}> Restarting services...${NC}\n"
     docker compose up -d
 
-    printf "${GREEN}> New self-signed certificate has been generated successfully!${NC}\n"
+    # Print success message
+    printf "\n"
+    print_success_box "New self-signed certificate has been generated successfully!"
 }
 
 # New functions to handle container lifecycle:
