@@ -782,6 +782,23 @@ enhanced_docker_pull() {
     fi
 }
 
+# Function to validate semver format
+validate_semver() {
+    local version="$1"
+
+    # Check if version is "latest" (special case)
+    if [ "$version" = "latest" ]; then
+        return 0
+    fi
+
+    # Validate semver format: x.y.z where x, y, z are non-negative integers
+    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Main function
 main() {
     parse_args "$@"
@@ -947,6 +964,23 @@ handle_docker_compose() {
         local temp_file="${file}.tmp"
         local download_url="${GITHUB_RAW_URL_REPO}/${version_tag}/${file}"
 
+        # First, check if the file exists by making a HEAD request
+        local http_status
+        http_status=$(curl -s -o /dev/null -w "%{http_code}" "$download_url" 2>/dev/null)
+
+        if [ "$http_status" = "404" ]; then
+            printf "\b ${RED}✗${NC}\n"
+            log_error "Version '${version_tag}' does not exist or is not available."
+            log_error "The requested version may not have been released yet or may be invalid."
+            printf "\n"
+            printf "${CYAN}Available options:${NC}\n"
+            printf "  ${YELLOW}•${NC} Check available versions at: https://github.com/${REPO_OWNER}/${REPO_NAME}/releases\n"
+            printf "  ${YELLOW}•${NC} Use a different version: ./install.sh install <version>\n"
+            printf "\n"
+            rm -f "$temp_file"
+            exit 1
+        fi
+
         if ! retry_command 3 2 curl -sSf "$download_url" -o "$temp_file"; then
             printf "\b ${RED}✗${NC}\n"
             log_error "Failed to download $file from $download_url"
@@ -976,13 +1010,22 @@ handle_docker_compose() {
 # Function to check and update install.sh for specific version
 check_install_script_version() {
     local target_version="$1"
-    printf "${CYAN}ℹ Checking install script version for ${target_version}...${NC}"
+    printf "${CYAN}ℹ Checking install script version for ${target_version}...${NC} ${GREEN}✓${NC}\n"
+
+    # First, check if the install.sh file exists for this version
+    local install_url="${GITHUB_RAW_URL_REPO}/${target_version}/install.sh"
+    local http_status
+    http_status=$(curl -s -o /dev/null -w "%{http_code}" "$install_url" 2>/dev/null)
+
+    if [ "$http_status" = "404" ]; then
+        printf "   > Install script not found for version ${target_version}. Continuing with current version.\n"
+        return 1
+    fi
 
     # Get remote install.sh for target version
-    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${target_version}/install.sh" -o "install.sh.tmp"; then
-        printf "\n${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
+    if ! curl -sSf "$install_url" -o "install.sh.tmp"; then
+        printf "${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
-        printf " ${GREEN}✓${NC}\n"
         return 1
     fi
 
@@ -1008,7 +1051,6 @@ check_install_script_version() {
         fi
     fi
 
-    printf " ${GREEN}✓${NC}\n"
     rm -f install.sh.tmp
     return 0
 }
@@ -1040,7 +1082,20 @@ create_env_file() {
             }
 
             printf "\n  ${CYAN}> Downloading .env.example...${NC}"
-            if curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
+
+            # Check if .env.example exists for this version
+            local env_example_url="${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example"
+            local http_status
+            http_status=$(curl -s -o /dev/null -w "%{http_code}" "$env_example_url" 2>/dev/null)
+
+            if [ "$http_status" = "404" ]; then
+                printf "\n  ${YELLOW}> .env.example not found for version ${latest_version}. Creating blank .env file.${NC}\n"
+                touch "$ENV_FILE"
+                printf " ${GREEN}✓${NC}\n"
+                return 0
+            fi
+
+            if curl -sSf "$env_example_url" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
                 printf "\n  ${GREEN}> .env.example downloaded successfully.${NC}\n"
             else
                 printf "\n  ${YELLOW}> Failed to download .env.example. Creating blank .env file.${NC}\n"
@@ -2177,6 +2232,18 @@ check_install_script_update() {
 # Function to perform the actual installation with specific version
 handle_install_version() {
     local target_version="$1"
+
+    # Validate semver format if a specific version is provided
+    if [ -n "$target_version" ] && [ "$target_version" != "latest" ]; then
+        if ! validate_semver "$target_version"; then
+            printf "${RED}Error: You tried to install AliasVault with version '${target_version}' which is an incorrect value.${NC}\n"
+            printf "Please check the command you executed and try again.${NC}\n"
+            printf "\n"
+            printf "The provided version must follow semantic versioning format (e.g., '0.0.1', '1.0.5') and match an existing version on GitHub.${NC}\n"
+            printf "Alternatively, you can omit the version to install the latest version.${NC}\n"
+            exit 1
+        fi
+    fi
 
     # If latest, get actual version number from GitHub API
     if [ "$target_version" = "latest" ]; then
