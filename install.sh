@@ -70,9 +70,20 @@ show_usage() {
     printf "  --verbose         Show detailed output\n"
     printf "  -y, --yes         Automatic yes to prompts\n"
     printf "  --dev             Target development database for db import/export operations\n"
-    printf "  --help            Show this help message\n"
     printf "\n"
+}
 
+# Function to print the logo
+print_logo() {
+    printf "${MAGENTA}" >&2
+    printf "==================================================\n" >&2
+    printf "    _    _ _           __      __         _ _   \n" >&2
+    printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n" >&2
+    printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n" >&2
+    printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n" >&2
+    printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n" >&2
+    printf "\n" >&2
+    printf "==================================================\n${NC}" >&2
 }
 
 # Function to parse command line arguments
@@ -819,7 +830,7 @@ main() {
                 exit 1
             fi
             ;;
-        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"configure-ssl"|"configure-email"|"configure-registration"|"configure-hostname"|"configure-ip-logging"|"update"|"configure-dev-db"|"db-export"|"db-import")
+        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"configure-ssl"|"configure-email"|"update"|"configure-dev-db"|"db-export"|"db-import")
             # Full dependency check for operations that require Docker
             if ! check_dependencies; then
                 exit 1
@@ -837,9 +848,6 @@ main() {
                     exit 1
                 fi
             fi
-
-            printf "\n"
-
             ;;
     esac
 
@@ -918,15 +926,15 @@ get_latest_version() {
     echo "$latest_version"
 }
 
-# Function to create required directories
-create_directories() {
+# Function to initialize workspace and create required directories
+initialize_workspace() {
     printf "${CYAN}ℹ Checking workspace...${NC} ${GREEN}✓${NC}\n"
 
     local dirs_needed=false
     for dir in "${REQUIRED_DIRS[@]}"; do
         if [ ! -d "$dir" ]; then
             if [ "$dirs_needed" = false ]; then
-                printf "  ${CYAN}> Creating required directories...${NC}\n"
+                printf "  ${GREEN}> Creating required directories...${NC}\n"
                 dirs_needed=true
             fi
             mkdir -p "$dir"
@@ -937,11 +945,6 @@ create_directories() {
             fi
         fi
     done
-}
-
-# Function to initialize workspace
-initialize_workspace() {
-    create_directories
 }
 
 # Function to handle docker-compose.yml
@@ -1055,19 +1058,6 @@ check_install_script_version() {
     return 0
 }
 
-# Function to print the logo
-print_logo() {
-    printf "${MAGENTA}" >&2
-    printf "==================================================\n" >&2
-    printf "    _    _ _           __      __         _ _   \n" >&2
-    printf "   / \  | (_) __ _ ___ \ \    / /_ _ _   _| | |_\n" >&2
-    printf "  / _ \ | | |/ _\` / __| \ \/\/ / _\` | | | | | __|\n" >&2
-    printf " / ___ \| | | (_| \__ \  \  / / (_| | |_| | | |_ \n" >&2
-    printf "/_/   \_\_|_|\__,_|___/   \/  \__,__|\__,_|_|\__|\n" >&2
-    printf "\n" >&2
-    printf "==================================================\n" >&2
-}
-
 # Function to create .env file
 create_env_file() {
     printf "${CYAN}ℹ Checking .env file...${NC} ${GREEN}✓${NC}\n"
@@ -1104,8 +1094,6 @@ create_env_file() {
 
         cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
         printf "  ${GREEN}> New .env file created from .env.example.${NC}\n"
-    else
-        printf " ${GREEN}✓${NC}\n"
     fi
 }
 
@@ -1267,7 +1255,6 @@ generate_admin_password() {
 
     update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
     update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-    printf "  ==> New admin password: $PASSWORD\n"
 }
 
 # Function to set default ports
@@ -1336,13 +1323,39 @@ delete_env_var() {
     fi
 }
 
+# Function to print a success box
+print_success_box() {
+    local message="$1"
+    local width=70
+    local header="╔══════════════════════════════════════════════════════════════════════╗"
+    local footer="╚══════════════════════════════════════════════════════════════════════╝"
+    local success="✓ SUCCESS!"
+    local success_line
+    local message_line
+    local padding
+
+    # Print header
+    printf "${MAGENTA}%s${NC}\n" "$header"
+
+    # Construct second line with centered success text
+    local success_padding=$(( (width - ${#success}) / 2 ))
+    printf "${MAGENTA}║${NC}%*s${GREEN}%s${NC}%*s${MAGENTA}║${NC}\n" \
+        "$success_padding" "" "$success" "$((width - success_padding - ${#success}))" ""
+
+    # Construct third line with centered message
+    local msg_len=${#message}
+    local msg_padding=$(( (width  - msg_len) / 2 ))
+    printf "${MAGENTA}║${NC}%*s${BOLD}%s${NC}%*s${MAGENTA}║${NC}\n" \
+        "$msg_padding" "" "$message" "$((width - msg_padding - msg_len))" ""
+
+    # Print footer
+    printf "${MAGENTA}%s${NC}\n" "$footer"
+}
+
 # Function to print success message
-print_success_message() {
+print_install_success_message() {
     printf "\n"
-    printf "${MAGENTA}╔══════════════════════════════════════════════════════════════════════╗${NC}\n"
-    printf "${MAGENTA}║${NC}                            ${GREEN}✓ SUCCESS!${NC}                                ${MAGENTA}║${NC}\n"
-    printf "${MAGENTA}║${NC}              ${BOLD}AliasVault is successfully installed!${NC}                   ${MAGENTA}║${NC}\n"
-    printf "${MAGENTA}╚══════════════════════════════════════════════════════════════════════╝${NC}\n"
+    print_success_box "AliasVault is successfully installed!"
     printf "\n"
     printf "${BOLD}To configure the server, login to the admin panel:${NC}\n"
     if [ -n "$PASSWORD" ]; then
@@ -1397,12 +1410,15 @@ recreate_docker_containers() {
 # Function to print password reset success message
 print_password_reset_message() {
     printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
+    print_success_box "The admin password has been successfully reset!"
     printf "\n"
-    printf "${GREEN}The admin password has been successfully reset, see the output above.${NC}\n"
+    printf "${BOLD}New admin credentials:${NC}\n"
+    printf "  ${CYAN}Admin Panel:${NC} https://localhost/admin\n"
+    printf "  ${CYAN}Username:${NC} admin\n"
+    printf "  ${CYAN}Password:${NC} $PASSWORD\n"
     printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
-    printf "\n"
+    printf "${YELLOW}⚠  IMPORTANT: Make sure to backup the above credentials in a safe place,${NC}\n"
+    printf "${YELLOW}   they won't be shown again!${NC}\n"
 }
 
 # Function to get docker compose command with appropriate config files
@@ -1604,7 +1620,7 @@ handle_build() {
     printf "${GREEN}✓ Docker Compose stack started successfully${NC}\n"
 
     # Only show success message if we made it here without errors
-    print_success_message
+    print_install_success_message
 }
 
 # Function to handle uninstall
@@ -1837,7 +1853,7 @@ handle_email_configuration() {
             fi
 
             # Only show next steps if everything succeeded
-            printf "\n${CYAN}The email server is now succesfully configured.${NC}\n"
+            printf "\n${CYAN}The email server is now successfully configured.${NC}\n"
             printf "\n"
             printf "To test the email server:\n"
             printf "   a. Log in to your AliasVault account\n"
@@ -2364,7 +2380,7 @@ handle_install_version() {
     printf "${GREEN}✓ Docker containers started successfully${NC}\n"
 
     # Only show success message if we made it here without errors
-    print_success_message
+    print_install_success_message
 }
 
 # Function to handle development database configuration
@@ -2690,6 +2706,11 @@ handle_hostname_configuration() {
         exit 1
     fi
 
+    printf "The hostname is the domain name where your AliasVault instance will be accessible.\n"
+    printf "A valid hostname is required for Let's Encrypt SSL certificate generation.\n"
+    printf "The hostname must be a real domain that points to this server (not localhost).\n"
+    printf "\n"
+
     # Get current hostname
     CURRENT_HOSTNAME=$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)
     printf "Current hostname: ${CYAN}${CURRENT_HOSTNAME}${NC}\n"
@@ -2709,10 +2730,7 @@ handle_hostname_configuration() {
     update_env_var "HOSTNAME" "$NEW_HOSTNAME"
 
     printf "\n"
-    printf "${GREEN}Hostname updated successfully!${NC}\n"
-    printf "New hostname: ${CYAN}${NEW_HOSTNAME}${NC}\n"
-    printf "\n"
-    printf "${MAGENTA}=========================================================${NC}\n"
+    print_success_box "Hostname updated successfully to ${NEW_HOSTNAME}!"
 }
 
 # Function to handle IP logging configuration
