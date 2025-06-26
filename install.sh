@@ -926,13 +926,13 @@ create_directories() {
     for dir in "${REQUIRED_DIRS[@]}"; do
         if [ ! -d "$dir" ]; then
             if [ "$dirs_needed" = false ]; then
-                printf "\n  ${CYAN}> Creating required directories...${NC}\n"
+                printf "  ${CYAN}> Creating required directories...${NC}\n"
                 dirs_needed=true
             fi
             mkdir -p "$dir"
             chmod -R 755 "$dir"
             if [ $? -ne 0 ]; then
-                printf "\n  ${RED}> Failed to create directory: $dir${NC}\n"
+                printf "  ${RED}> Failed to create directory: $dir${NC}\n"
                 exit 1
             fi
         fi
@@ -1070,14 +1070,13 @@ print_logo() {
 
 # Function to create .env file
 create_env_file() {
-    printf "${CYAN}ℹ Checking .env file...${NC}"
+    printf "${CYAN}ℹ Checking .env file...${NC} ${GREEN}✓${NC}\n"
     if [ ! -f "$ENV_FILE" ]; then
         if [ ! -f "$ENV_EXAMPLE_FILE" ]; then
             # Get latest release version
             local latest_version=$(get_latest_version) || {
                 printf "\n  ${YELLOW}> Failed to check latest version. Creating blank .env file.${NC}\n"
                 touch "$ENV_FILE"
-                printf " ${GREEN}✓${NC}\n"
                 return 0
             }
 
@@ -1091,7 +1090,6 @@ create_env_file() {
             if [ "$http_status" = "404" ]; then
                 printf "\n  ${YELLOW}> .env.example not found for version ${latest_version}. Creating blank .env file.${NC}\n"
                 touch "$ENV_FILE"
-                printf " ${GREEN}✓${NC}\n"
                 return 0
             fi
 
@@ -1100,14 +1098,12 @@ create_env_file() {
             else
                 printf "\n  ${YELLOW}> Failed to download .env.example. Creating blank .env file.${NC}\n"
                 touch "$ENV_FILE"
-                printf " ${GREEN}✓${NC}\n"
                 return 0
             fi
         fi
 
-        printf " ${GREEN}✓${NC}\n"
         cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
-        printf "\n  ${GREEN}> New .env file created from .env.example.${NC}\n"
+        printf "  ${GREEN}> New .env file created from .env.example.${NC}\n"
     else
         printf " ${GREEN}✓${NC}\n"
     fi
