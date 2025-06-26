@@ -25,11 +25,18 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
 
 # File paths
 ENV_FILE=".env"
 ENV_EXAMPLE_FILE=".env.example"
+
+# Minimum required versions
+MIN_DOCKER_VERSION="20.10.0"
+MIN_COMPOSE_VERSION="2.0.0"
+MIN_DISK_SPACE_GB=5
 
 # Function to show usage
 show_usage() {
@@ -214,6 +221,280 @@ parse_args() {
     done
 }
 
+# Progress and animation functions
+show_spinner() {
+    local pid=$1
+    local message="$2"
+    local delay=0.1
+    local spinstr='|/-\\'
+
+    printf "${CYAN}> %s${NC}" "$message"
+
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
+show_progress_bar() {
+    local current=$1
+    local total=$2
+    local message="$3"
+    local width=50
+    local percentage=$((current * 100 / total))
+    local completed=$((width * current / total))
+
+    printf "\r${CYAN}> %s${NC} [" "$message"
+    for ((i=0; i<completed; i++)); do printf "█"; done
+    for ((i=completed; i<width; i++)); do printf " "; done
+    printf "] %d%% (%d/%d)" $percentage $current $total
+}
+
+log_info() {
+    printf "${CYAN}ℹ ${NC}%s\n" "$1"
+}
+
+log_success() {
+    printf "${GREEN}✓ ${NC}%s\n" "$1"
+}
+
+log_warning() {
+    printf "${YELLOW}⚠ ${NC}%s\n" "$1"
+}
+
+log_error() {
+    printf "${RED}✗ ${NC}%s\n" "$1" >&2
+}
+
+# Version comparison function
+version_ge() {
+    test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
+}
+
+# Network connectivity check
+check_connectivity() {
+    log_info "Checking network connectivity..."
+
+    local test_urls=(
+        "https://api.github.com"
+        "https://raw.githubusercontent.com"
+        "https://ghcr.io"
+    )
+
+    for url in "${test_urls[@]}"; do
+        if ! curl -s --connect-timeout 10 --max-time 30 "$url" > /dev/null 2>&1; then
+            log_error "Cannot reach $url. Please check your internet connection."
+            return 1
+        fi
+    done
+
+    log_success "Network connectivity verified"
+    return 0
+}
+
+# Disk space check
+check_disk_space() {
+    log_info "Checking disk space..."
+
+    local available_gb=""
+
+    if command -v df >/dev/null 2>&1; then
+        # Use portable df command and parse available size in KB
+        local available_kb
+        available_kb=$(df -k . 2>/dev/null | awk 'NR==2 {print $4}')
+
+        if [ -n "$available_kb" ] && [ "$available_kb" -gt 0 ] 2>/dev/null; then
+            available_gb=$((available_kb / 1024 / 1024))
+        fi
+
+        if [ -n "$available_gb" ] && [ "$available_gb" -gt 0 ] 2>/dev/null; then
+            if [ "$available_gb" -lt "$MIN_DISK_SPACE_GB" ]; then
+                log_error "Insufficient disk space. Required: ${MIN_DISK_SPACE_GB}GB, Available: ${available_gb}GB"
+                return 1
+            fi
+            log_success "Disk space verified (${available_gb}GB available)"
+        else
+            log_warning "Cannot determine available disk space, skipping check"
+        fi
+    else
+        log_warning "Cannot check disk space (df command not available)"
+    fi
+
+    return 0
+}
+
+# Comprehensive dependency checks
+check_dependencies() {
+    log_info "Checking dependencies..."
+
+    local missing_deps=()
+    local version_issues=()
+    local has_issues=false
+
+    # Check Docker
+    if ! command -v docker > /dev/null 2>&1; then
+        missing_deps+=("docker")
+        has_issues=true
+    else
+        local docker_version=$(docker --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+        if [ -n "$docker_version" ]; then
+            if ! version_ge "$docker_version" "$MIN_DOCKER_VERSION"; then
+                version_issues+=("Docker version $docker_version is below minimum required $MIN_DOCKER_VERSION")
+                has_issues=true
+            fi
+        fi
+
+        # Check if Docker daemon is running
+        if ! docker info > /dev/null 2>&1; then
+            log_error "Docker daemon is not running. Please start Docker first."
+            return 1
+        fi
+    fi
+
+    # Check Docker Compose
+    if docker compose version > /dev/null 2>&1; then
+        local compose_version=$(docker compose version --short 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+        if [ -n "$compose_version" ]; then
+            if ! version_ge "$compose_version" "$MIN_COMPOSE_VERSION"; then
+                version_issues+=("Docker Compose version $compose_version is below minimum required $MIN_COMPOSE_VERSION")
+                has_issues=true
+            fi
+        fi
+    elif command -v docker-compose > /dev/null 2>&1; then
+        local compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+        log_warning "Using legacy docker-compose v1 ($compose_version). Consider upgrading to Docker Compose v2."
+    else
+        missing_deps+=("docker-compose")
+        has_issues=true
+    fi
+
+    # Check essential tools
+    for tool in curl openssl grep sed; do
+        if ! command -v "$tool" > /dev/null 2>&1; then
+            missing_deps+=("$tool")
+            has_issues=true
+        fi
+    done
+
+    # Only show detailed output if there are issues
+    if [ "$has_issues" = true ]; then
+        printf "\n"
+
+        if [ ${#missing_deps[@]} -gt 0 ]; then
+            printf "${RED}${BOLD}Missing required dependencies:${NC}\n"
+            for dep in "${missing_deps[@]}"; do
+                printf "  ${RED}✗${NC} %s\n" "$dep"
+            done
+            printf "\n"
+
+            # Provide installation hints based on OS
+            if command -v apt-get > /dev/null 2>&1; then
+                printf "${CYAN}To install missing dependencies on Ubuntu/Debian:${NC}\n"
+                printf "  sudo apt-get update && sudo apt-get install -y"
+                for dep in "${missing_deps[@]}"; do
+                    case $dep in
+                        "docker") printf " docker.io" ;;
+                        "docker-compose") printf " docker-compose" ;;
+                        *) printf " %s" "$dep" ;;
+                    esac
+                done
+                printf "\n\n"
+            elif command -v yum > /dev/null 2>&1; then
+                printf "${CYAN}To install missing dependencies on CentOS/RHEL:${NC}\n"
+                printf "  sudo yum install -y"
+                for dep in "${missing_deps[@]}"; do
+                    printf " %s" "$dep"
+                done
+                printf "\n\n"
+            elif command -v brew > /dev/null 2>&1; then
+                printf "${CYAN}To install missing dependencies on macOS:${NC}\n"
+                printf "  brew install"
+                for dep in "${missing_deps[@]}"; do
+                    case $dep in
+                        "docker") printf " --cask docker" ;;
+                        *) printf " %s" "$dep" ;;
+                    esac
+                done
+                printf "\n\n"
+            fi
+        fi
+
+        if [ ${#version_issues[@]} -gt 0 ]; then
+            printf "${YELLOW}${BOLD}Version compatibility warnings:${NC}\n"
+            for issue in "${version_issues[@]}"; do
+                printf "  ${YELLOW}⚠${NC} %s\n" "$issue"
+            done
+            printf "\n"
+            printf "${YELLOW}AliasVault may still work, but upgrading is recommended.${NC}\n\n"
+        fi
+
+        if [ ${#missing_deps[@]} -gt 0 ]; then
+            return 1
+        fi
+    else
+        log_success "Dependencies verified"
+    fi
+
+    return 0
+}
+
+# Enhanced error handling with retries
+retry_command() {
+    local max_attempts=$1
+    local delay=$2
+    shift 2
+    local command=("$@")
+    local attempt=1
+
+    while [ $attempt -le $max_attempts ]; do
+        if "${command[@]}"; then
+            return 0
+        fi
+
+        if [ $attempt -lt $max_attempts ]; then
+            log_warning "Attempt $attempt failed, retrying in ${delay}s..."
+            sleep $delay
+        fi
+
+        ((attempt++))
+    done
+
+    log_error "Command failed after $max_attempts attempts: ${command[*]}"
+    return 1
+}
+
+# Enhanced docker pull with progress
+enhanced_docker_pull() {
+    local image="$1"
+    local image_name=$(basename "$image")
+
+    if [ "$VERBOSE" = true ]; then
+        docker pull "$image"
+    else
+        (
+            docker pull "$image" > /tmp/docker_pull_${image_name//[:\/]/_}.log 2>&1 &
+            local pull_pid=$!
+            show_spinner $pull_pid "Pulling $image_name"
+            wait $pull_pid
+            local exit_code=$?
+
+            if [ $exit_code -eq 0 ]; then
+                printf " ${GREEN}✓${NC}\n"
+            else
+                printf " ${RED}✗${NC}\n"
+                cat /tmp/docker_pull_${image_name//[:\/]/_}.log >&2
+            fi
+
+            rm -f /tmp/docker_pull_${image_name//[:\/]/_}.log
+            return $exit_code
+        )
+    fi
+}
+
 # Main function
 main() {
     parse_args "$@"
@@ -225,6 +506,37 @@ main() {
     fi
 
     print_logo
+
+    # Skip dependency checks for certain commands that don't require Docker
+    case $COMMAND in
+        "update-installer")
+            # Only check basic network connectivity for installer updates
+            if ! check_connectivity; then
+                exit 1
+            fi
+            ;;
+        "install"|"build"|"start"|"restart"|"stop"|"uninstall"|"reset-admin-password"|"configure-ssl"|"configure-email"|"configure-registration"|"configure-hostname"|"configure-ip-logging"|"update"|"configure-dev-db"|"db-export"|"db-import")
+            # Full dependency check for operations that require Docker
+            if ! check_dependencies; then
+                printf "\n${RED}${BOLD}Dependency check failed. Please install missing dependencies before proceeding.${NC}\n"
+                exit 1
+            fi
+
+            # Additional checks for installation/build operations
+            if [[ "$COMMAND" == "install" || "$COMMAND" == "build" || "$COMMAND" == "update" ]]; then
+                if ! check_connectivity; then
+                    exit 1
+                fi
+                if ! check_disk_space; then
+                    exit 1
+                fi
+            fi
+
+            printf "\n"
+
+            ;;
+    esac
+
     case $COMMAND in
         "build")
             handle_build
@@ -334,33 +646,56 @@ initialize_workspace() {
 # Function to handle docker-compose.yml
 handle_docker_compose() {
     local version_tag="$1"
-    printf "${CYAN}> Downloading latest docker-compose files...${NC}\n"
+    log_info "Downloading docker-compose files for version ${version_tag}..."
 
-    # Download and overwrite docker-compose.yml
-    printf "  ${GREEN}> Downloading docker-compose.yml for version ${version_tag}...${NC}"
-    if curl -sSf "${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.yml" -o "docker-compose.yml.tmp" > /dev/null 2>&1; then
-        # Replace the :latest tag with the specific version if provided
-        if [ -n "$version_tag" ] && [ "$version_tag" != "latest" ]; then
-            sed "s/:latest/:$version_tag/g" docker-compose.yml.tmp > docker-compose.yml
-            rm docker-compose.yml.tmp
+    local files_to_download=(
+        "docker-compose.yml"
+        "docker-compose.letsencrypt.yml"
+    )
+
+    local total_files=${#files_to_download[@]}
+    local current_file=0
+
+    for file in "${files_to_download[@]}"; do
+        ((current_file++))
+
+        if [ "$VERBOSE" != true ]; then
+            show_progress_bar $current_file $total_files "Downloading compose files"
         else
-            mv docker-compose.yml.tmp docker-compose.yml
+            log_info "Downloading $file..."
         fi
-        printf "\n  ${CYAN}> docker-compose.yml downloaded successfully.${NC}\n"
-    else
-        printf "\n  ${YELLOW}> Failed to download docker-compose.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.yml and place it in the root directory of AliasVault.${NC}\n"
-        exit 1
-    fi
 
-    # Download and overwrite docker-compose.letsencrypt.yml
-    printf "  ${GREEN}> Downloading docker-compose.letsencrypt.yml for version ${version_tag}...${NC}"
-    if curl -sSf "${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.letsencrypt.yml" -o "docker-compose.letsencrypt.yml" > /dev/null 2>&1; then
-        printf "\n  ${CYAN}> docker-compose.letsencrypt.yml downloaded successfully.${NC}\n"
-    else
-        printf "\n  ${YELLOW}> Failed to download docker-compose.letsencrypt.yml, please check your internet connection and try again. Alternatively, you can download it manually from ${GITHUB_RAW_URL_REPO}/${version_tag}/docker-compose.letsencrypt.yml and place it in the root directory of AliasVault.${NC}\n"
-        exit 1
-    fi
+        local temp_file="${file}.tmp"
+        local download_url="${GITHUB_RAW_URL_REPO}/${version_tag}/${file}"
 
+        if ! retry_command 3 2 curl -sSf "$download_url" -o "$temp_file"; then
+            if [ "$VERBOSE" != true ]; then
+                printf "\n"
+            fi
+            log_error "Failed to download $file from $download_url"
+            log_error "Please check your internet connection and try again."
+            log_info "Alternatively, download manually and place in the current directory."
+            rm -f "$temp_file"
+            exit 1
+        fi
+
+        # Special handling for docker-compose.yml version replacement
+        if [ "$file" = "docker-compose.yml" ]; then
+            if [ -n "$version_tag" ] && [ "$version_tag" != "latest" ]; then
+                sed "s/:latest/:$version_tag/g" "$temp_file" > "$file"
+                rm "$temp_file"
+            else
+                mv "$temp_file" "$file"
+            fi
+        else
+            mv "$temp_file" "$file"
+        fi
+    done
+
+    if [ "$VERBOSE" != true ]; then
+        printf "\n"
+    fi
+    log_success "Docker compose files downloaded successfully"
     return 0
 }
 
@@ -563,22 +898,27 @@ generate_admin_password() {
 
     # Build locally if in build mode or if pre-built image is not available
     if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null || ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
-        printf "${CYAN}> Building InstallCli locally...${NC}"
+        log_info "Building InstallCli locally..."
         if [ "$VERBOSE" = true ]; then
-            docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile .
+            if ! docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile .; then
+                log_error "Failed to build InstallCli Docker image"
+                exit 1
+            fi
         else
             (
                 docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
                 BUILD_PID=$!
-                while kill -0 $BUILD_PID 2>/dev/null; do
-                    printf "."
-                    sleep 1
-                done
-                printf "\n"
+                show_spinner $BUILD_PID "Building InstallCli image"
                 wait $BUILD_PID
                 BUILD_EXIT_CODE=$?
-                if [ $BUILD_EXIT_CODE -ne 0 ]; then
-                    printf "\n${RED}> Error building Docker image. Check install_build_output.log for details.${NC}\n"
+
+                if [ $BUILD_EXIT_CODE -eq 0 ]; then
+                    printf " ${GREEN}✓${NC}\n"
+                    rm -f install_build_output.log
+                else
+                    printf " ${RED}✗${NC}\n"
+                    log_error "Failed to build InstallCli Docker image. Build output:"
+                    cat install_build_output.log >&2
                     exit $BUILD_EXIT_CODE
                 fi
             )
@@ -694,14 +1034,33 @@ print_success_message() {
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    printf "${CYAN}> (Re)creating Docker containers...${NC}\n"
+    log_info "(Re)creating Docker containers..."
 
     if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command) up -d --force-recreate
+        if ! $(get_docker_compose_command) up -d --force-recreate; then
+            log_error "Failed to recreate Docker containers"
+            exit 1
+        fi
     else
-        $(get_docker_compose_command) up -d --force-recreate > /dev/null 2>&1
+        (
+            $(get_docker_compose_command) up -d --force-recreate > /tmp/docker_recreate.log 2>&1 &
+            RECREATE_PID=$!
+            show_spinner $RECREATE_PID "Recreating containers"
+            wait $RECREATE_PID
+            RECREATE_EXIT_CODE=$?
+
+            if [ $RECREATE_EXIT_CODE -eq 0 ]; then
+                printf " ${GREEN}✓${NC}\n"
+                rm -f /tmp/docker_recreate.log
+            else
+                printf " ${RED}✗${NC}\n"
+                log_error "Failed to recreate Docker containers. Output:"
+                cat /tmp/docker_recreate.log >&2
+                exit 1
+            fi
+        )
     fi
-    printf "${GREEN}> Docker containers (re)created successfully.${NC}\n"
+    log_success "Docker containers (re)created successfully"
 }
 
 # Function to print password reset success message
@@ -886,29 +1245,32 @@ handle_build() {
     printf "\n${YELLOW}+++ Building and starting services +++${NC}\n"
     printf "\n"
 
-    printf "${CYAN}> Building Docker Compose stack...${NC}"
+    log_info "Building Docker Compose stack..."
     if [ "$VERBOSE" = true ]; then
-        $(get_docker_compose_command "build") build || {
-            printf "\n${RED}> Failed to build Docker Compose stack${NC}\n"
+        if ! $(get_docker_compose_command) build; then
+            log_error "Failed to build Docker Compose stack"
             exit 1
-        }
+        fi
     else
         (
-            $(get_docker_compose_command "build") build > install_compose_build_output.log 2>&1 &
+            $(get_docker_compose_command) build > install_compose_build_output.log 2>&1 &
             BUILD_PID=$!
-            while kill -0 $BUILD_PID 2>/dev/null; do
-                printf "."
-                sleep 1
-            done
+            show_spinner $BUILD_PID "Building Docker images"
             wait $BUILD_PID
             BUILD_EXIT_CODE=$?
-            if [ $BUILD_EXIT_CODE -ne 0 ]; then
-                printf "\n${RED}> Failed to build Docker Compose stack. Check install_compose_build_output.log for details.${NC}\n"
+
+            if [ $BUILD_EXIT_CODE -eq 0 ]; then
+                printf " ${GREEN}✓${NC}\n"
+                rm -f install_compose_build_output.log
+            else
+                printf " ${RED}✗${NC}\n"
+                log_error "Failed to build Docker Compose stack. Build output:"
+                cat install_compose_build_output.log >&2
                 exit 1
             fi
         )
     fi
-    printf "\n${GREEN}> Docker Compose stack built successfully.${NC}\n"
+    log_success "Docker Compose stack built successfully"
 
     printf "${CYAN}> Starting Docker Compose stack...${NC}\n"
 
@@ -1598,7 +1960,10 @@ handle_install_version() {
     fi
 
     # Update docker-compose files with correct version so we pull the correct images
-    handle_docker_compose "$target_version"
+    if ! handle_docker_compose "$target_version"; then
+        log_error "Failed to download docker-compose files"
+        exit 1
+    fi
 
     # Initialize environment
     set_support_email || { printf "${RED}> Failed to set support email${NC}\n"; exit 1; }
@@ -1620,7 +1985,7 @@ handle_install_version() {
     printf "\n${YELLOW}+++ Pulling Docker images +++${NC}\n"
     printf "\n"
 
-    printf "${CYAN}> Installing version: ${target_version}${NC}\n"
+    log_info "Installing version: ${target_version}"
 
     images=(
         "${GITHUB_CONTAINER_REGISTRY}-postgres:${target_version}"
@@ -1632,14 +1997,27 @@ handle_install_version() {
         "${GITHUB_CONTAINER_REGISTRY}-task-runner:${target_version}"
     )
 
+    local total_images=${#images[@]}
+    local current_image=0
+
     for image in "${images[@]}"; do
-        printf "${CYAN}> Pulling $image...${NC}\n"
-        if [ "$VERBOSE" = true ]; then
-            docker pull $image || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
-        else
-            docker pull $image > /dev/null 2>&1 || printf "${YELLOW}> Warning: Failed to pull image: $image - continuing anyway${NC}\n"
+        ((current_image++))
+        if [ "$VERBOSE" != true ]; then
+            show_progress_bar $current_image $total_images "Pulling Docker images"
+        fi
+
+        if ! retry_command 3 5 enhanced_docker_pull "$image"; then
+            if [ "$VERBOSE" != true ]; then
+                printf "\n"
+            fi
+            log_warning "Failed to pull image: $image - continuing anyway"
         fi
     done
+
+    if [ "$VERBOSE" != true ]; then
+        printf "\n"
+    fi
+    log_success "Docker image pulling completed"
 
     # Save version to .env
     update_env_var "ALIASVAULT_VERSION" "$target_version"
@@ -1647,12 +2025,33 @@ handle_install_version() {
     # Start containers
     printf "\n${YELLOW}+++ Starting services +++${NC}\n"
     printf "\n"
+
+    log_info "Starting Docker containers..."
     if [ "$VERBOSE" = true ]; then
-        docker compose up -d --force-recreate
+        if ! docker compose up -d --force-recreate; then
+            log_error "Failed to start Docker containers"
+            exit 1
+        fi
     else
-        docker compose up -d --force-recreate > /dev/null 2>&1
+        (
+            docker compose up -d --force-recreate > /tmp/docker_start.log 2>&1 &
+            START_PID=$!
+            show_spinner $START_PID "Starting containers"
+            wait $START_PID
+            START_EXIT_CODE=$?
+
+            if [ $START_EXIT_CODE -eq 0 ]; then
+                printf " ${GREEN}✓${NC}\n"
+                rm -f /tmp/docker_start.log
+            else
+                printf " ${RED}✗${NC}\n"
+                log_error "Failed to start Docker containers. Output:"
+                cat /tmp/docker_start.log >&2
+                exit 1
+            fi
+        )
     fi
-    printf "${GREEN}> Docker containers recreated.${NC}\n"
+    log_success "Docker containers started successfully"
 
     # Only show success message if we made it here without errors
     print_success_message
