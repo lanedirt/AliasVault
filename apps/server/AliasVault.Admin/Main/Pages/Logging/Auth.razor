@@ -67,7 +67,7 @@ else
                     <SortableTableColumn>
                         @if (UserLookup.TryGetValue(log.Username, out var userId))
                         {
-                            <a href="/users/@userId">
+                            <a href="users/@userId">
                                 @log.Username
                             </a>
                         }
