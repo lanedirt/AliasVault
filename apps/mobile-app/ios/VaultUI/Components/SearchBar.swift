@@ -15,6 +15,7 @@ public struct SearchBarView: View {
 
                 TextField("Search credentials...", text: $text)
                     .autocapitalization(.none)
+                    .disableAutocorrection(true)
                     .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
                     .padding(.leading, 4)
                     .padding(.trailing, 28) // Space for clear button
