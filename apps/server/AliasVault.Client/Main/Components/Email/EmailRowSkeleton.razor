@@ -7,25 +7,31 @@
                 <div class="w-full h-full rounded-full bg-gray-300 dark:bg-gray-700"></div>
             </SkeletonBase>
         </div>
-    <div class="flex-grow w-full">
-            <div class="flex items-center justify-between mb-2 mr-4">
-                <div>
-                    <div class="mb-2 flex items-center w-full">
-                        <SkeletonBase Height="24" AdditionalClasses="w-56">
+        <div class="flex-grow min-w-0">
+            <div class="flex items-start justify-between">
+                <div class="flex-grow min-w-0 mr-2">
+                    <!-- From Name (top, prominent) -->
+                    <div class="mb-1">
+                        <SkeletonBase Height="18" AdditionalClasses="w-40">
                             <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
                         </SkeletonBase>
                     </div>
-                    <div class="text-sm w-full">
-                        <SkeletonBase Height="16" AdditionalClasses="w-56">
+                    <!-- Subject (smaller, below from) -->
+                    <div class="mb-1">
+                        <SkeletonBase Height="16" AdditionalClasses="w-48">
+                            <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+                        </SkeletonBase>
+                    </div>
+                    <!-- Message Preview (single line) -->
+                    <div>
+                        <SkeletonBase Height="12" AdditionalClasses="w-64">
                             <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
                         </SkeletonBase>
                     </div>
                 </div>
-                <div class="justify-end hidden md:flex">
-                    <SkeletonBase Height="16" AdditionalClasses="w-24 mr-4">
-                        <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
-                    </SkeletonBase>
-                    <SkeletonBase Height="16" AdditionalClasses="w-24">
+                <!-- Date (compact format) -->
+                <div class="flex-shrink-0">
+                    <SkeletonBase Height="12" AdditionalClasses="w-10">
                         <div class="w-full h-full bg-gray-300 dark:bg-gray-700 rounded"></div>
                     </SkeletonBase>
                 </div>
