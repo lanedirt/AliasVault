@@ -55,6 +55,18 @@
             Set the default language that will be used when generating new identities.
         </span>
     </div>
+
+    <div class="mb-4">
+        <label for="defaultIdentityGender" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Alias generation gender</label>
+        <select @bind="DefaultIdentityGender" @bind:after="UpdateDefaultIdentityGender" id="defaultIdentityGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option value="random">Random</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+        <span class="block text-sm font-normal text-gray-500 truncate dark:text-gray-400">
+            Set the default gender preference for generating new identities.
+        </span>
+    </div>
 </div>
 
 <div class="p-4  mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -71,6 +83,7 @@
     private string DefaultEmailDomain { get; set; } = string.Empty;
     private bool AutoEmailRefresh { get; set; }
     private string DefaultIdentityLanguage { get; set; } = string.Empty;
+    private string DefaultIdentityGender { get; set; } = string.Empty;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -92,6 +105,7 @@
         }
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;
         DefaultIdentityLanguage = DbService.Settings.DefaultIdentityLanguage;
+        DefaultIdentityGender = DbService.Settings.DefaultIdentityGender;
     }
 
     /// <summary>
@@ -113,11 +127,20 @@
     }
 
     /// <summary>
-    /// Updates the auto email refresh setting.
+    /// Updates the default identity language setting.
     /// </summary>
     private async Task UpdateDefaultIdentityLanguage()
     {
         await DbService.Settings.SetDefaultIdentityLanguage(DefaultIdentityLanguage);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Updates the default identity gender setting.
+    /// </summary>
+    private async Task UpdateDefaultIdentityGender()
+    {
+        await DbService.Settings.SetDefaultIdentityGender(DefaultIdentityGender);
         StateHasChanged();
     }
 }
