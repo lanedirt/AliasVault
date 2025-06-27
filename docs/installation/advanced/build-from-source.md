@@ -2,7 +2,7 @@
 layout: default
 title: Build from Source
 parent: Advanced
-nav_order: 2
+nav_order: 3
 ---
 
 # Build from Source
