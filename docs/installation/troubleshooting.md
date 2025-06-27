@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Troubleshooting
-parent: Installation Guide
+parent: Server Installation
 nav_order: 5
 ---
 
