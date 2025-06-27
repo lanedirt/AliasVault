@@ -297,7 +297,11 @@ const CredentialAddEdit: React.FC = () => {
   const generateRandomAlias = useCallback(async () => {
     const { identityGenerator, passwordGenerator } = await initializeGenerators();
 
-    const identity = identityGenerator.generateRandomIdentity();
+    // Get gender preference from database
+    const genderPreference = dbContext.sqliteClient!.getDefaultIdentityGender();
+
+    // Generate identity with gender preference
+    const identity = identityGenerator.generateRandomIdentity(genderPreference);
     const password = passwordGenerator.generateRandomPassword();
 
     const metadata = await dbContext.getVaultMetadata();
