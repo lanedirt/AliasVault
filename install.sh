@@ -370,6 +370,8 @@ get_port_config() {
 
 # Check if ports are available (not in use by non-AliasVault processes)
 check_port_availability() {
+    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
+
     printf "${CYAN}ℹ Checking port availability...${NC} "
 
     local ports_config
@@ -541,7 +543,8 @@ check_port_availability() {
         fi
 
         if [ "$http_https_in_use" = true ]; then
-            printf "  ${YELLOW}•${NC} Try stopping nginx/apache with 'sudo systemctl stop nginx apache2'\n"
+            printf "  ${YELLOW}•${NC} Try stopping the existing local webserver (e.g. nginx, apache, httpd etc.)\n"
+            printf "  ${YELLOW}•${NC} Change the default AliasVault ports (80, 443) in the .env file\n"
         fi
 
         printf "\nIf this still doesn't work, try finding out which services are running on the specified ports and read documentation for your distribution on how to disable them.\n"
@@ -1393,7 +1396,6 @@ handle_install() {
 # Function to handle build
 handle_build() {
     printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
-    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
 
     # Set deployment mode to build to ensure container lifecycle uses build configuration
     set_deployment_mode "build"
@@ -2102,7 +2104,6 @@ handle_install_version() {
     fi
 
     printf "\n${YELLOW}+++ Installing AliasVault ${target_version} +++${NC}\n"
-    create_env_file || { printf "${RED}> Failed to create .env file${NC}\n"; exit 1; }
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
