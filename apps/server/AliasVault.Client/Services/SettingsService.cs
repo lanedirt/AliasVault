@@ -46,6 +46,12 @@ public sealed class SettingsService
     public string DefaultIdentityLanguage => GetSetting("DefaultIdentityLanguage", "en")!;
 
     /// <summary>
+    /// Gets the DefaultIdentityGender setting.
+    /// </summary>
+    /// <returns>Default identity gender preference.</returns>
+    public string DefaultIdentityGender => GetSetting("DefaultIdentityGender", "random")!;
+
+    /// <summary>
     /// Gets a value indicating whether the tutorial has been completed.
     /// </summary>
     public bool TutorialDone => GetSetting("TutorialDone", false);
@@ -108,6 +114,13 @@ public sealed class SettingsService
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
     public Task SetDefaultIdentityLanguage(string value) => SetSettingAsync("DefaultIdentityLanguage", value);
+
+    /// <summary>
+    /// Sets the DefaultIdentityGender setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetDefaultIdentityGender(string value) => SetSettingAsync("DefaultIdentityGender", value);
 
     /// <summary>
     /// Sets the TutorialDone setting.

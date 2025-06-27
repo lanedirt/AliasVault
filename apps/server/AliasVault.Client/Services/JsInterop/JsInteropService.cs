@@ -311,8 +311,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     /// Generates a random identity using the specified language.
     /// </summary>
     /// <param name="language">The language to use for generating the identity (e.g. "en", "nl").</param>
+    /// <param name="gender">The gender preference for generating the identity (optional, defaults to random).</param>
     /// <returns>An AliasVaultIdentity containing the generated identity information.</returns>
-    public async Task<AliasVaultIdentity> GenerateRandomIdentityAsync(string language)
+    public async Task<AliasVaultIdentity> GenerateRandomIdentityAsync(string language, string? gender = null)
     {
         try
         {
@@ -322,7 +323,9 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
             }
 
             var generatorInstance = await _identityGeneratorModule!.InvokeAsync<IJSObjectReference>("CreateIdentityGenerator", language);
-            var result = await generatorInstance.InvokeAsync<AliasVaultIdentity>("generateRandomIdentity");
+            var result = string.IsNullOrEmpty(gender) || gender == "random"
+                ? await generatorInstance.InvokeAsync<AliasVaultIdentity>("generateRandomIdentity")
+                : await generatorInstance.InvokeAsync<AliasVaultIdentity>("generateRandomIdentity", gender);
 
             return result;
         }

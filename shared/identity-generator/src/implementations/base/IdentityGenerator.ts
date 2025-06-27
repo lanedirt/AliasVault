@@ -44,7 +44,7 @@ export abstract class IdentityGenerator implements IIdentityGenerator {
   /**
    * Generate a random identity.
    */
-  public generateRandomIdentity(): Identity {
+  public generateRandomIdentity(gender?: string | 'random'): Identity {
     const identity: Identity = {
       firstName: '',
       lastName: '',
@@ -55,12 +55,33 @@ export abstract class IdentityGenerator implements IIdentityGenerator {
     };
 
     // Determine gender
-    if (this.random() < 0.5) {
-      identity.firstName = this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)];
-      identity.gender = Gender.Male;
+    let selectedGender: Gender;
+    if (gender === 'random' || gender === undefined) {
+      // Random selection (default behavior)
+      selectedGender = this.random() < 0.5 ? Gender.Male : Gender.Female;
     } else {
+      // Use specified gender
+      if (gender === 'male') {
+        selectedGender = Gender.Male;
+      } else if (gender === 'female') {
+        selectedGender = Gender.Female;
+      } else {
+        selectedGender = Gender.Male;
+      }
+    }
+
+    // Set gender and appropriate first name
+    identity.gender = selectedGender;
+    if (selectedGender === Gender.Male) {
+      identity.firstName = this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)];
+    } else if (selectedGender === Gender.Female) {
       identity.firstName = this.firstNamesFemale[Math.floor(this.random() * this.firstNamesFemale.length)];
-      identity.gender = Gender.Female;
+    } else {
+      // For Gender.Other, randomly choose from either list
+      const usesMaleNames = this.random() < 0.5;
+      identity.firstName = usesMaleNames
+        ? this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)]
+        : this.firstNamesFemale[Math.floor(this.random() * this.firstNamesFemale.length)];
     }
 
     identity.lastName = this.lastNames[Math.floor(this.random() * this.lastNames.length)];
