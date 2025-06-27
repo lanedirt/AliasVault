@@ -44,6 +44,20 @@
             }
         },
         {
+            "label": "Build and watch SMTP Service",
+            "type": "shell",
+            "command": "dotnet watch",
+            "args": [],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/apps/server/Services/AliasVault.SmtpService"
+            }
+        },
+        {
             "label": "Build and watch Client CSS",
             "type": "shell",
             "command": "npm",
