@@ -388,6 +388,13 @@ export class SqliteClient {
   }
 
   /**
+   * Get the default identity gender preference from the database.
+   */
+  public getDefaultIdentityGender(): string {
+    return this.getSetting('DefaultIdentityGender', 'random');
+  }
+
+  /**
    * Get the password settings from the database.
    */
   public getPasswordSettings(): PasswordSettings {
