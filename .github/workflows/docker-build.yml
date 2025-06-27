@@ -125,8 +125,8 @@ jobs:
       - name: Test reset-admin-password output
         if: ${{ !steps.install_script.outputs.skip_remaining }}
         run: |
-          output=$(./install.sh reset-admin-password)
-          if ! echo "$output" | grep -E '.*Password: [A-Za-z0-9+/=]{8,}.*'; then
+          output=$(./install.sh reset-admin-password | sed 's/\x1b\[[0-9;]*m//g')
+          if ! echo "$output" | grep -Eq '^\s*Password: [A-Za-z0-9+/=]{8,}'; then
             echo "Invalid reset-admin-password output"
             exit 1
           fi
