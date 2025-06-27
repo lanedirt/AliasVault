@@ -10,7 +10,7 @@
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="@(TotalRecords > 0 ? $"Auth logs ({TotalRecords:N0})" : "Auth logs")"
+    Title="@GetTitle()"
     Description="This page shows an overview of recent auth attempts.">
     <CustomActions>
         <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
@@ -25,13 +25,13 @@
 
        <div class="mb-3 flex space-x-4">
             <div class="flex w-full">
-                <div class="w-2/3 pr-2">
+                <div class="w-1/2 pr-2">
                     <div class="relative">
                         <SearchIcon />
                         <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 ps-10 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                     </div>
                 </div>
-                <div class="w-1/3 pl-2">
+                <div class="w-1/4 px-1">
                     <select @bind="SelectedEventType" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">All event types</option>
                         @foreach (var eventType in Enum.GetValues<AuthEventType>())
@@ -39,6 +39,12 @@
                             <option value="@eventType">@eventType</option>
                         }
                     </select>
+                </div>
+                <div class="w-1/4 pl-2">
+                    <button type="button" @onclick="ToggleUniqueUsernames"
+                            class="w-full px-4 py-2 text-sm font-medium rounded border transition-colors duration-200 @(ShowUniqueUsernames ? "bg-orange-400 text-white border-orange-500 hover:bg-orange-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600")">
+                        @(ShowUniqueUsernames ? "✓ Unique users" : "Unique users")
+                    </button>
                 </div>
             </div>
         </div>
@@ -126,6 +132,14 @@ else
                 _ = RefreshData();
             }
         }
+    }
+
+    private bool ShowUniqueUsernames { get; set; } = false;
+
+    private void ToggleUniqueUsernames()
+    {
+        ShowUniqueUsernames = !ShowUniqueUsernames;
+        _ = RefreshData();
     }
 
     private string SortColumn { get; set; } = "Id";
@@ -228,11 +242,33 @@ else
 
         query = ApplySort(query);
 
-        TotalRecords = await query.CountAsync();
-        LogList = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToListAsync();
+        // Handle unique usernames filtering after getting all results (since GroupBy with OrderBy in Select is complex for EF)
+        if (ShowUniqueUsernames)
+        {
+            // Get all matching records first
+            var allLogs = await query.ToListAsync();
+
+            // Group by username and take the latest entry for each username
+            var uniqueLogs = allLogs
+                .GroupBy(x => x.Username)
+                .Select(g => g.OrderByDescending(x => x.Timestamp).First())
+                .ToList();
+
+            // Apply pagination to the unique results
+            TotalRecords = uniqueLogs.Count;
+            LogList = uniqueLogs
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+        }
+        else
+        {
+            TotalRecords = await query.CountAsync();
+            LogList = await query
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+        }
 
         // Create user lookup dictionary for the current page
         var usernames = LogList.Select(x => x.Username).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToList();
@@ -296,6 +332,9 @@ else
         return query;
     }
 
+    /// <summary>
+    /// Show confirmation modal to delete all logs.
+    /// </summary>
     private async Task DeleteLogsWithConfirmation()
     {
         if (await ConfirmModalService.ShowConfirmation("Confirm Delete", "Are you sure you want to delete all logs? This action cannot be undone."))
@@ -304,6 +343,9 @@ else
         }
     }
 
+    /// <summary>
+    /// Delete all logs.
+    /// </summary>
     private async Task DeleteLogs()
     {
         IsLoading = true;
@@ -316,5 +358,25 @@ else
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Get the title of the page.
+    /// </summary>
+    /// <returns>The title of the page.</returns>
+    private string GetTitle()
+    {
+        if (TotalRecords == 0)
+        {
+            return "Auth logs";
+        }
+
+        var title = $"Auth logs ({TotalRecords:N0})";
+        if (ShowUniqueUsernames)
+        {
+            title += " - Unique usernames";
+        }
+
+        return title;
     }
 }

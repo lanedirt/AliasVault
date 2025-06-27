@@ -1,0 +1,336 @@
+@page "/all-time-stats"
+@using AliasVault.Admin.Main.Models
+@using AliasVault.Admin.Services
+@using AliasVault.Admin.Main.Pages.Dashboard.Components
+@using AliasVault.RazorComponents.Tables
+@inherits MainBase
+@inject StatisticsService StatisticsService
+
+<LayoutPageTitle>All-Time Statistics</LayoutPageTitle>
+
+<PageHeader
+    BreadcrumbItems="@BreadcrumbItems"
+    Title="All-Time Statistics"
+    Description="View metrics and insights into the usage totals of this AliasVault server.">
+    <CustomActions>
+        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+    </CustomActions>
+</PageHeader>
+
+<div class="px-4 space-y-6">
+    <!-- Overview Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center">
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Users</h3>
+                    @if (_totalUsers.HasValue)
+                    {
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">@_totalUsers.Value.ToString("N0")</p>
+                    }
+                    else
+                    {
+                        <div class="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center">
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Email Aliases</h3>
+                    @if (_totalAliases.HasValue)
+                    {
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">@_totalAliases.Value.ToString("N0")</p>
+                    }
+                    else
+                    {
+                        <div class="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center">
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Emails</h3>
+                    @if (_totalEmails.HasValue)
+                    {
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">@_totalEmails.Value.ToString("N0")</p>
+                    }
+                    else
+                    {
+                        <div class="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center">
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Email attachments</h3>
+                    @if (_totalEmailAttachments.HasValue)
+                    {
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">@_totalEmailAttachments.Value.ToString("N0")</p>
+                    }
+                    else
+                    {
+                        <div class="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Users Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Users by Storage -->
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Users by Storage</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the largest vault storage requirements</p>
+                </div>
+            </div>
+            @if (_topUsersByStorage != null)
+            {
+                <div class="overflow-x-auto">
+                    <SortableTable Columns="@_storageTableColumns">
+                        @foreach (var user in _topUsersByStorage)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <a href="/users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                                        @user.Username
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.StorageDisplaySize</td>
+                            </tr>
+                        }
+                    </SortableTable>
+                </div>
+            }
+            else
+            {
+                <div class="px-6 py-8 flex justify-center">
+                    <LoadingIndicator />
+                </div>
+            }
+        </div>
+
+        <!-- Top Users by Aliases -->
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Users by Aliases</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the most email aliases created</p>
+                </div>
+            </div>
+            @if (_topUsersByAliases != null)
+            {
+                <div class="overflow-x-auto">
+                    <SortableTable Columns="@_aliasTableColumns">
+                        @foreach (var user in _topUsersByAliases)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <a href="/users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                                        @user.Username
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.AliasCount.ToString("N0")</td>
+                            </tr>
+                        }
+                    </SortableTable>
+                </div>
+            }
+            else
+            {
+                <div class="px-6 py-8 flex justify-center">
+                    <LoadingIndicator />
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Top IP Addresses -->
+    @if (_topIpAddresses != null && _topIpAddresses.Any())
+    {
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top IP Address Ranges</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">IP ranges with the most associated user accounts (last octet anonymized, successful logins only)</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <SortableTable Columns="@_ipTableColumns">
+                    @foreach (var ip in _topIpAddresses)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
+                                <a href="/logging/auth?search=@Uri.EscapeDataString(ip.OriginalIpAddress)" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                                    @ip.IpAddress
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@ip.UniqueUserCount.ToString("N0")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@ip.LastActivity.ToString("MMM dd, yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </SortableTable>
+            </div>
+        </div>
+    }
+    else if (_topIpAddresses != null && !_topIpAddresses.Any())
+    {
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="text-center text-gray-500 dark:text-gray-400">
+                <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No IP Address Data</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">IP addresses are fully anonymized or no successful logins recorded.</p>
+            </div>
+        </div>
+    }
+    else if (_ipAddressesLoading)
+    {
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top IP Address Ranges</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">IP ranges with the most associated user accounts (last octet anonymized, successful logins only)</p>
+                </div>
+            </div>
+            <div class="px-6 py-8 flex justify-center">
+                <LoadingIndicator />
+            </div>
+        </div>
+    }
+
+    @if (_loadingError)
+    {
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error Loading Statistics</h3>
+                    <p class="text-sm text-red-700 dark:text-red-300 mt-1">Unable to retrieve some server statistics. Please try refreshing the page.</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // Basic statistics (loaded first for immediate feedback)
+    private int? _totalUsers;
+    private int? _totalAliases;
+    private int? _totalEmails;
+    private int? _totalEmailAttachments;
+
+    // Detailed statistics (loaded separately)
+    private List<TopUserByStorage>? _topUsersByStorage;
+    private List<TopUserByAliases>? _topUsersByAliases;
+    private List<TopIpAddress>? _topIpAddresses;
+    private bool _ipAddressesLoading = true;
+    private bool _loadingError = false;
+
+    private readonly List<TableColumn> _storageTableColumns = new()
+    {
+        new() { Title = "User", PropertyName = "Username", Sortable = false },
+        new() { Title = "Storage", PropertyName = "StorageDisplaySize", Sortable = false }
+    };
+
+    private readonly List<TableColumn> _aliasTableColumns = new()
+    {
+        new() { Title = "User", PropertyName = "Username", Sortable = false },
+        new() { Title = "Aliases", PropertyName = "AliasCount", Sortable = false }
+    };
+
+    private readonly List<TableColumn> _ipTableColumns = new()
+    {
+        new() { Title = "IP Range", PropertyName = "IpAddress", Sortable = false },
+        new() { Title = "Users", PropertyName = "UniqueUserCount", Sortable = false },
+        new() { Title = "Last Activity", PropertyName = "LastActivity", Sortable = false }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Load statistics asynchronously for better perceived performance
+        _ = LoadBasicStatisticsAsync();
+        _ = LoadDetailedStatisticsAsync();
+    }
+
+    private void RefreshData()
+    {
+        // Reset all data
+        _totalUsers = null;
+        _totalAliases = null;
+        _totalEmails = null;
+        _totalEmailAttachments = null;
+        _topUsersByStorage = null;
+        _topUsersByAliases = null;
+        _topIpAddresses = null;
+        _ipAddressesLoading = true;
+        _loadingError = false;
+
+        StateHasChanged();
+
+        // Reload statistics
+        _ = LoadBasicStatisticsAsync();
+        _ = LoadDetailedStatisticsAsync();
+    }
+
+    private async Task LoadBasicStatisticsAsync()
+    {
+        try
+        {
+            var stats = await StatisticsService.GetServerStatisticsAsync();
+
+            _totalUsers = stats.TotalUsers;
+            _totalAliases = stats.TotalAliases;
+            _totalEmails = stats.TotalEmails;
+            _totalEmailAttachments = stats.TotalEmailAttachments;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading basic statistics: {ex.Message}");
+            _loadingError = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadDetailedStatisticsAsync()
+    {
+        try
+        {
+            var stats = await StatisticsService.GetServerStatisticsAsync();
+
+            _topUsersByStorage = stats.TopUsersByStorage;
+            _topUsersByAliases = stats.TopUsersByAliases;
+            _topIpAddresses = stats.TopIpAddresses;
+            _ipAddressesLoading = false;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading detailed statistics: {ex.Message}");
+            _loadingError = true;
+            _ipAddressesLoading = false;
+            StateHasChanged();
+        }
+    }
+}

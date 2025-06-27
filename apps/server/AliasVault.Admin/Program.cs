@@ -61,6 +61,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthLoggingService>();
 builder.Services.AddScoped<ConfirmModalService>();
 builder.Services.AddScoped<ServerSettingsService>();
+builder.Services.AddTransient<StatisticsService>();
 builder.Services.AddSingleton(new VersionedContentService(Directory.GetCurrentDirectory() + "/wwwroot"));
 builder.Services.AddApexCharts();
 
