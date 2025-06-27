@@ -7,6 +7,7 @@
 @using AliasVault.Shared.Models.WebApi
 @using AliasVault.Shared.Models.WebApi.Email
 @using AliasVault.Client.Main.Components
+@using AliasVault.Client.Main.Components.Email
 @using AliasVault.Client.Main.Services
 @inherits MainBase
 @inject HttpClient HttpClient
@@ -31,14 +32,37 @@
 
 @if (IsLoading)
 {
-    <div class="overflow-x-auto px-4">
-        <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden mt-6">
-            <ul class="divide-y divide-gray-200 dark:divide-gray-600">
-                @for (int i = 0; i < 5; i++)
-            {
-                <EmailRowSkeleton />
-            }
-            </ul>
+    <div class="px-4">
+        <!-- Mobile Skeleton -->
+        <div class="block lg:hidden mt-6">
+            <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+                <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        <EmailRowSkeleton />
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Desktop Skeleton -->
+        <div class="hidden lg:flex mt-6 h-[calc(100vh-300px)] min-h-[600px]">
+            <!-- Left Sidebar Skeleton -->
+            <div class="w-1/4 bg-white border rounded-l-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+                <div class="h-full overflow-y-auto">
+                    <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <EmailRowSkeleton />
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Panel Skeleton -->
+            <div class="w-3/4">
+                <EmailPreviewSkeleton />
+            </div>
         </div>
     </div>
 }
@@ -52,28 +76,93 @@ else if (NoEmailClaims)
 }
 else
 {
-    <div class="overflow-x-auto px-4">
-        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged"/>
+    <div class="px-4">
+        <!-- Mobile Layout (sm and down) - Modal behavior with traditional pagination -->
+        <div class="block lg:hidden mt-6">
+            <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged"/>
 
-        <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden mt-6">
-            <ul class="divide-y divide-gray-200 dark:divide-gray-600">
-                @if (EmailList.Count == 0)
-                {
-                    <li class="p-4 text-center text-gray-500 dark:text-gray-300">
-                        No emails have been received yet.
-                    </li>
-                }
-                else
-                {
-                    @foreach (var email in EmailList)
+            <div class="bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden mt-4">
+                <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+                    @if (EmailList.Count == 0)
                     {
-                        <EmailRow
-                            Email="email"
-                            OnEmailClick="ShowAliasVaultEmailInModal"
-                            OnCredentialClick="NavigateToCredential" />
+                        <li class="p-4 text-center text-gray-500 dark:text-gray-300">
+                            No emails have been received yet.
+                        </li>
                     }
-                }
-            </ul>
+                    else
+                    {
+                        @foreach (var email in EmailList)
+                        {
+                            <EmailRow
+                                Email="email"
+                                OnEmailClick="ShowAliasVaultEmailInModal"
+                                IsSelected="false" />
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Desktop Layout (lg and up) - Sidebar and Preview with Load More -->
+        <div class="hidden lg:flex mt-6 h-[calc(100vh-300px)] min-h-[600px] rounded-lg overflow-hidden">
+            <!-- Left Sidebar - Email List -->
+            <div class="w-1/4 bg-white border border-r-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col">
+                <div class="flex-1 overflow-y-auto" id="email-list-container">
+                    <ul>
+                        @if (EmailList.Count == 0)
+                        {
+                            <li class="p-4 text-center text-gray-500 dark:text-gray-300">
+                                No emails have been received yet.
+                            </li>
+                        }
+                        else
+                        {
+                            @foreach (var email in EmailList)
+                            {
+                                <EmailRow
+                                    Email="email"
+                                    OnEmailClick="SelectEmailForPreview"
+                                    IsSelected="@(SelectedEmailId == email.Id)" />
+                            }
+                        }
+                        <!-- Load More Button for Desktop -->
+                        @if (HasMoreEmails && EmailList.Count > 0)
+                        {
+                            <li class="border-t border-gray-200 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-700">
+                                <button @onclick="LoadMoreEmails"
+                                        disabled="@IsLoadingMore"
+                                        class="w-full px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:text-primary-400 dark:bg-primary-900/20 dark:border-primary-800 dark:hover:bg-primary-900/30">
+                                    @if (IsLoadingMore)
+                                    {
+                                        <span class="flex items-center justify-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Loading...
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>Load More (@(TotalRecords - EmailList.Count) remaining)</span>
+                                    }
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Panel - Email Preview -->
+            <div class="w-3/4">
+                <EmailPreview
+                    Email="SelectedEmail"
+                    IsSpamOk="false"
+                    OnEmailDeleted="HandleEmailDeleted"
+                    CredentialId="@GetSelectedEmailCredentialId()"
+                    CredentialName="@GetSelectedEmailCredentialName()"
+                    OnCredentialClick="NavigateToCredential" />
+            </div>
         </div>
     </div>
 }
@@ -87,6 +176,10 @@ else
     private bool EmailModalVisible { get; set; }
     private bool NoEmailClaims { get; set; }
     private EmailApiModel EmailModalEmail { get; set; } = new();
+    private int? SelectedEmailId { get; set; }
+    private EmailApiModel? SelectedEmail { get; set; }
+    private bool IsLoadingMore { get; set; }
+    private bool HasMoreEmails => TotalRecords > EmailList.Count;
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -110,6 +203,14 @@ else
         LoadingService.StartLoading("emails", 300, StateHasChanged);
         NoEmailClaims = false;
         CloseEmailModal();
+
+        // Clear selected email when refreshing
+        SelectedEmailId = null;
+        SelectedEmail = null;
+
+        // Reset pagination for fresh load
+        CurrentPage = 1;
+        EmailList.Clear();
 
         var emailClaimList = await DbService.GetEmailClaimListAsync();
 
@@ -178,12 +279,15 @@ else
     /// <summary>
     /// Update the local mailbox emails.
     /// </summary>
-    private async Task UpdateMailboxEmails(MailboxBulkResponse? model)
+    private async Task UpdateMailboxEmails(MailboxBulkResponse? model, bool appendToList = false)
     {
         if (model == null)
         {
-            EmailList = [];
-            TotalRecords = 0;
+            if (!appendToList)
+            {
+                EmailList = [];
+                TotalRecords = 0;
+            }
             return;
         }
 
@@ -201,8 +305,26 @@ else
             );
 
         // Convert the email list to view models and add credential info in a single pass
-        var decryptedEmailList = await EmailService.DecryptEmailList(model.Mails);
-        EmailList = decryptedEmailList.Select(email =>
+        List<MailboxEmailApiModel> decryptedEmailList;
+        try
+        {
+            decryptedEmailList = await EmailService.DecryptEmailList(model.Mails);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Sequence contains no matching element"))
+        {
+            // Handle case where encryption keys are not available for some emails
+            GlobalNotificationService.AddErrorMessage("Some emails could not be decrypted due to missing encryption keys. Please try syncing your vault.", true);
+            Logger.LogWarning(ex, "Failed to decrypt some emails due to missing encryption keys");
+
+            // Return empty list or skip problematic emails
+            if (!appendToList)
+            {
+                EmailList = [];
+                TotalRecords = 0;
+            }
+            return;
+        }
+        var newEmails = decryptedEmailList.Select(email =>
         {
             var toEmail = email.ToLocal + "@" + email.ToDomain;
             var credentialInfo = credentialLookup.TryGetValue(toEmail.ToLower(), out var info)
@@ -224,9 +346,26 @@ else
             };
         }).ToList();
 
+        if (appendToList)
+        {
+            EmailList.AddRange(newEmails);
+        }
+        else
+        {
+            EmailList = newEmails;
+        }
+
         CurrentPage = model.CurrentPage;
         PageSize = model.PageSize;
         TotalRecords = model.TotalRecords;
+
+        // Auto-select first email on desktop layout if none is selected and emails exist (only for initial load)
+        if (!appendToList && EmailList.Count > 0 && SelectedEmailId == null)
+        {
+            var firstEmail = EmailList.First();
+            SelectedEmailId = firstEmail.Id;
+            _ = LoadSelectedEmailForPreview(firstEmail.Id);
+        }
     }
 
     /// <summary>
@@ -266,5 +405,155 @@ else
     private void NavigateToCredential(Guid credentialId)
     {
         NavigationManager.NavigateTo($"/credentials/{credentialId}");
+    }
+
+    /// <summary>
+    /// Select an email for preview (desktop layout).
+    /// </summary>
+    private async Task SelectEmailForPreview(int emailId)
+    {
+        SelectedEmailId = emailId;
+        await LoadSelectedEmailForPreview(emailId);
+    }
+
+    /// <summary>
+    /// Load the full email data for preview.
+    /// </summary>
+    private async Task LoadSelectedEmailForPreview(int emailId)
+    {
+        try
+        {
+            EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"v1/Email/{emailId}");
+            if (mail != null)
+            {
+                // Decrypt the email content locally.
+                var context = await DbService.GetDbContextAsync();
+                var privateKey = await context.EncryptionKeys.FirstOrDefaultAsync(x => x.PublicKey == mail.EncryptionKey);
+                if (privateKey is not null)
+                {
+                    mail = await EmailService.DecryptEmail(mail);
+                }
+
+                SelectedEmail = mail;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Failed to load email: {ex.Message}", true);
+            Logger.LogError(ex, "An error occurred while loading email for preview");
+        }
+    }
+
+    /// <summary>
+    /// Handle email deletion from preview panel.
+    /// </summary>
+    private async Task HandleEmailDeleted(int emailId)
+    {
+        // Clear the selected email if it was deleted
+        if (SelectedEmailId == emailId)
+        {
+            SelectedEmailId = null;
+            SelectedEmail = null;
+        }
+
+        // Refresh the email list
+        await RefreshData();
+    }
+
+    /// <summary>
+    /// Get the credential ID for the currently selected email.
+    /// </summary>
+    private Guid GetSelectedEmailCredentialId()
+    {
+        if (SelectedEmailId == null) return Guid.Empty;
+
+        var selectedEmailListItem = EmailList.FirstOrDefault(e => e.Id == SelectedEmailId);
+        return selectedEmailListItem?.CredentialId ?? Guid.Empty;
+    }
+
+    /// <summary>
+    /// Get the credential name for the currently selected email.
+    /// </summary>
+    private string GetSelectedEmailCredentialName()
+    {
+        if (SelectedEmailId == null) return string.Empty;
+
+        var selectedEmailListItem = EmailList.FirstOrDefault(e => e.Id == SelectedEmailId);
+        return selectedEmailListItem?.CredentialName ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Load more emails for the desktop view.
+    /// </summary>
+    private async Task LoadMoreEmails()
+    {
+        if (IsLoadingMore || !HasMoreEmails) return;
+
+        IsLoadingMore = true;
+        StateHasChanged();
+
+        try
+        {
+            var emailClaimList = await DbService.GetEmailClaimListAsync();
+
+            if (emailClaimList.Count == 0)
+            {
+                return;
+            }
+
+            var requestModel = new MailboxBulkRequest
+            {
+                Page = CurrentPage + 1,
+                PageSize = PageSize,
+                Addresses = emailClaimList,
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
+            request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
+
+            var response = await HttpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var mailbox = await response.Content.ReadFromJsonAsync<MailboxBulkResponse>();
+                await UpdateMailboxEmails(mailbox, true); // Append to existing list
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(errorContent);
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        if (errorResponse != null)
+                        {
+                            switch (errorResponse.Code)
+                            {
+                                case "CLAIM_DOES_NOT_EXIST":
+                                    GlobalNotificationService.AddErrorMessage("An error occurred while trying to load more emails. Please try to edit and " +
+                                                                              "save any credential entry to synchronize the database, then try again.", true);
+                                    break;
+                                default:
+                                    throw new ArgumentException(errorResponse.Message);
+                            }
+                        }
+                        break;
+                    case HttpStatusCode.Unauthorized:
+                        throw new UnauthorizedAccessException(errorResponse?.Message);
+                    default:
+                        throw new WebException(errorResponse?.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Failed to load more emails: {ex.Message}", true);
+            Logger.LogError(ex, "An error occurred while loading more emails");
+        }
+        finally
+        {
+            IsLoadingMore = false;
+            StateHasChanged();
+        }
     }
 }

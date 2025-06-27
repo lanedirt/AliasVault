@@ -10,82 +10,102 @@
 @inject HttpClient HttpClient
 @inject ConfirmModalService ConfirmModalService
 
-<ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
-    <ModalWrapper OnEnter="Close">
-        <div id="emailModal" class="relative bg-white w-3/4 flex flex-col rounded-lg shadow-xl max-h-[90vh] border-2 border-gray-300 dark:border-gray-400">
-            <!-- Header -->
-            <div class="p-4 border-b">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-2xl font-bold text-gray-900">
-                        @if (IsSpamOk)
-                        {
-                            <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)">@Email.Subject</a>
-                        }
-                        else
-                        {
-                            <span>@Email?.Subject</span>
-                        }
-                    </h2>
-                    <button @onclick="Close" class="text-gray-400 hover:text-gray-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                <!-- 2-column layout for email details -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <div class="space-y-1">
-                        <p>From: @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
-                        <p>To: @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p>Date: @Email?.DateSystem</p>
-                        <p>Actions: <button @onclick="ShowDeleteConfirmation" class="text-red-500 hover:text-red-700 text-sm">Delete</button></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Scrollable Content -->
-            <div class="flex-1 overflow-y-auto p-4">
-                <div class="text-gray-700 dark:text-gray-300">
-                    <div>
-                        <iframe class="w-full overscroll-y-auto" style="height:500px;" srcdoc="@EmailBody">
-                        </iframe>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    @if (Email?.Attachments?.Any() == true)
+<div class="h-full flex flex-col bg-white border-l border-gray-200 dark:border-gray-700 rounded-l-lg">
+    @if (Email != null)
+    {
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+                    @if (IsSpamOk)
                     {
-                        <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Attachments:</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                @foreach (var attachment in Email.Attachments)
-                                {
-                                    <div class="flex items-center space-x-2">
-                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                        </svg>
-                                        <button @onclick="() => DownloadAttachment(attachment)"
-                                                class="text-primary hover:underline text-sm truncate attachment-link">
-                                            (@(Math.Ceiling((double)attachment.Filesize / 1024)) KB) @attachment.Filename
-                                        </button>
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                        <a target="_blank" href="https://spamok.com/@(Email!.ToLocal)/@(Email!.Id)" class="hover:underline">@Email.Subject</a>
                     }
+                    else
+                    {
+                        <span>@Email?.Subject</span>
+                    }
+                </h2>
+                <button @onclick="ShowDeleteConfirmation" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- 2-column layout for email details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
+                <div class="space-y-1">
+                    <p><span class="font-medium">From:</span> @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
+                    <p><span class="font-medium">To:</span> @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
                 </div>
-                <div class="mt-6 flex justify-end space-x-4">
-                    <button id="close-email-modal" @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+                <div class="space-y-1">
+                    <p><span class="font-medium">Date:</span> @Email?.DateSystem</p>
+                    @if (!string.IsNullOrEmpty(CredentialName) && CredentialId != Guid.Empty)
+                    {
+                        <p><span class="font-medium">Credential:</span>
+                            <button @onclick="@(() => OnCredentialClick.InvokeAsync(CredentialId))"
+                                    class="text-blue-600 hover:underline dark:text-blue-400 cursor-pointer">
+                                @CredentialName
+                            </button>
+                        </p>
+                    }
+                    else
+                    {
+                        <p><span class="font-medium">Credential:</span> <span class="text-gray-400 dark:text-gray-500">None</span></p>
+                    }
                 </div>
             </div>
         </div>
-    </ModalWrapper>
-</ClickOutsideHandler>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Email Content - Takes remaining space -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="text-gray-700 dark:text-gray-300 h-full">
+                    <iframe class="w-full h-full border-0" srcdoc="@EmailBody">
+                    </iframe>
+                </div>
+            </div>
+
+            @if (Email?.Attachments?.Any() == true)
+            {
+                <!-- Attachments Section - Fixed height -->
+                <div class="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-800">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Attachments:</h3>
+                    <div class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                        @foreach (var attachment in Email.Attachments)
+                        {
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                </svg>
+                                <button @onclick="() => DownloadAttachment(attachment)"
+                                        class="text-blue-600 hover:underline text-sm truncate dark:text-blue-400">
+                                    (@(Math.Ceiling((double)attachment.Filesize / 1024)) KB) @attachment.Filename
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+            <div class="text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <p class="mt-2 text-sm">Select an email to view its contents</p>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     /// <summary>
-    /// The email to show in the modal.
+    /// The email to show in the preview.
     /// </summary>
     [Parameter]
     public EmailApiModel? Email { get; set; }
@@ -97,16 +117,28 @@
     public bool IsSpamOk { get; set; }
 
     /// <summary>
-    /// Callback when the modal is closed.
-    /// </summary>
-    [Parameter]
-    public EventCallback<bool> OnClose { get; set; }
-
-    /// <summary>
     /// Callback when an email is deleted.
     /// </summary>
     [Parameter]
     public EventCallback<int> OnEmailDeleted { get; set; }
+
+    /// <summary>
+    /// The ID of the credential associated with this email.
+    /// </summary>
+    [Parameter]
+    public Guid CredentialId { get; set; }
+
+    /// <summary>
+    /// The name of the credential associated with this email.
+    /// </summary>
+    [Parameter]
+    public string CredentialName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Callback when credential is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Guid> OnCredentialClick { get; set; }
 
     /// <summary>
     /// The message body to display
@@ -132,15 +164,6 @@
         {
             await DeleteEmail();
         }
-    }
-
-    /// <summary>
-    /// Close the modal.
-    /// </summary>
-    [JSInvokable]
-    public Task Close()
-    {
-        return OnClose.InvokeAsync(false);
     }
 
     /// <summary>
@@ -186,7 +209,6 @@
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
                 GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
-                await Close();
             }
             else
             {
@@ -230,11 +252,10 @@
     }
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        await base.OnInitializedAsync();
+        await base.OnParametersSetAsync();
 
-        // Determine email body
         if (Email != null)
         {
             // Check if there is HTML content, if not, then set default viewtype to plain
