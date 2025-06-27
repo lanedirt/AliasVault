@@ -71,6 +71,7 @@ show_usage() {
     printf "  --verbose         Show detailed output\n"
     printf "  -y, --yes         Automatic yes to prompts\n"
     printf "  --dev             Target development database for db import/export operations"
+    printf "\n"
 }
 
 # Function to print the logo
@@ -544,7 +545,7 @@ check_port_availability() {
 
         if [ "$http_https_in_use" = true ]; then
             printf "  ${YELLOW}•${NC} Try stopping the existing local webserver (e.g. nginx, apache, httpd etc.)\n"
-            printf "  ${YELLOW}•${NC} Change the default AliasVault ports (80, 443) in the .env file\n"
+            printf "  ${YELLOW}•${NC} Change the default AliasVault ports (80, 443) by editing the .env file\n"
         fi
 
         printf "\nIf this still doesn't work, try finding out which services are running on the specified ports and read documentation for your distribution on how to disable them.\n"
