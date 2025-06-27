@@ -23,10 +23,10 @@
                     }
                     else
                     {
-                        <span>@Email?.Subject</span>
+                        <span>@Email.Subject</span>
                     }
                 </h2>
-                <button @onclick="ShowDeleteConfirmation" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                <button @onclick="ShowDeleteConfirmation" id="delete-email" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -35,11 +35,11 @@
             <!-- 2-column layout for email details -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                 <div class="space-y-1">
-                    <p><span class="font-medium">From:</span> @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
-                    <p><span class="font-medium">To:</span> @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
+                    <p><span class="font-medium">From:</span> @(Email.FromLocal)@@@(Email.FromDomain)</p>
+                    <p><span class="font-medium">To:</span> @(Email.ToLocal)@@@(Email.ToDomain)</p>
                 </div>
                 <div class="space-y-1">
-                    <p><span class="font-medium">Date:</span> @Email?.DateSystem</p>
+                    <p><span class="font-medium">Date:</span> @Email.DateSystem</p>
                     @if (!string.IsNullOrEmpty(CredentialName) && CredentialId != Guid.Empty)
                     {
                         <p><span class="font-medium">Credential:</span>
@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            @if (Email?.Attachments?.Any() == true)
+            @if (Email.Attachments?.Any() == true)
             {
                 <!-- Attachments Section - Fixed height -->
                 <div class="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-800">
@@ -80,7 +80,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                                 </svg>
                                 <button @onclick="() => DownloadAttachment(attachment)"
-                                        class="text-blue-600 hover:underline text-sm truncate dark:text-blue-400">
+                                        class="text-blue-600 hover:underline text-sm truncate dark:text-blue-400 attachment-link">
                                     (@(Math.Ceiling((double)attachment.Filesize / 1024)) KB) @attachment.Filename
                                 </button>
                             </div>

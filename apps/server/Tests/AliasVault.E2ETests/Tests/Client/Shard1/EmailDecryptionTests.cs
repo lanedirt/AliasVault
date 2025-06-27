@@ -121,9 +121,9 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         emailContent = await Page.TextContentAsync("body");
         Assert.That(emailContent, Does.Contain(textSubject), "Email not (correctly) decrypted and displayed on the emails page. Check email decryption logic.");
 
-        // Attempt to click on the email subject to open the modal.
-        await Page.Locator("text=" + textSubject).First.ClickAsync();
-        await WaitForUrlAsync("emails**", "Delete");
+        // Attempt to click on the email subject to open the email.
+        await Page.Locator("div", new PageLocatorOptions { HasTextString = textSubject }).First.ClickAsync();
+        await WaitForUrlAsync("emails**", "Credential:");
 
         // Assert that the anchor tag in the email iframe has target="_blank" attribute.
         var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
@@ -131,6 +131,9 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Click the delete button to delete the email.
         await Page.Locator("id=delete-email").First.ClickAsync();
+
+        // Click the confirm button.
+        await Page.Locator("id=confirmButton").First.ClickAsync();
 
         // Wait for the email delete confirm message to show up.
         await WaitForUrlAsync("emails**", "Email deleted successfully");
@@ -240,9 +243,9 @@ public class EmailDecryptionTests : ClientPlaywrightTest
         var attachmentIndicator = await Page.Locator(".attachment-indicator").First.GetAttributeAsync("class");
         Assert.That(attachmentIndicator, Is.Not.Null, "Attachment indicator not visible on email page. Check email attachment decryption logic.");
 
-        // Attempt to click on the email subject to open the modal.
-        await Page.Locator("text=" + textSubject).First.ClickAsync();
-        await WaitForUrlAsync("emails**", "Delete");
+        // Attempt to click on the email subject to open the email.
+        await Page.Locator("div", new PageLocatorOptions { HasTextString = textSubject }).First.ClickAsync();
+        await WaitForUrlAsync("emails**", "Credential:");
 
         // Assert that the anchor tag in the email iframe has target="_blank" attribute.
         var anchorTag = await Page.Locator("iframe").First.GetAttributeAsync("srcdoc");
@@ -271,6 +274,9 @@ public class EmailDecryptionTests : ClientPlaywrightTest
 
         // Click the delete button to delete the email.
         await Page.Locator("id=delete-email").First.ClickAsync();
+
+        // Click the confirm button.
+        await Page.Locator("id=confirmButton").First.ClickAsync();
 
         // Wait for the email delete confirm message to show up.
         await WaitForUrlAsync("emails**", "Email deleted successfully");
