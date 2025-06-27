@@ -362,7 +362,7 @@ else
         // Auto-select first email on desktop layout if none is selected and emails exist (only for initial load)
         if (!appendToList && EmailList.Count > 0 && SelectedEmailId == null)
         {
-            var firstEmail = EmailList.First();
+            var firstEmail = EmailList[0];
             SelectedEmailId = firstEmail.Id;
             _ = LoadSelectedEmailForPreview(firstEmail.Id);
         }
