@@ -78,33 +78,21 @@ and then in the prompt choose option 2.
 
 ## 3. Email Server Setup
 
-AliasVault includes a built-in email server that can handle multiple custom domains for your aliases.
+AliasVault includes a built-in email server that allows you to generate email aliases on-the-fly for every website you use, and receive the and read the emails straight in AliasVault.
 
-{: .note }
-Please be aware that if you skip this step, AliasVault will default to use public email domains offered by SpamOK. While this will still work for creating email aliases, it has privacy limitations. For complete privacy and control, we recommend following the setup steps below to use your own private domain. [Learn more about the differences between private and public email domains](../misc/private-vs-public-email.md).
+> **Note:**
+> If you skip this step, AliasVault will default to use public email domains offered by SpamOK. While this still works for creating aliases, it has privacy limitations. For complete privacy and control, we recommend setting up your own domain.
+> [Learn more about the differences between private and public email domains](../misc/private-vs-public-email.md).
 
-To set up the email server, you need the following:
-- Public IPv4 address
-- Open ports (25 and 587) in server firewall for SMTP traffic
-- Access to DNS record management for your domain
+---
 
-### a) DNS Configuration
-Configure the following DNS records for your domain:
-
-| Name | Type | Priority | Content                   | TTL |
-|------|------|----------|---------------------------|-----|
-| mail | A    |          | `<your-server-public-ip>` | 3600 |
-| @    | MX   | 10       | `mail.<your-domain>`      | 3600 |
-
-> Note: Replace `<your-server-public-ip>` and `<your-domain>` with your actual values.
-
-### b) Port Configuration
-The email server requires the following ports to be open:
-- Port 25: Standard SMTP (unencrypted)
-- Port 587: SMTP with STARTTLS (encrypted)
+### Requirements
+- A **public IPv4 address** with ports 25 and 587 pointing to your AliasVault server
+- Open ports **25** and **587** on your server firewall for email SMTP traffic.
 
 #### Verifying Port Access
-You can test if the SMTP ports are correctly configured using telnet:
+
+Use `telnet` to confirm the ports are reachable on your public IP:
 
 ```bash
 # Test standard SMTP port
@@ -116,7 +104,66 @@ telnet <your-server-public-ip> 587
 
 If successful, you'll see a connection establishment message. Press Ctrl+C to exit the telnet session.
 
-### c) Setting Up Email Domains
+### Choose your configuration: primary domain vs subdomain
+
+AliasVault can be configured under:
+
+- **A primary (top-level) domain**
+  Example: `your-aliasvault.com`. This allows you to receive email on `%alias%@your-aliasvault.com`.
+
+- **A subdomain of your existing domain**
+  Example: `aliasvault.example.com`. This allows you to receive email on `%alias%@aliasvault.example.com`. Email sent to your main domain remains unaffected and will continue arriving in your usual inbox.
+
+---
+
+#### a) Setup using a primary domain
+
+##### DNS Configuration
+
+Configure the following DNS records **on your primary domain** (e.g. `your-aliasvault.com`):
+
+| Name | Type | Priority | Content                   | TTL |
+|------|------|----------|---------------------------|-----|
+| mail | A    |          | `<your-server-public-ip>` | 3600 |
+| @    | MX   | 10       | `mail.your-aliasvault.com`| 3600 |
+
+> Replace `<your-server-public-ip>` with your actual server IP.
+
+##### Example
+
+- `mail.your-aliasvault.com` points to your server IP.
+- Email to `@your-aliasvault.com` will be handled by your AliasVault server.
+
+---
+
+#### b) Setup using a subdomain
+
+##### DNS Configuration
+
+Configure the following DNS records **on your subdomain setup** (for example, `aliasvault.example.com`):
+
+| Name                     | Type | Priority | Content                       | TTL |
+|---------------------------|------|----------|-------------------------------|-----|
+| mail.aliasvault           | A    |          | `<your-server-public-ip>`     | 3600 |
+| aliasvault.example.com    | MX   | 10       | `mail.aliasvault.example.com` | 3600 |
+
+> 🔹 Explanation:
+> - `mail.aliasvault` creates a DNS A record for `mail.aliasvault.example.com` pointing to your server IP.
+> - The MX record on `aliasvault.example.com` directs mail to `mail.aliasvault.example.com`.
+
+> Replace `<your-server-public-ip>` with your actual server’s IP address.
+
+##### Example
+
+- `mail.aliasvault.example.com` points to your server IP.
+- Emails to `user@aliasvault.example.com` will be handled by your AliasVault server.
+
+This keeps the email configuration of your primary domain (`example.com`) completely separate, so you can keep receiving email on your normal email addresses and have unique AliasVault addresses too.
+
+---
+
+### Configuring AliasVault
+After setting up your DNS, continue with configuring AliasVault to let it know which email domains it should support.
 
 1. Run the email configuration script:
   ```bash
@@ -135,7 +182,7 @@ If successful, you'll see a connection establishment message. Press Ctrl+C to ex
 {: .note }
 Important: DNS propagation can take up to 24-48 hours. During this time, email delivery might be inconsistent.
 
-If you encounter any issues, feel free to open an issue on the [GitHub repository](https://github.com/lanedirt/AliasVault/issues).
+If you encounter any issues, feel free to join the [Discord chat](https://discord.gg/DsaXMTEtpF) to get help from other users and maintainers.
 
 ---
 
